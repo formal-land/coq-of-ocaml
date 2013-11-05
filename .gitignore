@@ -1,3 +1,4 @@
+*~
 *.annot
 *.cmo
 *.cma
@@ -7,3 +8,5 @@
 *.cmx
 *.cmxs
 *.cmxa
+*.native
+_build/
