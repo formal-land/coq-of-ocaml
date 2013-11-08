@@ -32,6 +32,9 @@ module Name = struct
   
   let pp (f : Format.formatter) (n : t) : unit =
     Format.fprintf f "%s" n
+  
+  type t' = t
+  module Set = Set.Make(struct type t = t' let compare = compare end)
 end
 
 module Ident = struct
@@ -111,22 +114,116 @@ module Exp = struct
 end
 
 module Type = struct
+  type t =
+    | Variable of Name.t
+    | Arrow of t * t
+    | Tuple of t list
+    | Apply of Ident.t * t list
+  
+(*  let rec of_type_expr (typ : Types.type_expr) : t =*)
+(*    Printtyp.type_expr Format.std_formatter typ;*)
+(*    Format.fprintf Format.std_formatter "@\n";*)
+(*    match typ.Types.desc with*)
+(*    | Types.Tvar None -> Variable (Printf.sprintf "A%d" typ.Types.id) (* FIXME *)*)
+(*    | Types.Tarrow (_, typ_x, typ_y, _) -> Arrow (of_type_expr typ_x, of_type_expr typ_y)*)
+(*    | Types.Ttuple typs -> Tuple (List.map of_type_expr typs)*)
+(*    | Types.Tconstr (path, typs, _) -> Apply (Ident.of_path path, List.map of_type_expr typs)*)
+(*    | Types.Tobject _ | Types.Tfield _ | Types.Tnil -> failwith "gre0"*)
+(*    | Types.Tlink typ -> of_type_expr typ (* FIXME *)*)
+(*    | Types.Tsubst _ -> failwith "gre1"*)
+(*    | Types.Tvariant _ -> failwith "gre"*)
+(*    | Types.Tvar _ | Types.Tpoly _ | Types.Tpackage _ -> failwith "type not handled"*)
+  
+  let rec pp (f : Format.formatter) (typ : t) : unit =
+    match typ with
+    | Variable x -> Name.pp f x
+    | Arrow (typ_x, typ_y) ->
+      Format.fprintf f "(";
+      pp f typ_x;
+      Format.fprintf f "@ ->@ ";
+      pp f typ_y;
+      Format.fprintf f ")"
+    | Tuple typs ->
+      (match typs with
+      | [] -> Format.fprintf f "unit"
+      | typ :: typss ->
+        Format.fprintf f "(";
+        pp f typ;
+        List.iter (fun typ -> Format.fprintf f "@ *@ "; pp f typ) typs;
+        Format.fprintf f ")")
+    | Apply (constr, typs) ->
+      Format.fprintf f "(";
+      Ident.pp f constr;
+      List.iter (fun typ -> Format.fprintf f "@ "; pp f typ) typs;
+      Format.fprintf f ")"
+end
+
+module Schema = struct
+  type t = {
+    variables : Name.t list;
+    typ : Type.t}
+  
+  let of_type_expr (typ : Types.type_expr) : t =
+    Printtyp.type_expr Format.std_formatter typ;
+    Format.fprintf Format.std_formatter "@\n";
+    let rec aux typ : Name.Set.t * Type.t =
+      match typ.Types.desc with
+      | Types.Tvar None ->
+        let x = Printf.sprintf "A%d" typ.Types.id in
+        (Name.Set.singleton x, Type.Variable x)
+      | Types.Tarrow (_, typ_x, typ_y, _) ->
+        let (s_x, typ_x) = aux typ_x in
+        let (s_y, typ_y) = aux typ_y in
+        (Name.Set.union s_x s_y, Type.Arrow (typ_x, typ_y))
+      | Types.Ttuple typs ->
+        let (ss, typs) = List.split (List.map aux typs) in
+        (List.fold_left Name.Set.union Name.Set.empty ss, Type.Tuple typs)
+      | Types.Tconstr (path, typs, _) ->
+        let (ss, typs) = List.split (List.map aux typs) in
+        (List.fold_left Name.Set.union Name.Set.empty ss, Type.Apply (Ident.of_path path, typs))
+      | Types.Tlink typ -> aux typ
+      | _ -> failwith "type not handled" in
+    let (s, typ) = aux typ in
+    { variables = Name.Set.elements s; typ = typ }
+  
+  let of_expression (e : Typedtree.expression) : t =
+    of_type_expr e.Typedtree.exp_type
+  
+  let pp (f : Format.formatter) (schema : t) : unit =
+    (match schema.variables with
+    | [] -> ()
+    | xs ->
+      Format.fprintf f "forall@ (";
+      List.iter (fun x -> Name.pp f x; Format.fprintf f "@ ") xs;
+      Format.fprintf f ":@ Type),@ ");
+    Type.pp f schema.typ
 end
 
 module Definition = struct
   type t = {
     name : Name.t;
+    schema : Schema.t;
     value : Exp.t}
   
   let of_structure_item (item : Typedtree.structure_item) : t =
     match item.Typedtree.str_desc with
-    | Typedtree.Tstr_value (Asttypes.Nonrecursive, [pattern, e]) ->
-      { name = Name.of_pattern pattern; value = Exp.of_expression e }
+    | Typedtree.Tstr_value (Asttypes.Nonrecursive, [pattern, e]) -> {
+      name = Name.of_pattern pattern;
+      schema = Schema.of_expression e;
+      value = Exp.of_expression e}
     | _ -> failwith "structure item not handled"
   
   let pp (f : Format.formatter) (def : t) : unit =
     Format.fprintf f "Definition@ ";
     Name.pp f def.name;
+    (match def.schema.Schema.variables with
+    | [] -> ()
+    | xs ->
+      Format.fprintf f "@ (";
+      List.iter (fun x -> Name.pp f x; Format.fprintf f "@ ") xs;
+      Format.fprintf f ":@ Type)");
+    Format.fprintf f "@ :@ ";
+    Type.pp f def.schema.Schema.typ;
     Format.fprintf f "@ :=@ ";
     Exp.pp f false def.value;
     Format.fprintf f "."
