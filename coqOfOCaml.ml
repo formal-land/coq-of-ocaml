@@ -39,7 +39,6 @@ module Ident = struct
     path : Name.t list;
     base : Name.t}
   
-  
   let rec of_path (p : Path.t) : t =
     match p with
     | Path.Pident i -> { path = []; base = Name.of_ident i }
@@ -111,6 +110,9 @@ module Exp = struct
       close_paren ()
 end
 
+module Type = struct
+end
+
 module Definition = struct
   type t = {
     name : Name.t;
@@ -142,19 +144,23 @@ module Definitions = struct
     List.iter (fun def -> Definition.pp f def; Format.fprintf f "@\n") defs
 end
 
-let parse (file_name : string) : Typedtree.structure =
+let parse (file_name : string) : Typedtree.structure * Types.signature =
   let env = Env.initial in
   let input = Pparse.preprocess file_name in
   let input = Pparse.file Format.str_formatter input Parse.implementation Config.ast_impl_magic_number in
-  let (structure, _, _) = Typemod.type_toplevel_phrase env input in
-  structure
+  let (structure, signature, _) = Typemod.type_toplevel_phrase env input in
+  (structure, signature)
 
 let parse_and_print (file_name : string) : unit =
   Printf.printf "Parsing %s:\n" file_name;
-  let structure = parse file_name in
+  let (structure, signature) = parse file_name in
   let definitions = Definitions.of_structure structure in
-  Printtyped.implementation Format.std_formatter structure;
-  Definitions.pp Format.std_formatter definitions
+  let f = Format.std_formatter in
+  Printtyped.implementation f structure;
+  Format.fprintf f "@\n";
+  Printtyp.signature f signature;
+  Format.fprintf f "@\n";
+  Definitions.pp f definitions
 
 let main () =
   Arg.parse [] parse_and_print "Usage: ..."
