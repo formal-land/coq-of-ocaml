@@ -9,4 +9,7 @@
 *.cmxs
 *.cmxa
 *.native
+*.vo
+*.glob
+*.v
 _build/

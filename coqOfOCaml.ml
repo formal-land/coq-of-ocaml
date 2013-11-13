@@ -32,6 +32,7 @@ module Ident = struct
     let p = aux p in
     (* We convert identifiers from OCaml to their Coq's equivalents *)
     match p with
+    | { path = []; base = "()" } -> { path = []; base = "tt" }
     | { path = []; base = "int" } -> { path = []; base = "nat" }
     | _ -> p
   
@@ -62,7 +63,7 @@ module Type = struct
       | typ :: typss ->
         Format.fprintf f "(";
         pp f typ;
-        List.iter (fun typ -> Format.fprintf f "@ *@ "; pp f typ) typs;
+        List.iter (fun typ -> Format.fprintf f "@ *@ "; pp f typ) (List.tl typs);
         Format.fprintf f ")")
     | Apply (constr, typs) ->
       Format.fprintf f "(";
@@ -128,7 +129,7 @@ module Constant = struct
     match c with
     | Int n -> Format.fprintf f "%d" n
     | Char c -> Format.fprintf f "%c" c
-    | String s -> Format.fprintf f "%s" s
+    | String s -> Format.fprintf f "\"%s\" %% string" s
 end
 
 module Exp = struct
@@ -136,6 +137,7 @@ module Exp = struct
     | Constant of Constant.t
     | Variable of Ident.t
     | Tuple of t list
+    | Constructor of Ident.t * t list
     | Apply of t * t list
     | Function of Name.t * t
     | Let of Name.t * t * t
@@ -155,6 +157,7 @@ module Exp = struct
         | None -> failwith "expected an argument") e_xs in
       Apply (e_f, e_xs)
     | Texp_tuple es -> Tuple (List.map of_expression es)
+    | Texp_construct (path, _, _, es, _) -> Constructor (Ident.of_path path, List.map of_expression es)
     | _ -> failwith "expression not handled"
   
   let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
@@ -169,6 +172,11 @@ module Exp = struct
       | [] -> ()
       | e :: es -> pp f true e; List.iter (fun e -> Format.fprintf f ", ";  pp f true e) es);
       Format.fprintf f ")"
+    | Constructor (x, es) ->
+      open_paren ();
+      Ident.pp f x;
+      List.iter (fun e -> Format.fprintf f "@ "; pp f true e) es;
+      close_paren ()
     | Apply (e_f, e_xs) ->
       open_paren ();
       pp f true e_f;
@@ -242,17 +250,16 @@ let parse (file_name : string) : Typedtree.structure * Types.signature =
   (structure, signature)
 
 let parse_and_print (file_name : string) : unit =
-  Printf.printf "Parsing %s:\n" file_name;
   let (structure, signature) = parse file_name in
   let definitions = Definitions.of_structure structure in
-  let f = Format.std_formatter in
-  Printtyped.implementation f structure;
-  Format.fprintf f "@\n";
-  Printtyp.signature f signature;
-  Format.fprintf f "@\n";
-  Definitions.pp f definitions
+  (*let err = Format.err_formatter in
+  Printtyped.implementation err structure;
+  Printtyp.signature err signature;*)
+  let std = Format.std_formatter in
+  Format.fprintf std "Require Import String.@\n\n";
+  Definitions.pp std definitions
 
 let main () =
-  Arg.parse [] parse_and_print "Usage: ..."
+  Arg.parse [] parse_and_print "Usage: ..." (* FIXME: usage *)
 
 ;;main ()
