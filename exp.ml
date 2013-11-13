@@ -6,6 +6,7 @@ type t =
   | Apply of t * t list
   | Function of Name.t * t
   | Let of Name.t * t * t
+  | Match of t * (Pattern.t * t) list
 
 let rec of_expression (e : Typedtree.expression) : t =
   let open Typedtree in
@@ -21,6 +22,10 @@ let rec of_expression (e : Typedtree.expression) : t =
       | Some e_x -> of_expression e_x
       | None -> failwith "expected an argument") e_xs in
     Apply (e_f, e_xs)
+  | Texp_match (e, cases, _) ->
+    let e = of_expression e in
+    let cases = List.map (fun (p, e) -> (Pattern.of_pattern p, of_expression e)) cases in
+    Match (e, cases)
   | Texp_tuple es -> Tuple (List.map of_expression es)
   | Texp_construct (path, _, _, es, _) -> Constructor (PathName.of_path path, List.map of_expression es)
   | _ -> failwith "expression not handled"
@@ -63,3 +68,14 @@ let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
     Format.fprintf f "@ in@\n";
     pp f false e2;
     close_paren ()
+  | Match (e, cases) ->
+    Format.fprintf f "match@ ";
+    pp f false e;
+    Format.fprintf f "@ with@\n";
+    List.iter (fun (p, e) ->
+      Format.fprintf f "|@ ";
+      Pattern.pp f p;
+      Format.fprintf f "@ =>@ ";
+      pp f false e;
+      Format.fprintf f "@\n") cases;
+    Format.fprintf f "end"
