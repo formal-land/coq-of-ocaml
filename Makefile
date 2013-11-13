@@ -7,7 +7,7 @@ default:
 
 clean:
 	ocamlbuild -clean
-	rm -f tests/Nex* tests/ex*.glob tests/ex*.vo
+	rm -f tests/ex*.v tests/Nex* tests/ex*.glob tests/ex*.vo
 
 test: $(TESTS_OUTPUT)
 
