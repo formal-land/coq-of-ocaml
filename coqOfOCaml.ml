@@ -35,6 +35,7 @@ module Ident = struct
     | { path = []; base = "()" } -> { path = []; base = "tt" }
     | { path = []; base = "int" } -> { path = []; base = "nat" }
     | { path = []; base = "char" } -> { path = []; base = "ascii" }
+    | { path = []; base = "::" } -> { path = []; base = "cons" }
     | _ -> p
   
   let pp (f : Format.formatter) (i : t) : unit =
@@ -257,7 +258,8 @@ let parse_and_print (file_name : string) : unit =
   Printtyped.implementation err structure;
   Printtyp.signature err signature;*)
   let std = Format.std_formatter in
-  Format.fprintf std "Require Import Ascii.@\nRequire Import String.@\n\n";
+  Format.fprintf std "Require Import Ascii.@\nRequire Import String.@\nRequire Import List.@\n@\n";
+  Format.fprintf std "Import ListNotations.@\n@\n";
   Definitions.pp std definitions
 
 let main () =
