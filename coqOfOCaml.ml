@@ -1,24 +1,3 @@
-module Constant = struct
-  type t =
-    | Int of int
-    | Char of char
-    | String of string
-  
-  let of_constant (c : Asttypes.constant) : t =
-    let open Asttypes in
-    match c with
-    | Const_int n -> Int n
-    | Const_char c -> Char c
-    | Const_string s -> String s
-    | _ -> failwith "constant not handled"
-  
-  let pp (f : Format.formatter) (c : t) : unit =
-    match c with
-    | Int n -> Format.fprintf f "%d" n
-    | Char c -> Format.fprintf f "%c" c
-    | String s -> Format.fprintf f "%s" s
-end
-
 module Name = struct
   type t = string
   
@@ -42,17 +21,114 @@ module Ident = struct
     path : Name.t list;
     base : Name.t}
   
-  let rec of_path (p : Path.t) : t =
+  let of_path (p : Path.t) : t =
+    let rec aux p =
+      match p with
+      | Path.Pident i -> { path = []; base = Name.of_ident i }
+      | Path.Pdot (p, s, _) ->
+        let i = aux p in
+        { path = s :: i.path; base = i.base }
+      | Path.Papply _ -> failwith "application of paths not handled" in
+    let p = aux p in
+    (* We convert identifiers from OCaml to their Coq's equivalents *)
     match p with
-    | Path.Pident i -> { path = []; base = Name.of_ident i }
-    | Path.Pdot (p, s, _) ->
-      let i = of_path p in
-      { path = s :: i.path; base = i.base }
-    | Path.Papply _ -> failwith "application of paths not handled"
+    | { path = []; base = "int" } -> { path = []; base = "nat" }
+    | _ -> p
   
   let pp (f : Format.formatter) (i : t) : unit =
     List.iter (Name.pp f) i.path;
     Name.pp f i.base
+end
+
+module Type = struct
+  type t =
+    | Variable of Name.t
+    | Arrow of t * t
+    | Tuple of t list
+    | Apply of Ident.t * t list
+  
+  let rec pp (f : Format.formatter) (typ : t) : unit =
+    match typ with
+    | Variable x -> Name.pp f x
+    | Arrow (typ_x, typ_y) ->
+      Format.fprintf f "(";
+      pp f typ_x;
+      Format.fprintf f "@ ->@ ";
+      pp f typ_y;
+      Format.fprintf f ")"
+    | Tuple typs ->
+      (match typs with
+      | [] -> Format.fprintf f "unit"
+      | typ :: typss ->
+        Format.fprintf f "(";
+        pp f typ;
+        List.iter (fun typ -> Format.fprintf f "@ *@ "; pp f typ) typs;
+        Format.fprintf f ")")
+    | Apply (constr, typs) ->
+      Format.fprintf f "(";
+      Ident.pp f constr;
+      List.iter (fun typ -> Format.fprintf f "@ "; pp f typ) typs;
+      Format.fprintf f ")"
+end
+
+module Schema = struct
+  type t = {
+    variables : Name.t list;
+    typ : Type.t}
+  
+  let of_type_expr (typ : Types.type_expr) : t =
+    let rec aux typ : Name.Set.t * Type.t =
+      match typ.Types.desc with
+      | Types.Tvar None ->
+        let x = Printf.sprintf "A%d" typ.Types.id in
+        (Name.Set.singleton x, Type.Variable x)
+      | Types.Tarrow (_, typ_x, typ_y, _) ->
+        let (s_x, typ_x) = aux typ_x in
+        let (s_y, typ_y) = aux typ_y in
+        (Name.Set.union s_x s_y, Type.Arrow (typ_x, typ_y))
+      | Types.Ttuple typs ->
+        let (ss, typs) = List.split (List.map aux typs) in
+        (List.fold_left Name.Set.union Name.Set.empty ss, Type.Tuple typs)
+      | Types.Tconstr (path, typs, _) ->
+        let (ss, typs) = List.split (List.map aux typs) in
+        (List.fold_left Name.Set.union Name.Set.empty ss, Type.Apply (Ident.of_path path, typs))
+      | Types.Tlink typ -> aux typ
+      | _ -> failwith "type not handled" in
+    let (s, typ) = aux typ in
+    { variables = Name.Set.elements s; typ = typ }
+  
+  let of_expression (e : Typedtree.expression) : t =
+    of_type_expr e.Typedtree.exp_type
+  
+  let pp (f : Format.formatter) (schema : t) : unit =
+    (match schema.variables with
+    | [] -> ()
+    | xs ->
+      Format.fprintf f "forall@ (";
+      List.iter (fun x -> Name.pp f x; Format.fprintf f "@ ") xs;
+      Format.fprintf f ":@ Type),@ ");
+    Type.pp f schema.typ
+end
+
+module Constant = struct
+  type t =
+    | Int of int
+    | Char of char
+    | String of string
+  
+  let of_constant (c : Asttypes.constant) : t =
+    let open Asttypes in
+    match c with
+    | Const_int n -> Int n
+    | Const_char c -> Char c
+    | Const_string s -> String s
+    | _ -> failwith "constant not handled"
+  
+  let pp (f : Format.formatter) (c : t) : unit =
+    match c with
+    | Int n -> Format.fprintf f "%d" n
+    | Char c -> Format.fprintf f "%c" c
+    | String s -> Format.fprintf f "%s" s
 end
 
 module Exp = struct
@@ -71,10 +147,13 @@ module Exp = struct
     | Texp_constant constant -> Constant (Constant.of_constant constant)
     | Texp_let (Asttypes.Nonrecursive, [x, e1], e2) -> Let (Name.of_pattern x, of_expression e1, of_expression e2)
     | Texp_function (_, [x, e], _) -> Function (Name.of_pattern x, of_expression e)
-    | Texp_apply (e_f, e_xs) -> Apply (of_expression e_f, List.map (fun (_, e_x, _) ->
-      match e_x with
-      | Some e_x -> of_expression e_x
-      | None -> failwith "expected an argument") e_xs)
+    | Texp_apply (e_f, e_xs) ->
+      let e_f = of_expression e_f in
+      let e_xs = List.map (fun (_, e_x, _) ->
+        match e_x with
+        | Some e_x -> of_expression e_x
+        | None -> failwith "expected an argument") e_xs in
+      Apply (e_f, e_xs)
     | Texp_tuple es -> Tuple (List.map of_expression es)
     | _ -> failwith "expression not handled"
   
@@ -113,92 +192,6 @@ module Exp = struct
       close_paren ()
 end
 
-module Type = struct
-  type t =
-    | Variable of Name.t
-    | Arrow of t * t
-    | Tuple of t list
-    | Apply of Ident.t * t list
-  
-(*  let rec of_type_expr (typ : Types.type_expr) : t =*)
-(*    Printtyp.type_expr Format.std_formatter typ;*)
-(*    Format.fprintf Format.std_formatter "@\n";*)
-(*    match typ.Types.desc with*)
-(*    | Types.Tvar None -> Variable (Printf.sprintf "A%d" typ.Types.id) (* FIXME *)*)
-(*    | Types.Tarrow (_, typ_x, typ_y, _) -> Arrow (of_type_expr typ_x, of_type_expr typ_y)*)
-(*    | Types.Ttuple typs -> Tuple (List.map of_type_expr typs)*)
-(*    | Types.Tconstr (path, typs, _) -> Apply (Ident.of_path path, List.map of_type_expr typs)*)
-(*    | Types.Tobject _ | Types.Tfield _ | Types.Tnil -> failwith "gre0"*)
-(*    | Types.Tlink typ -> of_type_expr typ (* FIXME *)*)
-(*    | Types.Tsubst _ -> failwith "gre1"*)
-(*    | Types.Tvariant _ -> failwith "gre"*)
-(*    | Types.Tvar _ | Types.Tpoly _ | Types.Tpackage _ -> failwith "type not handled"*)
-  
-  let rec pp (f : Format.formatter) (typ : t) : unit =
-    match typ with
-    | Variable x -> Name.pp f x
-    | Arrow (typ_x, typ_y) ->
-      Format.fprintf f "(";
-      pp f typ_x;
-      Format.fprintf f "@ ->@ ";
-      pp f typ_y;
-      Format.fprintf f ")"
-    | Tuple typs ->
-      (match typs with
-      | [] -> Format.fprintf f "unit"
-      | typ :: typss ->
-        Format.fprintf f "(";
-        pp f typ;
-        List.iter (fun typ -> Format.fprintf f "@ *@ "; pp f typ) typs;
-        Format.fprintf f ")")
-    | Apply (constr, typs) ->
-      Format.fprintf f "(";
-      Ident.pp f constr;
-      List.iter (fun typ -> Format.fprintf f "@ "; pp f typ) typs;
-      Format.fprintf f ")"
-end
-
-module Schema = struct
-  type t = {
-    variables : Name.t list;
-    typ : Type.t}
-  
-  let of_type_expr (typ : Types.type_expr) : t =
-    Printtyp.type_expr Format.std_formatter typ;
-    Format.fprintf Format.std_formatter "@\n";
-    let rec aux typ : Name.Set.t * Type.t =
-      match typ.Types.desc with
-      | Types.Tvar None ->
-        let x = Printf.sprintf "A%d" typ.Types.id in
-        (Name.Set.singleton x, Type.Variable x)
-      | Types.Tarrow (_, typ_x, typ_y, _) ->
-        let (s_x, typ_x) = aux typ_x in
-        let (s_y, typ_y) = aux typ_y in
-        (Name.Set.union s_x s_y, Type.Arrow (typ_x, typ_y))
-      | Types.Ttuple typs ->
-        let (ss, typs) = List.split (List.map aux typs) in
-        (List.fold_left Name.Set.union Name.Set.empty ss, Type.Tuple typs)
-      | Types.Tconstr (path, typs, _) ->
-        let (ss, typs) = List.split (List.map aux typs) in
-        (List.fold_left Name.Set.union Name.Set.empty ss, Type.Apply (Ident.of_path path, typs))
-      | Types.Tlink typ -> aux typ
-      | _ -> failwith "type not handled" in
-    let (s, typ) = aux typ in
-    { variables = Name.Set.elements s; typ = typ }
-  
-  let of_expression (e : Typedtree.expression) : t =
-    of_type_expr e.Typedtree.exp_type
-  
-  let pp (f : Format.formatter) (schema : t) : unit =
-    (match schema.variables with
-    | [] -> ()
-    | xs ->
-      Format.fprintf f "forall@ (";
-      List.iter (fun x -> Name.pp f x; Format.fprintf f "@ ") xs;
-      Format.fprintf f ":@ Type),@ ");
-    Type.pp f schema.typ
-end
-
 module Definition = struct
   type t = {
     name : Name.t;
@@ -219,9 +212,9 @@ module Definition = struct
     (match def.schema.Schema.variables with
     | [] -> ()
     | xs ->
-      Format.fprintf f "@ (";
+      Format.fprintf f "@ {";
       List.iter (fun x -> Name.pp f x; Format.fprintf f "@ ") xs;
-      Format.fprintf f ":@ Type)");
+      Format.fprintf f ":@ Type}");
     Format.fprintf f "@ :@ ";
     Type.pp f def.schema.Schema.typ;
     Format.fprintf f "@ :=@ ";
