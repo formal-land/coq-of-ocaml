@@ -34,6 +34,7 @@ module Ident = struct
     match p with
     | { path = []; base = "()" } -> { path = []; base = "tt" }
     | { path = []; base = "int" } -> { path = []; base = "nat" }
+    | { path = []; base = "char" } -> { path = []; base = "ascii" }
     | _ -> p
   
   let pp (f : Format.formatter) (i : t) : unit =
@@ -128,8 +129,8 @@ module Constant = struct
   let pp (f : Format.formatter) (c : t) : unit =
     match c with
     | Int n -> Format.fprintf f "%d" n
-    | Char c -> Format.fprintf f "%c" c
-    | String s -> Format.fprintf f "\"%s\" %% string" s
+    | Char c -> Format.fprintf f "\"%c\"@ %%@ char" c
+    | String s -> Format.fprintf f "\"%s\"@ %%@ string" s
 end
 
 module Exp = struct
@@ -193,7 +194,7 @@ module Exp = struct
       open_paren ();
       Format.fprintf f "let@ ";
       Name.pp f x;
-      Format.fprintf f "@ =@ ";
+      Format.fprintf f "@ :=@ ";
       pp f false e1;
       Format.fprintf f "@ in@\n";
       pp f false e2;
@@ -256,7 +257,7 @@ let parse_and_print (file_name : string) : unit =
   Printtyped.implementation err structure;
   Printtyp.signature err signature;*)
   let std = Format.std_formatter in
-  Format.fprintf std "Require Import String.@\n\n";
+  Format.fprintf std "Require Import Ascii.@\nRequire Import String.@\n\n";
   Definitions.pp std definitions
 
 let main () =

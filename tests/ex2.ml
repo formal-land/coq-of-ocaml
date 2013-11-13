@@ -2,7 +2,7 @@
 
 let t0 = ()
 
-let t1 = (1, "one")
+let t1 = ('c', "one")
 
 let t2 = (1, 2, 3)
 
