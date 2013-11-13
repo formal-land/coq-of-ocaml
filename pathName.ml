@@ -17,7 +17,9 @@ let of_path (p : Path.t) : t =
   | { path = []; base = "int" } -> { path = []; base = "nat" }
   | { path = []; base = "char" } -> { path = []; base = "ascii" }
   | { path = []; base = "::" } -> { path = []; base = "cons" }
+(*  | { path = ["="]; base = "Pervasives" } -> { path = []; base = "eq" }*) (* FIXME: use the type classes in Coq to have a general boolean equality *)
   | { path = ["+"]; base = "Pervasives" } -> { path = []; base = "plus" }
+  | { path = ["*"]; base = "Pervasives" } -> { path = []; base = "mult" }
   | _ -> p
 
 let pp (f : Format.formatter) (i : t) : unit =

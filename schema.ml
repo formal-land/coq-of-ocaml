@@ -23,6 +23,7 @@ let of_type_expr (typ : Types.type_expr) : t =
   let (s, typ) = aux typ in
   { variables = Name.Set.elements s; typ = typ }
 
+(** Rename type variables starting from the letter 'A'. *)
 let rename_nicely (schema : t) : t =
   let rec aux s x' : t =
     match s.variables with
