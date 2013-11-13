@@ -25,12 +25,3 @@ let of_type_expr (typ : Types.type_expr) : t =
 
 let of_expression (e : Typedtree.expression) : t =
   of_type_expr e.Typedtree.exp_type
-
-let pp (f : Format.formatter) (schema : t) : unit =
-  (match schema.variables with
-  | [] -> ()
-  | xs ->
-    Format.fprintf f "forall@ (";
-    List.iter (fun x -> Name.pp f x; Format.fprintf f "@ ") xs;
-    Format.fprintf f ":@ Type),@ ");
-  Type.pp f schema.typ

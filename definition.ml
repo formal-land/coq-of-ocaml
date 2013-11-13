@@ -43,10 +43,10 @@ let pp (f : Format.formatter) (def : t) : unit =
     Format.fprintf f "@ (";
     Name.pp f x;
     Format.fprintf f "@ :@ ";
-    Type.pp f t;
+    Type.pp f false t;
     Format.fprintf f ")") def.args;
   Format.fprintf f "@ :@ ";
-  Type.pp f (snd def.body);
+  Type.pp f false (snd def.body);
   Format.fprintf f "@ :=@ ";
   Exp.pp f false (fst def.body);
   Format.fprintf f "."
