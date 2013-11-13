@@ -30,6 +30,13 @@ let rec of_expression (e : Typedtree.expression) : t =
   | Texp_construct (path, _, _, es, _) -> Constructor (PathName.of_path path, List.map of_expression es)
   | _ -> failwith "expression not handled"
 
+let rec open_function (e : t) : Name.t list * t =
+  match e with
+  | Function (x, e) ->
+    let (xs, e) = open_function e in
+    (x :: xs, e)
+  | _ -> ([], e)
+
 let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
   let open_paren () = if paren then Format.fprintf f "(" in
   let close_paren () = if paren then Format.fprintf f ")" in

@@ -4,6 +4,14 @@ type t =
   | Tuple of t list
   | Apply of PathName.t * t list
 
+(** In a function's type, extract the list of arguments' types and the body's type *)
+let rec open_function (typ : t) : t list * t =
+  match typ with
+  | Arrow (typ_x, typ_y) ->
+    let (typs, typ) = open_function typ_y in
+    (typ_x :: typs, typ)
+  | _ -> ([], typ)
+
 let rec pp (f : Format.formatter) (typ : t) : unit =
   match typ with
   | Variable x -> Name.pp f x

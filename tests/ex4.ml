@@ -1,4 +1,4 @@
-(* Pre-defined types *)
+(** Pre-defined types *)
 
 let u = ()
 

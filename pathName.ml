@@ -17,8 +17,9 @@ let of_path (p : Path.t) : t =
   | { path = []; base = "int" } -> { path = []; base = "nat" }
   | { path = []; base = "char" } -> { path = []; base = "ascii" }
   | { path = []; base = "::" } -> { path = []; base = "cons" }
+  | { path = ["+"]; base = "Pervasives" } -> { path = []; base = "plus" }
   | _ -> p
 
 let pp (f : Format.formatter) (i : t) : unit =
-  List.iter (Name.pp f) i.path;
+  List.iter (fun x -> Name.pp f x; Format.fprintf f ".") i.path;
   Name.pp f i.base

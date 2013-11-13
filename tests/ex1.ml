@@ -1,4 +1,4 @@
-(* Polymophic function *)
+(** Polymophic function *)
 
 let f x y = x
 

@@ -1,7 +1,17 @@
 open Definitions
 
+(** Return the initial environment with the Pervasives module. *)
+let initial_env () =
+  Config.load_path := [Config.standard_library];
+  Env.reset_cache ();
+  Ident.reinit ();
+  try
+    Env.open_pers_signature "Pervasives" Env.initial
+  with Not_found ->
+    failwith "cannot open pervasives.cmi"
+
 let parse (file_name : string) : Typedtree.structure * Types.signature =
-  let env = Env.initial in
+  let env = initial_env () in
   let input = Pparse.preprocess file_name in
   let input = Pparse.file Format.str_formatter input Parse.implementation Config.ast_impl_magic_number in
   let (structure, signature, _) = Typemod.type_toplevel_phrase env input in

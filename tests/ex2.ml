@@ -1,4 +1,4 @@
-(* Tuples *)
+(** Tuples *)
 
 let t0 = ()
 

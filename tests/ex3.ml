@@ -1,4 +1,4 @@
-(* Lets *)
+(** Lets *)
 let n1 =
   let m = 12 in
   let n1 = m in
