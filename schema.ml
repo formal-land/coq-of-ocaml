@@ -23,5 +23,14 @@ let of_type_expr (typ : Types.type_expr) : t =
   let (s, typ) = aux typ in
   { variables = Name.Set.elements s; typ = typ }
 
+let rename_nicely (schema : t) : t =
+  let rec aux s x' : t =
+    match s.variables with
+    | [] -> s
+    | x :: xs ->
+      let s = aux { variables = xs; typ = s.typ } (Char.chr (Char.code x' + 1)) in
+      { variables = String.make 1 x' :: s.variables; typ = Type.substitute_variable s.typ x (String.make 1 x') } in
+  aux schema 'A'
+
 let of_expression (e : Typedtree.expression) : t =
-  of_type_expr e.Typedtree.exp_type
+  rename_nicely (of_type_expr e.Typedtree.exp_type)
