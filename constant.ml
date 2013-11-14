@@ -13,6 +13,10 @@ let of_constant (c : Asttypes.constant) : t =
 
 let pp (f : Format.formatter) (c : t) : unit =
   match c with
-  | Int n -> Format.fprintf f "%d" n
+  | Int n ->
+    if n >= 0 then
+      Format.fprintf f "%d" n
+    else
+      Format.fprintf f "(%d)" n
   | Char c -> Format.fprintf f "\"%c\"@ %%@ char" c
   | String s -> Format.fprintf f "\"%s\"@ %%@ string" s

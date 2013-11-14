@@ -24,7 +24,13 @@ let parse_and_print (file_name : string) : unit =
   Printtyped.implementation err structure;
   Printtyp.signature err signature;*)
   let std = Format.std_formatter in
-  Format.fprintf std "Require Import Ascii.@\nRequire Import String.@\nRequire Import List.@\n@\n";
+  Format.fprintf std "Require Import ZArith.@\n";
+  Format.fprintf std "Require Import Ascii.@\n";
+  Format.fprintf std "Require Import String.@\n";
+  Format.fprintf std "Require Import List.@\n";
+  Format.fprintf std "Require Import Program.Basics.@\n";
+  Format.fprintf std "Require Import Classes.SetoidDec.@\n@\n";
+  Format.fprintf std "Local Open Scope Z_scope.@\n";
   Format.fprintf std "Import ListNotations.@\n@\n";
   Definitions.pp std definitions
 

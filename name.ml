@@ -12,4 +12,4 @@ let pp (f : Format.formatter) (n : t) : unit =
   Format.fprintf f "%s" n
 
 type t' = t
-module Set = Set.Make(struct type t = t' let compare = compare end)
+module Set = Set.Make (struct type t = t' let compare = compare end)
