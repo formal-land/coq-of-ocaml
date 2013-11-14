@@ -81,7 +81,7 @@ let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
     Format.fprintf f "@ with@\n";
     List.iter (fun (p, e) ->
       Format.fprintf f "|@ ";
-      Pattern.pp f p;
+      Pattern.pp f false p;
       Format.fprintf f "@ =>@ ";
       pp f false e;
       Format.fprintf f "@\n") cases;

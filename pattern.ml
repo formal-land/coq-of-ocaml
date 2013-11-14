@@ -14,22 +14,27 @@ let rec of_pattern (p : pattern) : t =
   | Tpat_construct (path, _, _, ps, _) -> Constructor (PathName.of_path path, List.map of_pattern ps)
   | _ -> failwith "unhandled pattern"
 
-let rec pp (f : Format.formatter) (p : t) : unit =
+let rec pp (f : Format.formatter) (paren : bool) (p : t) : unit =
+  let open_paren () = if paren then Format.fprintf f "(" in
+  let close_paren () = if paren then Format.fprintf f ")" in
   match p with
   | Any -> Format.fprintf f "_"
   | Variable x -> Name.pp f x
   | Tuple ps ->
     Format.fprintf f "(";
-    pp f (List.hd ps);
+    pp f false (List.hd ps);
     List.iter (fun p ->
       Format.fprintf f ",@ ";
-      pp f p)
+      pp f false p)
       (List.tl ps);
     Format.fprintf f ")"
   | Constructor (path, ps) ->
-    if ps <> [] then Format.fprintf f "(";
-    PathName.pp f path;
-    List.iter (fun p ->
-      Format.fprintf f "@ ";
-      pp f p) ps;
-    if ps <> [] then Format.fprintf f ")"
+    if ps = [] then
+      PathName.pp f path
+    else (
+      open_paren ();
+      PathName.pp f path;
+      List.iter (fun p ->
+        Format.fprintf f "@ ";
+        pp f true p) ps;
+      close_paren ())
