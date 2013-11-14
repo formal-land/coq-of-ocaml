@@ -38,43 +38,39 @@ let rec open_function (e : t) : Name.t list * t =
   | _ -> ([], e)
 
 let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
-  let open_paren () = if paren then Format.fprintf f "(" in
-  let close_paren () = if paren then Format.fprintf f ")" in
   match e with
   | Constant c -> Constant.pp f c
   | Variable x -> PathName.pp f x
   | Tuple es ->
     Format.fprintf f "(";
-    (match es with
-    | [] -> ()
-    | e :: es -> pp f true e; List.iter (fun e -> Format.fprintf f ", ";  pp f true e) es);
+    Pp.sep_by es (fun _ -> Format.fprintf f ", ") (fun e -> pp f true e);
     Format.fprintf f ")"
   | Constructor (x, es) ->
-    open_paren ();
+    Pp.open_paren f paren;
     PathName.pp f x;
-    List.iter (fun e -> Format.fprintf f "@ "; pp f true e) es;
-    close_paren ()
+    Format.fprintf f "@ ";
+    Pp.sep_by es (fun _ -> Format.fprintf f "@ ") (fun e -> pp f true e);
+    Pp.close_paren f paren
   | Apply (e_f, e_xs) ->
-    open_paren ();
-    pp f true e_f;
-    List.iter (fun e_x -> Format.fprintf f "@ "; pp f true e_x) e_xs;
-    close_paren ()
+    Pp.open_paren f paren;
+    Pp.sep_by (e_f :: e_xs) (fun _ -> Format.fprintf f "@ ") (fun e -> pp f true e);
+    Pp.close_paren f paren
   | Function (x, e) ->
-    open_paren ();
+    Pp.open_paren f paren;
     Format.fprintf f "fun@ ";
     Name.pp f x;
     Format.fprintf f "@ =>@ ";
     pp f false e;
-    close_paren ()
+    Pp.close_paren f paren
   | Let (x, e1, e2) ->
-    open_paren ();
+    Pp.open_paren f paren;
     Format.fprintf f "let@ ";
     Name.pp f x;
     Format.fprintf f "@ :=@ ";
     pp f false e1;
     Format.fprintf f "@ in@\n";
     pp f false e2;
-    close_paren ()
+    Pp.close_paren f paren
   | Match (e, cases) ->
     Format.fprintf f "match@ ";
     pp f false e;

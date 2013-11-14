@@ -21,26 +21,23 @@ let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
   | Apply (path, typs) -> Apply (path, List.map (fun typ -> substitute_variable typ x x') typs)
 
 let rec pp (f : Format.formatter) (paren : bool) (typ : t) : unit =
-  let open_paren () = if paren then Format.fprintf f "(" in
-  let close_paren () = if paren then Format.fprintf f ")" in
   match typ with
   | Variable x -> Name.pp f x
   | Arrow (typ_x, typ_y) ->
-    open_paren ();
+    Pp.open_paren f paren;
     pp f true typ_x;
     Format.fprintf f "@ ->@ ";
     pp f false typ_y;
-    close_paren ()
+    Pp.close_paren f paren
   | Tuple typs ->
     (match typs with
     | [] -> Format.fprintf f "unit"
-    | typ :: typss ->
-      open_paren ();
-      pp f true typ;
-      List.iter (fun typ -> Format.fprintf f "@ *@ "; pp f true typ) (List.tl typs);
-      close_paren ())
+    | _ ->
+      Pp.open_paren f paren;
+      Pp.sep_by typs (fun _ -> Format.fprintf f "@ *@ ") (fun typ -> pp f true typ);
+      Pp.close_paren f paren)
   | Apply (constr, typs) ->
-    if typs <> [] then open_paren ();
+    if typs <> [] then Pp.open_paren f paren;
     PathName.pp f constr;
     List.iter (fun typ -> Format.fprintf f "@ "; pp f true typ) typs;
-    if typs <> [] then close_paren ()
+    if typs <> [] then Pp.close_paren f paren

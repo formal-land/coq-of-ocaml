@@ -15,26 +15,19 @@ let rec of_pattern (p : pattern) : t =
   | _ -> failwith "unhandled pattern"
 
 let rec pp (f : Format.formatter) (paren : bool) (p : t) : unit =
-  let open_paren () = if paren then Format.fprintf f "(" in
-  let close_paren () = if paren then Format.fprintf f ")" in
   match p with
   | Any -> Format.fprintf f "_"
   | Variable x -> Name.pp f x
   | Tuple ps ->
     Format.fprintf f "(";
-    pp f false (List.hd ps);
-    List.iter (fun p ->
-      Format.fprintf f ",@ ";
-      pp f false p)
-      (List.tl ps);
+    Pp.sep_by ps (fun _ -> Format.fprintf f ",@ ") (fun p -> pp f false p);
     Format.fprintf f ")"
   | Constructor (path, ps) ->
     if ps = [] then
       PathName.pp f path
     else (
-      open_paren ();
+      Pp.open_paren f paren;
       PathName.pp f path;
-      List.iter (fun p ->
-        Format.fprintf f "@ ";
-        pp f true p) ps;
-      close_paren ())
+      Format.fprintf f "@ ";
+      Pp.sep_by ps (fun _ -> Format.fprintf f "@ ") (fun p -> pp f true p);
+      Pp.close_paren f paren)
