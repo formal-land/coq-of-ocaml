@@ -22,10 +22,10 @@ let rec of_expression (e : expression) : t =
   match e.exp_desc with
   | Texp_ident (path, _, _) -> Variable (PathName.of_path path)
   | Texp_constant constant -> Constant (Constant.of_constant constant)
-  | Texp_let (rec_flag, [x, e1], e2) ->
+  | Texp_let (rec_flag, [{pat_desc = Tpat_var (x, _)}, e1], e2) ->
     let e1_schema = Schema.of_type (Type.of_type_expr e1.exp_type) in
     let e1_typ = e1_schema.Schema.typ in
-    let x = Name.of_pattern x in
+    let x = Name.of_ident x in
     let e1 = of_expression e1 in
     let e2 = of_expression e2 in
     let (arg_names, e1_body) = open_function e1 in
@@ -34,7 +34,10 @@ let rec of_expression (e : expression) : t =
     else
       let (arg_typs, e1_body_typ) = Type.open_function e1_typ (List.length arg_names) in
       LetFun (Recursivity.of_rec_flag rec_flag, x, e1_schema.Schema.variables, List.combine arg_names arg_typs, e1_body_typ, e1_body, e2)
-  | Texp_function (_, [x, e], _) -> Function (Name.of_pattern x, of_expression e)
+  | Texp_function (_, [{pat_desc = Tpat_var (x, _)}, e], _) -> Function (Name.of_ident x, of_expression e)
+  | Texp_function (_, cases, _) ->
+    let (x, e) = open_cases cases in
+    Function (x, e)
   | Texp_apply (e_f, e_xs) ->
     let e_f = of_expression e_f in
     let e_xs = List.map (fun (_, e_x, _) ->
@@ -49,6 +52,10 @@ let rec of_expression (e : expression) : t =
   | Texp_tuple es -> Tuple (List.map of_expression es)
   | Texp_construct (path, _, _, es, _) -> Constructor (PathName.of_path path, List.map of_expression es)
   | _ -> failwith "expression not handled"
+and open_cases (cases : (pattern * expression) list) : Name.t * t =
+  let cases = List.map (fun (pattern, e) -> (Pattern.of_pattern pattern, of_expression e)) cases in
+  let x = Name.fresh "match_var" in
+  (x, Match (Variable (PathName.of_name x), cases))
 
 let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
   match e with

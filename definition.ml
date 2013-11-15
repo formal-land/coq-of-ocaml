@@ -73,8 +73,8 @@ type t =
 
 let of_structure_item (item : structure_item) : t =
   match item.str_desc with
-  | Tstr_value (rec_flag, [pattern, e]) ->
-    let name = Name.of_pattern pattern in
+  | Tstr_value (rec_flag, [{pat_desc = Tpat_var (name, _)}, e]) ->
+    let name = Name.of_ident name in
     let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
     let free_type_vars = schema.Schema.variables in
     let (arg_names, body_exp) = Exp.open_function (Exp.of_expression e) in

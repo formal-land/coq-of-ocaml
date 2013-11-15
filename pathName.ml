@@ -2,6 +2,9 @@ type t = {
   path : Name.t list;
   base : Name.t}
 
+let of_name (x : Name.t) : t =
+  { path = []; base = x }
+
 let of_path (p : Path.t) : t =
   let rec aux p =
     match p with
