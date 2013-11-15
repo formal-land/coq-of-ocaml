@@ -43,8 +43,12 @@ module Inductive = struct
     Format.fprintf f "Inductive@ ";
     Name.pp f ind.name;
     Format.fprintf f "@ :=@\n";
-    Format.fprintf f "|@ ";
-    Format.fprintf f "@\n";
+    Pp.sep_by ind.constructors (fun _ -> Format.fprintf f "@\n") (fun (constr, args) ->
+      Format.fprintf f "|@ ";
+      Name.pp f constr;
+      Format.fprintf f "@ :@ ";
+      List.iter (fun arg -> Type.pp f true arg; Format.fprintf f "@ ->@ ") args;
+      Name.pp f ind.name);
     Format.fprintf f ".";
 end
 

@@ -19,10 +19,12 @@ let parse (file_name : string) : Typedtree.structure * Types.signature =
 
 let parse_and_print (file_name : string) : unit =
   let (structure, signature) = parse file_name in
+  if false then (
+    let err = Format.err_formatter in
+    Printtyped.implementation err structure;
+    Printtyp.signature err signature;
+    exit 0);
   let definitions = Definitions.of_structure structure in
-  (*let err = Format.err_formatter in
-  Printtyped.implementation err structure;
-  Printtyp.signature err signature;*)
   let std = Format.std_formatter in
   Format.fprintf std "Require Import ZArith.@\n";
   Format.fprintf std "Require Import Ascii.@\n";

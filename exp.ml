@@ -46,11 +46,14 @@ let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
     Pp.sep_by es (fun _ -> Format.fprintf f ", ") (fun e -> pp f true e);
     Format.fprintf f ")"
   | Constructor (x, es) ->
-    Pp.open_paren f paren;
-    PathName.pp f x;
-    Format.fprintf f "@ ";
-    Pp.sep_by es (fun _ -> Format.fprintf f "@ ") (fun e -> pp f true e);
-    Pp.close_paren f paren
+    if es = [] then
+      PathName.pp f x
+    else (
+      Pp.open_paren f paren;
+      PathName.pp f x;
+      Format.fprintf f "@ ";
+      Pp.sep_by es (fun _ -> Format.fprintf f "@ ") (fun e -> pp f true e);
+      Pp.close_paren f paren)
   | Apply (e_f, e_xs) ->
     Pp.open_paren f paren;
     Pp.sep_by (e_f :: e_xs) (fun _ -> Format.fprintf f "@ ") (fun e -> pp f true e);

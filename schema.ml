@@ -8,6 +8,7 @@ let of_type_expr (typ : Types.type_expr) : t =
     | Types.Tvar None ->
       let x = Printf.sprintf "A%d" typ.Types.id in
       (Name.Set.singleton x, Type.Variable x)
+    | Types.Tvar (Some x) -> (Name.Set.singleton x, Type.Variable x)
     | Types.Tarrow (_, typ_x, typ_y, _) ->
       let (s_x, typ_x) = aux typ_x in
       let (s_y, typ_y) = aux typ_y in
@@ -23,7 +24,7 @@ let of_type_expr (typ : Types.type_expr) : t =
   let (s, typ) = aux typ in
   { variables = Name.Set.elements s; typ = typ }
 
-(** Rename type variables starting from the letter 'A'. *)
+(** Rename the type variables starting from the letter 'A'. *)
 let rename_nicely (schema : t) : t =
   let rec aux s x' : t =
     match s.variables with
