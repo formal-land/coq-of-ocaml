@@ -6,13 +6,12 @@ module Value = struct
     free_type_vars : Name.t list;
     args : (Name.t * Type.t) list;
     body : Exp.t * Type.t;
-    is_rec : bool}
+    is_rec : Recursivity.t}
   
   let pp (f : Format.formatter) (value : t) : unit =
-    if value.is_rec then
-      Format.fprintf f "Fixpoint@ "
-    else
-      Format.fprintf f "Definition@ ";
+    (match value.is_rec with
+      | Recursivity.Recursive -> Format.fprintf f "Fixpoint@ "
+      | Recursivity.NonRecursive -> Format.fprintf f "Definition@ ");
     Name.pp f value.name;
     (match value.free_type_vars with
     | [] -> ()
@@ -76,20 +75,16 @@ let of_structure_item (item : structure_item) : t =
   match item.str_desc with
   | Tstr_value (rec_flag, [pattern, e]) ->
     let name = Name.of_pattern pattern in
-    let schema = Schema.of_expression e in
+    let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
     let free_type_vars = schema.Schema.variables in
-    let (args_type, body_type) = Type.open_function schema.Schema.typ in
-    let (args_name, body_exp) = Exp.open_function (Exp.of_expression e) in
-    let is_rec = match rec_flag with
-      | Asttypes.Nonrecursive -> false
-      | Asttypes.Recursive -> true
-      | _ -> failwith "recursivity flag not handled" in
+    let (arg_names, body_exp) = Exp.open_function (Exp.of_expression e) in
+    let (arg_typs, body_typ) = Type.open_function schema.Schema.typ (List.length arg_names) in
     Value {
       Value.name = name;
       free_type_vars = free_type_vars;
-      args = List.combine args_name args_type;
-      body = (body_exp, body_type);
-      is_rec = is_rec }
+      args = List.combine arg_names arg_typs;
+      body = (body_exp, body_typ);
+      is_rec = Recursivity.of_rec_flag rec_flag }
   | Tstr_type [name, _, typ] ->
     (match typ.typ_kind with
     | Ttype_variant cases ->

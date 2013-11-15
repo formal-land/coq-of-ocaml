@@ -22,13 +22,16 @@ let rec free_vars (typ : t) : Name.Set.t =
   | Arrow (typ_x, typ_y) -> Name.Set.union (free_vars typ_x) (free_vars typ_y)
   | Tuple typs | Apply (_, typs) -> List.fold_left (fun s typ -> Name.Set.union s (free_vars typ)) Name.Set.empty typs
 
-(** In a function's type, extract the list of arguments' types and the body's  *)
-let rec open_function (typ : t) : t list * t =
-  match typ with
-  | Arrow (typ_x, typ_y) ->
-    let (typs, typ) = open_function typ_y in
-    (typ_x :: typs, typ)
-  | _ -> ([], typ)
+(** In a function's type, extract the list of arguments' types (up to n elements) and the body's type  *)
+let rec open_function (typ : t) (n : int) : t list * t =
+  if n = 0 then
+    ([], typ)
+  else
+    match typ with
+    | Arrow (typ_x, typ_y) ->
+      let (typs, typ) = open_function typ_y (n - 1) in
+      (typ_x :: typs, typ)
+    | _ -> ([], typ)
 
 (** Replace a variable name by another. *)
 let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =

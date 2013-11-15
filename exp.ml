@@ -1,3 +1,5 @@
+open Typedtree
+
 type t =
   | Constant of Constant.t
   | Variable of PathName.t
@@ -6,14 +8,32 @@ type t =
   | Apply of t * t list
   | Function of Name.t * t
   | Let of Name.t * t * t
+  | LetFun of Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t * t
   | Match of t * (Pattern.t * t) list
 
-let rec of_expression (e : Typedtree.expression) : t =
-  let open Typedtree in
+let rec open_function (e : t) : Name.t list * t =
+  match e with
+  | Function (x, e) ->
+    let (xs, e) = open_function e in
+    (x :: xs, e)
+  | _ -> ([], e)
+
+let rec of_expression (e : expression) : t =
   match e.exp_desc with
   | Texp_ident (path, _, _) -> Variable (PathName.of_path path)
   | Texp_constant constant -> Constant (Constant.of_constant constant)
-  | Texp_let (Asttypes.Nonrecursive, [x, e1], e2) -> Let (Name.of_pattern x, of_expression e1, of_expression e2)
+  | Texp_let (rec_flag, [x, e1], e2) ->
+    let e1_schema = Schema.of_type (Type.of_type_expr e1.exp_type) in
+    let e1_typ = e1_schema.Schema.typ in
+    let x = Name.of_pattern x in
+    let e1 = of_expression e1 in
+    let e2 = of_expression e2 in
+    let (arg_names, e1_body) = open_function e1 in
+    if arg_names = [] then
+      Let (x, e1, e2)
+    else
+      let (arg_typs, e1_body_typ) = Type.open_function e1_typ (List.length arg_names) in
+      LetFun (Recursivity.of_rec_flag rec_flag, x, e1_schema.Schema.variables, List.combine arg_names arg_typs, e1_body_typ, e1_body, e2)
   | Texp_function (_, [x, e], _) -> Function (Name.of_pattern x, of_expression e)
   | Texp_apply (e_f, e_xs) ->
     let e_f = of_expression e_f in
@@ -29,13 +49,6 @@ let rec of_expression (e : Typedtree.expression) : t =
   | Texp_tuple es -> Tuple (List.map of_expression es)
   | Texp_construct (path, _, _, es, _) -> Constructor (PathName.of_path path, List.map of_expression es)
   | _ -> failwith "expression not handled"
-
-let rec open_function (e : t) : Name.t list * t =
-  match e with
-  | Function (x, e) ->
-    let (xs, e) = open_function e in
-    (x :: xs, e)
-  | _ -> ([], e)
 
 let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
   match e with
@@ -73,6 +86,33 @@ let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
     pp f false e1;
     Format.fprintf f "@ in@\n";
     pp f false e2;
+    Pp.close_paren f paren
+  | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
+    Pp.open_paren f paren;
+    Format.fprintf f "let@ ";
+    if is_rec = Recursivity.Recursive then
+      Format.fprintf f "fix@ ";
+    Name.pp f f_name;
+    if typ_vars <> [] then (
+      Format.fprintf f "@ {";
+      List.iter (fun x ->
+        Name.pp f x;
+        Format.fprintf f "@ ")
+        typ_vars;
+      Format.fprintf f "@ :@ Type}");
+    List.iter (fun (x, x_typ) ->
+      Format.fprintf f "@ (";
+      Name.pp f x;
+      Format.fprintf f "@ :@ ";
+      Type.pp f false x_typ;
+      Format.fprintf f ")")
+      xs;
+    Format.fprintf f "@ :@ ";
+    Type.pp f false f_typ;
+    Format.fprintf f "@ :=@\n";
+    pp f false e_f;
+    Format.fprintf f "@ in@\n";
+    pp f false e;
     Pp.close_paren f paren
   | Match (e, cases) ->
     Format.fprintf f "match@ ";
