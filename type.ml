@@ -1,10 +1,28 @@
+open Types
+
 type t =
   | Variable of Name.t
   | Arrow of t * t
   | Tuple of t list
   | Apply of PathName.t * t list
 
-(** In a function's type, extract the list of arguments' types and the body's type. *)
+let rec of_type_expr (typ : Types.type_expr) : t =
+  match typ.desc with
+  | Tvar None -> Variable (Printf.sprintf "A%d" typ.id)
+  | Tvar (Some x) -> Variable x
+  | Tarrow (_, typ_x, typ_y, _) -> Arrow (of_type_expr typ_x, of_type_expr typ_y)
+  | Ttuple typs -> Tuple (List.map of_type_expr typs)
+  | Tconstr (path, typs, _) -> Apply (PathName.of_path path, List.map of_type_expr typs)
+  | Tlink typ -> of_type_expr typ
+  | _ -> failwith "type not handled"
+
+let rec free_vars (typ : t) : Name.Set.t =
+  match typ with
+  | Variable x -> Name.Set.singleton x
+  | Arrow (typ_x, typ_y) -> Name.Set.union (free_vars typ_x) (free_vars typ_y)
+  | Tuple typs | Apply (_, typs) -> List.fold_left (fun s typ -> Name.Set.union s (free_vars typ)) Name.Set.empty typs
+
+(** In a function's type, extract the list of arguments' types and the body's  *)
 let rec open_function (typ : t) : t list * t =
   match typ with
   | Arrow (typ_x, typ_y) ->

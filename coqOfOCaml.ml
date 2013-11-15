@@ -33,7 +33,8 @@ let parse_and_print (file_name : string) : unit =
   Format.fprintf std "Require Import Program.Basics.@\n";
   Format.fprintf std "Require Import Classes.SetoidDec.@\n@\n";
   Format.fprintf std "Local Open Scope Z_scope.@\n";
-  Format.fprintf std "Import ListNotations.@\n@\n";
+  Format.fprintf std "Import ListNotations.@\n";
+  Format.fprintf std "Set Implicit Arguments.@\n@\n";
   Definitions.pp std definitions
 
 let main () =
