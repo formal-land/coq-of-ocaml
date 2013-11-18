@@ -67,9 +67,26 @@ module Inductive = struct
       Format.fprintf f ".")
 end
 
+module Record = struct
+  type t = {
+    name : Name.t;
+    fields : (Name.t * Type.t) list }
+
+  let pp (f : Format.formatter) (r : t) : unit =
+    Format.fprintf f "Record@ ";
+    Name.pp f r.name;
+    Format.fprintf f "@ :=@ {@\n";
+    Pp.sep_by r.fields (fun _ -> Format.fprintf f ";@\n") (fun (x, typ) ->
+      Name.pp f x;
+      Format.fprintf f "@ :@ ";
+      Type.pp f false typ);
+    Format.fprintf f "@ }."
+end
+
 type t =
   | Value of Value.t
   | Inductive of Inductive.t
+  | Record of Record.t
   | Module of Name.t * t list
 
 let rec of_structure (structure : structure) : t list =
@@ -102,6 +119,10 @@ let rec of_structure (structure : structure) : t list =
           Inductive.name = Name.of_ident name;
           free_type_vars = free_type_vars;
           constructors = constructors }
+      | Ttype_record fields ->
+        Record {
+          Record.name = Name.of_ident name;
+          fields = List.map (fun (x, _, _, typ, _) -> (Name.of_ident x, Type.of_type_expr typ.ctyp_type)) fields }
       | _ -> failwith "Type definition not handled.")
     | Tstr_module (name, _, { mod_desc = Tmod_structure structure }) ->
       Module (Name.of_ident name, of_structure structure)
@@ -113,6 +134,7 @@ let rec pp (f : Format.formatter) (defs : t list) : unit =
     match def with
     | Value value -> Value.pp f value
     | Inductive ind -> Inductive.pp f ind
+    | Record record -> Record.pp f record
     | Module (name, defs) ->
       Format.fprintf f "Module@ ";
       Name.pp f name;

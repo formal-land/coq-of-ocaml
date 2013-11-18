@@ -14,6 +14,7 @@ let rec of_type_expr (typ : Types.type_expr) : t =
   | Ttuple typs -> Tuple (List.map of_type_expr typs)
   | Tconstr (path, typs, _) -> Apply (PathName.of_path path, List.map of_type_expr typs)
   | Tlink typ -> of_type_expr typ
+  | Tpoly (typ, []) -> of_type_expr typ
   | _ -> failwith "type not handled"
 
 let rec free_vars (typ : t) : Name.Set.t =
