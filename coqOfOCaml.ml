@@ -26,6 +26,11 @@ let parse_cmt (file_name : string) : Typedtree.structure =
 
 (** The main function. *)
 let main () =
-  Arg.parse [] (fun file_name -> of_ocaml (parse_cmt file_name)) "Usage: ..." (* FIXME: usage *)
+  let usage_msg = "Usage: ./coqOfOCaml.native file.cmt\nOptions are:" in
+  let file_name = ref None in
+  Arg.parse [] (fun arg -> file_name := Some arg) usage_msg;
+  match !file_name with
+  | None -> Arg.usage [] usage_msg
+  | Some file_name -> of_ocaml (parse_cmt file_name)
 
 ;;main ()
