@@ -12,6 +12,7 @@ type t =
   | Match of t * (Pattern.t * t) list
   | Record of (PathName.t * t) list
   | Field of t * PathName.t
+  | IfThenElse of t * t * t
 
 let rec open_function (e : t) : Name.t list * t =
   match e with
@@ -55,7 +56,14 @@ let rec of_expression (e : expression) : t =
   | Texp_construct (path, _, _, es, _) -> Constructor (PathName.of_path path, List.map of_expression es)
   | Texp_record (fields, _) -> Record (List.map (fun (path, _, _, e) -> (PathName.of_path path, of_expression e)) fields)
   | Texp_field (e, path, _, _) -> Field (of_expression e, PathName.of_path path)
-  | _ -> failwith "expression not handled"
+  | Texp_ifthenelse (e1, e2, e3) ->
+    let e3 = match e3 with
+      | None -> Constructor ({ PathName.path = []; base = "tt" }, [])
+      | Some e3 -> of_expression e3 in
+    IfThenElse (of_expression e1, of_expression e2, e3)
+  | Texp_try _ | Texp_setfield _ | Texp_array _ | Texp_sequence _ | Texp_while _ | Texp_for _ | Texp_assert _ | Texp_assertfalse ->
+    failwith "Imperative expression not handled."
+  | _ -> failwith "Expression not handled."
 and open_cases (cases : (pattern * expression) list) : Name.t * t =
   let cases = List.map (fun (pattern, e) -> (Pattern.of_pattern pattern, of_expression e)) cases in
   let x = Name.fresh "match_var" in
@@ -149,3 +157,10 @@ let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
     Format.fprintf f "@ ";
     pp f true e;
     Pp.close_paren f paren
+  | IfThenElse (e1, e2, e3) ->
+    Format.fprintf f "if@ ";
+    pp f false e1;
+    Format.fprintf f "@ then@ ";
+    pp f false e2;
+    Format.fprintf f "@ else@ ";
+    pp f false e3

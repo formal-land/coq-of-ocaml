@@ -83,10 +83,20 @@ module Record = struct
     Format.fprintf f "@ }."
 end
 
+module Open = struct
+  type t = PathName.t
+
+  let pp (f : Format.formatter) (o : t): unit =
+    Format.fprintf f "Require Import@ ";
+    PathName.pp f o;
+    Format.fprintf f "."
+end
+
 type t =
   | Value of Value.t
   | Inductive of Inductive.t
   | Record of Record.t
+  | Open of Open.t
   | Module of Name.t * t list
 
 let rec of_structure (structure : structure) : t list =
@@ -124,8 +134,10 @@ let rec of_structure (structure : structure) : t list =
           Record.name = Name.of_ident name;
           fields = List.map (fun (x, _, _, typ, _) -> (Name.of_ident x, Type.of_type_expr typ.ctyp_type)) fields }
       | _ -> failwith "Type definition not handled.")
+    | Tstr_open (path, _) -> Open (PathName.of_path path)
     | Tstr_module (name, _, { mod_desc = Tmod_structure structure }) ->
       Module (Name.of_ident name, of_structure structure)
+    | Tstr_exception _ -> failwith "Imperative structure item not handled."
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
 
@@ -135,6 +147,7 @@ let rec pp (f : Format.formatter) (defs : t list) : unit =
     | Value value -> Value.pp f value
     | Inductive ind -> Inductive.pp f ind
     | Record record -> Record.pp f record
+    | Open o -> Open.pp f o
     | Module (name, defs) ->
       Format.fprintf f "Module@ ";
       Name.pp f name;
