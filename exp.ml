@@ -10,6 +10,8 @@ type t =
   | Let of Name.t * t * t
   | LetFun of Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t * t
   | Match of t * (Pattern.t * t) list
+  | Record of (PathName.t * t) list
+  | Field of t * PathName.t
 
 let rec open_function (e : t) : Name.t list * t =
   match e with
@@ -51,6 +53,8 @@ let rec of_expression (e : expression) : t =
     Match (e, cases)
   | Texp_tuple es -> Tuple (List.map of_expression es)
   | Texp_construct (path, _, _, es, _) -> Constructor (PathName.of_path path, List.map of_expression es)
+  | Texp_record (fields, _) -> Record (List.map (fun (path, _, _, e) -> (PathName.of_path path, of_expression e)) fields)
+  | Texp_field (e, path, _, _) -> Field (of_expression e, PathName.of_path path)
   | _ -> failwith "expression not handled"
 and open_cases (cases : (pattern * expression) list) : Name.t * t =
   let cases = List.map (fun (pattern, e) -> (Pattern.of_pattern pattern, of_expression e)) cases in
@@ -132,3 +136,16 @@ let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
       pp f false e;
       Format.fprintf f "@\n") cases;
     Format.fprintf f "end"
+  | Record fields ->
+    Format.fprintf f "{|@ ";
+    Pp.sep_by fields (fun _ -> Format.fprintf f ";@ ") (fun (x, e) ->
+      PathName.pp f x;
+      Format.fprintf f "@ :=@ ";
+      pp f false e);
+    Format.fprintf f "@ |}"
+  | Field (e, x) ->
+    Pp.open_paren f paren;
+    PathName.pp f x;
+    Format.fprintf f "@ ";
+    pp f true e;
+    Pp.close_paren f paren
