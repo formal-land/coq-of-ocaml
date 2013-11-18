@@ -70,40 +70,55 @@ end
 type t =
   | Value of Value.t
   | Inductive of Inductive.t
+  | Module of Name.t * t list
 
-let of_structure_item (item : structure_item) : t =
-  match item.str_desc with
-  | Tstr_value (rec_flag, [{pat_desc = Tpat_var (name, _)}, e]) ->
-    let name = Name.of_ident name in
-    let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
-    let free_type_vars = schema.Schema.variables in
-    let (arg_names, body_exp) = Exp.open_function (Exp.of_expression e) in
-    let (arg_typs, body_typ) = Type.open_function schema.Schema.typ (List.length arg_names) in
-    Value {
-      Value.name = name;
-      free_type_vars = free_type_vars;
-      args = List.combine arg_names arg_typs;
-      body = (body_exp, body_typ);
-      is_rec = Recursivity.of_rec_flag rec_flag }
-  | Tstr_type [name, _, typ] ->
-    (match typ.typ_kind with
-    | Ttype_variant cases ->
-      let constructors = List.map (fun (constr, _, typs, _) ->
-        (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ.ctyp_type) typs))
-        cases in
-      let free_type_vars = List.map (fun name ->
-        match name with
-        | Some x -> x.Asttypes.txt
-        | None -> failwith "Type parameter expected.")
-        typ.typ_params in
-      Inductive {
-        Inductive.name = Name.of_ident name;
+let rec of_structure (structure : structure) : t list =
+  let of_structure_item (item : structure_item) : t =
+    match item.str_desc with
+    | Tstr_value (rec_flag, [{pat_desc = Tpat_var (name, _)}, e]) ->
+      let name = Name.of_ident name in
+      let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
+      let free_type_vars = schema.Schema.variables in
+      let (arg_names, body_exp) = Exp.open_function (Exp.of_expression e) in
+      let (arg_typs, body_typ) = Type.open_function schema.Schema.typ (List.length arg_names) in
+      Value {
+        Value.name = name;
         free_type_vars = free_type_vars;
-        constructors = constructors }
-    | _ -> failwith "Type definition not handled.")
-  | _ -> failwith "Structure item not handled."
+        args = List.combine arg_names arg_typs;
+        body = (body_exp, body_typ);
+        is_rec = Recursivity.of_rec_flag rec_flag }
+    | Tstr_type [name, _, typ] ->
+      (match typ.typ_kind with
+      | Ttype_variant cases ->
+        let constructors = List.map (fun (constr, _, typs, _) ->
+          (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ.ctyp_type) typs))
+          cases in
+        let free_type_vars = List.map (fun name ->
+          match name with
+          | Some x -> x.Asttypes.txt
+          | None -> failwith "Type parameter expected.")
+          typ.typ_params in
+        Inductive {
+          Inductive.name = Name.of_ident name;
+          free_type_vars = free_type_vars;
+          constructors = constructors }
+      | _ -> failwith "Type definition not handled.")
+    | Tstr_module (name, _, { mod_desc = Tmod_structure structure }) ->
+      Module (Name.of_ident name, of_structure structure)
+    | _ -> failwith "Structure item not handled." in
+  List.map of_structure_item structure.str_items
 
-let pp (f : Format.formatter) (def : t) : unit =
-  match def with
-  | Value value -> Value.pp f value
-  | Inductive ind -> Inductive.pp f ind
+let rec pp (f : Format.formatter) (defs : t list) : unit =
+  let pp_one (def : t) : unit =
+    match def with
+    | Value value -> Value.pp f value
+    | Inductive ind -> Inductive.pp f ind
+    | Module (name, defs) ->
+      Format.fprintf f "Module@ ";
+      Name.pp f name;
+      Format.fprintf f ".@\n";
+      pp f defs;
+      Format.fprintf f "@\nEnd@ ";
+      Name.pp f name;
+      Format.fprintf f "." in
+  Pp.sep_by defs (fun _ -> Format.fprintf f "@\n@\n") (fun def -> pp_one def)

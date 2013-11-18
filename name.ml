@@ -12,13 +12,11 @@ let of_ident (i : Ident.t) : t =
 let fresh : string -> t =
   let counters : int Map.t ref = ref Map.empty in
   fun prefix ->
-  	if Map.mem prefix !counters then (
-  	  let n = Map.find prefix !counters in
-  	  counters := Map.add  prefix (n + 1) !counters;
-  	  Printf.sprintf "%s_%d" prefix n)
-  	else (
-  	  counters := Map.add prefix (-1) !counters;
-  	  Printf.sprintf "%s_0" prefix)
+    if not (Map.mem prefix !counters) then
+      counters := Map.add prefix 0 !counters;
+    let n = Map.find prefix !counters in
+    counters := Map.add prefix (n + 1) !counters;
+    Printf.sprintf "%s_%d" prefix n
 
-let pp (f : Format.formatter) (n : t) : unit =
-  Format.fprintf f "%s" n
+let pp (f : Format.formatter) (name : t) : unit =
+  Format.fprintf f "%s" name

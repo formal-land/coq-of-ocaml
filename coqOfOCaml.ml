@@ -1,6 +1,6 @@
 (** Display an OCaml structure on stdout converted in Coq. *)
 let of_ocaml (structure : Typedtree.structure) : unit =
-  let definitions = Definitions.of_structure structure in
+  let definition = Definition.of_structure structure in
   let std = Format.std_formatter in
   Format.fprintf std "Require Import ZArith.@\n";
   Format.fprintf std "Require Import Ascii.@\n";
@@ -11,7 +11,7 @@ let of_ocaml (structure : Typedtree.structure) : unit =
   Format.fprintf std "Local Open Scope Z_scope.@\n";
   Format.fprintf std "Import ListNotations.@\n";
   Format.fprintf std "Set Implicit Arguments.@\n@\n";
-  Definitions.pp std definitions
+  Definition.pp std definition
 
 (** Display an OCaml structure on stdout using the OCaml's pretty-printer. *)
 let pp_ocaml (structure : Typedtree.structure) : unit =

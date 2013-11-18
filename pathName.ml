@@ -10,17 +10,18 @@ let of_path (p : Path.t) : t =
     match p with
     | Path.Pident i -> { path = []; base = Name.of_ident i }
     | Path.Pdot (p, s, _) ->
-      let i = aux p in
-      { path = s :: i.path; base = i.base }
+      let p = aux p in
+      { path = p.base :: p.path; base = s }
     | Path.Papply _ -> failwith "application of paths not handled" in
   let p = aux p in
+  let p = { path = List.rev p.path; base = p.base } in
   (* We convert identifiers from OCaml to their Coq's equivalents *)
   match p with
   | { path = []; base = "()" } -> { path = []; base = "tt" }
   | { path = []; base = "int" } -> { path = []; base = "Z" }
   | { path = []; base = "char" } -> { path = []; base = "ascii" }
   | { path = []; base = "::" } -> { path = []; base = "cons" }
-  | { path = [x]; base = "Pervasives" } -> (match x with
+  | { path = ["Pervasives"]; base = x } -> (match x with
     | "=" -> { path = []; base = "equiv_decb" }
     | "<>" -> { path = []; base = "nequiv_decb" }
     | "not" -> { path = []; base = "negb" }
