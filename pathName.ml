@@ -57,7 +57,8 @@ let of_path (p : Path.t) : t =
     | "int_of_string" -> failwith "int_of_string not handled."
     | "fst" -> { path = []; base = "fst" }
     | "snd" -> { path = []; base = "snd" }
-    | "@" -> { path = []; base = "app" })
+    | "@" -> { path = []; base = "app" }
+    | _ -> p)
   | _ -> p
 
 let pp (f : Format.formatter) (i : t) : unit =

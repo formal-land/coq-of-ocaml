@@ -7,11 +7,14 @@ default:
 
 clean:
 	ocamlbuild -clean
-	rm -f tests/ex*.v tests/Nex* tests/ex*.glob tests/ex*.vo
+	rm -f a.out tests/ex*.cmo tests/ex*.cmi tests/ex*.cmt tests/ex*.v tests/Nex* tests/ex*.glob tests/ex*.vo
 
 test: $(TESTS_OUTPUT)
 
-%.v: %.ml default
+%.cmt: %.ml
+	ocamlc -bin-annot $<
+
+%.v: %.cmt default
 	./$(OUTPUT) $< >$@
 
 %.vo: %.v
