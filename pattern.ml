@@ -2,10 +2,12 @@ open Typedtree
 
 type t =
   | Any
+  | Constant of Constant.t
   | Variable of Name.t
   | Tuple of t list
   | Constructor of PathName.t * t list
   | Alias of t * Name.t
+  | Record of (PathName.t * t) list
 
 let rec of_pattern (p : pattern) : t =
   match p.pat_desc with
@@ -14,11 +16,14 @@ let rec of_pattern (p : pattern) : t =
   | Tpat_tuple ps -> Tuple (List.map of_pattern ps)
   | Tpat_construct (path, _, _, ps, _) -> Constructor (PathName.of_path path, List.map of_pattern ps)
   | Tpat_alias (p, x, _) -> Alias (of_pattern p, Name.of_ident x)
+  | Tpat_constant c -> Constant (Constant.of_constant c)
+  | Tpat_record (fields, _) -> Record (List.map (fun (x, _, _, p) -> (PathName.of_path x, of_pattern p)) fields)
   | _ -> failwith "unhandled pattern"
 
 let rec pp (f : Format.formatter) (paren : bool) (p : t) : unit =
   match p with
   | Any -> Format.fprintf f "_"
+  | Constant c -> Constant.pp f c
   | Variable x -> Name.pp f x
   | Tuple ps ->
     Format.fprintf f "(";
@@ -39,3 +44,10 @@ let rec pp (f : Format.formatter) (paren : bool) (p : t) : unit =
     Format.fprintf f "@ as@ ";
     Name.pp f x;
     Pp.close_paren f paren
+  | Record fields ->
+    Format.fprintf f "{|@ ";
+    Pp.sep_by fields (fun _ -> Format.fprintf f ";@ ") (fun (x, p) ->
+      PathName.pp f x;
+      Format.fprintf f "@ :=@ ";
+      pp f false p);
+    Format.fprintf f "@ |}"
