@@ -1,5 +1,7 @@
+(** An expression. *)
 open Typedtree
 
+(** The simplified OCaml AST we use. *)
 type t =
   | Constant of Constant.t
   | Variable of PathName.t
@@ -14,6 +16,7 @@ type t =
   | Field of t * PathName.t
   | IfThenElse of t * t * t
 
+(** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
   match e with
   | Function (x, e) ->
@@ -21,6 +24,7 @@ let rec open_function (e : t) : Name.t list * t =
     (x :: xs, e)
   | _ -> ([], e)
 
+(** Import an OCaml expression. *)
 let rec of_expression (e : expression) : t =
   match e.exp_desc with
   | Texp_ident (path, _, _) -> Variable (PathName.of_path path)
@@ -64,11 +68,13 @@ let rec of_expression (e : expression) : t =
   | Texp_try _ | Texp_setfield _ | Texp_array _ | Texp_sequence _ | Texp_while _ | Texp_for _ | Texp_assert _ | Texp_assertfalse ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
+(** Generate a variable and a "match" on this variable from a list of patterns. *)
 and open_cases (cases : (pattern * expression) list) : Name.t * t =
   let cases = List.map (fun (pattern, e) -> (Pattern.of_pattern pattern, of_expression e)) cases in
   let x = Name.fresh "match_var" in
   (x, Match (Variable (PathName.of_name x), cases))
 
+(** Pretty-print an expression (inside parenthesis if the [paren] flag is set). *)
 let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
   match e with
   | Constant c -> Constant.pp f c

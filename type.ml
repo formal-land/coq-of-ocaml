@@ -1,3 +1,4 @@
+(** A type, with free type variables for polymorphic arguments. *)
 open Types
 
 type t =
@@ -6,6 +7,7 @@ type t =
   | Tuple of t list
   | Apply of PathName.t * t list
 
+(** Import an OCaml type. *)
 let rec of_type_expr (typ : Types.type_expr) : t =
   match typ.desc with
   | Tvar None -> Variable (Printf.sprintf "A%d" typ.id)
@@ -17,13 +19,14 @@ let rec of_type_expr (typ : Types.type_expr) : t =
   | Tpoly (typ, []) -> of_type_expr typ
   | _ -> failwith "type not handled"
 
+(** The set of free variables in a type (the polymorphic arguments). *)
 let rec free_vars (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x
   | Arrow (typ_x, typ_y) -> Name.Set.union (free_vars typ_x) (free_vars typ_y)
   | Tuple typs | Apply (_, typs) -> List.fold_left (fun s typ -> Name.Set.union s (free_vars typ)) Name.Set.empty typs
 
-(** In a function's type, extract the list of arguments' types (up to n elements) and the body's type  *)
+(** In a function's type, extract the list of arguments' types (up to [n] elements) and the body's type.  *)
 let rec open_function (typ : t) (n : int) : t list * t =
   if n = 0 then
     ([], typ)
@@ -42,6 +45,7 @@ let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
   | Tuple typs -> Tuple (List.map (fun typ -> substitute_variable typ x x') typs)
   | Apply (path, typs) -> Apply (path, List.map (fun typ -> substitute_variable typ x x') typs)
 
+(** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
 let rec pp (f : Format.formatter) (paren : bool) (typ : t) : unit =
   match typ with
   | Variable x -> Name.pp f x

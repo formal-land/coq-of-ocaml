@@ -1,3 +1,4 @@
+(** A schema is a type with the list of its polymorphic arguments. *)
 type t = {
   variables : Name.t list;
   typ : Type.t}
@@ -12,5 +13,6 @@ let rename_nicely (schema : t) : t =
       { variables = String.make 1 x' :: s.variables; typ = Type.substitute_variable s.typ x (String.make 1 x') } in
   aux schema 'A'
 
+(** Lift a [Type.t] to a schema. *)
 let of_type (typ : Type.t) : t =
   rename_nicely { variables = Name.Set.elements (Type.free_vars typ); typ = typ }

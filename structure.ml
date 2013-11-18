@@ -1,13 +1,16 @@
+(** A structure represents the contents of a ".ml" file. *)
 open Typedtree
 
+(** A value is a toplevel definition made with a "let". *)
 module Value = struct
   type t = {
     name : Name.t;
-    free_type_vars : Name.t list;
-    args : (Name.t * Type.t) list;
-    body : Exp.t * Type.t;
-    is_rec : Recursivity.t}
+    free_type_vars : Name.t list; (** Polymorphic type variables. *)
+    args : (Name.t * Type.t) list; (** Names and types of the arguments. *)
+    body : Exp.t * Type.t; (** Body and type of the body. *)
+    is_rec : Recursivity.t (** If the function is recursive. *) }
   
+  (** Pretty-print a value definition. *)
   let pp (f : Format.formatter) (value : t) : unit =
     (match value.is_rec with
       | Recursivity.Recursive -> Format.fprintf f "Fixpoint@ "
@@ -33,12 +36,14 @@ module Value = struct
     Format.fprintf f "."
 end
 
+(** A definition of a sum type. *)
 module Inductive = struct
   type t = {
     name : Name.t;
-    free_type_vars : Name.t list;
-    constructors : (Name.t * Type.t list) list}
+    free_type_vars : Name.t list; (** Polymorphic type variables. *)
+    constructors : (Name.t * Type.t list) list (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
+  (** Pretty-print a sum type definition. *)
   let pp (f : Format.formatter) (ind : t) : unit =
     Format.fprintf f "Inductive@ ";
     Name.pp f ind.name;
@@ -67,11 +72,13 @@ module Inductive = struct
       Format.fprintf f ".")
 end
 
+(** A definition of a record. *)
 module Record = struct
   type t = {
     name : Name.t;
-    fields : (Name.t * Type.t) list }
+    fields : (Name.t * Type.t) list (** The names of the fields with their types. *) }
 
+  (** Pretty-print a record definition. *)
   let pp (f : Format.formatter) (r : t) : unit =
     Format.fprintf f "Record@ ";
     Name.pp f r.name;
@@ -83,15 +90,18 @@ module Record = struct
     Format.fprintf f "@ }."
 end
 
+(** The "open" construct to open a module. *)
 module Open = struct
   type t = PathName.t
 
+  (** Pretty-print an open construct. *)
   let pp (f : Format.formatter) (o : t): unit =
     Format.fprintf f "Require Import@ ";
     PathName.pp f o;
     Format.fprintf f "."
 end
 
+(** A structure. *)
 type t =
   | Value of Value.t
   | Inductive of Inductive.t
@@ -99,6 +109,7 @@ type t =
   | Open of Open.t
   | Module of Name.t * t list
 
+(** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list =
   let of_structure_item (item : structure_item) : t =
     match item.str_desc with
@@ -141,6 +152,7 @@ let rec of_structure (structure : structure) : t list =
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
 
+(** Pretty-print a structure. *)
 let rec pp (f : Format.formatter) (defs : t list) : unit =
   let pp_one (def : t) : unit =
     match def with

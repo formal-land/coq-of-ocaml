@@ -1,6 +1,6 @@
-(** Display an OCaml structure on stdout converted in Coq. *)
+(** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) : unit =
-  let definition = Definition.of_structure structure in
+  let definition = Structure.of_structure structure in
   let std = Format.std_formatter in
   Format.fprintf std "Require Import ZArith.@\n";
   Format.fprintf std "Require Import Ascii.@\n";
@@ -11,27 +11,11 @@ let of_ocaml (structure : Typedtree.structure) : unit =
   Format.fprintf std "Local Open Scope Z_scope.@\n";
   Format.fprintf std "Import ListNotations.@\n";
   Format.fprintf std "Set Implicit Arguments.@\n@\n";
-  Definition.pp std definition
+  Structure.pp std definition
 
 (** Display an OCaml structure on stdout using the OCaml's pretty-printer. *)
 let pp_ocaml (structure : Typedtree.structure) : unit =
   Printtyped.implementation Format.std_formatter structure
-
-(** Parse a .ml file to a typed AST. *)
-let parse_ml (file_name : string) : Typedtree.structure =
-  (* The initial environment with the Pervasives module. *)
-  let env =
-    Config.load_path := [Config.standard_library];
-    Env.reset_cache ();
-    Ident.reinit ();
-    try
-      Env.open_pers_signature "Pervasives" Env.initial
-    with Not_found ->
-      failwith "cannot open pervasives.cmi" in
-  let input = Pparse.preprocess file_name in
-  let input = Pparse.file Format.str_formatter input Parse.implementation Config.ast_impl_magic_number in
-  let (structure, _, _) = Typemod.type_toplevel_phrase env input in
-  structure
 
 (** Parse a .cmt file to a typed AST. *)
 let parse_cmt (file_name : string) : Typedtree.structure =

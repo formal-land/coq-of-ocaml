@@ -1,10 +1,13 @@
+(** Global identifiers with a module path, used to reference a definition for example. *)
 type t = {
   path : Name.t list;
   base : Name.t}
 
+(** Lift a local name to a global name. *)
 let of_name (x : Name.t) : t =
   { path = []; base = x }
 
+(** Import an OCaml path. *)
 let of_path (p : Path.t) : t =
   let rec aux p =
     match p with
@@ -62,6 +65,7 @@ let of_path (p : Path.t) : t =
     | _ -> p)
   | _ -> p
 
+(** Pretty-print a global name. *)
 let pp (f : Format.formatter) (i : t) : unit =
   List.iter (fun x -> Name.pp f x; Format.fprintf f ".") i.path;
   Name.pp f i.base

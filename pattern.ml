@@ -1,3 +1,4 @@
+(** Patterns used for the "match". *)
 open Typedtree
 
 type t =
@@ -5,10 +6,11 @@ type t =
   | Constant of Constant.t
   | Variable of Name.t
   | Tuple of t list
-  | Constructor of PathName.t * t list
+  | Constructor of PathName.t * t list (** A constructor name and a list of pattern in arguments. *)
   | Alias of t * Name.t
-  | Record of (PathName.t * t) list
+  | Record of (PathName.t * t) list (** A list of fields from a record with their expected patterns. *)
 
+(** Import an OCaml pattern. *)
 let rec of_pattern (p : pattern) : t =
   match p.pat_desc with
   | Tpat_any -> Any
@@ -20,6 +22,7 @@ let rec of_pattern (p : pattern) : t =
   | Tpat_record (fields, _) -> Record (List.map (fun (x, _, _, p) -> (PathName.of_path x, of_pattern p)) fields)
   | _ -> failwith "unhandled pattern"
 
+(** Pretty-print a pattern (inside parenthesis if the [paren] flag is set). *)
 let rec pp (f : Format.formatter) (paren : bool) (p : t) : unit =
   match p with
   | Any -> Format.fprintf f "_"
