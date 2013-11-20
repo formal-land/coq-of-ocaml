@@ -13,5 +13,4 @@ a.out
 *.native
 *.vo
 *.glob
-*.v
 _build/

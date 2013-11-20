@@ -40,8 +40,8 @@ let convert (p : t) : t =
     | "lsl" -> { path = ["Z"]; base = "shiftl" }
     | "lsr" -> { path = ["Z"]; base = "shiftr" }
     | "^" -> { path = []; base = "append" }
-    | "int_of_char" -> { path = []; base = "(compose Z.of_nat nat_of_ascii)" }
-    | "char_of_int" -> { path = []; base = "(compose ascii_of_nat Z.to_nat)" }
+    | "int_of_char" -> { path = []; base = "int_of_char" }
+    | "char_of_int" -> { path = []; base = "char_of_int" }
     | "ignore" -> { path = []; base = "(fun _ => tt)" }
     | "string_of_bool" -> failwith "string_of_bool not handled."
     | "bool_of_string" -> failwith "bool_of_string not handled."
