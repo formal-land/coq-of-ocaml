@@ -1,24 +1,12 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
+open Asttypes
+
 type t = {
   path : Name.t list;
   base : Name.t}
 
-(** Lift a local name to a global name. *)
-let of_name (x : Name.t) : t =
-  { path = []; base = x }
-
-(** Import an OCaml path. *)
-let of_path (p : Path.t) : t =
-  let rec aux p =
-    match p with
-    | Path.Pident i -> { path = []; base = Name.of_ident i }
-    | Path.Pdot (p, s, _) ->
-      let p = aux p in
-      { path = p.base :: p.path; base = s }
-    | Path.Papply _ -> failwith "application of paths not handled" in
-  let p = aux p in
-  let p = { path = List.rev p.path; base = p.base } in
-  (* We convert identifiers from OCaml to their Coq's equivalents *)
+(* Convert an identifier from OCaml to its Coq's equivalent. *)
+let convert (p : t) : t =
   match p with
   | { path = []; base = "()" } -> { path = []; base = "tt" }
   | { path = []; base = "int" } -> { path = []; base = "Z" }
@@ -64,6 +52,32 @@ let of_path (p : Path.t) : t =
     | "@" -> { path = []; base = "app" }
     | _ -> p)
   | _ -> p
+
+(** Lift a local name to a global name. *)
+let of_name (path : string list) (x : Name.t) : t =
+  convert { path = path; base = x }
+
+(** Import an OCaml [Longident.t]. *)
+let of_longident (longident : Longident.t) : t =
+  match List.rev (Longident.flatten longident) with
+  | [] -> assert false
+  | x :: xs -> convert { path = xs; base = x }
+
+(** Import an OCaml location. *)
+let of_loc (loc : Longident.t loc) : t = 
+  of_longident loc.txt
+
+(** Import an OCaml [Path.t]. *)
+let of_path (p : Path.t) : t =
+  let rec aux p =
+    match p with
+    | Path.Pident x -> { path = []; base = Name.of_ident x }
+    | Path.Pdot (p, s, _) ->
+      let p = aux p in
+      { path = p.base :: p.path; base = s }
+    | Path.Papply _ -> failwith "application of paths not handled" in
+  let p = aux p in
+  convert { path = List.rev p.path; base = p.base }
 
 (** Pretty-print a global name. *)
 let pp (f : Format.formatter) (i : t) : unit =

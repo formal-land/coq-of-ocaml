@@ -12,6 +12,10 @@ module Map = Map.Make (struct type t = t' let compare = compare end)
 let of_ident (i : Ident.t) : t =
   i.Ident.name
 
+(** Lift a [string] to an identifier. *)
+let of_string (s : string) : t =
+  s
+
 (** Generate a fresh name from a given [prefix]. *)
 let fresh : string -> t =
   let counters : int Map.t ref = ref Map.empty in

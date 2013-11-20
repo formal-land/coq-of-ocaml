@@ -1,5 +1,6 @@
 (** A structure represents the contents of a ".ml" file. *)
 open Typedtree
+open Types
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
@@ -113,7 +114,7 @@ type t =
 let rec of_structure (structure : structure) : t list =
   let of_structure_item (item : structure_item) : t =
     match item.str_desc with
-    | Tstr_value (rec_flag, [{pat_desc = Tpat_var (name, _)}, e]) ->
+    | Tstr_value (rec_flag, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
       let name = Name.of_ident name in
       let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
       let free_type_vars = schema.Schema.variables in
@@ -125,28 +126,28 @@ let rec of_structure (structure : structure) : t list =
         args = List.combine arg_names arg_typs;
         body = (body_exp, body_typ);
         is_rec = Recursivity.of_rec_flag rec_flag }
-    | Tstr_type [name, _, typ] ->
-      (match typ.typ_kind with
-      | Ttype_variant cases ->
-        let constructors = List.map (fun (constr, _, typs, _) ->
-          (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ.ctyp_type) typs))
+    | Tstr_type [{typ_id = name; typ_type = typ}] ->
+      (match typ.type_kind with
+      | Type_variant cases ->
+        let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
+          (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ) typs))
           cases in
-        let free_type_vars = List.map (fun name ->
-          match name with
-          | Some x -> x.Asttypes.txt
-          | None -> failwith "Type parameter expected.")
-          typ.typ_params in
+        let free_type_vars = List.map (fun x ->
+          match Type.of_type_expr x with
+          | Type.Variable x -> x
+          | _ -> failwith "The type parameter was expected to be a variable.")
+          typ.type_params in
         Inductive {
           Inductive.name = Name.of_ident name;
           free_type_vars = free_type_vars;
           constructors = constructors }
-      | Ttype_record fields ->
+      | Type_record (fields, _) ->
         Record {
           Record.name = Name.of_ident name;
-          fields = List.map (fun (x, _, _, typ, _) -> (Name.of_ident x, Type.of_type_expr typ.ctyp_type)) fields }
+          fields = List.map (fun {ld_id = x; ld_type = typ} -> (Name.of_ident x, Type.of_type_expr typ)) fields }
       | _ -> failwith "Type definition not handled.")
-    | Tstr_open (path, _) -> Open (PathName.of_path path)
-    | Tstr_module (name, _, { mod_desc = Tmod_structure structure }) ->
+    | Tstr_open (_, path, _, _) -> Open (PathName.of_path path)
+    | Tstr_module {mb_id = name; mb_expr = { mod_desc = Tmod_structure structure }} ->
       Module (Name.of_ident name, of_structure structure)
     | Tstr_exception _ -> failwith "Imperative structure item not handled."
     | _ -> failwith "Structure item not handled." in

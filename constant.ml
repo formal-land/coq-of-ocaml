@@ -1,16 +1,17 @@
 (** Constants. *)
+open Asttypes
+
 type t =
   | Int of int
   | Char of char
   | String of string
 
 (** Import an OCaml constant. *)
-let of_constant (c : Asttypes.constant) : t =
-  let open Asttypes in
+let of_constant (c : constant) : t =
   match c with
   | Const_int n -> Int n
   | Const_char c -> Char c
-  | Const_string s -> String s
+  | Const_string (s, _) -> String s
   | _ -> failwith "Constant not handled."
 
 (** Pretty-print a constant. *)
