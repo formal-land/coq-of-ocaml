@@ -1,5 +1,6 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open Asttypes
+open PPrint
 
 type t = {
   path : Name.t list;
@@ -20,8 +21,8 @@ let convert (p : t) : t =
     | "&" -> failwith "\"&\" is deprecated. Use \"&&\" instead."
     | "||" -> { path = []; base = "orb" }
     | "or" -> failwith "\"or\" is deprecated. Use \"||\" instead."
-    | "|>" -> { path = []; base = "(flip apply)" } (* TODO: test it using OCaml 4.1 *)
-    | "@@" -> { path = []; base = "apply" } (* TODO: test it using OCaml 4.1 *)
+    | "|>" -> { path = []; base = "reverse_apply" }
+    | "@@" -> { path = []; base = "apply" }
     | "~-" -> { path = ["Z"]; base = "opp" }
     | "~+" -> { path = []; base = "" }
     | "succ" -> { path = ["Z"]; base = "succ" }
@@ -42,7 +43,7 @@ let convert (p : t) : t =
     | "^" -> { path = []; base = "append" }
     | "int_of_char" -> { path = []; base = "int_of_char" }
     | "char_of_int" -> { path = []; base = "char_of_int" }
-    | "ignore" -> { path = []; base = "(fun _ => tt)" }
+    | "ignore" -> { path = []; base = "ignore" }
     | "string_of_bool" -> failwith "string_of_bool not handled."
     | "bool_of_string" -> failwith "bool_of_string not handled."
     | "string_of_int" -> failwith "string_of_int not handled."
@@ -80,6 +81,5 @@ let of_path (p : Path.t) : t =
   convert { path = List.rev p.path; base = p.base }
 
 (** Pretty-print a global name. *)
-let pp (f : Format.formatter) (i : t) : unit =
-  List.iter (fun x -> Name.pp f x; Format.fprintf f ".") i.path;
-  Name.pp f i.base
+let pp (i : t) : document =
+  separate (!^ ".") (List.map Name.pp (i.path @ [i.base]))

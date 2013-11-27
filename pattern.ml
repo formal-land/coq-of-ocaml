@@ -1,6 +1,7 @@
 (** Patterns used for the "match". *)
 open Typedtree
 open Types
+open PPrint
 
 type t =
   | Any
@@ -24,34 +25,28 @@ let rec of_pattern (p : pattern) : t =
   | _ -> failwith "unhandled pattern"
 
 (** Pretty-print a pattern (inside parenthesis if the [paren] flag is set). *)
-let rec pp (f : Format.formatter) (paren : bool) (p : t) : unit =
+let rec pp (paren : bool) (p : t) : document =
   match p with
-  | Any -> Format.fprintf f "_"
-  | Constant c -> Constant.pp f c
-  | Variable x -> Name.pp f x
-  | Tuple ps ->
-    Format.fprintf f "(";
-    Pp.sep_by ps (fun _ -> Format.fprintf f ",@ ") (fun p -> pp f false p);
-    Format.fprintf f ")"
-  | Constructor (path, ps) ->
+  | Any -> !^ "_"
+  | Constant c -> Constant.pp c
+  | Variable x -> Name.pp x
+  | Tuple ps -> group (lparen ^^ flow (!^ "," ^^ break 1) (List.map (pp false) ps) ^^ rparen)
+  | Constructor (x, ps) ->
     if ps = [] then
-      PathName.pp f path
-    else (
-      Pp.open_paren f paren;
-      PathName.pp f path;
-      Format.fprintf f "@ ";
-      Pp.sep_by ps (fun _ -> Format.fprintf f "@ ") (fun p -> pp f true p);
-      Pp.close_paren f paren)
+      PathName.pp x
+    else
+      group (
+        Pp.open_paren paren ^^
+        flow (break 1) (PathName.pp x :: List.map (pp true) ps) ^^
+        Pp.close_paren paren)
   | Alias (p, x) ->
-    Pp.open_paren f paren;
-    pp f false p;
-    Format.fprintf f "@ as@ ";
-    Name.pp f x;
-    Pp.close_paren f paren
+    group (
+      Pp.open_paren paren ^^
+      flow (break 1) [pp false p; !^ "as"; Name.pp x] ^^
+      Pp.close_paren paren)
   | Record fields ->
-    Format.fprintf f "{|@ ";
-    Pp.sep_by fields (fun _ -> Format.fprintf f ";@ ") (fun (x, p) ->
-      PathName.pp f x;
-      Format.fprintf f "@ :=@ ";
-      pp f false p);
-    Format.fprintf f "@ |}"
+    group (flow (break 1) [
+      !^ "{|";
+      flow (!^ ";" ^^ break 1) (fields |> List.map (fun (x, p) ->
+        group (flow (break 1) [PathName.pp x; !^ ":="; pp false p])));
+      !^ "|}"])

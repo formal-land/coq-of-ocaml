@@ -22,4 +22,4 @@ let p = fst (1, 2) + snd (3, 4)
 
 let l = [1; 2] @ [3]
 
-(* let x = (fun n -> n + 1) @@ 12 *) (* TODO: test it using OCaml 4.1 *)
+let y = (fun n -> n + 1) @@ 12

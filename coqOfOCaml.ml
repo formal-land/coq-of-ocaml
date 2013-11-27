@@ -1,12 +1,17 @@
+open PPrint
+
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) : unit =
   let definition = Structure.of_structure structure in
-  let std = Format.std_formatter in
-  Format.fprintf std "Require Import CoqOfOCaml.@\n@\n";
-  Format.fprintf std "Local Open Scope Z_scope.@\n";
-  Format.fprintf std "Import ListNotations.@\n";
-  Format.fprintf std "Set Implicit Arguments.@\n@\n";
-  Structure.pp std definition
+  let document =
+    concat (List.map (fun d -> d ^^ hardline) [
+      !^ "Require Import CoqOfOCaml." ^^ hardline;
+      !^ "Local Open Scope Z_scope.";
+      !^ "Import ListNotations.";
+      !^ "Set Implicit Arguments."]) ^^ hardline ^^
+    Structure.pp definition in
+  ToChannel.pretty 1. 80 stdout document;
+  flush stdout
 
 (** Display an OCaml structure on stdout using the OCaml's pretty-printer. *)
 let pp_ocaml (structure : Typedtree.structure) : unit =

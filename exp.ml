@@ -1,6 +1,7 @@
 (** An expression. *)
 open Typedtree
 open Types
+open PPrint
 
 (** The simplified OCaml AST we use. *)
 type t =
@@ -80,98 +81,62 @@ and open_cases (cases : case list) : Name.t * t =
   (x, Match (Variable (PathName.of_name [] x), cases))
 
 (** Pretty-print an expression (inside parenthesis if the [paren] flag is set). *)
-let rec pp (f : Format.formatter) (paren : bool) (e : t) : unit =
+let rec pp (paren : bool) (e : t) : document =
   match e with
-  | Constant c -> Constant.pp f c
-  | Variable x -> PathName.pp f x
-  | Tuple es ->
-    Format.fprintf f "(";
-    Pp.sep_by es (fun _ -> Format.fprintf f ", ") (fun e -> pp f true e);
-    Format.fprintf f ")"
+  | Constant c -> Constant.pp c
+  | Variable x -> PathName.pp x
+  | Tuple es -> group (lparen ^^ flow (!^ "," ^^ break 1) (List.map (pp true) es) ^^ rparen)
   | Constructor (x, es) ->
     if es = [] then
-      PathName.pp f x
-    else (
-      Pp.open_paren f paren;
-      PathName.pp f x;
-      Format.fprintf f "@ ";
-      Pp.sep_by es (fun _ -> Format.fprintf f "@ ") (fun e -> pp f true e);
-      Pp.close_paren f paren)
+      PathName.pp x
+    else
+      group (
+        Pp.open_paren paren ^^
+        flow (break 1) (PathName.pp x :: List.map (pp true) es) ^^
+        Pp.close_paren paren)
   | Apply (e_f, e_xs) ->
-    Pp.open_paren f paren;
-    Pp.sep_by (e_f :: e_xs) (fun _ -> Format.fprintf f "@ ") (fun e -> pp f true e);
-    Pp.close_paren f paren
+    group (
+      Pp.open_paren paren ^^
+      flow (break 1) (List.map (pp true) (e_f :: e_xs)) ^^
+      Pp.close_paren paren)
   | Function (x, e) ->
-    Pp.open_paren f paren;
-    Format.fprintf f "fun@ ";
-    Name.pp f x;
-    Format.fprintf f "@ =>@ ";
-    pp f false e;
-    Pp.close_paren f paren
+    group (flow (break 1) [
+      Pp.open_paren paren ^^ !^ "fun"; Name.pp x; !^ "=>";
+      pp false e ^^ Pp.close_paren paren])
   | Let (x, e1, e2) ->
-    Pp.open_paren f paren;
-    Format.fprintf f "let@ ";
-    Name.pp f x;
-    Format.fprintf f "@ :=@ ";
-    pp f false e1;
-    Format.fprintf f "@ in@\n";
-    pp f false e2;
-    Pp.close_paren f paren
+    group (flow (break 1) [
+      Pp.open_paren paren ^^ !^ "let"; Name.pp x; !^ ":="; pp false e1; !^ "in";
+      nest 2 (pp false e2 ^^ Pp.close_paren paren)])
   | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
-    Pp.open_paren f paren;
-    Format.fprintf f "let@ ";
-    if is_rec = Recursivity.Recursive then
-      Format.fprintf f "fix@ ";
-    Name.pp f f_name;
-    if typ_vars <> [] then (
-      Format.fprintf f "@ {";
-      List.iter (fun x ->
-        Name.pp f x;
-        Format.fprintf f "@ ")
-        typ_vars;
-      Format.fprintf f "@ :@ Type}");
-    List.iter (fun (x, x_typ) ->
-      Format.fprintf f "@ (";
-      Name.pp f x;
-      Format.fprintf f "@ :@ ";
-      Type.pp f false x_typ;
-      Format.fprintf f ")")
-      xs;
-    Format.fprintf f "@ :@ ";
-    Type.pp f false f_typ;
-    Format.fprintf f "@ :=@\n";
-    pp f false e_f;
-    Format.fprintf f "@ in@\n";
-    pp f false e;
-    Pp.close_paren f paren
+    group (flow (break 1) [
+      Pp.open_paren paren ^^ !^ "let";
+      (match is_rec with
+      | Recursivity.Recursive -> !^ "fix"
+      | _ -> empty);
+      Name.pp f_name;
+      (if typ_vars = [] then empty
+      else group (flow (break 1) (
+          !^ "{" ::
+          List.map Name.pp typ_vars @ [
+          !^ ":"; !^ "Type"; !^ "}"])));
+      group (flow (break 1) (xs |> List.map (fun (x, x_typ) -> flow (break 1) [
+        lparen ^^ Name.pp x; !^ ":"; Type.pp false x_typ ^^ rparen])));
+      !^ ":"; Type.pp false f_typ; !^ ":=" ^^ hardline ^^
+      pp false e_f; !^ "in" ^^ hardline ^^
+      pp false e ^^ Pp.close_paren paren])
   | Match (e, cases) ->
-    Format.fprintf f "match@ ";
-    pp f false e;
-    Format.fprintf f "@ with@\n";
-    List.iter (fun (p, e) ->
-      Format.fprintf f "|@ ";
-      Pattern.pp f false p;
-      Format.fprintf f "@ =>@ ";
-      pp f false e;
-      Format.fprintf f "@\n") cases;
-    Format.fprintf f "end"
+    group (flow (break 1) [
+      !^ "match"; pp false e; !^ "with" ^^ hardline ^^
+      flow (break 1) (cases |> List.map (fun (p, e) ->
+        group (flow (break 1) [!^ "|"; Pattern.pp false p; !^ "=>"; pp false e ^^ hardline]))) ^^
+      !^ "end"])
   | Record fields ->
-    Format.fprintf f "{|@ ";
-    Pp.sep_by fields (fun _ -> Format.fprintf f ";@ ") (fun (x, e) ->
-      PathName.pp f x;
-      Format.fprintf f "@ :=@ ";
-      pp f false e);
-    Format.fprintf f "@ |}"
-  | Field (e, x) ->
-    Pp.open_paren f paren;
-    PathName.pp f x;
-    Format.fprintf f "@ ";
-    pp f true e;
-    Pp.close_paren f paren
+    group (flow (break 1) [!^ "{|"; flow (!^ ";" ^^ break 1) (fields |> List.map (fun (x, e) ->
+      group (flow (break 1) [PathName.pp x; !^ ":="; pp false e]))); !^ "|}"])
+  | Field (e, x) -> group (Pp.open_paren paren ^^ PathName.pp x ^/^ pp true e ^^ Pp.close_paren paren)
   | IfThenElse (e1, e2, e3) ->
-    Format.fprintf f "if@ ";
-    pp f false e1;
-    Format.fprintf f "@ then@ ";
-    pp f false e2;
-    Format.fprintf f "@ else@ ";
-    pp f false e3
+    group (flow (break 1) [
+      !^ "if"; pp false e1; !^ "then" ^^ hardline ^^
+      nest 2 (pp false e2) ^^ hardline ^^
+      !^ "else" ^^ hardline ^^
+      nest 2 (pp false e3)])

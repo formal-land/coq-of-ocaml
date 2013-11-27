@@ -1,5 +1,6 @@
 (** Local identifiers, used for variable names in patterns for example. *)
 open Typedtree
+open PPrint
 
 (** Just a [string] (no freshness counter for now). *)
 type t = string
@@ -27,5 +28,5 @@ let fresh : string -> t =
     Printf.sprintf "%s_%d" prefix n
 
 (** Pretty-print a name. *)
-let pp (f : Format.formatter) (name : t) : unit =
-  Format.fprintf f "%s" name
+let pp (name : t) : document =
+  !^ name

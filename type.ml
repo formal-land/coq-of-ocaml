@@ -1,5 +1,6 @@
 (** A type, with free type variables for polymorphic arguments. *)
 open Types
+open PPrint
 
 type t =
   | Variable of Name.t
@@ -46,24 +47,24 @@ let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
   | Apply (path, typs) -> Apply (path, List.map (fun typ -> substitute_variable typ x x') typs)
 
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
-let rec pp (f : Format.formatter) (paren : bool) (typ : t) : unit =
+let rec pp (paren : bool) (typ : t) : document =
   match typ with
-  | Variable x -> Name.pp f x
+  | Variable x -> Name.pp x
   | Arrow (typ_x, typ_y) ->
-    Pp.open_paren f paren;
-    pp f true typ_x;
-    Format.fprintf f "@ ->@ ";
-    pp f false typ_y;
-    Pp.close_paren f paren
+    group (
+      Pp.open_paren paren ^^
+      flow (break 1) [pp true typ_x; !^ "->"; pp false typ_y] ^^
+      Pp.close_paren paren)
   | Tuple typs ->
     (match typs with
-    | [] -> Format.fprintf f "unit"
+    | [] -> !^ "unit"
     | _ ->
-      Pp.open_paren f paren;
-      Pp.sep_by typs (fun _ -> Format.fprintf f "@ *@ ") (fun typ -> pp f true typ);
-      Pp.close_paren f paren)
+      group (
+        Pp.open_paren paren ^^
+        flow (break 1 ^^ !^ "*" ^^ break 1) (List.map (pp true) typs) ^^
+        Pp.close_paren paren))
   | Apply (constr, typs) ->
-    if typs <> [] then Pp.open_paren f paren;
-    PathName.pp f constr;
-    List.iter (fun typ -> Format.fprintf f "@ "; pp f true typ) typs;
-    if typs <> [] then Pp.close_paren f paren
+    group (
+      Pp.open_paren (paren && typs <> []) ^^
+      flow (break 1) (PathName.pp constr :: List.map (pp true) typs) ^^
+      Pp.close_paren (paren && typs <> []))

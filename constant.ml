@@ -1,5 +1,6 @@
 (** Constants. *)
 open Asttypes
+open PPrint
 
 type t =
   | Int of int
@@ -15,12 +16,12 @@ let of_constant (c : constant) : t =
   | _ -> failwith "Constant not handled."
 
 (** Pretty-print a constant. *)
-let pp (f : Format.formatter) (c : t) : unit =
+let pp (c : t) : document =
   match c with
   | Int n ->
     if n >= 0 then
-      Format.fprintf f "%d" n
+      OCaml.int n
     else
-      Format.fprintf f "(%d)" n
-  | Char c -> Format.fprintf f "\"%c\"@ %%@ char" c
-  | String s -> Format.fprintf f "\"%s\"@ %%@ string" s
+      lparen ^^ OCaml.int n ^^ rparen
+  | Char c -> group (flow (break 1) [!^ "\"" ^^ !^ (Char.escaped c) ^^ !^ "\""; !^ "%"; !^ "char"])
+  | String s -> group (flow (break 1) [OCaml.string s; !^ "%"; !^ "string"])
