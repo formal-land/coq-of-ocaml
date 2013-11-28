@@ -149,7 +149,8 @@ let monadise (e : t) : t =
     | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
       let e1 = aux e1 (Name.Set.union env (added_vars_in_let_fun is_rec f xs)) in
       let e2 = aux e2 (Name.Set.add f env) in
-      LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2)
+      let xs = xs |> List.map (fun (x, typ) -> (x, Type.monadise typ)) in
+      LetFun (is_rec, f, typ_vars, xs, Type.Monad (Type.monadise f_typ), e1, e2)
     | Match (e, cases) ->
       let (x, env') = Name.fresh "x" env in
       Bind (aux e env, x, Match (var x, cases |> List.map (fun (pattern, e) ->

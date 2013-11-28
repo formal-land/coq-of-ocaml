@@ -25,6 +25,9 @@ Definition ignore {A : Type} (_ : A) : unit :=
 Definition app {A : Type} (l1 l2 : list A) : list A :=
   app l1 l2.
 
+Definition M (A : Type) : Type :=
+  A.
+
 Definition ret {A : Type} (x : A) : A :=
   x.
 
