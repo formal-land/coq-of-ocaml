@@ -1,8 +1,8 @@
 open PPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
-let of_ocaml (structure : Typedtree.structure) : unit =
-  let definition = Structure.of_structure structure in
+let of_ocaml (structure : Typedtree.structure) (is_monadic : bool) : unit =
+  let definition = Structure.of_structure structure is_monadic in
   let document =
     concat (List.map (fun d -> d ^^ hardline) [
       !^ "Require Import CoqOfOCaml." ^^ hardline;
@@ -28,9 +28,11 @@ let parse_cmt (file_name : string) : Typedtree.structure =
 let main () =
   let usage_msg = "Usage: ./coqOfOCaml.native file.cmt\nOptions are:" in
   let file_name = ref None in
-  Arg.parse [] (fun arg -> file_name := Some arg) usage_msg;
+  let is_monadic = ref false in
+  Arg.parse ["-monad", Arg.Set is_monadic, "Do a monadic encoding"]
+    (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage [] usage_msg
-  | Some file_name -> of_ocaml (parse_cmt file_name)
+  | Some file_name -> of_ocaml (parse_cmt file_name) !is_monadic
 
 ;;main ()

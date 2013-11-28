@@ -25,6 +25,17 @@ Definition ignore {A : Type} (_ : A) : unit :=
 Definition app {A : Type} (l1 l2 : list A) : list A :=
   app l1 l2.
 
+(*Definition M (A : Type) : Type :=
+  nat -> nat * A.
+
+Definition ret {A : Type} (x : A) : M A :=
+  fun s => (s, x).
+
+Definition bind {A B : Type} (x : M A) (f : A -> M B) : M B :=
+  fun s =>
+    let (s, x) := x s in
+    f x s.*)
+
 Definition M (A : Type) : Type :=
   A.
 

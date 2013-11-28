@@ -90,7 +90,7 @@ type t =
   | Module of Name.t * t list
 
 (** Import an OCaml structure. *)
-let rec of_structure (structure : structure) : t list =
+let rec of_structure (structure : structure) (is_monadic : bool) : t list =
   let of_structure_item (item : structure_item) : t =
     match item.str_desc with
     | Tstr_value (rec_flag, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
@@ -99,11 +99,18 @@ let rec of_structure (structure : structure) : t list =
       let free_type_vars = schema.Schema.variables in
       let (arg_names, body_exp) = Exp.open_function (Exp.of_expression e) in
       let (arg_typs, body_typ) = Type.open_function schema.Schema.typ (List.length arg_names) in
+      let (body_exp, arg_typs, body_typ) =
+        if is_monadic then (
+          Exp.simplify @@ Exp.monadise body_exp,
+          List.map Type.monadise arg_typs,
+          Type.Monad (Type.monadise body_typ))
+        else
+          (body_exp, arg_typs, body_typ) in
       Value {
         Value.name = name;
         free_type_vars = free_type_vars;
-        args = List.combine arg_names (List.map Type.monadise arg_typs);
-        body = (Exp.simplify @@ Exp.monadise body_exp, Type.Monad (Type.monadise body_typ));
+        args = List.combine arg_names arg_typs;
+        body = (body_exp, body_typ);
         is_rec = Recursivity.of_rec_flag rec_flag }
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with
@@ -127,7 +134,7 @@ let rec of_structure (structure : structure) : t list =
       | _ -> failwith "Type definition not handled.")
     | Tstr_open (_, path, _, _) -> Open (PathName.of_path path)
     | Tstr_module {mb_id = name; mb_expr = { mod_desc = Tmod_structure structure }} ->
-      Module (Name.of_ident name, of_structure structure)
+      Module (Name.of_ident name, of_structure structure is_monadic)
     | Tstr_exception _ -> failwith "Imperative structure item not handled."
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
