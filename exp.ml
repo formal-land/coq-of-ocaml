@@ -82,7 +82,13 @@ and open_cases (cases : case list) : Name.t * t =
   let x = Name.unsafe_fresh "match_var" in
   (x, Match (Variable (PathName.of_name [] x), cases))
 
-(** Free variables of an expression (we do not consider variables referencing an other module). *)
+let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t) (xs : (Name.t * Type.t) list) : Name.Set.t =
+  let s = List.fold_left (fun s (x, _) -> Name.Set.add x s) Name.Set.empty xs in
+  if is_rec = Recursivity.Recursive
+  then Name.Set.add f s
+  else s
+
+(** Free variables of an expression (we do not consider variables with a path referencing other modules). *)
 let rec free_vars (e : t) : Name.Set.t =
   let free_vars_of_list es =
     List.fold_left (fun s e -> Name.Set.union s (free_vars e)) Name.Set.empty es in
@@ -95,11 +101,7 @@ let rec free_vars (e : t) : Name.Set.t =
   | Function (x, e) -> Name.Set.remove x (free_vars e)
   | Let (x, e1, e2) | Bind (e1, x, e2) -> Name.Set.union (free_vars e1) (Name.Set.remove x (free_vars e2))
   | LetFun (is_rec, f, _, xs, _, e1, e2) ->
-    let s_e1 = List.fold_left (fun s (x, _) -> Name.Set.remove x s) (free_vars e1) xs in
-    let s_e1 =
-      if is_rec = Recursivity.Recursive
-      then Name.Set.remove f s_e1
-      else s_e1 in
+    let s_e1 = Name.Set.diff (free_vars e1) (added_vars_in_let_fun is_rec f xs) in
     Name.Set.union s_e1 (Name.Set.remove f (free_vars e2))
   | Match (e, cases) ->
     let s_e = free_vars e in
@@ -113,9 +115,12 @@ let rec free_vars (e : t) : Name.Set.t =
 
 (** Do the monadic transformation of an expression. *)
 let monadise (e : t) : t =
+  (** The [env] is the set of current free variables. *)
   let rec aux (e : t) (env : Name.Set.t) : t =
     let var (x : Name.t) : t =
       Variable (PathName.of_name [] x) in
+    (** Sequentialize the execution of the [es] expressions and bind their values to [xs].
+        Then call [k] with the [xs] and the new environment. *)
     let rec aux_list (es : t list) (env : Name.Set.t) (xs : Name.t list)
       (k : Name.Set.t -> Name.t list -> t) : t =
       match es with
@@ -141,15 +146,30 @@ let monadise (e : t) : t =
       | e :: es -> aux (Apply (Apply (e_f, [e]), es)) env)
     | Function (x, e) -> Return (Function (x, aux e (Name.Set.add x env)))
     | Let (x, e1, e2) -> Bind (aux e1 env, x, aux e2 (Name.Set.add x env))
+    | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
+      let e1 = aux e1 (Name.Set.union env (added_vars_in_let_fun is_rec f xs)) in
+      let e2 = aux e2 (Name.Set.add f env) in
+      LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2)
     | Match (e, cases) ->
       let (x, env') = Name.fresh "x" env in
       Bind (aux e env, x, Match (var x, cases |> List.map (fun (pattern, e) ->
         (pattern, aux e (Name.Set.union env' (Pattern.free_vars pattern))))))
-    | _ -> e in
+    | Record fields -> aux_list (List.map snd fields) env [] (fun env xs ->
+      Return (Record (List.map2 (fun (f, _) x -> (f, var x)) fields xs)))
+    | Field (e, f) ->
+      let (x, _) = Name.fresh "x" env in
+      Bind (aux e env, x,
+      Return (Field (var x, f)))
+    | IfThenElse (e1, e2, e3) ->
+      let (x, env') = Name.fresh "x" env in
+      Bind (aux e1 env, x,
+      IfThenElse (var x, aux e2 env', aux e3 env'))
+    | Return _ | Bind _ -> failwith "This expression is already monadic." in
   aux e (free_vars e)
 
 (** Simplify binds of a return and lets of a variable. *)
 let simplify (e : t) : t =
+  (** The [env] is the environment of substitutions to make. *)
   let rec aux (env : t Name.Map.t) (e : t) : t =
     let rm x = Name.Map.remove x env in
     match e with
@@ -166,11 +186,10 @@ let simplify (e : t) : t =
     | Function (x, e) -> Function (x, aux (rm x) e)
     | Let (x, e1, e2) -> Let (x, aux env e1, aux (rm x) e2)
     | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
-      let env_in_f = List.fold_left (fun env (x, _) -> Name.Map.remove x env) env xs in
-      let env_in_f =
-        if is_rec = Recursivity.Recursive
-        then Name.Map.remove f env_in_f
-        else env_in_f in
+      let env_in_f = Name.Set.fold (fun x env ->
+        Name.Map.remove x env)
+        (added_vars_in_let_fun is_rec f xs)
+        env in
       LetFun (is_rec, f, typ_vars, xs, f_typ, aux env_in_f e1, aux (rm f) e2)
     | Match (e, cases) -> Match (aux env e, cases |> List.map (fun (p, e) ->
       let env = Name.Set.fold (fun x env -> Name.Map.remove x env) (Pattern.free_vars p) env in
