@@ -20,3 +20,16 @@ Definition char_of_int (n : Z) : ascii :=
 
 Definition ignore {A : Type} (_ : A) : unit :=
   tt.
+
+(** The concatenation of lists with an implicit parameter. *)
+Definition app {A : Type} (l1 l2 : list A) : list A :=
+  app l1 l2.
+
+Definition ret {A : Type} (x : A) : A :=
+  x.
+
+Definition bind {A B : Type} (x : A) (f : A -> B) : B :=
+  f x.
+
+Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
+  (at level 200, X ident, A at level 100, B at level 200).

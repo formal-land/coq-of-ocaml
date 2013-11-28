@@ -24,6 +24,17 @@ let rec of_pattern (p : pattern) : t =
   | Tpat_record (fields, _) -> Record (List.map (fun (x, _, p) -> (PathName.of_loc x, of_pattern p)) fields)
   | _ -> failwith "unhandled pattern"
 
+(** Free variables in a pattern. *)
+let rec free_vars (p : t) : Name.Set.t =
+  let free_vars_of_list ps =
+    List.fold_left (fun s p -> Name.Set.union s (free_vars p)) Name.Set.empty ps in
+  match p with
+  | Any | Constant _ -> Name.Set.empty
+  | Variable x -> Name.Set.singleton x
+  | Tuple ps | Constructor (_, ps) -> free_vars_of_list ps
+  | Alias (p, x) -> Name.Set.union (Name.Set.singleton x) (free_vars p)
+  | Record fields -> free_vars_of_list (List.map snd fields)
+
 (** Pretty-print a pattern (inside parenthesis if the [paren] flag is set). *)
 let rec pp (paren : bool) (p : t) : document =
   match p with

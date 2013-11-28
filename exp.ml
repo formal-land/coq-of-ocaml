@@ -21,6 +21,8 @@ type t =
   | Record of (PathName.t * t) list (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
+  | Return of t (** Monadic return. *)
+  | Bind of t * Name.t * t (** Monadic bind. *)
 
 (** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
@@ -77,8 +79,108 @@ let rec of_expression (e : expression) : t =
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
 and open_cases (cases : case list) : Name.t * t =
   let cases = List.map (fun {c_lhs = p; c_rhs = e} -> (Pattern.of_pattern p, of_expression e)) cases in
-  let x = Name.fresh "match_var" in
+  let x = Name.unsafe_fresh "match_var" in
   (x, Match (Variable (PathName.of_name [] x), cases))
+
+(** Free variables of an expression (we do not consider variables referencing an other module). *)
+let rec free_vars (e : t) : Name.Set.t =
+  let free_vars_of_list es =
+    List.fold_left (fun s e -> Name.Set.union s (free_vars e)) Name.Set.empty es in
+  match e with
+  | Constant _ -> Name.Set.empty
+  | Variable { PathName.path = []; base = x } -> Name.Set.singleton x
+  | Variable _ -> Name.Set.empty
+  | Tuple es | Constructor (_, es) -> free_vars_of_list es
+  | Apply (e_f, es) -> free_vars_of_list (e_f :: es)
+  | Function (x, e) -> Name.Set.remove x (free_vars e)
+  | Let (x, e1, e2) | Bind (e1, x, e2) -> Name.Set.union (free_vars e1) (Name.Set.remove x (free_vars e2))
+  | LetFun (is_rec, f, _, xs, _, e1, e2) ->
+    let s_e1 = List.fold_left (fun s (x, _) -> Name.Set.remove x s) (free_vars e1) xs in
+    let s_e1 =
+      if is_rec = Recursivity.Recursive
+      then Name.Set.remove f s_e1
+      else s_e1 in
+    Name.Set.union s_e1 (Name.Set.remove f (free_vars e2))
+  | Match (e, cases) ->
+    let s_e = free_vars e in
+    let s_cases = cases |> List.fold_left (fun s (pattern, e) ->
+      Name.Set.union s (Name.Set.diff (free_vars e) (Pattern.free_vars pattern)))
+      Name.Set.empty in
+    Name.Set.union s_e s_cases
+  | Record fields -> free_vars_of_list (List.map snd fields)
+  | Field (e, _) | Return e -> free_vars e
+  | IfThenElse (e1, e2, e3) -> free_vars_of_list [e1; e2; e3]
+
+(** Do the monadic transformation of an expression. *)
+let monadise (e : t) : t =
+  let rec aux (e : t) (env : Name.Set.t) : t =
+    let var (x : Name.t) : t =
+      Variable (PathName.of_name [] x) in
+    let rec aux_list (es : t list) (env : Name.Set.t) (xs : Name.t list)
+      (k : Name.Set.t -> Name.t list -> t) : t =
+      match es with
+      | [] -> k env (List.rev xs)
+      | e :: es ->
+        let (x, env') = Name.fresh "x" env in
+        Bind (aux e env, x, aux_list es env' (x :: xs) k) in
+    match e with
+    | Constant _ | Variable _ -> Return e
+    | Tuple es -> aux_list es env [] (fun _ xs ->
+        Return (Tuple (List.map var xs)))
+    | Constructor (x, es) -> aux_list es env [] (fun _ xs ->
+        Return (Constructor (x, List.map var xs)))
+    | Apply (e_f, es) ->
+      (match es with
+      | [] -> aux e_f env
+      | [e_x] ->
+        let (f, env') = Name.fresh "f" env in
+        let (x, env') = Name.fresh "x" env' in
+        Bind (aux e_f env, f,
+        Bind (aux e_x env, x,
+        Apply (var f, [var x])))
+      | e :: es -> aux (Apply (Apply (e_f, [e]), es)) env)
+    | Function (x, e) -> Return (Function (x, aux e (Name.Set.add x env)))
+    | Let (x, e1, e2) -> Bind (aux e1 env, x, aux e2 (Name.Set.add x env))
+    | Match (e, cases) ->
+      let (x, env') = Name.fresh "x" env in
+      Bind (aux e env, x, Match (var x, cases |> List.map (fun (pattern, e) ->
+        (pattern, aux e (Name.Set.union env' (Pattern.free_vars pattern))))))
+    | _ -> e in
+  aux e (free_vars e)
+
+(** Simplify binds of a return and lets of a variable. *)
+let simplify (e : t) : t =
+  let rec aux (env : t Name.Map.t) (e : t) : t =
+    let rm x = Name.Map.remove x env in
+    match e with
+    | Bind (Return e1, x, e2) -> aux env (Let (x, e1, e2))
+    | Let (x, Variable x', e2) -> aux (Name.Map.add x (Variable x') env) e2
+    | Variable x ->
+      (match x with
+      | { PathName.path = []; base = x } -> if Name.Map.mem x env then Name.Map.find x env else e
+      | _ -> e)
+    | Constant _ -> e
+    | Tuple es -> Tuple (List.map (aux env) es)
+    | Constructor (x, es) -> Constructor (x, List.map (aux env) es)
+    | Apply (e_f, es) -> Apply (aux env e_f, List.map (aux env) es)
+    | Function (x, e) -> Function (x, aux (rm x) e)
+    | Let (x, e1, e2) -> Let (x, aux env e1, aux (rm x) e2)
+    | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
+      let env_in_f = List.fold_left (fun env (x, _) -> Name.Map.remove x env) env xs in
+      let env_in_f =
+        if is_rec = Recursivity.Recursive
+        then Name.Map.remove f env_in_f
+        else env_in_f in
+      LetFun (is_rec, f, typ_vars, xs, f_typ, aux env_in_f e1, aux (rm f) e2)
+    | Match (e, cases) -> Match (aux env e, cases |> List.map (fun (p, e) ->
+      let env = Name.Set.fold (fun x env -> Name.Map.remove x env) (Pattern.free_vars p) env in
+      (p, aux env e)))
+    | Record fields -> Record (fields |> List.map (fun (x, e) -> (x, aux env e)))
+    | Field (e, x) -> Field (aux env e, x)
+    | IfThenElse (e1, e2, e3) -> IfThenElse (aux env e1, aux env e2, aux env e3)
+    | Return e -> Return (aux env e)
+    | Bind (e1, x, e2) -> Bind (aux env e1, x, aux (rm x) e2) in
+  aux Name.Map.empty e
 
 (** Pretty-print an expression (inside parenthesis if the [paren] flag is set). *)
 let rec pp (paren : bool) (e : t) : document =
@@ -128,7 +230,7 @@ let rec pp (paren : bool) (e : t) : document =
     group (flow (break 1) [
       !^ "match"; pp false e; !^ "with" ^^ hardline ^^
       flow (break 1) (cases |> List.map (fun (p, e) ->
-        group (flow (break 1) [!^ "|"; Pattern.pp false p; !^ "=>"; pp false e ^^ hardline]))) ^^
+        group (flow (break 1) [!^ "|"; Pattern.pp false p; !^ "=>"; nest 2 (pp false e) ^^ hardline]))) ^^
       !^ "end"])
   | Record fields ->
     group (flow (break 1) [!^ "{|"; flow (!^ ";" ^^ break 1) (fields |> List.map (fun (x, e) ->
@@ -140,3 +242,8 @@ let rec pp (paren : bool) (e : t) : document =
       nest 2 (pp false e2) ^^ hardline ^^
       !^ "else" ^^ hardline ^^
       nest 2 (pp false e3)])
+  | Return e -> pp paren (Apply (Variable (PathName.of_name [] "ret"), [e]))
+  | Bind (e1, x, e2) ->
+    group (flow (break 1) [
+      Pp.open_paren paren ^^ !^ "let!"; Name.pp x; !^ ":="; pp false e1; !^ "in";
+      nest 2 (pp false e2 ^^ Pp.close_paren paren)])

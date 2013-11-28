@@ -103,7 +103,7 @@ let rec of_structure (structure : structure) : t list =
         Value.name = name;
         free_type_vars = free_type_vars;
         args = List.combine arg_names arg_typs;
-        body = (body_exp, body_typ);
+        body = (Exp.simplify @@ Exp.monadise body_exp, body_typ);
         is_rec = Recursivity.of_rec_flag rec_flag }
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with

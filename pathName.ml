@@ -6,6 +6,10 @@ type t = {
   path : Name.t list;
   base : Name.t}
 
+type t' = t
+module Set = Set.Make (struct type t = t' let compare = compare end)
+module Map = Map.Make (struct type t = t' let compare = compare end)
+
 (* Convert an identifier from OCaml to its Coq's equivalent. *)
 let convert (p : t) : t =
   match p with
