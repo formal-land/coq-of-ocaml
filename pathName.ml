@@ -20,6 +20,7 @@ let convert (p : t) : t =
   | { path = ["Pervasives"]; base = x } -> (match x with
     | "=" -> { path = []; base = "equiv_decb" }
     | "<>" -> { path = []; base = "nequiv_decb" }
+    | "<" -> { path = ["Z"]; base = "ltb" }
     | "not" -> { path = []; base = "negb" }
     | "&&" -> { path = []; base = "andb" }
     | "&" -> failwith "\"&\" is deprecated. Use \"&&\" instead."

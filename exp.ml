@@ -34,6 +34,9 @@ let rec open_function (e : t) : Name.t list * t =
 
 (** Import an OCaml expression. *)
 let rec of_expression (e : expression) : t =
+  let loc = e.exp_loc.Location.loc_start in
+  let (file_name, l, c) = Location.get_pos_info loc in
+  print_endline file_name;
   match e.exp_desc with
   | Texp_ident (path, _, _) -> Variable (PathName.of_path path)
   | Texp_constant constant -> Constant (Constant.of_constant constant)

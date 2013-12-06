@@ -16,7 +16,7 @@ test: $(TESTS_OUTPUT)
 	ocamlc -bin-annot $<
 
 %.v: %.cmt default
-	./$(OUTPUT) -monad $< >$@
+	./$(OUTPUT) $< >$@
 
 %.vo: %.v
 	coqc $<
