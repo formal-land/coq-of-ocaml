@@ -21,17 +21,7 @@ let pp_ocaml (structure : Typedtree.structure) : unit =
 let parse_cmt (file_name : string) : Typedtree.structure =
   let (_, cmt) = Cmt_format.read file_name in
   match cmt with
-  | Some {
-    Cmt_format.cmt_annots = Cmt_format.Implementation structure;
-    cmt_initial_env = env } ->
-    let Env.Env_open (summary, _) = Env.summary env in
-    (match summary with
-    | Env.Env_module (_, _, m) -> print_endline "module"
-    | Env.Env_open (_, path) -> ToChannel.pretty 1. 80 stdout (PathName.pp @@ PathName.of_path path)
-    | Env.Env_exception (_, x, { Types.exn_loc = { Location.loc_start = loc } }) ->
-      ToChannel.pretty 1. 80 stdout (Name.pp @@ Name.of_ident x)
-    | Env.Env_empty | Env.Env_value _ | Env.Env_type _ | Env.Env_modtype _ | Env.Env_class _ | Env.Env_cltype _ -> failwith "gre");
-    structure
+  | Some { Cmt_format.cmt_annots = Cmt_format.Implementation structure } -> structure
   | _ -> failwith "Cannot extract cmt data."
 
 (** The main function. *)
