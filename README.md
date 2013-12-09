@@ -1,5 +1,5 @@
-coq-of-ocaml
-============
+CoqOfOCaml
+==========
 
 Compiler of OCaml to Coq.
 

@@ -1,7 +1,7 @@
 (** A structure represents the contents of a ".ml" file. *)
 open Typedtree
 open Types
-open PPrint
+open SmartPrint
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
@@ -13,20 +13,19 @@ module Value = struct
     is_rec : Recursivity.t (** If the function is recursive. *) }
   
   (** Pretty-print a value definition. *)
-  let pp (value : t) : document =
-    group (flow (break 1) [
+  let pp (value : t) : SmartPrint.t =
+    nest 2 (
       (match value.is_rec with
-        | Recursivity.Recursive -> !^ "Fixpoint"
-        | Recursivity.NonRecursive -> !^ "Definition");
-      Name.pp value.name;
+      | Recursivity.Recursive -> !^ "Fixpoint"
+      | Recursivity.NonRecursive -> !^ "Definition") ^^
+      Name.pp value.name ^^
       (match value.free_type_vars with
       | [] -> empty
-      | xs -> group (flow (break 1) [
-        !^ "{" ^^ flow (break 1) (List.map Name.pp xs); !^ ":"; !^ "Type}"]));
-      group (flow (break 1) (value.args |> List.map (fun (x, t) ->
-        group (flow (break 1) [lparen ^^ Name.pp x; !^ ":"; Type.pp false t ^^ rparen]))));
-      !^ ":"; Type.pp false (snd value.body);
-      !^ ":="; Exp.pp false (fst value.body) ^^ !^ "."])
+      | xs -> nest 2 @@ braces (separate space (List.map Name.pp xs) ^^ !^ ":" ^^ !^ "Type")) ^^
+      nest 2 (separate space (value.args |> List.map (fun (x, t) ->
+        nest 2 @@ parens (Name.pp x ^^ !^ ":" ^^ Type.pp false t)))) ^^
+      !^ ":" ^^ Type.pp false (snd value.body) ^^
+      !^ ":=" ^^ Exp.pp false (fst value.body) ^-^ !^ ".")
 end
 
 (** A definition of a sum type. *)
@@ -37,24 +36,25 @@ module Inductive = struct
     constructors : (Name.t * Type.t list) list (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
   (** Pretty-print a sum type definition. *)
-  let pp (ind : t) : document =
-    group (flow (break 1) [
-      !^ "Inductive"; Name.pp ind.name;
-      (if ind.free_type_vars = [] then empty
-      else group (flow (break 1) [
-        lparen ^^ flow (break 1) (List.map Name.pp ind.free_type_vars);
-        !^ ":"; !^ "Type" ^^ rparen]));
-      !^ ":"; !^ "Type"; !^ ":=" ^^ hardline ^^
-      flow hardline (ind.constructors |> List.map (fun (constr, args) ->
-        group (flow (break 1) [
-          !^ "|";Name.pp constr; !^ ":";
-          flow empty (args |> List.map (fun arg -> Type.pp true arg ^/^ !^ "->" ^^ break 1)); Name.pp ind.name;
-          flow (break 1) (List.map Name.pp ind.free_type_vars)]))) ^^ !^ "." ^^ hardline ^^
-      flow hardline (ind.constructors |> List.map (fun (name, args) ->
-        group (flow (break 1) [
-          !^ "Arguments"; Name.pp name;
-          flow (break 1) (ind.free_type_vars |> List.map (fun x -> !^ "{" ^^ Name.pp x ^^ !^ "}"));
-          flow (break 1) (List.map (fun _ -> !^ "_") args) ^^ !^ "."])))])
+  let pp (ind : t) : SmartPrint.t =
+    nest 2 (
+      !^ "Inductive" ^^ Name.pp ind.name ^^
+      (if ind.free_type_vars = []
+      then empty
+      else nest 2 @@ parens (
+        separate space (List.map Name.pp ind.free_type_vars) ^^
+        !^ ":" ^^ !^ "Type")) ^^
+      !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
+      separate newline (ind.constructors |> List.map (fun (constr, args) ->
+        nest 2 (
+          !^ "|" ^^ Name.pp constr ^^ !^ ":" ^^
+          separate space (args |> List.map (fun arg -> Type.pp true arg ^^ !^ "->")) ^^ Name.pp ind.name ^^
+          separate space (List.map Name.pp ind.free_type_vars)))) ^-^ !^ "." ^^ newline ^^
+      separate newline (ind.constructors |> List.map (fun (name, args) ->
+        nest 2 (
+          !^ "Arguments" ^^ Name.pp name ^^
+          separate space (ind.free_type_vars |> List.map (fun x -> braces @@ Name.pp x)) ^^
+          separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
 end
 
 (** A definition of a record. *)
@@ -64,12 +64,12 @@ module Record = struct
     fields : (Name.t * Type.t) list (** The names of the fields with their types. *) }
 
   (** Pretty-print a record definition. *)
-  let pp (r : t) : document =
-    group (flow (break 1) [
-      !^ "Record"; Name.pp r.name;!^ ":="; !^ "{" ^^ hardline ^^
-      flow (!^ ";" ^^ hardline) (r.fields |> List.map (fun (x, typ) ->
-        group (nest 2 (flow (break 1) [Name.pp x; !^ ":"; Type.pp false typ]))));
-      !^ "}."])
+  let pp (r : t) : SmartPrint.t =
+    nest 2 (
+      !^ "Record" ^^ Name.pp r.name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
+      separate (!^ ";" ^^ newline) (r.fields |> List.map (fun (x, typ) ->
+        nest 2 (Name.pp x ^^ !^ ":" ^^ Type.pp false typ))) ^^
+      !^ "}.")
 end
 
 (** The "open" construct to open a module. *)
@@ -77,8 +77,8 @@ module Open = struct
   type t = PathName.t
 
   (** Pretty-print an open construct. *)
-  let pp (o : t): document =
-    group (!^ "Require Import" ^/^ PathName.pp o ^^ !^ ".")
+  let pp (o : t): SmartPrint.t =
+    nest 2 (!^ "Require Import" ^^ PathName.pp o ^-^ !^ ".")
 end
 
 (** A structure. *)
@@ -140,16 +140,16 @@ let rec of_structure (structure : structure) (is_monadic : bool) : t list =
   List.map of_structure_item structure.str_items
 
 (** Pretty-print a structure. *)
-let rec pp (defs : t list) : document =
-  let pp_one (def : t) : document =
+let rec pp (defs : t list) : SmartPrint.t =
+  let pp_one (def : t) : SmartPrint.t =
     match def with
     | Value value -> Value.pp value
     | Inductive ind -> Inductive.pp ind
     | Record record -> Record.pp record
     | Open o -> Open.pp o
     | Module (name, defs) ->
-      group (flow (break 1) [
-        !^ "Module"; Name.pp name ^^ !^ "." ^^ hardline ^^
-        nest 2 (pp defs) ^^ hardline ^^
-        !^ "End"; Name.pp name ^^ !^ "."]) in
-  flow (hardline ^^ hardline) (List.map pp_one defs)
+      nest 2 (
+        !^ "Module" ^^ Name.pp name ^-^ !^ "." ^^ newline ^^
+        pp defs ^^ newline ^^
+        !^ "End" ^^ Name.pp name ^-^ !^ ".") in
+  separate (newline ^^ newline) (List.map pp_one defs)

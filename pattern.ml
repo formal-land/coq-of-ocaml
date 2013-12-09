@@ -1,7 +1,7 @@
 (** Patterns used for the "match". *)
 open Typedtree
 open Types
-open PPrint
+open SmartPrint
 
 type t =
   | Any
@@ -36,28 +36,21 @@ let rec free_vars (p : t) : Name.Set.t =
   | Record fields -> free_vars_of_list (List.map snd fields)
 
 (** Pretty-print a pattern (inside parenthesis if the [paren] flag is set). *)
-let rec pp (paren : bool) (p : t) : document =
+let rec pp (paren : bool) (p : t) : SmartPrint.t =
   match p with
   | Any -> !^ "_"
   | Constant c -> Constant.pp c
   | Variable x -> Name.pp x
-  | Tuple ps -> group (lparen ^^ flow (!^ "," ^^ break 1) (List.map (pp false) ps) ^^ rparen)
+  | Tuple ps -> parens @@ nest 2 @@ separate (!^ "," ^^ space) (List.map (pp false) ps)
   | Constructor (x, ps) ->
     if ps = [] then
       PathName.pp x
     else
-      group (
-        Pp.open_paren paren ^^
-        flow (break 1) (PathName.pp x :: List.map (pp true) ps) ^^
-        Pp.close_paren paren)
+      Pp.parens paren @@ nest 2 @@ separate space (PathName.pp x :: List.map (pp true) ps)
   | Alias (p, x) ->
-    group (
-      Pp.open_paren paren ^^
-      flow (break 1) [pp false p; !^ "as"; Name.pp x] ^^
-      Pp.close_paren paren)
+    Pp.parens paren @@ nest 2 (pp false p ^^ !^ "as" ^^ Name.pp x)
   | Record fields ->
-    group (flow (break 1) [
-      !^ "{|";
-      flow (!^ ";" ^^ break 1) (fields |> List.map (fun (x, p) ->
-        group (flow (break 1) [PathName.pp x; !^ ":="; pp false p])));
-      !^ "|}"])
+    !^ "{|" ^^
+    nest_all 2 @@ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, p) ->
+      nest 2 (PathName.pp x ^^ !^ ":=" ^^ pp false p)))
+    ^^ !^ "|}"

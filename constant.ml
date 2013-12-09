@@ -1,6 +1,6 @@
 (** Constants. *)
 open Asttypes
-open PPrint
+open SmartPrint
 
 type t =
   | Int of int
@@ -16,12 +16,12 @@ let of_constant (c : constant) : t =
   | _ -> failwith "Constant not handled."
 
 (** Pretty-print a constant. *)
-let pp (c : t) : document =
+let pp (c : t) : SmartPrint.t =
   match c with
   | Int n ->
     if n >= 0 then
       OCaml.int n
     else
-      lparen ^^ OCaml.int n ^^ rparen
-  | Char c -> group (flow (break 1) [!^ "\"" ^^ !^ (Char.escaped c) ^^ !^ "\""; !^ "%"; !^ "char"])
-  | String s -> group (flow (break 1) [OCaml.string s; !^ "%"; !^ "string"])
+      parens @@ OCaml.int n
+  | Char c -> group (double_quotes (!^ (Char.escaped c)) ^^ !^ "%" ^^ !^ "char")
+  | String s -> group (OCaml.string s ^^ !^ "%" ^^ !^ "string")

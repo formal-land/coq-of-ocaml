@@ -1,6 +1,6 @@
 (** Local identifiers, used for variable names in patterns for example. *)
 open Typedtree
-open PPrint
+open SmartPrint
 
 (** Just a [string] (no freshness counter for now). *)
 type t = string
@@ -39,5 +39,5 @@ let fresh (prefix : string) (env : Set.t) : t * Set.t =
   (s, Set.add s env)
 
 (** Pretty-print a name. *)
-let pp (name : t) : document =
+let pp (name : t) : SmartPrint.t =
   !^ name

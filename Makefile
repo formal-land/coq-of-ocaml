@@ -3,7 +3,7 @@ TESTS_INPUT = $(wildcard tests/ex*.ml)
 TESTS_OUTPUT = $(TESTS_INPUT:.ml=.vo)
 
 default:
-	ocamlbuild $(OUTPUT) -lflags -I,+compiler-libs,ocamlcommon.cmxa -package pprint,compiler-libs
+	ocamlbuild $(OUTPUT) -lflags -I,+compiler-libs,ocamlcommon.cmxa -package smart_print,compiler-libs
 	coqc CoqOfOCaml.v
 
 clean:

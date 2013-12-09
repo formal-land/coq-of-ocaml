@@ -1,16 +1,16 @@
-open PPrint
+open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (is_monadic : bool) : unit =
   let definition = Structure.of_structure structure is_monadic in
   let document =
-    concat (List.map (fun d -> d ^^ hardline) [
-      !^ "Require Import CoqOfOCaml." ^^ hardline;
+    concat (List.map (fun d -> d ^^ newline) [
+      !^ "Require Import CoqOfOCaml." ^^ newline;
       !^ "Local Open Scope Z_scope.";
       !^ "Import ListNotations.";
-      !^ "Set Implicit Arguments."]) ^^ hardline ^^
+      !^ "Set Implicit Arguments."]) ^^ newline ^^
     Structure.pp definition in
-  ToChannel.pretty 1. 80 stdout document;
+  to_stdout 80 document;
   flush stdout
 
 (** Display an OCaml structure on stdout using the OCaml's pretty-printer. *)

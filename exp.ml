@@ -1,7 +1,7 @@
 (** An expression. *)
 open Typedtree
 open Types
-open PPrint
+open SmartPrint
 
 (** The simplified OCaml AST we use. *)
 type t =
@@ -203,67 +203,58 @@ let simplify (e : t) : t =
   aux Name.Map.empty e
 
 (** Pretty-print an expression (inside parenthesis if the [paren] flag is set). *)
-let rec pp (paren : bool) (e : t) : document =
+let rec pp (paren : bool) (e : t) : SmartPrint.t =
   match e with
   | Constant c -> Constant.pp c
   | Variable x -> PathName.pp x
-  | Tuple es -> group (lparen ^^ flow (!^ "," ^^ break 1) (List.map (pp true) es) ^^ rparen)
+  | Tuple es -> parens @@ nest 2 @@ separate (!^ "," ^^ space) (List.map (pp true) es)
   | Constructor (x, es) ->
     if es = [] then
       PathName.pp x
     else
-      group (
-        Pp.open_paren paren ^^
-        flow (break 1) (PathName.pp x :: List.map (pp true) es) ^^
-        Pp.close_paren paren)
+      Pp.parens paren @@ nest 2 @@ separate space (PathName.pp x :: List.map (pp true) es)
   | Apply (e_f, e_xs) ->
-    group (
-      Pp.open_paren paren ^^
-      flow (break 1) (List.map (pp true) (e_f :: e_xs)) ^^
-      Pp.close_paren paren)
+    Pp.parens paren @@ nest 2 @@ separate space (List.map (pp true) (e_f :: e_xs))
   | Function (x, e) ->
-    group (flow (break 1) [
-      Pp.open_paren paren ^^ !^ "fun"; Name.pp x; !^ "=>";
-      pp false e ^^ Pp.close_paren paren])
+    Pp.parens paren @@ nest 2 (!^ "fun" ^^ Name.pp x ^^ !^ "=>" ^^ pp false e)
   | Let (x, e1, e2) ->
-    group (flow (break 1) [
-      Pp.open_paren paren ^^ !^ "let"; Name.pp x; !^ ":="; pp false e1; !^ "in";
-      nest 2 (pp false e2 ^^ Pp.close_paren paren)])
+    Pp.parens paren @@ nest 2 (
+      !^ "let" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ pp false e2)
   | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
-    group (flow (break 1) [
-      Pp.open_paren paren ^^ !^ "let";
+    Pp.parens paren @@ nest 2 (
+      !^ "let" ^^
       (match is_rec with
       | Recursivity.Recursive -> !^ "fix"
-      | _ -> empty);
-      Name.pp f_name;
-      (if typ_vars = [] then empty
-      else group (flow (break 1) (
-          !^ "{" ::
-          List.map Name.pp typ_vars @ [
-          !^ ":"; !^ "Type"; !^ "}"])));
-      group (flow (break 1) (xs |> List.map (fun (x, x_typ) -> flow (break 1) [
-        lparen ^^ Name.pp x; !^ ":"; Type.pp false x_typ ^^ rparen])));
-      !^ ":"; Type.pp false f_typ; !^ ":=" ^^ hardline ^^
-      pp false e_f; !^ "in" ^^ hardline ^^
-      pp false e ^^ Pp.close_paren paren])
+      | _ -> empty) ^^
+      Name.pp f_name ^^
+      (if typ_vars = []
+      then empty
+      else nest 2 @@ braces (
+        separate space (List.map Name.pp typ_vars) ^^
+        !^ ":" ^^ !^ "Type")) ^^
+      nest 2 (separate space (xs |> List.map (fun (x, x_typ) ->
+        parens (Name.pp x ^^ !^ ":" ^^ Type.pp false x_typ)))) ^^
+      !^ ":" ^^ Type.pp false f_typ ^^ !^ ":=" ^^ newline ^^
+      pp false e_f ^^ !^ "in" ^^ newline ^^
+      pp false e)
   | Match (e, cases) ->
-    group (flow (break 1) [
-      !^ "match"; pp false e; !^ "with" ^^ hardline ^^
-      flow (break 1) (cases |> List.map (fun (p, e) ->
-        group (flow (break 1) [!^ "|"; Pattern.pp false p; !^ "=>"; nest 2 (pp false e) ^^ hardline]))) ^^
-      !^ "end"])
+    nest 2 (
+      !^ "match" ^^ pp false e ^^ !^ "with" ^^ newline ^^
+      separate space (cases |> List.map (fun (p, e) ->
+        nest 2 (!^ "|" ^^ Pattern.pp false p ^^ !^ "=>" ^^ nest 2 (pp false e) ^^ newline))) ^^
+      !^ "end")
   | Record fields ->
-    group (flow (break 1) [!^ "{|"; flow (!^ ";" ^^ break 1) (fields |> List.map (fun (x, e) ->
-      group (flow (break 1) [PathName.pp x; !^ ":="; pp false e]))); !^ "|}"])
-  | Field (e, x) -> group (Pp.open_paren paren ^^ PathName.pp x ^/^ pp true e ^^ Pp.close_paren paren)
+    nest 2 (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
+      nest 2 (PathName.pp x ^^ !^ ":=" ^^ pp false e))) ^^ !^ "|}")
+  | Field (e, x) -> nest 2 @@ Pp.parens paren (PathName.pp x ^^ pp true e)
   | IfThenElse (e1, e2, e3) ->
-    group (flow (break 1) [
-      !^ "if"; pp false e1; !^ "then" ^^ hardline ^^
-      nest 2 (pp false e2) ^^ hardline ^^
-      !^ "else" ^^ hardline ^^
-      nest 2 (pp false e3)])
+    nest 2 (
+      !^ "if" ^^ pp false e1 ^^ !^ "then" ^^ newline ^^
+      pp false e2 ^^ newline ^^
+      !^ "else" ^^ newline ^^
+      pp false e3)
   | Return e -> pp paren (Apply (Variable (PathName.of_name [] "ret"), [e]))
   | Bind (e1, x, e2) ->
-    group (flow (break 1) [
-      Pp.open_paren paren ^^ !^ "let!"; Name.pp x; !^ ":="; pp false e1; !^ "in";
-      nest 2 (pp false e2 ^^ Pp.close_paren paren)])
+    nest 2 @@ Pp.parens paren (
+      !^ "let!" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ newline ^^
+      pp false e2)

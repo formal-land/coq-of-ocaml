@@ -1,6 +1,6 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open Asttypes
-open PPrint
+open SmartPrint
 
 type t = {
   path : Name.t list;
@@ -86,5 +86,5 @@ let of_path (p : Path.t) : t =
   convert { path = List.rev p.path; base = p.base }
 
 (** Pretty-print a global name. *)
-let pp (i : t) : document =
+let pp (i : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.pp (i.path @ [i.base]))

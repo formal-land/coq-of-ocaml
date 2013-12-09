@@ -1,6 +1,6 @@
 (** A type, with free type variables for polymorphic arguments. *)
 open Types
-open PPrint
+open SmartPrint
 
 type t =
   | Variable of Name.t
@@ -59,25 +59,18 @@ let rec monadise (typ : t) : t =
   | Monad _ -> failwith "This type is already monadic."
 
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
-let rec pp (paren : bool) (typ : t) : document =
+let rec pp (paren : bool) (typ : t) : SmartPrint.t =
   match typ with
   | Variable x -> Name.pp x
   | Arrow (typ_x, typ_y) ->
-    group (
-      Pp.open_paren paren ^^
-      flow (break 1) [pp true typ_x; !^ "->"; pp false typ_y] ^^
-      Pp.close_paren paren)
+    group @@ Pp.parens paren (pp true typ_x ^^ !^ "->" ^^ pp false typ_y)
   | Tuple typs ->
     (match typs with
     | [] -> !^ "unit"
     | _ ->
-      group (
-        Pp.open_paren paren ^^
-        flow (break 1 ^^ !^ "*" ^^ break 1) (List.map (pp true) typs) ^^
-        Pp.close_paren paren))
+      group @@ Pp.parens paren @@ separate (space ^^ !^ "*" ^^ space)
+        (List.map (pp true) typs))
   | Apply (path, typs) ->
-    group (
-      Pp.open_paren (paren && typs <> []) ^^
-      flow (break 1) (PathName.pp path :: List.map (pp true) typs) ^^
-      Pp.close_paren (paren && typs <> []))
+    group @@ Pp.parens (paren && typs <> []) @@ separate space
+      (PathName.pp path :: List.map (pp true) typs)
   | Monad typ -> pp paren (Apply (PathName.of_name [] "M", [typ]))
