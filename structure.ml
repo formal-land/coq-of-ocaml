@@ -14,16 +14,16 @@ module Value = struct
   
   (** Pretty-print a value definition. *)
   let pp (value : t) : SmartPrint.t =
-    nest 2 (
+    nest (
       (match value.is_rec with
       | Recursivity.Recursive -> !^ "Fixpoint"
       | Recursivity.NonRecursive -> !^ "Definition") ^^
       Name.pp value.name ^^
       (match value.free_type_vars with
       | [] -> empty
-      | xs -> nest 2 @@ braces (separate space (List.map Name.pp xs) ^^ !^ ":" ^^ !^ "Type")) ^^
-      nest 2 (separate space (value.args |> List.map (fun (x, t) ->
-        nest 2 @@ parens (Name.pp x ^^ !^ ":" ^^ Type.pp false t)))) ^^
+      | xs -> braces @@ nest (separate space (List.map Name.pp xs) ^^ !^ ":" ^^ !^ "Type")) ^^
+      nest (separate space (value.args |> List.map (fun (x, t) ->
+        parens @@ nest (Name.pp x ^^ !^ ":" ^^ Type.pp false t)))) ^^
       !^ ":" ^^ Type.pp false (snd value.body) ^^
       !^ ":=" ^^ Exp.pp false (fst value.body) ^-^ !^ ".")
 end
@@ -37,21 +37,21 @@ module Inductive = struct
   
   (** Pretty-print a sum type definition. *)
   let pp (ind : t) : SmartPrint.t =
-    nest 2 (
+    nest (
       !^ "Inductive" ^^ Name.pp ind.name ^^
       (if ind.free_type_vars = []
       then empty
-      else nest 2 @@ parens (
+      else parens @@ nest (
         separate space (List.map Name.pp ind.free_type_vars) ^^
         !^ ":" ^^ !^ "Type")) ^^
       !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (constr, args) ->
-        nest 2 (
+        nest (
           !^ "|" ^^ Name.pp constr ^^ !^ ":" ^^
           separate space (args |> List.map (fun arg -> Type.pp true arg ^^ !^ "->")) ^^ Name.pp ind.name ^^
           separate space (List.map Name.pp ind.free_type_vars)))) ^-^ !^ "." ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (name, args) ->
-        nest 2 (
+        nest (
           !^ "Arguments" ^^ Name.pp name ^^
           separate space (ind.free_type_vars |> List.map (fun x -> braces @@ Name.pp x)) ^^
           separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
@@ -65,10 +65,10 @@ module Record = struct
 
   (** Pretty-print a record definition. *)
   let pp (r : t) : SmartPrint.t =
-    nest 2 (
+    nest (
       !^ "Record" ^^ Name.pp r.name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
-      separate (!^ ";" ^^ newline) (r.fields |> List.map (fun (x, typ) ->
-        nest 2 (Name.pp x ^^ !^ ":" ^^ Type.pp false typ))) ^^
+      indent (separate (!^ ";" ^^ newline) (r.fields |> List.map (fun (x, typ) ->
+        nest (Name.pp x ^^ !^ ":" ^^ Type.pp false typ)))) ^^
       !^ "}.")
 end
 
@@ -78,7 +78,7 @@ module Open = struct
 
   (** Pretty-print an open construct. *)
   let pp (o : t): SmartPrint.t =
-    nest 2 (!^ "Require Import" ^^ PathName.pp o ^-^ !^ ".")
+    nest (!^ "Require Import" ^^ PathName.pp o ^-^ !^ ".")
 end
 
 (** A structure. *)
@@ -148,8 +148,8 @@ let rec pp (defs : t list) : SmartPrint.t =
     | Record record -> Record.pp record
     | Open o -> Open.pp o
     | Module (name, defs) ->
-      nest 2 (
+      nest (
         !^ "Module" ^^ Name.pp name ^-^ !^ "." ^^ newline ^^
-        pp defs ^^ newline ^^
+        indent (pp defs) ^^ newline ^^
         !^ "End" ^^ Name.pp name ^-^ !^ ".") in
   separate (newline ^^ newline) (List.map pp_one defs)

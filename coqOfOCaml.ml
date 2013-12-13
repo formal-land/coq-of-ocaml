@@ -10,7 +10,7 @@ let of_ocaml (structure : Typedtree.structure) (is_monadic : bool) : unit =
       !^ "Import ListNotations.";
       !^ "Set Implicit Arguments."]) ^^ newline ^^
     Structure.pp definition in
-  to_stdout 80 document;
+  to_stdout 80 2 document;
   flush stdout
 
 (** Display an OCaml structure on stdout using the OCaml's pretty-printer. *)

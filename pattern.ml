@@ -41,16 +41,16 @@ let rec pp (paren : bool) (p : t) : SmartPrint.t =
   | Any -> !^ "_"
   | Constant c -> Constant.pp c
   | Variable x -> Name.pp x
-  | Tuple ps -> parens @@ nest 2 @@ separate (!^ "," ^^ space) (List.map (pp false) ps)
+  | Tuple ps -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (pp false) ps)
   | Constructor (x, ps) ->
     if ps = [] then
       PathName.pp x
     else
-      Pp.parens paren @@ nest 2 @@ separate space (PathName.pp x :: List.map (pp true) ps)
+      Pp.parens paren @@ nest @@ separate space (PathName.pp x :: List.map (pp true) ps)
   | Alias (p, x) ->
-    Pp.parens paren @@ nest 2 (pp false p ^^ !^ "as" ^^ Name.pp x)
+    Pp.parens paren @@ nest (pp false p ^^ !^ "as" ^^ Name.pp x)
   | Record fields ->
     !^ "{|" ^^
-    nest_all 2 @@ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, p) ->
-      nest 2 (PathName.pp x ^^ !^ ":=" ^^ pp false p)))
+    nest_all @@ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, p) ->
+      nest (PathName.pp x ^^ !^ ":=" ^^ pp false p)))
     ^^ !^ "|}"

@@ -207,21 +207,21 @@ let rec pp (paren : bool) (e : t) : SmartPrint.t =
   match e with
   | Constant c -> Constant.pp c
   | Variable x -> PathName.pp x
-  | Tuple es -> parens @@ nest 2 @@ separate (!^ "," ^^ space) (List.map (pp true) es)
+  | Tuple es -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (pp true) es)
   | Constructor (x, es) ->
     if es = [] then
       PathName.pp x
     else
-      Pp.parens paren @@ nest 2 @@ separate space (PathName.pp x :: List.map (pp true) es)
+      Pp.parens paren @@ nest @@ separate space (PathName.pp x :: List.map (pp true) es)
   | Apply (e_f, e_xs) ->
-    Pp.parens paren @@ nest 2 @@ separate space (List.map (pp true) (e_f :: e_xs))
+    Pp.parens paren @@ nest @@ separate space (List.map (pp true) (e_f :: e_xs))
   | Function (x, e) ->
-    Pp.parens paren @@ nest 2 (!^ "fun" ^^ Name.pp x ^^ !^ "=>" ^^ pp false e)
+    Pp.parens paren @@ nest (!^ "fun" ^^ Name.pp x ^^ !^ "=>" ^^ pp false e)
   | Let (x, e1, e2) ->
-    Pp.parens paren @@ nest 2 (
-      !^ "let" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ pp false e2)
+    Pp.parens paren @@ nest (
+      !^ "let" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ newline ^^ pp false e2)
   | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
-    Pp.parens paren @@ nest 2 (
+    Pp.parens paren @@ nest (
       !^ "let" ^^
       (match is_rec with
       | Recursivity.Recursive -> !^ "fix"
@@ -229,32 +229,32 @@ let rec pp (paren : bool) (e : t) : SmartPrint.t =
       Name.pp f_name ^^
       (if typ_vars = []
       then empty
-      else nest 2 @@ braces (
+      else braces @@ nest (
         separate space (List.map Name.pp typ_vars) ^^
         !^ ":" ^^ !^ "Type")) ^^
-      nest 2 (separate space (xs |> List.map (fun (x, x_typ) ->
+      nest (separate space (xs |> List.map (fun (x, x_typ) ->
         parens (Name.pp x ^^ !^ ":" ^^ Type.pp false x_typ)))) ^^
       !^ ":" ^^ Type.pp false f_typ ^^ !^ ":=" ^^ newline ^^
-      pp false e_f ^^ !^ "in" ^^ newline ^^
+      indent (pp false e_f) ^^ !^ "in" ^^ newline ^^
       pp false e)
   | Match (e, cases) ->
-    nest 2 (
+    nest (
       !^ "match" ^^ pp false e ^^ !^ "with" ^^ newline ^^
       separate space (cases |> List.map (fun (p, e) ->
-        nest 2 (!^ "|" ^^ Pattern.pp false p ^^ !^ "=>" ^^ nest 2 (pp false e) ^^ newline))) ^^
+        nest (!^ "|" ^^ Pattern.pp false p ^^ !^ "=>" ^^ pp false e ^^ newline))) ^^
       !^ "end")
   | Record fields ->
-    nest 2 (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
-      nest 2 (PathName.pp x ^^ !^ ":=" ^^ pp false e))) ^^ !^ "|}")
-  | Field (e, x) -> nest 2 @@ Pp.parens paren (PathName.pp x ^^ pp true e)
+    nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
+      nest (PathName.pp x ^^ !^ ":=" ^^ pp false e))) ^^ !^ "|}")
+  | Field (e, x) -> Pp.parens paren @@ nest (PathName.pp x ^^ pp true e)
   | IfThenElse (e1, e2, e3) ->
-    nest 2 (
+    nest (
       !^ "if" ^^ pp false e1 ^^ !^ "then" ^^ newline ^^
-      pp false e2 ^^ newline ^^
+      indent (pp false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
-      pp false e3)
+      indent (pp false e3))
   | Return e -> pp paren (Apply (Variable (PathName.of_name [] "ret"), [e]))
   | Bind (e1, x, e2) ->
-    nest 2 @@ Pp.parens paren (
+    Pp.parens paren @@ nest (
       !^ "let!" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ newline ^^
       pp false e2)

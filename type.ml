@@ -63,14 +63,14 @@ let rec pp (paren : bool) (typ : t) : SmartPrint.t =
   match typ with
   | Variable x -> Name.pp x
   | Arrow (typ_x, typ_y) ->
-    group @@ Pp.parens paren (pp true typ_x ^^ !^ "->" ^^ pp false typ_y)
+    Pp.parens paren @@ nest (pp true typ_x ^^ !^ "->" ^^ pp false typ_y)
   | Tuple typs ->
     (match typs with
     | [] -> !^ "unit"
     | _ ->
-      group @@ Pp.parens paren @@ separate (space ^^ !^ "*" ^^ space)
+      Pp.parens paren @@ nest @@ separate (space ^^ !^ "*" ^^ space)
         (List.map (pp true) typs))
   | Apply (path, typs) ->
-    group @@ Pp.parens (paren && typs <> []) @@ separate space
+    Pp.parens (paren && typs <> []) @@ nest @@ separate space
       (PathName.pp path :: List.map (pp true) typs)
   | Monad typ -> pp paren (Apply (PathName.of_name [] "M", [typ]))

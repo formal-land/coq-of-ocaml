@@ -23,5 +23,5 @@ let pp (c : t) : SmartPrint.t =
       OCaml.int n
     else
       parens @@ OCaml.int n
-  | Char c -> group (double_quotes (!^ (Char.escaped c)) ^^ !^ "%" ^^ !^ "char")
-  | String s -> group (OCaml.string s ^^ !^ "%" ^^ !^ "string")
+  | Char c -> nest (double_quotes (!^ (Char.escaped c)) ^^ !^ "%" ^^ !^ "char")
+  | String s -> nest (OCaml.string s ^^ !^ "%" ^^ !^ "string")
