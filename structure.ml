@@ -15,14 +15,15 @@ module Value = struct
   (** Pretty-print a value definition. *)
   let pp (value : t) : SmartPrint.t =
     nest (
-      (match value.is_rec with
-      | Recursivity.Recursive -> !^ "Fixpoint"
-      | Recursivity.NonRecursive -> !^ "Definition") ^^
+      (if Recursivity.to_bool value.is_rec then
+        !^ "Fixpoint"
+      else
+        !^ "Definition") ^^
       Name.pp value.name ^^
       (match value.free_type_vars with
       | [] -> empty
-      | xs -> braces @@ nest (separate space (List.map Name.pp xs) ^^ !^ ":" ^^ !^ "Type")) ^^
-      nest (separate space (value.args |> List.map (fun (x, t) ->
+      | xs -> braces @@ group (separate space (List.map Name.pp xs) ^^ !^ ":" ^^ !^ "Type")) ^^
+      group (separate space (value.args |> List.map (fun (x, t) ->
         parens @@ nest (Name.pp x ^^ !^ ":" ^^ Type.pp false t)))) ^^
       !^ ":" ^^ Type.pp false (snd value.body) ^^
       !^ ":=" ^^ Exp.pp false (fst value.body) ^-^ !^ ".")
@@ -33,7 +34,8 @@ module Inductive = struct
   type t = {
     name : Name.t;
     free_type_vars : Name.t list; (** Polymorphic type variables. *)
-    constructors : (Name.t * Type.t list) list (** The list of constructors, each with a name and the list of the types of the arguments. *) }
+    constructors : (Name.t * Type.t list) list
+      (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
   (** Pretty-print a sum type definition. *)
   let pp (ind : t) : SmartPrint.t =

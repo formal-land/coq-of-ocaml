@@ -33,6 +33,8 @@ let main () =
     (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage [] usage_msg
-  | Some file_name -> of_ocaml (parse_cmt file_name) !is_monadic
+  | Some file_name -> of_ocaml (parse_cmt file_name) !is_monadic;
+  (*print_newline ();
+  to_stdout 80 2 @@ Structure.pp [PervasivesModule.pervasives]*)
 
 ;;main ()

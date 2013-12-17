@@ -84,7 +84,7 @@ and open_cases (cases : case list) : Name.t * t =
 
 let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t) (xs : (Name.t * Type.t) list) : Name.Set.t =
   let s = List.fold_left (fun s (x, _) -> Name.Set.add x s) Name.Set.empty xs in
-  if is_rec = Recursivity.Recursive
+  if Recursivity.to_bool is_rec
   then Name.Set.add f s
   else s
 
@@ -223,16 +223,14 @@ let rec pp (paren : bool) (e : t) : SmartPrint.t =
   | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^
-      (match is_rec with
-      | Recursivity.Recursive -> !^ "fix"
-      | _ -> empty) ^^
+      (if Recursivity.to_bool is_rec then !^ "fix" else empty) ^^
       Name.pp f_name ^^
       (if typ_vars = []
       then empty
-      else braces @@ nest (
+      else braces @@ group (
         separate space (List.map Name.pp typ_vars) ^^
         !^ ":" ^^ !^ "Type")) ^^
-      nest (separate space (xs |> List.map (fun (x, x_typ) ->
+      group (separate space (xs |> List.map (fun (x, x_typ) ->
         parens (Name.pp x ^^ !^ ":" ^^ Type.pp false x_typ)))) ^^
       !^ ":" ^^ Type.pp false f_typ ^^ !^ ":=" ^^ newline ^^
       indent (pp false e_f) ^^ !^ "in" ^^ newline ^^
