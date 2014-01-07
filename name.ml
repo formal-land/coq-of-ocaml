@@ -27,6 +27,7 @@ let unsafe_fresh : string -> t =
     counters := Map.add prefix (n + 1) !counters;
     Printf.sprintf "%s_%d" prefix n
 
+(*
 (** Generate a fresh name from a given [prefix] which is not in [env]. *)
 let fresh (prefix : string) (env : Set.t) : t * Set.t =
   let prefix_n s n =
@@ -37,6 +38,7 @@ let fresh (prefix : string) (env : Set.t) : t * Set.t =
     else n in
   let s = prefix_n prefix (first_n 0) in
   (s, Set.add s env)
+*)
 
 (** Pretty-print a name. *)
 let pp (name : t) : SmartPrint.t =

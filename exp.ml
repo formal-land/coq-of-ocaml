@@ -113,60 +113,107 @@ let rec free_vars (e : t) : Name.Set.t =
   | Field (e, _) | Return e -> free_vars e
   | IfThenElse (e1, e2, e3) -> free_vars_of_list [e1; e2; e3]
 
-(** Do the monadic transformation of an expression. *)
-let monadise (e : t) : t =
-  (** The [env] is the set of current free variables. *)
-  let rec aux (e : t) (env : Name.Set.t) : t =
-    let var (x : Name.t) : t =
-      Variable (PathName.of_name [] x) in
-    (** Sequentialize the execution of the [es] expressions and bind their values to [xs].
-        Then call [k] with the [xs] and the new environment. *)
-    let rec aux_list (es : t list) (env : Name.Set.t) (xs : Name.t list)
-      (k : Name.Set.t -> Name.t list -> t) : t =
+type env = Effect.Type.t PathName.Map.t
+
+(** Do the monadic transformation of an expression using an effects environment. *)
+let monadise (e : t) (effects : env) : t * bool =
+  (* let free_vars : Name.Set.t = free_vars e in *)
+  let var (x : Name.t) : t =
+    Variable (PathName.of_name [] x) in
+  (** The [env] is the set of current free variables, used to generate fresh names. *)
+  let rec aux (e : t) (effects : env) : t * Effect.t =
+    (** Sequentialize the execution of the [es] expressions and bind their values
+        to some variables. The computation of these expressions can generate
+        effects but they cannot be functions with effects. [es'] are or variables
+        names in case of a bind, else the original expression.
+        Then call [k] with the new environment and the [es']. *)
+    let rec aux_list (es : t list) (effects : env)
+      (es' : (t * Effect.Type.t) list) (has_effects : bool)
+      (k : t list -> Effect.Type.t list -> t * Effect.t)
+      : t * Effect.t =
       match es with
-      | [] -> k env (List.rev xs)
+      | [] ->
+        let (es, es_typs) = List.split @@ List.rev es' in
+        let (e, e_effect) = k es es_typs in
+        if has_effects && not e_effect.Effect.effect then
+          (Return e, { Effect.effect = true; typ = e_effect.Effect.typ })
+        else
+          (e, e_effect)
       | e :: es ->
-        let (x, env') = Name.fresh "x" env in
-        Bind (aux e env, x, aux_list es env' (x :: xs) k) in
+        let (e, e_effect) = aux e effects in
+        if e_effect.Effect.effect then
+          let (x, effects) = PathName.fresh "x" e_effect.Effect.typ effects in
+          let (final_e, final_e_effect) = aux_list es effects ((var x, e_effect.Effect.typ) :: es') true k in
+          (Bind (e, x, final_e), final_e_effect)
+        else
+          aux_list es effects ((e, e_effect.Effect.typ) :: es') has_effects k in
+    let compound (es : t list) (k : t list -> t) : t * Effect.t =
+      aux_list es effects [] false (fun es es_typs ->
+      if List.for_all Effect.Type.is_pure es_typs then
+        (k es, Effect.pure)
+      else
+        failwith "Elements of compounds cannot have effects") in
     match e with
-    | Constant _ | Variable _ -> Return e
-    | Tuple es -> aux_list es env [] (fun _ xs ->
-        Return (Tuple (List.map var xs)))
-    | Constructor (x, es) -> aux_list es env [] (fun _ xs ->
-        Return (Constructor (x, List.map var xs)))
+    | Constant _ -> (e, Effect.pure)
+    | Variable _ -> (e, Effect.pure)
+    | Tuple es -> compound es (fun es -> Tuple es)
+    | Constructor (x, es) -> compound es (fun es -> Constructor (x, es))
     | Apply (e_f, es) ->
       (match es with
-      | [] -> aux e_f env
+      | [] -> aux e_f effects
       | [e_x] ->
-        let (f, env') = Name.fresh "f" env in
-        let (x, env') = Name.fresh "x" env' in
-        Bind (aux e_f env, f,
-        Bind (aux e_x env, x,
-        Apply (var f, [var x])))
-      | e :: es -> aux (Apply (Apply (e_f, [e]), es)) env)
-    | Function (x, e) -> Return (Function (x, aux e (Name.Set.add x env)))
-    | Let (x, e1, e2) -> Bind (aux e1 env, x, aux e2 (Name.Set.add x env))
-    | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
-      let e1 = aux e1 (Name.Set.union env (added_vars_in_let_fun is_rec f xs)) in
-      let e2 = aux e2 (Name.Set.add f env) in
-      let xs = xs |> List.map (fun (x, typ) -> (x, Type.monadise typ)) in
-      LetFun (is_rec, f, typ_vars, xs, Type.Monad (Type.monadise f_typ), e1, e2)
+        aux_list [e_f; e_x] effects [] false (fun es es_typs ->
+          match (es, es_typs) with
+          | ([e_f; e_x], [Effect.Type.Arrow (e_f_effect, e_f_typ); e_x_typ]) ->
+            if Effect.Type.is_pure e_x_typ then
+              (Apply (e_f, [e_x]), { Effect.effect = e_f_effect; typ = e_f_typ })
+            else
+              failwith "Functions cannot be applied to functions with effects."
+          | _ -> failwith "Unexpected answer from 'aux_list'")
+      | e :: es -> aux (Apply (Apply (e_f, [e]), es)) effects)
+    | Function (x, e) ->
+      let (e, e_effect) = aux e (PathName.Map.add (PathName.of_name [] x) Effect.Type.Ground effects) in
+      (Function (x, e),
+        { Effect.effect = false; typ = Effect.Type.Arrow (e_effect.Effect.effect, e_effect.Effect.typ) })
+    | Let (x, e1, e2) ->
+      let (e1, e1_effect) = aux e1 effects in
+      let (e2, e2_effect) = aux e2 (PathName.Map.add (PathName.of_name [] x) e1_effect.Effect.typ effects) in
+      if e1_effect.Effect.effect then
+        (Bind (e1, x, if e2_effect.Effect.effect then e2 else Return e2),
+          { Effect.effect = true; typ = e2_effect.Effect.typ })
+      else
+        (Let (x, e1, e2), e2_effect)
+    | LetFun (is_rec, f, typ_vars, xs, e1_typ, e1, e2) ->
+      let effects_in_e1 = List.fold_left (fun effects (x, x_typ) ->
+        PathName.Map.add (PathName.of_name [] x) (Effect.Type.of_type x_typ) effects)
+        effects xs in
+      let (e1, e1_effect) = aux e1 effects_in_e1 in
+      let f_typ = List.fold_left (fun typ _ ->
+        Effect.Type.Arrow (false, typ)) e1_effect.Effect.typ xs in
+      let effects_in_e2 = PathName.Map.add (PathName.of_name [] f) f_typ effects in
+      let (e2, e2_effect) = aux e2 effects_in_e2 in
+      let e1_typ = Effect.monadise e1_typ e1_effect in
+      (LetFun (is_rec, f, typ_vars, xs, e1_typ, e1, e2), e2_effect)
     | Match (e, cases) ->
-      let (x, env') = Name.fresh "x" env in
+      (*let (x, env') = Name.fresh "x" env in
       Bind (aux e env, x, Match (var x, cases |> List.map (fun (pattern, e) ->
-        (pattern, aux e (Name.Set.union env' (Pattern.free_vars pattern))))))
-    | Record fields -> aux_list (List.map snd fields) env [] (fun env xs ->
-      Return (Record (List.map2 (fun (f, _) x -> (f, var x)) fields xs)))
-    | Field (e, f) ->
-      let (x, _) = Name.fresh "x" env in
+        (pattern, aux e (Name.Set.union env' (Pattern.free_vars pattern))))))*)
+      failwith "TODO"
+    | Record fields -> failwith "TODO"
+      (*aux_list (List.map snd fields) env [] (fun env xs ->
+        Return (Record (List.map2 (fun (f, _) x -> (f, var x)) fields xs)))*)
+    | Field (e, f) -> failwith "TODO"
+      (*let (x, _) = Name.fresh "x" env in
       Bind (aux e env, x,
-      Return (Field (var x, f)))
+      Return (Field (var x, f)))*)
     | IfThenElse (e1, e2, e3) ->
-      let (x, env') = Name.fresh "x" env in
+      (*let (x, env') = Name.fresh "x" env in
       Bind (aux e1 env, x,
-      IfThenElse (var x, aux e2 env', aux e3 env'))
+      IfThenElse (var x, aux e2 env', aux e3 env'))*)
+      failwith "TODO"
     | Return _ | Bind _ -> failwith "This expression is already monadic." in
-  aux e (free_vars e)
+  let (e, e_effect) = aux e effects in
+  (e, e_effect.Effect.effect)
 
 (** Simplify binds of a return and lets of a variable. *)
 let simplify (e : t) : t =

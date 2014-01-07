@@ -49,15 +49,6 @@ let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
   | Apply (path, typs) -> Apply (path, List.map (fun typ -> substitute_variable typ x x') typs)
   | Monad typ -> Monad (substitute_variable typ x x')
 
-(** The monadic transformation of the type [typ]. *)
-let rec monadise (typ : t) : t =
-  match typ with
-  | Variable _ -> typ
-  | Arrow (typ_x, typ_y) -> Arrow (monadise typ_x, Monad (monadise typ_y))
-  | Tuple typs -> Tuple (List.map monadise typs)
-  | Apply (path, typs) -> Apply (path, List.map monadise typs)
-  | Monad _ -> failwith "This type is already monadic."
-
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
 let rec pp (paren : bool) (typ : t) : SmartPrint.t =
   match typ with

@@ -103,9 +103,13 @@ let rec of_structure (structure : structure) (is_monadic : bool) : t list =
       let (arg_typs, body_typ) = Type.open_function schema.Schema.typ (List.length arg_names) in
       let (body_exp, arg_typs, body_typ) =
         if is_monadic then (
-          Exp.simplify @@ Exp.monadise body_exp,
-          List.map Type.monadise arg_typs,
-          Type.Monad (Type.monadise body_typ))
+          let (e, effect) = Exp.monadise body_exp PathName.Map.empty in
+          if effect then
+            failwith "Cannot have effects at toplevel."
+          else
+            Exp.simplify e,
+          arg_typs,
+          body_typ)
         else
           (body_exp, arg_typs, body_typ) in
       Value {
@@ -140,6 +144,19 @@ let rec of_structure (structure : structure) (is_monadic : bool) : t list =
     | Tstr_exception _ -> failwith "Imperative structure item not handled."
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
+
+let rec signature (def : t) : Signature.t option =
+  let rec remove_nones (l : 'a option list) : 'a list =
+    match l with
+    | [] -> []
+    | None :: xs -> remove_nones xs
+    | Some x :: xs -> x :: remove_nones xs in
+  match def with
+  | Value { Value.name = name } -> Some (Signature.Value (name, false))
+  | Inductive _ | Record _ | Open _ -> None
+  | Module (name, defs) ->
+    Some (Signature.Module (name,
+      defs |> List.map signature |> remove_nones))
 
 (** Pretty-print a structure. *)
 let rec pp (defs : t list) : SmartPrint.t =
