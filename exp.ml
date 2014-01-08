@@ -174,7 +174,7 @@ let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t) (xs : (Name.t * 
   | IfThenElse (e1, e2, e3) -> free_vars_of_list [e1; e2; e3]*)
 
 (** Do the monadic transformation of an expression using an effects environment. *)
-let monadise (e : t) (effects : Effect.Env.t) : t * bool =
+let monadise (e : t) (effects : Effect.Env.t) : t * Effect.t =
   let var (x : Name.t) : t =
     Variable (PathName.of_name [] x) in
   (** [effects] is the set of current freet) (variables, used to generate fresh names. *)
@@ -269,8 +269,7 @@ let monadise (e : t) (effects : Effect.Env.t) : t * bool =
       IfThenElse (var x, aux e2 env', aux e3 env'))*)
       failwith "TODO"
     | Return _ | Bind _ -> failwith "This expression is already monadic." in
-  let (e, e_effect) = aux e effects in
-  (e, e_effect.Effect.effect)
+  aux e effects
 
 (** Simplify binds of a return and lets of a variable. *)
 let simplify (e : t) : t =

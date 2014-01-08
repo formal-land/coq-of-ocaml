@@ -1,8 +1,8 @@
 open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
-let of_ocaml (structure : Typedtree.structure) (is_monadic : bool) : unit =
-  let definition = Structure.of_structure structure is_monadic in
+let of_ocaml (structure : Typedtree.structure) : unit =
+  let (definition, _) = Structure.of_structure structure [] PathName.Map.empty in
   let document =
     concat (List.map (fun d -> d ^^ newline) [
       !^ "Require Import CoqOfOCaml." ^^ newline;
@@ -28,12 +28,10 @@ let parse_cmt (file_name : string) : Typedtree.structure =
 let main () =
   let usage_msg = "Usage: ./coqOfOCaml.native file.cmt\nOptions are:" in
   let file_name = ref None in
-  let is_monadic = ref false in
-  Arg.parse ["-monad", Arg.Set is_monadic, "Do a monadic encoding"]
-    (fun arg -> file_name := Some arg) usage_msg;
+  Arg.parse [] (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage [] usage_msg
-  | Some file_name -> of_ocaml (parse_cmt file_name) !is_monadic;
+  | Some file_name -> of_ocaml (parse_cmt file_name);
   (*print_newline ();
   to_stdout 80 2 @@ Structure.pp [PervasivesModule.pervasives]*)
 

@@ -2,8 +2,14 @@
 open Asttypes
 open SmartPrint
 
+module Path' = Path
+
+module Path = struct
+  type t = string list
+end
+
 type t = {
-  path : Name.t list;
+  path : Path.t;
   base : Name.t}
 
 type t' = t
@@ -60,7 +66,7 @@ let convert (p : t) : t =
   | _ -> p
 
 (** Lift a local name to a global name. *)
-let of_name (path : string list) (x : Name.t) : t =
+let of_name (path : Path.t) (x : Name.t) : t =
   convert { path = path; base = x }
 
 (** Import an OCaml [Longident.t]. *)
@@ -74,14 +80,14 @@ let of_loc (loc : Longident.t loc) : t =
   of_longident loc.txt
 
 (** Import an OCaml [Path.t]. *)
-let of_path (p : Path.t) : t =
+let of_path (p : Path'.t) : t =
   let rec aux p =
     match p with
-    | Path.Pident x -> { path = []; base = Name.of_ident x }
-    | Path.Pdot (p, s, _) ->
+    | Path'.Pident x -> { path = []; base = Name.of_ident x }
+    | Path'.Pdot (p, s, _) ->
       let p = aux p in
       { path = p.base :: p.path; base = s }
-    | Path.Papply _ -> failwith "application of paths not handled" in
+    | Path'.Papply _ -> failwith "application of paths not handled" in
   let p = aux p in
   convert { path = List.rev p.path; base = p.base }
 

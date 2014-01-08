@@ -92,30 +92,38 @@ type t =
   | Module of Name.t * t list
 
 (** Import an OCaml structure. *)
-let rec of_structure (structure : structure) (is_monadic : bool) : t list =
-  let of_structure_item (item : structure_item) : t =
+let rec of_structure (structure : structure)
+  (path : PathName.Path.t) (effects : Effect.Env.t)
+  : t list * Effect.Env.t =
+  let of_structure_item (item : structure_item)
+    (path : PathName.Path.t) (effects : Effect.Env.t)
+    : t * Effect.Env.t =
     match item.str_desc with
     | Tstr_value (rec_flag, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
       let name = Name.of_ident name in
       let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
       let free_type_vars = schema.Schema.variables in
       let (args_names, body_exp) = Exp.open_function (Exp.of_expression e) in
-      let (args_types, body_typ) = Type.open_type schema.Schema.typ (List.length args_names) in
-      let body_exp =
-        if is_monadic then
-          let (e, effect) = Exp.monadise body_exp PathName.Map.empty in
-          if effect then
-            failwith "Cannot have effects at toplevel."
-          else
-            Exp.simplify e
-        else
-          body_exp in
-      Value {
+      let (args_typs, body_typ) = Type.open_type schema.Schema.typ (List.length args_names) in
+      let effects_in_e = List.fold_left2 (fun effects x x_typ ->
+        PathName.Map.add (PathName.of_name path x) (Effect.Type.of_type x_typ) effects)
+        effects args_names args_typs in
+      let (e, e_effect) = Exp.monadise body_exp effects_in_e in
+      if e_effect.Effect.effect && args_typs = [] then
+        failwith "Cannot have effects at toplevel.";
+      let body_exp = Exp.simplify e in
+      (* TODO: add effect for the return value *)
+      let effect_typ = List.fold_right (fun x_typ effect_typ ->
+        Effect.Type.Arrow (false, Effect.Type.of_type x_typ, effect_typ))
+        args_typs e_effect.Effect.typ in
+      let effects = PathName.Map.add (PathName.of_name path name) effect_typ effects in
+      (Value {
         Value.name = name;
         free_type_vars = free_type_vars;
-        args = List.combine args_names args_types;
+        args = List.combine args_names args_typs;
         body = (body_exp, body_typ);
-        is_rec = Recursivity.of_rec_flag rec_flag }
+        is_rec = Recursivity.of_rec_flag rec_flag },
+        effects)
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with
       | Type_variant cases ->
@@ -127,23 +135,32 @@ let rec of_structure (structure : structure) (is_monadic : bool) : t list =
           | Type.Variable x -> x
           | _ -> failwith "The type parameter was expected to be a variable.")
           typ.type_params in
-        Inductive {
+        (Inductive {
           Inductive.name = Name.of_ident name;
           free_type_vars = free_type_vars;
-          constructors = constructors }
+          constructors = constructors },
+          effects)
       | Type_record (fields, _) ->
-        Record {
+        (Record {
           Record.name = Name.of_ident name;
-          fields = List.map (fun {ld_id = x; ld_type = typ} -> (Name.of_ident x, Type.of_type_expr typ)) fields }
+          fields = List.map (fun {ld_id = x; ld_type = typ} -> (Name.of_ident x, Type.of_type_expr typ)) fields },
+          effects)
       | _ -> failwith "Type definition not handled.")
-    | Tstr_open (_, path, _, _) -> Open (PathName.of_path path)
+    | Tstr_open (_, path, _, _) -> (Open (PathName.of_path path), effects)
     | Tstr_module {mb_id = name; mb_expr = { mod_desc = Tmod_structure structure }} ->
-      Module (Name.of_ident name, of_structure structure is_monadic)
+      let name = Name.of_ident name in
+      let (structures, effects) = of_structure structure (name :: path) effects in
+      (Module (name, structures), effects)
     | Tstr_exception _ -> failwith "Imperative structure item not handled."
     | _ -> failwith "Structure item not handled." in
-  List.map of_structure_item structure.str_items
+  let (structures, effects) =
+    List.fold_left (fun (structures, effects) item ->
+      let (structure, effects) = of_structure_item item path effects in
+      (structure :: structures, effects))
+      ([], effects) structure.str_items in
+  (List.rev structures, effects)
 
-let rec signature (def : t) : Signature.t option =
+(*let rec signature (def : t) : Signature.t option =
   let rec remove_nones (l : 'a option list) : 'a list =
     match l with
     | [] -> []
@@ -154,7 +171,7 @@ let rec signature (def : t) : Signature.t option =
   | Inductive _ | Record _ | Open _ -> None
   | Module (name, defs) ->
     Some (Signature.Module (name,
-      defs |> List.map signature |> remove_nones))
+      defs |> List.map signature |> remove_nones))*)
 
 (** Pretty-print a structure. *)
 let rec pp (defs : t list) : SmartPrint.t =
