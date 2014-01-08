@@ -99,23 +99,21 @@ let rec of_structure (structure : structure) (is_monadic : bool) : t list =
       let name = Name.of_ident name in
       let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
       let free_type_vars = schema.Schema.variables in
-      let (arg_names, body_exp) = Exp.open_function (Exp.of_expression e) in
-      let (arg_typs, body_typ) = Type.open_function schema.Schema.typ (List.length arg_names) in
-      let (body_exp, arg_typs, body_typ) =
-        if is_monadic then (
+      let (args_names, body_exp) = Exp.open_function (Exp.of_expression e) in
+      let (args_types, body_typ) = Type.open_type schema.Schema.typ (List.length args_names) in
+      let body_exp =
+        if is_monadic then
           let (e, effect) = Exp.monadise body_exp PathName.Map.empty in
           if effect then
             failwith "Cannot have effects at toplevel."
           else
-            Exp.simplify e,
-          arg_typs,
-          body_typ)
+            Exp.simplify e
         else
-          (body_exp, arg_typs, body_typ) in
+          body_exp in
       Value {
         Value.name = name;
         free_type_vars = free_type_vars;
-        args = List.combine arg_names arg_typs;
+        args = List.combine args_names args_types;
         body = (body_exp, body_typ);
         is_rec = Recursivity.of_rec_flag rec_flag }
     | Tstr_type [{typ_id = name; typ_type = typ}] ->

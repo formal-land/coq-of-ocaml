@@ -10,7 +10,7 @@ type t =
   | Tuple of t list (** A tuple of expressions. *)
   | Constructor of PathName.t * t list (** A constructor name and a list of arguments. *)
   | Apply of t * t list (** A curryfied application to a list of arguments. *)
-  | Function of Name.t * t (** An argument name and a body. *)
+  | Function of Name.t * Type.t * t (** An argument name, the type of this argument and a body. *)
   | Let of Name.t * t * t (** A "let" of a non-functional value. *)
   | LetFun of Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t * t
     (** A "let" of a function: the recursivity flag, the function name, the type variables,
@@ -24,10 +24,65 @@ type t =
   | Return of t (** Monadic return. *)
   | Bind of t * Name.t * t (** Monadic bind. *)
 
+(** Pretty-print an expression (inside parenthesis if the [paren] flag is set). *)
+let rec pp (paren : bool) (e : t) : SmartPrint.t =
+  match e with
+  | Constant c -> Constant.pp c
+  | Variable x -> PathName.pp x
+  | Tuple es -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (pp true) es)
+  | Constructor (x, es) ->
+    if es = [] then
+      PathName.pp x
+    else
+      Pp.parens paren @@ nest @@ separate space (PathName.pp x :: List.map (pp true) es)
+  | Apply (e_f, e_xs) ->
+    Pp.parens paren @@ nest @@ separate space (List.map (pp true) (e_f :: e_xs))
+  | Function (x, _, e) ->
+    Pp.parens paren @@ nest (!^ "fun" ^^ Name.pp x ^^ !^ "=>" ^^ pp false e)
+  | Let (x, e1, e2) ->
+    Pp.parens paren @@ nest (
+      !^ "let" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ newline ^^ pp false e2)
+  | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
+    Pp.parens paren @@ nest (
+      !^ "let" ^^
+      (if Recursivity.to_bool is_rec then !^ "fix" else empty) ^^
+      Name.pp f_name ^^
+      (if typ_vars = []
+      then empty
+      else braces @@ group (
+        separate space (List.map Name.pp typ_vars) ^^
+        !^ ":" ^^ !^ "Type")) ^^
+      group (separate space (xs |> List.map (fun (x, x_typ) ->
+        parens (Name.pp x ^^ !^ ":" ^^ Type.pp false x_typ)))) ^^
+      !^ ":" ^^ Type.pp false f_typ ^^ !^ ":=" ^^ newline ^^
+      indent (pp false e_f) ^^ !^ "in" ^^ newline ^^
+      pp false e)
+  | Match (e, cases) ->
+    nest (
+      !^ "match" ^^ pp false e ^^ !^ "with" ^^ newline ^^
+      separate space (cases |> List.map (fun (p, e) ->
+        nest (!^ "|" ^^ Pattern.pp false p ^^ !^ "=>" ^^ pp false e ^^ newline))) ^^
+      !^ "end")
+  | Record fields ->
+    nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
+      nest (PathName.pp x ^^ !^ ":=" ^^ pp false e))) ^^ !^ "|}")
+  | Field (e, x) -> Pp.parens paren @@ nest (PathName.pp x ^^ pp true e)
+  | IfThenElse (e1, e2, e3) ->
+    nest (
+      !^ "if" ^^ pp false e1 ^^ !^ "then" ^^ newline ^^
+      indent (pp false e2) ^^ newline ^^
+      !^ "else" ^^ newline ^^
+      indent (pp false e3))
+  | Return e -> pp paren (Apply (Variable (PathName.of_name [] "ret"), [e]))
+  | Bind (e1, x, e2) ->
+    Pp.parens paren @@ nest (
+      !^ "let!" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ newline ^^
+      pp false e2)
+
 (** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
   match e with
-  | Function (x, e) ->
+  | Function (x, _, e) ->
     let (xs, e) = open_function e in
     (x :: xs, e)
   | _ -> ([], e)
@@ -38,21 +93,23 @@ let rec of_expression (e : expression) : t =
   | Texp_ident (path, _, _) -> Variable (PathName.of_path path)
   | Texp_constant constant -> Constant (Constant.of_constant constant)
   | Texp_let (rec_flag, [{vb_pat = {pat_desc = Tpat_var (x, _)}; vb_expr = e1}], e2) ->
-    let e1_schema = Schema.of_type (Type.of_type_expr e1.exp_type) in
-    let e1_typ = e1_schema.Schema.typ in
     let x = Name.of_ident x in
+    let e1_schema = Schema.of_type (Type.of_type_expr e1.exp_type) in
     let e1 = of_expression e1 in
     let e2 = of_expression e2 in
-    let (arg_names, e1_body) = open_function e1 in
-    if arg_names = [] then
+    let (args_names, e1_body) = open_function e1 in
+    if args_names = [] then
       Let (x, e1, e2)
     else
-      let (arg_typs, e1_body_typ) = Type.open_function e1_typ (List.length arg_names) in
-      LetFun (Recursivity.of_rec_flag rec_flag, x, e1_schema.Schema.variables, List.combine arg_names arg_typs, e1_body_typ, e1_body, e2)
-  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _) -> Function (Name.of_ident x, of_expression e)
+      let e1_typ = e1_schema.Schema.typ in
+      let (args_typs, e1_body_typ) = Type.open_type e1_typ (List.length args_names) in
+      LetFun (Recursivity.of_rec_flag rec_flag, x, e1_schema.Schema.variables,
+        List.combine args_names args_typs, e1_body_typ, e1_body, e2)
+  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _); pat_type = x_typ}; c_rhs = e}], _) ->
+    Function (Name.of_ident x, Type.of_type_expr x_typ, of_expression e)
   | Texp_function (_, cases, _) ->
-    let (x, e) = open_cases cases in
-    Function (x, e)
+    let (x, x_typ, e) = open_cases cases in
+    Function (x, x_typ, e)
   | Texp_apply (e_f, e_xs) ->
     let e_f = of_expression e_f in
     let e_xs = List.map (fun (_, e_x, _) ->
@@ -73,14 +130,17 @@ let rec of_expression (e : expression) : t =
       | None -> Constructor ({ PathName.path = []; base = "tt" }, [])
       | Some e3 -> of_expression e3 in
     IfThenElse (of_expression e1, of_expression e2, e3)
-  | Texp_try _ | Texp_setfield _ | Texp_array _ | Texp_sequence _ | Texp_while _ | Texp_for _ | Texp_assert _ ->
+  | Texp_try _ | Texp_setfield _ | Texp_array _ | Texp_sequence _
+    | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
-and open_cases (cases : case list) : Name.t * t =
-  let cases = List.map (fun {c_lhs = p; c_rhs = e} -> (Pattern.of_pattern p, of_expression e)) cases in
+and open_cases (cases : case list) : Name.t * Type.t * t =
   let x = Name.unsafe_fresh "match_var" in
-  (x, Match (Variable (PathName.of_name [] x), cases))
+  let x_typ = Type.Tuple (List.map (fun {c_lhs = {pat_type = typ}} -> Type.of_type_expr typ) cases) in
+  let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
+      (Pattern.of_pattern p, of_expression e)) in
+  (x, x_typ, Match (Variable (PathName.of_name [] x), cases))
 
 let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t) (xs : (Name.t * Type.t) list) : Name.Set.t =
   let s = List.fold_left (fun s (x, _) -> Name.Set.add x s) Name.Set.empty xs in
@@ -89,7 +149,7 @@ let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t) (xs : (Name.t * 
   else s
 
 (** Free variables of an expression (we do not consider variables with a path referencing other modules). *)
-let rec free_vars (e : t) : Name.Set.t =
+(*let rec free_vars (e : t) : Name.Set.t =
   let free_vars_of_list es =
     List.fold_left (fun s e -> Name.Set.union s (free_vars e)) Name.Set.empty es in
   match e with
@@ -98,7 +158,7 @@ let rec free_vars (e : t) : Name.Set.t =
   | Variable _ -> Name.Set.empty
   | Tuple es | Constructor (_, es) -> free_vars_of_list es
   | Apply (e_f, es) -> free_vars_of_list (e_f :: es)
-  | Function (x, e) -> Name.Set.remove x (free_vars e)
+  | Function (x, _, e) -> Name.Set.remove x (free_vars e)
   | Let (x, e1, e2) | Bind (e1, x, e2) -> Name.Set.union (free_vars e1) (Name.Set.remove x (free_vars e2))
   | LetFun (is_rec, f, _, xs, _, e1, e2) ->
     let s_e1 = Name.Set.diff (free_vars e1) (added_vars_in_let_fun is_rec f xs) in
@@ -111,23 +171,20 @@ let rec free_vars (e : t) : Name.Set.t =
     Name.Set.union s_e s_cases
   | Record fields -> free_vars_of_list (List.map snd fields)
   | Field (e, _) | Return e -> free_vars e
-  | IfThenElse (e1, e2, e3) -> free_vars_of_list [e1; e2; e3]
-
-type env = Effect.Type.t PathName.Map.t
+  | IfThenElse (e1, e2, e3) -> free_vars_of_list [e1; e2; e3]*)
 
 (** Do the monadic transformation of an expression using an effects environment. *)
-let monadise (e : t) (effects : env) : t * bool =
-  (* let free_vars : Name.Set.t = free_vars e in *)
+let monadise (e : t) (effects : Effect.Env.t) : t * bool =
   let var (x : Name.t) : t =
     Variable (PathName.of_name [] x) in
-  (** The [env] is the set of current free variables, used to generate fresh names. *)
-  let rec aux (e : t) (effects : env) : t * Effect.t =
+  (** [effects] is the set of current freet) (variables, used to generate fresh names. *)
+  let rec aux (e : t) (effects : Effect.Env.t) : t * Effect.t =
     (** Sequentialize the execution of the [es] expressions and bind their values
         to some variables. The computation of these expressions can generate
         effects but they cannot be functions with effects. [es'] are or variables
         names in case of a bind, else the original expression.
-        Then call [k] with the new environment and the [es']. *)
-    let rec aux_list (es : t list) (effects : env)
+        Then call [k] with the new Effect.Env.tironment and the [es']. *)
+    let rec aux_list (es : t list) (effects : Effect.Env.t)
       (es' : (t * Effect.Type.t) list) (has_effects : bool)
       (k : t list -> Effect.Type.t list -> t * Effect.t)
       : t * Effect.t =
@@ -155,7 +212,7 @@ let monadise (e : t) (effects : env) : t * bool =
         failwith "Elements of compounds cannot have effects") in
     match e with
     | Constant _ -> (e, Effect.pure)
-    | Variable _ -> (e, Effect.pure)
+    | Variable x -> (e, { Effect.effect = false; typ = PathName.Map.find x effects })
     | Tuple es -> compound es (fun es -> Tuple es)
     | Constructor (x, es) -> compound es (fun es -> Constructor (x, es))
     | Apply (e_f, es) ->
@@ -164,17 +221,17 @@ let monadise (e : t) (effects : env) : t * bool =
       | [e_x] ->
         aux_list [e_f; e_x] effects [] false (fun es es_typs ->
           match (es, es_typs) with
-          | ([e_f; e_x], [Effect.Type.Arrow (e_f_effect, e_f_typ); e_x_typ]) ->
+          | ([e_f; e_x], [Effect.Type.Arrow (e_f_effect, e_f_typ1, e_f_typ2); e_x_typ]) ->
             if Effect.Type.is_pure e_x_typ then
-              (Apply (e_f, [e_x]), { Effect.effect = e_f_effect; typ = e_f_typ })
+              (Apply (e_f, [e_x]), { Effect.effect = e_f_effect; typ = e_f_typ2 })
             else
               failwith "Functions cannot be applied to functions with effects."
           | _ -> failwith "Unexpected answer from 'aux_list'")
       | e :: es -> aux (Apply (Apply (e_f, [e]), es)) effects)
-    | Function (x, e) ->
+    | Function (x, x_typ, e) ->
       let (e, e_effect) = aux e (PathName.Map.add (PathName.of_name [] x) Effect.Type.Ground effects) in
-      (Function (x, e),
-        { Effect.effect = false; typ = Effect.Type.Arrow (e_effect.Effect.effect, e_effect.Effect.typ) })
+      (Function (x, x_typ, e), { Effect.effect = false;
+        typ = Effect.Type.Arrow (e_effect.Effect.effect, Effect.Type.of_type x_typ, e_effect.Effect.typ) })
     | Let (x, e1, e2) ->
       let (e1, e1_effect) = aux e1 effects in
       let (e2, e2_effect) = aux e2 (PathName.Map.add (PathName.of_name [] x) e1_effect.Effect.typ effects) in
@@ -188,8 +245,8 @@ let monadise (e : t) (effects : env) : t * bool =
         PathName.Map.add (PathName.of_name [] x) (Effect.Type.of_type x_typ) effects)
         effects xs in
       let (e1, e1_effect) = aux e1 effects_in_e1 in
-      let f_typ = List.fold_left (fun typ _ ->
-        Effect.Type.Arrow (false, typ)) e1_effect.Effect.typ xs in
+      let f_typ = List.fold_right (fun (_, x_typ) f_typ ->
+        Effect.Type.Arrow (false, Effect.Type.of_type x_typ, f_typ)) xs e1_effect.Effect.typ in
       let effects_in_e2 = PathName.Map.add (PathName.of_name [] f) f_typ effects in
       let (e2, e2_effect) = aux e2 effects_in_e2 in
       let e1_typ = Effect.monadise e1_typ e1_effect in
@@ -231,7 +288,7 @@ let simplify (e : t) : t =
     | Tuple es -> Tuple (List.map (aux env) es)
     | Constructor (x, es) -> Constructor (x, List.map (aux env) es)
     | Apply (e_f, es) -> Apply (aux env e_f, List.map (aux env) es)
-    | Function (x, e) -> Function (x, aux (rm x) e)
+    | Function (x, x_typ, e) -> Function (x, x_typ, aux (rm x) e)
     | Let (x, e1, e2) -> Let (x, aux env e1, aux (rm x) e2)
     | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
       let env_in_f = Name.Set.fold (fun x env ->
@@ -248,58 +305,3 @@ let simplify (e : t) : t =
     | Return e -> Return (aux env e)
     | Bind (e1, x, e2) -> Bind (aux env e1, x, aux (rm x) e2) in
   aux Name.Map.empty e
-
-(** Pretty-print an expression (inside parenthesis if the [paren] flag is set). *)
-let rec pp (paren : bool) (e : t) : SmartPrint.t =
-  match e with
-  | Constant c -> Constant.pp c
-  | Variable x -> PathName.pp x
-  | Tuple es -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (pp true) es)
-  | Constructor (x, es) ->
-    if es = [] then
-      PathName.pp x
-    else
-      Pp.parens paren @@ nest @@ separate space (PathName.pp x :: List.map (pp true) es)
-  | Apply (e_f, e_xs) ->
-    Pp.parens paren @@ nest @@ separate space (List.map (pp true) (e_f :: e_xs))
-  | Function (x, e) ->
-    Pp.parens paren @@ nest (!^ "fun" ^^ Name.pp x ^^ !^ "=>" ^^ pp false e)
-  | Let (x, e1, e2) ->
-    Pp.parens paren @@ nest (
-      !^ "let" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ newline ^^ pp false e2)
-  | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
-    Pp.parens paren @@ nest (
-      !^ "let" ^^
-      (if Recursivity.to_bool is_rec then !^ "fix" else empty) ^^
-      Name.pp f_name ^^
-      (if typ_vars = []
-      then empty
-      else braces @@ group (
-        separate space (List.map Name.pp typ_vars) ^^
-        !^ ":" ^^ !^ "Type")) ^^
-      group (separate space (xs |> List.map (fun (x, x_typ) ->
-        parens (Name.pp x ^^ !^ ":" ^^ Type.pp false x_typ)))) ^^
-      !^ ":" ^^ Type.pp false f_typ ^^ !^ ":=" ^^ newline ^^
-      indent (pp false e_f) ^^ !^ "in" ^^ newline ^^
-      pp false e)
-  | Match (e, cases) ->
-    nest (
-      !^ "match" ^^ pp false e ^^ !^ "with" ^^ newline ^^
-      separate space (cases |> List.map (fun (p, e) ->
-        nest (!^ "|" ^^ Pattern.pp false p ^^ !^ "=>" ^^ pp false e ^^ newline))) ^^
-      !^ "end")
-  | Record fields ->
-    nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
-      nest (PathName.pp x ^^ !^ ":=" ^^ pp false e))) ^^ !^ "|}")
-  | Field (e, x) -> Pp.parens paren @@ nest (PathName.pp x ^^ pp true e)
-  | IfThenElse (e1, e2, e3) ->
-    nest (
-      !^ "if" ^^ pp false e1 ^^ !^ "then" ^^ newline ^^
-      indent (pp false e2) ^^ newline ^^
-      !^ "else" ^^ newline ^^
-      indent (pp false e3))
-  | Return e -> pp paren (Apply (Variable (PathName.of_name [] "ret"), [e]))
-  | Bind (e1, x, e2) ->
-    Pp.parens paren @@ nest (
-      !^ "let!" ^^ Name.pp x ^^ !^ ":=" ^^ pp false e1 ^^ !^ "in" ^^ newline ^^
-      pp false e2)

@@ -26,19 +26,20 @@ let rec free_vars (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x
   | Arrow (typ_x, typ_y) -> Name.Set.union (free_vars typ_x) (free_vars typ_y)
-  | Tuple typs | Apply (_, typs) -> List.fold_left (fun s typ -> Name.Set.union s (free_vars typ)) Name.Set.empty typs
+  | Tuple typs | Apply (_, typs) ->
+    List.fold_left (fun s typ -> Name.Set.union s (free_vars typ)) Name.Set.empty typs
   | Monad typ -> free_vars typ
 
-(** In a function's type, extract the list of arguments' types (up to [n] elements) and the body's type.  *)
-let rec open_function (typ : t) (n : int) : t list * t =
+(** In a function's type extract the body's type (up to [n] arguments). *)
+let rec open_type (typ : t) (n : int) : t list * t =
   if n = 0 then
     ([], typ)
   else
     match typ with
-    | Arrow (typ_x, typ_y) ->
-      let (typs, typ) = open_function typ_y (n - 1) in
-      (typ_x :: typs, typ)
-    | _ -> ([], typ)
+    | Arrow (typ1, typ2) ->
+      let (typs, typ) = open_type typ2 (n - 1) in
+      (typ1 :: typs, typ)
+    | _ -> failwith "Expected an arrow type."
 
 (** Replace a variable name by another. *)
 let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
