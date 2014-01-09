@@ -7,7 +7,7 @@ open SmartPrint
 module Value = struct
   type t = {
     name : Name.t;
-    free_type_vars : Name.t list; (** Polymorphic type variables. *)
+    free_typ_vars : Name.t list; (** Polymorphic type variables. *)
     args : (Name.t * Type.t) list; (** Names and types of the arguments. *)
     body : Exp.t * Type.t; (** Body and type of the body. *)
     is_rec : Recursivity.t (** If the function is recursive. *) }
@@ -20,7 +20,7 @@ module Value = struct
       else
         !^ "Definition") ^^
       Name.pp value.name ^^
-      (match value.free_type_vars with
+      (match value.free_typ_vars with
       | [] -> empty
       | xs -> braces @@ group (separate space (List.map Name.pp xs) ^^ !^ ":" ^^ !^ "Type")) ^^
       group (separate space (value.args |> List.map (fun (x, t) ->
@@ -33,7 +33,7 @@ end
 module Inductive = struct
   type t = {
     name : Name.t;
-    free_type_vars : Name.t list; (** Polymorphic type variables. *)
+    free_typ_vars : Name.t list; (** Polymorphic type variables. *)
     constructors : (Name.t * Type.t list) list
       (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
@@ -41,21 +41,21 @@ module Inductive = struct
   let pp (ind : t) : SmartPrint.t =
     nest (
       !^ "Inductive" ^^ Name.pp ind.name ^^
-      (if ind.free_type_vars = []
+      (if ind.free_typ_vars = []
       then empty
       else parens @@ nest (
-        separate space (List.map Name.pp ind.free_type_vars) ^^
+        separate space (List.map Name.pp ind.free_typ_vars) ^^
         !^ ":" ^^ !^ "Type")) ^^
       !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (constr, args) ->
         nest (
           !^ "|" ^^ Name.pp constr ^^ !^ ":" ^^
           separate space (args |> List.map (fun arg -> Type.pp true arg ^^ !^ "->")) ^^ Name.pp ind.name ^^
-          separate space (List.map Name.pp ind.free_type_vars)))) ^-^ !^ "." ^^ newline ^^
+          separate space (List.map Name.pp ind.free_typ_vars)))) ^-^ !^ "." ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (name, args) ->
         nest (
           !^ "Arguments" ^^ Name.pp name ^^
-          separate space (ind.free_type_vars |> List.map (fun x -> braces @@ Name.pp x)) ^^
+          separate space (ind.free_typ_vars |> List.map (fun x -> braces @@ Name.pp x)) ^^
           separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
 end
 
@@ -100,29 +100,21 @@ let rec of_structure (structure : structure)
     : t * Effect.Env.t =
     match item.str_desc with
     | Tstr_value (rec_flag, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
-      let name = Name.of_ident name in
-      let schema = Schema.of_type (Type.of_type_expr e.exp_type) in
-      let free_type_vars = schema.Schema.variables in
-      let (args_names, body_exp) = Exp.open_function (Exp.of_expression e) in
-      let (args_typs, body_typ) = Type.open_type schema.Schema.typ (List.length args_names) in
-      let effects_in_e = List.fold_left2 (fun effects x x_typ ->
-        PathName.Map.add (PathName.of_name path x) (Effect.Type.of_type x_typ) effects)
-        effects args_names args_typs in
-      let (e, e_effect) = Exp.monadise body_exp effects_in_e in
-      if e_effect.Effect.effect && args_typs = [] then
+      let (rec_flag, name, free_typ_vars, args, body_typ, body) =
+        Exp.import_let_fun rec_flag name e in
+      let effects_in_e = Effect.Env.in_function path effects args in
+      let (e, e_effect) = Exp.monadise body path effects_in_e in
+      if e_effect.Effect.effect && args = [] then
         failwith "Cannot have effects at toplevel.";
       let body_exp = Exp.simplify e in
-      (* TODO: add effect for the return value *)
-      let effect_typ = List.fold_right (fun x_typ effect_typ ->
-        Effect.Type.Arrow (false, Effect.Type.of_type x_typ, effect_typ))
-        args_typs e_effect.Effect.typ in
+      let effect_typ = Effect.function_typ args e_effect in
       let effects = PathName.Map.add (PathName.of_name path name) effect_typ effects in
       (Value {
         Value.name = name;
-        free_type_vars = free_type_vars;
-        args = List.combine args_names args_typs;
+        free_typ_vars = free_typ_vars;
+        args = args;
         body = (body_exp, body_typ);
-        is_rec = Recursivity.of_rec_flag rec_flag },
+        is_rec = rec_flag },
         effects)
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with
@@ -130,14 +122,14 @@ let rec of_structure (structure : structure)
         let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
           (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ) typs))
           cases in
-        let free_type_vars = List.map (fun x ->
+        let free_typ_vars = List.map (fun x ->
           match Type.of_type_expr x with
           | Type.Variable x -> x
           | _ -> failwith "The type parameter was expected to be a variable.")
           typ.type_params in
         (Inductive {
           Inductive.name = Name.of_ident name;
-          free_type_vars = free_type_vars;
+          free_typ_vars = free_typ_vars;
           constructors = constructors },
           effects)
       | Type_record (fields, _) ->

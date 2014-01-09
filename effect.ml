@@ -44,6 +44,12 @@ module Env = struct
   let pp (effects : t) : SmartPrint.t =
     PathName.Map.bindings effects |> OCaml.list (fun (x, typ) ->
       nest (PathName.pp x ^^ !^ ":" ^^ Type.pp false typ))
+
+  let in_function (path : PathName.Path.t) (effects : t)
+    (args : (Name.t * Type'.t) list) : t =
+    List.fold_left (fun effects (x, x_typ) ->
+      PathName.Map.add (PathName.of_name path x) (Type.of_type x_typ) effects)
+      effects args
 end
 
 type t = { effect : bool; typ : Type.t }
@@ -51,7 +57,20 @@ type t = { effect : bool; typ : Type.t }
 let pure : t =
   { effect = false; typ = Type.Ground }
 
-let monadise (typ : Type'.t) (effect : t) : Type'.t=
+let function_typ (args : (Name.t * Type'.t) list) (body_effect : t) : Type.t =
+  match List.rev args with
+  | [] ->
+    if body_effect.effect then
+      failwith "Unexpected effect."
+    else
+      body_effect.typ
+  | (_, x_typ) :: args ->
+    List.fold_left (fun effect_typ (_, x_typ) ->
+      Type.Arrow (false, Type.of_type x_typ, effect_typ))
+      (Type.Arrow (body_effect.effect, Type.of_type x_typ, body_effect.typ))
+      args
+
+let monadise (typ : Type'.t) (effect : t) : Type'.t =
   let typ = Type.monadise typ effect.typ in
   if effect.effect then
     Type'.Monad typ
