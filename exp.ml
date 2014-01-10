@@ -24,6 +24,36 @@ type t =
   | Return of t (** Monadic return. *)
   | Bind of t * Name.t * t (** Monadic bind. *)
 
+let rec pp (e : t) : SmartPrint.t =
+  match e with
+  | Constant c -> Constant.pp c
+  | Variable x -> PathName.pp x
+  | Tuple es -> nest (!^ "Tuple" ^^ Pp.list (List.map pp es))
+  | Constructor (x, es) ->
+    nest (!^ "Constructor" ^^ Pp.list (PathName.pp x :: List.map pp es))
+  | Apply (e_f, e_xs) ->
+    nest (!^ "Apply" ^^ Pp.list (pp e_f :: List.map pp e_xs))
+  | Function (x, x_typ, e) ->
+    nest (!^ "Function" ^^ Pp.list [Name.pp x; Type.pp x_typ; pp e])
+  | Let (x, e1, e2) ->
+    nest (!^ "Let" ^^ Pp.list [Name.pp x; pp e1; pp e2])
+  | LetFun (is_rec, x, typ_vars, args, typ, e1, e2) ->
+    nest (!^ "LetFun" ^^ Pp.list [
+      Recursivity.pp is_rec; Name.pp x;
+      OCaml.list Name.pp typ_vars; pp e1; pp e2])
+  | Match (e, cases) ->
+    nest (!^ "Match" ^^ Pp.list [pp e; cases |> OCaml.list (fun (p, e) ->
+      nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
+  | Record fields ->
+    nest (!^ "Record" ^^ Pp.list (fields |> List.map (fun (x, e) ->
+      nest @@ parens (PathName.pp x ^-^ !^ "," ^^ pp e))))
+  | Field (e, x) -> nest (!^ "Field" ^^ Pp.list [pp e; PathName.pp x])
+  | IfThenElse (e1, e2, e3) ->
+    nest (!^ "IfThenElse" ^^ Pp.list [pp e1; pp e2; pp e3])
+  | Return e -> nest (!^ "IfThenElse" ^^ Pp.list [pp e])
+  | Bind (e1, x, e2) ->
+    nest (!^ "Bind" ^^ Pp.list [pp e1; Name.pp x; pp e2])
+
 (** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
   match e with

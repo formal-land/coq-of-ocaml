@@ -7,7 +7,7 @@ open SmartPrint
 module Value = struct
   type t = {
     name : Name.t;
-    free_typ_vars : Name.t list; (** Polymorphic type variables. *)
+    typ_vars : Name.t list; (** Polymorphic type variables. *)
     args : (Name.t * Type.t) list; (** Names and types of the arguments. *)
     body : Exp.t * Type.t; (** Body and type of the body. *)
     is_rec : Recursivity.t (** If the function is recursive. *) }
@@ -20,7 +20,7 @@ module Value = struct
       else
         !^ "Definition") ^^
       Name.to_coq value.name ^^
-      (match value.free_typ_vars with
+      (match value.typ_vars with
       | [] -> empty
       | xs -> braces @@ group (separate space (List.map Name.to_coq xs) ^^ !^ ":" ^^ !^ "Type")) ^^
       group (separate space (value.args |> List.map (fun (x, t) ->
@@ -33,7 +33,7 @@ end
 module Inductive = struct
   type t = {
     name : Name.t;
-    free_typ_vars : Name.t list; (** Polymorphic type variables. *)
+    typ_vars : Name.t list; (** Polymorphic type variables. *)
     constructors : (Name.t * Type.t list) list
       (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
@@ -41,21 +41,21 @@ module Inductive = struct
   let to_coq (ind : t) : SmartPrint.t =
     nest (
       !^ "Inductive" ^^ Name.to_coq ind.name ^^
-      (if ind.free_typ_vars = []
+      (if ind.typ_vars = []
       then empty
       else parens @@ nest (
-        separate space (List.map Name.to_coq ind.free_typ_vars) ^^
+        separate space (List.map Name.to_coq ind.typ_vars) ^^
         !^ ":" ^^ !^ "Type")) ^^
       !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (constr, args) ->
         nest (
           !^ "|" ^^ Name.to_coq constr ^^ !^ ":" ^^
           separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^ Name.to_coq ind.name ^^
-          separate space (List.map Name.to_coq ind.free_typ_vars)))) ^-^ !^ "." ^^ newline ^^
+          separate space (List.map Name.to_coq ind.typ_vars)))) ^-^ !^ "." ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (name, args) ->
         nest (
           !^ "Arguments" ^^ Name.to_coq name ^^
-          separate space (ind.free_typ_vars |> List.map (fun x -> braces @@ Name.to_coq x)) ^^
+          separate space (ind.typ_vars |> List.map (fun x -> braces @@ Name.to_coq x)) ^^
           separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
 end
 
@@ -100,7 +100,7 @@ let rec of_structure (structure : structure)
     : t * Effect.Env.t =
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
-      let (is_rec, name, free_typ_vars, args, e_typ, e) =
+      let (is_rec, name, typ_vars, args, e_typ, e) =
         Exp.import_let_fun is_rec name e in
       let name_typ = Effect.function_typ args
         { Effect.effect = false; typ = Effect.Type.of_type e_typ } in
@@ -118,7 +118,7 @@ let rec of_structure (structure : structure)
       let effects = PathName.Map.add (PathName.of_name path name) effect_typ effects in
       (Value {
         Value.name = name;
-        free_typ_vars = free_typ_vars;
+        typ_vars = typ_vars;
         args = args;
         body = (e_exp, e_typ);
         is_rec = is_rec },
@@ -129,14 +129,14 @@ let rec of_structure (structure : structure)
         let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
           (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ) typs))
           cases in
-        let free_typ_vars = List.map (fun x ->
+        let typ_vars = List.map (fun x ->
           match Type.of_type_expr x with
           | Type.Variable x -> x
           | _ -> failwith "The type parameter was expected to be a variable.")
           typ.type_params in
         (Inductive {
           Inductive.name = Name.of_ident name;
-          free_typ_vars = free_typ_vars;
+          typ_vars = typ_vars;
           constructors = constructors },
           effects)
       | Type_record (fields, _) ->

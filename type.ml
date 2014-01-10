@@ -9,6 +9,15 @@ type t =
   | Apply of PathName.t * t list
   | Monad of t
 
+let rec pp (typ : t) : SmartPrint.t =
+  match typ with
+  | Variable x -> !^ "'" ^-^ !^ x
+  | Arrow (typ1, typ2) -> nest @@ parens (pp typ1 ^^ !^ "->" ^^ pp typ2)
+  | Tuple typs -> nest @@ parens (separate (space ^^ !^ "*" ^^ space) (List.map pp typs))
+  | Apply (x, typs) ->
+    nest (!^ "Apply" ^^ nest (parens (
+      separate (!^ "," ^^ space) (PathName.pp x :: List.map pp typs))))
+
 (** Import an OCaml type. *)
 let rec of_type_expr (typ : Types.type_expr) : t =
   match typ.desc with

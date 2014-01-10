@@ -9,6 +9,9 @@ type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
 
+let pp (x : t) : SmartPrint.t =
+  single_quotes (!^ x)
+
 (** Import an OCaml identifier. *)
 let of_ident (i : Ident.t) : t =
   i.Ident.name
@@ -41,5 +44,5 @@ let fresh (prefix : string) (env : Set.t) : t * Set.t =
 *)
 
 (** Pretty-print a name to Coq. *)
-let to_coq (name : t) : SmartPrint.t =
-  !^ name
+let to_coq (x : t) : SmartPrint.t =
+  !^ x
