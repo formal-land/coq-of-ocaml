@@ -99,22 +99,29 @@ let rec of_structure (structure : structure)
     (path : PathName.Path.t) (effects : Effect.Env.t)
     : t * Effect.Env.t =
     match item.str_desc with
-    | Tstr_value (rec_flag, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
-      let (rec_flag, name, free_typ_vars, args, body_typ, body) =
-        Exp.import_let_fun rec_flag name e in
-      let effects_in_e = Effect.Env.in_function path effects args in
-      let (e, e_effect) = Exp.monadise body path effects_in_e in
+    | Tstr_value (is_rec, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
+      let (is_rec, name, free_typ_vars, args, e_typ, e) =
+        Exp.import_let_fun is_rec name e in
+      let name_typ = Effect.function_typ args
+        { Effect.effect = false; typ = Effect.Type.of_type e_typ } in
+      let effects_in_e =
+        if Recursivity.to_bool is_rec then
+          PathName.Map.add (PathName.of_name path name) name_typ effects
+        else
+          effects in
+      let effects_in_e = Effect.Env.in_function path effects_in_e args in
+      let (e, e_effect) = Exp.monadise e path effects_in_e in
       if e_effect.Effect.effect && args = [] then
         failwith "Cannot have effects at toplevel.";
-      let body_exp = Exp.simplify e in
+      let e_exp = Exp.simplify e in
       let effect_typ = Effect.function_typ args e_effect in
       let effects = PathName.Map.add (PathName.of_name path name) effect_typ effects in
       (Value {
         Value.name = name;
         free_typ_vars = free_typ_vars;
         args = args;
-        body = (body_exp, body_typ);
-        is_rec = rec_flag },
+        body = (e_exp, e_typ);
+        is_rec = is_rec },
         effects)
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with

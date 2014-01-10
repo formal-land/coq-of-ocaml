@@ -183,9 +183,40 @@ let rec monadise (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
       (k es, Effect.pure)
     else
       failwith "Elements of compounds cannot have effects") in
+  let unify (cases : (Pattern.t option * t) list) : t list * Effect.t =
+    let (es, es_effects) = List.split (cases |> List.map (fun (p, e) ->
+      let pattern_vars = match p with
+        | None -> Name.Set.empty
+        | Some p -> Pattern.free_vars p in
+      let effects = Name.Set.fold (fun x effects ->
+        PathName.Map.add (PathName.of_name path x) Effect.Type.Ground effects)
+        pattern_vars effects in
+      monadise e path effects)) in
+    let rec are_equal effects =
+      match effects with
+      | effect1 :: effect2 :: effects ->
+        effect1.Effect.typ = effect2.Effect.typ && are_equal (effect2 :: effects)
+      | _ -> true in
+    if are_equal es_effects then
+      let effect_typ = match es_effects with
+        | [] -> Effect.Type.Ground
+        | { Effect.typ = typ } :: _ -> typ in
+      let is_effect = List.exists (fun effect -> effect.Effect.effect) es_effects in
+      let effect = { Effect.effect = is_effect; typ = effect_typ } in
+      if is_effect then
+        (List.map2 (fun e effect ->
+          if effect.Effect.effect then e else Return e)
+          es es_effects,
+          effect)
+      else
+        (es, effect)
+    else
+      failwith "Effect types are supposed to be equal for unification." in
   match e with
   | Constant _ -> (e, Effect.pure)
-  | Variable x -> (e, { Effect.effect = false; typ = PathName.Map.find x effects })
+  | Variable x ->
+    (try (e, { Effect.effect = false; typ = PathName.Map.find x effects })
+    with Not_found -> failwith (SmartPrint.to_string 80 2 (single_quotes (PathName.pp x) ^^ !^ "not found.")))
   | Tuple es -> compound es (fun es -> Tuple es)
   | Constructor (x, es) -> compound es (fun es -> Constructor (x, es))
   | Apply (e_f, es) ->
@@ -215,7 +246,14 @@ let rec monadise (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
     else
       (Let (x, e1, e2), e2_effect)
   | LetFun (is_rec, name, typ_vars, args, e1_typ, e1, e2) ->
-    let effects_in_e1 = Effect.Env.in_function path effects args in
+    let name_typ = Effect.function_typ args
+      { Effect.effect = false; typ = Effect.Type.of_type e1_typ } in
+    let effects_in_e1 =
+      if Recursivity.to_bool is_rec then
+        PathName.Map.add (PathName.of_name path name) name_typ effects
+      else
+        effects in
+    let effects_in_e1 = Effect.Env.in_function path effects_in_e1 args in
     let (e1, e1_effect) = monadise e1 path effects_in_e1 in
     let name_typ = Effect.function_typ args e1_effect in
     let effects_in_e2 = PathName.Map.add (PathName.of_name path name) name_typ effects in
@@ -223,22 +261,29 @@ let rec monadise (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
     let e1_typ = Effect.monadise e1_typ e1_effect in
     (LetFun (is_rec, name, typ_vars, args, e1_typ, e1, e2), e2_effect)
   | Match (e, cases) ->
-    (*let (x, env') = Name.fresh "x" env in
-    Bind (monadise e env, x, Match (var x, cases |> List.map (fun (pattern, e) ->
-      (pattern, monadise e (Name.Set.union env' (Pattern.free_vars pattern))))))*)
-    failwith "TODO"
-  | Record fields -> failwith "TODO"
-    (*monadise_list (List.map snd fields) env [] (fun env xs ->
-      Return (Record (List.map2 (fun (f, _) x -> (f, var x)) fields xs)))*)
-  | Field (e, f) -> failwith "TODO"
-    (*let (x, _) = Name.fresh "x" env in
-    Bind (monadise e env, x,
-    Return (Field (var x, f)))*)
+    monadise_list [e] effects [] false (fun es es_typs ->
+      match (es, es_typs) with
+      | ([e], _) ->
+        let (es, effect) = unify (List.map (fun (p, e) -> (Some p, e)) cases) in
+        (Match (e, List.map2 (fun e (p, _) -> (p, e)) es cases), effect)
+      | _ -> failwith "Unexpected answer from 'monadise_list'.")
+  | Record fields ->
+    compound (List.map snd fields) (fun es ->
+      Record (List.map2 (fun (x, _) e -> (x, e)) fields es))
+  | Field (e, f) ->
+    monadise_list [e] effects [] false (fun es es_typs ->
+      match (es, es_typs) with
+      | ([e], [e_typ]) -> (Field (e, f), Effect.pure)
+      | _ -> failwith "Unexpected answer from 'monadise_list'.")
   | IfThenElse (e1, e2, e3) ->
-    (*let (x, env') = Name.fresh "x" env in
-    Bind (monadise e1 env, x,
-    IfThenElse (var x, monadise e2 env', monadise e3 env'))*)
-    failwith "TODO"
+    monadise_list [e1] effects [] false (fun es es_typs ->
+      match (es, es_typs) with
+      | ([e1], _) ->
+        let (es, effect) = unify [(None, e2); (None, e3)] in
+        (match es with
+        | [e2; e3] -> (IfThenElse (e1, e2, e3), effect)
+        | _ -> failwith "Unexpected answer from 'unify'.")
+      | _ -> failwith "Unexpected answer from 'monadise_list'.")
   | Return _ | Bind _ -> failwith "This expression is already monadic."
 
 let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t)

@@ -11,6 +11,7 @@ let of_ocaml (structure : Typedtree.structure) : unit =
       !^ "Set Implicit Arguments."]) ^^ newline ^^
     Structure.pp definition in
   to_stdout 80 2 document;
+  print_newline ();
   flush stdout
 
 (** Display an OCaml structure on stdout using the OCaml's pretty-printer. *)

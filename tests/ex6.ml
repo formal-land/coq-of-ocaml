@@ -12,6 +12,5 @@ let rec fold f a l =
 
 let l = [5; 6; 7; 2]
 
-let incr x = x + 1
-
-let n = fold (fun x y -> x + y) 0 (map incr l)
+let n incr plus =
+    fold (fun x y -> plus x y) 0 (map incr l)

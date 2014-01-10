@@ -12,6 +12,8 @@ clean:
 
 test: $(TESTS_OUTPUT)
 
+cmt: $(TESTS_INPUT:.ml=.cmt)
+
 %.cmt: %.ml
 	ocamlc -bin-annot $<
 

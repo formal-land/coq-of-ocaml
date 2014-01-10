@@ -65,6 +65,10 @@ let convert (p : t) : t =
     | _ -> p)
   | _ -> p
 
+(** Pretty-print a global name. *)
+let pp (x : t) : SmartPrint.t =
+  separate (!^ ".") (List.map Name.pp (x.path @ [x.base]))
+
 (** Lift a local name to a global name. *)
 let of_name (path : Path.t) (x : Name.t) : t =
   convert { path = path; base = x }
@@ -104,7 +108,3 @@ let fresh (prefix : string) (v : 'a) (env : 'a Map.t) : Name.t * 'a Map.t =
       n in
   let x = prefix_n prefix (first_n 0) in
   (x, Map.add (of_name [] x) v env)
-
-(** Pretty-print a global name. *)
-let pp (i : t) : SmartPrint.t =
-  separate (!^ ".") (List.map Name.pp (i.path @ [i.base]))
