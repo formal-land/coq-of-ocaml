@@ -1,7 +1,6 @@
 (** The initially opened module. *)
 open Structure
 
-
 module Helpers = struct
   let from_simple_form (name : string) (free_type_vars : string list)
     (args : (string * Type.t) list) (body : Exp.t * Type.t) (is_rec : bool)
