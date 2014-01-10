@@ -8,12 +8,6 @@ module Type = struct
     | Ground
     | Arrow of bool * t * t
 
-  let rec pp (paren : bool) (typ : t) : SmartPrint.t =
-    match typ with
-    | Ground -> !^ "."
-    | Arrow (effect, typ1, typ2) -> Pp.parens paren @@ nest (
-      pp true typ1 ^^ (if effect then !^ "-e->" else !^ "->") ^^ pp false typ2)
-
   let rec is_pure (typ : t) : bool =
     match typ with
     | Ground -> true
@@ -36,20 +30,26 @@ module Type = struct
     | (Type.Monad _, _) -> failwith "This type is already monadic."
     | _ ->
       failwith "Type and effect type are not compatible."
+
+  let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
+    match typ with
+    | Ground -> !^ "."
+    | Arrow (effect, typ1, typ2) -> Pp.parens paren @@ nest (
+      to_coq true typ1 ^^ (if effect then !^ "-e->" else !^ "->") ^^ to_coq false typ2)
 end
 
 module Env = struct
   type t = Type.t PathName.Map.t
-
-  let pp (effects : t) : SmartPrint.t =
-    PathName.Map.bindings effects |> OCaml.list (fun (x, typ) ->
-      nest (PathName.pp x ^^ !^ ":" ^^ Type.pp false typ))
 
   let in_function (path : PathName.Path.t) (effects : t)
     (args : (Name.t * Type'.t) list) : t =
     List.fold_left (fun effects (x, x_typ) ->
       PathName.Map.add (PathName.of_name path x) (Type.of_type x_typ) effects)
       effects args
+
+  let to_coq (effects : t) : SmartPrint.t =
+    PathName.Map.bindings effects |> OCaml.list (fun (x, typ) ->
+      nest (PathName.to_coq x ^^ !^ ":" ^^ Type.to_coq false typ))
 end
 
 type t = { effect : bool; typ : Type.t }

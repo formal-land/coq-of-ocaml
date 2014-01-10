@@ -51,18 +51,18 @@ let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
   | Monad typ -> Monad (substitute_variable typ x x')
 
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
-let rec pp (paren : bool) (typ : t) : SmartPrint.t =
+let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
   match typ with
-  | Variable x -> Name.pp x
+  | Variable x -> Name.to_coq x
   | Arrow (typ_x, typ_y) ->
-    Pp.parens paren @@ nest (pp true typ_x ^^ !^ "->" ^^ pp false typ_y)
+    Pp.parens paren @@ nest (to_coq true typ_x ^^ !^ "->" ^^ to_coq false typ_y)
   | Tuple typs ->
     (match typs with
     | [] -> !^ "unit"
     | _ ->
       Pp.parens paren @@ nest @@ separate (space ^^ !^ "*" ^^ space)
-        (List.map (pp true) typs))
+        (List.map (to_coq true) typs))
   | Apply (path, typs) ->
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
-      (PathName.pp path :: List.map (pp true) typs)
-  | Monad typ -> pp paren (Apply (PathName.of_name [] "M", [typ]))
+      (PathName.to_coq path :: List.map (to_coq true) typs)
+  | Monad typ -> to_coq paren (Apply (PathName.of_name [] "M", [typ]))

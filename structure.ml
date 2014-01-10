@@ -12,21 +12,21 @@ module Value = struct
     body : Exp.t * Type.t; (** Body and type of the body. *)
     is_rec : Recursivity.t (** If the function is recursive. *) }
   
-  (** Pretty-print a value definition. *)
-  let pp (value : t) : SmartPrint.t =
+  (** Pretty-print a value definition to Coq. *)
+  let to_coq (value : t) : SmartPrint.t =
     nest (
       (if Recursivity.to_bool value.is_rec then
         !^ "Fixpoint"
       else
         !^ "Definition") ^^
-      Name.pp value.name ^^
+      Name.to_coq value.name ^^
       (match value.free_typ_vars with
       | [] -> empty
-      | xs -> braces @@ group (separate space (List.map Name.pp xs) ^^ !^ ":" ^^ !^ "Type")) ^^
+      | xs -> braces @@ group (separate space (List.map Name.to_coq xs) ^^ !^ ":" ^^ !^ "Type")) ^^
       group (separate space (value.args |> List.map (fun (x, t) ->
-        parens @@ nest (Name.pp x ^^ !^ ":" ^^ Type.pp false t)))) ^^
-      !^ ":" ^^ Type.pp false (snd value.body) ^^
-      !^ ":=" ^^ Exp.pp false (fst value.body) ^-^ !^ ".")
+        parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
+      !^ ":" ^^ Type.to_coq false (snd value.body) ^^
+      !^ ":=" ^^ Exp.to_coq false (fst value.body) ^-^ !^ ".")
 end
 
 (** A definition of a sum type. *)
@@ -37,25 +37,25 @@ module Inductive = struct
     constructors : (Name.t * Type.t list) list
       (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
-  (** Pretty-print a sum type definition. *)
-  let pp (ind : t) : SmartPrint.t =
+  (** Pretty-print a sum type definition to Coq. *)
+  let to_coq (ind : t) : SmartPrint.t =
     nest (
-      !^ "Inductive" ^^ Name.pp ind.name ^^
+      !^ "Inductive" ^^ Name.to_coq ind.name ^^
       (if ind.free_typ_vars = []
       then empty
       else parens @@ nest (
-        separate space (List.map Name.pp ind.free_typ_vars) ^^
+        separate space (List.map Name.to_coq ind.free_typ_vars) ^^
         !^ ":" ^^ !^ "Type")) ^^
       !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (constr, args) ->
         nest (
-          !^ "|" ^^ Name.pp constr ^^ !^ ":" ^^
-          separate space (args |> List.map (fun arg -> Type.pp true arg ^^ !^ "->")) ^^ Name.pp ind.name ^^
-          separate space (List.map Name.pp ind.free_typ_vars)))) ^-^ !^ "." ^^ newline ^^
+          !^ "|" ^^ Name.to_coq constr ^^ !^ ":" ^^
+          separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^ Name.to_coq ind.name ^^
+          separate space (List.map Name.to_coq ind.free_typ_vars)))) ^-^ !^ "." ^^ newline ^^
       separate newline (ind.constructors |> List.map (fun (name, args) ->
         nest (
-          !^ "Arguments" ^^ Name.pp name ^^
-          separate space (ind.free_typ_vars |> List.map (fun x -> braces @@ Name.pp x)) ^^
+          !^ "Arguments" ^^ Name.to_coq name ^^
+          separate space (ind.free_typ_vars |> List.map (fun x -> braces @@ Name.to_coq x)) ^^
           separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
 end
 
@@ -65,12 +65,12 @@ module Record = struct
     name : Name.t;
     fields : (Name.t * Type.t) list (** The names of the fields with their types. *) }
 
-  (** Pretty-print a record definition. *)
-  let pp (r : t) : SmartPrint.t =
+  (** Pretty-print a record definition to Coq. *)
+  let to_coq (r : t) : SmartPrint.t =
     nest (
-      !^ "Record" ^^ Name.pp r.name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
+      !^ "Record" ^^ Name.to_coq r.name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate (!^ ";" ^^ newline) (r.fields |> List.map (fun (x, typ) ->
-        nest (Name.pp x ^^ !^ ":" ^^ Type.pp false typ)))) ^^
+        nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false typ)))) ^^
       !^ "}.")
 end
 
@@ -78,9 +78,9 @@ end
 module Open = struct
   type t = PathName.t
 
-  (** Pretty-print an open construct. *)
-  let pp (o : t): SmartPrint.t =
-    nest (!^ "Require Import" ^^ PathName.pp o ^-^ !^ ".")
+  (** Pretty-print an open construct to Coq. *)
+  let to_coq (o : t): SmartPrint.t =
+    nest (!^ "Require Import" ^^ PathName.to_coq o ^-^ !^ ".")
 end
 
 (** A structure. *)
@@ -172,17 +172,17 @@ let rec of_structure (structure : structure)
     Some (Signature.Module (name,
       defs |> List.map signature |> remove_nones))*)
 
-(** Pretty-print a structure. *)
-let rec pp (defs : t list) : SmartPrint.t =
-  let pp_one (def : t) : SmartPrint.t =
+(** Pretty-print a structure to Coq. *)
+let rec to_coq (defs : t list) : SmartPrint.t =
+  let to_coq_one (def : t) : SmartPrint.t =
     match def with
-    | Value value -> Value.pp value
-    | Inductive ind -> Inductive.pp ind
-    | Record record -> Record.pp record
-    | Open o -> Open.pp o
+    | Value value -> Value.to_coq value
+    | Inductive ind -> Inductive.to_coq ind
+    | Record record -> Record.to_coq record
+    | Open o -> Open.to_coq o
     | Module (name, defs) ->
       nest (
-        !^ "Module" ^^ Name.pp name ^-^ !^ "." ^^ newline ^^
-        indent (pp defs) ^^ newline ^^
-        !^ "End" ^^ Name.pp name ^-^ !^ ".") in
-  separate (newline ^^ newline) (List.map pp_one defs)
+        !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+        indent (to_coq defs) ^^ newline ^^
+        !^ "End" ^^ Name.to_coq name ^-^ !^ ".") in
+  separate (newline ^^ newline) (List.map to_coq_one defs)

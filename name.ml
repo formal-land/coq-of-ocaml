@@ -40,6 +40,6 @@ let fresh (prefix : string) (env : Set.t) : t * Set.t =
   (s, Set.add s env)
 *)
 
-(** Pretty-print a name. *)
-let pp (name : t) : SmartPrint.t =
+(** Pretty-print a name to Coq. *)
+let to_coq (name : t) : SmartPrint.t =
   !^ name

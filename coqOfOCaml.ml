@@ -9,7 +9,7 @@ let of_ocaml (structure : Typedtree.structure) : unit =
       !^ "Local Open Scope Z_scope.";
       !^ "Import ListNotations.";
       !^ "Set Implicit Arguments."]) ^^ newline ^^
-    Structure.pp definition in
+    Structure.to_coq definition in
   to_stdout 80 2 document;
   print_newline ();
   flush stdout

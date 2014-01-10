@@ -67,7 +67,7 @@ let convert (p : t) : t =
 
 (** Pretty-print a global name. *)
 let pp (x : t) : SmartPrint.t =
-  separate (!^ ".") (List.map Name.pp (x.path @ [x.base]))
+  single_quotes @@ separate (!^ ".") (List.map (fun s -> !^ s) (x.path @ [x.base]))
 
 (** Lift a local name to a global name. *)
 let of_name (path : Path.t) (x : Name.t) : t =
@@ -108,3 +108,7 @@ let fresh (prefix : string) (v : 'a) (env : 'a Map.t) : Name.t * 'a Map.t =
       n in
   let x = prefix_n prefix (first_n 0) in
   (x, Map.add (of_name [] x) v env)
+
+(** Pretty-print a global name to Coq. *)
+let to_coq (x : t) : SmartPrint.t =
+  separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))

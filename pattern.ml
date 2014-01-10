@@ -35,22 +35,22 @@ let rec free_vars (p : t) : Name.Set.t =
   | Alias (p, x) -> Name.Set.union (Name.Set.singleton x) (free_vars p)
   | Record fields -> free_vars_of_list (List.map snd fields)
 
-(** Pretty-print a pattern (inside parenthesis if the [paren] flag is set). *)
-let rec pp (paren : bool) (p : t) : SmartPrint.t =
+(** Pretty-print a pattern to Coq (inside parenthesis if the [paren] flag is set). *)
+let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
   match p with
   | Any -> !^ "_"
-  | Constant c -> Constant.pp c
-  | Variable x -> Name.pp x
-  | Tuple ps -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (pp false) ps)
+  | Constant c -> Constant.to_coq c
+  | Variable x -> Name.to_coq x
+  | Tuple ps -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq false) ps)
   | Constructor (x, ps) ->
     if ps = [] then
-      PathName.pp x
+      PathName.to_coq x
     else
-      Pp.parens paren @@ nest @@ separate space (PathName.pp x :: List.map (pp true) ps)
+      Pp.parens paren @@ nest @@ separate space (PathName.to_coq x :: List.map (to_coq true) ps)
   | Alias (p, x) ->
-    Pp.parens paren @@ nest (pp false p ^^ !^ "as" ^^ Name.pp x)
+    Pp.parens paren @@ nest (to_coq false p ^^ !^ "as" ^^ Name.to_coq x)
   | Record fields ->
     !^ "{|" ^^
     nest_all @@ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, p) ->
-      nest (PathName.pp x ^^ !^ ":=" ^^ pp false p)))
+      nest (PathName.to_coq x ^^ !^ ":=" ^^ to_coq false p)))
     ^^ !^ "|}"
