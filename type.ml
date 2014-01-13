@@ -11,11 +11,11 @@ type t =
 
 let rec pp (typ : t) : SmartPrint.t =
   match typ with
-  | Variable x -> !^ "'" ^-^ !^ x
+  | Variable x -> Name.pp x
   | Arrow (typ1, typ2) -> nest @@ parens (pp typ1 ^^ !^ "->" ^^ pp typ2)
   | Tuple typs -> nest @@ parens (separate (space ^^ !^ "*" ^^ space) (List.map pp typs))
   | Apply (x, typs) ->
-    nest (!^ "Apply" ^^ nest (parens (
+    nest (!^ "Type" ^^ nest (parens (
       separate (!^ "," ^^ space) (PathName.pp x :: List.map pp typs))))
 
 (** Import an OCaml type. *)

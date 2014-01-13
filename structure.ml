@@ -7,10 +7,17 @@ open SmartPrint
 module Value = struct
   type t = {
     name : Name.t;
+    is_rec : Recursivity.t; (** If the function is recursive. *)
     typ_vars : Name.t list; (** Polymorphic type variables. *)
     args : (Name.t * Type.t) list; (** Names and types of the arguments. *)
-    body : Exp.t * Type.t; (** Body and type of the body. *)
-    is_rec : Recursivity.t (** If the function is recursive. *) }
+    body : Exp.t * Type.t (** Body and type of the body. *) }
+
+  let pp (value : t) : SmartPrint.t =
+    nest (!^ "Value" ^^ Name.pp value.name ^-^ !^ ":" ^^ newline ^^ indent (Pp.list [
+      Recursivity.pp value.is_rec;
+      OCaml.list Name.pp value.typ_vars;
+      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) value.args;
+      Pp.list [Exp.pp (fst value.body); Type.pp (snd value.body)]]))
   
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : t) : SmartPrint.t =
@@ -37,6 +44,11 @@ module Inductive = struct
     constructors : (Name.t * Type.t list) list
       (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
+  let pp (ind : t) : SmartPrint.t =
+    nest (!^ "Inductive" ^^ Name.pp ind.name ^-^ !^ ":" ^^ newline ^^ indent (Pp.list [
+      OCaml.list Name.pp ind.typ_vars;
+      OCaml.list (fun (x, typs) -> Pp.list [Name.pp x; OCaml.list Type.pp typs]) ind.constructors]))
+
   (** Pretty-print a sum type definition to Coq. *)
   let to_coq (ind : t) : SmartPrint.t =
     nest (
@@ -65,6 +77,10 @@ module Record = struct
     name : Name.t;
     fields : (Name.t * Type.t) list (** The names of the fields with their types. *) }
 
+  let pp (r : t) : SmartPrint.t =
+    nest (!^ "Record" ^^ Name.pp r.name ^-^ !^ ":" ^^ newline ^^ indent (Pp.list [
+      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) r.fields]))
+
   (** Pretty-print a record definition to Coq. *)
   let to_coq (r : t) : SmartPrint.t =
     nest (
@@ -78,6 +94,9 @@ end
 module Open = struct
   type t = PathName.t
 
+  let pp (o : t) : SmartPrint.t =
+    nest (!^ "Open" ^^ Pp.list [PathName.pp o])
+
   (** Pretty-print an open construct to Coq. *)
   let to_coq (o : t): SmartPrint.t =
     nest (!^ "Require Import" ^^ PathName.to_coq o ^-^ !^ ".")
@@ -90,6 +109,20 @@ type t =
   | Record of Record.t
   | Open of Open.t
   | Module of Name.t * t list
+
+let rec pp (defs : t list) : SmartPrint.t =
+  let pp_one (def : t) : SmartPrint.t =
+    match def with
+    | Value value -> Value.pp value
+    | Inductive ind -> Inductive.pp ind
+    | Record record -> Record.pp record
+    | Open o -> Open.pp o
+    | Module (name, defs) ->
+      nest (
+        !^ "Module" ^^ Name.pp name ^-^ !^ "." ^^ newline ^^
+        indent (pp defs) ^^ newline ^^
+        !^ "End" ^^ Name.pp name ^-^ !^ ".") in
+  separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure)
@@ -118,10 +151,10 @@ let rec of_structure (structure : structure)
       let effects = PathName.Map.add (PathName.of_name path name) effect_typ effects in
       (Value {
         Value.name = name;
+        is_rec = is_rec;
         typ_vars = typ_vars;
         args = args;
-        body = (e_exp, e_typ);
-        is_rec = is_rec },
+        body = (e_exp, e_typ) },
         effects)
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with

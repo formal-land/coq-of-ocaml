@@ -1,22 +1,22 @@
 open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
-let of_ocaml (structure : Typedtree.structure) : unit =
-  let (definition, _) = Structure.of_structure structure [] PathName.Map.empty in
+let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
+  let (definitions, _) = Structure.of_structure structure [] PathName.Map.empty in
   let document =
-    concat (List.map (fun d -> d ^^ newline) [
-      !^ "Require Import CoqOfOCaml." ^^ newline;
-      !^ "Local Open Scope Z_scope.";
-      !^ "Import ListNotations.";
-      !^ "Set Implicit Arguments."]) ^^ newline ^^
-    Structure.to_coq definition in
+    match mode with
+    | "exp" -> Structure.pp definitions
+    | "coq" ->
+      concat (List.map (fun d -> d ^^ newline) [
+        !^ "Require Import CoqOfOCaml." ^^ newline;
+        !^ "Local Open Scope Z_scope.";
+        !^ "Import ListNotations.";
+        !^ "Set Implicit Arguments."]) ^^ newline ^^
+      Structure.to_coq definitions
+    | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
   to_stdout 80 2 document;
   print_newline ();
   flush stdout
-
-(** Display an OCaml structure on stdout using the OCaml's pretty-printer. *)
-let pp_ocaml (structure : Typedtree.structure) : unit =
-  Printtyped.implementation Format.std_formatter structure
 
 (** Parse a .cmt file to a typed AST. *)
 let parse_cmt (file_name : string) : Typedtree.structure =
@@ -27,12 +27,15 @@ let parse_cmt (file_name : string) : Typedtree.structure =
 
 (** The main function. *)
 let main () =
-  let usage_msg = "Usage: ./coqOfOCaml.native file.cmt\nOptions are:" in
   let file_name = ref None in
-  Arg.parse [] (fun arg -> file_name := Some arg) usage_msg;
+  let mode = ref "" in
+  let options = [
+    "-mode", Arg.Set_string mode, " exp, coq"] in
+  let usage_msg = "Usage: ./coqOfOCaml.native file.cmt\nOptions are:" in
+  Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
-  | None -> Arg.usage [] usage_msg
-  | Some file_name -> of_ocaml (parse_cmt file_name);
+  | None -> Arg.usage options usage_msg
+  | Some file_name -> of_ocaml (parse_cmt file_name) !mode;
   (*print_newline ();
   to_stdout 80 2 @@ Structure.pp [PervasivesModule.pervasives]*)
 

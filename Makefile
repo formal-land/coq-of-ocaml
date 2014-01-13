@@ -1,6 +1,6 @@
 OUTPUT = coqOfOCaml.native
 TESTS_INPUT = $(wildcard tests/ex*.ml)
-TESTS_OUTPUT = $(TESTS_INPUT:.ml=.vo)
+TESTS_OUTPUT = $(TESTS_INPUT:.ml=.exp)
 
 default:
 	ocamlbuild $(OUTPUT) -lflags -I,+compiler-libs,ocamlcommon.cmxa -package smart_print,compiler-libs
@@ -13,12 +13,16 @@ clean:
 test: $(TESTS_OUTPUT)
 
 cmt: $(TESTS_INPUT:.ml=.cmt)
+exp: $(TESTS_INPUT:.ml=.exp)
 
 %.cmt: %.ml
 	ocamlc -bin-annot $<
 
+%.exp: %.cmt default
+	./$(OUTPUT) -mode exp $< >$@
+
 %.v: %.cmt default
-	./$(OUTPUT) $< >$@
+	./$(OUTPUT) -mode coq $< >$@
 
 %.vo: %.v
 	coqc $<
