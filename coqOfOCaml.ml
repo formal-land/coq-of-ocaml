@@ -2,11 +2,14 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
-  let (definitions, _) = Structure.of_structure structure [] PathName.Map.empty in
   let document =
     match mode with
-    | "exp" -> Structure.pp definitions
+    | "exp" ->
+      let definitions = Structure.of_structure structure in
+      Structure.pp definitions
     | "coq" ->
+      let definitions = Structure.of_structure structure in
+      let (definitions, _) = Structure.monadise definitions [] PathName.Map.empty in
       concat (List.map (fun d -> d ^^ newline) [
         !^ "Require Import CoqOfOCaml." ^^ newline;
         !^ "Local Open Scope Z_scope.";

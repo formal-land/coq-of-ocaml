@@ -125,16 +125,58 @@ let rec pp (defs : t list) : SmartPrint.t =
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
-let rec of_structure (structure : structure)
-  (path : PathName.Path.t) (effects : Effect.Env.t)
-  : t list * Effect.Env.t =
-  let of_structure_item (item : structure_item)
-    (path : PathName.Path.t) (effects : Effect.Env.t)
-    : t * Effect.Env.t =
+let rec of_structure (structure : structure) : t list =
+  let of_structure_item (item : structure_item) : t =
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
       let (is_rec, name, typ_vars, args, e_typ, e) =
         Exp.import_let_fun is_rec name e in
+      Value {
+        Value.name = name;
+        is_rec = is_rec;
+        typ_vars = typ_vars;
+        args = args;
+        body = (e, e_typ) }
+    | Tstr_type [{typ_id = name; typ_type = typ}] ->
+      (match typ.type_kind with
+      | Type_variant cases ->
+        let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
+          (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ) typs))
+          cases in
+        let typ_vars = List.map (fun x ->
+          match Type.of_type_expr x with
+          | Type.Variable x -> x
+          | _ -> failwith "The type parameter was expected to be a variable.")
+          typ.type_params in
+        Inductive {
+          Inductive.name = Name.of_ident name;
+          typ_vars = typ_vars;
+          constructors = constructors }
+      | Type_record (fields, _) ->
+        Record {
+          Record.name = Name.of_ident name;
+          fields = List.map (fun {ld_id = x; ld_type = typ} -> (Name.of_ident x, Type.of_type_expr typ)) fields }
+      | _ -> failwith "Type definition not handled.")
+    | Tstr_open (_, path, _, _) -> Open (PathName.of_path path)
+    | Tstr_module {mb_id = name; mb_expr = { mod_desc = Tmod_structure structure }} ->
+      let name = Name.of_ident name in
+      let structures = of_structure structure in
+      Module (name, structures)
+    | Tstr_exception _ -> failwith "Imperative structure item not handled."
+    | _ -> failwith "Structure item not handled." in
+  List.map of_structure_item structure.str_items
+
+let rec monadise (defs : t list) (path : PathName.Path.t) (effects : Effect.Env.t)
+  : t list * Effect.Env.t =
+  let monadise_one (def : t) (path : PathName.Path.t) (effects : Effect.Env.t)
+    : t * Effect.Env.t =
+    match def with
+    | Value {
+      name = name;
+      is_rec = is_rec;
+      typ_vars = typ_vars;
+      args = args;
+      body = (e, e_typ) } ->
       let name_typ = Effect.function_typ args
         { Effect.effect = false; typ = Effect.Type.of_type e_typ } in
       let effects_in_e =
@@ -156,54 +198,16 @@ let rec of_structure (structure : structure)
         args = args;
         body = (e_exp, e_typ) },
         effects)
-    | Tstr_type [{typ_id = name; typ_type = typ}] ->
-      (match typ.type_kind with
-      | Type_variant cases ->
-        let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
-          (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ) typs))
-          cases in
-        let typ_vars = List.map (fun x ->
-          match Type.of_type_expr x with
-          | Type.Variable x -> x
-          | _ -> failwith "The type parameter was expected to be a variable.")
-          typ.type_params in
-        (Inductive {
-          Inductive.name = Name.of_ident name;
-          typ_vars = typ_vars;
-          constructors = constructors },
-          effects)
-      | Type_record (fields, _) ->
-        (Record {
-          Record.name = Name.of_ident name;
-          fields = List.map (fun {ld_id = x; ld_type = typ} -> (Name.of_ident x, Type.of_type_expr typ)) fields },
-          effects)
-      | _ -> failwith "Type definition not handled.")
-    | Tstr_open (_, path, _, _) -> (Open (PathName.of_path path), effects)
-    | Tstr_module {mb_id = name; mb_expr = { mod_desc = Tmod_structure structure }} ->
-      let name = Name.of_ident name in
-      let (structures, effects) = of_structure structure (name :: path) effects in
-      (Module (name, structures), effects)
-    | Tstr_exception _ -> failwith "Imperative structure item not handled."
-    | _ -> failwith "Structure item not handled." in
-  let (structures, effects) =
-    List.fold_left (fun (structures, effects) item ->
-      let (structure, effects) = of_structure_item item path effects in
-      (structure :: structures, effects))
-      ([], effects) structure.str_items in
-  (List.rev structures, effects)
-
-(*let rec signature (def : t) : Signature.t option =
-  let rec remove_nones (l : 'a option list) : 'a list =
-    match l with
-    | [] -> []
-    | None :: xs -> remove_nones xs
-    | Some x :: xs -> x :: remove_nones xs in
-  match def with
-  | Value { Value.name = name } -> Some (Signature.Value (name, false))
-  | Inductive _ | Record _ | Open _ -> None
-  | Module (name, defs) ->
-    Some (Signature.Module (name,
-      defs |> List.map signature |> remove_nones))*)
+    | Inductive _ | Record _ | Open _ -> (def, effects)
+    | Module (name, defs) ->
+      let (defs, effects) = monadise defs (name :: path) effects in
+      (Module (name, defs), effects) in
+  let (defs, effects) =
+    List.fold_left (fun (defs, effects) def ->
+      let (def, effects) = monadise_one def path effects in
+      (def :: defs, effects))
+      ([], effects) defs in
+  (List.rev defs, effects)
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
