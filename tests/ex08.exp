@@ -36,7 +36,7 @@ Value 'sum':
         [
           (Constructor ('D1'), Int(0));
           (Constructor ('D2', 'x', 'xs'),
-            Apply ('Z.add', 'x', Apply ('sum', 'xs')))
+            Apply (Apply ('Z.add', 'x'), Apply ('sum', 'xs')))
         ]), Type ('Z')))
 
 Value 's':

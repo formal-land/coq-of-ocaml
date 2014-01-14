@@ -18,8 +18,9 @@ Module 'List2'.
                         'x',
                         'xs'),
                       Apply
-                        ('Z.add',
-                          'x',
+                        (Apply
+                          ('Z.add',
+                            'x'),
                           Apply
                             ('sum',
                               'xs')))

@@ -9,10 +9,16 @@ Value 'l':
               (Constructor ('cons', 'x', 'xs'),
                 Constructor
                   ('cons', Apply ('f', 'x'),
-                    Apply ('map', 'f', 'xs')))
+                    Apply
+                      (Apply
+                        ('map',
+                          'f'),
+                        'xs')))
             ]),
         Apply
-          ('map', Function ('n', Type ('Z'), Apply ('Z.add', 'n', Int(1))),
+          (Apply
+            ('map',
+              Function ('n', Type ('Z'), Apply (Apply ('Z.add', 'n'), Int(1)))),
             Constructor
               ('cons', Int(5),
                 Constructor

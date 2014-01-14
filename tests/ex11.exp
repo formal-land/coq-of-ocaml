@@ -16,7 +16,7 @@ Value 'r'':
 Value 's':
   (non_rec, [ ], [ ],
     (Apply
-      ('Z.add', Field ('r', 'SizedString.size'),
+      (Apply ('Z.add', Field ('r', 'SizedString.size')),
         Field ('r'', 'SizedString.size')), Type ('Z')))
 
 Value 'f':

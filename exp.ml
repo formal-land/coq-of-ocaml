@@ -9,7 +9,7 @@ type t =
   | Variable of PathName.t
   | Tuple of t list (** A tuple of expressions. *)
   | Constructor of PathName.t * t list (** A constructor name and a list of arguments. *)
-  | Apply of t * t list (** A curryfied application to a list of arguments. *)
+  | Apply of t * t (** An application. *)
   | Function of Name.t * Type.t * t (** An argument name, the type of this argument and a body. *)
   | Let of Name.t * t * t (** A "let" of a non-functional value. *)
   | LetFun of Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t * t
@@ -31,8 +31,8 @@ let rec pp (e : t) : SmartPrint.t =
   | Tuple es -> nest (!^ "Tuple" ^^ Pp.list (List.map pp es))
   | Constructor (x, es) ->
     nest (!^ "Constructor" ^^ Pp.list (PathName.pp x :: List.map pp es))
-  | Apply (e_f, e_xs) ->
-    nest (!^ "Apply" ^^ Pp.list (pp e_f :: List.map pp e_xs))
+  | Apply (e_f, e_x) ->
+    nest (!^ "Apply" ^^ Pp.list [pp e_f; pp e_x])
   | Function (x, x_typ, e) ->
     nest (!^ "Function" ^^ Pp.list [Name.pp x; Type.pp x_typ; pp e])
   | Let (x, e1, e2) ->
@@ -86,7 +86,7 @@ let rec of_expression (e : expression) : t =
       match e_x with
       | Some e_x -> of_expression e_x
       | None -> failwith "expected an argument") e_xs in
-    Apply (e_f, e_xs)
+    List.fold_left (fun e e_x -> Apply (e, e_x)) e_f e_xs
   | Texp_match (e, cases, _) ->
     let e = of_expression e in
     let cases = List.map (fun {c_lhs = p; c_rhs = e} -> (Pattern.of_pattern p, of_expression e)) cases in
@@ -126,7 +126,7 @@ and import_let_fun (rec_flag : Asttypes.rec_flag) (name : Ident.t) (e : expressi
   (Recursivity.of_rec_flag rec_flag, name, e_schema.Schema.variables,
     List.combine args_names args_typs, e_body_typ, e_body)
 
-module EffectTree = struct
+module Tree = struct
   type t =
     | Leaf of Effect.t
     | Compound of t list * Effect.t
@@ -144,13 +144,33 @@ module EffectTree = struct
       | Field (_, effect) -> effect
 end
 
-let rec tree (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
-  : t * EffectTree.t =
+let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t =
+  let compound (es : t list) : Tree.t =
+    let trees = List.map (tree path effects) es in
+    let effects = List.map Tree.effect trees in
+    let have_effect = effects |> List.exists (fun effect ->
+      effect.Effect.effect) in
+    let have_functional_effect = effects |> List.exists (fun effect ->
+      Effect.Type.is_pure effect.Effect.typ) in
+    if have_functional_effect then
+      failwith "Compounds cannot have functional effects."
+    else
+      Tree.Compound (trees,
+        { Effect.effect = have_effect; typ = Effect.Type.Pure }) in
   match e with
-  | Constant _ -> failwith "TODO"
+  | Constant _ -> Tree.Leaf Effect.pure
+  | Variable x ->
+    (try Tree.Leaf { Effect.effect = false; typ = PathName.Map.find x effects }
+    with Not_found ->
+      failwith (SmartPrint.to_string 80 2 (PathName.pp x ^^ !^ "not found.")))
+  | Tuple es | Constructor (_, es) -> compound es
+  | Apply (e_f, e_x) ->
+    let tree_f = tree path effects e_f in
+    let tree_x = tree path effects e_x in
+    failwith "TODO"
   | _ -> failwith "TODO"
 
-(*)
+(*
 (** Do the monadic transformation of an expression using an effects environment. *)
 let rec monadise (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
   : t * Effect.t =
@@ -312,7 +332,7 @@ let simplify (e : t) : t =
     | Constant _ -> e
     | Tuple es -> Tuple (List.map (aux env) es)
     | Constructor (x, es) -> Constructor (x, List.map (aux env) es)
-    | Apply (e_f, es) -> Apply (aux env e_f, List.map (aux env) es)
+    | Apply (e_f, e_x) -> Apply (aux env e_f, aux env e_x)
     | Function (x, x_typ, e) -> Function (x, x_typ, aux (rm x) e)
     | Let (x, e1, e2) -> Let (x, aux env e1, aux (rm x) e2)
     | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
@@ -342,8 +362,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       PathName.to_coq x
     else
       Pp.parens paren @@ nest @@ separate space (PathName.to_coq x :: List.map (to_coq true) es)
-  | Apply (e_f, e_xs) ->
-    Pp.parens paren @@ nest @@ separate space (List.map (to_coq true) (e_f :: e_xs))
+  | Apply (e_f, e_x) ->
+    Pp.parens paren @@ nest @@ (to_coq true e_f ^^ to_coq true e_x)
   | Function (x, _, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | Let (x, e1, e2) ->
@@ -380,7 +400,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Return e -> to_coq paren (Apply (Variable (PathName.of_name [] "ret"), [e]))
+  | Return e -> to_coq paren (Apply (Variable (PathName.of_name [] "ret"), e))
   | Bind (e1, x, e2) ->
     Pp.parens paren @@ nest (
       !^ "let!" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^

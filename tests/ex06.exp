@@ -6,7 +6,8 @@ Value 'map':
           (Constructor ('[]'), Constructor ('[]'));
           (Constructor ('cons', 'x', 'xs'),
             Constructor
-              ('cons', Apply ('f', 'x'), Apply ('map', 'f', 'xs')))
+              ('cons', Apply ('f', 'x'),
+                Apply (Apply ('map', 'f'), 'xs')))
         ]), Type ('list', 'A')))
 
 Value 'fold':
@@ -17,7 +18,10 @@ Value 'fold':
         [
           (Constructor ('[]'), 'a');
           (Constructor ('cons', 'x', 'xs'),
-            Apply ('fold', 'f', Apply ('f', 'a', 'x'), 'xs'))
+            Apply
+              (Apply
+                (Apply ('fold', 'f'),
+                  Apply (Apply ('f', 'a'), 'x')), 'xs'))
         ]), 'A'))
 
 Value 'l':
@@ -37,7 +41,10 @@ Value 'n':
       ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
     ],
     (Apply
-      ('fold',
-        Function
-          ('x', Type ('Z'), Function ('y', 'A818', Apply ('plus', 'x', 'y'))),
-        Int(0), Apply ('map', 'incr', 'l')), Type ('Z')))
+      (Apply
+        (Apply
+          ('fold',
+            Function
+              ('x', Type ('Z'),
+                Function ('y', 'A818', Apply (Apply ('plus', 'x'), 'y')))),
+          Int(0)), Apply (Apply ('map', 'incr'), 'l')), Type ('Z')))
