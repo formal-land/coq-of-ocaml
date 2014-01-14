@@ -1,0 +1,35 @@
+Value 'u':
+  (non_rec, [ ], [ ], (Constructor ('tt'), Type ('unit')))
+
+Value 'l1':
+  (non_rec, [ 'A' ], [ ], (Constructor ('[]'), Type ('list', 'A')))
+
+Value 'l2':
+  (non_rec, [ ], [ ],
+    (Constructor ('cons', Int(1), Constructor ('[]')), Type ('list', Type ('Z'))))
+
+Value 'l3':
+  (non_rec, [ ], [ ],
+    (Constructor
+      ('cons', Int(1),
+        Constructor
+          ('cons', Int(5),
+            Constructor
+              ('cons', Int(7),
+                Constructor
+                  ('cons', Int(32),
+                    Constructor ('cons', Int(15), Constructor ('[]')))))),
+      Type ('list', Type ('Z'))))
+
+Value 'o1':
+  (non_rec, [ 'A' ], [ ], (Constructor ('None'), Type ('option', 'A')))
+
+Value 'o2':
+  (non_rec, [ ], [ ],
+    (Constructor ('Some', Int(12)), Type ('option', Type ('Z'))))
+
+Value 'c':
+  (non_rec, [ ], [ ], (Char("g"), Type ('ascii')))
+
+Value 's':
+  (non_rec, [ ], [ ], (String("bla"), Type ('string')))

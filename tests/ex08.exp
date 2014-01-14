@@ -1,0 +1,53 @@
+Inductive 't1':
+  ([ ],
+    [
+      ('C1', [ Type ('Z') ]);
+      ('C2', [ Type ('bool'); Type ('Z') ]);
+      ('C3', [ ])
+    ])
+
+Value 'n':
+  (non_rec, [ ], [ ],
+    (Constructor ('C2', Constructor ('false'), Int(3)), Type ('t1')))
+
+Value 'm':
+  (non_rec, [ ], [ ],
+    (Match
+      ('n', [ (Constructor ('C2', 'b', Any), 'b'); (Any, Constructor ('true')) ]),
+      Type ('bool')))
+
+Inductive 't2':
+  ([ 'a' ], [ ('D1', [ ]); ('D2', [ 'a'; Type ('t2', 'a') ]) ])
+
+Value 'of_list':
+  (rec, [ 'A' ], [ ('l', Type ('list', 'A')) ],
+    (Match
+      ('l',
+        [
+          (Constructor ('[]'), Constructor ('D1'));
+          (Constructor ('cons', 'x', 'xs'),
+            Constructor ('D2', 'x', Apply ('of_list', 'xs')))
+        ]), Type ('t2', 'A')))
+
+Value 'sum':
+  (rec, [ ], [ ('l', Type ('t2', Type ('Z'))) ],
+    (Match
+      ('l',
+        [
+          (Constructor ('D1'), Int(0));
+          (Constructor ('D2', 'x', 'xs'),
+            Apply ('Z.add', 'x', Apply ('sum', 'xs')))
+        ]), Type ('Z')))
+
+Value 's':
+  (non_rec, [ ], [ ],
+    (Apply
+      ('sum',
+        Apply
+          ('of_list',
+            Constructor
+              ('cons', Int(5),
+                Constructor
+                  ('cons', Int(7),
+                    Constructor ('cons', Int(3), Constructor ('[]')))))),
+      Type ('Z')))

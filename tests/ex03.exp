@@ -1,0 +1,11 @@
+Value 'n1':
+  (non_rec, [ ], [ ], (Let ('m', Int(12), Let ('n1', 'm', 'n1')), Type ('Z')))
+
+Value 'n2':
+  (non_rec, [ ], [ ],
+    (LetFun
+      (non_rec, 'p1', [ 'A'; 'B'; 'C' ],
+        Apply ('c', Function ('x', 'A705', Function ('y', 'A708', 'x'))),
+        LetFun
+          (non_rec, 'c', [ 'A' ], Apply ('f', Int(12), Int(23)),
+            Apply ('p1', 'c'))), Type ('Z')))

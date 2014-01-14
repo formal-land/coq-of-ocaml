@@ -1,0 +1,43 @@
+Value 'map':
+  (rec, [ 'A'; 'B' ], [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
+    (Match
+      ('l',
+        [
+          (Constructor ('[]'), Constructor ('[]'));
+          (Constructor ('cons', 'x', 'xs'),
+            Constructor
+              ('cons', Apply ('f', 'x'), Apply ('map', 'f', 'xs')))
+        ]), Type ('list', 'A')))
+
+Value 'fold':
+  (rec, [ 'A'; 'B' ],
+    [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
+    (Match
+      ('l',
+        [
+          (Constructor ('[]'), 'a');
+          (Constructor ('cons', 'x', 'xs'),
+            Apply ('fold', 'f', Apply ('f', 'a', 'x'), 'xs'))
+        ]), 'A'))
+
+Value 'l':
+  (non_rec, [ ], [ ],
+    (Constructor
+      ('cons', Int(5),
+        Constructor
+          ('cons', Int(6),
+            Constructor
+              ('cons', Int(7), Constructor ('cons', Int(2), Constructor ('[]'))))),
+      Type ('list', Type ('Z'))))
+
+Value 'n':
+  (non_rec, [ 'A' ],
+    [
+      ('incr', (Type ('Z') -> 'A'));
+      ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
+    ],
+    (Apply
+      ('fold',
+        Function
+          ('x', Type ('Z'), Function ('y', 'A818', Apply ('plus', 'x', 'y'))),
+        Int(0), Apply ('map', 'incr', 'l')), Type ('Z')))

@@ -1,0 +1,4 @@
+Value 'n':
+  (non_rec, [ ], [ ],
+    (LetFun (non_rec, 'f', [ 'A'; 'B' ], 'x', Apply ('f', Int(12), Int(3))),
+      Type ('Z')))

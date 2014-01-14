@@ -1,0 +1,53 @@
+Module 'SizedString'.
+  Record 't':
+    ([ ('name', Type ('string')); ('size', Type ('Z')) ])
+End 'SizedString'.
+
+Value 'r':
+  (non_rec, [ ], [ ],
+    (Record (('SizedString.name', String("gre")), ('SizedString.size', Int(3))),
+      Type ('SizedString.t')))
+
+Value 'r'':
+  (non_rec, [ ], [ ],
+    (Record (('SizedString.name', String("haha")), ('SizedString.size', Int(4))),
+      Type ('SizedString.t')))
+
+Value 's':
+  (non_rec, [ ], [ ],
+    (Apply
+      ('Z.add', Field ('r', 'SizedString.size'),
+        Field ('r'', 'SizedString.size')), Type ('Z')))
+
+Value 'f':
+  (non_rec, [ ], [ ('match_var_0', Type ('SizedString.t')) ],
+    (Match
+      ('match_var_0',
+        [
+          (Record (('SizedString.size', Int(3))), Constructor ('true'));
+          (Any, Constructor ('false'))
+        ]), Type ('bool')))
+
+Value 'b':
+  (non_rec, [ ], [ ], (Apply ('f', 'r'), Type ('bool')))
+
+Value 'b'':
+  (non_rec, [ ], [ ], (Apply ('f', 'r''), Type ('bool')))
+
+Module 'Point'.
+  Record 't':
+    ([ ('x', Type ('Z')); ('y', Type ('Z')); ('z', Type ('Z')) ])
+  
+  Value 'p':
+    (non_rec, [ ], [ ],
+      (Record (('x', Int(5)), ('y', Int(-3)), ('z', Int(1))), Type ('t')))
+  
+  Value 'b':
+    (non_rec, [ ], [ ],
+      (Match
+        ('p',
+          [
+            (Record (('x', Int(5)), ('z', Int(1))), Constructor ('true'));
+            (Any, Constructor ('false'))
+          ]), Type ('bool')))
+End 'Point'.

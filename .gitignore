@@ -1,6 +1,5 @@
 a.out
 *.annot
-*.exp
 *.cmo
 *.cma
 *.cmi

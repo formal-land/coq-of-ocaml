@@ -7,6 +7,8 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     | "exp" ->
       let definitions = Structure.of_structure structure in
       Structure.pp definitions
+    | "effects" -> empty
+    | "monadise" -> empty
     | "coq" ->
       let definitions = Structure.of_structure structure in
       let (definitions, _) = Structure.monadise definitions [] PathName.Map.empty in

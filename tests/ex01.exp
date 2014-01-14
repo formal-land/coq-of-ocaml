@@ -1,0 +1,5 @@
+Value 'f':
+  (non_rec, [ 'A'; 'B' ], [ ('x', 'A'); ('y', 'B') ], ('x', 'A'))
+
+Value 'n':
+  (non_rec, [ ], [ ], (Apply ('f', Int(12), Int(3)), Type ('Z')))

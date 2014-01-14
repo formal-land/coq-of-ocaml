@@ -1,0 +1,20 @@
+Value 'n':
+  (non_rec, [ ], [ ],
+    (Match
+      (Tuple
+        (Constructor
+          ('cons', Int(1), Constructor ('cons', Int(2), Constructor ('[]'))),
+          Constructor ('false')),
+        [
+          (Tuple
+            (Constructor
+              ('cons', 'x',
+                Constructor ('cons', Any, Constructor ('[]'))),
+              Constructor ('true')), 'x');
+          (Tuple
+            (Constructor
+              ('cons', Any,
+                Constructor ('cons', 'y', Constructor ('[]'))),
+              Constructor ('false')), 'y');
+          (Any, Int(0))
+        ]), Type ('Z')))
