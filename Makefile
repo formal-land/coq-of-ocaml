@@ -10,10 +10,13 @@ clean:
 	ocamlbuild -clean
 	rm -f CoqOfOCaml.vo CoqOfOCaml.glob a.out tests/ex*.cmo tests/ex*.cmi tests/ex*.cmt tests/ex*.v tests/Nex* tests/ex*.glob tests/ex*.vo
 
-test: $(TESTS_OUTPUT)
+test: $(OUTPUT)
+	ruby test.rb
 
 cmt: $(TESTS_INPUT:.ml=.cmt)
 exp: $(TESTS_INPUT:.ml=.exp)
+v: $(TESTS_INPUT:.ml=.v)
+vo: $(TESTS_INPUT:.ml=.vo)
 
 %.cmt: %.ml
 	ocamlc -bin-annot $<

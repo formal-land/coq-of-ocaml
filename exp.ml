@@ -107,9 +107,13 @@ let rec of_expression (e : expression) : t =
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
 and open_cases (cases : case list) : Name.t * Type.t * t =
   let x = Name.unsafe_fresh "match_var" in
-  let x_typ = Type.Tuple (List.map (fun {c_lhs = {pat_type = typ}} -> Type.of_type_expr typ) cases) in
+  (* TODO: check free type variables. *)
+  let x_typ =
+    match cases with
+    | {c_lhs = {pat_type = typ}} :: _ -> Type.of_type_expr typ
+    | [] -> failwith "TODO" in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
-      (Pattern.of_pattern p, of_expression e)) in
+    (Pattern.of_pattern p, of_expression e)) in
   (x, x_typ, Match (Variable (PathName.of_name [] x), cases))
 and import_let_fun (rec_flag : Asttypes.rec_flag) (name : Ident.t) (e : expression)
   : Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t =
@@ -122,6 +126,31 @@ and import_let_fun (rec_flag : Asttypes.rec_flag) (name : Ident.t) (e : expressi
   (Recursivity.of_rec_flag rec_flag, name, e_schema.Schema.variables,
     List.combine args_names args_typs, e_body_typ, e_body)
 
+module EffectTree = struct
+  type t =
+    | Leaf of Effect.t
+    | Compound of t list * Effect.t
+    | Apply of t * t list * Effect.t
+    | Function of t * Effect.t
+    | Let of t * t * Effect.t
+    | LetFun of t * t * Effect.t
+    | Match of t * t list * Effect.t
+    | Field of t * Effect.t
+
+  let effect (tree : t) : Effect.t =
+    match tree with
+    | Leaf effect | Compound (_, effect) | Apply (_, _, effect) | Function (_, effect)
+      | Let (_, _, effect) | LetFun (_, _, effect) | Match (_, _, effect)
+      | Field (_, effect) -> effect
+end
+
+let rec tree (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
+  : t * EffectTree.t =
+  match e with
+  | Constant _ -> failwith "TODO"
+  | _ -> failwith "TODO"
+
+(*)
 (** Do the monadic transformation of an expression using an effects environment. *)
 let rec monadise (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
   : t * Effect.t =
@@ -259,7 +288,7 @@ let rec monadise (e : t) (path : PathName.Path.t) (effects : Effect.Env.t)
         | [e2; e3] -> (IfThenElse (e1, e2, e3), effect)
         | _ -> failwith "Unexpected answer from 'unify'.")
       | _ -> failwith "Unexpected answer from 'monadise_list'.")
-  | Return _ | Bind _ -> failwith "This expression is already monadic."
+  | Return _ | Bind _ -> failwith "This expression is already monadic."*)
 
 let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t)
   (xs : (Name.t * Type.t) list) : Name.Set.t =

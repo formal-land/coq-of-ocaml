@@ -17,6 +17,7 @@ let rec pp (typ : t) : SmartPrint.t =
   | Apply (x, typs) ->
     nest (!^ "Type" ^^ nest (parens (
       separate (!^ "," ^^ space) (PathName.pp x :: List.map pp typs))))
+  | Monad typ -> nest (!^ "Monad" ^^ parens (pp typ))
 
 (** Import an OCaml type. *)
 let rec of_type_expr (typ : Types.type_expr) : t =

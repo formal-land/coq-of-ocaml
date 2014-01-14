@@ -166,13 +166,13 @@ let rec of_structure (structure : structure) : t list =
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
 
-let rec monadise (defs : t list) (path : PathName.Path.t) (effects : Effect.Env.t)
+(*let rec monadise (defs : t list) (path : PathName.Path.t) (effects : Effect.Env.t)
   : t list * Effect.Env.t =
   let monadise_one (def : t) (path : PathName.Path.t) (effects : Effect.Env.t)
     : t * Effect.Env.t =
     match def with
     | Value {
-      name = name;
+      Value.name = name;
       is_rec = is_rec;
       typ_vars = typ_vars;
       args = args;
@@ -207,7 +207,7 @@ let rec monadise (defs : t list) (path : PathName.Path.t) (effects : Effect.Env.
       let (def, effects) = monadise_one def path effects in
       (def :: defs, effects))
       ([], effects) defs in
-  (List.rev defs, effects)
+  (List.rev defs, effects)*)
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
