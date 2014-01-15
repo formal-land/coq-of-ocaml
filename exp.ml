@@ -212,7 +212,43 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
     let tree2 = tree path effects_in_e2 e2 in
     let effect2 = Tree.effect tree2 in
     Tree.LetFun (tree1, tree2, effect2)
-  | _ -> failwith "TODO"
+  | Match (e, cases) ->
+    let tree_e = tree path effects e in
+    let effect_e = Tree.effect tree_e in
+    if Effect.Type.is_pure effect_e.Effect.typ then
+      let trees = cases |> List.map (fun (p, e) ->
+        let pattern_vars = Pattern.free_vars p in
+        let effects = Name.Set.fold (fun x effects ->
+          PathName.Map.add (PathName.of_name path x) Effect.Type.Pure effects)
+          pattern_vars effects in
+        tree path effects e) in
+      let effect = Effect.unify (List.map Tree.effect trees) in
+      Tree.Match (tree_e, trees,
+        { Effect.effect = effect_e.Effect.effect || effect.Effect.effect;
+          typ = effect.Effect.typ })
+    else
+      failwith "Cannot match a value with functional effects."
+  | Record fields -> compound (List.map snd fields)
+  | Field (e, _) ->
+    let tree_e = tree path effects e in
+    let effect_e = Tree.effect tree_e in
+    if Effect.Type.is_pure effect_e.Effect.typ then
+      Tree.Field (tree_e, effect_e)
+    else
+      failwith "Cannot take a field of a value with functional effects."
+  | IfThenElse (e1, e2, e3) ->
+    let tree_e1 = tree path effects e1 in
+    let effect_e1 = Tree.effect tree_e1 in
+    if Effect.Type.is_pure effect_e1.Effect.typ then
+      let trees = List.map (tree path effects) [e2; e3] in
+      let effect = Effect.unify (List.map Tree.effect trees) in
+      Tree.Match (tree_e1, trees,
+        { Effect.effect = effect_e1.Effect.effect || effect.Effect.effect;
+          typ = effect.Effect.typ })
+    else
+      failwith "Cannot do an if on a value with functional effects."
+  | Return _ | Bind _ ->
+    failwith "Cannot compute effects on an explicit return or bind."
 
 (*
 (** Do the monadic transformation of an expression using an effects environment. *)

@@ -37,6 +37,15 @@ module Type = struct
     | Pure -> Pure
     | Arrow (_, typ) -> typ
 
+  let unify (typs : t list) : t =
+    let rec aux typ1 typ2 =
+      match (typ1, typ2) with
+      | (Pure, _) -> if is_pure typ2 then Pure else typ2
+      | (_, Pure) -> if is_pure typ1 then Pure else typ1
+      | (Arrow (effect1, typ1), Arrow (effect2, typ2)) ->
+        Arrow (effect1 && effect2, aux typ1 typ2) in
+    List.fold_left aux Pure typs
+
   let rec monadise (typ : Type.t) (effect_typ : t) : Type.t =
     match (typ, effect_typ) with
     | (Type.Variable _, Pure) | (Type.Tuple _, Pure)
@@ -80,6 +89,10 @@ let function_typ (args : (Name.t * Type'.t) list) (body_effect : t) : Type.t =
     List.fold_left (fun effect_typ _ -> Type.Arrow (false, effect_typ))
       (Type.Arrow (body_effect.effect, body_effect.typ))
       args
+
+let unify (effects : t list) : t =
+  { effect = List.exists (fun effect -> effect.effect) effects;
+    typ = Type.unify (List.map (fun effect -> effect.typ) effects) }
 
 let monadise (typ : Type'.t) (effect : t) : Type'.t =
   let typ = Type.monadise typ effect.typ in
