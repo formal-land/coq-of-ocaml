@@ -10,14 +10,15 @@ module Value = struct
     is_rec : Recursivity.t; (** If the function is recursive. *)
     typ_vars : Name.t list; (** Polymorphic type variables. *)
     args : (Name.t * Type.t) list; (** Names and types of the arguments. *)
-    body : Exp.t * Type.t (** Body and type of the body. *) }
+    typ : Type.t; (** Type of the body. *)
+    body : Exp.t (** Body expression. *) }
 
   let pp (value : t) : SmartPrint.t =
     nest (!^ "Value" ^^ Name.pp value.name ^-^ !^ ":" ^^ newline ^^ indent (Pp.list [
       Recursivity.pp value.is_rec;
       OCaml.list Name.pp value.typ_vars;
       OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) value.args;
-      Pp.list [Exp.pp (fst value.body); Type.pp (snd value.body)]]))
+      Type.pp value.typ; Exp.pp value.body]))
   
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : t) : SmartPrint.t =
@@ -32,8 +33,8 @@ module Value = struct
       | xs -> braces @@ group (separate space (List.map Name.to_coq xs) ^^ !^ ":" ^^ !^ "Type")) ^^
       group (separate space (value.args |> List.map (fun (x, t) ->
         parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
-      !^ ":" ^^ Type.to_coq false (snd value.body) ^^
-      !^ ":=" ^^ Exp.to_coq false (fst value.body) ^-^ !^ ".")
+      !^ ":" ^^ Type.to_coq false value.typ ^^
+      !^ ":=" ^^ Exp.to_coq false value.body ^-^ !^ ".")
 end
 
 (** A definition of a sum type. *)
@@ -136,7 +137,8 @@ let rec of_structure (structure : structure) : t list =
         is_rec = is_rec;
         typ_vars = typ_vars;
         args = args;
-        body = (e, e_typ) }
+        typ = e_typ;
+        body = e }
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with
       | Type_variant cases ->

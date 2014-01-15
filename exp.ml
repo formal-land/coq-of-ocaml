@@ -10,7 +10,7 @@ type t =
   | Tuple of t list (** A tuple of expressions. *)
   | Constructor of PathName.t * t list (** A constructor name and a list of arguments. *)
   | Apply of t * t (** An application. *)
-  | Function of Name.t * Type.t * t (** An argument name, the type of this argument and a body. *)
+  | Function of Name.t * t (** An argument name and a body. *)
   | Let of Name.t * t * t (** A "let" of a non-functional value. *)
   | LetFun of Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t * t
     (** A "let" of a function: the recursivity flag, the function name, the type variables,
@@ -33,14 +33,15 @@ let rec pp (e : t) : SmartPrint.t =
     nest (!^ "Constructor" ^^ Pp.list (PathName.pp x :: List.map pp es))
   | Apply (e_f, e_x) ->
     nest (!^ "Apply" ^^ Pp.list [pp e_f; pp e_x])
-  | Function (x, x_typ, e) ->
-    nest (!^ "Function" ^^ Pp.list [Name.pp x; Type.pp x_typ; pp e])
+  | Function (x, e) ->
+    nest (!^ "Function" ^^ Pp.list [Name.pp x; pp e])
   | Let (x, e1, e2) ->
     nest (!^ "Let" ^^ Pp.list [Name.pp x; pp e1; pp e2])
   | LetFun (is_rec, x, typ_vars, args, typ, e1, e2) ->
     nest (!^ "LetFun" ^^ Pp.list [
-      Recursivity.pp is_rec; Name.pp x;
-      OCaml.list Name.pp typ_vars; pp e1; pp e2])
+      Recursivity.pp is_rec; Name.pp x; OCaml.list Name.pp typ_vars;
+      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) args;
+      pp e1; pp e2])
   | Match (e, cases) ->
     nest (!^ "Match" ^^ Pp.list [pp e; cases |> OCaml.list (fun (p, e) ->
       nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
@@ -57,7 +58,7 @@ let rec pp (e : t) : SmartPrint.t =
 (** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
   match e with
-  | Function (x, _, e) ->
+  | Function (x, e) ->
     let (xs, e) = open_function e in
     (x :: xs, e)
   | _ -> ([], e)
@@ -75,11 +76,11 @@ let rec of_expression (e : expression) : t =
       Let (name, body, e2)
     else
       LetFun (rec_flag, name, free_typ_vars, args, body_typ, body, e2)
-  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _); pat_type = x_typ}; c_rhs = e}], _) ->
-    Function (Name.of_ident x, Type.of_type_expr x_typ, of_expression e)
+  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _) ->
+    Function (Name.of_ident x, of_expression e)
   | Texp_function (_, cases, _) ->
-    let (x, x_typ, e) = open_cases cases in
-    Function (x, x_typ, e)
+    let (x, e) = open_cases cases in
+    Function (x, e)
   | Texp_apply (e_f, e_xs) ->
     let e_f = of_expression e_f in
     let e_xs = List.map (fun (_, e_x, _) ->
@@ -105,16 +106,11 @@ let rec of_expression (e : expression) : t =
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
-and open_cases (cases : case list) : Name.t * Type.t * t =
+and open_cases (cases : case list) : Name.t * t =
   let x = Name.unsafe_fresh "match_var" in
-  (* TODO: check free type variables. *)
-  let x_typ =
-    match cases with
-    | {c_lhs = {pat_type = typ}} :: _ -> Type.of_type_expr typ
-    | [] -> failwith "TODO" in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
     (Pattern.of_pattern p, of_expression e)) in
-  (x, x_typ, Match (Variable (PathName.of_name [] x), cases))
+  (x, Match (Variable (PathName.of_name [] x), cases))
 and import_let_fun (rec_flag : Asttypes.rec_flag) (name : Ident.t) (e : expression)
   : Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t =
   let name = Name.of_ident name in
@@ -130,7 +126,7 @@ module Tree = struct
   type t =
     | Leaf of Effect.t
     | Compound of t list * Effect.t
-    | Apply of t * t list * Effect.t
+    | Apply of t * t * Effect.t
     | Function of t * Effect.t
     | Let of t * t * Effect.t
     | LetFun of t * t * Effect.t
@@ -160,14 +156,62 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
   match e with
   | Constant _ -> Tree.Leaf Effect.pure
   | Variable x ->
-    (try Tree.Leaf { Effect.effect = false; typ = PathName.Map.find x effects }
+    (try Tree.Leaf { Effect.effect = false; typ = Effect.Env.find x effects }
     with Not_found ->
       failwith (SmartPrint.to_string 80 2 (PathName.pp x ^^ !^ "not found.")))
   | Tuple es | Constructor (_, es) -> compound es
   | Apply (e_f, e_x) ->
     let tree_f = tree path effects e_f in
     let tree_x = tree path effects e_x in
-    failwith "TODO"
+    let effect_f = Tree.effect tree_f in
+    let effect_x = Tree.effect tree_x in
+    let have_effect =
+      effect_f.Effect.effect || effect_x.Effect.effect ||
+      (Effect.Type.return_effect effect_f.Effect.typ) in
+    let effect_typ = Effect.Type.return_type effect_f.Effect.typ in
+    Tree.Apply (tree_f, tree_x,
+      { Effect.effect = have_effect; typ = effect_typ })
+  | Function (x, e) ->
+    let tree_e = tree path (Effect.Env.add (PathName.of_name path x)
+      Effect.Type.Pure effects) e in
+    let effect_e = Tree.effect tree_e in
+    Tree.Function (tree_e,
+      { Effect.effect = false; typ = Effect.Type.Arrow (
+        effect_e.Effect.effect, effect_e.Effect.typ) })
+  | Let (x, e1, e2) ->
+    let tree1 = tree path effects e1 in
+    let effect1 = Tree.effect tree1 in
+    let tree2 = tree path (Effect.Env.add (PathName.of_name path x)
+      effect1.Effect.typ effects) e2 in
+    let effect2 = Tree.effect tree2 in
+    let have_effect = effect1.Effect.effect || effect2.Effect.effect in
+    Tree.Let (tree1, tree2,
+      { Effect.effect = have_effect; typ = effect2.Effect.typ })
+  | LetFun (is_rec, x, _, args, typ, e1, e2) ->
+    let effects_in_e1 = Effect.Env.in_function path effects args in
+    let (tree1, x_typ) =
+      if Recursivity.to_bool is_rec then
+        let rec fix_tree1 x_typ =
+          let effects_in_e1 = Effect.Env.add (PathName.of_name path x)
+            x_typ effects_in_e1 in
+          let tree1 = tree path effects_in_e1 e1 in
+          let effect1 = Tree.effect tree1 in
+          let x_typ' = Effect.function_typ args effect1 in
+          if Effect.Type.eq x_typ x_typ' then
+            (tree1, x_typ)
+          else
+            fix_tree1 x_typ' in
+        fix_tree1 Effect.Type.Pure
+      else
+        let tree1 = tree path effects_in_e1 e1 in
+        let effect1 = Tree.effect tree1 in
+        let x_typ = Effect.function_typ args effect1 in
+        (tree1, x_typ) in
+    let effects_in_e2 = Effect.Env.add (PathName.of_name path x)
+      x_typ effects in
+    let tree2 = tree path effects_in_e2 e2 in
+    let effect2 = Tree.effect tree2 in
+    Tree.LetFun (tree1, tree2, effect2)
   | _ -> failwith "TODO"
 
 (*
@@ -333,7 +377,7 @@ let simplify (e : t) : t =
     | Tuple es -> Tuple (List.map (aux env) es)
     | Constructor (x, es) -> Constructor (x, List.map (aux env) es)
     | Apply (e_f, e_x) -> Apply (aux env e_f, aux env e_x)
-    | Function (x, x_typ, e) -> Function (x, x_typ, aux (rm x) e)
+    | Function (x, e) -> Function (x, aux (rm x) e)
     | Let (x, e1, e2) -> Let (x, aux env e1, aux (rm x) e2)
     | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
       let env_in_f = Name.Set.fold (fun x env ->
@@ -364,7 +408,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       Pp.parens paren @@ nest @@ separate space (PathName.to_coq x :: List.map (to_coq true) es)
   | Apply (e_f, e_x) ->
     Pp.parens paren @@ nest @@ (to_coq true e_f ^^ to_coq true e_x)
-  | Function (x, _, e) ->
+  | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | Let (x, e1, e2) ->
     Pp.parens paren @@ nest (

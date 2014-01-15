@@ -1,16 +1,16 @@
 Value 'u':
-  (non_rec, [ ], [ ], (Constructor ('tt'), Type ('unit')))
+  (non_rec, [ ], [ ], Type ('unit'), Constructor ('tt'))
 
 Value 'l1':
-  (non_rec, [ 'A' ], [ ], (Constructor ('[]'), Type ('list', 'A')))
+  (non_rec, [ 'A' ], [ ], Type ('list', 'A'), Constructor ('[]'))
 
 Value 'l2':
-  (non_rec, [ ], [ ],
-    (Constructor ('cons', Int(1), Constructor ('[]')), Type ('list', Type ('Z'))))
+  (non_rec, [ ], [ ], Type ('list', Type ('Z')),
+    Constructor ('cons', Int(1), Constructor ('[]')))
 
 Value 'l3':
-  (non_rec, [ ], [ ],
-    (Constructor
+  (non_rec, [ ], [ ], Type ('list', Type ('Z')),
+    Constructor
       ('cons', Int(1),
         Constructor
           ('cons', Int(5),
@@ -18,18 +18,16 @@ Value 'l3':
               ('cons', Int(7),
                 Constructor
                   ('cons', Int(32),
-                    Constructor ('cons', Int(15), Constructor ('[]')))))),
-      Type ('list', Type ('Z'))))
+                    Constructor ('cons', Int(15), Constructor ('[]')))))))
 
 Value 'o1':
-  (non_rec, [ 'A' ], [ ], (Constructor ('None'), Type ('option', 'A')))
+  (non_rec, [ 'A' ], [ ], Type ('option', 'A'), Constructor ('None'))
 
 Value 'o2':
-  (non_rec, [ ], [ ],
-    (Constructor ('Some', Int(12)), Type ('option', Type ('Z'))))
+  (non_rec, [ ], [ ], Type ('option', Type ('Z')), Constructor ('Some', Int(12)))
 
 Value 'c':
-  (non_rec, [ ], [ ], (Char("g"), Type ('ascii')))
+  (non_rec, [ ], [ ], Type ('ascii'), Char("g"))
 
 Value 's':
-  (non_rec, [ ], [ ], (String("bla"), Type ('string')))
+  (non_rec, [ ], [ ], Type ('string'), String("bla"))

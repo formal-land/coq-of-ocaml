@@ -1,7 +1,8 @@
 Value 'l':
-  (non_rec, [ ], [ ],
-    (LetFun
+  (non_rec, [ ], [ ], Type ('list', Type ('Z')),
+    LetFun
       (rec, 'map', [ 'A'; 'B' ],
+        [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
         Match
           ('match_var_0',
             [
@@ -16,12 +17,9 @@ Value 'l':
                         'xs')))
             ]),
         Apply
-          (Apply
-            ('map',
-              Function ('n', Type ('Z'), Apply (Apply ('Z.add', 'n'), Int(1)))),
+          (Apply ('map', Function ('n', Apply (Apply ('Z.add', 'n'), Int(1)))),
             Constructor
               ('cons', Int(5),
                 Constructor
                   ('cons', Int(7),
-                    Constructor ('cons', Int(8), Constructor ('[]')))))),
-      Type ('list', Type ('Z'))))
+                    Constructor ('cons', Int(8), Constructor ('[]')))))))

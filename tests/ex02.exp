@@ -1,17 +1,17 @@
 Value 't0':
-  (non_rec, [ ], [ ], (Constructor ('tt'), Type ('unit')))
+  (non_rec, [ ], [ ], Type ('unit'), Constructor ('tt'))
 
 Value 't1':
-  (non_rec, [ ], [ ],
-    (Tuple (Char("c"), String("one")), (Type ('ascii') * Type ('string'))))
+  (non_rec, [ ], [ ], (Type ('ascii') * Type ('string')),
+    Tuple (Char("c"), String("one")))
 
 Value 't2':
   (non_rec, [ ], [ ],
-    (Tuple (Int(1), Int(2), Int(3), Constructor ('false'), Constructor ('true')),
-      (Type ('Z') * Type ('Z') * Type ('Z') * Type ('bool') * Type ('bool'))))
+    (Type ('Z') * Type ('Z') * Type ('Z') * Type ('bool') * Type ('bool')),
+    Tuple (Int(1), Int(2), Int(3), Constructor ('false'), Constructor ('true')))
 
 Value 'f':
-  (non_rec, [ 'A' ], [ ('x', 'A') ], (Tuple ('x', 'x'), ('A' * 'A')))
+  (non_rec, [ 'A' ], [ ('x', 'A') ], ('A' * 'A'), Tuple ('x', 'x'))
 
 Value 't3':
-  (non_rec, [ ], [ ], (Apply ('f', Int(12)), (Type ('Z') * Type ('Z'))))
+  (non_rec, [ ], [ ], (Type ('Z') * Type ('Z')), Apply ('f', Int(12)))

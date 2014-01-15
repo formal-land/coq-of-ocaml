@@ -1,5 +1,5 @@
 Value 'n':
-  (non_rec, [ ], [ ],
-    (LetFun
-      (non_rec, 'f', [ 'A'; 'B' ], 'x', Apply (Apply ('f', Int(12)), Int(3))),
-      Type ('Z')))
+  (non_rec, [ ], [ ], Type ('Z'),
+    LetFun
+      (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'A'); ('y', 'B') ], 'x',
+        Apply (Apply ('f', Int(12)), Int(3))))

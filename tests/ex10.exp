@@ -3,8 +3,8 @@ Module 'List2'.
     ([ 'a' ], [ ('Nil', [ ]); ('Cons', [ 'a'; Type ('t', 'a') ]) ])
   
   Value 'sum':
-    (rec, [ ], [ ('match_var_0', Type ('t', Type ('Z'))) ],
-      (Match
+    (rec, [ ], [ ('match_var_0', Type ('t', Type ('Z'))) ], Type ('Z'),
+      Match
         ('match_var_0',
           [
             (Alias (Any, 'l'),
@@ -25,27 +25,27 @@ Module 'List2'.
                             ('sum',
                               'xs')))
                   ]))
-          ]), Type ('Z')))
+          ]))
   
   Value 'of_list':
-    (rec, [ 'A' ], [ ('match_var_1', Type ('list', 'A')) ],
-      (Match
+    (rec, [ 'A' ], [ ('match_var_1', Type ('list', 'A')) ], Type ('t', 'A'),
+      Match
         ('match_var_1',
           [
             (Constructor ('[]'), Constructor ('Nil'));
             (Constructor ('cons', 'x', 'xs'),
               Constructor ('Cons', 'x', Apply ('of_list', 'xs')))
-          ]), Type ('t', 'A')))
+          ]))
   
   Module 'Inside'.
     Value 'x':
-      (non_rec, [ ], [ ], (Int(12), Type ('Z')))
+      (non_rec, [ ], [ ], Type ('Z'), Int(12))
   End 'Inside'.
 End 'List2'.
 
 Value 'n':
-  (non_rec, [ ], [ ],
-    (Apply
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
       ('List2.sum',
         Apply
           ('List2.of_list',
@@ -56,5 +56,4 @@ Value 'n':
                     Constructor
                       ('cons', Int(6),
                         Constructor
-                          ('cons', 'List2.Inside.x', Constructor ('[]'))))))),
-      Type ('Z')))
+                          ('cons', 'List2.Inside.x', Constructor ('[]'))))))))

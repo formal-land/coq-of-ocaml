@@ -33,12 +33,6 @@ class Test
   def check(mode)
     coq_of_ocaml(mode) == reference(mode)
   end
-
-  def clean
-    for ext in ['.cmt', '.cmi', '.cmo', '.glob', '.vo'] do
-      FileUtils.rm_f(extension(ext))
-    end
-  end
 end
 
 class Tests
@@ -64,13 +58,6 @@ class Tests
       end
     end
   end
-
-  def clean
-    puts "\e[1mCleaning.\e[0m"
-    for test in @tests do
-      test.clean
-    end
-  end
 end
 
 tests = Tests.new(Dir.glob('tests/ex*.ml'))
@@ -81,5 +68,3 @@ puts
 tests.check('effects')
 puts
 tests.check('monadise')
-puts
-tests.clean

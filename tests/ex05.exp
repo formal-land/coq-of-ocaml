@@ -1,6 +1,6 @@
 Value 'n':
-  (non_rec, [ ], [ ],
-    (Match
+  (non_rec, [ ], [ ], Type ('Z'),
+    Match
       (Tuple
         (Constructor
           ('cons', Int(1), Constructor ('cons', Int(2), Constructor ('[]'))),
@@ -17,4 +17,4 @@ Value 'n':
                 Constructor ('cons', 'y', Constructor ('[]'))),
               Constructor ('false')), 'y');
           (Any, Int(0))
-        ]), Type ('Z')))
+        ]))

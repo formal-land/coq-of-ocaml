@@ -20,6 +20,23 @@ module Type = struct
     | Pure -> true
     | Arrow (effect, typ) -> not effect && is_pure typ
 
+  let rec eq (typ1 : t) (typ2 : t) : bool =
+    match (typ1, typ2) with
+    | (Pure, _) -> is_pure typ2
+    | (_, Pure) -> is_pure typ1
+    | (Arrow (effect1, typ1), Arrow (effect2, typ2)) ->
+      (effect1 = effect2) && eq typ1 typ2
+
+  let return_effect (typ : t) : bool =
+    match typ with
+    | Pure -> false
+    | Arrow (effect, _) -> effect
+
+  let return_type (typ : t) : t =
+    match typ with
+    | Pure -> Pure
+    | Arrow (_, typ) -> typ
+
   let rec monadise (typ : Type.t) (effect_typ : t) : Type.t =
     match (typ, effect_typ) with
     | (Type.Variable _, Pure) | (Type.Tuple _, Pure)
@@ -37,6 +54,12 @@ module Env = struct
   let pp (effects : t) : SmartPrint.t =
     PathName.Map.bindings effects |> OCaml.list (fun (x, typ) ->
       nest (PathName.pp x ^^ !^ ":" ^^ Type.pp false typ))
+
+  let add (x : PathName.t) (typ : Type.t) (effects : t) : t =
+    PathName.Map.add x typ effects
+
+  let find (x : PathName.t) (effects : t) : Type.t =
+    PathName.Map.find x effects
 
   let in_function (path : PathName.Path.t) (effects : t)
     (args : (Name.t * Type'.t) list) : t =

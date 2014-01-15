@@ -7,41 +7,40 @@ Inductive 't1':
     ])
 
 Value 'n':
-  (non_rec, [ ], [ ],
-    (Constructor ('C2', Constructor ('false'), Int(3)), Type ('t1')))
+  (non_rec, [ ], [ ], Type ('t1'),
+    Constructor ('C2', Constructor ('false'), Int(3)))
 
 Value 'm':
-  (non_rec, [ ], [ ],
-    (Match
-      ('n', [ (Constructor ('C2', 'b', Any), 'b'); (Any, Constructor ('true')) ]),
-      Type ('bool')))
+  (non_rec, [ ], [ ], Type ('bool'),
+    Match
+      ('n', [ (Constructor ('C2', 'b', Any), 'b'); (Any, Constructor ('true')) ]))
 
 Inductive 't2':
   ([ 'a' ], [ ('D1', [ ]); ('D2', [ 'a'; Type ('t2', 'a') ]) ])
 
 Value 'of_list':
-  (rec, [ 'A' ], [ ('l', Type ('list', 'A')) ],
-    (Match
+  (rec, [ 'A' ], [ ('l', Type ('list', 'A')) ], Type ('t2', 'A'),
+    Match
       ('l',
         [
           (Constructor ('[]'), Constructor ('D1'));
           (Constructor ('cons', 'x', 'xs'),
             Constructor ('D2', 'x', Apply ('of_list', 'xs')))
-        ]), Type ('t2', 'A')))
+        ]))
 
 Value 'sum':
-  (rec, [ ], [ ('l', Type ('t2', Type ('Z'))) ],
-    (Match
+  (rec, [ ], [ ('l', Type ('t2', Type ('Z'))) ], Type ('Z'),
+    Match
       ('l',
         [
           (Constructor ('D1'), Int(0));
           (Constructor ('D2', 'x', 'xs'),
             Apply (Apply ('Z.add', 'x'), Apply ('sum', 'xs')))
-        ]), Type ('Z')))
+        ]))
 
 Value 's':
-  (non_rec, [ ], [ ],
-    (Apply
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
       ('sum',
         Apply
           ('of_list',
@@ -49,5 +48,4 @@ Value 's':
               ('cons', Int(5),
                 Constructor
                   ('cons', Int(7),
-                    Constructor ('cons', Int(3), Constructor ('[]')))))),
-      Type ('Z')))
+                    Constructor ('cons', Int(3), Constructor ('[]')))))))

@@ -1,6 +1,7 @@
 Value 'map':
   (rec, [ 'A'; 'B' ], [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
-    (Match
+    Type ('list', 'A'),
+    Match
       ('l',
         [
           (Constructor ('[]'), Constructor ('[]'));
@@ -8,12 +9,13 @@ Value 'map':
             Constructor
               ('cons', Apply ('f', 'x'),
                 Apply (Apply ('map', 'f'), 'xs')))
-        ]), Type ('list', 'A')))
+        ]))
 
 Value 'fold':
   (rec, [ 'A'; 'B' ],
     [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
-    (Match
+    'A',
+    Match
       ('l',
         [
           (Constructor ('[]'), 'a');
@@ -22,29 +24,26 @@ Value 'fold':
               (Apply
                 (Apply ('fold', 'f'),
                   Apply (Apply ('f', 'a'), 'x')), 'xs'))
-        ]), 'A'))
+        ]))
 
 Value 'l':
-  (non_rec, [ ], [ ],
-    (Constructor
+  (non_rec, [ ], [ ], Type ('list', Type ('Z')),
+    Constructor
       ('cons', Int(5),
         Constructor
           ('cons', Int(6),
             Constructor
-              ('cons', Int(7), Constructor ('cons', Int(2), Constructor ('[]'))))),
-      Type ('list', Type ('Z'))))
+              ('cons', Int(7), Constructor ('cons', Int(2), Constructor ('[]'))))))
 
 Value 'n':
   (non_rec, [ 'A' ],
     [
       ('incr', (Type ('Z') -> 'A'));
       ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
-    ],
-    (Apply
+    ], Type ('Z'),
+    Apply
       (Apply
         (Apply
           ('fold',
-            Function
-              ('x', Type ('Z'),
-                Function ('y', 'A818', Apply (Apply ('plus', 'x'), 'y')))),
-          Int(0)), Apply (Apply ('map', 'incr'), 'l')), Type ('Z')))
+            Function ('x', Function ('y', Apply (Apply ('plus', 'x'), 'y')))),
+          Int(0)), Apply (Apply ('map', 'incr'), 'l')))

@@ -3,8 +3,8 @@ Inductive 'tree':
     [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
 
 Value 'find':
-  (rec, [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
-    (Match
+  (rec, [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Type ('bool'),
+    Match
       ('t',
         [
           (Constructor ('Leaf'), Constructor ('false'));
@@ -18,4 +18,4 @@ Value 'find':
                       (Apply ('find', 'x'),
                         't2'),
                     Constructor ('true'))))
-        ]), Type ('bool')))
+        ]))
