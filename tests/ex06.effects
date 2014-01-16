@@ -1,0 +1,59 @@
+Value
+  (Match
+    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+      Compound
+        (Apply
+          (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+          Apply
+            (Apply
+              (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+          Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Match
+    (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+      Apply
+        (Apply
+          (Apply
+            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+              Effect (false, .)),
+            Apply
+              (Apply
+                (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                  Effect (false, .)), Leaf (Effect (false, .)),
+                Effect (false, .)), Effect (false, .)),
+          Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Compound
+    (Leaf (Effect (false, .)),
+      Compound
+        (Leaf (Effect (false, .)),
+          Compound
+            (Leaf (Effect (false, .)),
+              Compound
+                (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+                  Effect (false, .)), Effect (false, .)), Effect (false, .)),
+      Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Apply
+        (Leaf (Effect (false, .)),
+          Function
+            (Function
+              (Apply
+                (Apply
+                  (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                    Effect (false, .)), Leaf (Effect (false, .)),
+                  Effect (false, .)), Effect (false, . -> .)),
+              Effect (false, . -> . -> .)), Effect (false, .)),
+        Leaf (Effect (false, .)), Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+          Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)),
+    . -> . -> .)
+[ 'fold' : .; 'l' : .; 'map' : .; 'n' : . -> . -> . ]

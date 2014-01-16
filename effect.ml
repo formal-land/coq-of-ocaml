@@ -79,12 +79,20 @@ end
 
 type t = { effect : bool; typ : Type.t }
 
+let pp (effect : t) : SmartPrint.t =
+  nest (!^ "Effect" ^^ Pp.list [
+    OCaml.bool effect.effect; Type.pp false effect.typ])
+
 let pure : t =
   { effect = false; typ = Type.Pure }
 
 let function_typ (args : (Name.t * Type'.t) list) (body_effect : t) : Type.t =
   match args with
-  | [] -> failwith "Expected some arguments."
+  | [] ->
+    if body_effect.effect then
+      failwith "Unexpected effect."
+    else
+      body_effect.typ
   | _ :: args ->
     List.fold_left (fun effect_typ _ -> Type.Arrow (false, effect_typ))
       (Type.Arrow (body_effect.effect, body_effect.typ))

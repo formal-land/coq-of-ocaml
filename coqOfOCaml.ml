@@ -7,7 +7,11 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     | "exp" ->
       let definitions = Structure.of_structure structure in
       Structure.pp definitions
-    | "effects" -> empty
+    | "effects" ->
+      let definitions = Structure.of_structure structure in
+      let (trees, effects) = Structure.to_trees [] PathName.Map.empty definitions in
+      Structure.Tree.pps trees ^^ newline ^^
+      Effect.Env.pp effects
     | "monadise" -> empty
     | "coq" ->
       (*let definitions = Structure.of_structure structure in

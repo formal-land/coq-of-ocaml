@@ -15,6 +15,7 @@ test: $(OUTPUT)
 
 cmt: $(TESTS_INPUT:.ml=.cmt)
 exp: $(TESTS_INPUT:.ml=.exp)
+effects: $(TESTS_INPUT:.ml=.effects)
 v: $(TESTS_INPUT:.ml=.v)
 vo: $(TESTS_INPUT:.ml=.vo)
 
@@ -23,6 +24,9 @@ vo: $(TESTS_INPUT:.ml=.vo)
 
 %.exp: %.cmt default
 	./$(OUTPUT) -mode exp $< >$@
+
+%.effects: %.cmt default
+	./$(OUTPUT) -mode effects $< >$@
 
 %.v: %.cmt default
 	./$(OUTPUT) -mode coq $< >$@

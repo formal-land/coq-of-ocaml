@@ -1,0 +1,9 @@
+Value
+  (LetFun
+    (Leaf (Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, . -> . -> .)), Leaf (Effect (false, .)),
+            Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)),
+      Effect (false, .)), .)
+[ 'n' : . ]

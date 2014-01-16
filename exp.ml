@@ -138,16 +138,31 @@ module Tree = struct
     | Leaf effect | Compound (_, effect) | Apply (_, _, effect) | Function (_, effect)
       | Let (_, _, effect) | LetFun (_, _, effect) | Match (_, _, effect)
       | Field (_, effect) -> effect
+
+  let rec pp (tree : t) : SmartPrint.t =
+    let aux constructor trees =
+      nest (!^ constructor ^^ Pp.list (
+        List.map pp trees @ [Effect.pp (effect tree)])) in
+    match tree with
+    | Leaf _ -> aux "Leaf" []
+    | Compound (trees, _) -> aux "Compound" trees
+    | Apply (tree1, tree2, _) -> aux "Apply" [tree1; tree2]
+    | Function (tree, _) -> aux "Function" [tree]
+    | Let (tree1, tree2, _) -> aux "Let" [tree1; tree2]
+    | LetFun (tree1, tree2, _) -> aux "LetFun" [tree1; tree2]
+    | Match (tree, trees, _) -> aux "Match" (tree :: trees)
+    | Field (tree, _) -> aux "Field" [tree]
 end
 
-let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t =
+let rec to_tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t)
+  : Tree.t =
   let compound (es : t list) : Tree.t =
-    let trees = List.map (tree path effects) es in
+    let trees = List.map (to_tree path effects) es in
     let effects = List.map Tree.effect trees in
     let have_effect = effects |> List.exists (fun effect ->
       effect.Effect.effect) in
     let have_functional_effect = effects |> List.exists (fun effect ->
-      Effect.Type.is_pure effect.Effect.typ) in
+      not (Effect.Type.is_pure effect.Effect.typ)) in
     if have_functional_effect then
       failwith "Compounds cannot have functional effects."
     else
@@ -161,9 +176,9 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
       failwith (SmartPrint.to_string 80 2 (PathName.pp x ^^ !^ "not found.")))
   | Tuple es | Constructor (_, es) -> compound es
   | Apply (e_f, e_x) ->
-    let tree_f = tree path effects e_f in
-    let tree_x = tree path effects e_x in
+    let tree_f = to_tree path effects e_f in
     let effect_f = Tree.effect tree_f in
+    let tree_x = to_tree path effects e_x in
     let effect_x = Tree.effect tree_x in
     let have_effect =
       effect_f.Effect.effect || effect_x.Effect.effect ||
@@ -172,30 +187,30 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
     Tree.Apply (tree_f, tree_x,
       { Effect.effect = have_effect; typ = effect_typ })
   | Function (x, e) ->
-    let tree_e = tree path (Effect.Env.add (PathName.of_name path x)
+    let tree_e = to_tree path (Effect.Env.add (PathName.of_name path x)
       Effect.Type.Pure effects) e in
     let effect_e = Tree.effect tree_e in
     Tree.Function (tree_e,
       { Effect.effect = false; typ = Effect.Type.Arrow (
         effect_e.Effect.effect, effect_e.Effect.typ) })
   | Let (x, e1, e2) ->
-    let tree1 = tree path effects e1 in
+    let tree1 = to_tree path effects e1 in
     let effect1 = Tree.effect tree1 in
-    let tree2 = tree path (Effect.Env.add (PathName.of_name path x)
+    let tree2 = to_tree path (Effect.Env.add (PathName.of_name path x)
       effect1.Effect.typ effects) e2 in
     let effect2 = Tree.effect tree2 in
     let have_effect = effect1.Effect.effect || effect2.Effect.effect in
     Tree.Let (tree1, tree2,
       { Effect.effect = have_effect; typ = effect2.Effect.typ })
   | LetFun (is_rec, x, _, args, _, e1, e2) ->
-    let (tree1, x_typ) = tree_let_fun path effects is_rec x args e1 in
+    let (tree1, x_typ) = to_tree_let_fun path effects is_rec x args e1 in
     let effects_in_e2 = Effect.Env.add (PathName.of_name path x)
       x_typ effects in
-    let tree2 = tree path effects_in_e2 e2 in
+    let tree2 = to_tree path effects_in_e2 e2 in
     let effect2 = Tree.effect tree2 in
     Tree.LetFun (tree1, tree2, effect2)
   | Match (e, cases) ->
-    let tree_e = tree path effects e in
+    let tree_e = to_tree path effects e in
     let effect_e = Tree.effect tree_e in
     if Effect.Type.is_pure effect_e.Effect.typ then
       let trees = cases |> List.map (fun (p, e) ->
@@ -203,7 +218,7 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
         let effects = Name.Set.fold (fun x effects ->
           PathName.Map.add (PathName.of_name path x) Effect.Type.Pure effects)
           pattern_vars effects in
-        tree path effects e) in
+        to_tree path effects e) in
       let effect = Effect.unify (List.map Tree.effect trees) in
       Tree.Match (tree_e, trees,
         { Effect.effect = effect_e.Effect.effect || effect.Effect.effect;
@@ -212,17 +227,17 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
       failwith "Cannot match a value with functional effects."
   | Record fields -> compound (List.map snd fields)
   | Field (e, _) ->
-    let tree_e = tree path effects e in
-    let effect_e = Tree.effect tree_e in
-    if Effect.Type.is_pure effect_e.Effect.typ then
-      Tree.Field (tree_e, effect_e)
+    let tree = to_tree path effects e in
+    let effect = Tree.effect tree in
+    if Effect.Type.is_pure effect.Effect.typ then
+      Tree.Field (tree, effect)
     else
       failwith "Cannot take a field of a value with functional effects."
   | IfThenElse (e1, e2, e3) ->
-    let tree_e1 = tree path effects e1 in
+    let tree_e1 = to_tree path effects e1 in
     let effect_e1 = Tree.effect tree_e1 in
     if Effect.Type.is_pure effect_e1.Effect.typ then
-      let trees = List.map (tree path effects) [e2; e3] in
+      let trees = List.map (to_tree path effects) [e2; e3] in
       let effect = Effect.unify (List.map Tree.effect trees) in
       Tree.Match (tree_e1, trees,
         { Effect.effect = effect_e1.Effect.effect || effect.Effect.effect;
@@ -232,27 +247,27 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
   | Return _ | Bind _ ->
     failwith "Cannot compute effects on an explicit return or bind."
 
-  and tree_let_fun (path : PathName.Path.t) (effects : Effect.Env.t)
+  and to_tree_let_fun (path : PathName.Path.t) (effects : Effect.Env.t)
     (is_rec : Recursivity.t) (x : Name.t) (args : (Name.t * Type.t) list)
-    (e1 : t) : Tree.t * Effect.Type.t =
-    let effects_in_e1 = Effect.Env.in_function path effects args in
+    (e : t) : Tree.t * Effect.Type.t =
+    let effects_in_e = Effect.Env.in_function path effects args in
     if Recursivity.to_bool is_rec then
-      let rec fix_tree1 x_typ =
-        let effects_in_e1 = Effect.Env.add (PathName.of_name path x)
-          x_typ effects_in_e1 in
-        let tree1 = tree path effects_in_e1 e1 in
-        let effect1 = Tree.effect tree1 in
-        let x_typ' = Effect.function_typ args effect1 in
+      let rec fix_tree x_typ =
+        let effects_in_e = Effect.Env.add (PathName.of_name path x)
+          x_typ effects_in_e in
+        let tree = to_tree path effects_in_e e in
+        let effect = Tree.effect tree in
+        let x_typ' = Effect.function_typ args effect in
         if Effect.Type.eq x_typ x_typ' then
-          (tree1, x_typ)
+          (tree, x_typ)
         else
-          fix_tree1 x_typ' in
-      fix_tree1 Effect.Type.Pure
+          fix_tree x_typ' in
+      fix_tree Effect.Type.Pure
     else
-      let tree1 = tree path effects_in_e1 e1 in
-      let effect1 = Tree.effect tree1 in
-      let x_typ = Effect.function_typ args effect1 in
-      (tree1, x_typ)
+      let tree = to_tree path effects_in_e e in
+      let effect = Tree.effect tree in
+      let x_typ = Effect.function_typ args effect in
+      (tree, x_typ)
 
 (*
 (** Do the monadic transformation of an expression using an effects environment. *)

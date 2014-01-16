@@ -1,0 +1,8 @@
+Value (Leaf (Effect (false, .)), . -> . -> .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, . -> . -> .)), Leaf (Effect (false, .)),
+        Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)), .)
+[ 'f' : . -> . -> .; 'n' : . ]

@@ -1,0 +1,23 @@
+Value
+  (Let
+    (Leaf (Effect (false, .)),
+      Let
+        (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+      Effect (false, .)), .)
+
+Value
+  (LetFun
+    (Apply
+      (Leaf (Effect (false, .)),
+        Function
+          (Function (Leaf (Effect (false, .)), Effect (false, . -> .)),
+            Effect (false, . -> . -> .)), Effect (false, .)),
+      LetFun
+        (Apply
+          (Apply
+            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+              Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+          Apply
+            (Leaf (Effect (false, . -> .)), Leaf (Effect (false, . -> .)),
+              Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+[ 'n1' : .; 'n2' : . ]

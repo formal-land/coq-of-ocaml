@@ -173,28 +173,41 @@ module Tree = struct
     | Value of Exp.Tree.t * Effect.Type.t
     | Module of t list
     | Other
+
+  let rec pps (trees : t list) : SmartPrint.t =
+    let pp (tree : t) : SmartPrint.t =
+      match tree with
+      | Value (tree, typ) -> nest (!^ "Value" ^^ Pp.list [
+        Exp.Tree.pp tree; Effect.Type.pp false typ])
+      | Module trees ->
+        nest (
+          !^ "Module" ^^ newline ^^
+          indent (pps trees) ^^ newline ^^
+          !^ "End")
+      | Other -> !^ "Other" in
+    separate (newline ^^ newline) (List.map pp trees)
 end
 
-let rec tree (path : PathName.Path.t) (effects : Effect.Env.t)
+let rec to_trees (path : PathName.Path.t) (effects : Effect.Env.t)
   (defs : t list) : Tree.t list * Effect.Env.t =
-  let rec tree_one (def : t) (effects : Effect.Env.t) : Tree.t * Effect.Env.t =
+  let rec to_tree (def : t) (effects : Effect.Env.t) : Tree.t * Effect.Env.t =
     match def with
     | Value {
       Value.name = x;
       is_rec = is_rec;
       args = args;
       body = e } ->
-      let (tree_e, x_typ) = Exp.tree_let_fun path effects is_rec x args e in
+      let (tree, x_typ) = Exp.to_tree_let_fun path effects is_rec x args e in
       let effects = Effect.Env.add (PathName.of_name path x) x_typ effects in
-      (Tree.Value (tree_e, x_typ), effects)
+      (Tree.Value (tree, x_typ), effects)
     | Module (name, defs) ->
-      let (trees, effects) = tree (name :: path) effects defs in
+      let (trees, effects) = to_trees (name :: path) effects defs in
       (Tree.Module trees, effects)
     | Inductive _ | Record _ | Open _ -> (Tree.Other, effects) in
   let (trees, effects) =
     List.fold_left (fun (trees, effects) def ->
-      let (tree_def, effects) = tree_one def effects in
-      (tree_def :: trees, effects))
+      let (tree, effects) = to_tree def effects in
+      (tree :: trees, effects))
       ([], effects) defs in
   (List.rev trees, effects)
 
