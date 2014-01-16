@@ -187,26 +187,8 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
     let have_effect = effect1.Effect.effect || effect2.Effect.effect in
     Tree.Let (tree1, tree2,
       { Effect.effect = have_effect; typ = effect2.Effect.typ })
-  | LetFun (is_rec, x, _, args, typ, e1, e2) ->
-    let effects_in_e1 = Effect.Env.in_function path effects args in
-    let (tree1, x_typ) =
-      if Recursivity.to_bool is_rec then
-        let rec fix_tree1 x_typ =
-          let effects_in_e1 = Effect.Env.add (PathName.of_name path x)
-            x_typ effects_in_e1 in
-          let tree1 = tree path effects_in_e1 e1 in
-          let effect1 = Tree.effect tree1 in
-          let x_typ' = Effect.function_typ args effect1 in
-          if Effect.Type.eq x_typ x_typ' then
-            (tree1, x_typ)
-          else
-            fix_tree1 x_typ' in
-        fix_tree1 Effect.Type.Pure
-      else
-        let tree1 = tree path effects_in_e1 e1 in
-        let effect1 = Tree.effect tree1 in
-        let x_typ = Effect.function_typ args effect1 in
-        (tree1, x_typ) in
+  | LetFun (is_rec, x, _, args, _, e1, e2) ->
+    let (tree1, x_typ) = tree_let_fun path effects is_rec x args e1 in
     let effects_in_e2 = Effect.Env.add (PathName.of_name path x)
       x_typ effects in
     let tree2 = tree path effects_in_e2 e2 in
@@ -249,6 +231,28 @@ let rec tree (path : PathName.Path.t) (effects : Effect.Env.t) (e : t) : Tree.t 
       failwith "Cannot do an if on a value with functional effects."
   | Return _ | Bind _ ->
     failwith "Cannot compute effects on an explicit return or bind."
+
+  and tree_let_fun (path : PathName.Path.t) (effects : Effect.Env.t)
+    (is_rec : Recursivity.t) (x : Name.t) (args : (Name.t * Type.t) list)
+    (e1 : t) : Tree.t * Effect.Type.t =
+    let effects_in_e1 = Effect.Env.in_function path effects args in
+    if Recursivity.to_bool is_rec then
+      let rec fix_tree1 x_typ =
+        let effects_in_e1 = Effect.Env.add (PathName.of_name path x)
+          x_typ effects_in_e1 in
+        let tree1 = tree path effects_in_e1 e1 in
+        let effect1 = Tree.effect tree1 in
+        let x_typ' = Effect.function_typ args effect1 in
+        if Effect.Type.eq x_typ x_typ' then
+          (tree1, x_typ)
+        else
+          fix_tree1 x_typ' in
+      fix_tree1 Effect.Type.Pure
+    else
+      let tree1 = tree path effects_in_e1 e1 in
+      let effect1 = Tree.effect tree1 in
+      let x_typ = Effect.function_typ args effect1 in
+      (tree1, x_typ)
 
 (*
 (** Do the monadic transformation of an expression using an effects environment. *)
