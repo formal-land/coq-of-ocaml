@@ -120,9 +120,8 @@ let rec pp (defs : t list) : SmartPrint.t =
     | Open o -> Open.pp o
     | Module (name, defs) ->
       nest (
-        !^ "Module" ^^ Name.pp name ^-^ !^ "." ^^ newline ^^
-        indent (pp defs) ^^ newline ^^
-        !^ "End" ^^ Name.pp name ^-^ !^ ".") in
+        !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+        indent (pp defs)) in
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)

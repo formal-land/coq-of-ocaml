@@ -1,0 +1,195 @@
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Apply
+          (Apply
+            (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+              Effect (false, .)), Compound (Effect (false, .)),
+            Effect (false, .)), Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, .)),
+            Apply
+              (Apply
+                (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+                  Effect (false, .)), Compound (Effect (false, .)),
+                Effect (false, .)), Effect (false, .)),
+          Apply
+            (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+              Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+          Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Apply
+          (Apply
+            (Leaf (Effect (false, .)),
+              Apply
+                (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                  Effect (false, .)), Effect (false, .)),
+            Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, .)),
+            Apply
+              (Apply
+                (Leaf (Effect (false, .)),
+                  Apply
+                    (Apply
+                      (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                        Effect (false, .)), Leaf (Effect (false, .)),
+                      Effect (false, .)), Effect (false, .)),
+                Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)),
+          Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Leaf (Effect (false, .)),
+      Apply
+        (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+      Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Apply
+          (Apply
+            (Leaf (Effect (false, .)),
+              Apply
+                (Apply
+                  (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                    Effect (false, .)), Leaf (Effect (false, .)),
+                  Effect (false, .)), Effect (false, .)),
+            Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)),
+      Leaf (Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Apply
+          (Apply
+            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+              Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+        Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+          Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+      Leaf (Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Leaf (Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, .)),
+            Apply
+              (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                Effect (false, .)), Effect (false, .)),
+          Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+    .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Apply
+          (Leaf (Effect (false, .)),
+            Compound
+              (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                Effect (false, .)), Effect (false, .)), Effect (false, .)),
+      Apply
+        (Leaf (Effect (false, .)),
+          Compound
+            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+              Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Compound
+          (Leaf (Effect (false, .)),
+            Compound
+              (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+                Effect (false, .)), Effect (false, .)), Effect (false, .)),
+      Compound
+        (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+          Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Function
+          (Apply
+            (Apply
+              (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
+            Effect (false, . -> .)), Effect (false, .)),
+      Leaf (Effect (false, .)), Effect (false, .)), .)
+[
+  '' : .;
+  'andb' : .;
+  'app' : .;
+  'append' : .;
+  'apply' : .;
+  'b' : .;
+  'c' : .;
+  'char_of_int' : .;
+  'equiv_decb' : .;
+  'fst' : .;
+  'ignore' : .;
+  'int_of_char' : .;
+  'l' : .;
+  'n1' : .;
+  'n2' : .;
+  'n3' : .;
+  'n4' : .;
+  'n5' : .;
+  'negb' : .;
+  'nequiv_decb' : .;
+  'orb' : .;
+  'p' : .;
+  'reverse_apply' : .;
+  's' : .;
+  'snd' : .;
+  'x' : .;
+  'y' : .;
+  'Z.abs' : .;
+  'Z.add' : .;
+  'Z.div' : .;
+  'Z.land' : .;
+  'Z.lor' : .;
+  'Z.ltb' : .;
+  'Z.lxor' : .;
+  'Z.modulo' : .;
+  'Z.mul' : .;
+  'Z.opp' : .;
+  'Z.pred' : .;
+  'Z.shiftl' : .;
+  'Z.shiftr' : .;
+  'Z.sub' : .;
+  'Z.succ' : .
+]

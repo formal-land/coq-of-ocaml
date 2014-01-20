@@ -64,6 +64,8 @@ module Env = struct
     PathName.Map.bindings effects |> OCaml.list (fun (x, typ) ->
       nest (PathName.pp x ^^ !^ ":" ^^ Type.pp false typ))
 
+  let empty : t = PathName.Map.empty
+
   let add (x : PathName.t) (typ : Type.t) (effects : t) : t =
     PathName.Map.add x typ effects
 

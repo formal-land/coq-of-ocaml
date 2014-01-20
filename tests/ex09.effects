@@ -1,0 +1,63 @@
+Value
+  (LetFun
+    (Match
+      (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+        Compound
+          (Apply
+            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+              Effect (false, .)),
+            Apply
+              (Apply
+                (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                  Effect (false, .)), Leaf (Effect (false, .)),
+                Effect (false, .)), Effect (false, .)), Effect (false, .)),
+      Apply
+        (Apply
+          (Leaf (Effect (false, .)),
+            Function
+              (Apply
+                (Apply
+                  (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+                    Effect (false, .)), Leaf (Effect (false, .)),
+                  Effect (false, .)), Effect (false, . -> .)), Effect (false, .)),
+          Compound
+            (Leaf (Effect (false, .)),
+              Compound
+                (Leaf (Effect (false, .)),
+                  Compound
+                    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+                      Effect (false, .)), Effect (false, .)), Effect (false, .)),
+          Effect (false, .)), Effect (false, .)), .)
+[
+  '' : .;
+  'andb' : .;
+  'app' : .;
+  'append' : .;
+  'apply' : .;
+  'char_of_int' : .;
+  'equiv_decb' : .;
+  'fst' : .;
+  'ignore' : .;
+  'int_of_char' : .;
+  'l' : .;
+  'negb' : .;
+  'nequiv_decb' : .;
+  'orb' : .;
+  'reverse_apply' : .;
+  'snd' : .;
+  'Z.abs' : .;
+  'Z.add' : .;
+  'Z.div' : .;
+  'Z.land' : .;
+  'Z.lor' : .;
+  'Z.ltb' : .;
+  'Z.lxor' : .;
+  'Z.modulo' : .;
+  'Z.mul' : .;
+  'Z.opp' : .;
+  'Z.pred' : .;
+  'Z.shiftl' : .;
+  'Z.shiftr' : .;
+  'Z.sub' : .;
+  'Z.succ' : .
+]

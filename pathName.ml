@@ -23,7 +23,8 @@ let convert (p : t) : t =
   | { path = []; base = "int" } -> { path = []; base = "Z" }
   | { path = []; base = "char" } -> { path = []; base = "ascii" }
   | { path = []; base = "::" } -> { path = []; base = "cons" }
-  | { path = ["Pervasives"]; base = x } -> (match x with
+  | { path = ["Pervasives"]; base = x } ->
+    (match x with
     | "=" -> { path = []; base = "equiv_decb" }
     | "<>" -> { path = []; base = "nequiv_decb" }
     | "<" -> { path = ["Z"]; base = "ltb" }

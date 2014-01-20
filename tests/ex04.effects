@@ -28,4 +28,43 @@ Value (Compound (Leaf (Effect (false, .)), Effect (false, .)), .)
 Value (Leaf (Effect (false, .)), .)
 
 Value (Leaf (Effect (false, .)), .)
-[ 'c' : .; 'l1' : .; 'l2' : .; 'l3' : .; 'o1' : .; 'o2' : .; 's' : .; 'u' : . ]
+[
+  '' : .;
+  'andb' : .;
+  'app' : .;
+  'append' : .;
+  'apply' : .;
+  'c' : .;
+  'char_of_int' : .;
+  'equiv_decb' : .;
+  'fst' : .;
+  'ignore' : .;
+  'int_of_char' : .;
+  'l1' : .;
+  'l2' : .;
+  'l3' : .;
+  'negb' : .;
+  'nequiv_decb' : .;
+  'o1' : .;
+  'o2' : .;
+  'orb' : .;
+  'reverse_apply' : .;
+  's' : .;
+  'snd' : .;
+  'u' : .;
+  'Z.abs' : .;
+  'Z.add' : .;
+  'Z.div' : .;
+  'Z.land' : .;
+  'Z.lor' : .;
+  'Z.ltb' : .;
+  'Z.lxor' : .;
+  'Z.modulo' : .;
+  'Z.mul' : .;
+  'Z.opp' : .;
+  'Z.pred' : .;
+  'Z.shiftl' : .;
+  'Z.shiftr' : .;
+  'Z.sub' : .;
+  'Z.succ' : .
+]

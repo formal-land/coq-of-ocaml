@@ -1,7 +1,6 @@
-Module 'SizedString'.
+Module 'SizedString':
   Record 't':
     ([ ('name', Type ('string')); ('size', Type ('Z')) ])
-End 'SizedString'.
 
 Value 'r':
   (non_rec, [ ], [ ], Type ('SizedString.t'),
@@ -32,7 +31,7 @@ Value 'b':
 Value 'b'':
   (non_rec, [ ], [ ], Type ('bool'), Apply ('f', 'r''))
 
-Module 'Point'.
+Module 'Point':
   Record 't':
     ([ ('x', Type ('Z')); ('y', Type ('Z')); ('z', Type ('Z')) ])
   
@@ -48,4 +47,3 @@ Module 'Point'.
             (Record (('x', Int(5)), ('z', Int(1))), Constructor ('true'));
             (Any, Constructor ('false'))
           ]))
-End 'Point'.

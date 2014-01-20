@@ -1,4 +1,4 @@
-Module 'List2'.
+Module 'List2':
   Inductive 't':
     ([ 'a' ], [ ('Nil', [ ]); ('Cons', [ 'a'; Type ('t', 'a') ]) ])
   
@@ -37,11 +37,9 @@ Module 'List2'.
               Constructor ('Cons', 'x', Apply ('of_list', 'xs')))
           ]))
   
-  Module 'Inside'.
+  Module 'Inside':
     Value 'x':
       (non_rec, [ ], [ ], Type ('Z'), Int(12))
-  End 'Inside'.
-End 'List2'.
 
 Value 'n':
   (non_rec, [ ], [ ], Type ('Z'),

@@ -1,34 +1,37 @@
 (** The initially opened module. *)
-open Structure
+open Effect.Type
 
-module Helpers = struct
-  let from_simple_form (name : string) (free_type_vars : string list)
-    (args : (string * Type.t) list) (body : Exp.t * Type.t) (is_rec : bool)
-    : Structure.t =
-    Value {
-      Value.name = Name.of_string name;
-      free_type_vars = List.map Name.of_string free_type_vars;
-      args = args |> List.map (fun (x, t) -> (Name.of_string x, t));
-      body = body;
-      is_rec = Recursivity.New is_rec }
-  
-  let ev (x : string) : Exp.t =
-    Exp.Variable (PathName.of_name [] @@ Name.of_string x)
-
-  let app (f : string) (xs : string list) : Exp.t =
-    Exp.Apply (ev f, List.map ev xs)
-
-  let tv (x : string) : Type.t =
-    Type.Variable (Name.of_string x)
-end
-
-open Helpers
-
-let pervasives : Structure.t =
-  Module (Name.of_string "Pervasives", [
-    from_simple_form "not" [] [("b", tv "bool")]
-      (app "negb" ["b"], tv "bool") false;
-    from_simple_form "&&" [] [("b1", tv "bool"); ("b2", tv "bool")]
-      (app "andb" ["b1"; "b2"], tv "bool") false;
-    from_simple_form "||" [] [("b1", tv "bool"); ("b2", tv "bool")]
-      (app "orb" ["b1"; "b2"], tv "bool") false])
+let effects : Effect.Env.t =
+  List.fold_left (fun effects (path, x, typ) ->
+    Effect.Env.add (PathName.of_name path x) typ effects)
+    Effect.Env.empty
+    [ [], "equiv_decb", Pure;
+      [], "nequiv_decb", Pure;
+      ["Z"], "ltb", Pure;
+      [], "negb", Pure;
+      [], "andb", Pure;
+      [], "orb", Pure;
+      [], "reverse_apply", Pure;
+      [], "apply", Pure;
+      ["Z"], "opp", Pure;
+      [], "", Pure;
+      ["Z"], "succ", Pure;
+      ["Z"], "pred", Pure;
+      ["Z"], "add", Pure;
+      ["Z"], "sub", Pure;
+      ["Z"], "mul", Pure;
+      ["Z"], "div", Pure;
+      ["Z"], "modulo", Pure;
+      ["Z"], "abs", Pure;
+      ["Z"], "land", Pure;
+      ["Z"], "lor", Pure;
+      ["Z"], "lxor", Pure;
+      ["Z"], "shiftl", Pure;
+      ["Z"], "shiftr", Pure;
+      [], "append", Pure;
+      [], "int_of_char", Pure;
+      [], "char_of_int", Pure;
+      [], "ignore", Pure;
+      [], "fst", Pure;
+      [], "snd", Pure;
+      [], "app", Pure ]
