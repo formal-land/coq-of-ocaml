@@ -177,12 +177,11 @@ module Tree = struct
     let pp (tree : t) : SmartPrint.t =
       match tree with
       | Value (tree, typ) -> nest (!^ "Value" ^^ Pp.list [
-        Exp.Tree.pp tree; Effect.Type.pp false typ])
+        Effect.Type.pp false typ; Exp.Tree.pp tree])
       | Module trees ->
         nest (
           !^ "Module" ^^ newline ^^
-          indent (pps trees) ^^ newline ^^
-          !^ "End")
+          indent (pps trees))
       | Other -> !^ "Other" in
     separate (newline ^^ newline) (List.map pp trees)
 end

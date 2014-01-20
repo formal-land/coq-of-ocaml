@@ -34,4 +34,5 @@ let effects : Effect.Env.t =
       [], "ignore", Pure;
       [], "fst", Pure;
       [], "snd", Pure;
-      [], "app", Pure ]
+      [], "app", Pure;
+      ["TODO"], "failwith", Arrow (true, Pure) ]

@@ -1,5 +1,11 @@
-Value 'n':
-  (non_rec, [ ], [ ], Type ('Z'),
-    LetFun
-      (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'A'); ('y', 'B') ], 'x',
-        Apply (Apply ('f', Int(12)), Int(3))))
+Value 'head':
+  (non_rec, [ 'A' ], [ ('l', Type ('list', 'A')) ], 'A',
+    Match
+      ('l',
+        [
+          (Constructor ('cons', 'x', Any), 'x');
+          (Constructor ('[]'),
+            Apply
+              ('TODO.failwith',
+                String("Cannot take the head of an empty list.")))
+        ]))

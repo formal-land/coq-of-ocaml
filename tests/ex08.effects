@@ -1,49 +1,55 @@
 Other
 
 Value
-  (Compound
-    (Compound (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
-    .)
+  (.,
+    Compound
+      (Effect (false, .), Compound (Effect (false, .)), Leaf (Effect (false, .))))
 
 Value
-  (Match
-    (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-      Compound (Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Match
+      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+        Compound (Effect (false, .))))
 
 Other
 
 Value
-  (Match
-    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
-      Compound
-        (Leaf (Effect (false, .)),
-          Apply
-            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-              Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Match
+      (Effect (false, .), Leaf (Effect (false, .)),
+        Compound (Effect (false, .)),
+        Compound
+          (Effect (false, .), Leaf (Effect (false, .)),
+            Apply
+              (Effect (false, .), Leaf (Effect (false, .)),
+                Leaf (Effect (false, .))))))
 
 Value
-  (Match
-    (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-      Apply
-        (Apply
-          (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
-          Apply
-            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-              Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Match
+      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+        Apply
+          (Effect (false, .),
+            Apply
+              (Effect (false, .), Leaf (Effect (false, .)),
+                Leaf (Effect (false, .))),
+            Apply
+              (Effect (false, .), Leaf (Effect (false, .)),
+                Leaf (Effect (false, .))))))
 
 Value
-  (Apply
-    (Leaf (Effect (false, .)),
-      Apply
-        (Leaf (Effect (false, .)),
-          Compound
-            (Leaf (Effect (false, .)),
-              Compound
-                (Leaf (Effect (false, .)),
-                  Compound
-                    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
-                      Effect (false, .)), Effect (false, .)), Effect (false, .)),
-          Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Apply
+      (Effect (false, .), Leaf (Effect (false, .)),
+        Apply
+          (Effect (false, .), Leaf (Effect (false, .)),
+            Compound
+              (Effect (false, .), Leaf (Effect (false, .)),
+                Compound
+                  (Effect (false, .), Leaf (Effect (false, .)),
+                    Compound
+                      (Effect (false, .), Leaf (Effect (false, .)),
+                        Compound (Effect (false, .))))))))
 [
   '' : .;
   'andb' : .;
@@ -65,6 +71,7 @@ Value
   's' : .;
   'snd' : .;
   'sum' : .;
+  'TODO.failwith' : . -e-> .;
   'Z.abs' : .;
   'Z.add' : .;
   'Z.div' : .;

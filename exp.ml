@@ -142,7 +142,7 @@ module Tree = struct
   let rec pp (tree : t) : SmartPrint.t =
     let aux constructor trees =
       nest (!^ constructor ^^ Pp.list (
-        List.map pp trees @ [Effect.pp (effect tree)])) in
+        Effect.pp (effect tree) :: List.map pp trees)) in
     match tree with
     | Leaf _ -> aux "Leaf" []
     | Compound (trees, _) -> aux "Compound" trees

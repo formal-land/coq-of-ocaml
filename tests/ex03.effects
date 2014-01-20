@@ -1,25 +1,29 @@
 Value
-  (Let
-    (Leaf (Effect (false, .)),
-      Let
-        (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
-      Effect (false, .)), .)
+  (.,
+    Let
+      (Effect (false, .), Leaf (Effect (false, .)),
+        Let
+          (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)))))
 
 Value
-  (LetFun
-    (Apply
-      (Leaf (Effect (false, .)),
-        Function
-          (Function (Leaf (Effect (false, .)), Effect (false, . -> .)),
-            Effect (false, . -> . -> .)), Effect (false, .)),
-      LetFun
-        (Apply
-          (Apply
-            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-              Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)),
-          Apply
-            (Leaf (Effect (false, . -> .)), Leaf (Effect (false, . -> .)),
-              Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+  (.,
+    LetFun
+      (Effect (false, .),
+        Apply
+          (Effect (false, .), Leaf (Effect (false, .)),
+            Function
+              (Effect (false, . -> . -> .),
+                Function (Effect (false, . -> .), Leaf (Effect (false, .))))),
+        LetFun
+          (Effect (false, .),
+            Apply
+              (Effect (false, .),
+                Apply
+                  (Effect (false, .), Leaf (Effect (false, .)),
+                    Leaf (Effect (false, .))), Leaf (Effect (false, .))),
+            Apply
+              (Effect (false, .), Leaf (Effect (false, . -> .)),
+                Leaf (Effect (false, . -> .))))))
 [
   '' : .;
   'andb' : .;
@@ -38,6 +42,7 @@ Value
   'orb' : .;
   'reverse_apply' : .;
   'snd' : .;
+  'TODO.failwith' : . -e-> .;
   'Z.abs' : .;
   'Z.add' : .;
   'Z.div' : .;

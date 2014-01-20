@@ -1,10 +1,12 @@
-Value (Leaf (Effect (false, .)), . -> . -> .)
+Value (. -> . -> ., Leaf (Effect (false, .)))
 
 Value
-  (Apply
-    (Apply
-      (Leaf (Effect (false, . -> . -> .)), Leaf (Effect (false, .)),
-        Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Apply
+      (Effect (false, .),
+        Apply
+          (Effect (false, . -> .), Leaf (Effect (false, . -> . -> .)),
+            Leaf (Effect (false, .))), Leaf (Effect (false, .))))
 [
   '' : .;
   'andb' : .;
@@ -23,6 +25,7 @@ Value
   'orb' : .;
   'reverse_apply' : .;
   'snd' : .;
+  'TODO.failwith' : . -e-> .;
   'Z.abs' : .;
   'Z.add' : .;
   'Z.div' : .;

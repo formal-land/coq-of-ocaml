@@ -1,33 +1,33 @@
-Value (Compound (Effect (false, .)), .)
+Value (., Compound (Effect (false, .)))
 
-Value (Compound (Effect (false, .)), .)
-
-Value
-  (Compound
-    (Leaf (Effect (false, .)), Compound (Effect (false, .)), Effect (false, .)),
-    .)
+Value (., Compound (Effect (false, .)))
 
 Value
-  (Compound
-    (Leaf (Effect (false, .)),
-      Compound
-        (Leaf (Effect (false, .)),
-          Compound
-            (Leaf (Effect (false, .)),
-              Compound
-                (Leaf (Effect (false, .)),
-                  Compound
-                    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
-                      Effect (false, .)), Effect (false, .)), Effect (false, .)),
-          Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Compound
+      (Effect (false, .), Leaf (Effect (false, .)), Compound (Effect (false, .))))
 
-Value (Compound (Effect (false, .)), .)
+Value
+  (.,
+    Compound
+      (Effect (false, .), Leaf (Effect (false, .)),
+        Compound
+          (Effect (false, .), Leaf (Effect (false, .)),
+            Compound
+              (Effect (false, .), Leaf (Effect (false, .)),
+                Compound
+                  (Effect (false, .), Leaf (Effect (false, .)),
+                    Compound
+                      (Effect (false, .), Leaf (Effect (false, .)),
+                        Compound (Effect (false, .))))))))
 
-Value (Compound (Leaf (Effect (false, .)), Effect (false, .)), .)
+Value (., Compound (Effect (false, .)))
 
-Value (Leaf (Effect (false, .)), .)
+Value (., Compound (Effect (false, .), Leaf (Effect (false, .))))
 
-Value (Leaf (Effect (false, .)), .)
+Value (., Leaf (Effect (false, .)))
+
+Value (., Leaf (Effect (false, .)))
 [
   '' : .;
   'andb' : .;
@@ -52,6 +52,7 @@ Value (Leaf (Effect (false, .)), .)
   's' : .;
   'snd' : .;
   'u' : .;
+  'TODO.failwith' : . -e-> .;
   'Z.abs' : .;
   'Z.add' : .;
   'Z.div' : .;

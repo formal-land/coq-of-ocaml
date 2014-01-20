@@ -63,6 +63,7 @@ let convert (p : t) : t =
     | "fst" -> { path = []; base = "fst" }
     | "snd" -> { path = []; base = "snd" }
     | "@" -> { path = []; base = "app" }
+    | "failwith" -> { path = ["TODO"]; base = "failwith" }
     | _ -> p)
   | _ -> p
 

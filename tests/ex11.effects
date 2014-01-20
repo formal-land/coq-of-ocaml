@@ -1,50 +1,57 @@
 Module
   Other
-End
 
 Value
-  (Compound
-    (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Compound
+      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .))))
 
 Value
-  (Compound
-    (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Compound
+      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .))))
 
 Value
-  (Apply
-    (Apply
-      (Leaf (Effect (false, .)),
-        Field (Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)),
-      Field (Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+  (.,
+    Apply
+      (Effect (false, .),
+        Apply
+          (Effect (false, .), Leaf (Effect (false, .)),
+            Field (Effect (false, .), Leaf (Effect (false, .)))),
+        Field (Effect (false, .), Leaf (Effect (false, .)))))
 
 Value
-  (Match
-    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
-      Compound (Effect (false, .)), Effect (false, .)), . -> .)
+  (. -> .,
+    Match
+      (Effect (false, .), Leaf (Effect (false, .)),
+        Compound (Effect (false, .)), Compound (Effect (false, .))))
 
 Value
-  (Apply
-    (Leaf (Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)),
-    .)
+  (.,
+    Apply
+      (Effect (false, .), Leaf (Effect (false, . -> .)),
+        Leaf (Effect (false, .))))
 
 Value
-  (Apply
-    (Leaf (Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)),
-    .)
+  (.,
+    Apply
+      (Effect (false, .), Leaf (Effect (false, . -> .)),
+        Leaf (Effect (false, .))))
 
 Module
   Other
   
   Value
-    (Compound
-      (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-        Leaf (Effect (false, .)), Effect (false, .)), .)
+    (.,
+      Compound
+        (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+          Leaf (Effect (false, .))))
   
   Value
-    (Match
-      (Leaf (Effect (false, .)), Compound (Effect (false, .)),
-        Compound (Effect (false, .)), Effect (false, .)), .)
-End
+    (.,
+      Match
+        (Effect (false, .), Leaf (Effect (false, .)),
+          Compound (Effect (false, .)), Compound (Effect (false, .))))
 [
   '' : .;
   'andb' : .;
@@ -69,6 +76,7 @@ End
   'snd' : .;
   'Point.b' : .;
   'Point.p' : .;
+  'TODO.failwith' : . -e-> .;
   'Z.abs' : .;
   'Z.add' : .;
   'Z.div' : .;

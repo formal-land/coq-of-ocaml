@@ -1,11 +1,10 @@
 Value
-  (LetFun
-    (Leaf (Effect (false, .)),
-      Apply
-        (Apply
-          (Leaf (Effect (false, . -> . -> .)), Leaf (Effect (false, .)),
-            Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)),
-      Effect (false, .)), .)
+  (. -e-> .,
+    Match
+      (Effect (true, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+        Apply
+          (Effect (true, .), Leaf (Effect (false, . -e-> .)),
+            Leaf (Effect (false, .)))))
 [
   '' : .;
   'andb' : .;
@@ -15,14 +14,15 @@ Value
   'char_of_int' : .;
   'equiv_decb' : .;
   'fst' : .;
+  'head' : . -e-> .;
   'ignore' : .;
   'int_of_char' : .;
-  'n' : .;
   'negb' : .;
   'nequiv_decb' : .;
   'orb' : .;
   'reverse_apply' : .;
   'snd' : .;
+  'TODO.failwith' : . -e-> .;
   'Z.abs' : .;
   'Z.add' : .;
   'Z.div' : .;

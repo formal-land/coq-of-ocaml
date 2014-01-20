@@ -1,33 +1,38 @@
 Value
-  (LetFun
-    (Match
-      (Leaf (Effect (false, .)), Compound (Effect (false, .)),
-        Compound
-          (Apply
-            (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-              Effect (false, .)),
+  (.,
+    LetFun
+      (Effect (false, .),
+        Match
+          (Effect (false, .), Leaf (Effect (false, .)),
+            Compound (Effect (false, .)),
+            Compound
+              (Effect (false, .),
+                Apply
+                  (Effect (false, .), Leaf (Effect (false, .)),
+                    Leaf (Effect (false, .))),
+                Apply
+                  (Effect (false, .),
+                    Apply
+                      (Effect (false, .), Leaf (Effect (false, .)),
+                        Leaf (Effect (false, .))), Leaf (Effect (false, .))))),
+        Apply
+          (Effect (false, .),
             Apply
-              (Apply
-                (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-                  Effect (false, .)), Leaf (Effect (false, .)),
-                Effect (false, .)), Effect (false, .)), Effect (false, .)),
-      Apply
-        (Apply
-          (Leaf (Effect (false, .)),
-            Function
-              (Apply
-                (Apply
-                  (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-                    Effect (false, .)), Leaf (Effect (false, .)),
-                  Effect (false, .)), Effect (false, . -> .)), Effect (false, .)),
-          Compound
-            (Leaf (Effect (false, .)),
-              Compound
-                (Leaf (Effect (false, .)),
-                  Compound
-                    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
-                      Effect (false, .)), Effect (false, .)), Effect (false, .)),
-          Effect (false, .)), Effect (false, .)), .)
+              (Effect (false, .), Leaf (Effect (false, .)),
+                Function
+                  (Effect (false, . -> .),
+                    Apply
+                      (Effect (false, .),
+                        Apply
+                          (Effect (false, .), Leaf (Effect (false, .)),
+                            Leaf (Effect (false, .))), Leaf (Effect (false, .))))),
+            Compound
+              (Effect (false, .), Leaf (Effect (false, .)),
+                Compound
+                  (Effect (false, .), Leaf (Effect (false, .)),
+                    Compound
+                      (Effect (false, .), Leaf (Effect (false, .)),
+                        Compound (Effect (false, .))))))))
 [
   '' : .;
   'andb' : .;
@@ -45,6 +50,7 @@ Value
   'orb' : .;
   'reverse_apply' : .;
   'snd' : .;
+  'TODO.failwith' : . -e-> .;
   'Z.abs' : .;
   'Z.add' : .;
   'Z.div' : .;
