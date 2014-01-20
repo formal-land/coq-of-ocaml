@@ -187,7 +187,7 @@ module Tree = struct
     separate (newline ^^ newline) (List.map pp trees)
 end
 
-let rec to_trees (path : PathName.Path.t) (effects : Effect.Env.t)
+let rec to_trees (effects : Effect.Env.t)
   (defs : t list) : Tree.t list * Effect.Env.t =
   let rec to_tree (def : t) (effects : Effect.Env.t) : Tree.t * Effect.Env.t =
     match def with
@@ -196,12 +196,12 @@ let rec to_trees (path : PathName.Path.t) (effects : Effect.Env.t)
       is_rec = is_rec;
       args = args;
       body = e } ->
-      let (tree, x_typ) = Exp.to_tree_let_fun path effects is_rec x args e in
-      let effects = Effect.Env.add (PathName.of_name path x) x_typ effects in
+      let (tree, x_typ) = Exp.to_tree_let_fun effects is_rec x args e in
+      let effects = Effect.Env.add (PathName.of_name [] x) x_typ effects in
       (Tree.Value (tree, x_typ), effects)
     | Module (name, defs) ->
-      let (trees, effects) = to_trees (name :: path) effects defs in
-      (Tree.Module trees, effects)
+      let (trees, effects) = to_trees (Effect.Env.open_module effects) defs in
+      (Tree.Module trees, Effect.Env.close_module effects name)
     | Inductive _ | Record _ | Open _ -> (Tree.Other, effects) in
   let (trees, effects) =
     List.fold_left (fun (trees, effects) def ->

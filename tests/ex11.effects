@@ -1,0 +1,87 @@
+Module
+  Other
+End
+
+Value
+  (Compound
+    (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Compound
+    (Leaf (Effect (false, .)), Leaf (Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Apply
+    (Apply
+      (Leaf (Effect (false, .)),
+        Field (Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)),
+      Field (Leaf (Effect (false, .)), Effect (false, .)), Effect (false, .)), .)
+
+Value
+  (Match
+    (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+      Compound (Effect (false, .)), Effect (false, .)), . -> .)
+
+Value
+  (Apply
+    (Leaf (Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)),
+    .)
+
+Value
+  (Apply
+    (Leaf (Effect (false, . -> .)), Leaf (Effect (false, .)), Effect (false, .)),
+    .)
+
+Module
+  Other
+  
+  Value
+    (Compound
+      (Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+        Leaf (Effect (false, .)), Effect (false, .)), .)
+  
+  Value
+    (Match
+      (Leaf (Effect (false, .)), Compound (Effect (false, .)),
+        Compound (Effect (false, .)), Effect (false, .)), .)
+End
+[
+  '' : .;
+  'andb' : .;
+  'app' : .;
+  'append' : .;
+  'apply' : .;
+  'b' : .;
+  'b'' : .;
+  'char_of_int' : .;
+  'equiv_decb' : .;
+  'f' : . -> .;
+  'fst' : .;
+  'ignore' : .;
+  'int_of_char' : .;
+  'negb' : .;
+  'nequiv_decb' : .;
+  'orb' : .;
+  'r' : .;
+  'r'' : .;
+  'reverse_apply' : .;
+  's' : .;
+  'snd' : .;
+  'Point.b' : .;
+  'Point.p' : .;
+  'Z.abs' : .;
+  'Z.add' : .;
+  'Z.div' : .;
+  'Z.land' : .;
+  'Z.lor' : .;
+  'Z.ltb' : .;
+  'Z.lxor' : .;
+  'Z.modulo' : .;
+  'Z.mul' : .;
+  'Z.opp' : .;
+  'Z.pred' : .;
+  'Z.shiftl' : .;
+  'Z.shiftr' : .;
+  'Z.sub' : .;
+  'Z.succ' : .
+]
