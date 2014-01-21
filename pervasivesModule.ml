@@ -35,4 +35,17 @@ let effects : Effect.Env.t =
       [], "fst", Pure;
       [], "snd", Pure;
       [], "app", Pure;
-      ["TODO"], "failwith", Arrow (true, Pure) ]
+      [], "invalid_arg", Arrow (true, Pure);
+      [], "failwith", Arrow (true, Pure);
+      [], "print_char", Arrow (true, Pure);
+      [], "print_string", Arrow (true, Pure);
+      [], "print_int", Arrow (true, Pure);
+      [], "print_endline", Arrow (true, Pure);
+      [], "print_newline", Arrow (true, Pure);
+      [], "prerr_char", Arrow (true, Pure);
+      [], "prerr_string", Arrow (true, Pure);
+      [], "prerr_int", Arrow (true, Pure);
+      [], "prerr_endline", Arrow (true, Pure);
+      [], "prerr_newline", Arrow (true, Pure);
+      [], "read_line", Arrow (true, Pure);
+      [], "read_int", Arrow (true, Pure) ]

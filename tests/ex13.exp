@@ -6,6 +6,6 @@ Value 'head':
           (Constructor ('cons', 'x', Any), 'x');
           (Constructor ('[]'),
             Apply
-              ('TODO.failwith',
+              ('failwith',
                 String("Cannot take the head of an empty list.")))
         ]))

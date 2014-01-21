@@ -63,7 +63,20 @@ let convert (p : t) : t =
     | "fst" -> { path = []; base = "fst" }
     | "snd" -> { path = []; base = "snd" }
     | "@" -> { path = []; base = "app" }
-    | "failwith" -> { path = ["TODO"]; base = "failwith" }
+    | "invalid_arg" -> { path = []; base = "invalid_arg" }
+    | "failwith" -> { path = []; base = "failwith" }
+    | "print_char" -> { path = []; base = "print_char" }
+    | "print_string" -> { path = []; base = "print_string" }
+    | "print_int" -> { path = []; base = "print_int" }
+    | "print_endline" -> { path = []; base = "print_endline" }
+    | "print_newline" -> { path = []; base = "print_newline" }
+    | "prerr_char" -> { path = []; base = "prerr_char" }
+    | "prerr_string" -> { path = []; base = "prerr_string" }
+    | "prerr_int" -> { path = []; base = "prerr_int" }
+    | "prerr_endline" -> { path = []; base = "prerr_endline" }
+    | "prerr_newline" -> { path = []; base = "prerr_newline" }
+    | "read_line" -> { path = []; base = "read_line" }
+    | "read_int" -> { path = []; base = "read_int" }
     | _ -> p)
   | _ -> p
 

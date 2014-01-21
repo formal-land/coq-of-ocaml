@@ -9,9 +9,8 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
       Structure.pp definitions
     | "effects" ->
       let definitions = Structure.of_structure structure in
-      let (trees, effects) = Structure.to_trees PervasivesModule.effects definitions in
-      Structure.Tree.pps trees ^^ newline ^^
-      Effect.Env.pp effects
+      let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
+      Structure.Tree.pps trees
     | "monadise" -> empty
     | "coq" ->
       (*let definitions = Structure.of_structure structure in
