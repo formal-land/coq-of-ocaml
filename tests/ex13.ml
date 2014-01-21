@@ -8,7 +8,7 @@ let tail l =
 let rec print_list = function
   | [] -> ()
   | x :: xs ->
-    let forget = print_int x in
+    print_int x;
     print_list xs
 
 let f = print_list

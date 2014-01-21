@@ -10,7 +10,7 @@ Value
   (. -e-> .,
     Match
       (Effect (true, .), Leaf (Effect (false, .)), Compound (Effect (false, .)),
-        Let
+        Sequence
           (Effect (true, .),
             Apply
               (Effect (true, .), Leaf (Effect (false, . -e-> .)),

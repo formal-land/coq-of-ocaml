@@ -17,9 +17,8 @@ Value 'print_list':
         [
           (Constructor ('[]'), Constructor ('tt'));
           (Constructor ('cons', 'x', 'xs'),
-            Let
-              ('forget', Apply ('print_int', 'x'),
-                Apply ('print_list', 'xs')))
+            Sequence
+              (Apply ('print_int', 'x'), Apply ('print_list', 'xs')))
         ]))
 
 Value 'f':

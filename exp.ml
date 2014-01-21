@@ -21,6 +21,7 @@ type t =
   | Record of (PathName.t * t) list (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
+  | Sequence of t * t (** A sequence of two expressions. *)
   | Return of t (** Monadic return. *)
   | Bind of t * Name.t * t (** Monadic bind. *)
 
@@ -51,6 +52,7 @@ let rec pp (e : t) : SmartPrint.t =
   | Field (e, x) -> nest (!^ "Field" ^^ Pp.list [pp e; PathName.pp x])
   | IfThenElse (e1, e2, e3) ->
     nest (!^ "IfThenElse" ^^ Pp.list [pp e1; pp e2; pp e3])
+  | Sequence (e1, e2) -> nest (!^ "Sequence" ^^ Pp.list [pp e1; pp e2])
   | Return e -> nest (!^ "IfThenElse" ^^ Pp.list [pp e])
   | Bind (e1, x, e2) ->
     nest (!^ "Bind" ^^ Pp.list [pp e1; Name.pp x; pp e2])
@@ -101,7 +103,8 @@ let rec of_expression (e : expression) : t =
       | None -> Constructor ({ PathName.path = []; base = "tt" }, [])
       | Some e3 -> of_expression e3 in
     IfThenElse (of_expression e1, of_expression e2, e3)
-  | Texp_try _ | Texp_setfield _ | Texp_array _ | Texp_sequence _
+  | Texp_sequence (e1, e2) -> Sequence (of_expression e1, of_expression e2)
+  | Texp_try _ | Texp_setfield _ | Texp_array _
     | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
@@ -132,12 +135,14 @@ module Tree = struct
     | LetFun of t * t * Effect.t
     | Match of t * t list * Effect.t
     | Field of t * Effect.t
+    | Sequence of t * t * Effect.t
 
   let effect (tree : t) : Effect.t =
     match tree with
     | Leaf effect | Compound (_, effect) | Apply (_, _, effect)
       | Function (_, effect) | Let (_, _, effect) | LetFun (_, _, effect)
-      | Match (_, _, effect) | Field (_, effect) -> effect
+      | Match (_, _, effect) | Field (_, effect)
+      | Sequence (_, _, effect) -> effect
 
   let rec pp (tree : t) : SmartPrint.t =
     let aux constructor trees =
@@ -152,6 +157,7 @@ module Tree = struct
     | LetFun (tree1, tree2, _) -> aux "LetFun" [tree1; tree2]
     | Match (tree, trees, _) -> aux "Match" (tree :: trees)
     | Field (tree, _) -> aux "Field" [tree]
+    | Sequence (tree1, tree2, _) -> aux "Sequence" [tree1; tree2]
 end
 
 let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
@@ -245,6 +251,14 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
           typ = effect.Effect.typ })
     else
       failwith "Cannot do an if on a value with functional effects."
+  | Sequence (e1, e2) ->
+    let tree_e1 = to_tree effects e1 in
+    let effect_e1 = Tree.effect tree_e1 in
+    let tree_e2 = to_tree effects e2 in
+    let effect_e2 = Tree.effect tree_e2 in
+    Tree.Sequence (tree_e1, tree_e2,
+      { Effect.effect = effect_e1.Effect.effect || effect_e2.Effect.effect;
+        typ = effect_e2.Effect.typ })
   | Return _ | Bind _ ->
     failwith "Cannot compute effects on an explicit return or bind."
 
@@ -453,6 +467,7 @@ let simplify (e : t) : t =
     | Record fields -> Record (fields |> List.map (fun (x, e) -> (x, aux env e)))
     | Field (e, x) -> Field (aux env e, x)
     | IfThenElse (e1, e2, e3) -> IfThenElse (aux env e1, aux env e2, aux env e3)
+    | Sequence (e1, e2) -> Sequence (aux env e1, aux env e2)
     | Return e -> Return (aux env e)
     | Bind (e1, x, e2) -> Bind (aux env e1, x, aux (rm x) e2) in
   aux Name.Map.empty e
@@ -506,6 +521,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
+  | Sequence (e1, e2) ->
+    nest (to_coq true e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
   | Return e -> to_coq paren (Apply (Variable (PathName.of_name [] "ret"), e))
   | Bind (e1, x, e2) ->
     Pp.parens paren @@ nest (
