@@ -110,19 +110,33 @@ let of_path (p : Path'.t) : t =
   let p = aux p in
   convert { path = List.rev p.path; base = p.base }
 
-let fresh (prefix : string) (v : 'a) (env : 'a Map.t) : Name.t * 'a Map.t =
-  let prefix_n s n =
-    if n = 0 then
-      Name.of_string s
-    else
-      Name.of_string @@ Printf.sprintf "%s_%d" s n in
-  let rec first_n (n : int) : int =
-    if Map.mem (of_name [] @@ prefix_n prefix n) env then
-      first_n (n + 1)
-    else
-      n in
-  let x = prefix_n prefix (first_n 0) in
-  (x, Map.add (of_name [] x) v env)
+module Env = struct
+  type t = Set.t list
+
+  let rec mem (x : t') (env : t) : bool =
+    match env with
+    | [] -> false
+    | set :: env -> Set.mem x set || mem x env
+
+  let add (x : t') (env : t) : t =
+    match env with
+    | set :: env -> Set.add x set :: env
+    | [] -> failwith "Environment's list cannot be empty."
+
+  let fresh (prefix : string) (env : t) : Name.t * t =
+    let prefix_n s n =
+      if n = 0 then
+        Name.of_string s
+      else
+        Name.of_string @@ Printf.sprintf "%s_%d" s n in
+    let rec first_n (n : int) : int =
+      if mem (of_name [] @@ prefix_n prefix n) env then
+        first_n (n + 1)
+      else
+        n in
+    let x = prefix_n prefix (first_n 0) in
+    (x, add (of_name [] x) env)
+end
 
 (** Pretty-print a global name to Coq. *)
 let to_coq (x : t) : SmartPrint.t =
