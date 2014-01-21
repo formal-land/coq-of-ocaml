@@ -209,49 +209,6 @@ let rec to_trees (effects : Effect.Env.t)
       ([], effects) defs in
   (List.rev trees, effects)
 
-(*let rec monadise (defs : t list) (path : PathName.Path.t) (effects : Effect.Env.t)
-  : t list * Effect.Env.t =
-  let monadise_one (def : t) (path : PathName.Path.t) (effects : Effect.Env.t)
-    : t * Effect.Env.t =
-    match def with
-    | Value {
-      Value.name = name;
-      is_rec = is_rec;
-      typ_vars = typ_vars;
-      args = args;
-      body = (e, e_typ) } ->
-      let name_typ = Effect.function_typ args
-        { Effect.effect = false; typ = Effect.Type.of_type e_typ } in
-      let effects_in_e =
-        if Recursivity.to_bool is_rec then
-          PathName.Map.add (PathName.of_name path name) name_typ effects
-        else
-          effects in
-      let effects_in_e = Effect.Env.in_function path effects_in_e args in
-      let (e, e_effect) = Exp.monadise e path effects_in_e in
-      if e_effect.Effect.effect && args = [] then
-        failwith "Cannot have effects at toplevel.";
-      let e_exp = Exp.simplify e in
-      let effect_typ = Effect.function_typ args e_effect in
-      let effects = PathName.Map.add (PathName.of_name path name) effect_typ effects in
-      (Value {
-        Value.name = name;
-        is_rec = is_rec;
-        typ_vars = typ_vars;
-        args = args;
-        body = (e_exp, e_typ) },
-        effects)
-    | Inductive _ | Record _ | Open _ -> (def, effects)
-    | Module (name, defs) ->
-      let (defs, effects) = monadise defs (name :: path) effects in
-      (Module (name, defs), effects) in
-  let (defs, effects) =
-    List.fold_left (fun (defs, effects) def ->
-      let (def, effects) = monadise_one def path effects in
-      (def :: defs, effects))
-      ([], effects) defs in
-  (List.rev defs, effects)*)
-
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
   let to_coq_one (def : t) : SmartPrint.t =
