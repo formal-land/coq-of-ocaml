@@ -1,24 +1,19 @@
-Value (., Compound (Effect (false, .)))
+Value (., Compound (Effect ([ ], .)))
+
+Value
+  (., Compound (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
 
 Value
   (.,
     Compound
-      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .))))
-
-Value
-  (.,
-    Compound
-      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-        Leaf (Effect (false, .)), Compound (Effect (false, .)),
-        Compound (Effect (false, .))))
+      (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)),
+        Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
+        Compound (Effect ([ ], .))))
 
 Value
   (. -> .,
-    Compound
-      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .))))
+    Compound (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
 
 Value
   (.,
-    Apply
-      (Effect (false, .), Leaf (Effect (false, . -> .)),
-        Leaf (Effect (false, .))))
+    Apply (Effect ([ ], .), Leaf (Effect ([ ], . -> .)), Leaf (Effect ([ ], .))))

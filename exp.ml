@@ -164,19 +164,23 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
   let compound (es : t list) : Tree.t =
     let trees = List.map (to_tree effects) es in
     let effects = List.map Tree.effect trees in
-    let have_effect = effects |> List.exists (fun effect ->
-      effect.Effect.effect) in
+    let descriptor = Effect.Descriptor.union (
+      List.map (fun effect -> effect.Effect.descriptor) effects) in
     let have_functional_effect = effects |> List.exists (fun effect ->
       not (Effect.Type.is_pure effect.Effect.typ)) in
     if have_functional_effect then
       failwith "Compounds cannot have functional effects."
     else
       Tree.Compound (trees,
-        { Effect.effect = have_effect; typ = Effect.Type.Pure }) in
+        { Effect.descriptor = descriptor; typ = Effect.Type.Pure }) in
   match e with
-  | Constant _ -> Tree.Leaf Effect.pure
+  | Constant _ -> Tree.Leaf
+    { Effect.descriptor = Effect.Descriptor.pure;
+      typ = Effect.Type.Pure }
   | Variable x ->
-    (try Tree.Leaf { Effect.effect = false; typ = Effect.Env.find x effects }
+    (try Tree.Leaf
+      { Effect.descriptor = Effect.Descriptor.pure;
+        typ = Effect.Env.find x effects }
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (PathName.pp x ^^ !^ "not found.")))
   | Tuple es | Constructor (_, es) -> compound es
@@ -186,12 +190,12 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
     let tree_x = to_tree effects e_x in
     let effect_x = Tree.effect tree_x in
     if Effect.Type.is_pure effect_x.Effect.typ then
-      let have_effect =
-        effect_f.Effect.effect || effect_x.Effect.effect ||
-        (Effect.Type.return_effect effect_f.Effect.typ) in
+      let descriptor = Effect.Descriptor.union [
+        effect_f.Effect.descriptor; effect_x.Effect.descriptor;
+        Effect.Type.return_descriptor effect_f.Effect.typ] in
       let effect_typ = Effect.Type.return_type effect_f.Effect.typ in
       Tree.Apply (tree_f, tree_x,
-        { Effect.effect = have_effect; typ = effect_typ })
+        { Effect.descriptor = descriptor; typ = effect_typ })
     else
       failwith "Fucntion arguments cannot have functional effects."
   | Function (x, e) ->
@@ -199,17 +203,20 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       Effect.Type.Pure effects) e in
     let effect_e = Tree.effect tree_e in
     Tree.Function (tree_e,
-      { Effect.effect = false; typ = Effect.Type.Arrow (
-        effect_e.Effect.effect, effect_e.Effect.typ) })
+      { Effect.descriptor = Effect.Descriptor.pure;
+        typ = Effect.Type.Arrow (
+          effect_e.Effect.descriptor, effect_e.Effect.typ) })
   | Let (x, e1, e2) ->
     let tree1 = to_tree effects e1 in
     let effect1 = Tree.effect tree1 in
     let tree2 = to_tree (Effect.Env.add (PathName.of_name [] x)
       effect1.Effect.typ effects) e2 in
     let effect2 = Tree.effect tree2 in
-    let have_effect = effect1.Effect.effect || effect2.Effect.effect in
+    let descriptor = Effect.Descriptor.union
+      [effect1.Effect.descriptor; effect2.Effect.descriptor] in
     Tree.Let (tree1, tree2,
-      { Effect.effect = have_effect; typ = effect2.Effect.typ })
+      { Effect.descriptor = descriptor;
+        typ = effect2.Effect.typ })
   | LetFun (is_rec, x, _, args, _, e1, e2) ->
     let (tree1, x_typ) = to_tree_let_fun effects is_rec x args e1 in
     let effects_in_e2 = Effect.Env.add (PathName.of_name [] x) x_typ effects in
@@ -226,9 +233,10 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
           Effect.Env.add (PathName.of_name [] x) Effect.Type.Pure effects)
           pattern_vars effects in
         to_tree effects e) in
-      let effect = Effect.unify (List.map Tree.effect trees) in
+      let effect = Effect.union (List.map Tree.effect trees) in
       Tree.Match (tree_e, trees,
-        { Effect.effect = effect_e.Effect.effect || effect.Effect.effect;
+        { Effect.descriptor = Effect.Descriptor.union
+            [effect_e.Effect.descriptor; effect.Effect.descriptor];
           typ = effect.Effect.typ })
     else
       failwith "Cannot match a value with functional effects."
@@ -245,9 +253,10 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
     let effect_e1 = Tree.effect tree_e1 in
     if Effect.Type.is_pure effect_e1.Effect.typ then
       let trees = List.map (to_tree effects) [e2; e3] in
-      let effect = Effect.unify (List.map Tree.effect trees) in
+      let effect = Effect.union (List.map Tree.effect trees) in
       Tree.Match (tree_e1, trees,
-        { Effect.effect = effect_e1.Effect.effect || effect.Effect.effect;
+        { Effect.descriptor = Effect.Descriptor.union
+            [effect_e1.Effect.descriptor; effect.Effect.descriptor];
           typ = effect.Effect.typ })
     else
       failwith "Cannot do an if on a value with functional effects."
@@ -257,7 +266,8 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
     let tree_e2 = to_tree effects e2 in
     let effect_e2 = Tree.effect tree_e2 in
     Tree.Sequence (tree_e1, tree_e2,
-      { Effect.effect = effect_e1.Effect.effect || effect_e2.Effect.effect;
+      { Effect.descriptor = Effect.Descriptor.union
+          [effect_e1.Effect.descriptor; effect_e2.Effect.descriptor];
         typ = effect_e2.Effect.typ })
   | Return _ | Bind _ ->
     failwith "Cannot compute effects on an explicit return or bind."

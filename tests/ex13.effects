@@ -1,42 +1,45 @@
 Value
-  (. -e-> .,
+  (. -[ 'Failure' ]-> .,
     Match
-      (Effect (true, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+      (Effect ([ 'Failure' ], .), Leaf (Effect ([ ], .)),
+        Leaf (Effect ([ ], .)),
         Apply
-          (Effect (true, .), Leaf (Effect (false, . -e-> .)),
-            Leaf (Effect (false, .)))))
+          (Effect ([ 'Failure' ], .), Leaf (Effect ([ ], . -[ 'Failure' ]-> .)),
+            Leaf (Effect ([ ], .)))))
 
 Value
-  (. -e-> .,
+  (. -[ 'io' ]-> .,
     Match
-      (Effect (true, .), Leaf (Effect (false, .)), Compound (Effect (false, .)),
+      (Effect ([ 'io' ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
         Sequence
-          (Effect (true, .),
+          (Effect ([ 'io' ], .),
             Apply
-              (Effect (true, .), Leaf (Effect (false, . -e-> .)),
-                Leaf (Effect (false, .))),
+              (Effect ([ 'io' ], .), Leaf (Effect ([ ], . -[ 'io' ]-> .)),
+                Leaf (Effect ([ ], .))),
             Apply
-              (Effect (true, .), Leaf (Effect (false, . -e-> .)),
-                Leaf (Effect (false, .))))))
+              (Effect ([ 'io' ], .), Leaf (Effect ([ ], . -[ 'io' ]-> .)),
+                Leaf (Effect ([ ], .))))))
 
-Value (. -e-> ., Leaf (Effect (false, . -e-> .)))
+Value (. -[ 'io' ]-> ., Leaf (Effect ([ ], . -[ 'io' ]-> .)))
 
 Value
-  (. -> . -e-> .,
+  (. -> . -[ 'Failure'; 'io' ]-> .,
     Match
-      (Effect (false, . -e-> .), Leaf (Effect (false, .)),
+      (Effect ([ ], . -[ 'Failure'; 'io' ]-> .), Leaf (Effect ([ ], .)),
         Function
-          (Effect (false, . -e-> .),
+          (Effect ([ ], . -[ 'Failure'; 'io' ]-> .),
             Match
-              (Effect (true, .), Leaf (Effect (false, .)),
+              (Effect ([ 'Failure'; 'io' ], .), Leaf (Effect ([ ], .)),
                 Apply
-                  (Effect (true, .), Leaf (Effect (false, . -e-> .)),
+                  (Effect ([ 'Failure'; 'io' ], .),
+                    Leaf (Effect ([ ], . -[ 'io' ]-> .)),
                     Apply
-                      (Effect (true, .), Leaf (Effect (false, . -e-> .)),
+                      (Effect ([ 'Failure' ], .),
+                        Leaf (Effect ([ ], . -[ 'Failure' ]-> .)),
                         Compound
-                          (Effect (false, .), Leaf (Effect (false, .)),
+                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
                             Compound
-                              (Effect (false, .), Leaf (Effect (false, .)),
+                              (Effect ([ ], .), Leaf (Effect ([ ], .)),
                                 Compound
-                                  (Effect (false, .), Leaf (Effect (false, .)),
-                                    Compound (Effect (false, .)))))))))))
+                                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                                    Compound (Effect ([ ], .)))))))))))

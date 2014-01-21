@@ -1,70 +1,67 @@
 Value
   (.,
     Match
-      (Effect (false, .), Leaf (Effect (false, .)),
-        Compound (Effect (false, .)),
+      (Effect ([ ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
         Compound
-          (Effect (false, .),
+          (Effect ([ ], .),
             Apply
-              (Effect (false, .), Leaf (Effect (false, .)),
-                Leaf (Effect (false, .))),
+              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
             Apply
-              (Effect (false, .),
+              (Effect ([ ], .),
                 Apply
-                  (Effect (false, .), Leaf (Effect (false, .)),
-                    Leaf (Effect (false, .))), Leaf (Effect (false, .))))))
+                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))))))
 
 Value
   (.,
     Match
-      (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)),
+      (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)),
         Apply
-          (Effect (false, .),
+          (Effect ([ ], .),
             Apply
-              (Effect (false, .),
+              (Effect ([ ], .),
                 Apply
-                  (Effect (false, .), Leaf (Effect (false, .)),
-                    Leaf (Effect (false, .))),
+                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                    Leaf (Effect ([ ], .))),
                 Apply
-                  (Effect (false, .),
+                  (Effect ([ ], .),
                     Apply
-                      (Effect (false, .), Leaf (Effect (false, .)),
-                        Leaf (Effect (false, .))), Leaf (Effect (false, .)))),
-            Leaf (Effect (false, .)))))
+                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                        Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))),
+            Leaf (Effect ([ ], .)))))
 
 Value
   (.,
     Compound
-      (Effect (false, .), Leaf (Effect (false, .)),
+      (Effect ([ ], .), Leaf (Effect ([ ], .)),
         Compound
-          (Effect (false, .), Leaf (Effect (false, .)),
+          (Effect ([ ], .), Leaf (Effect ([ ], .)),
             Compound
-              (Effect (false, .), Leaf (Effect (false, .)),
+              (Effect ([ ], .), Leaf (Effect ([ ], .)),
                 Compound
-                  (Effect (false, .), Leaf (Effect (false, .)),
-                    Compound (Effect (false, .)))))))
+                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                    Compound (Effect ([ ], .)))))))
 
 Value
   (. -> . -> .,
     Apply
-      (Effect (false, .),
+      (Effect ([ ], .),
         Apply
-          (Effect (false, .),
+          (Effect ([ ], .),
             Apply
-              (Effect (false, .), Leaf (Effect (false, .)),
+              (Effect ([ ], .), Leaf (Effect ([ ], .)),
                 Function
-                  (Effect (false, . -> . -> .),
+                  (Effect ([ ], . -> . -> .),
                     Function
-                      (Effect (false, . -> .),
+                      (Effect ([ ], . -> .),
                         Apply
-                          (Effect (false, .),
+                          (Effect ([ ], .),
                             Apply
-                              (Effect (false, .), Leaf (Effect (false, .)),
-                                Leaf (Effect (false, .))),
-                            Leaf (Effect (false, .)))))),
-            Leaf (Effect (false, .))),
+                              (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))),
+            Leaf (Effect ([ ], .))),
         Apply
-          (Effect (false, .),
+          (Effect ([ ], .),
             Apply
-              (Effect (false, .), Leaf (Effect (false, .)),
-                Leaf (Effect (false, .))), Leaf (Effect (false, .)))))
+              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
+            Leaf (Effect ([ ], .)))))

@@ -1,26 +1,25 @@
 Value
   (.,
     Let
-      (Effect (false, .), Leaf (Effect (false, .)),
-        Let
-          (Effect (false, .), Leaf (Effect (false, .)), Leaf (Effect (false, .)))))
+      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+        Let (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)))))
 
 Value
   (.,
     LetFun
-      (Effect (false, .),
+      (Effect ([ ], .),
         Apply
-          (Effect (false, .), Leaf (Effect (false, .)),
+          (Effect ([ ], .), Leaf (Effect ([ ], .)),
             Function
-              (Effect (false, . -> . -> .),
-                Function (Effect (false, . -> .), Leaf (Effect (false, .))))),
+              (Effect ([ ], . -> . -> .),
+                Function (Effect ([ ], . -> .), Leaf (Effect ([ ], .))))),
         LetFun
-          (Effect (false, .),
+          (Effect ([ ], .),
             Apply
-              (Effect (false, .),
+              (Effect ([ ], .),
                 Apply
-                  (Effect (false, .), Leaf (Effect (false, .)),
-                    Leaf (Effect (false, .))), Leaf (Effect (false, .))),
+                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
             Apply
-              (Effect (false, .), Leaf (Effect (false, . -> .)),
-                Leaf (Effect (false, . -> .))))))
+              (Effect ([ ], .), Leaf (Effect ([ ], . -> .)),
+                Leaf (Effect ([ ], . -> .))))))

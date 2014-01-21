@@ -2,6 +2,9 @@
 open Effect.Type
 
 let effects : Effect.Env.t =
+  let exn_invalid_argument = Effect.Descriptor.of_name "Invalid_argument" in
+  let exn_failure = Effect.Descriptor.of_name "Failure" in
+  let io = Effect.Descriptor.of_name "io" in
   List.fold_left (fun effects (path, x, typ) ->
     Effect.Env.add (PathName.of_name path x) typ effects)
     Effect.Env.empty
@@ -35,17 +38,17 @@ let effects : Effect.Env.t =
       [], "fst", Pure;
       [], "snd", Pure;
       [], "app", Pure;
-      [], "invalid_arg", Arrow (true, Pure);
-      [], "failwith", Arrow (true, Pure);
-      [], "print_char", Arrow (true, Pure);
-      [], "print_string", Arrow (true, Pure);
-      [], "print_int", Arrow (true, Pure);
-      [], "print_endline", Arrow (true, Pure);
-      [], "print_newline", Arrow (true, Pure);
-      [], "prerr_char", Arrow (true, Pure);
-      [], "prerr_string", Arrow (true, Pure);
-      [], "prerr_int", Arrow (true, Pure);
-      [], "prerr_endline", Arrow (true, Pure);
-      [], "prerr_newline", Arrow (true, Pure);
-      [], "read_line", Arrow (true, Pure);
-      [], "read_int", Arrow (true, Pure) ]
+      [], "invalid_arg", Arrow (exn_invalid_argument, Pure);
+      [], "failwith", Arrow (exn_failure, Pure);
+      [], "print_char", Arrow (io, Pure);
+      [], "print_string", Arrow (io, Pure);
+      [], "print_int", Arrow (io, Pure);
+      [], "print_endline", Arrow (io, Pure);
+      [], "print_newline", Arrow (io, Pure);
+      [], "prerr_char", Arrow (io, Pure);
+      [], "prerr_string", Arrow (io, Pure);
+      [], "prerr_int", Arrow (io, Pure);
+      [], "prerr_endline", Arrow (io, Pure);
+      [], "prerr_newline", Arrow (io, Pure);
+      [], "read_line", Arrow (io, Pure);
+      [], "read_int", Arrow (io, Pure) ]

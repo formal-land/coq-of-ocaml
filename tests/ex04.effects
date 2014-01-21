@@ -1,30 +1,30 @@
-Value (., Compound (Effect (false, .)))
+Value (., Compound (Effect ([ ], .)))
 
-Value (., Compound (Effect (false, .)))
-
-Value
-  (.,
-    Compound
-      (Effect (false, .), Leaf (Effect (false, .)), Compound (Effect (false, .))))
+Value (., Compound (Effect ([ ], .)))
 
 Value
   (.,
     Compound
-      (Effect (false, .), Leaf (Effect (false, .)),
+      (Effect ([ ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .))))
+
+Value
+  (.,
+    Compound
+      (Effect ([ ], .), Leaf (Effect ([ ], .)),
         Compound
-          (Effect (false, .), Leaf (Effect (false, .)),
+          (Effect ([ ], .), Leaf (Effect ([ ], .)),
             Compound
-              (Effect (false, .), Leaf (Effect (false, .)),
+              (Effect ([ ], .), Leaf (Effect ([ ], .)),
                 Compound
-                  (Effect (false, .), Leaf (Effect (false, .)),
+                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
                     Compound
-                      (Effect (false, .), Leaf (Effect (false, .)),
-                        Compound (Effect (false, .))))))))
+                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                        Compound (Effect ([ ], .))))))))
 
-Value (., Compound (Effect (false, .)))
+Value (., Compound (Effect ([ ], .)))
 
-Value (., Compound (Effect (false, .), Leaf (Effect (false, .))))
+Value (., Compound (Effect ([ ], .), Leaf (Effect ([ ], .))))
 
-Value (., Leaf (Effect (false, .)))
+Value (., Leaf (Effect ([ ], .)))
 
-Value (., Leaf (Effect (false, .)))
+Value (., Leaf (Effect ([ ], .)))

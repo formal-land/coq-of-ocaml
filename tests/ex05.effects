@@ -1,13 +1,12 @@
 Value
   (.,
     Match
-      (Effect (false, .),
+      (Effect ([ ], .),
         Compound
-          (Effect (false, .),
+          (Effect ([ ], .),
             Compound
-              (Effect (false, .), Leaf (Effect (false, .)),
+              (Effect ([ ], .), Leaf (Effect ([ ], .)),
                 Compound
-                  (Effect (false, .), Leaf (Effect (false, .)),
-                    Compound (Effect (false, .)))), Compound (Effect (false, .))),
-        Leaf (Effect (false, .)), Leaf (Effect (false, .)),
-        Leaf (Effect (false, .))))
+                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                    Compound (Effect ([ ], .)))), Compound (Effect ([ ], .))),
+        Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
