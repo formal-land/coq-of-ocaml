@@ -135,9 +135,9 @@ module Tree = struct
 
   let effect (tree : t) : Effect.t =
     match tree with
-    | Leaf effect | Compound (_, effect) | Apply (_, _, effect) | Function (_, effect)
-      | Let (_, _, effect) | LetFun (_, _, effect) | Match (_, _, effect)
-      | Field (_, effect) -> effect
+    | Leaf effect | Compound (_, effect) | Apply (_, _, effect)
+      | Function (_, effect) | Let (_, _, effect) | LetFun (_, _, effect)
+      | Match (_, _, effect) | Field (_, effect) -> effect
 
   let rec pp (tree : t) : SmartPrint.t =
     let aux constructor trees =
@@ -154,8 +154,7 @@ module Tree = struct
     | Field (tree, _) -> aux "Field" [tree]
 end
 
-let rec to_tree (effects : Effect.Env.t) (e : t)
-  : Tree.t =
+let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
   let compound (es : t list) : Tree.t =
     let trees = List.map (to_tree effects) es in
     let effects = List.map Tree.effect trees in
@@ -172,20 +171,23 @@ let rec to_tree (effects : Effect.Env.t) (e : t)
   | Constant _ -> Tree.Leaf Effect.pure
   | Variable x ->
     (try Tree.Leaf { Effect.effect = false; typ = Effect.Env.find x effects }
-    with Not_found ->
-      failwith (SmartPrint.to_string 80 2 (PathName.pp x ^^ !^ "not found.")))
+    with Not_found -> failwith (SmartPrint.to_string 80 2
+      (PathName.pp x ^^ !^ "not found.")))
   | Tuple es | Constructor (_, es) -> compound es
   | Apply (e_f, e_x) ->
     let tree_f = to_tree effects e_f in
     let effect_f = Tree.effect tree_f in
     let tree_x = to_tree effects e_x in
     let effect_x = Tree.effect tree_x in
-    let have_effect =
-      effect_f.Effect.effect || effect_x.Effect.effect ||
-      (Effect.Type.return_effect effect_f.Effect.typ) in
-    let effect_typ = Effect.Type.return_type effect_f.Effect.typ in
-    Tree.Apply (tree_f, tree_x,
-      { Effect.effect = have_effect; typ = effect_typ })
+    if Effect.Type.is_pure effect_x.Effect.typ then
+      let have_effect =
+        effect_f.Effect.effect || effect_x.Effect.effect ||
+        (Effect.Type.return_effect effect_f.Effect.typ) in
+      let effect_typ = Effect.Type.return_type effect_f.Effect.typ in
+      Tree.Apply (tree_f, tree_x,
+        { Effect.effect = have_effect; typ = effect_typ })
+    else
+      failwith "Fucntion arguments cannot have functional effects."
   | Function (x, e) ->
     let tree_e = to_tree (Effect.Env.add (PathName.of_name [] x)
       Effect.Type.Pure effects) e in
@@ -256,7 +258,10 @@ let rec to_tree (effects : Effect.Env.t) (e : t)
           x_typ effects_in_e in
         let tree = to_tree effects_in_e e in
         let effect = Tree.effect tree in
-        let x_typ' = Effect.function_typ args effect in
+        let x_typ' =
+          match Effect.function_typ args effect with
+          | Some typ -> typ
+          | None -> failwith "Toplevel values cannot have effects." in
         if Effect.Type.eq x_typ x_typ' then
           (tree, x_typ)
         else
@@ -265,7 +270,10 @@ let rec to_tree (effects : Effect.Env.t) (e : t)
     else
       let tree = to_tree effects_in_e e in
       let effect = Tree.effect tree in
-      let x_typ = Effect.function_typ args effect in
+      let x_typ =
+        match Effect.function_typ args effect with
+        | Some typ -> typ
+        | None -> failwith "Toplevel values cannot have effects." in
       (tree, x_typ)
 
 (*

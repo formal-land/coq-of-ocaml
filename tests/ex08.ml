@@ -1,4 +1,5 @@
 (** Sum types *)
+
 type t1 =
   | C1 of int
   | C2 of bool * int

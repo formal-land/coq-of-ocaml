@@ -5,3 +5,38 @@ Value
         Apply
           (Effect (true, .), Leaf (Effect (false, . -e-> .)),
             Leaf (Effect (false, .)))))
+
+Value
+  (. -e-> .,
+    Match
+      (Effect (true, .), Leaf (Effect (false, .)), Compound (Effect (false, .)),
+        Let
+          (Effect (true, .),
+            Apply
+              (Effect (true, .), Leaf (Effect (false, . -e-> .)),
+                Leaf (Effect (false, .))),
+            Apply
+              (Effect (true, .), Leaf (Effect (false, . -e-> .)),
+                Leaf (Effect (false, .))))))
+
+Value (. -e-> ., Leaf (Effect (false, . -e-> .)))
+
+Value
+  (. -> . -e-> .,
+    Match
+      (Effect (false, . -e-> .), Leaf (Effect (false, .)),
+        Function
+          (Effect (false, . -e-> .),
+            Match
+              (Effect (true, .), Leaf (Effect (false, .)),
+                Apply
+                  (Effect (true, .), Leaf (Effect (false, . -e-> .)),
+                    Apply
+                      (Effect (true, .), Leaf (Effect (false, . -e-> .)),
+                        Compound
+                          (Effect (false, .), Leaf (Effect (false, .)),
+                            Compound
+                              (Effect (false, .), Leaf (Effect (false, .)),
+                                Compound
+                                  (Effect (false, .), Leaf (Effect (false, .)),
+                                    Compound (Effect (false, .)))))))))))

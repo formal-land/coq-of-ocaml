@@ -1,4 +1,16 @@
-let head l =
+(** Effects *)
+
+let tail l =
   match l with
-  | x :: _ -> x
-  | [] -> failwith "Cannot take the head of an empty list."
+  | _ :: xs -> xs
+  | [] -> failwith "Cannot take the tail of an empty list."
+
+let rec print_list = function
+  | [] -> ()
+  | x :: xs ->
+    let forget = print_int x in
+    print_list xs
+
+let f = print_list
+
+let x () () = f (tail [5; 7; 8])

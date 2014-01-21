@@ -109,17 +109,18 @@ let pp (effect : t) : SmartPrint.t =
 let pure : t =
   { effect = false; typ = Type.Pure }
 
-let function_typ (args : (Name.t * Type'.t) list) (body_effect : t) : Type.t =
+let function_typ (args : (Name.t * Type'.t) list) (body_effect : t)
+  : Type.t option =
   match args with
   | [] ->
     if body_effect.effect then
-      failwith "Unexpected effect."
+      None
     else
-      body_effect.typ
+      Some body_effect.typ
   | _ :: args ->
-    List.fold_left (fun effect_typ _ -> Type.Arrow (false, effect_typ))
+    Some (List.fold_left (fun effect_typ _ -> Type.Arrow (false, effect_typ))
       (Type.Arrow (body_effect.effect, body_effect.typ))
-      args
+      args)
 
 let unify (effects : t list) : t =
   { effect = List.exists (fun effect -> effect.effect) effects;

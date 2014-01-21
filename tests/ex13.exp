@@ -1,11 +1,57 @@
-Value 'head':
-  (non_rec, [ 'A' ], [ ('l', Type ('list', 'A')) ], 'A',
+Value 'tail':
+  (non_rec, [ 'A' ], [ ('l', Type ('list', 'A')) ], Type ('list', 'A'),
     Match
       ('l',
         [
-          (Constructor ('cons', 'x', Any), 'x');
+          (Constructor ('cons', Any, 'xs'), 'xs');
           (Constructor ('[]'),
             Apply
               ('failwith',
-                String("Cannot take the head of an empty list.")))
+                String("Cannot take the tail of an empty list.")))
+        ]))
+
+Value 'print_list':
+  (rec, [ ], [ ('match_var_0', Type ('list', Type ('Z'))) ], Type ('unit'),
+    Match
+      ('match_var_0',
+        [
+          (Constructor ('[]'), Constructor ('tt'));
+          (Constructor ('cons', 'x', 'xs'),
+            Let
+              ('forget', Apply ('print_int', 'x'),
+                Apply ('print_list', 'xs')))
+        ]))
+
+Value 'f':
+  (non_rec, [ ], [ ], (Type ('list', Type ('Z')) -> Type ('unit')), 'print_list')
+
+Value 'x':
+  (non_rec, [ ], [ ('match_var_1', Type ('unit')) ],
+    (Type ('unit') -> Type ('unit')),
+    Match
+      ('match_var_1',
+        [
+          (Constructor ('tt'),
+            Function
+              ('match_var_2',
+                Match
+                  ('match_var_2',
+                    [
+                      (Constructor ('tt'),
+                        Apply
+                          ('f',
+                            Apply
+                              ('tail',
+                                Constructor
+                                  ('cons',
+                                    Int(5),
+                                    Constructor
+                                      ('cons',
+                                        Int(7),
+                                        Constructor
+                                          ('cons',
+                                            Int(8),
+                                            Constructor
+                                              ('[]')))))))
+                    ])))
         ]))
