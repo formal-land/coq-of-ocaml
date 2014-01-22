@@ -358,16 +358,57 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
     let env = PathName.Env.add (PathName.of_name [] x) env in
     let e2 = monadise env e2 tree2 in
     bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 x e2
+  | (LetFun (is_rec, x, typ_vars, args, typ, e1, e2),
+    Tree.LetFun (tree1, tree2, _)) ->
+    let env_in_e1 =
+      if Recursivity.to_bool is_rec then
+        PathName.Env.add (PathName.of_name [] x) env
+      else
+        env in
+    let e1 = monadise env_in_e1 e1 tree1 in
+    let env_in_e2 = PathName.Env.add (PathName.of_name [] x) env in
+    let e2 = monadise env_in_e2 e2 tree2 in
+    Let (x, e1, e2)
+  | (Match (e, cases), Tree.Match (tree, trees, _)) ->
+    monadise_list env [e] [tree] d [] (fun es' ->
+      match es' with
+      | [e] ->
+        let cases = List.map2 (fun (p, e) tree ->
+          let env = Name.Set.fold (fun x env ->
+            PathName.Env.add (PathName.of_name [] x) env)
+            (Pattern.free_vars p) env in
+          (p, lift (Tree.descriptor tree) d (monadise env e tree)))
+          cases trees in
+        Match (e, cases)
+      | _ -> failwith "Wrong answer from 'monadise_list'.")
+  | (Record fields, Tree.Compound (trees, _)) ->
+    monadise_list env (List.map snd fields) trees d [] (fun es' ->
+      let fields = List.map2 (fun (f, _) e -> (f, e)) fields es' in
+      lift Effect.Descriptor.pure d (Record fields))
+  | (Field (e, x), Tree.Field (tree, _)) ->
+    monadise_list env [e] [tree] d [] (fun es' ->
+      match es' with
+      | [e] -> lift Effect.Descriptor.pure d (Field (e, x))
+      | _ -> failwith "Wrong answer from 'monadise_list'.")
+  | (IfThenElse (e1, e2, e3), Tree.Match (tree1, [tree2; tree3], _)) ->
+    monadise_list env [e1] [tree1] d [] (fun es' ->
+      match es' with
+      | [e1] ->
+        let e2 = lift (Tree.descriptor tree2) d (monadise env e2 tree2) in
+        let e3 = lift (Tree.descriptor tree3) d (monadise env e3 tree3) in
+        IfThenElse (e1, e2, e3)
+      | _ -> failwith "Wrong answer from 'monadise_list'.")
+  (* | (Sequence (e1, e2), Tree.Sequence (tree1, tree2, _)) -> *)
   | _ -> failwith "TODO"
  
-let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t)
+(*let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t)
   (xs : (Name.t * Type.t) list) : Name.Set.t =
   let s = List.fold_left (fun s (x, _) -> Name.Set.add x s)
     Name.Set.empty xs in
   if Recursivity.to_bool is_rec then
     Name.Set.add f s
   else
-    s
+    s*)
 (*
 (** Simplify binds of a return and lets of a variable. *)
 let simplify (e : t) : t =
