@@ -1,0 +1,21 @@
+Inductive 'tree':
+  ([ ],
+    [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
+
+Value 'find':
+  (rec, [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Type ('bool'),
+    Match
+      ('t',
+        [
+          (Constructor ('Leaf'), Constructor ('false'));
+          (Constructor ('Node', 't1', 'x'', 't2'),
+            IfThenElse
+              (Apply (Apply ('Z.ltb', 'x'), 'x''),
+                Apply (Apply ('find', 'x'), 't1'),
+                IfThenElse
+                  (Apply (Apply ('Z.ltb', 'x''), 'x'),
+                    Apply
+                      (Apply ('find', 'x'),
+                        't2'),
+                    Constructor ('true'))))
+        ]))

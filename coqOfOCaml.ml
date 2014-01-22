@@ -11,17 +11,23 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
       let definitions = Structure.of_structure structure in
       let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
       Structure.Tree.pps trees
-    | "monadise" -> empty
+    | "monadise" ->
+      let definitions = Structure.of_structure structure in
+      let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
+      let (_, definitions) =
+        Structure.monadise PathName.Env.empty definitions trees in
+      Structure.pp definitions
     | "coq" ->
-      (*let definitions = Structure.of_structure structure in
-      let (definitions, _) = Structure.monadise definitions [] PathName.Map.empty in
+      let definitions = Structure.of_structure structure in
+      let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
+      let (_, definitions) =
+        Structure.monadise PathName.Env.empty definitions trees in
       concat (List.map (fun d -> d ^^ newline) [
         !^ "Require Import CoqOfOCaml." ^^ newline;
         !^ "Local Open Scope Z_scope.";
         !^ "Import ListNotations.";
         !^ "Set Implicit Arguments."]) ^^ newline ^^
-      Structure.to_coq definitions*)
-      failwith "TODO"
+      Structure.to_coq definitions
     | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
   to_stdout 80 2 document;
   print_newline ();

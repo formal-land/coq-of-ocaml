@@ -25,32 +25,13 @@ Value 'f':
   (non_rec, [ ], [ ], (Type ('list', Type ('Z')) -> Type ('unit')), 'print_list')
 
 Value 'x':
-  (non_rec, [ ], [ ('match_var_1', Type ('unit')) ],
-    (Type ('unit') -> Type ('unit')),
-    Match
-      ('match_var_1',
-        [
-          (Constructor ('tt'),
-            Function
-              ('match_var_2',
-                Match
-                  ('match_var_2',
-                    [
-                      (Constructor ('tt'),
-                        Apply
-                          ('f',
-                            Apply
-                              ('tail',
-                                Constructor
-                                  ('cons',
-                                    Int(5),
-                                    Constructor
-                                      ('cons',
-                                        Int(7),
-                                        Constructor
-                                          ('cons',
-                                            Int(8),
-                                            Constructor
-                                              ('[]')))))))
-                    ])))
-        ]))
+  (non_rec, [ 'A' ], [ ('z', 'A') ], Type ('unit'),
+    Apply
+      ('f',
+        Apply
+          ('tail',
+            Constructor
+              ('cons', Int(5),
+                Constructor
+                  ('cons', Int(7),
+                    Constructor ('cons', Int(8), Constructor ('[]')))))))

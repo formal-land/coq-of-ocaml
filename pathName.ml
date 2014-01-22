@@ -113,6 +113,8 @@ let of_path (p : Path'.t) : t =
 module Env = struct
   type t = Set.t list
 
+  let empty : t = [Set.empty]
+
   let rec mem (x : t') (env : t) : bool =
     match env with
     | [] -> false
@@ -136,6 +138,19 @@ module Env = struct
         n in
     let x = prefix_n prefix (first_n 0) in
     (x, add (of_name [] x) env)
+
+  let open_module (env : t) : t =
+    Set.empty :: env
+
+  let close_module (env : t) (name : string) : t =
+    match env with
+    | set1 :: set2 :: env ->
+      Set.fold (fun x set ->
+        let { path = path; base = base } = x in
+        Set.add { path = name :: path; base = base } set)
+        set1 set2
+        :: env
+    | _ -> failwith "At least one module should be opened."
 end
 
 (** Pretty-print a global name to Coq. *)

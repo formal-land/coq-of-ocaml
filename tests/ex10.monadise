@@ -1,0 +1,57 @@
+Module 'List2':
+  Inductive 't':
+    ([ 'a' ], [ ('Nil', [ ]); ('Cons', [ 'a'; Type ('t', 'a') ]) ])
+  
+  Value 'sum':
+    (rec, [ ], [ ('match_var_0', Type ('t', Type ('Z'))) ], Type ('Z'),
+      Match
+        ('match_var_0',
+          [
+            (Alias (Any, 'l'),
+              Match
+                ('l',
+                  [
+                    (Constructor ('Nil'),
+                      Int(0));
+                    (Constructor
+                      ('Cons',
+                        'x',
+                        'xs'),
+                      Apply
+                        (Apply
+                          ('Z.add',
+                            'x'),
+                          Apply
+                            ('sum',
+                              'xs')))
+                  ]))
+          ]))
+  
+  Value 'of_list':
+    (rec, [ 'A' ], [ ('match_var_1', Type ('list', 'A')) ], Type ('t', 'A'),
+      Match
+        ('match_var_1',
+          [
+            (Constructor ('[]'), Constructor ('Nil'));
+            (Constructor ('cons', 'x', 'xs'),
+              Constructor ('Cons', 'x', Apply ('of_list', 'xs')))
+          ]))
+  
+  Module 'Inside':
+    Value 'x':
+      (non_rec, [ ], [ ], Type ('Z'), Int(12))
+
+Value 'n':
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
+      ('List2.sum',
+        Apply
+          ('List2.of_list',
+            Constructor
+              ('cons', Int(5),
+                Constructor
+                  ('cons', Int(7),
+                    Constructor
+                      ('cons', Int(6),
+                        Constructor
+                          ('cons', 'List2.Inside.x', Constructor ('[]'))))))))

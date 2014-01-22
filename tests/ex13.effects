@@ -23,23 +23,15 @@ Value
 Value (. -[ 'io' ]-> ., Leaf (Effect ([ ], . -[ 'io' ]-> .)))
 
 Value
-  (. -> . -[ 'Failure'; 'io' ]-> .,
-    Match
-      (Effect ([ ], . -[ 'Failure'; 'io' ]-> .), Leaf (Effect ([ ], .)),
-        Function
-          (Effect ([ ], . -[ 'Failure'; 'io' ]-> .),
-            Match
-              (Effect ([ 'Failure'; 'io' ], .), Leaf (Effect ([ ], .)),
-                Apply
-                  (Effect ([ 'Failure'; 'io' ], .),
-                    Leaf (Effect ([ ], . -[ 'io' ]-> .)),
-                    Apply
-                      (Effect ([ 'Failure' ], .),
-                        Leaf (Effect ([ ], . -[ 'Failure' ]-> .)),
-                        Compound
-                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                            Compound
-                              (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                                Compound
-                                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                                    Compound (Effect ([ ], .)))))))))))
+  (. -[ 'Failure'; 'io' ]-> .,
+    Apply
+      (Effect ([ 'Failure'; 'io' ], .), Leaf (Effect ([ ], . -[ 'io' ]-> .)),
+        Apply
+          (Effect ([ 'Failure' ], .), Leaf (Effect ([ ], . -[ 'Failure' ]-> .)),
+            Compound
+              (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                Compound
+                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                    Compound
+                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                        Compound (Effect ([ ], .))))))))

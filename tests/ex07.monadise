@@ -1,0 +1,81 @@
+Value 'b':
+  (non_rec, [ ], [ ], Type ('bool'),
+    Apply
+      (Apply
+        ('orb',
+          Apply
+            (Apply ('equiv_decb', Constructor ('false')), Constructor ('true'))),
+        Apply
+          (Apply
+            ('andb',
+              Apply
+                (Apply ('nequiv_decb', Constructor ('tt')), Constructor ('tt'))),
+            Apply ('negb', Constructor ('true')))))
+
+Value 'n1':
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply (Apply ('Z.add', Int(1)), Apply (Apply ('Z.mul', Int(2)), Int(3))))
+
+Value 'n2':
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
+      (Apply
+        ('Z.sub', Apply (Apply ('Z.add', Apply ('Z.abs', Int(-1))), Int(1))),
+        Apply
+          (Apply
+            ('Z.mul',
+              Apply
+                (Apply ('Z.modulo', Apply (Apply ('Z.div', Int(5)), Int(23))),
+                  Int(4))), Int(3))))
+
+Value 'n3':
+  (non_rec, [ ], [ ], Type ('Z'), Apply ('Z.pred', Apply ('Z.succ', Int(12))))
+
+Value 'n4':
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
+      (Apply
+        ('Z.lxor',
+          Apply
+            (Apply ('Z.lor', Apply (Apply ('Z.land', Int(5)), Int(7))), Int(3))),
+        Int(9)))
+
+Value 'n5':
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
+      (Apply ('Z.add', Apply (Apply ('Z.shiftl', Int(156)), Int(4))),
+        Apply (Apply ('Z.shiftr', Int(12)), Int(1))))
+
+Value 's':
+  (non_rec, [ ], [ ], Type ('string'),
+    Apply (Apply ('append', String("ghj")), String("klm")))
+
+Value 'c':
+  (non_rec, [ ], [ ], Type ('ascii'),
+    Apply
+      ('char_of_int',
+        Apply (Apply ('Z.add', Apply ('int_of_char', Char("c"))), Int(1))))
+
+Value 'x':
+  (non_rec, [ ], [ ], Type ('unit'), Apply ('ignore', Int(23)))
+
+Value 'p':
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
+      (Apply ('Z.add', Apply ('fst', Tuple (Int(1), Int(2)))),
+        Apply ('snd', Tuple (Int(3), Int(4)))))
+
+Value 'l':
+  (non_rec, [ ], [ ], Type ('list', Type ('Z')),
+    Apply
+      (Apply
+        ('app',
+          Constructor
+            ('cons', Int(1), Constructor ('cons', Int(2), Constructor ('[]')))),
+        Constructor ('cons', Int(3), Constructor ('[]'))))
+
+Value 'y':
+  (non_rec, [ ], [ ], Type ('Z'),
+    Apply
+      (Apply ('apply', Function ('n', Apply (Apply ('Z.add', 'n'), Int(1)))),
+        Int(12)))

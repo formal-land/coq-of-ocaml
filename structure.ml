@@ -212,6 +212,47 @@ let rec to_trees (effects : Effect.Env.t)
       ([], effects) defs in
   (List.rev trees, effects)
 
+let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
+  : PathName.Env.t * t list =
+  let rec monadise_one (env : PathName.Env.t) (def : t) (tree : Tree.t)
+    : PathName.Env.t * t =
+    match (def, tree) with
+    | (
+      Value {
+        Value.name = name;
+        is_rec = is_rec;
+        typ_vars = typ_vars;
+        args = args;
+        typ = typ;
+        body = body },
+      Tree.Value (tree, effect)) ->
+      let env_in_body =
+        if Recursivity.to_bool is_rec then
+          PathName.Env.add (PathName.of_name [] name) env
+        else
+          env in
+      let body = Exp.monadise env_in_body body tree in
+      let env = PathName.Env.add (PathName.of_name [] name) env in
+      (env, Value {
+        Value.name = name;
+        is_rec = is_rec;
+        typ_vars = typ_vars;
+        args = args;
+        typ = typ;
+        body = body })
+    | (Module (name, defs), Tree.Module trees) ->
+      let (env, defs) = monadise (PathName.Env.open_module env) defs trees in
+      (PathName.Env.close_module env name, Module (name, defs))
+    | (Inductive _, Tree.Other) | (Record _, Tree.Other)
+      | (Open _, Tree.Other) -> (env, def)
+    | _ -> failwith "Unexpected arguments for 'monadise'." in
+  let (env, defs) =
+    List.fold_left2 (fun (env, defs) def tree ->
+      let (env, def) = monadise_one env def tree in
+      (env, def :: defs))
+      (env, []) defs trees in
+  (env, List.rev defs)
+
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
   let to_coq_one (def : t) : SmartPrint.t =

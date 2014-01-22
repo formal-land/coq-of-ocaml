@@ -1,0 +1,25 @@
+Value 'l':
+  (non_rec, [ ], [ ], Type ('list', Type ('Z')),
+    LetFun
+      (rec, 'map', [ 'A'; 'B' ],
+        [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
+        Match
+          ('match_var_0',
+            [
+              (Constructor ('[]'), Constructor ('[]'));
+              (Constructor ('cons', 'x', 'xs'),
+                Constructor
+                  ('cons', Apply ('f', 'x'),
+                    Apply
+                      (Apply
+                        ('map',
+                          'f'),
+                        'xs')))
+            ]),
+        Apply
+          (Apply ('map', Function ('n', Apply (Apply ('Z.add', 'n'), Int(1)))),
+            Constructor
+              ('cons', Int(5),
+                Constructor
+                  ('cons', Int(7),
+                    Constructor ('cons', Int(8), Constructor ('[]')))))))

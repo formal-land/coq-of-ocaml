@@ -13,4 +13,4 @@ let rec print_list = function
 
 let f = print_list
 
-let x () () = f (tail [5; 7; 8])
+let x z = f (tail [5; 7; 8])

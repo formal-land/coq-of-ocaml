@@ -59,7 +59,7 @@ let rec pp (e : t) : SmartPrint.t =
     nest (!^ "Lift" ^^
       Pp.list [Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
   | Bind (e1, x, e2) -> nest (!^ "Bind" ^^ Pp.list
-    [pp e1; OCaml.option Name.pp x; pp e2])
+    [pp e1; nest (OCaml.option Name.pp x); pp e2])
 
 (** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
@@ -363,7 +363,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
     let env = PathName.Env.add (PathName.of_name [] x) env in
     let e2 = monadise env e2 tree2 in
     bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 (Some x) e2
-  | (LetFun (is_rec, x, typ_vars, args, typ, e1, e2),
+  | (LetFun (is_rec, x, typ_args, args, typ, e1, e2),
     Tree.LetFun (tree1, tree2, _)) ->
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
@@ -373,7 +373,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
     let e1 = monadise env_in_e1 e1 tree1 in
     let env_in_e2 = PathName.Env.add (PathName.of_name [] x) env in
     let e2 = monadise env_in_e2 e2 tree2 in
-    Let (x, e1, e2)
+    LetFun (is_rec, x, typ_args, args, typ, e1, e2)
   | (Match (e, cases), Tree.Match (tree, trees, _)) ->
     monadise_list env [e] [tree] d [] (fun es' ->
       match es' with
