@@ -284,7 +284,8 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
   and to_tree_let_fun (effects : Effect.Env.t)
     (is_rec : Recursivity.t) (x : Name.t) (args : (Name.t * Type.t) list)
     (e : t) : Tree.t * Effect.Type.t =
-    let effects_in_e = Effect.Env.in_function effects args in
+    let args_names = List.map fst args in
+    let effects_in_e = Effect.Env.in_function effects args_names in
     if Recursivity.to_bool is_rec then
       let rec fix_tree x_typ =
         let effects_in_e = Effect.Env.add (PathName.of_name [] x)
@@ -292,7 +293,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
         let tree = to_tree effects_in_e e in
         let effect = Tree.effect tree in
         let x_typ' =
-          match Effect.function_typ args effect with
+          match Effect.function_typ args_names effect with
           | Some typ -> typ
           | None -> failwith "Toplevel values cannot have effects." in
         if Effect.Type.eq x_typ x_typ' then
@@ -304,7 +305,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       let tree = to_tree effects_in_e e in
       let effect = Tree.effect tree in
       let x_typ =
-        match Effect.function_typ args effect with
+        match Effect.function_typ args_names effect with
         | Some typ -> typ
         | None -> failwith "Toplevel values cannot have effects." in
       (tree, x_typ)
@@ -365,6 +366,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
     bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 (Some x) e2
   | (LetFun (is_rec, x, typ_args, args, typ, e1, e2),
     Tree.LetFun (tree1, tree2, _)) ->
+    let typ = Type.monadise typ (Tree.effect tree1) in
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
         PathName.Env.add (PathName.of_name [] x) env

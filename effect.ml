@@ -1,8 +1,6 @@
 (** Types for the effects. *)
 open SmartPrint
 
-module Type' = Type
-
 module Descriptor = struct
   type t = Name.Set.t
 
@@ -70,17 +68,6 @@ module Type = struct
       | (Arrow (d1, typ1), Arrow (d2, typ2)) ->
         Arrow (Descriptor.union [d1; d2], aux typ1 typ2) in
     List.fold_left aux Pure typs
-
-  let rec monadise (typ : Type.t) (effect_typ : t) : Type.t =
-    match (typ, effect_typ) with
-    | (Type.Variable _, Pure) | (Type.Tuple _, Pure)
-      | (Type.Apply _, Pure) | (Type.Arrow _, Pure) -> typ
-    | (Type.Arrow (typ1, typ2), Arrow (d, effect_typ2)) ->
-      let typ2 = monadise typ2 effect_typ2 in
-      Type.Arrow (typ1,
-        if Descriptor.is_pure d then typ2 else Type.Monad typ2)
-    | (Type.Monad _, _) -> failwith "This type is already monadic."
-    | _ -> failwith "Type and effect type are not compatible."
 end
 
 module Env = struct
@@ -120,10 +107,10 @@ module Env = struct
         :: effects
     | _ -> failwith "At least one module should be opened."
 
-  let in_function (effects : t) (args : (Name.t * Type'.t) list) : t =
-    List.fold_left (fun effects (x, _) ->
+  let in_function (effects : t) (args_names : Name.t list) : t =
+    List.fold_left (fun effects x ->
       add (PathName.of_name [] x) Type.Pure effects)
-      effects args
+      effects args_names
 end
 
 type t = { descriptor : Descriptor.t; typ : Type.t }
@@ -132,28 +119,22 @@ let pp (effect : t) : SmartPrint.t =
   nest (!^ "Effect" ^^ Pp.list [
     Descriptor.pp effect.descriptor; Type.pp false effect.typ])
 
-let function_typ (args : (Name.t * Type'.t) list) (body_effect : t)
+let function_typ (args_names : Name.t list) (body_effect : t)
   : Type.t option =
-  match args with
+  match args_names with
   | [] ->
     if Descriptor.is_pure body_effect.descriptor then
       Some body_effect.typ
     else
       None
-  | _ :: args ->
+  | _ :: args_names ->
     Some (List.fold_left (fun effect_typ _ ->
       Type.Arrow (Descriptor.pure, effect_typ))
-      (Type.Arrow (body_effect.descriptor, body_effect.typ))
-      args)
+      (Type.Arrow
+          (body_effect.descriptor, body_effect.typ))
+      args_names)
 
 let union (effects : t list) : t =
   { descriptor =
       Descriptor.union @@ List.map (fun effect -> effect.descriptor) effects;
     typ = Type.union (List.map (fun effect -> effect.typ) effects) }
-
-let monadise (typ : Type'.t) (effect : t) : Type'.t =
-  let typ = Type.monadise typ effect.typ in
-  if Descriptor.is_pure effect.descriptor then
-    typ
-  else
-    Type'.Monad typ

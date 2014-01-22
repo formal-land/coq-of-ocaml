@@ -7,7 +7,7 @@ type t =
   | Arrow of t * t
   | Tuple of t list
   | Apply of PathName.t * t list
-  | Monad of t
+  | Monad of Effect.Descriptor.t * t
 
 let rec pp (typ : t) : SmartPrint.t =
   match typ with
@@ -17,7 +17,8 @@ let rec pp (typ : t) : SmartPrint.t =
   | Apply (x, typs) ->
     nest (!^ "Type" ^^ nest (parens (
       separate (!^ "," ^^ space) (PathName.pp x :: List.map pp typs))))
-  | Monad typ -> nest (!^ "Monad" ^^ parens (pp typ))
+  | Monad (d, typ) -> nest (!^ "Monad" ^^ Pp.list [
+    Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. *)
 let rec of_type_expr (typ : Types.type_expr) : t =
@@ -38,7 +39,7 @@ let rec free_vars (typ : t) : Name.Set.t =
   | Arrow (typ_x, typ_y) -> Name.Set.union (free_vars typ_x) (free_vars typ_y)
   | Tuple typs | Apply (_, typs) ->
     List.fold_left (fun s typ -> Name.Set.union s (free_vars typ)) Name.Set.empty typs
-  | Monad typ -> free_vars typ
+  | Monad (_, typ) -> free_vars typ
 
 (** In a function's type extract the body's type (up to [n] arguments). *)
 let rec open_type (typ : t) (n : int) : t list * t =
@@ -58,7 +59,27 @@ let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
   | Arrow (typ1, typ2) -> Arrow (substitute_variable typ1 x x', substitute_variable typ2 x x')
   | Tuple typs -> Tuple (List.map (fun typ -> substitute_variable typ x x') typs)
   | Apply (path, typs) -> Apply (path, List.map (fun typ -> substitute_variable typ x x') typs)
-  | Monad typ -> Monad (substitute_variable typ x x')
+  | Monad (d, typ) -> Monad (d, substitute_variable typ x x')
+
+let monadise (typ : t) (effect : Effect.t) : t =
+  let rec aux (typ : t) (effect_typ : Effect.Type.t) : t =
+    match (typ, effect_typ) with
+    | (Variable _, Effect.Type.Pure) | (Tuple _, Effect.Type.Pure)
+      | (Apply _, Effect.Type.Pure) | (Arrow _, Effect.Type.Pure) -> typ
+    | (Arrow (typ1, typ2), Effect.Type.Arrow (d, effect_typ2)) ->
+      let typ2 = aux typ2 effect_typ2 in
+      Arrow (typ1,
+        if Effect.Descriptor.is_pure d then
+          typ2
+        else
+          Monad (d, typ2))
+    | (Monad _, _) -> failwith "This type is already monadic."
+    | _ -> failwith "Type and effect type are not compatible." in
+  let typ = aux typ effect.typ in
+  if Effect.Descriptor.is_pure effect.Effect.descriptor then
+    typ
+  else
+    Monad (effect.Effect.descriptor, typ)
 
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
@@ -75,4 +96,5 @@ let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
   | Apply (path, typs) ->
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
       (PathName.to_coq path :: List.map (to_coq true) typs)
-  | Monad typ -> to_coq paren (Apply (PathName.of_name [] "M", [typ]))
+  | Monad (d, typ) -> (* TODO; display [d] *)
+    to_coq paren (Apply (PathName.of_name [] "M", [typ]))

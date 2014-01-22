@@ -226,6 +226,7 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
         typ = typ;
         body = body },
       Tree.Value (tree, effect)) ->
+      let typ = Type.monadise typ (Exp.Tree.effect tree) in
       let env_in_body =
         if Recursivity.to_bool is_rec then
           PathName.Env.add (PathName.of_name [] name) env

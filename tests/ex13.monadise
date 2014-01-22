@@ -1,5 +1,6 @@
 Value 'tail':
-  (non_rec, [ 'A' ], [ ('l', Type ('list', 'A')) ], Type ('list', 'A'),
+  (non_rec, [ 'A' ], [ ('l', Type ('list', 'A')) ],
+    Monad ([ 'Failure' ], Type ('list', 'A')),
     Match
       ('l',
         [
@@ -11,7 +12,8 @@ Value 'tail':
         ]))
 
 Value 'print_list':
-  (rec, [ ], [ ('match_var_0', Type ('list', Type ('Z'))) ], Type ('unit'),
+  (rec, [ ], [ ('match_var_0', Type ('list', Type ('Z'))) ],
+    Monad ([ 'io' ], Type ('unit')),
     Match
       ('match_var_0',
         [
@@ -23,10 +25,11 @@ Value 'print_list':
         ]))
 
 Value 'f':
-  (non_rec, [ ], [ ], (Type ('list', Type ('Z')) -> Type ('unit')), 'print_list')
+  (non_rec, [ ], [ ],
+    (Type ('list', Type ('Z')) -> Monad ([ 'io' ], Type ('unit'))), 'print_list')
 
 Value 'x':
-  (non_rec, [ 'A' ], [ ('z', 'A') ], Type ('unit'),
+  (non_rec, [ 'A' ], [ ('z', 'A') ], Monad ([ 'Failure'; 'io' ], Type ('unit')),
     Bind
       (Lift
         ([ 'Failure' ], [ 'Failure'; 'io' ],
