@@ -23,8 +23,8 @@ type t =
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
   | Sequence of t * t (** A sequence of two expressions. *)
   | Lift of Effect.Descriptor.t * Effect.Descriptor.t * t
-    (** Monadic return. *)
-  | Bind of t * Name.t * t
+    (** Monadic lift. *)
+  | Bind of t * Name.t option * t
     (** Monadic bind. *)
 
 let rec pp (e : t) : SmartPrint.t =
@@ -58,7 +58,8 @@ let rec pp (e : t) : SmartPrint.t =
   | Lift (d1, d2, e) ->
     nest (!^ "Lift" ^^
       Pp.list [Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
-  | Bind (e1, x, e2) -> nest (!^ "Bind" ^^ Pp.list [pp e1; Name.pp x; pp e2])
+  | Bind (e1, x, e2) -> nest (!^ "Bind" ^^ Pp.list
+    [pp e1; OCaml.option Name.pp x; pp e2])
 
 (** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
@@ -73,14 +74,16 @@ let rec of_expression (e : expression) : t =
   match e.exp_desc with
   | Texp_ident (path, _, _) -> Variable (PathName.of_path path)
   | Texp_constant constant -> Constant (Constant.of_constant constant)
-  | Texp_let (rec_flag, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e1}], e2) ->
-    let (rec_flag, name, free_typ_vars, args, body_typ, body) =
-      import_let_fun rec_flag name e1 in
+  | Texp_let (rec_flag, [{vb_pat = pattern; vb_expr = e1}], e2) ->
+    let (rec_flag, pattern, free_typ_vars, args, body_typ, body) =
+      import_let_fun rec_flag pattern e1 in
     let e2 = of_expression e2 in
-    if args = [] then
-      Let (name, body, e2)
-    else
+    (match (pattern, args) with
+    | (Pattern.Variable name, []) -> Let (name, body, e2)
+    | (_, []) -> Match (body, [pattern, e2])
+    | (Pattern.Variable name, _) ->
       LetFun (rec_flag, name, free_typ_vars, args, body_typ, body, e2)
+    | _ -> failwith "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _) ->
     Function (Name.of_ident x, of_expression e)
   | Texp_function (_, cases, _) ->
@@ -117,15 +120,15 @@ and open_cases (cases : case list) : Name.t * t =
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
     (Pattern.of_pattern p, of_expression e)) in
   (x, Match (Variable (PathName.of_name [] x), cases))
-and import_let_fun (rec_flag : Asttypes.rec_flag) (name : Ident.t) (e : expression)
-  : Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t =
-  let name = Name.of_ident name in
+and import_let_fun (rec_flag : Asttypes.rec_flag) (pattern : pattern) (e : expression)
+  : Recursivity.t * Pattern.t * Name.t list * (Name.t * Type.t) list * Type.t * t =
+  let pattern = Pattern.of_pattern pattern in
   let e_schema = Schema.of_type (Type.of_type_expr e.exp_type) in
   let e = of_expression e in
   let (args_names, e_body) = open_function e in
   let e_typ = e_schema.Schema.typ in
   let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
-  (Recursivity.of_rec_flag rec_flag, name, e_schema.Schema.variables,
+  (Recursivity.of_rec_flag rec_flag, pattern, e_schema.Schema.variables,
     List.combine args_names args_typs, e_body_typ, e_body)
 
 module Tree = struct
@@ -316,7 +319,9 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
   (** [d1] is the descriptor of [e1], [d2] of [e2]. *)
   let bind d1 d2 e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
-      Let (x, e1, e2)
+      match x with
+      | Some x -> Let (x, e1, e2)
+      | None -> e2
     else
       Bind (lift d1 d2 e1, x, e2) in
   (** [k es'] is supposed to raise the effect [d]. *)
@@ -330,7 +335,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
       else
         let e' = monadise env e tree in
         let (x, env) = PathName.Env.fresh "x" env in
-        bind d_e d e' x
+        bind d_e d e' (Some x)
           (monadise_list env es trees d (var x :: es') k)
     | _ -> failwith "Unexpected number of trees." in
   let d = Tree.descriptor tree in
@@ -357,7 +362,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
     let e1 = monadise env e1 tree1 in
     let env = PathName.Env.add (PathName.of_name [] x) env in
     let e2 = monadise env e2 tree2 in
-    bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 x e2
+    bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 (Some x) e2
   | (LetFun (is_rec, x, typ_vars, args, typ, e1, e2),
     Tree.LetFun (tree1, tree2, _)) ->
     let env_in_e1 =
@@ -398,57 +403,12 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
         let e3 = lift (Tree.descriptor tree3) d (monadise env e3 tree3) in
         IfThenElse (e1, e2, e3)
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  (* | (Sequence (e1, e2), Tree.Sequence (tree1, tree2, _)) -> *)
-  | _ -> failwith "TODO"
+  | (Sequence (e1, e2), Tree.Sequence (tree1, tree2, _)) ->
+    let e1 = monadise env e1 tree1 in
+    let e2 = monadise env e2 tree2 in
+    bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 None e2
+  | _ -> failwith "Unexpected arguments for 'monadise'."
  
-(*let added_vars_in_let_fun (is_rec : Recursivity.t) (f : Name.t)
-  (xs : (Name.t * Type.t) list) : Name.Set.t =
-  let s = List.fold_left (fun s (x, _) -> Name.Set.add x s)
-    Name.Set.empty xs in
-  if Recursivity.to_bool is_rec then
-    Name.Set.add f s
-  else
-    s*)
-(*
-(** Simplify binds of a return and lets of a variable. *)
-let simplify (e : t) : t =
-  (** The [env] is the environment of substitutions to make. *)
-  let rec aux (env : t Name.Map.t) (e : t) : t =
-    let rm x = Name.Map.remove x env in
-    match e with
-    | Bind (Return (d1, d2, e1), x, e2) -> aux env (Let (x, e1, e2))
-    | Let (x, Variable x', e2) -> aux (Name.Map.add x (Variable x') env) e2
-    | Variable x ->
-      (match x with
-      | { PathName.path = []; base = x } ->
-        if Name.Map.mem x env then
-          Name.Map.find x env
-        else
-          e
-      | _ -> e)
-    | Constant _ -> e
-    | Tuple es -> Tuple (List.map (aux env) es)
-    | Constructor (x, es) -> Constructor (x, List.map (aux env) es)
-    | Apply (e_f, e_x) -> Apply (aux env e_f, aux env e_x)
-    | Function (x, e) -> Function (x, aux (rm x) e)
-    | Let (x, e1, e2) -> Let (x, aux env e1, aux (rm x) e2)
-    | LetFun (is_rec, f, typ_vars, xs, f_typ, e1, e2) ->
-      let env_in_f = Name.Set.fold (fun x env ->
-        Name.Map.remove x env)
-        (added_vars_in_let_fun is_rec f xs)
-        env in
-      LetFun (is_rec, f, typ_vars, xs, f_typ, aux env_in_f e1, aux (rm f) e2)
-    | Match (e, cases) -> Match (aux env e, cases |> List.map (fun (p, e) ->
-      let env = Name.Set.fold (fun x env -> Name.Map.remove x env) (Pattern.free_vars p) env in
-      (p, aux env e)))
-    | Record fields -> Record (fields |> List.map (fun (x, e) -> (x, aux env e)))
-    | Field (e, x) -> Field (aux env e, x)
-    | IfThenElse (e1, e2, e3) -> IfThenElse (aux env e1, aux env e2, aux env e3)
-    | Sequence (e1, e2) -> Sequence (aux env e1, aux env e2)
-    | Return (d1, d2, e) -> Return (d1, d2, aux env e)
-    | Bind (e1, x, e2) -> Bind (aux env e1, x, aux (rm x) e2) in
-  aux Name.Map.empty e*)
-
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   match e with
@@ -504,5 +464,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     to_coq paren (Apply (Variable (PathName.of_name [] "lift"), e))
   | Bind (e1, x, e2) ->
     Pp.parens paren @@ nest (
-      !^ "let!" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^
+      !^ "let!" ^^ (match x with
+        | None -> !^ "_"
+        | Some x -> Name.to_coq x) ^^ !^ ":=" ^^
+        to_coq false e1 ^^ !^ "in" ^^ newline ^^
       to_coq false e2)

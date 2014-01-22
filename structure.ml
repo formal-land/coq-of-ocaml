@@ -128,16 +128,19 @@ let rec pp (defs : t list) : SmartPrint.t =
 let rec of_structure (structure : structure) : t list =
   let of_structure_item (item : structure_item) : t =
     match item.str_desc with
-    | Tstr_value (is_rec, [{vb_pat = {pat_desc = Tpat_var (name, _)}; vb_expr = e}]) ->
-      let (is_rec, name, typ_vars, args, e_typ, e) =
-        Exp.import_let_fun is_rec name e in
-      Value {
-        Value.name = name;
-        is_rec = is_rec;
-        typ_vars = typ_vars;
-        args = args;
-        typ = e_typ;
-        body = e }
+    | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
+      let (is_rec, pattern, typ_vars, args, e_typ, e) =
+        Exp.import_let_fun is_rec pattern e in
+      (match pattern with
+      | Pattern.Variable name ->
+        Value {
+          Value.name = name;
+          is_rec = is_rec;
+          typ_vars = typ_vars;
+          args = args;
+          typ = e_typ;
+          body = e }
+      | _ -> failwith "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with
       | Type_variant cases ->
