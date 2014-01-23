@@ -22,10 +22,10 @@ type t =
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
   | Sequence of t * t (** A sequence of two expressions. *)
+  | Return of t (** Monadic return. *)
+  | Bind of t * Name.t option * t (** Monadic bind. *)
   | Lift of Effect.Descriptor.t * Effect.Descriptor.t * t
     (** Monadic lift. *)
-  | Bind of t * Name.t option * t
-    (** Monadic bind. *)
 
 let rec pp (e : t) : SmartPrint.t =
   match e with
@@ -55,11 +55,12 @@ let rec pp (e : t) : SmartPrint.t =
   | IfThenElse (e1, e2, e3) ->
     nest (!^ "IfThenElse" ^^ Pp.list [pp e1; pp e2; pp e3])
   | Sequence (e1, e2) -> nest (!^ "Sequence" ^^ Pp.list [pp e1; pp e2])
+  | Return e -> nest (!^ "Return" ^^ Pp.list [pp e])
+  | Bind (e1, x, e2) -> nest (!^ "Bind" ^^ Pp.list
+    [pp e1; nest (OCaml.option Name.pp x); pp e2])
   | Lift (d1, d2, e) ->
     nest (!^ "Lift" ^^
       Pp.list [Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
-  | Bind (e1, x, e2) -> nest (!^ "Bind" ^^ Pp.list
-    [pp e1; nest (OCaml.option Name.pp x); pp e2])
 
 (** Take a function expression and make explicit the list of arguments and the body. *)
 let rec open_function (e : t) : Name.t list * t =
@@ -278,8 +279,8 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       { Effect.descriptor = Effect.Descriptor.union
           [effect_e1.Effect.descriptor; effect_e2.Effect.descriptor];
         typ = effect_e2.Effect.typ })
-  | Lift _ | Bind _ ->
-    failwith "Cannot compute effects on an explicit lift or bind."
+  | Return _ | Bind _ | Lift _ ->
+    failwith "Cannot compute effects on an explicit return, bind or lift."
 
   and to_tree_let_fun (effects : Effect.Env.t)
     (is_rec : Recursivity.t) (x : Name.t) (args : (Name.t * Type.t) list)
@@ -315,6 +316,8 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
   let lift d1 d2 e =
     if Effect.Descriptor.eq d1 d2 then
       e
+    else if Effect.Descriptor.is_pure d1 then
+      Return e
     else
       Lift (d1, d2, e) in
   (** [d1] is the descriptor of [e1], [d2] of [e2]. *)
@@ -462,8 +465,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e3))
   | Sequence (e1, e2) ->
     nest (to_coq true e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
-  | Lift (d1, d2, e) -> (* TODO: print d1 and d2. *)
-    to_coq paren (Apply (Variable (PathName.of_name [] "lift"), e))
+  | Return e -> Pp.parens paren @@ nest (!^ "ret" ^^ to_coq true e)
   | Bind (e1, x, e2) ->
     Pp.parens paren @@ nest (
       !^ "let!" ^^ (match x with
@@ -471,3 +473,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         | Some x -> Name.to_coq x) ^^ !^ ":=" ^^
         to_coq false e1 ^^ !^ "in" ^^ newline ^^
       to_coq false e2)
+  | Lift (d1, d2, e) ->
+    Pp.parens paren @@ nest (
+      !^ "lift" ^^ Effect.Descriptor.to_coq d2 ^^
+      OCaml.list OCaml.bool (Effect.Descriptor.subset d1 d2) ^^
+      to_coq true e)

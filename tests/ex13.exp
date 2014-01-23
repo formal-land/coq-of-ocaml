@@ -11,18 +11,20 @@ Value 'tail':
         ]))
 
 Value 'print_list':
-  (rec, [ ], [ ('match_var_0', Type ('list', Type ('Z'))) ], Type ('unit'),
+  (rec, [ ], [ ('match_var_0', Type ('list', Type ('string'))) ], Type ('unit'),
     Match
       ('match_var_0',
         [
           (Constructor ('[]'), Constructor ('tt'));
           (Constructor ('cons', 'x', 'xs'),
             Sequence
-              (Apply ('print_int', 'x'), Apply ('print_list', 'xs')))
+              (Apply ('print_string', 'x'),
+                Apply ('print_list', 'xs')))
         ]))
 
 Value 'f':
-  (non_rec, [ ], [ ], (Type ('list', Type ('Z')) -> Type ('unit')), 'print_list')
+  (non_rec, [ ], [ ], (Type ('list', Type ('string')) -> Type ('unit')),
+    'print_list')
 
 Value 'x':
   (non_rec, [ 'A' ], [ ('z', 'A') ], Type ('unit'),
@@ -31,7 +33,7 @@ Value 'x':
         Apply
           ('tail',
             Constructor
-              ('cons', Int(5),
+              ('cons', String("Hello"),
                 Constructor
-                  ('cons', Int(7),
-                    Constructor ('cons', Int(8), Constructor ('[]')))))))
+                  ('cons', String(" "),
+                    Constructor ('cons', String("world"), Constructor ('[]')))))))

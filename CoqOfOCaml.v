@@ -86,22 +86,15 @@ Module Effect.
   Defined.
 End Effect.
 
-Definition M (e : Effect.t) (A : Type) : Type :=
+Definition M (es : list Effect.t) (A : Type) : Type :=
+  let e := Effect.of_list es in
   Effect.S e -> (A + Effect.E e) * Effect.S e.
 
-Definition lift (es : list Effect.t) (bs : list bool) {A : Type}
-  (x : M (Effect.of_list (Effect.sub es bs)) A)
-  : M (Effect.of_list es) A :=
-  fun s =>
-    let (r, s') := x (Effect.filter es bs s) in
-    let s := Effect.expand_state es bs s' s in
-    match r with
-    | inl x => (inl x, s)
-    | inr err => (inr (Effect.expand_exception es bs err), s)
-    end.
+Definition ret {es : list Effect.t} {A : Type} (x : A) : M es A :=
+  fun s => (inl x, s).
 
-Definition bind {e : Effect.t} {A B : Type}
-  (x : M e A) (f : A -> M e B) : M e B :=
+Definition bind {es : list Effect.t} {A B : Type}
+  (x : M es A) (f : A -> M es B) : M es B :=
   fun s =>
     let (x, s) := x s in
     match x with
@@ -111,3 +104,34 @@ Definition bind {e : Effect.t} {A B : Type}
 
 Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
   (at level 200, X ident, A at level 100, B at level 200).
+
+Definition lift (es : list Effect.t) (bs : list bool) {A : Type}
+  (x : M (Effect.sub es bs) A) : M es A :=
+  fun s =>
+    let (r, s') := x (Effect.filter es bs s) in
+    let s := Effect.expand_state es bs s' s in
+    match r with
+    | inl x => (inl x, s)
+    | inr err => (inr (Effect.expand_exception es bs err), s)
+    end.
+
+Definition Invalid_argument := Effect.new unit string.
+
+Definition Failure := Effect.new unit string.
+
+Definition IO := Effect.new (list string * list string) Empty_set.
+
+Definition invalid_arg {A : Type} (message : string)
+  : M [Invalid_argument] A :=
+  fun s => (inr (inl message), s).
+
+Definition failwith {A : Type} (message : string)
+  : M [Failure] A :=
+  fun s => (inr (inl message), s).
+
+Definition print_string (message : string) : M [IO] unit :=
+  fun s =>
+    match s with
+    | ((stream_i, stream_o), _) =>
+      (inl tt, ((stream_i, message :: stream_o), tt))
+    end.

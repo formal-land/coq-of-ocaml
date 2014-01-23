@@ -1,25 +1,62 @@
 (** Types for the effects. *)
 open SmartPrint
 
+module Atom = struct
+  type t = {
+    name : PathName.t;
+    state : string;
+    error: string }
+
+  type t' = t
+  let compare (a1 : t) (a2 : t) : int =
+    compare a1.name a2.name
+
+  module Set = Set.Make (struct type t = t' let compare = compare end)
+  module Map = Map.Make (struct type t = t' let compare = compare end)
+
+  let pp (a : t) : SmartPrint.t =
+    nest (!^ "Atom" ^^ Pp.list [
+      PathName.pp a.name; OCaml.string a.state; OCaml.string a.error])
+
+  let to_coq (a : t) : SmartPrint.t =
+    PathName.to_coq a.name
+end
+
 module Descriptor = struct
-  type t = Name.Set.t
+  type t = Atom.Set.t
 
   let pp (d : t) : SmartPrint.t =
-    OCaml.list Name.pp (Name.Set.elements d)
+    OCaml.list (fun a -> PathName.pp a.Atom.name) (Atom.Set.elements d)
 
-  let pure : t = Name.Set.empty
+  let pure : t = Atom.Set.empty
 
   let is_pure (d : t) : bool =
-    Name.Set.is_empty d
+    Atom.Set.is_empty d
 
   let eq (d1 : t) (d2 : t) : bool =
-    Name.Set.equal d1 d2
+    Atom.Set.equal d1 d2
 
-  let of_name (x : Name.t) : t =
-    Name.Set.singleton x
+  let of_atom (x : Atom.t) : t =
+    Atom.Set.singleton x
 
   let union (ds : t list) : t =
-    List.fold_left (Name.Set.union) pure ds
+    List.fold_left (Atom.Set.union) pure ds
+
+  let subset (d1 : t) (d2 : t) : bool list =
+    let rec aux as1 as2 =
+      match (as1, as2) with
+      | ([], _) -> List.map (fun _ -> false) as2
+      | (a1 :: as1', a2 :: as2') ->
+        if a1.Atom.name = a2.Atom.name then
+          true :: aux as1' as2'
+        else
+          false :: aux as1 as2'
+      | (_ :: _, []) ->
+        failwith "You must have a subset to compute the subset" in
+    aux (Atom.Set.elements d1) (Atom.Set.elements d2)
+
+  let to_coq (d : t) : SmartPrint.t =
+    OCaml.list Atom.to_coq (Atom.Set.elements d)
 end
 
 module Type = struct

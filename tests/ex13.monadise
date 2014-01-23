@@ -4,7 +4,7 @@ Value 'tail':
     Match
       ('l',
         [
-          (Constructor ('cons', Any, 'xs'), Lift ([ ], [ 'Failure' ], 'xs'));
+          (Constructor ('cons', Any, 'xs'), Return ('xs'));
           (Constructor ('[]'),
             Apply
               ('failwith',
@@ -12,32 +12,33 @@ Value 'tail':
         ]))
 
 Value 'print_list':
-  (rec, [ ], [ ('match_var_0', Type ('list', Type ('Z'))) ],
-    Monad ([ 'io' ], Type ('unit')),
+  (rec, [ ], [ ('match_var_0', Type ('list', Type ('string'))) ],
+    Monad ([ 'IO' ], Type ('unit')),
     Match
       ('match_var_0',
         [
-          (Constructor ('[]'), Lift ([ ], [ 'io' ], Constructor ('tt')));
+          (Constructor ('[]'), Return (Constructor ('tt')));
           (Constructor ('cons', 'x', 'xs'),
             Bind
-              (Apply ('print_int', 'x'), None,
+              (Apply ('print_string', 'x'), None,
                 Apply ('print_list', 'xs')))
         ]))
 
 Value 'f':
   (non_rec, [ ], [ ],
-    (Type ('list', Type ('Z')) -> Monad ([ 'io' ], Type ('unit'))), 'print_list')
+    (Type ('list', Type ('string')) -> Monad ([ 'IO' ], Type ('unit'))),
+    'print_list')
 
 Value 'x':
-  (non_rec, [ 'A' ], [ ('z', 'A') ], Monad ([ 'Failure'; 'io' ], Type ('unit')),
+  (non_rec, [ 'A' ], [ ('z', 'A') ], Monad ([ 'Failure'; 'IO' ], Type ('unit')),
     Bind
       (Lift
-        ([ 'Failure' ], [ 'Failure'; 'io' ],
+        ([ 'Failure' ], [ 'Failure'; 'IO' ],
           Apply
             ('tail',
               Constructor
-                ('cons', Int(5),
+                ('cons', String("Hello"),
                   Constructor
-                    ('cons', Int(7),
-                      Constructor ('cons', Int(8), Constructor ('[]')))))),
-        Some 'x', Lift ([ 'io' ], [ 'Failure'; 'io' ], Apply ('f', 'x'))))
+                    ('cons', String(" "),
+                      Constructor ('cons', String("world"), Constructor ('[]')))))),
+        Some 'x', Lift ([ 'IO' ], [ 'Failure'; 'IO' ], Apply ('f', 'x'))))

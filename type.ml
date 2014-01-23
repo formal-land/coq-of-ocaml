@@ -96,5 +96,6 @@ let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
   | Apply (path, typs) ->
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
       (PathName.to_coq path :: List.map (to_coq true) typs)
-  | Monad (d, typ) -> (* TODO; display [d] *)
-    to_coq paren (Apply (PathName.of_name [] "M", [typ]))
+  | Monad (d, typ) ->
+    Pp.parens paren @@ nest (
+      !^ "M" ^^ Effect.Descriptor.to_coq d ^^ to_coq true typ)

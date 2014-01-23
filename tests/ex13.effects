@@ -8,24 +8,24 @@ Value
             Leaf (Effect ([ ], .)))))
 
 Value
-  (. -[ 'io' ]-> .,
+  (. -[ 'IO' ]-> .,
     Match
-      (Effect ([ 'io' ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
+      (Effect ([ 'IO' ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
         Sequence
-          (Effect ([ 'io' ], .),
+          (Effect ([ 'IO' ], .),
             Apply
-              (Effect ([ 'io' ], .), Leaf (Effect ([ ], . -[ 'io' ]-> .)),
+              (Effect ([ 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
                 Leaf (Effect ([ ], .))),
             Apply
-              (Effect ([ 'io' ], .), Leaf (Effect ([ ], . -[ 'io' ]-> .)),
+              (Effect ([ 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
                 Leaf (Effect ([ ], .))))))
 
-Value (. -[ 'io' ]-> ., Leaf (Effect ([ ], . -[ 'io' ]-> .)))
+Value (. -[ 'IO' ]-> ., Leaf (Effect ([ ], . -[ 'IO' ]-> .)))
 
 Value
-  (. -[ 'Failure'; 'io' ]-> .,
+  (. -[ 'Failure'; 'IO' ]-> .,
     Apply
-      (Effect ([ 'Failure'; 'io' ], .), Leaf (Effect ([ ], . -[ 'io' ]-> .)),
+      (Effect ([ 'Failure'; 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
         Apply
           (Effect ([ 'Failure' ], .), Leaf (Effect ([ ], . -[ 'Failure' ]-> .)),
             Compound

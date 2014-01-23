@@ -8,9 +8,9 @@ let tail l =
 let rec print_list = function
   | [] -> ()
   | x :: xs ->
-    print_int x;
+    print_string x;
     print_list xs
 
 let f = print_list
 
-let x z = f (tail [5; 7; 8])
+let x z = f (tail ["Hello"; " "; "world"])

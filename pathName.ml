@@ -82,7 +82,8 @@ let convert (p : t) : t =
 
 (** Pretty-print a global name. *)
 let pp (x : t) : SmartPrint.t =
-  single_quotes @@ separate (!^ ".") (List.map (fun s -> !^ s) (x.path @ [x.base]))
+  single_quotes @@ separate (!^ ".")
+    (List.map (fun s -> !^ s) (x.path @ [x.base]))
 
 (** Lift a local name to a global name. *)
 let of_name (path : Path.t) (x : Name.t) : t =
