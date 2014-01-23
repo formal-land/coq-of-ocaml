@@ -475,6 +475,4 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       to_coq false e2)
   | Lift (d1, d2, e) ->
     Pp.parens paren @@ nest (
-      !^ "lift" ^^ Effect.Descriptor.to_coq d2 ^^
-      OCaml.list OCaml.bool (Effect.Descriptor.subset d1 d2) ^^
-      to_coq true e)
+      !^ "lift" ^^ Effect.Descriptor.subset_to_coq d1 d2 ^^ to_coq true e)

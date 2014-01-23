@@ -13,4 +13,4 @@ let rec print_list = function
 
 let f = print_list
 
-let x z = f (tail ["Hello"; " "; "world"])
+let x z = f (tail ["Stop"; "Hello"; " "; "world"])

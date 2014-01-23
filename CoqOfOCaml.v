@@ -44,45 +44,50 @@ Module Effect.
     | e :: es => add e (of_list es)
     end.
   
-  Fixpoint sub (es : list t) (bs : list bool) : list t :=
-    match (es, bs) with
-    | ([], _) => []
-    | (e :: es, b :: bs) =>
-      if b then
-        e :: sub es bs
-      else
-        sub es bs
-    | (_ :: _, []) => es
+  Fixpoint domain (ebs : list (t * bool)) : list t :=
+    match ebs with
+    | [] => []
+    | (e, _) :: ebs => e :: domain ebs
     end.
   
-  Fixpoint filter (es : list t) (bs : list bool)
-    (s : S (of_list es)) {struct es}
-    : S (of_list (sub es bs)).
-    destruct es as [|e es]; destruct bs as [|b bs]; try exact s.
-    destruct b; simpl in *.
-    - exact (fst s, filter es bs (snd s)).
-    - exact (filter es bs (snd s)).
+  Fixpoint sub (ebs : list (t * bool)) : list t :=
+    match ebs with
+    | [] => []
+    | (_, false) :: ebs => sub ebs
+    | (e, true) :: ebs => e :: sub ebs
+    end.
+  
+  Fixpoint filter (ebs : list (t * bool))
+    (s : S (of_list (domain ebs))) {struct ebs}
+    : S (of_list (sub ebs)).
+    destruct ebs as [|[e b] ebs].
+    - exact s.
+    - destruct b; simpl in *.
+      + exact (fst s, filter ebs (snd s)).
+      + exact (filter ebs (snd s)).
   Defined.
   
-  Fixpoint expand_exception (es : list t) (bs : list bool)
-    (err : E (of_list (sub es bs))) {struct es}
-    : E (of_list es).
-    destruct es as [|e es]; destruct bs as [|b bs]; try exact err.
-    destruct b; simpl in *.
-    - exact (match err with
-      | inl err => inl err
-      | inr err => inr (expand_exception es bs err)
-      end).
-    - exact (inr (expand_exception es bs err)).
+  Fixpoint expand_exception (ebs : list (t * bool))
+    (err : E (of_list (sub ebs))) {struct ebs}
+    : E (of_list (domain ebs)).
+    destruct ebs as [|[e b] ebs].
+    - exact err.
+    - destruct b; simpl in *.
+      + exact (match err with
+        | inl err => inl err
+        | inr err => inr (expand_exception ebs err)
+        end).
+      + exact (inr (expand_exception ebs err)).
   Defined.
   
-  Fixpoint expand_state (es : list t) (bs : list bool)
-    (s1 : S (of_list (sub es bs))) (s2 : S (of_list es)) {struct es}
-    : S (of_list es).
-    destruct es as [|e es]; destruct bs as [|b bs]; try exact s1.
-    destruct b; simpl in *.
-    - exact (fst s1, expand_state es bs (snd s1) (snd s2)).
-    - exact (fst s2, expand_state es bs s1 (snd s2)).
+  Fixpoint expand_state (ebs : list (t * bool))
+    (s1 : S (of_list (sub ebs))) (s2 : S (of_list (domain ebs)))
+    {struct ebs} : S (of_list (domain ebs)).
+    destruct ebs as [|[e b] ebs].
+    - exact s1.
+    - destruct b; simpl in *.
+      + exact (fst s1, expand_state ebs (snd s1) (snd s2)).
+      + exact (fst s2, expand_state ebs s1 (snd s2)).
   Defined.
 End Effect.
 
@@ -105,14 +110,14 @@ Definition bind {es : list Effect.t} {A B : Type}
 Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
   (at level 200, X ident, A at level 100, B at level 200).
 
-Definition lift (es : list Effect.t) (bs : list bool) {A : Type}
-  (x : M (Effect.sub es bs) A) : M es A :=
+Definition lift (ebs : list (Effect.t * bool)) {A : Type}
+  (x : M (Effect.sub ebs) A) : M (Effect.domain ebs) A :=
   fun s =>
-    let (r, s') := x (Effect.filter es bs s) in
-    let s := Effect.expand_state es bs s' s in
+    let (r, s') := x (Effect.filter ebs s) in
+    let s := Effect.expand_state ebs s' s in
     match r with
     | inl x => (inl x, s)
-    | inr err => (inr (Effect.expand_exception es bs err), s)
+    | inr err => (inr (Effect.expand_exception ebs err), s)
     end.
 
 Definition Invalid_argument := Effect.new unit string.

@@ -42,21 +42,23 @@ module Descriptor = struct
   let union (ds : t list) : t =
     List.fold_left (Atom.Set.union) pure ds
 
-  let subset (d1 : t) (d2 : t) : bool list =
-    let rec aux as1 as2 =
-      match (as1, as2) with
-      | ([], _) -> List.map (fun _ -> false) as2
-      | (a1 :: as1', a2 :: as2') ->
-        if a1.Atom.name = a2.Atom.name then
-          true :: aux as1' as2'
-        else
-          false :: aux as1 as2'
-      | (_ :: _, []) ->
-        failwith "You must have a subset to compute the subset" in
-    aux (Atom.Set.elements d1) (Atom.Set.elements d2)
-
   let to_coq (d : t) : SmartPrint.t =
     OCaml.list Atom.to_coq (Atom.Set.elements d)
+
+  let subset_to_coq (d1 : t) (d2 : t) : SmartPrint.t =
+    let rec aux as1 as2 =
+      match (as1, as2) with
+      | ([], _) -> List.map (fun a2 -> (a2.Atom.name, false)) as2
+      | (a1 :: as1', a2 :: as2') ->
+        if a1.Atom.name = a2.Atom.name then
+          (a2.Atom.name, true) :: aux as1' as2'
+        else
+          (a2.Atom.name, false) :: aux as1 as2'
+      | (_ :: _, []) ->
+        failwith "Must be a subset to display the subset." in
+    aux (Atom.Set.elements d1) (Atom.Set.elements d2) |>
+    OCaml.list (fun (a, b) ->
+      parens (PathName.to_coq a ^-^ !^ "," ^^ OCaml.bool b))
 end
 
 module Type = struct

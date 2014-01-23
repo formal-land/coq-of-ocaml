@@ -34,4 +34,6 @@ Value
                   (Effect ([ ], .), Leaf (Effect ([ ], .)),
                     Compound
                       (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                        Compound (Effect ([ ], .))))))))
+                        Compound
+                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                            Compound (Effect ([ ], .)))))))))

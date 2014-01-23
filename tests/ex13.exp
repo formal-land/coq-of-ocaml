@@ -33,7 +33,10 @@ Value 'x':
         Apply
           ('tail',
             Constructor
-              ('cons', String("Hello"),
+              ('cons', String("Stop"),
                 Constructor
-                  ('cons', String(" "),
-                    Constructor ('cons', String("world"), Constructor ('[]')))))))
+                  ('cons', String("Hello"),
+                    Constructor
+                      ('cons', String(" "),
+                        Constructor
+                          ('cons', String("world"), Constructor ('[]'))))))))
