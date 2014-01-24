@@ -33,6 +33,13 @@ class Test
   def check(mode)
     coq_of_ocaml(mode) == reference(mode)
   end
+
+  def coq
+    cmd = ['coqc', extension('.v')]
+    print cmd.join(" ")
+    IO.popen(cmd + [:err => '/dev/null']).read
+    $?
+  end
 end
 
 class Tests
@@ -58,6 +65,17 @@ class Tests
       end
     end
   end
+
+  def coq
+    puts "\e[1mRunning coqc (compiles the reference files):\e[0m"
+    for test in @tests do
+      if test.coq
+        puts "  \e[1;34m[ \e[32mOK \e[34m]\e[0m"
+      else
+        puts "  \e[1;34m[ \e[31merror \e[34m]\e[0m"
+      end
+    end
+  end
 end
 
 tests = Tests.new(Dir.glob('tests/ex*.ml'))
@@ -68,3 +86,7 @@ puts
 tests.check('effects')
 puts
 tests.check('monadise')
+puts
+tests.check('v')
+puts
+tests.coq

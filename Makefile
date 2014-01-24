@@ -33,7 +33,7 @@ vo: $(TESTS_INPUT:.ml=.vo)
 	./$(OUTPUT) -mode monadise $< >$@
 
 %.v: %.cmt default
-	./$(OUTPUT) -mode coq $< >$@
+	./$(OUTPUT) -mode v $< >$@
 
 %.vo: %.v
 	coqc $<

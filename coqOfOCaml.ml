@@ -17,7 +17,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
       let (_, definitions) =
         Structure.monadise PathName.Env.empty definitions trees in
       Structure.pp definitions
-    | "coq" ->
+    | "v" ->
       let definitions = Structure.of_structure structure in
       let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
       let (_, definitions) =
