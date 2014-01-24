@@ -1,0 +1,14 @@
+Value
+  (. -> . -> .,
+    Match
+      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+        Apply
+          (Effect ([ ], .),
+            Apply
+              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
+            Leaf (Effect ([ ], .))),
+        Apply
+          (Effect ([ ], .),
+            Apply
+              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
+            Leaf (Effect ([ ], .)))))

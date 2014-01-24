@@ -4,17 +4,13 @@ Module
   Value
     (.,
       Match
-        (Effect ([ ], .), Leaf (Effect ([ ], .)),
-          Match
-            (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)),
+        (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)),
+          Apply
+            (Effect ([ ], .),
               Apply
-                (Effect ([ ], .),
-                  Apply
-                    (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                      Leaf (Effect ([ ], .))),
-                  Apply
-                    (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                      Leaf (Effect ([ ], .)))))))
+                (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
+              Apply
+                (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))))
   
   Value
     (.,

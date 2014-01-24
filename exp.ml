@@ -62,7 +62,8 @@ let rec pp (e : t) : SmartPrint.t =
     nest (!^ "Lift" ^^
       Pp.list [Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
 
-(** Take a function expression and make explicit the list of arguments and the body. *)
+(** Take a function expression and make explicit the list of arguments and
+    the body. *)
 let rec open_function (e : t) : Name.t list * t =
   match e with
   | Function (x, e) ->
@@ -85,7 +86,9 @@ let rec of_expression (e : expression) : t =
     | (Pattern.Variable name, _) ->
       LetFun (rec_flag, name, free_typ_vars, args, body_typ, body, e2)
     | _ -> failwith "Cannot match a function definition on a pattern.")
-  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _) ->
+  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
+  | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
+    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _)->
     Function (Name.of_ident x, of_expression e)
   | Texp_function (_, cases, _) ->
     let (x, e) = open_cases cases in
