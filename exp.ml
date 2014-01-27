@@ -76,7 +76,7 @@ let rec of_expression (e : expression) : t =
   match e.exp_desc with
   | Texp_ident (path, _, _) -> Variable (PathName.of_path path)
   | Texp_constant constant -> Constant (Constant.of_constant constant)
-  | Texp_let (rec_flag, [{vb_pat = pattern; vb_expr = e1}], e2) ->
+  | Texp_let (rec_flag, [{ vb_pat = pattern; vb_expr = e1 }], e2) ->
     let (rec_flag, pattern, free_typ_vars, args, body_typ, body) =
       import_let_fun rec_flag pattern e1 in
     let e2 = of_expression e2 in
@@ -86,9 +86,19 @@ let rec of_expression (e : expression) : t =
     | (Pattern.Variable name, _) ->
       LetFun (rec_flag, name, free_typ_vars, args, body_typ, body, e2)
     | _ -> failwith "Cannot match a function definition on a pattern.")
+  | Texp_let (rec_flag, fs, e2) ->
+    let defs = fs |> List.map (fun { vb_pat = pattern; vb_expr = e1 } ->
+      import_let_fun rec_flag pattern e1) in
+    let defs = defs |> List.map (function
+      | (_, Pattern.Variable f, _, args, typ, e) -> (f, args, typ, e)
+      | _ -> failwith "Unexpected format for mutual definitions.") in
+    let f_typs = defs |> List.map (fun (_, args, typ, _) ->
+      List.fold_right (fun (_, x_typ) typ -> Type.Arrow (x_typ, typ))
+        args typ) in
+    failwith "TODO"
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
-    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _)->
+    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->
     Function (Name.of_ident x, of_expression e)
   | Texp_function (_, cases, _) ->
     let (x, e) = open_cases cases in
