@@ -62,6 +62,59 @@ let rec pp (e : t) : SmartPrint.t =
     nest (!^ "Lift" ^^
       Pp.list [Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
 
+let rec free_variables_in_set (env : Name.Set.t) (e : t) : Name.Set.t =
+  let aux (es : t list) : Name.Set.t =
+    List.fold_left (fun vars e ->
+      Name.Set.union (free_variables_in_set env e) vars)
+      Name.Set.empty es in
+  match e with
+  | Constant _ -> Name.Set.empty
+  | Variable x ->
+    if x.PathName.path = [] && Name.Set.mem x.PathName.base env then
+      Name.Set.add x.PathName.base env
+    else
+      env
+  | Tuple es | Constructor (_, es) -> aux es
+  | Apply (e1, e2) -> aux [e1; e2]
+  | Function (x, e) -> free_variables_in_set (Name.Set.remove x env) e
+  | Let (x, e1, e2) | Bind (e1, Some x, e2) ->
+    Name.Set.union
+      (free_variables_in_set env e1)
+      (free_variables_in_set (Name.Set.remove x env) e2)
+  | LetFun (_, f, _, args, _, e1, e2) ->
+    let env_in_e1 =
+      List.fold_left (fun env (x, _) -> Name.Set.remove x env)
+      env args in
+    Name.Set.union
+      (free_variables_in_set env_in_e1 e1)
+      (free_variables_in_set (Name.Set.remove f env) e2)
+  | Match (e, cases) ->
+    let cases_vars = cases |> List.map (fun (p, e) ->
+      free_variables_in_set (Name.Set.diff env (Pattern.free_vars p)) e) in
+    List.fold_left Name.Set.union (free_variables_in_set env e) cases_vars
+  | Record fields -> aux (List.map snd fields)
+  | Field (e, _) | Return e | Lift (_, _, e) -> free_variables_in_set env e
+  | IfThenElse (e1, e2, e3) -> aux [e1; e2; e3]
+  | Sequence (e1, e2) | Bind (e1, None, e2) -> aux [e1; e2]
+
+(* TODO: optimize *)
+let rec sort_mutual_definitions (defs : (Name.t * t) list)
+  : (Name.t * t) list =
+  let names = List.fold_left (fun env (x, _) ->
+    Name.Set.add x env)
+    Name.Set.empty defs in
+  let references = defs |> List.map (fun (x, e) ->
+    free_variables_in_set (Name.Set.remove x names) e) in
+  let nb_references = List.map Name.Set.cardinal references in
+  let nb_referenced = defs |> List.map (fun (x, _) ->
+    List.length @@ List.filter (Name.Set.mem x) references) in
+  let defs = List.map fst @@ List.sort (fun (_, (a, b)) (_, (c, d)) ->
+    compare (a * d) (c * b))
+    (List.combine defs (List.combine nb_references nb_referenced)) in
+  match defs with
+  | [] -> []
+  | def :: defs -> def :: sort_mutual_definitions defs
+
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
 let rec open_function (e : t) : Name.t list * t =
