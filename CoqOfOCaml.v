@@ -126,6 +126,10 @@ Definition Failure := Effect.new unit string.
 
 Definition IO := Effect.new (list string * list string) Empty_set.
 
+Definition Counter := Effect.new nat Empty_set.
+
+Definition NonTermination := Effect.new unit unit.
+
 Definition invalid_arg {A : Type} (message : string)
   : M [Invalid_argument] A :=
   fun s => (inr (inl message), s).
@@ -140,3 +144,19 @@ Definition print_string (message : string) : M [IO] unit :=
     | ((stream_i, stream_o), _) =>
       (inl tt, ((stream_i, message :: stream_o), tt))
     end.
+
+Definition read_counter (_ : unit) : M [Counter] nat :=
+  fun s => (inl (fst s), s).
+
+Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
+  fun s => (inr (inl tt), s).
+
+(*Fixpoint f_rec (counter : nat) (n : nat) : M [NonTermination] unit :=
+  match counter with
+  | O => not_terminated tt
+  | S counter => f_rec counter (S n)
+  end.
+
+Definition f (n : nat) : M [Counter; NonTermination] unit :=
+  let! counter := lift [(_, true); (_, false)] (read_counter tt) in
+  lift [(_, false); (_, true)] (f_rec counter n).*)

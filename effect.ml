@@ -48,17 +48,16 @@ module Descriptor = struct
   let subset_to_coq (d1 : t) (d2 : t) : SmartPrint.t =
     let rec aux as1 as2 =
       match (as1, as2) with
-      | ([], _) -> List.map (fun a2 -> (a2.Atom.name, false)) as2
+      | ([], _) -> List.map (fun _ -> false) as2
       | (a1 :: as1', a2 :: as2') ->
         if a1.Atom.name = a2.Atom.name then
-          (a2.Atom.name, true) :: aux as1' as2'
+          true :: aux as1' as2'
         else
-          (a2.Atom.name, false) :: aux as1 as2'
+          false :: aux as1 as2'
       | (_ :: _, []) ->
         failwith "Must be a subset to display the subset." in
     aux (Atom.Set.elements d1) (Atom.Set.elements d2) |>
-    OCaml.list (fun (a, b) ->
-      parens (PathName.to_coq a ^-^ !^ "," ^^ OCaml.bool b))
+    OCaml.list (fun b -> parens (!^ "_" ^-^ !^ "," ^^ OCaml.bool b))
 end
 
 module Type = struct

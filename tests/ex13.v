@@ -22,9 +22,9 @@ Definition f : (list string) -> M [ IO ] unit := print_list.
 
 Definition x {A : Type} (z : A) : M [ Failure; IO ] unit :=
   let! x :=
-    lift [ (Failure, true); (IO, false) ]
+    lift [ (_, true); (_, false) ]
       (tail
         (cons "Stop" % string
           (cons "Hello" % string (cons " " % string (cons "world" % string [])))))
     in
-  lift [ (Failure, false); (IO, true) ] (f x).
+  lift [ (_, false); (_, true) ] (f x).
