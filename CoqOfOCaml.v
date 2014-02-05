@@ -110,15 +110,24 @@ Definition bind {es : list Effect.t} {A B : Type}
 Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
   (at level 200, X ident, A at level 100, B at level 200).
 
-Definition lift (ebs : list (Effect.t * bool)) {A : Type}
-  (x : M (Effect.sub ebs) A) : M (Effect.domain ebs) A :=
-  fun s =>
-    let (r, s') := x (Effect.filter ebs s) in
-    let s := Effect.expand_state ebs s' s in
-    match r with
-    | inl x => (inl x, s)
-    | inr err => (inr (Effect.expand_exception ebs err), s)
-    end.
+Definition lift {A : Type} (es : list Effect.t) (bs : string)
+  (x : M _ A) : M _ A :=
+  let aux (ebs : list (Effect.t * bool)) (x : M (Effect.sub ebs) A)
+    : M (Effect.domain ebs) A :=
+    fun s =>
+      let (r, s') := x (Effect.filter ebs s) in
+      let s := Effect.expand_state ebs s' s in
+      match r with
+      | inl x => (inl x, s)
+      | inr err => (inr (Effect.expand_exception ebs err), s)
+      end in
+  let fix bool_list (s : string) : list bool :=
+    match s with
+    | EmptyString => []
+    | String "0" s => false :: bool_list s
+    | String _ s => true :: bool_list s
+    end in
+  aux (List.combine es (bool_list bs)) x.
 
 Definition Invalid_argument := Effect.new unit string.
 
@@ -158,5 +167,5 @@ Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
   end.
 
 Definition f (n : nat) : M [Counter; NonTermination] unit :=
-  let! counter := lift [(_, true); (_, false)] (read_counter tt) in
-  lift [(_, false); (_, true)] (f_rec counter n).*)
+  let! counter := lift [_;_] "10" (read_counter tt) in
+  lift [_;_] "01" (f_rec counter n).*)
