@@ -187,6 +187,103 @@ and import_let_fun (rec_flag : Asttypes.rec_flag) (pattern : pattern) (e : expre
   (Recursivity.of_rec_flag rec_flag, pattern, e_schema.Schema.variables,
     List.combine args_names args_typs, e_body_typ, e_body)
 
+let rec substitute (x : PathName.t) (e' : t) (e : t) : t =
+  match e with
+  | Constant _ -> e
+  | Variable y -> if x = y then e' else Variable y
+  | Tuple es -> Tuple (List.map (substitute x e') es)
+  | Constructor (y, es) -> Constructor (y, List.map (substitute x e') es)
+  | Apply (e1, e2) -> Apply (substitute x e' e1, substitute x e' e2)
+  | Function (y, e) ->
+    if PathName.of_name [] y = x then
+      Function (y, e)
+    else
+      Function (y, substitute x e' e)
+  | Let (y, e1, e2) ->
+    let e1 = substitute x e' e1 in
+    Let (y, e1, if PathName.of_name [] y = x then e2 else substitute x e' e2)
+  | LetFun (is_rec, y, typ_args, args, typ, e1, e2) ->
+    let e1 =
+      if Recursivity.to_bool is_rec && PathName.of_name [] y = x then
+        e1
+      else
+        substitute x e' e1 in
+    let e2 = if PathName.of_name [] y = x then e2 else substitute x e' e2 in
+    LetFun (is_rec, y, typ_args, args, typ, e1, e2)
+  | Match (e, cases) ->
+    let e = substitute x e' e in
+    let cases = cases |> List.map (fun (p, e) ->
+      let ys = Pattern.free_variables p in
+      if Name.Set.exists (fun y -> PathName.of_name [] y = x) ys then
+        (p, e)
+      else
+        (p, substitute x e' e)) in
+    Match (e, cases)
+  | Record fields ->
+    Record (List.map (fun (y, e) -> (y, substitute x e' e)) fields)
+  | Field (e, y) -> Field (substitute x e' e, y)
+  | IfThenElse (e1, e2, e3) ->
+    IfThenElse (substitute x e' e1, substitute x e' e2, substitute x e' e3)
+  | Sequence (e1, e2) -> Sequence (substitute x e' e1, substitute x e' e2)
+  | Return e -> Return (substitute x e' e)
+  | Bind (e1, y, e2) ->
+    let e1 = substitute x e' e1 in
+    let e2 =
+      match y with
+      | None -> substitute x e' e2
+      | Some y ->
+        if PathName.of_name [] y = x then
+          e2
+        else
+          substitute x e' e2 in
+    Bind (e1, y, e2)
+  | Lift (d1, d2, e) -> Lift (d1, d2, substitute x e' e)
+
+let rec monadise_let_rec (e : t) : t =
+  match e with
+  | Constant _ | Variable _ -> e
+  | Tuple es -> Tuple (List.map monadise_let_rec es)
+  | Constructor (x, es) ->
+    Constructor (x, List.map monadise_let_rec es)
+  | Apply (e1, e2) -> Apply (monadise_let_rec e1, monadise_let_rec e2)
+  | Function (x, e) -> Function (x, monadise_let_rec e)
+  | Let (x, e1, e2) -> Let (x, monadise_let_rec e1, monadise_let_rec e2)
+  | LetFun (is_rec, x, typ_args, args, typ, e1, e2) ->
+    let e1 = monadise_let_rec e1 in
+    let e2 = monadise_let_rec e2 in
+    if Recursivity.to_bool is_rec then
+      let var (x : Name.t) : t = Variable (PathName.of_name [] x) in
+      let x_rec = x ^ "_rec" in
+      let args' =
+        ("counter", Type.Apply (PathName.of_name [] "nat", [])) :: args in
+      let e1 = Match (var "counter", [
+        (Pattern.Constant (Constant.Nat 0),
+          Apply (var "not_terminated", var "tt"));
+        (Pattern.Constructor (PathName.of_name [] "S",
+          [Pattern.Variable "counter"]),
+          substitute (PathName.of_name [] x)
+            (Apply (var x_rec, var "counter")) e1)]) in
+      LetFun (is_rec, x_rec, typ_args, args', typ, e1,
+      LetFun (Recursivity.New false, x, typ_args, args, typ,
+        Let ("counter", Apply (var "read_counter", var "tt"),
+        List.fold_left (fun e (x, _) -> Apply (e, var x))
+          (Apply (var x_rec, var "counter")) args),
+      e2))
+    else
+      LetFun (is_rec, x, typ_args, args, typ, e1, e2)
+  | Match (e, cases) ->
+    Match (monadise_let_rec e,
+      List.map (fun (p, e) -> (p, monadise_let_rec e)) cases)
+  | Record fields ->
+    Record (List.map (fun (x, e) -> (x, monadise_let_rec e)) fields)
+  | Field (e, x) -> Field (monadise_let_rec e, x)
+  | IfThenElse (e1, e2, e3) ->
+    IfThenElse (monadise_let_rec e1, monadise_let_rec e2, monadise_let_rec e3)
+  | Sequence (e1, e2) -> Sequence (monadise_let_rec e1, monadise_let_rec e2)
+  | Return e -> monadise_let_rec e
+  | Bind (e1, x, e2) -> Bind (monadise_let_rec e1, x, monadise_let_rec e2)
+  | Lift (d1, d2, e) -> Lift (d1, d2, monadise_let_rec e)
+
 module Tree = struct
   type t =
     | Leaf of Effect.t
