@@ -3,6 +3,15 @@ open Typedtree
 open Types
 open SmartPrint
 
+module Definition = struct
+  (** A "let" of a function: the recursivity flag, the function name, the type variables,
+    the names and types of the arguments, the return type, the body and the expression
+    in which we do the "let". We need to group [Let] and [Function] in one constructor
+    to make the Coq's fixpoint operator work (and have a nicer pretty-printing). *)
+  type 'a t =
+    Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * 'a
+end
+
 (** The simplified OCaml AST we use. *)
 type t =
   | Constant of Constant.t
@@ -13,10 +22,6 @@ type t =
   | Function of Name.t * t (** An argument name and a body. *)
   | Let of Name.t * t * t (** A "let" of a non-functional value. *)
   | LetFun of Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t * t
-    (** A "let" of a function: the recursivity flag, the function name, the type variables,
-        the names and types of the arguments, the return type, the body and the expression
-        in which we do the "let". We need to group [Let] and [Function] in one constructor
-        to make the Coq's fixpoint operator work (and have a nicer pretty-printing). *)
   | Match of t * (Pattern.t * t) list (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
