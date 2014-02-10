@@ -157,29 +157,6 @@ let rec of_expression (e : expression) : t =
     | (Pattern.Variable name, _) ->
       LetFun (rec_flag, name, free_typ_vars, args, body_typ, body, e2)
     | _ -> failwith "Cannot match a function definition on a pattern.")
-  (*| Texp_let (rec_flag, defs, e2) ->
-    let rec_flag = Recursivity.of_rec_flag rec_flag in
-    let defs = defs |>
-      List.map (fun { vb_pat = p; vb_expr = e1 } ->
-        (Pattern.of_pattern p, of_expression e1)) |>
-      sort_mutual_definitions in
-    if Recursivity.to_bool rec_flag then
-      failwith ""
-    else
-      if defs |> List.for_all (fun (_, _, references) ->
-        Name.Set.is_empty references) then
-        failwith ""
-      else
-        failwith ""*)
-    (* let defs = fs |> List.map (fun { vb_pat = pattern; vb_expr = e1 } ->
-      import_let_fun rec_flag pattern e1) in
-    let defs = defs |> List.map (function
-      | (_, Pattern.Variable f, _, args, typ, e) -> (f, args, typ, e)
-      | _ -> failwith "Unexpected format for mutual definitions.") in
-    let f_typs = defs |> List.map (fun (_, args, typ, _) ->
-      List.fold_right (fun (_, x_typ) typ -> Type.Arrow (x_typ, typ))
-        args typ) in
-    failwith "TODO" *)
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
     ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->

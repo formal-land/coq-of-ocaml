@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Run the tests in 'tests/'
 require 'fileutils'
 
@@ -18,10 +19,12 @@ class Test
     system(*cmd)
   end
 
-  def coq_of_ocaml(mode)
+  def coq_of_ocaml_cmd(mode)
     cmd = ['./coqOfOCaml.native', '-mode', mode, extension('.cmt')]
-    print cmd.join(" ")
-    IO.popen(cmd).read
+  end
+
+  def coq_of_ocaml(mode)
+    IO.popen(coq_of_ocaml_cmd(mode)).read
   end
 
   def reference(mode)
@@ -34,10 +37,12 @@ class Test
     coq_of_ocaml(mode) == reference(mode)
   end
 
+  def coq_cmd
+    ['coqc', extension('.v')]
+  end
+
   def coq
-    cmd = ['coqc', extension('.v')]
-    print cmd.join(" ")
-    IO.popen(cmd + [:err => '/dev/null']).read
+    IO.popen(coq_cmd + [:err => '/dev/null']).read
     $?
   end
 end
@@ -59,10 +64,11 @@ class Tests
     puts "\e[1mChecking '-#{mode}':\e[0m"
     for test in @tests do
       if test.check(mode)
-        puts "  \e[1;34m[ \e[32mOK \e[34m]\e[0m"
+        print "  \e[1;32m✓\e[0m  "
       else
-        puts "  \e[1;34m[ \e[31merror \e[34m]\e[0m"
+        print "  \e[31m✗\e[0m  "
       end
+      puts test.coq_of_ocaml_cmd(mode).join(" ")
     end
   end
 
@@ -70,10 +76,11 @@ class Tests
     puts "\e[1mRunning coqc (compiles the reference files):\e[0m"
     for test in @tests do
       if test.coq
-        puts "  \e[1;34m[ \e[32mOK \e[34m]\e[0m"
+        print "  \e[1;32m✓\e[0m  "
       else
-        puts "  \e[1;34m[ \e[31merror \e[34m]\e[0m"
+        print "  \e[31m✗\e[0m  "
       end
+      puts test.coq_cmd.join(" ")
     end
   end
 end

@@ -110,21 +110,34 @@ Definition bind {es : list Effect.t} {A B : Type}
 Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
   (at level 200, X ident, A at level 100, B at level 200).
 
-Definition lift (ebs : list (Effect.t * bool)) {A : Type}
-  (x : M (Effect.sub ebs) A) : M (Effect.domain ebs) A :=
-  fun s =>
-    let (r, s') := x (Effect.filter ebs s) in
-    let s := Effect.expand_state ebs s' s in
-    match r with
-    | inl x => (inl x, s)
-    | inr err => (inr (Effect.expand_exception ebs err), s)
-    end.
+Definition lift {A : Type} (es : list Effect.t) (bs : string)
+  (x : M _ A) : M _ A :=
+  let aux (ebs : list (Effect.t * bool)) (x : M (Effect.sub ebs) A)
+    : M (Effect.domain ebs) A :=
+    fun s =>
+      let (r, s') := x (Effect.filter ebs s) in
+      let s := Effect.expand_state ebs s' s in
+      match r with
+      | inl x => (inl x, s)
+      | inr err => (inr (Effect.expand_exception ebs err), s)
+      end in
+  let fix bool_list (s : string) : list bool :=
+    match s with
+    | EmptyString => []
+    | String "0" s => false :: bool_list s
+    | String _ s => true :: bool_list s
+    end in
+  aux (List.combine es (bool_list bs)) x.
 
 Definition Invalid_argument := Effect.new unit string.
 
 Definition Failure := Effect.new unit string.
 
 Definition IO := Effect.new (list string * list string) Empty_set.
+
+Definition Counter := Effect.new nat Empty_set.
+
+Definition NonTermination := Effect.new unit unit.
 
 Definition invalid_arg {A : Type} (message : string)
   : M [Invalid_argument] A :=
@@ -140,3 +153,19 @@ Definition print_string (message : string) : M [IO] unit :=
     | ((stream_i, stream_o), _) =>
       (inl tt, ((stream_i, message :: stream_o), tt))
     end.
+
+Definition read_counter (_ : unit) : M [Counter] nat :=
+  fun s => (inl (fst s), s).
+
+Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
+  fun s => (inr (inl tt), s).
+
+(*Fixpoint f_rec (counter : nat) (n : nat) : M [NonTermination] unit :=
+  match counter with
+  | O => not_terminated tt
+  | S counter => f_rec counter (S n)
+  end.
+
+Definition f (n : nat) : M [Counter; NonTermination] unit :=
+  let! counter := lift [_;_] "10" (read_counter tt) in
+  lift [_;_] "01" (f_rec counter n).*)
