@@ -123,25 +123,6 @@ let rec open_function (e : t) : Name.t list * t =
     (x :: xs, e)
   | _ -> ([], e)
 
-(*module OCamlDefinition = struct
-  type exp = t
-
-  type t =
-    | Pattern of Pattern.t * exp
-end
-
-module Dependency = struct
-  type t = Name.t * Name.t list * 
-end
-
-module Let = struct
-  type exp = t
-
-  type t =
-    | Pattern of Pattern.t * exp
-    | Function of Recursivity.t * Name.t * 
-end*)
-
 (** Import an OCaml expression. *)
 let rec of_expression (e : expression) : t =
   match e.exp_desc with
