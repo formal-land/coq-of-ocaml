@@ -3,13 +3,20 @@ open Typedtree
 open Types
 open SmartPrint
 
-module Definition = struct
-  (** A "let" of a function: the recursivity flag, the function name, the type variables,
+module DefinitionHeader = struct
+  (** TODO: update comment.
+    A "let" of a function: the recursivity flag, the function name, the type variables,
     the names and types of the arguments, the return type, the body and the expression
     in which we do the "let". We need to group [Let] and [Function] in one constructor
     to make the Coq's fixpoint operator work (and have a nicer pretty-printing). *)
-  type 'a t =
-    Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * 'a
+  type t =
+    Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t
+
+  let pp (def_header : t) : SmartPrint.t =
+    let (is_rec, x, typ_vars, args, typ) = def_header in
+    Pp.list [
+      Recursivity.pp is_rec; Name.pp x; OCaml.list Name.pp typ_vars;
+      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) args]
 end
 
 (** The simplified OCaml AST we use. *)
@@ -20,8 +27,7 @@ type t =
   | Constructor of PathName.t * t list (** A constructor name and a list of arguments. *)
   | Apply of t * t (** An application. *)
   | Function of Name.t * t (** An argument name and a body. *)
-  | Let of Name.t * t * t (** A "let" of a non-functional value. *)
-  | LetFun of Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t * t * t
+  | Let of DefinitionHeader.t * t * t
   | Match of t * (Pattern.t * t) list (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
@@ -29,8 +35,7 @@ type t =
   | Sequence of t * t (** A sequence of two expressions. *)
   | Return of t (** Monadic return. *)
   | Bind of t * Name.t option * t (** Monadic bind. *)
-  | Lift of Effect.Descriptor.t * Effect.Descriptor.t * t
-    (** Monadic lift. *)
+  | Lift of Effect.Descriptor.t * Effect.Descriptor.t * t (** Monadic lift. *)
 
 let rec pp (e : t) : SmartPrint.t =
   match e with
@@ -43,13 +48,8 @@ let rec pp (e : t) : SmartPrint.t =
     nest (!^ "Apply" ^^ Pp.list [pp e_f; pp e_x])
   | Function (x, e) ->
     nest (!^ "Function" ^^ Pp.list [Name.pp x; pp e])
-  | Let (x, e1, e2) ->
-    nest (!^ "Let" ^^ Pp.list [Name.pp x; pp e1; pp e2])
-  | LetFun (is_rec, x, typ_vars, args, typ, e1, e2) ->
-    nest (!^ "LetFun" ^^ Pp.list [
-      Recursivity.pp is_rec; Name.pp x; OCaml.list Name.pp typ_vars;
-      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) args;
-      pp e1; pp e2])
+  | Let (def_header, e1, e2) ->
+    nest (!^ "Let" ^^ Pp.list [DefinitionHeader.pp def_header; pp e1; pp e2])
   | Match (e, cases) ->
     nest (!^ "Match" ^^ Pp.list [pp e; cases |> OCaml.list (fun (p, e) ->
       nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
@@ -80,13 +80,17 @@ let rec free_variables (e : t) : Name.Set.t =
   | Tuple es | Constructor (_, es) -> aux es
   | Apply (e1, e2) -> aux [e1; e2]
   | Function (x, e) -> Name.Set.remove x (free_variables e)
-  | Let (x, e1, e2) | Bind (e1, Some x, e2) ->
-    Name.Set.union (free_variables e1)
-      (Name.Set.remove x (free_variables e2))
-  | LetFun (_, f, _, args, _, e1, e2) ->
+  | Bind (e1, Some x, e2) ->
+    Name.Set.union (free_variables e1) (Name.Set.remove x (free_variables e2))
+  | Let ((is_rec, f, _, args, _), e1, e2) ->
     let vars_in_e1 =
       List.fold_left (fun vars (x, _) -> Name.Set.remove x vars)
       (free_variables e1) args in
+    let vars_in_e1 =
+      if Recursivity.to_bool is_rec then
+        Name.Set.remove f vars_in_e1
+      else
+        vars_in_e1 in
     Name.Set.union vars_in_e1 (Name.Set.remove f (free_variables e2))
   | Match (e, cases) ->
     let cases_vars = cases |> List.map (fun (p, e) ->
@@ -138,10 +142,11 @@ let rec of_expression (e : expression) : t =
       import_let_fun rec_flag pattern e1 in
     let e2 = of_expression e2 in
     (match (pattern, args) with
-    | (Pattern.Variable name, []) -> Let (name, body, e2)
+    | (Pattern.Variable name, []) ->
+      Let ((Recursivity.New false, name, [], [], body_typ), body, e2)
     | (_, []) -> Match (body, [pattern, e2])
     | (Pattern.Variable name, _) ->
-      LetFun (rec_flag, name, free_typ_vars, args, body_typ, body, e2)
+      Let ((rec_flag, name, free_typ_vars, args, body_typ), body, e2)
     | _ -> failwith "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
@@ -204,17 +209,15 @@ let rec substitute (x : PathName.t) (e' : t) (e : t) : t =
       Function (y, e)
     else
       Function (y, substitute x e' e)
-  | Let (y, e1, e2) ->
-    let e1 = substitute x e' e1 in
-    Let (y, e1, if PathName.of_name [] y = x then e2 else substitute x e' e2)
-  | LetFun (is_rec, y, typ_args, args, typ, e1, e2) ->
+  | Let ((is_rec, y, typ_args, args, typ), e1, e2) ->
     let e1 =
-      if Recursivity.to_bool is_rec && PathName.of_name [] y = x then
+      if (Recursivity.to_bool is_rec && PathName.of_name [] y = x)
+        || List.exists (fun (y, _) -> PathName.of_name [] y = x) args then
         e1
       else
         substitute x e' e1 in
     let e2 = if PathName.of_name [] y = x then e2 else substitute x e' e2 in
-    LetFun (is_rec, y, typ_args, args, typ, e1, e2)
+    Let ((is_rec, y, typ_args, args, typ), e1, e2)
   | Match (e, cases) ->
     let e = substitute x e' e in
     let cases = cases |> List.map (fun (p, e) ->
