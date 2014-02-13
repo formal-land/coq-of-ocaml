@@ -1,6 +1,6 @@
 Value
   (.,
-    LetFun
+    Let
       (Effect ([ ], .),
         Match
           (Effect ([ ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),

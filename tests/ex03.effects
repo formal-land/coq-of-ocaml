@@ -6,14 +6,14 @@ Value
 
 Value
   (.,
-    LetFun
+    Let
       (Effect ([ ], .),
         Apply
           (Effect ([ ], .), Leaf (Effect ([ ], .)),
             Function
               (Effect ([ ], . -> . -> .),
                 Function (Effect ([ ], . -> .), Leaf (Effect ([ ], .))))),
-        LetFun
+        Let
           (Effect ([ ], .),
             Apply
               (Effect ([ ], .),

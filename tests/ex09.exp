@@ -1,8 +1,9 @@
 Value 'l':
   (non_rec, [ ], [ ], Type ('list', Type ('Z')),
-    LetFun
-      (rec, 'map', [ 'A'; 'B' ],
-        [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
+    Let
+      ((rec, 'map', [ 'A'; 'B' ],
+        [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ], Some
+        Type ('list', 'A')),
         Match
           ('match_var_0',
             [

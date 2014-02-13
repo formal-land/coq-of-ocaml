@@ -10,13 +10,17 @@ module DefinitionHeader = struct
     in which we do the "let". We need to group [Let] and [Function] in one constructor
     to make the Coq's fixpoint operator work (and have a nicer pretty-printing). *)
   type t =
-    Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t
+    Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t option
 
   let pp (def_header : t) : SmartPrint.t =
     let (is_rec, x, typ_vars, args, typ) = def_header in
     Pp.list [
       Recursivity.pp is_rec; Name.pp x; OCaml.list Name.pp typ_vars;
-      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) args]
+      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) args;
+      OCaml.option Type.pp typ]
+
+  let variable (x : Name.t) : t =
+    (Recursivity.New false, x, [], [], None)
 end
 
 (** The simplified OCaml AST we use. *)
@@ -143,10 +147,10 @@ let rec of_expression (e : expression) : t =
     let e2 = of_expression e2 in
     (match (pattern, args) with
     | (Pattern.Variable name, []) ->
-      Let ((Recursivity.New false, name, [], [], body_typ), body, e2)
+      Let ((Recursivity.New false, name, [], [], None), body, e2)
     | (_, []) -> Match (body, [pattern, e2])
     | (Pattern.Variable name, _) ->
-      Let ((rec_flag, name, free_typ_vars, args, body_typ), body, e2)
+      Let ((rec_flag, name, free_typ_vars, args, Some body_typ), body, e2)
     | _ -> failwith "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
@@ -255,8 +259,7 @@ let rec monadise_let_rec (e : t) : t =
     Constructor (x, List.map monadise_let_rec es)
   | Apply (e1, e2) -> Apply (monadise_let_rec e1, monadise_let_rec e2)
   | Function (x, e) -> Function (x, monadise_let_rec e)
-  | Let (x, e1, e2) -> Let (x, monadise_let_rec e1, monadise_let_rec e2)
-  | LetFun (is_rec, x, typ_args, args, typ, e1, e2) ->
+  | Let ((is_rec, x, typ_args, args, typ) as header, e1, e2) ->
     let e1 = monadise_let_rec e1 in
     let e2 = monadise_let_rec e2 in
     if Recursivity.to_bool is_rec then
@@ -271,14 +274,15 @@ let rec monadise_let_rec (e : t) : t =
           [Pattern.Variable "counter"]),
           substitute (PathName.of_name [] x)
             (Apply (var x_rec, var "counter")) e1)]) in
-      LetFun (is_rec, x_rec, typ_args, args', typ, e1,
-      LetFun (Recursivity.New false, x, typ_args, args, typ,
-        Let ("counter", Apply (var "read_counter", var "tt"),
+      Let ((is_rec, x_rec, typ_args, args', typ), e1,
+      Let ((Recursivity.New false, x, typ_args, args, typ),
+        Let (DefinitionHeader.variable "counter",
+          Apply (var "read_counter", var "tt"),
         List.fold_left (fun e (x, _) -> Apply (e, var x))
           (Apply (var x_rec, var "counter")) args),
       e2))
     else
-      LetFun (is_rec, x, typ_args, args, typ, e1, e2)
+      Let (header, e1, e2)
   | Match (e, cases) ->
     Match (monadise_let_rec e,
       List.map (fun (p, e) -> (p, monadise_let_rec e)) cases)
@@ -299,7 +303,6 @@ module Tree = struct
     | Apply of t * t * Effect.t
     | Function of t * Effect.t
     | Let of t * t * Effect.t
-    | LetFun of t * t * Effect.t
     | Match of t * t list * Effect.t
     | Field of t * Effect.t
     | Sequence of t * t * Effect.t
@@ -307,9 +310,8 @@ module Tree = struct
   let effect (tree : t) : Effect.t =
     match tree with
     | Leaf effect | Compound (_, effect) | Apply (_, _, effect)
-      | Function (_, effect) | Let (_, _, effect) | LetFun (_, _, effect)
-      | Match (_, _, effect) | Field (_, effect)
-      | Sequence (_, _, effect) -> effect
+      | Function (_, effect) | Let (_, _, effect) | Match (_, _, effect)
+      | Field (_, effect) | Sequence (_, _, effect) -> effect
 
   let descriptor (tree : t) : Effect.Descriptor.t =
     (effect tree).Effect.descriptor
@@ -324,7 +326,6 @@ module Tree = struct
     | Apply (tree1, tree2, _) -> aux "Apply" [tree1; tree2]
     | Function (tree, _) -> aux "Function" [tree]
     | Let (tree1, tree2, _) -> aux "Let" [tree1; tree2]
-    | LetFun (tree1, tree2, _) -> aux "LetFun" [tree1; tree2]
     | Match (tree, trees, _) -> aux "Match" (tree :: trees)
     | Field (tree, _) -> aux "Field" [tree]
     | Sequence (tree1, tree2, _) -> aux "Sequence" [tree1; tree2]
@@ -376,7 +377,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       { Effect.descriptor = Effect.Descriptor.pure;
         typ = Effect.Type.Arrow (
           effect_e.Effect.descriptor, effect_e.Effect.typ) })
-  | Let (x, e1, e2) ->
+  (*| Let (x, e1, e2) ->
     let tree1 = to_tree effects e1 in
     let effect1 = Tree.effect tree1 in
     let tree2 = to_tree (Effect.Env.add (PathName.of_name [] x)
@@ -386,13 +387,13 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       [effect1.Effect.descriptor; effect2.Effect.descriptor] in
     Tree.Let (tree1, tree2,
       { Effect.descriptor = descriptor;
-        typ = effect2.Effect.typ })
-  | LetFun (is_rec, x, _, args, _, e1, e2) ->
+        typ = effect2.Effect.typ })*)
+  | Let ((is_rec, x, _, args, _), e1, e2) ->
     let (tree1, x_typ) = to_tree_let_fun effects is_rec x args e1 in
     let effects_in_e2 = Effect.Env.add (PathName.of_name [] x) x_typ effects in
     let tree2 = to_tree effects_in_e2 e2 in
     let effect2 = Tree.effect tree2 in
-    Tree.LetFun (tree1, tree2, effect2)
+    Tree.Let (tree1, tree2, effect2)
   | Match (e, cases) ->
     let tree_e = to_tree effects e in
     let effect_e = Tree.effect tree_e in
@@ -484,7 +485,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
   let bind d1 d2 e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
       match x with
-      | Some x -> Let (x, e1, e2)
+      | Some x -> Let (DefinitionHeader.variable x, e1, e2)
       | None -> e2
     else
       Bind (lift d1 d2 e1, x, e2) in
@@ -522,13 +523,13 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
   | (Function (x, e), Tree.Function (tree, _)) ->
     let env = PathName.Env.add (PathName.of_name [] x) env in
     Function (x, monadise env e tree)
-  | (Let (x, e1, e2), Tree.Let (tree1, tree2, _)) ->
+  | (Let ((_, x, _, [], None), e1, e2), Tree.Let (tree1, tree2, _)) ->
     let e1 = monadise env e1 tree1 in
     let env = PathName.Env.add (PathName.of_name [] x) env in
     let e2 = monadise env e2 tree2 in
     bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 (Some x) e2
-  | (LetFun (is_rec, x, typ_args, args, typ, e1, e2),
-    Tree.LetFun (tree1, tree2, _)) ->
+  | (Let ((is_rec, x, typ_args, args, Some typ), e1, e2),
+    Tree.Let (tree1, tree2, _)) ->
     let typ = Type.monadise typ (Tree.effect tree1) in
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
@@ -538,7 +539,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
     let e1 = monadise env_in_e1 e1 tree1 in
     let env_in_e2 = PathName.Env.add (PathName.of_name [] x) env in
     let e2 = monadise env_in_e2 e2 tree2 in
-    LetFun (is_rec, x, typ_args, args, typ, e1, e2)
+    Let ((is_rec, x, typ_args, args, Some typ), e1, e2)
   | (Match (e, cases), Tree.Match (tree, trees, _)) ->
     monadise_list env [e] [tree] d [] (fun es' ->
       match es' with
@@ -589,10 +590,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest @@ (to_coq true e_f ^^ to_coq true e_x)
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
-  | Let (x, e1, e2) ->
+  | Let ((_, x, _, [], _), e1, e2) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
-  | LetFun (is_rec, f_name, typ_vars, xs, f_typ, e_f, e) ->
+  | Let ((is_rec, f_name, typ_vars, xs, Some f_typ), e_f, e) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^
       (if Recursivity.to_bool is_rec then !^ "fix" else empty) ^^
