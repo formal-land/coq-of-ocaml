@@ -14,4 +14,3 @@ a.out
 *.vo
 *.glob
 _build/
-tests/*.v

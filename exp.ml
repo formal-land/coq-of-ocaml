@@ -3,7 +3,7 @@ open Typedtree
 open Types
 open SmartPrint
 
-module DefinitionHeader = struct
+module Header = struct
   (** TODO: update comment.
     A "let" of a function: the recursivity flag, the function name, the type variables,
     the names and types of the arguments, the return type, the body and the expression
@@ -12,8 +12,8 @@ module DefinitionHeader = struct
   type t =
     Recursivity.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t option
 
-  let pp (def_header : t) : SmartPrint.t =
-    let (is_rec, x, typ_vars, args, typ) = def_header in
+  let pp (header : t) : SmartPrint.t =
+    let (is_rec, x, typ_vars, args, typ) = header in
     Pp.list [
       Recursivity.pp is_rec; Name.pp x; OCaml.list Name.pp typ_vars;
       OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) args;
@@ -31,7 +31,7 @@ type t =
   | Constructor of PathName.t * t list (** A constructor name and a list of arguments. *)
   | Apply of t * t (** An application. *)
   | Function of Name.t * t (** An argument name and a body. *)
-  | Let of DefinitionHeader.t * t * t
+  | Let of Header.t * t * t
   | Match of t * (Pattern.t * t) list (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
@@ -52,8 +52,10 @@ let rec pp (e : t) : SmartPrint.t =
     nest (!^ "Apply" ^^ Pp.list [pp e_f; pp e_x])
   | Function (x, e) ->
     nest (!^ "Function" ^^ Pp.list [Name.pp x; pp e])
-  | Let (def_header, e1, e2) ->
-    nest (!^ "Let" ^^ Pp.list [DefinitionHeader.pp def_header; pp e1; pp e2])
+  | Let (header, e1, e2) ->
+    nest (!^ "Let" ^^ Header.pp header ^^ !^ "=" ^^ newline ^^
+      indent (pp e1) ^^ !^ "in" ^^ newline ^^
+      pp e2)
   | Match (e, cases) ->
     nest (!^ "Match" ^^ Pp.list [pp e; cases |> OCaml.list (fun (p, e) ->
       nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
@@ -276,7 +278,7 @@ let rec monadise_let_rec (e : t) : t =
             (Apply (var x_rec, var "counter")) e1)]) in
       Let ((is_rec, x_rec, typ_args, args', typ), e1,
       Let ((Recursivity.New false, x, typ_args, args, typ),
-        Let (DefinitionHeader.variable "counter",
+        Let (Header.variable "counter",
           Apply (var "read_counter", var "tt"),
         List.fold_left (fun e (x, _) -> Apply (e, var x))
           (Apply (var x_rec, var "counter")) args),
@@ -485,7 +487,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
   let bind d1 d2 e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
       match x with
-      | Some x -> Let (DefinitionHeader.variable x, e1, e2)
+      | Some x -> Let (Header.variable x, e1, e2)
       | None -> e2
     else
       Bind (lift d1 d2 e1, x, e2) in
@@ -593,7 +595,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Let ((_, x, _, [], _), e1, e2) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
-  | Let ((is_rec, f_name, typ_vars, xs, Some f_typ), e_f, e) ->
+  | Let ((is_rec, f_name, typ_vars, xs, f_typ), e_f, e) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^
       (if Recursivity.to_bool is_rec then !^ "fix" else empty) ^^
@@ -605,7 +607,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         !^ ":" ^^ !^ "Type")) ^^
       group (separate space (xs |> List.map (fun (x, x_typ) ->
         parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false x_typ)))) ^^
-      !^ ":" ^^ Type.to_coq false f_typ ^^ !^ ":=" ^^ newline ^^
+      (match f_typ with
+      | None -> empty
+      | Some f_typ -> !^ ":" ^^ Type.to_coq false f_typ) ^^
+      !^ ":=" ^^ newline ^^
       indent (to_coq false e_f) ^^ !^ "in" ^^ newline ^^
       to_coq false e)
   | Match (e, cases) ->
