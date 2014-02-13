@@ -1,17 +1,76 @@
-Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
+Value
+  (non_rec, 'l', [ ], [ ], Some
+    Monad ([ 'Counter'; 'NonTermination' ], Type ('list', Type ('Z')))) =
   Let
-    (rec, 'map', [ 'A'; 'B' ],
-      [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ], Some
-      Type ('list', 'A')) =
+    (rec, 'map_rec', [ 'A'; 'B' ],
+      [
+        ('counter', Type ('nat'));
+        ('f', ('B' -> 'A'));
+        ('match_var_0', Type ('list', 'B'))
+      ], Some Monad ([ 'NonTermination' ], Type ('list', 'A'))) =
     Match
-      ('match_var_0',
+      ('counter',
         [
-          (Constructor ('[]'), Constructor ('[]'));
-          (Constructor ('cons', 'x', 'xs'),
-            Constructor
-              ('cons', Apply ('f', 'x'),
-                Apply (Apply ('map', 'f'), 'xs')))
+          (Nat(0), Apply ('not_terminated', 'tt'));
+          (Constructor ('S', 'counter'),
+            Match
+              ('match_var_0',
+                [
+                  (Constructor ('[]'),
+                    Return
+                      (Constructor
+                        ('[]')));
+                  (Constructor ('cons', 'x', 'xs'),
+                    Bind
+                      (Apply
+                        (Apply
+                          (Apply
+                            ('map_rec',
+                              'counter'),
+                            'f'),
+                          'xs'),
+                        Some
+                          'x_1',
+                        Return
+                          (Constructor
+                            ('cons',
+                              Apply
+                                ('f',
+                                  'x'),
+                              'x_1'))))
+                ]))
         ]) in
+  Let
+    (non_rec, 'map', [ 'A'; 'B' ],
+      [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ], Some
+      Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
+    Bind
+      (Lift
+        ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+          Apply ('read_counter', 'tt')), Some 'counter',
+        Lift
+          ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply (Apply (Apply ('map_rec', 'counter'), 'f'), 'match_var_0')))
+    in
+  Let
+    (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ], Some
+      Monad ([ 'NonTermination' ], 'A')) =
+    Match
+      ('counter',
+        [
+          (Nat(0), Apply ('not_terminated', 'tt'));
+          (Constructor ('S', 'counter'), Return ('x'))
+        ]) in
+  Let
+    (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ], Some
+      Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
+    Bind
+      (Lift
+        ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+          Apply ('read_counter', 'tt')), Some 'counter',
+        Lift
+          ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply (Apply ('loop_rec', 'counter'), 'x'))) in
   Apply
     (Apply ('map', Function ('n', Apply (Apply ('Z.add', 'n'), Int(1)))),
       Constructor

@@ -370,7 +370,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       Tree.Apply (tree_f, tree_x,
         { Effect.descriptor = descriptor; typ = effect_typ })
     else
-      failwith "Fucntion arguments cannot have functional effects."
+      failwith "Function arguments cannot have functional effects."
   | Function (x, e) ->
     let tree_e = to_tree (Effect.Env.add (PathName.of_name [] x)
       Effect.Type.Pure effects) e in
@@ -379,23 +379,17 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       { Effect.descriptor = Effect.Descriptor.pure;
         typ = Effect.Type.Arrow (
           effect_e.Effect.descriptor, effect_e.Effect.typ) })
-  (*| Let (x, e1, e2) ->
-    let tree1 = to_tree effects e1 in
+  | Let ((is_rec, x, _, args, _), e1, e2) ->
+    let (tree1, x_typ) = to_tree_let_fun effects is_rec x args e1 in
     let effect1 = Tree.effect tree1 in
-    let tree2 = to_tree (Effect.Env.add (PathName.of_name [] x)
-      effect1.Effect.typ effects) e2 in
+    let effects_in_e2 = Effect.Env.add (PathName.of_name [] x) x_typ effects in
+    let tree2 = to_tree effects_in_e2 e2 in
     let effect2 = Tree.effect tree2 in
     let descriptor = Effect.Descriptor.union
       [effect1.Effect.descriptor; effect2.Effect.descriptor] in
     Tree.Let (tree1, tree2,
       { Effect.descriptor = descriptor;
-        typ = effect2.Effect.typ })*)
-  | Let ((is_rec, x, _, args, _), e1, e2) ->
-    let (tree1, x_typ) = to_tree_let_fun effects is_rec x args e1 in
-    let effects_in_e2 = Effect.Env.add (PathName.of_name [] x) x_typ effects in
-    let tree2 = to_tree effects_in_e2 e2 in
-    let effect2 = Tree.effect tree2 in
-    Tree.Let (tree1, tree2, effect2)
+        typ = effect2.Effect.typ })
   | Match (e, cases) ->
     let tree_e = to_tree effects e in
     let effect_e = Tree.effect tree_e in
@@ -456,10 +450,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
           x_typ effects_in_e in
         let tree = to_tree effects_in_e e in
         let effect = Tree.effect tree in
-        let x_typ' =
-          match Effect.function_typ args_names effect with
-          | Some typ -> typ
-          | None -> failwith "Toplevel values cannot have effects." in
+        let x_typ' = Effect.function_typ args_names effect in
         if Effect.Type.eq x_typ x_typ' then
           (tree, x_typ)
         else
@@ -468,10 +459,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
     else
       let tree = to_tree effects_in_e e in
       let effect = Tree.effect tree in
-      let x_typ =
-        match Effect.function_typ args_names effect with
-        | Some typ -> typ
-        | None -> failwith "Toplevel values cannot have effects." in
+      let x_typ = Effect.function_typ args_names effect in
       (tree, x_typ)
 
 let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
@@ -484,13 +472,13 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
     else
       Lift (d1, d2, e) in
   (** [d1] is the descriptor of [e1], [d2] of [e2]. *)
-  let bind d1 d2 e1 x e2 =
+  let bind d1 d2 d e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
       match x with
       | Some x -> Let (Header.variable x, e1, e2)
       | None -> e2
     else
-      Bind (lift d1 d2 e1, x, e2) in
+      Bind (lift d1 d e1, x, lift d2 d e2) in
   (** [k es'] is supposed to raise the effect [d]. *)
   let rec monadise_list env es trees d es' k =
     match (es, trees) with
@@ -502,7 +490,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
       else
         let e' = monadise env e tree in
         let (x, env) = PathName.Env.fresh "x" env in
-        bind d_e d e' (Some x)
+        bind d_e d d e' (Some x)
           (monadise_list env es trees d (var x :: es') k)
     | _ -> failwith "Unexpected number of trees." in
   let d = Tree.descriptor tree in
@@ -525,11 +513,11 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
   | (Function (x, e), Tree.Function (tree, _)) ->
     let env = PathName.Env.add (PathName.of_name [] x) env in
     Function (x, monadise env e tree)
-  | (Let ((_, x, _, [], None), e1, e2), Tree.Let (tree1, tree2, _)) ->
+  | (Let ((_, x, _, [], _), e1, e2), Tree.Let (tree1, tree2, _)) ->
     let e1 = monadise env e1 tree1 in
     let env = PathName.Env.add (PathName.of_name [] x) env in
     let e2 = monadise env e2 tree2 in
-    bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 (Some x) e2
+    bind (Tree.descriptor tree1) (Tree.descriptor tree2) d e1 (Some x) e2
   | (Let ((is_rec, x, typ_args, args, Some typ), e1, e2),
     Tree.Let (tree1, tree2, _)) ->
     let typ = Type.monadise typ (Tree.effect tree1) in
@@ -574,7 +562,7 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
   | (Sequence (e1, e2), Tree.Sequence (tree1, tree2, _)) ->
     let e1 = monadise env e1 tree1 in
     let e2 = monadise env e2 tree2 in
-    bind (Tree.descriptor tree1) (Tree.descriptor tree2) e1 None e2
+    bind (Tree.descriptor tree1) (Tree.descriptor tree2) d e1 None e2
   | _ -> failwith "Unexpected arguments for 'monadise'."
  
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)

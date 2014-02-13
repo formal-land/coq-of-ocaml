@@ -133,7 +133,7 @@ let rec of_structure (structure : structure) : t list =
       | Pattern.Variable x ->
         Value {
           Value.header = (is_rec, x, typ_vars, args, Some typ);
-          body = e }
+          body = Exp.monadise_let_rec e }
       | _ -> failwith "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with

@@ -14,10 +14,19 @@ let effects : Effect.Env.t =
     { Effect.Atom.name = PathName.of_name [] "IO";
       state = "list string * list string";
       error = "Empty_set" } in
+  let counter = Effect.Descriptor.of_atom
+    { Effect.Atom.name = PathName.of_name [] "Counter";
+      state = "nat";
+      error = "Empty_set" } in
+  let non_termination = Effect.Descriptor.of_atom
+    { Effect.Atom.name = PathName.of_name [] "NonTermination";
+      state = "unit";
+      error = "unit" } in
   List.fold_left (fun effects (path, x, typ) ->
     Effect.Env.add (PathName.of_name path x) typ effects)
     Effect.Env.empty
-    [ [], "equiv_decb", Pure;
+    [ [], "tt", Pure;
+      [], "equiv_decb", Pure;
       [], "nequiv_decb", Pure;
       ["Z"], "ltb", Pure;
       [], "negb", Pure;
@@ -60,4 +69,6 @@ let effects : Effect.Env.t =
       [], "prerr_endline", Arrow (io, Pure);
       [], "prerr_newline", Arrow (io, Pure);
       [], "read_line", Arrow (io, Pure);
-      [], "read_int", Arrow (io, Pure) ]
+      [], "read_int", Arrow (io, Pure);
+      [], "read_counter", Arrow (counter, Pure);
+      [], "not_terminated", Arrow (non_termination, Pure) ]
