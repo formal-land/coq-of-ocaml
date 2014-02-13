@@ -1,47 +1,48 @@
-Value 'tail':
-  (non_rec, [ 'A' ], [ ('l', Type ('list', 'A')) ],
-    Monad ([ 'Failure' ], Type ('list', 'A')),
-    Match
-      ('l',
-        [
-          (Constructor ('cons', Any, 'xs'), Return ('xs'));
-          (Constructor ('[]'),
-            Apply
-              ('failwith',
-                String("Cannot take the tail of an empty list.")))
-        ]))
-
-Value 'print_list':
-  (rec, [ ], [ ('match_var_0', Type ('list', Type ('string'))) ],
-    Monad ([ 'IO' ], Type ('unit')),
-    Match
-      ('match_var_0',
-        [
-          (Constructor ('[]'), Return (Constructor ('tt')));
-          (Constructor ('cons', 'x', 'xs'),
-            Bind
-              (Apply ('print_string', 'x'), None,
-                Apply ('print_list', 'xs')))
-        ]))
-
-Value 'f':
-  (non_rec, [ ], [ ],
-    (Type ('list', Type ('string')) -> Monad ([ 'IO' ], Type ('unit'))),
-    'print_list')
-
-Value 'x':
-  (non_rec, [ 'A' ], [ ('z', 'A') ], Monad ([ 'Failure'; 'IO' ], Type ('unit')),
-    Bind
-      (Lift
-        ([ 'Failure' ], [ 'Failure'; 'IO' ],
+Value
+  (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
+    Monad ([ 'Failure' ], Type ('list', 'A'))) =
+  Match
+    ('l',
+      [
+        (Constructor ('cons', Any, 'xs'), Return ('xs'));
+        (Constructor ('[]'),
           Apply
-            ('tail',
-              Constructor
-                ('cons', String("Stop"),
-                  Constructor
-                    ('cons', String("Hello"),
-                      Constructor
-                        ('cons', String(" "),
-                          Constructor
-                            ('cons', String("world"), Constructor ('[]'))))))),
-        Some 'x', Lift ([ 'IO' ], [ 'Failure'; 'IO' ], Apply ('f', 'x'))))
+            ('failwith',
+              String("Cannot take the tail of an empty list.")))
+      ])
+
+Value
+  (rec, 'print_list', [ ], [ ('match_var_0', Type ('list', Type ('string'))) ],
+    Some Monad ([ 'IO' ], Type ('unit'))) =
+  Match
+    ('match_var_0',
+      [
+        (Constructor ('[]'), Return (Constructor ('tt')));
+        (Constructor ('cons', 'x', 'xs'),
+          Bind
+            (Apply ('print_string', 'x'), None,
+              Apply ('print_list', 'xs')))
+      ])
+
+Value
+  (non_rec, 'f', [ ], [ ], Some
+    (Type ('list', Type ('string')) -> Monad ([ 'IO' ], Type ('unit')))) =
+  'print_list'
+
+Value
+  (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some
+    Monad ([ 'Failure'; 'IO' ], Type ('unit'))) =
+  Bind
+    (Lift
+      ([ 'Failure' ], [ 'Failure'; 'IO' ],
+        Apply
+          ('tail',
+            Constructor
+              ('cons', String("Stop"),
+                Constructor
+                  ('cons', String("Hello"),
+                    Constructor
+                      ('cons', String(" "),
+                        Constructor
+                          ('cons', String("world"), Constructor ('[]'))))))),
+      Some 'x', Lift ([ 'IO' ], [ 'Failure'; 'IO' ], Apply ('f', 'x')))

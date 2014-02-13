@@ -1,42 +1,41 @@
-Value 'tail':
-  (non_rec, [ 'A' ], [ ('l', Type ('list', 'A')) ], Type ('list', 'A'),
-    Match
-      ('l',
-        [
-          (Constructor ('cons', Any, 'xs'), 'xs');
-          (Constructor ('[]'),
-            Apply
-              ('failwith',
-                String("Cannot take the tail of an empty list.")))
-        ]))
+Value
+  (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
+    Type ('list', 'A')) =
+  Match
+    ('l',
+      [
+        (Constructor ('cons', Any, 'xs'), 'xs');
+        (Constructor ('[]'),
+          Apply
+            ('failwith',
+              String("Cannot take the tail of an empty list.")))
+      ])
 
-Value 'print_list':
-  (rec, [ ], [ ('match_var_0', Type ('list', Type ('string'))) ], Type ('unit'),
-    Match
-      ('match_var_0',
-        [
-          (Constructor ('[]'), Constructor ('tt'));
-          (Constructor ('cons', 'x', 'xs'),
-            Sequence
-              (Apply ('print_string', 'x'),
-                Apply ('print_list', 'xs')))
-        ]))
+Value
+  (rec, 'print_list', [ ], [ ('match_var_0', Type ('list', Type ('string'))) ],
+    Some Type ('unit')) =
+  Match
+    ('match_var_0',
+      [
+        (Constructor ('[]'), Constructor ('tt'));
+        (Constructor ('cons', 'x', 'xs'),
+          Sequence (Apply ('print_string', 'x'), Apply ('print_list', 'xs')))
+      ])
 
-Value 'f':
-  (non_rec, [ ], [ ], (Type ('list', Type ('string')) -> Type ('unit')),
-    'print_list')
+Value
+  (non_rec, 'f', [ ], [ ], Some
+    (Type ('list', Type ('string')) -> Type ('unit'))) =
+  'print_list'
 
-Value 'x':
-  (non_rec, [ 'A' ], [ ('z', 'A') ], Type ('unit'),
-    Apply
-      ('f',
-        Apply
-          ('tail',
-            Constructor
-              ('cons', String("Stop"),
-                Constructor
-                  ('cons', String("Hello"),
-                    Constructor
-                      ('cons', String(" "),
-                        Constructor
-                          ('cons', String("world"), Constructor ('[]'))))))))
+Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
+  Apply
+    ('f',
+      Apply
+        ('tail',
+          Constructor
+            ('cons', String("Stop"),
+              Constructor
+                ('cons', String("Hello"),
+                  Constructor
+                    ('cons', String(" "),
+                      Constructor ('cons', String("world"), Constructor ('[]')))))))

@@ -2,48 +2,44 @@ Module 'SizedString':
   Record 't':
     ([ ('name', Type ('string')); ('size', Type ('Z')) ])
 
-Value 'r':
-  (non_rec, [ ], [ ], Type ('SizedString.t'),
-    Record (('SizedString.name', String("gre")), ('SizedString.size', Int(3))))
+Value (non_rec, 'r', [ ], [ ], Some Type ('SizedString.t')) =
+  Record (('SizedString.name', String("gre")), ('SizedString.size', Int(3)))
 
-Value 'r'':
-  (non_rec, [ ], [ ], Type ('SizedString.t'),
-    Record (('SizedString.name', String("haha")), ('SizedString.size', Int(4))))
+Value (non_rec, 'r'', [ ], [ ], Some Type ('SizedString.t')) =
+  Record (('SizedString.name', String("haha")), ('SizedString.size', Int(4)))
 
-Value 's':
-  (non_rec, [ ], [ ], Type ('Z'),
-    Apply
-      (Apply ('Z.add', Field ('r', 'SizedString.size')),
-        Field ('r'', 'SizedString.size')))
+Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
+  Apply
+    (Apply ('Z.add', Field ('r', 'SizedString.size')),
+      Field ('r'', 'SizedString.size'))
 
-Value 'f':
-  (non_rec, [ ], [ ('match_var_0', Type ('SizedString.t')) ], Type ('bool'),
-    Match
-      ('match_var_0',
-        [
-          (Record (('SizedString.size', Int(3))), Constructor ('true'));
-          (Any, Constructor ('false'))
-        ]))
+Value
+  (non_rec, 'f', [ ], [ ('match_var_0', Type ('SizedString.t')) ], Some
+    Type ('bool')) =
+  Match
+    ('match_var_0',
+      [
+        (Record (('SizedString.size', Int(3))), Constructor ('true'));
+        (Any, Constructor ('false'))
+      ])
 
-Value 'b':
-  (non_rec, [ ], [ ], Type ('bool'), Apply ('f', 'r'))
+Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
+  Apply ('f', 'r')
 
-Value 'b'':
-  (non_rec, [ ], [ ], Type ('bool'), Apply ('f', 'r''))
+Value (non_rec, 'b'', [ ], [ ], Some Type ('bool')) =
+  Apply ('f', 'r'')
 
 Module 'Point':
   Record 't':
     ([ ('x', Type ('Z')); ('y', Type ('Z')); ('z', Type ('Z')) ])
   
-  Value 'p':
-    (non_rec, [ ], [ ], Type ('t'),
-      Record (('x', Int(5)), ('y', Int(-3)), ('z', Int(1))))
+  Value (non_rec, 'p', [ ], [ ], Some Type ('t')) =
+    Record (('x', Int(5)), ('y', Int(-3)), ('z', Int(1)))
   
-  Value 'b':
-    (non_rec, [ ], [ ], Type ('bool'),
-      Match
-        ('p',
-          [
-            (Record (('x', Int(5)), ('z', Int(1))), Constructor ('true'));
-            (Any, Constructor ('false'))
-          ]))
+  Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
+    Match
+      ('p',
+        [
+          (Record (('x', Int(5)), ('z', Int(1))), Constructor ('true'));
+          (Any, Constructor ('false'))
+        ])

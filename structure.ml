@@ -6,34 +6,32 @@ open SmartPrint
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
   type t = {
-    name : Name.t;
-    is_rec : Recursivity.t; (** If the function is recursive. *)
-    typ_vars : Name.t list; (** Polymorphic type variables. *)
-    args : (Name.t * Type.t) list; (** Names and types of the arguments. *)
-    typ : Type.t; (** Type of the body. *)
+    header : Exp.Header.t;
     body : Exp.t (** Body expression. *) }
 
   let pp (value : t) : SmartPrint.t =
-    nest (!^ "Value" ^^ Name.pp value.name ^-^ !^ ":" ^^ newline ^^ indent (Pp.list [
-      Recursivity.pp value.is_rec;
-      OCaml.list Name.pp value.typ_vars;
-      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) value.args;
-      Type.pp value.typ; Exp.pp value.body]))
+    nest (!^ "Value" ^^ Exp.Header.pp value.header ^^ !^ "=" ^^ newline ^^
+      indent (Exp.pp value.body))
   
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : t) : SmartPrint.t =
+    let (is_rec, x, typ_vars, args, typ) = value.header in
     nest (
-      (if Recursivity.to_bool value.is_rec then
+      (if Recursivity.to_bool is_rec then
         !^ "Fixpoint"
       else
         !^ "Definition") ^^
-      Name.to_coq value.name ^^
-      (match value.typ_vars with
+      Name.to_coq x ^^
+      (match typ_vars with
       | [] -> empty
-      | xs -> braces @@ group (separate space (List.map Name.to_coq xs) ^^ !^ ":" ^^ !^ "Type")) ^^
-      group (separate space (value.args |> List.map (fun (x, t) ->
+      | _ :: _ ->
+        braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
+        !^ ":" ^^ !^ "Type")) ^^
+      group (separate space (args |> List.map (fun (x, t) ->
         parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
-      !^ ":" ^^ Type.to_coq false value.typ ^^
+      (match typ with
+      | None -> empty
+      | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
       !^ ":=" ^^ Exp.to_coq false value.body ^-^ !^ ".")
 end
 
@@ -129,16 +127,12 @@ let rec of_structure (structure : structure) : t list =
   let of_structure_item (item : structure_item) : t =
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
-      let (is_rec, pattern, typ_vars, args, e_typ, e) =
+      let (is_rec, pattern, typ_vars, args, typ, e) =
         Exp.import_let_fun is_rec pattern e in
       (match pattern with
-      | Pattern.Variable name ->
+      | Pattern.Variable x ->
         Value {
-          Value.name = name;
-          is_rec = is_rec;
-          typ_vars = typ_vars;
-          args = args;
-          typ = e_typ;
+          Value.header = (is_rec, x, typ_vars, args, Some typ);
           body = e }
       | _ -> failwith "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
@@ -194,9 +188,7 @@ let rec to_trees (effects : Effect.Env.t)
   let rec to_tree (def : t) (effects : Effect.Env.t) : Tree.t * Effect.Env.t =
     match def with
     | Value {
-      Value.name = x;
-      is_rec = is_rec;
-      args = args;
+      Value.header = (is_rec, x, _, args, _);
       body = e } ->
       let (tree, x_typ) = Exp.to_tree_let_fun effects is_rec x args e in
       let effects = Effect.Env.add (PathName.of_name [] x) x_typ effects in
@@ -219,27 +211,21 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
     match (def, tree) with
     | (
       Value {
-        Value.name = name;
-        is_rec = is_rec;
-        typ_vars = typ_vars;
-        args = args;
-        typ = typ;
+        Value.header = (is_rec, x, typ_vars, args, typ);
         body = body },
       Tree.Value (tree, effect)) ->
-      let typ = Type.monadise typ (Exp.Tree.effect tree) in
+      let typ = match typ with
+        | None -> None
+        | Some typ -> Some (Type.monadise typ (Exp.Tree.effect tree)) in
       let env_in_body =
         if Recursivity.to_bool is_rec then
-          PathName.Env.add (PathName.of_name [] name) env
+          PathName.Env.add (PathName.of_name [] x) env
         else
           env in
       let body = Exp.monadise env_in_body body tree in
-      let env = PathName.Env.add (PathName.of_name [] name) env in
+      let env = PathName.Env.add (PathName.of_name [] x) env in
       (env, Value {
-        Value.name = name;
-        is_rec = is_rec;
-        typ_vars = typ_vars;
-        args = args;
-        typ = typ;
+        Value.header = (is_rec, x, typ_vars, args, typ);
         body = body })
     | (Module (name, defs), Tree.Module trees) ->
       let (env, defs) = monadise (PathName.Env.open_module env) defs trees in

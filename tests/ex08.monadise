@@ -6,46 +6,43 @@ Inductive 't1':
       ('C3', [ ])
     ])
 
-Value 'n':
-  (non_rec, [ ], [ ], Type ('t1'),
-    Constructor ('C2', Constructor ('false'), Int(3)))
+Value (non_rec, 'n', [ ], [ ], Some Type ('t1')) =
+  Constructor ('C2', Constructor ('false'), Int(3))
 
-Value 'm':
-  (non_rec, [ ], [ ], Type ('bool'),
-    Match
-      ('n', [ (Constructor ('C2', 'b', Any), 'b'); (Any, Constructor ('true')) ]))
+Value (non_rec, 'm', [ ], [ ], Some Type ('bool')) =
+  Match
+    ('n', [ (Constructor ('C2', 'b', Any), 'b'); (Any, Constructor ('true')) ])
 
 Inductive 't2':
   ([ 'a' ], [ ('D1', [ ]); ('D2', [ 'a'; Type ('t2', 'a') ]) ])
 
-Value 'of_list':
-  (rec, [ 'A' ], [ ('l', Type ('list', 'A')) ], Type ('t2', 'A'),
-    Match
-      ('l',
-        [
-          (Constructor ('[]'), Constructor ('D1'));
-          (Constructor ('cons', 'x', 'xs'),
-            Constructor ('D2', 'x', Apply ('of_list', 'xs')))
-        ]))
+Value
+  (rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some Type ('t2', 'A'))
+  =
+  Match
+    ('l',
+      [
+        (Constructor ('[]'), Constructor ('D1'));
+        (Constructor ('cons', 'x', 'xs'),
+          Constructor ('D2', 'x', Apply ('of_list', 'xs')))
+      ])
 
-Value 'sum':
-  (rec, [ ], [ ('l', Type ('t2', Type ('Z'))) ], Type ('Z'),
-    Match
-      ('l',
-        [
-          (Constructor ('D1'), Int(0));
-          (Constructor ('D2', 'x', 'xs'),
-            Apply (Apply ('Z.add', 'x'), Apply ('sum', 'xs')))
-        ]))
+Value (rec, 'sum', [ ], [ ('l', Type ('t2', Type ('Z'))) ], Some Type ('Z')) =
+  Match
+    ('l',
+      [
+        (Constructor ('D1'), Int(0));
+        (Constructor ('D2', 'x', 'xs'),
+          Apply (Apply ('Z.add', 'x'), Apply ('sum', 'xs')))
+      ])
 
-Value 's':
-  (non_rec, [ ], [ ], Type ('Z'),
-    Apply
-      ('sum',
-        Apply
-          ('of_list',
-            Constructor
-              ('cons', Int(5),
-                Constructor
-                  ('cons', Int(7),
-                    Constructor ('cons', Int(3), Constructor ('[]')))))))
+Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
+  Apply
+    ('sum',
+      Apply
+        ('of_list',
+          Constructor
+            ('cons', Int(5),
+              Constructor
+                ('cons', Int(7),
+                  Constructor ('cons', Int(3), Constructor ('[]'))))))
