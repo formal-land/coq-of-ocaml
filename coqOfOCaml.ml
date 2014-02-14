@@ -5,20 +5,24 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
   let document =
     match mode with
     | "exp" ->
-      let definitions = Structure.of_structure structure in
+      let definitions =
+        Structure.monadise_let_rec (Structure.of_structure structure) in
       Structure.pp definitions
     | "effects" ->
-      let definitions = Structure.of_structure structure in
+      let definitions =
+        Structure.monadise_let_rec (Structure.of_structure structure) in
       let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
       Structure.Tree.pps trees
     | "monadise" ->
-      let definitions = Structure.of_structure structure in
+      let definitions =
+        Structure.monadise_let_rec (Structure.of_structure structure) in
       let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
       let (_, definitions) =
         Structure.monadise PathName.Env.empty definitions trees in
       Structure.pp definitions
     | "v" ->
-      let definitions = Structure.of_structure structure in
+      let definitions =
+        Structure.monadise_let_rec (Structure.of_structure structure) in
       let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
       let (_, definitions) =
         Structure.monadise PathName.Env.empty definitions trees in

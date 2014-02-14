@@ -133,7 +133,7 @@ let rec of_structure (structure : structure) : t list =
       | Pattern.Variable x ->
         Value {
           Value.header = (is_rec, x, typ_vars, args, Some typ);
-          body = Exp.monadise_let_rec e }
+          body = e }
       | _ -> failwith "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       (match typ.type_kind with
@@ -163,6 +163,18 @@ let rec of_structure (structure : structure) : t list =
     | Tstr_exception _ -> failwith "Imperative structure item not handled."
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
+
+let rec monadise_let_rec (defs : t list) : t list =
+  let rec monadise_let_rec_one (def : t) : t list =
+    match def with
+    | Value { Value.header = header; body = body } ->
+      let defs = Exp.monadise_let_rec_definition header body in
+      defs |> List.map (fun (header, body) ->
+        Value { Value.header = header; body = body })
+    | Module (name, defs) -> [Module (name, monadise_let_rec defs)]
+    | Inductive _ | Record _ | Open _ -> [def]
+    | _ -> failwith "Unexpected arguments for 'monadise'." in
+  List.concat (List.map monadise_let_rec_one defs)
 
 module Tree = struct
   type t =

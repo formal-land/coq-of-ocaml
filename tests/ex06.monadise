@@ -1,28 +1,97 @@
 Value
-  (rec, 'map', [ 'A'; 'B' ], [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
-    Some Type ('list', 'A')) =
+  (rec, 'map_rec', [ 'A'; 'B' ],
+    [ ('counter', Type ('nat')); ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
+    Some Monad ([ 'NonTermination' ], Type ('list', 'A'))) =
   Match
-    ('l',
+    ('counter',
       [
-        (Constructor ('[]'), Constructor ('[]'));
-        (Constructor ('cons', 'x', 'xs'),
-          Constructor
-            ('cons', Apply ('f', 'x'), Apply (Apply ('map', 'f'), 'xs')))
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('l',
+              [
+                (Constructor ('[]'),
+                  Return
+                    (Constructor
+                      ('[]')));
+                (Constructor ('cons', 'x', 'xs'),
+                  Bind
+                    (Apply
+                      (Apply
+                        (Apply
+                          ('map_rec',
+                            'counter'),
+                          'f'),
+                        'xs'),
+                      Some
+                        'x_1',
+                      Return
+                        (Constructor
+                          ('cons',
+                            Apply
+                              ('f',
+                                'x'),
+                            'x_1'))))
+              ]))
       ])
 
 Value
-  (rec, 'fold', [ 'A'; 'B' ],
-    [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
-    Some 'A') =
+  (non_rec, 'map', [ 'A'; 'B' ],
+    [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ], Some
+    Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
+  Bind
+    (Lift
+      ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+        Apply ('read_counter', 'tt')), Some 'counter',
+      Lift
+        ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          Apply (Apply (Apply ('map_rec', 'counter'), 'f'), 'l')))
+
+Value
+  (rec, 'fold_rec', [ 'A'; 'B' ],
+    [
+      ('counter', Type ('nat'));
+      ('f', ('A' -> ('B' -> 'A')));
+      ('a', 'A');
+      ('l', Type ('list', 'B'))
+    ], Some Monad ([ 'NonTermination' ], 'A')) =
   Match
-    ('l',
+    ('counter',
       [
-        (Constructor ('[]'), 'a');
-        (Constructor ('cons', 'x', 'xs'),
-          Apply
-            (Apply (Apply ('fold', 'f'), Apply (Apply ('f', 'a'), 'x')),
-              'xs'))
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('l',
+              [
+                (Constructor ('[]'), Return ('a'));
+                (Constructor ('cons', 'x', 'xs'),
+                  Apply
+                    (Apply
+                      (Apply
+                        (Apply
+                          ('fold_rec',
+                            'counter'),
+                          'f'),
+                        Apply
+                          (Apply
+                            ('f',
+                              'a'),
+                            'x')),
+                      'xs'))
+              ]))
       ])
+
+Value
+  (non_rec, 'fold', [ 'A'; 'B' ],
+    [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
+  Bind
+    (Lift
+      ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+        Apply ('read_counter', 'tt')), Some 'counter',
+      Lift
+        ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          Apply (Apply (Apply (Apply ('fold_rec', 'counter'), 'f'), 'a'), 'l')))
 
 Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
   Constructor
@@ -37,10 +106,12 @@ Value
     [
       ('incr', (Type ('Z') -> 'A'));
       ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
-    ], Some Type ('Z')) =
-  Apply
-    (Apply
-      (Apply
-        ('fold',
-          Function ('x', Function ('y', Apply (Apply ('plus', 'x'), 'y')))),
-        Int(0)), Apply (Apply ('map', 'incr'), 'l'))
+    ], Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+  Bind
+    (Apply (Apply ('map', 'incr'), 'l'), Some 'x',
+      Apply
+        (Apply
+          (Apply
+            ('fold',
+              Function ('x', Function ('y', Apply (Apply ('plus', 'x'), 'y')))),
+            Int(0)), 'x'))

@@ -3,18 +3,61 @@ Inductive 'tree':
     [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
 
 Value
-  (rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Some
-    Type ('bool')) =
+  (rec, 'find_rec', [ ],
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ], Some
+    Monad ([ 'NonTermination' ], Type ('bool'))) =
   Match
-    ('t',
+    ('counter',
       [
-        (Constructor ('Leaf'), Constructor ('false'));
-        (Constructor ('Node', 't1', 'x'', 't2'),
-          IfThenElse
-            (Apply (Apply ('Z.ltb', 'x'), 'x''),
-              Apply (Apply ('find', 'x'), 't1'),
-              IfThenElse
-                (Apply (Apply ('Z.ltb', 'x''), 'x'),
-                  Apply (Apply ('find', 'x'), 't2'),
-                  Constructor ('true'))))
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('t',
+              [
+                (Constructor ('Leaf'),
+                  Return
+                    (Constructor
+                      ('false')));
+                (Constructor ('Node', 't1', 'x'', 't2'),
+                  IfThenElse
+                    (Apply
+                      (Apply
+                        ('Z.ltb',
+                          'x'),
+                        'x''),
+                      Apply
+                        (Apply
+                          (Apply
+                            ('find_rec',
+                              'counter'),
+                            'x'),
+                          't1'),
+                      IfThenElse
+                        (Apply
+                          (Apply
+                            ('Z.ltb',
+                              'x''),
+                            'x'),
+                          Apply
+                            (Apply
+                              (Apply
+                                ('find_rec',
+                                  'counter'),
+                                'x'),
+                              't2'),
+                          Return
+                            (Constructor
+                              ('true')))))
+              ]))
       ])
+
+Value
+  (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Some
+    Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
+  Bind
+    (Lift
+      ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+        Apply ('read_counter', 'tt')), Some 'counter',
+      Lift
+        ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          Apply (Apply (Apply ('find_rec', 'counter'), 'x'), 't')))

@@ -8,24 +8,52 @@ Value
             Leaf (Effect ([ ], .)))))
 
 Value
-  (. -[ 'IO' ]-> .,
+  (. -> . -[ 'IO'; 'NonTermination' ]-> .,
     Match
-      (Effect ([ 'IO' ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
-        Sequence
-          (Effect ([ 'IO' ], .),
-            Apply
-              (Effect ([ 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
-                Leaf (Effect ([ ], .))),
-            Apply
-              (Effect ([ 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
-                Leaf (Effect ([ ], .))))))
-
-Value (. -[ 'IO' ]-> ., Leaf (Effect ([ ], . -[ 'IO' ]-> .)))
+      (Effect ([ 'IO'; 'NonTermination' ], .), Leaf (Effect ([ ], .)),
+        Apply
+          (Effect ([ 'NonTermination' ], .),
+            Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Match
+          (Effect ([ 'IO'; 'NonTermination' ], .), Leaf (Effect ([ ], .)),
+            Compound (Effect ([ ], .)),
+            Sequence
+              (Effect ([ 'IO'; 'NonTermination' ], .),
+                Apply
+                  (Effect ([ 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
+                    Leaf (Effect ([ ], .))),
+                Apply
+                  (Effect ([ 'IO'; 'NonTermination' ], .),
+                    Apply
+                      (Effect ([ ], . -[ 'IO'; 'NonTermination' ]-> .),
+                        Leaf
+                          (Effect ([ ], . -> . -[ 'IO'; 'NonTermination' ]-> .)),
+                        Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))))
 
 Value
-  (. -[ 'Failure'; 'IO' ]-> .,
+  (. -[ 'Counter'; 'IO'; 'NonTermination' ]-> .,
+    Let
+      (Effect ([ 'Counter'; 'IO'; 'NonTermination' ], .),
+        Apply
+          (Effect ([ 'Counter' ], .), Leaf (Effect ([ ], . -[ 'Counter' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Apply
+          (Effect ([ 'IO'; 'NonTermination' ], .),
+            Apply
+              (Effect ([ ], . -[ 'IO'; 'NonTermination' ]-> .),
+                Leaf (Effect ([ ], . -> . -[ 'IO'; 'NonTermination' ]-> .)),
+                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))
+
+Value
+  (. -[ 'Counter'; 'IO'; 'NonTermination' ]-> .,
+    Leaf (Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)))
+
+Value
+  (. -[ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ]-> .,
     Apply
-      (Effect ([ 'Failure'; 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
+      (Effect ([ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], .),
+        Leaf (Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
         Apply
           (Effect ([ 'Failure' ], .), Leaf (Effect ([ ], . -[ 'Failure' ]-> .)),
             Compound

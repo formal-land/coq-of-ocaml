@@ -3,18 +3,53 @@ Inductive 'tree':
     [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
 
 Value
-  (rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Some
+  (rec, 'find_rec', [ ],
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ], Some
     Type ('bool')) =
   Match
-    ('t',
+    ('counter',
       [
-        (Constructor ('Leaf'), Constructor ('false'));
-        (Constructor ('Node', 't1', 'x'', 't2'),
-          IfThenElse
-            (Apply (Apply ('Z.ltb', 'x'), 'x''),
-              Apply (Apply ('find', 'x'), 't1'),
-              IfThenElse
-                (Apply (Apply ('Z.ltb', 'x''), 'x'),
-                  Apply (Apply ('find', 'x'), 't2'),
-                  Constructor ('true'))))
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('t',
+              [
+                (Constructor ('Leaf'), Constructor ('false'));
+                (Constructor ('Node', 't1', 'x'', 't2'),
+                  IfThenElse
+                    (Apply
+                      (Apply
+                        ('Z.ltb',
+                          'x'),
+                        'x''),
+                      Apply
+                        (Apply
+                          (Apply
+                            ('find_rec',
+                              'counter'),
+                            'x'),
+                          't1'),
+                      IfThenElse
+                        (Apply
+                          (Apply
+                            ('Z.ltb',
+                              'x''),
+                            'x'),
+                          Apply
+                            (Apply
+                              (Apply
+                                ('find_rec',
+                                  'counter'),
+                                'x'),
+                              't2'),
+                          Constructor
+                            ('true'))))
+              ]))
       ])
+
+Value
+  (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Some
+    Type ('bool')) =
+  Let (non_rec, 'counter', [ ], [ ], None) =
+    Apply ('read_counter', 'tt') in
+  Apply (Apply (Apply ('find_rec', 'counter'), 'x'), 't')

@@ -12,29 +12,72 @@ Value
       ])
 
 Value
-  (rec, 'print_list', [ ], [ ('match_var_0', Type ('list', Type ('string'))) ],
-    Some Monad ([ 'IO' ], Type ('unit'))) =
+  (rec, 'print_list_rec', [ ],
+    [
+      ('counter', Type ('nat'));
+      ('match_var_0', Type ('list', Type ('string')))
+    ], Some Monad ([ 'IO'; 'NonTermination' ], Type ('unit'))) =
   Match
-    ('match_var_0',
+    ('counter',
       [
-        (Constructor ('[]'), Return (Constructor ('tt')));
-        (Constructor ('cons', 'x', 'xs'),
-          Bind
-            (Apply ('print_string', 'x'), None,
-              Apply ('print_list', 'xs')))
+        (Nat(0),
+          Lift
+            ([ 'NonTermination' ], [ 'IO'; 'NonTermination' ],
+              Apply ('not_terminated', 'tt')));
+        (Constructor ('S', 'counter'),
+          Match
+            ('match_var_0',
+              [
+                (Constructor ('[]'),
+                  Return
+                    (Constructor
+                      ('tt')));
+                (Constructor ('cons', 'x', 'xs'),
+                  Bind
+                    (Lift
+                      ([
+                        'IO'
+                      ],
+                        [
+                          'IO';
+                          'NonTermination'
+                        ],
+                        Apply
+                          ('print_string',
+                            'x')),
+                      None,
+                      Apply
+                        (Apply
+                          ('print_list_rec',
+                            'counter'),
+                          'xs')))
+              ]))
       ])
 
 Value
+  (non_rec, 'print_list', [ ],
+    [ ('match_var_0', Type ('list', Type ('string'))) ], Some
+    Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit'))) =
+  Bind
+    (Lift
+      ([ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination' ],
+        Apply ('read_counter', 'tt')), Some 'counter',
+      Lift
+        ([ 'IO'; 'NonTermination' ], [ 'Counter'; 'IO'; 'NonTermination' ],
+          Apply (Apply ('print_list_rec', 'counter'), 'match_var_0')))
+
+Value
   (non_rec, 'f', [ ], [ ], Some
-    (Type ('list', Type ('string')) -> Monad ([ 'IO' ], Type ('unit')))) =
+    (Type ('list', Type ('string')) ->
+      Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit')))) =
   'print_list'
 
 Value
   (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some
-    Monad ([ 'Failure'; 'IO' ], Type ('unit'))) =
+    Monad ([ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], Type ('unit'))) =
   Bind
     (Lift
-      ([ 'Failure' ], [ 'Failure'; 'IO' ],
+      ([ 'Failure' ], [ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ],
         Apply
           ('tail',
             Constructor
@@ -45,4 +88,7 @@ Value
                       ('cons', String(" "),
                         Constructor
                           ('cons', String("world"), Constructor ('[]'))))))),
-      Some 'x', Lift ([ 'IO' ], [ 'Failure'; 'IO' ], Apply ('f', 'x')))
+      Some 'x',
+      Lift
+        ([ 'Counter'; 'IO'; 'NonTermination' ],
+          [ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], Apply ('f', 'x')))

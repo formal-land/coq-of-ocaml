@@ -261,30 +261,10 @@ let rec monadise_let_rec (e : t) : t =
     Constructor (x, List.map monadise_let_rec es)
   | Apply (e1, e2) -> Apply (monadise_let_rec e1, monadise_let_rec e2)
   | Function (x, e) -> Function (x, monadise_let_rec e)
-  | Let ((is_rec, x, typ_args, args, typ) as header, e1, e2) ->
-    let e1 = monadise_let_rec e1 in
+  | Let (header, e1, e2) ->
+    let defs = monadise_let_rec_definition header e1 in
     let e2 = monadise_let_rec e2 in
-    if Recursivity.to_bool is_rec then
-      let var (x : Name.t) : t = Variable (PathName.of_name [] x) in
-      let x_rec = x ^ "_rec" in
-      let args' =
-        ("counter", Type.Apply (PathName.of_name [] "nat", [])) :: args in
-      let e1 = Match (var "counter", [
-        (Pattern.Constant (Constant.Nat 0),
-          Apply (var "not_terminated", var "tt"));
-        (Pattern.Constructor (PathName.of_name [] "S",
-          [Pattern.Variable "counter"]),
-          substitute (PathName.of_name [] x)
-            (Apply (var x_rec, var "counter")) e1)]) in
-      Let ((is_rec, x_rec, typ_args, args', typ), e1,
-      Let ((Recursivity.New false, x, typ_args, args, typ),
-        Let (Header.variable "counter",
-          Apply (var "read_counter", var "tt"),
-        List.fold_left (fun e (x, _) -> Apply (e, var x))
-          (Apply (var x_rec, var "counter")) args),
-      e2))
-    else
-      Let (header, e1, e2)
+    List.fold_right (fun (header, e) e2 -> Let (header, e, e2)) defs e2
   | Match (e, cases) ->
     Match (monadise_let_rec e,
       List.map (fun (p, e) -> (p, monadise_let_rec e)) cases)
@@ -297,6 +277,31 @@ let rec monadise_let_rec (e : t) : t =
   | Return e -> monadise_let_rec e
   | Bind (e1, x, e2) -> Bind (monadise_let_rec e1, x, monadise_let_rec e2)
   | Lift (d1, d2, e) -> Lift (d1, d2, monadise_let_rec e)
+
+and monadise_let_rec_definition (header : Header.t) (e : t)
+  : (Header.t * t) list =
+  let (is_rec, x, typ_vars, args, typ) = header in
+  let e = monadise_let_rec e in
+  if Recursivity.to_bool is_rec then
+    let var (x : Name.t) : t = Variable (PathName.of_name [] x) in
+    let x_rec = x ^ "_rec" in
+    let args' =
+      ("counter", Type.Apply (PathName.of_name [] "nat", [])) :: args in
+    let e = Match (var "counter", [
+      (Pattern.Constant (Constant.Nat 0),
+        Apply (var "not_terminated", var "tt"));
+      (Pattern.Constructor (PathName.of_name [] "S",
+        [Pattern.Variable "counter"]),
+        substitute (PathName.of_name [] x)
+          (Apply (var x_rec, var "counter")) e)]) in
+    [ ((is_rec, x_rec, typ_vars, args', typ), e);
+      ((Recursivity.New false, x, typ_vars, args, typ),
+        Let (Header.variable "counter",
+          Apply (var "read_counter", var "tt"),
+        List.fold_left (fun e (x, _) -> Apply (e, var x))
+          (Apply (var x_rec, var "counter")) args)) ]
+  else
+    [(header, e)]
 
 module Tree = struct
   type t =

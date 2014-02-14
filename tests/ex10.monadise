@@ -2,39 +2,107 @@ Module 'List2':
   Inductive 't':
     ([ 'a' ], [ ('Nil', [ ]); ('Cons', [ 'a'; Type ('t', 'a') ]) ])
   
-  Value (rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ], Some Type ('Z')) =
+  Value
+    (rec, 'sum_rec', [ ],
+      [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ], Some
+      Monad ([ 'NonTermination' ], Type ('Z'))) =
     Match
-      ('l',
+      ('counter',
         [
-          (Constructor ('Nil'), Int(0));
-          (Constructor ('Cons', 'x', 'xs'),
-            Apply (Apply ('Z.add', 'x'), Apply ('sum', 'xs')))
+          (Nat(0), Apply ('not_terminated', 'tt'));
+          (Constructor ('S', 'counter'),
+            Match
+              ('l',
+                [
+                  (Constructor ('Nil'), Return (Int(0)));
+                  (Constructor ('Cons', 'x', 'xs'),
+                    Bind
+                      (Apply
+                        (Apply
+                          ('sum_rec',
+                            'counter'),
+                          'xs'),
+                        Some
+                          'x_1',
+                        Return
+                          (Apply
+                            (Apply
+                              ('Z.add',
+                                'x'),
+                              'x_1'))))
+                ]))
         ])
   
   Value
-    (rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ], Some
-      Type ('t', 'A')) =
+    (non_rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ], Some
+      Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+    Bind
+      (Lift
+        ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+          Apply ('read_counter', 'tt')), Some 'counter',
+        Lift
+          ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply (Apply ('sum_rec', 'counter'), 'l')))
+  
+  Value
+    (rec, 'of_list_rec', [ 'A' ],
+      [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ], Some
+      Monad ([ 'NonTermination' ], Type ('t', 'A'))) =
     Match
-      ('match_var_0',
+      ('counter',
         [
-          (Constructor ('[]'), Constructor ('Nil'));
-          (Constructor ('cons', 'x', 'xs'),
-            Constructor ('Cons', 'x', Apply ('of_list', 'xs')))
+          (Nat(0), Apply ('not_terminated', 'tt'));
+          (Constructor ('S', 'counter'),
+            Match
+              ('match_var_0',
+                [
+                  (Constructor ('[]'),
+                    Return
+                      (Constructor
+                        ('Nil')));
+                  (Constructor ('cons', 'x', 'xs'),
+                    Bind
+                      (Apply
+                        (Apply
+                          ('of_list_rec',
+                            'counter'),
+                          'xs'),
+                        Some
+                          'x_1',
+                        Return
+                          (Constructor
+                            ('Cons',
+                              'x',
+                              'x_1'))))
+                ]))
         ])
+  
+  Value
+    (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ], Some
+      Monad ([ 'Counter'; 'NonTermination' ], Type ('t', 'A'))) =
+    Bind
+      (Lift
+        ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+          Apply ('read_counter', 'tt')), Some 'counter',
+        Lift
+          ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply (Apply ('of_list_rec', 'counter'), 'match_var_0')))
   
   Module 'Inside':
     Value (non_rec, 'x', [ ], [ ], Some Type ('Z')) =
       Int(12)
 
-Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ('List2.sum',
-      Apply
-        ('List2.of_list',
-          Constructor
-            ('cons', Int(5),
-              Constructor
-                ('cons', Int(7),
-                  Constructor
-                    ('cons', Int(6),
-                      Constructor ('cons', 'List2.Inside.x', Constructor ('[]')))))))
+Value
+  (non_rec, 'n', [ ], [ ], Some
+    Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+  Bind
+    (Apply
+      ('List2.of_list',
+        Constructor
+          ('cons', Int(5),
+            Constructor
+              ('cons', Int(7),
+                Constructor
+                  ('cons', Int(6),
+                    Constructor ('cons', 'List2.Inside.x', Constructor ('[]')))))),
+      Some 'x', Apply ('List2.sum', 'x'))

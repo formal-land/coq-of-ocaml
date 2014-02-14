@@ -12,15 +12,39 @@ Value
       ])
 
 Value
-  (rec, 'print_list', [ ], [ ('match_var_0', Type ('list', Type ('string'))) ],
-    Some Type ('unit')) =
+  (rec, 'print_list_rec', [ ],
+    [
+      ('counter', Type ('nat'));
+      ('match_var_0', Type ('list', Type ('string')))
+    ], Some Type ('unit')) =
   Match
-    ('match_var_0',
+    ('counter',
       [
-        (Constructor ('[]'), Constructor ('tt'));
-        (Constructor ('cons', 'x', 'xs'),
-          Sequence (Apply ('print_string', 'x'), Apply ('print_list', 'xs')))
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('match_var_0',
+              [
+                (Constructor ('[]'), Constructor ('tt'));
+                (Constructor ('cons', 'x', 'xs'),
+                  Sequence
+                    (Apply
+                      ('print_string',
+                        'x'),
+                      Apply
+                        (Apply
+                          ('print_list_rec',
+                            'counter'),
+                          'xs')))
+              ]))
       ])
+
+Value
+  (non_rec, 'print_list', [ ],
+    [ ('match_var_0', Type ('list', Type ('string'))) ], Some Type ('unit')) =
+  Let (non_rec, 'counter', [ ], [ ], None) =
+    Apply ('read_counter', 'tt') in
+  Apply (Apply ('print_list_rec', 'counter'), 'match_var_0')
 
 Value
   (non_rec, 'f', [ ], [ ], Some

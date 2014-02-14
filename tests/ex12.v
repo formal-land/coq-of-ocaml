@@ -10,15 +10,24 @@ Inductive tree : Type :=
 Arguments Leaf .
 Arguments Node _ _ _.
 
-Fixpoint find (x : Z) (t : tree) : bool :=
-  match t with
-  | Leaf => false
-  | Node t1 x' t2 =>
-    if (Z.ltb x) x' then
-      (find x) t1
-    else
-      if (Z.ltb x') x then
-        (find x) t2
+Fixpoint find_rec (counter : nat) (x : Z) (t : tree) : M [ NonTermination ] bool
+  :=
+  match counter with
+  | 0 % nat => not_terminated tt
+  | S counter =>
+    match t with
+    | Leaf => ret false
+    | Node t1 x' t2 =>
+      if (Z.ltb x) x' then
+        ((find_rec counter) x) t1
       else
-        true
+        if (Z.ltb x') x then
+          ((find_rec counter) x) t2
+        else
+          ret true
+    end
   end.
+
+Definition find (x : Z) (t : tree) : M [ Counter; NonTermination ] bool :=
+  let! counter := lift [_;_] "10" (read_counter tt) in
+  lift [_;_] "01" (((find_rec counter) x) t).

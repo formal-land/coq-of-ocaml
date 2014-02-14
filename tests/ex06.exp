@@ -1,28 +1,81 @@
 Value
-  (rec, 'map', [ 'A'; 'B' ], [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
+  (rec, 'map_rec', [ 'A'; 'B' ],
+    [ ('counter', Type ('nat')); ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
     Some Type ('list', 'A')) =
   Match
-    ('l',
+    ('counter',
       [
-        (Constructor ('[]'), Constructor ('[]'));
-        (Constructor ('cons', 'x', 'xs'),
-          Constructor
-            ('cons', Apply ('f', 'x'), Apply (Apply ('map', 'f'), 'xs')))
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('l',
+              [
+                (Constructor ('[]'), Constructor ('[]'));
+                (Constructor ('cons', 'x', 'xs'),
+                  Constructor
+                    ('cons',
+                      Apply
+                        ('f',
+                          'x'),
+                      Apply
+                        (Apply
+                          (Apply
+                            ('map_rec',
+                              'counter'),
+                            'f'),
+                          'xs')))
+              ]))
       ])
 
 Value
-  (rec, 'fold', [ 'A'; 'B' ],
+  (non_rec, 'map', [ 'A'; 'B' ],
+    [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ], Some Type ('list', 'A'))
+  =
+  Let (non_rec, 'counter', [ ], [ ], None) =
+    Apply ('read_counter', 'tt') in
+  Apply (Apply (Apply ('map_rec', 'counter'), 'f'), 'l')
+
+Value
+  (rec, 'fold_rec', [ 'A'; 'B' ],
+    [
+      ('counter', Type ('nat'));
+      ('f', ('A' -> ('B' -> 'A')));
+      ('a', 'A');
+      ('l', Type ('list', 'B'))
+    ], Some 'A') =
+  Match
+    ('counter',
+      [
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('l',
+              [
+                (Constructor ('[]'), 'a');
+                (Constructor ('cons', 'x', 'xs'),
+                  Apply
+                    (Apply
+                      (Apply
+                        (Apply
+                          ('fold_rec',
+                            'counter'),
+                          'f'),
+                        Apply
+                          (Apply
+                            ('f',
+                              'a'),
+                            'x')),
+                      'xs'))
+              ]))
+      ])
+
+Value
+  (non_rec, 'fold', [ 'A'; 'B' ],
     [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
     Some 'A') =
-  Match
-    ('l',
-      [
-        (Constructor ('[]'), 'a');
-        (Constructor ('cons', 'x', 'xs'),
-          Apply
-            (Apply (Apply ('fold', 'f'), Apply (Apply ('f', 'a'), 'x')),
-              'xs'))
-      ])
+  Let (non_rec, 'counter', [ ], [ ], None) =
+    Apply ('read_counter', 'tt') in
+  Apply (Apply (Apply (Apply ('fold_rec', 'counter'), 'f'), 'a'), 'l')
 
 Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
   Constructor
