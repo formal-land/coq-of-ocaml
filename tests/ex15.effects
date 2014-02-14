@@ -1,0 +1,144 @@
+Other
+
+Value (., Compound (Effect ([ ], .)))
+
+Value
+  (. -> . -> . -[ 'NonTermination' ]-> .,
+    Match
+      (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
+        Apply
+          (Effect ([ 'NonTermination' ], .),
+            Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Match
+          (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
+            Compound (Effect ([ ], .)),
+            Match
+              (Effect ([ 'NonTermination' ], .),
+                Apply
+                  (Effect ([ ], .),
+                    Apply
+                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                        Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+                Apply
+                  (Effect ([ 'NonTermination' ], .),
+                    Apply
+                      (Effect ([ ], . -[ 'NonTermination' ]-> .),
+                        Apply
+                          (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
+                            Leaf
+                              (Effect
+                                ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                            Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+                    Leaf (Effect ([ ], .))),
+                Match
+                  (Effect ([ 'NonTermination' ], .),
+                    Apply
+                      (Effect ([ ], .),
+                        Apply
+                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                            Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+                    Apply
+                      (Effect ([ 'NonTermination' ], .),
+                        Apply
+                          (Effect ([ ], . -[ 'NonTermination' ]-> .),
+                            Apply
+                              (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
+                                Leaf
+                                  (Effect
+                                    ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+                        Leaf (Effect ([ ], .))), Compound (Effect ([ ], .)))))))
+
+Value
+  (. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+    Let
+      (Effect ([ 'Counter'; 'NonTermination' ], .),
+        Apply
+          (Effect ([ 'Counter' ], .), Leaf (Effect ([ ], . -[ 'Counter' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Apply
+          (Effect ([ 'NonTermination' ], .),
+            Apply
+              (Effect ([ ], . -[ 'NonTermination' ]-> .),
+                Apply
+                  (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
+                    Leaf (Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+            Leaf (Effect ([ ], .)))))
+
+Value
+  (. -> . -> . -[ 'NonTermination' ]-> .,
+    Match
+      (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
+        Apply
+          (Effect ([ 'NonTermination' ], .),
+            Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Match
+          (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
+            Compound
+              (Effect ([ ], .), Compound (Effect ([ ], .)),
+                Leaf (Effect ([ ], .)), Compound (Effect ([ ], .))),
+            Match
+              (Effect ([ 'NonTermination' ], .),
+                Apply
+                  (Effect ([ ], .),
+                    Apply
+                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                        Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+                Compound
+                  (Effect ([ 'NonTermination' ], .),
+                    Apply
+                      (Effect ([ 'NonTermination' ], .),
+                        Apply
+                          (Effect ([ ], . -[ 'NonTermination' ]-> .),
+                            Apply
+                              (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
+                                Leaf
+                                  (Effect
+                                    ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+                        Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)),
+                    Leaf (Effect ([ ], .))),
+                Match
+                  (Effect ([ 'NonTermination' ], .),
+                    Apply
+                      (Effect ([ ], .),
+                        Apply
+                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                            Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+                    Compound
+                      (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
+                        Leaf (Effect ([ ], .)),
+                        Apply
+                          (Effect ([ 'NonTermination' ], .),
+                            Apply
+                              (Effect ([ ], . -[ 'NonTermination' ]-> .),
+                                Apply
+                                  (Effect
+                                    ([ ], . -> . -[ 'NonTermination' ]-> .),
+                                    Leaf
+                                      (Effect
+                                        ([ ],
+                                          . -> . -> . -[ 'NonTermination' ]-> .)),
+                                    Leaf (Effect ([ ], .))),
+                                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))),
+                    Leaf (Effect ([ ], .)))))))
+
+Value
+  (. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+    Let
+      (Effect ([ 'Counter'; 'NonTermination' ], .),
+        Apply
+          (Effect ([ 'Counter' ], .), Leaf (Effect ([ ], . -[ 'Counter' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Apply
+          (Effect ([ 'NonTermination' ], .),
+            Apply
+              (Effect ([ ], . -[ 'NonTermination' ]-> .),
+                Apply
+                  (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
+                    Leaf (Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
+            Leaf (Effect ([ ], .)))))

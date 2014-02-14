@@ -89,6 +89,24 @@ module Record = struct
       !^ "}.")
 end
 
+(** Definition of a synonym type. *)
+module Synonym = struct
+  type t = {
+    name : Name.t;
+    typ_vars : Name.t list;
+    value : Type.t }
+
+  let pp (s : t) : SmartPrint.t =
+    nest (!^ "Synonym" ^^ Pp.list [
+      Name.pp s.name; OCaml.list Name.pp s.typ_vars; Type.pp s.value])
+
+  let to_coq (s : t) : SmartPrint.t =
+    nest (
+      !^ "Definition" ^^ Name.to_coq s.name ^^
+      separate space (List.map Name.to_coq s.typ_vars) ^^ !^ ":=" ^^
+      Type.to_coq false s.value ^-^ !^ ".")
+end
+
 (** The "open" construct to open a module. *)
 module Open = struct
   type t = PathName.t
@@ -106,6 +124,7 @@ type t =
   | Value of Value.t
   | Inductive of Inductive.t
   | Record of Record.t
+  | Synonym of Synonym.t
   | Open of Open.t
   | Module of Name.t * t list
 
@@ -115,6 +134,7 @@ let rec pp (defs : t list) : SmartPrint.t =
     | Value value -> Value.pp value
     | Inductive ind -> Inductive.pp ind
     | Record record -> Record.pp record
+    | Synonym synonym -> Synonym.pp synonym
     | Open o -> Open.pp o
     | Module (name, defs) ->
       nest (
@@ -136,16 +156,15 @@ let rec of_structure (structure : structure) : t list =
           body = e }
       | _ -> failwith "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
+      let typ_vars = typ.type_params |> List.map (fun x ->
+        match Type.of_type_expr x with
+        | Type.Variable x -> x
+        | _ -> failwith "The type parameter was expected to be a variable.") in
       (match typ.type_kind with
       | Type_variant cases ->
         let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
           (Name.of_ident constr, List.map (fun typ -> Type.of_type_expr typ) typs))
           cases in
-        let typ_vars = List.map (fun x ->
-          match Type.of_type_expr x with
-          | Type.Variable x -> x
-          | _ -> failwith "The type parameter was expected to be a variable.")
-          typ.type_params in
         Inductive {
           Inductive.name = Name.of_ident name;
           typ_vars = typ_vars;
@@ -153,8 +172,16 @@ let rec of_structure (structure : structure) : t list =
       | Type_record (fields, _) ->
         Record {
           Record.name = Name.of_ident name;
-          fields = List.map (fun {ld_id = x; ld_type = typ} -> (Name.of_ident x, Type.of_type_expr typ)) fields }
-      | _ -> failwith "Type definition not handled.")
+          fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
+            (Name.of_ident x, Type.of_type_expr typ)) }
+      | Type_abstract ->
+        (match typ.type_manifest with
+        | Some typ ->
+          Synonym {
+            Synonym.name = Name.of_ident name;
+            typ_vars = typ_vars;
+            value = Type.of_type_expr typ }
+        | None -> failwith "Type definition not handled."))
     | Tstr_open (_, path, _, _) -> Open (PathName.of_path path)
     | Tstr_module {mb_id = name; mb_expr = { mod_desc = Tmod_structure structure }} ->
       let name = Name.of_ident name in
@@ -172,8 +199,7 @@ let rec monadise_let_rec (defs : t list) : t list =
       defs |> List.map (fun (header, body) ->
         Value { Value.header = header; body = body })
     | Module (name, defs) -> [Module (name, monadise_let_rec defs)]
-    | Inductive _ | Record _ | Open _ -> [def]
-    | _ -> failwith "Unexpected arguments for 'monadise'." in
+    | Inductive _ | Record _ | Synonym _ | Open _ -> [def] in
   List.concat (List.map monadise_let_rec_one defs)
 
 module Tree = struct
@@ -208,7 +234,7 @@ let rec to_trees (effects : Effect.Env.t)
     | Module (name, defs) ->
       let (trees, effects) = to_trees (Effect.Env.open_module effects) defs in
       (Tree.Module trees, Effect.Env.close_module effects name)
-    | Inductive _ | Record _ | Open _ -> (Tree.Other, effects) in
+    | Inductive _ | Record _ | Synonym _ | Open _ -> (Tree.Other, effects) in
   let (trees, effects) =
     List.fold_left (fun (trees, effects) def ->
       let (tree, effects) = to_tree def effects in
@@ -243,7 +269,7 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
       let (env, defs) = monadise (PathName.Env.open_module env) defs trees in
       (PathName.Env.close_module env name, Module (name, defs))
     | (Inductive _, Tree.Other) | (Record _, Tree.Other)
-      | (Open _, Tree.Other) -> (env, def)
+      | (Synonym _, Tree.Other) | (Open _, Tree.Other) -> (env, def)
     | _ -> failwith "Unexpected arguments for 'monadise'." in
   let (env, defs) =
     List.fold_left2 (fun (env, defs) def tree ->
@@ -259,6 +285,7 @@ let rec to_coq (defs : t list) : SmartPrint.t =
     | Value value -> Value.to_coq value
     | Inductive ind -> Inductive.to_coq ind
     | Record record -> Record.to_coq record
+    | Synonym s -> Synonym.to_coq s
     | Open o -> Open.to_coq o
     | Module (name, defs) ->
       nest (

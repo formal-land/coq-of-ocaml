@@ -38,12 +38,12 @@ class Test
   end
 
   def coq_cmd
-    ['coqc', extension('.v')]
+    "coqc #{extension('.v')}"
   end
 
   def coq
-    IO.popen(coq_cmd + [:err => '/dev/null']).read
-    $?
+    system("#{coq_cmd} 2>/dev/null")
+    $?.exitstatus == 0
   end
 end
 
@@ -80,7 +80,7 @@ class Tests
       else
         print "  \e[31m✗\e[0m "
       end
-      puts test.coq_cmd.join(" ")
+      puts test.coq_cmd
     end
   end
 end

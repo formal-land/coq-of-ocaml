@@ -1,0 +1,123 @@
+Inductive 'set':
+  ([ ], [ ('Empty', [ ]); ('Node', [ Type ('set'); Type ('Z'); Type ('set') ]) ])
+
+Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
+  Constructor ('Empty')
+
+Value
+  (rec, 'member_rec', [ ],
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Type ('bool')) =
+  Match
+    ('counter',
+      [
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('s',
+              [
+                (Constructor ('Empty'), Constructor ('false'));
+                (Constructor ('Node', 's1', 'y', 's2'),
+                  IfThenElse
+                    (Apply
+                      (Apply
+                        ('Z.ltb',
+                          'x'),
+                        'y'),
+                      Apply
+                        (Apply
+                          (Apply
+                            ('member_rec',
+                              'counter'),
+                            'x'),
+                          's1'),
+                      IfThenElse
+                        (Apply
+                          (Apply
+                            ('Z.ltb',
+                              'y'),
+                            'x'),
+                          Apply
+                            (Apply
+                              (Apply
+                                ('member_rec',
+                                  'counter'),
+                                'x'),
+                              's2'),
+                          Constructor
+                            ('true'))))
+              ]))
+      ])
+
+Value
+  (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Type ('bool')) =
+  Let (non_rec, 'counter', [ ], [ ], None) =
+    Apply ('read_counter', 'tt') in
+  Apply (Apply (Apply ('member_rec', 'counter'), 'x'), 's')
+
+Value
+  (rec, 'insert_rec', [ ],
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Type ('set')) =
+  Match
+    ('counter',
+      [
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('s',
+              [
+                (Constructor ('Empty'),
+                  Constructor
+                    ('Node',
+                      Constructor
+                        ('Empty'),
+                      'x',
+                      Constructor
+                        ('Empty')));
+                (Constructor ('Node', 's1', 'y', 's2'),
+                  IfThenElse
+                    (Apply
+                      (Apply
+                        ('Z.ltb',
+                          'x'),
+                        'y'),
+                      Constructor
+                        ('Node',
+                          Apply
+                            (Apply
+                              (Apply
+                                ('insert_rec',
+                                  'counter'),
+                                'x'),
+                              's1'),
+                          'y',
+                          's2'),
+                      IfThenElse
+                        (Apply
+                          (Apply
+                            ('Z.ltb',
+                              'y'),
+                            'x'),
+                          Constructor
+                            ('Node',
+                              's1',
+                              'y',
+                              Apply
+                                (Apply
+                                  (Apply
+                                    ('insert_rec',
+                                      'counter'),
+                                    'x'),
+                                  's2')),
+                          's')))
+              ]))
+      ])
+
+Value
+  (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Type ('set')) =
+  Let (non_rec, 'counter', [ ], [ ], None) =
+    Apply ('read_counter', 'tt') in
+  Apply (Apply (Apply ('insert_rec', 'counter'), 'x'), 's')

@@ -1,0 +1,147 @@
+Inductive 'set':
+  ([ ], [ ('Empty', [ ]); ('Node', [ Type ('set'); Type ('Z'); Type ('set') ]) ])
+
+Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
+  Constructor ('Empty')
+
+Value
+  (rec, 'member_rec', [ ],
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Monad ([ 'NonTermination' ], Type ('bool'))) =
+  Match
+    ('counter',
+      [
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('s',
+              [
+                (Constructor ('Empty'),
+                  Return
+                    (Constructor
+                      ('false')));
+                (Constructor ('Node', 's1', 'y', 's2'),
+                  IfThenElse
+                    (Apply
+                      (Apply
+                        ('Z.ltb',
+                          'x'),
+                        'y'),
+                      Apply
+                        (Apply
+                          (Apply
+                            ('member_rec',
+                              'counter'),
+                            'x'),
+                          's1'),
+                      IfThenElse
+                        (Apply
+                          (Apply
+                            ('Z.ltb',
+                              'y'),
+                            'x'),
+                          Apply
+                            (Apply
+                              (Apply
+                                ('member_rec',
+                                  'counter'),
+                                'x'),
+                              's2'),
+                          Return
+                            (Constructor
+                              ('true')))))
+              ]))
+      ])
+
+Value
+  (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
+  Bind
+    (Lift
+      ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+        Apply ('read_counter', 'tt')), Some 'counter',
+      Lift
+        ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          Apply (Apply (Apply ('member_rec', 'counter'), 'x'), 's')))
+
+Value
+  (rec, 'insert_rec', [ ],
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Monad ([ 'NonTermination' ], Type ('set'))) =
+  Match
+    ('counter',
+      [
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('s',
+              [
+                (Constructor ('Empty'),
+                  Return
+                    (Constructor
+                      ('Node',
+                        Constructor
+                          ('Empty'),
+                        'x',
+                        Constructor
+                          ('Empty'))));
+                (Constructor ('Node', 's1', 'y', 's2'),
+                  IfThenElse
+                    (Apply
+                      (Apply
+                        ('Z.ltb',
+                          'x'),
+                        'y'),
+                      Bind
+                        (Apply
+                          (Apply
+                            (Apply
+                              ('insert_rec',
+                                'counter'),
+                              'x'),
+                            's1'),
+                          Some
+                            'x',
+                          Return
+                            (Constructor
+                              ('Node',
+                                'x',
+                                'y',
+                                's2'))),
+                      IfThenElse
+                        (Apply
+                          (Apply
+                            ('Z.ltb',
+                              'y'),
+                            'x'),
+                          Bind
+                            (Apply
+                              (Apply
+                                (Apply
+                                  ('insert_rec',
+                                    'counter'),
+                                  'x'),
+                                's2'),
+                              Some
+                                'x',
+                              Return
+                                (Constructor
+                                  ('Node',
+                                    's1',
+                                    'y',
+                                    'x'))),
+                          Return
+                            ('s'))))
+              ]))
+      ])
+
+Value
+  (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
+    Monad ([ 'Counter'; 'NonTermination' ], Type ('set'))) =
+  Bind
+    (Lift
+      ([ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+        Apply ('read_counter', 'tt')), Some 'counter',
+      Lift
+        ([ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          Apply (Apply (Apply ('insert_rec', 'counter'), 'x'), 's')))
