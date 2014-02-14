@@ -10,8 +10,8 @@ Inductive tree : Type :=
 Arguments Leaf .
 Arguments Node _ _ _.
 
-Fixpoint find_rec (counter : nat) (x : Z) (t : tree) : M [ NonTermination ] bool
-  :=
+Fixpoint find_rec (counter : nat) (x : Z) (t : tree) :
+  M [ Err_NonTermination ] bool :=
   match counter with
   | 0 % nat => not_terminated tt
   | S counter =>
@@ -28,6 +28,7 @@ Fixpoint find_rec (counter : nat) (x : Z) (t : tree) : M [ NonTermination ] bool
     end
   end.
 
-Definition find (x : Z) (t : tree) : M [ Counter; NonTermination ] bool :=
+Definition find (x : Z) (t : tree) : M [ Ref_Counter; Err_NonTermination ] bool
+  :=
   let! counter := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (((find_rec counter) x) t).

@@ -74,10 +74,10 @@ Value
 
 Value
   (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some
-    Monad ([ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], Type ('unit'))) =
+    Monad ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], Type ('unit'))) =
   Bind
     (Lift
-      ([ 'Failure' ], [ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ],
+      ([ 'Failure' ], [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
         Apply
           ('tail',
             Constructor
@@ -91,4 +91,4 @@ Value
       Some 'x',
       Lift
         ([ 'Counter'; 'IO'; 'NonTermination' ],
-          [ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], Apply ('f', 'x')))
+          [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], Apply ('f', 'x')))

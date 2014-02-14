@@ -2,24 +2,38 @@
 open SmartPrint
 
 module Atom = struct
+  module Kind = struct
+    type t = State | Error
+
+    let pp (kind : t) : SmartPrint.t =
+      match kind with
+      | State -> !^ "State"
+      | Error -> !^ "Error"
+  end
+
   type t = {
     name : PathName.t;
-    state : string;
-    error: string }
+    kind : Kind.t;
+    coq_type : string }
 
   type t' = t
   let compare (a1 : t) (a2 : t) : int =
-    compare a1.name a2.name
+    compare (a1.kind, a1.name) (a2.kind, a2.name)
 
   module Set = Set.Make (struct type t = t' let compare = compare end)
   module Map = Map.Make (struct type t = t' let compare = compare end)
 
   let pp (a : t) : SmartPrint.t =
     nest (!^ "Atom" ^^ Pp.list [
-      PathName.pp a.name; OCaml.string a.state; OCaml.string a.error])
+      PathName.pp a.name; Kind.pp a.kind; OCaml.string a.coq_type])
 
   let to_coq (a : t) : SmartPrint.t =
-    PathName.to_coq a.name
+    PathName.to_coq {
+      PathName.path = a.name.PathName.path;
+      base =
+        (match a.kind with
+        | Kind.State -> "Ref_"
+        | Kind.Error -> "Err_") ^ a.name.PathName.base }
 end
 
 module Descriptor = struct

@@ -4,24 +4,24 @@ open Effect.Type
 let effects : Effect.Env.t =
   let exn_invalid_argument = Effect.Descriptor.of_atom
     { Effect.Atom.name = PathName.of_name [] "Invalid_argument";
-      state = "unit";
-      error = "string" } in
+      kind = Effect.Atom.Kind.Error;
+      coq_type = "string" } in
   let exn_failure = Effect.Descriptor.of_atom
     { Effect.Atom.name = PathName.of_name [] "Failure";
-      state = "unit";
-      error = "string" } in
+      kind = Effect.Atom.Kind.Error;
+      coq_type = "string" } in
   let io = Effect.Descriptor.of_atom
     { Effect.Atom.name = PathName.of_name [] "IO";
-      state = "list string * list string";
-      error = "Empty_set" } in
+      kind = Effect.Atom.Kind.State;
+      coq_type = "list string * list string" } in
   let counter = Effect.Descriptor.of_atom
     { Effect.Atom.name = PathName.of_name [] "Counter";
-      state = "nat";
-      error = "Empty_set" } in
+      kind = Effect.Atom.Kind.State;
+      coq_type = "nat" } in
   let non_termination = Effect.Descriptor.of_atom
     { Effect.Atom.name = PathName.of_name [] "NonTermination";
-      state = "unit";
-      error = "unit" } in
+      kind = Effect.Atom.Kind.Error;
+      coq_type = "unit" } in
   List.fold_left (fun effects (path, x, typ) ->
     Effect.Env.add (PathName.of_name path x) typ effects)
     Effect.Env.empty

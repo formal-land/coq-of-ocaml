@@ -50,9 +50,9 @@ Value
     Leaf (Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)))
 
 Value
-  (. -[ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ]-> .,
+  (. -[ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ]-> .,
     Apply
-      (Effect ([ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], .),
+      (Effect ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], .),
         Leaf (Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
         Apply
           (Effect ([ 'Failure' ], .), Leaf (Effect ([ ], . -[ 'Failure' ]-> .)),

@@ -11,7 +11,7 @@ Module List2.
   Arguments Nil {a} .
   Arguments Cons {a} _ _.
   
-  Fixpoint sum_rec (counter : nat) (l : t Z) : M [ NonTermination ] Z :=
+  Fixpoint sum_rec (counter : nat) (l : t Z) : M [ Err_NonTermination ] Z :=
     match counter with
     | 0 % nat => not_terminated tt
     | S counter =>
@@ -23,12 +23,12 @@ Module List2.
       end
     end.
   
-  Definition sum (l : t Z) : M [ Counter; NonTermination ] Z :=
+  Definition sum (l : t Z) : M [ Ref_Counter; Err_NonTermination ] Z :=
     let! counter := lift [_;_] "10" (read_counter tt) in
     lift [_;_] "01" ((sum_rec counter) l).
   
   Fixpoint of_list_rec {A : Type} (counter : nat) (match_var_0 : list A) :
-    M [ NonTermination ] (t A) :=
+    M [ Err_NonTermination ] (t A) :=
     match counter with
     | 0 % nat => not_terminated tt
     | S counter =>
@@ -41,7 +41,7 @@ Module List2.
     end.
   
   Definition of_list {A : Type} (match_var_0 : list A) :
-    M [ Counter; NonTermination ] (t A) :=
+    M [ Ref_Counter; Err_NonTermination ] (t A) :=
     let! counter := lift [_;_] "10" (read_counter tt) in
     lift [_;_] "01" ((of_list_rec counter) match_var_0).
   
@@ -50,6 +50,6 @@ Module List2.
   End Inside.
 End List2.
 
-Definition n : M [ Counter; NonTermination ] Z :=
+Definition n : M [ Ref_Counter; Err_NonTermination ] Z :=
   let! x := List2.of_list (cons 5 (cons 7 (cons 6 (cons List2.Inside.x [])))) in
   List2.sum x.

@@ -107,6 +107,29 @@ module Synonym = struct
       Type.to_coq false s.value ^-^ !^ ".")
 end
 
+module Exception = struct
+  type t = {
+    name : Name.t;
+    typ : Type.t }
+
+  let pp (exn : t) : SmartPrint.t =
+    nest (!^ "Exception" ^^ Pp.list [Name.pp exn.name; Type.pp exn.typ])
+
+  let to_coq (exn : t) : SmartPrint.t =
+    !^ "(* *)"
+
+  (*let to_atom (e : t) : Effect.Atom.t = {
+    Atom.name = e.name;
+    kind = Effect.Atom.Kind.Error;
+    coq_type =  }*)
+
+  (*let to_coq (e : t) : SmartPrint.t =
+    nest (
+      !^ "Definition" ^^ Name.to_coq e.name ^^
+      separate space (List.map Name.to_coq s.typ_vars) ^^ !^ ":=" ^^
+      Type.to_coq false s.value ^-^ !^ ".")*)
+end
+
 (** The "open" construct to open a module. *)
 module Open = struct
   type t = PathName.t
@@ -125,6 +148,7 @@ type t =
   | Inductive of Inductive.t
   | Record of Record.t
   | Synonym of Synonym.t
+  | Exception of Exception.t
   | Open of Open.t
   | Module of Name.t * t list
 
@@ -135,6 +159,7 @@ let rec pp (defs : t list) : SmartPrint.t =
     | Inductive ind -> Inductive.pp ind
     | Record record -> Record.pp record
     | Synonym synonym -> Synonym.pp synonym
+    | Exception exn -> Exception.pp exn
     | Open o -> Open.pp o
     | Module (name, defs) ->
       nest (
@@ -182,12 +207,17 @@ let rec of_structure (structure : structure) : t list =
             typ_vars = typ_vars;
             value = Type.of_type_expr typ }
         | None -> failwith "Type definition not handled."))
+    | Tstr_exception { cd_id = name; cd_args = args } ->
+      let typ =
+        Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
+          Type.of_type_expr typ)) in
+      Exception { Exception.name = Name.of_ident name; typ = typ}
     | Tstr_open (_, path, _, _) -> Open (PathName.of_path path)
-    | Tstr_module {mb_id = name; mb_expr = { mod_desc = Tmod_structure structure }} ->
+    | Tstr_module {mb_id = name;
+      mb_expr = { mod_desc = Tmod_structure structure }} ->
       let name = Name.of_ident name in
       let structures = of_structure structure in
       Module (name, structures)
-    | Tstr_exception _ -> failwith "Imperative structure item not handled."
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
 
@@ -199,7 +229,7 @@ let rec monadise_let_rec (defs : t list) : t list =
       defs |> List.map (fun (header, body) ->
         Value { Value.header = header; body = body })
     | Module (name, defs) -> [Module (name, monadise_let_rec defs)]
-    | Inductive _ | Record _ | Synonym _ | Open _ -> [def] in
+    | Inductive _ | Record _ | Synonym _ | Exception _ | Open _ -> [def] in
   List.concat (List.map monadise_let_rec_one defs)
 
 module Tree = struct
@@ -234,7 +264,8 @@ let rec to_trees (effects : Effect.Env.t)
     | Module (name, defs) ->
       let (trees, effects) = to_trees (Effect.Env.open_module effects) defs in
       (Tree.Module trees, Effect.Env.close_module effects name)
-    | Inductive _ | Record _ | Synonym _ | Open _ -> (Tree.Other, effects) in
+    | Inductive _ | Record _ | Synonym _ | Exception _ | Open _ ->
+      (Tree.Other, effects) in
   let (trees, effects) =
     List.fold_left (fun (trees, effects) def ->
       let (tree, effects) = to_tree def effects in
@@ -269,7 +300,8 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
       let (env, defs) = monadise (PathName.Env.open_module env) defs trees in
       (PathName.Env.close_module env name, Module (name, defs))
     | (Inductive _, Tree.Other) | (Record _, Tree.Other)
-      | (Synonym _, Tree.Other) | (Open _, Tree.Other) -> (env, def)
+      | (Synonym _, Tree.Other) | (Exception _, Tree.Other)
+      | (Open _, Tree.Other) -> (env, def)
     | _ -> failwith "Unexpected arguments for 'monadise'." in
   let (env, defs) =
     List.fold_left2 (fun (env, defs) def tree ->
@@ -286,6 +318,7 @@ let rec to_coq (defs : t list) : SmartPrint.t =
     | Inductive ind -> Inductive.to_coq ind
     | Record record -> Record.to_coq record
     | Synonym s -> Synonym.to_coq s
+    | Exception exn -> Exception.to_coq exn
     | Open o -> Open.to_coq o
     | Module (name, defs) ->
       nest (
