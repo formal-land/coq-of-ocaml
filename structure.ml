@@ -116,18 +116,8 @@ module Exception = struct
     nest (!^ "Exception" ^^ Pp.list [Name.pp exn.name; Type.pp exn.typ])
 
   let to_coq (exn : t) : SmartPrint.t =
-    !^ "(* *)"
-
-  (*let to_atom (e : t) : Effect.Atom.t = {
-    Atom.name = e.name;
-    kind = Effect.Atom.Kind.Error;
-    coq_type =  }*)
-
-  (*let to_coq (e : t) : SmartPrint.t =
-    nest (
-      !^ "Definition" ^^ Name.to_coq e.name ^^
-      separate space (List.map Name.to_coq s.typ_vars) ^^ !^ ":=" ^^
-      Type.to_coq false s.value ^-^ !^ ".")*)
+    !^ "Definition" ^^ Name.to_coq ("Err_" ^ exn.name) ^^ !^ ":=" ^^
+    !^ "Effect.new" ^^ !^ "unit" ^^ Type.to_coq true exn.typ ^-^ !^ "."
 end
 
 (** The "open" construct to open a module. *)

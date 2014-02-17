@@ -1,16 +1,3 @@
-Module 'Break':
-  Inductive 't':
-    ([ ], [ ('Space', [ ]); ('Newline', [ ]) ])
+Exception ('Overflow', ())
 
-Module 'Atom':
-  Inductive 't':
-    ([ ],
-      [
-        ('String', [ Type ('string'); Type ('Z'); Type ('Z') ]);
-        ('Break', [ Type ('Break.t') ]);
-        ('GroupOne', [ Type ('bool'); Type ('list', Type ('t')) ]);
-        ('GroupAll', [ Type ('bool'); Type ('list', Type ('t')) ]);
-        ('Indent', [ Type ('Z'); Type ('t') ])
-      ])
-  
-  Exception ('Overflow', ())
+Exception ('Wtf', (Type ('Z') * Type ('string')))
