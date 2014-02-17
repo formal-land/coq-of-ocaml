@@ -1,27 +1,28 @@
 (** The initially opened module. *)
 open Effect.Type
+open SmartPrint
 
 let effects : Effect.Env.t =
   let exn_invalid_argument = Effect.Descriptor.of_atom
-    { Effect.Atom.name = PathName.of_name [] "Invalid_argument";
+    { Effect.Atom.name = "Invalid_argument";
       kind = Effect.Atom.Kind.Error;
-      coq_type = "string" } in
+      coq_type = !^ "string" } in
   let exn_failure = Effect.Descriptor.of_atom
-    { Effect.Atom.name = PathName.of_name [] "Failure";
+    { Effect.Atom.name = "Failure";
       kind = Effect.Atom.Kind.Error;
-      coq_type = "string" } in
+      coq_type = !^ "string" } in
   let io = Effect.Descriptor.of_atom
-    { Effect.Atom.name = PathName.of_name [] "IO";
+    { Effect.Atom.name = "IO";
       kind = Effect.Atom.Kind.State;
-      coq_type = "list string * list string" } in
+      coq_type = !^ "list string * list string" } in
   let counter = Effect.Descriptor.of_atom
-    { Effect.Atom.name = PathName.of_name [] "Counter";
+    { Effect.Atom.name = "Counter";
       kind = Effect.Atom.Kind.State;
-      coq_type = "nat" } in
+      coq_type = !^ "nat" } in
   let non_termination = Effect.Descriptor.of_atom
-    { Effect.Atom.name = PathName.of_name [] "NonTermination";
+    { Effect.Atom.name = "NonTermination";
       kind = Effect.Atom.Kind.Error;
-      coq_type = "unit" } in
+      coq_type = !^ "unit" } in
   List.fold_left (fun effects (path, x, typ) ->
     Effect.Env.add (PathName.of_name path x) typ effects)
     Effect.Env.empty

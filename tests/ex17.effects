@@ -1,3 +1,62 @@
 Other
 
 Other
+
+Value
+  (. -[ 'TailLess' ]-> .,
+    Apply
+      (Effect ([ 'TailLess' ], .), Leaf (Effect ([ ], . -[ 'TailLess' ]-> .)),
+        Compound (Effect ([ ], .))))
+
+Value
+  (. -[ 'Wtf' ]-> .,
+    Apply
+      (Effect ([ 'Wtf' ], .), Leaf (Effect ([ ], . -[ 'Wtf' ]-> .)),
+        Compound
+          (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)))))
+
+Value
+  (. -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .,
+    Match
+      (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
+        Leaf (Effect ([ ], .)),
+        Apply
+          (Effect ([ 'NonTermination' ], .),
+            Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Match
+          (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
+            Leaf (Effect ([ ], .)),
+            Sequence
+              (Effect ([ 'IO'; 'TailLess' ], .),
+                Apply
+                  (Effect ([ 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
+                    Leaf (Effect ([ ], .))),
+                Apply
+                  (Effect ([ 'TailLess' ], .),
+                    Leaf (Effect ([ ], . -[ 'TailLess' ]-> .)),
+                    Compound (Effect ([ ], .)))), Leaf (Effect ([ ], .)),
+            Apply
+              (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
+                Apply
+                  (Effect ([ ], . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .),
+                    Leaf
+                      (Effect
+                        ([ ], . -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
+                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))))))
+
+Value
+  (. -[ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ]-> .,
+    Let
+      (Effect ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], .),
+        Apply
+          (Effect ([ 'Counter' ], .), Leaf (Effect ([ ], . -[ 'Counter' ]-> .)),
+            Leaf (Effect ([ ], .))),
+        Apply
+          (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
+            Apply
+              (Effect ([ ], . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .),
+                Leaf
+                  (Effect
+                    ([ ], . -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
+                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))

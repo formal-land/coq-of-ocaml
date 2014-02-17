@@ -115,9 +115,26 @@ module Exception = struct
   let pp (exn : t) : SmartPrint.t =
     nest (!^ "Exception" ^^ Pp.list [Name.pp exn.name; Type.pp exn.typ])
 
+  let effect_name (exn : t) : string =
+    "Err_" ^ exn.name
+
+  let atom (exn : t) : Effect.Atom.t = {
+    Effect.Atom.name = exn.name;
+    kind = Effect.Atom.Kind.Error;
+    coq_type = Type.to_coq false exn.typ }
+
+  let raise_effect_typ (exn : t) : Effect.Type.t =
+    Effect.Type.Arrow (Effect.Descriptor.of_atom (atom exn), Effect.Type.Pure)
+
   let to_coq (exn : t) : SmartPrint.t =
-    !^ "Definition" ^^ Name.to_coq ("Err_" ^ exn.name) ^^ !^ ":=" ^^
-    !^ "Effect.new" ^^ !^ "unit" ^^ Type.to_coq true exn.typ ^-^ !^ "."
+    !^ "Definition" ^^ Name.to_coq (effect_name exn) ^^ !^ ":=" ^^
+    !^ "Effect.new" ^^ !^ "unit" ^^ Type.to_coq true exn.typ ^-^ !^ "." ^^
+    newline ^^ newline ^^
+    !^ "Definition" ^^ Name.to_coq exn.name ^^ !^ "{A : Type}" ^^
+    nest (parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false exn.typ)) ^^ !^ ":" ^^
+    !^ "M" ^^ !^ "[" ^^ !^ (effect_name exn) ^^ !^ "]" ^^ !^ "A" ^^ !^ ":=" ^^
+    newline ^^ indent (
+      !^ "fun s => (inr (inl x), s).")
 end
 
 (** The "open" construct to open a module. *)
@@ -254,7 +271,11 @@ let rec to_trees (effects : Effect.Env.t)
     | Module (name, defs) ->
       let (trees, effects) = to_trees (Effect.Env.open_module effects) defs in
       (Tree.Module trees, Effect.Env.close_module effects name)
-    | Inductive _ | Record _ | Synonym _ | Exception _ | Open _ ->
+    | Exception exn ->
+      let effects = Effect.Env.add (PathName.of_name [] exn.Exception.name)
+        (Exception.raise_effect_typ exn) effects in
+      (Tree.Other, effects)
+    | Inductive _ | Record _ | Synonym _ | Open _ ->
       (Tree.Other, effects) in
   let (trees, effects) =
     List.fold_left (fun (trees, effects) def ->
@@ -289,9 +310,10 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
     | (Module (name, defs), Tree.Module trees) ->
       let (env, defs) = monadise (PathName.Env.open_module env) defs trees in
       (PathName.Env.close_module env name, Module (name, defs))
+    | (Exception exn, Tree.Other) ->
+      (PathName.Env.add (PathName.of_name [] exn.Exception.name) env, def)
     | (Inductive _, Tree.Other) | (Record _, Tree.Other)
-      | (Synonym _, Tree.Other) | (Exception _, Tree.Other)
-      | (Open _, Tree.Other) -> (env, def)
+      | (Synonym _, Tree.Other) | (Open _, Tree.Other) -> (env, def)
     | _ -> failwith "Unexpected arguments for 'monadise'." in
   let (env, defs) =
     List.fold_left2 (fun (env, defs) def tree ->

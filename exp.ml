@@ -167,7 +167,11 @@ let rec of_expression (e : expression) : t =
       match e_x with
       | Some e_x -> of_expression e_x
       | None -> failwith "expected an argument") e_xs in
-    List.fold_left (fun e e_x -> Apply (e, e_x)) e_f e_xs
+    (match (e_f, e_xs) with
+    | (Variable x, [Constructor (exn, es)])
+      when x = PathName.of_name ["Pervasives"] "raise" ->
+      Apply (Variable exn, Tuple es)
+    | _ -> List.fold_left (fun e e_x -> Apply (e, e_x)) e_f e_xs)
   | Texp_match (e, cases, _) ->
     let e = of_expression e in
     let cases = List.map (fun {c_lhs = p; c_rhs = e} -> (Pattern.of_pattern p, of_expression e)) cases in
@@ -575,7 +579,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   match e with
   | Constant c -> Constant.to_coq c
   | Variable x -> PathName.to_coq x
-  | Tuple es -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
+  | Tuple es ->
+    if es = [] then
+      !^ "tt"
+    else
+      parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
   | Constructor (x, es) ->
     if es = [] then
       PathName.to_coq x

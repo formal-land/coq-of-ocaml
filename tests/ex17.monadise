@@ -1,3 +1,87 @@
-Exception ('Overflow', ())
+Exception ('TailLess', ())
 
 Exception ('Wtf', (Type ('Z') * Type ('string')))
+
+Value
+  (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ], Some Monad ([ 'TailLess' ], 'A'))
+  =
+  Apply ('TailLess', Tuple ())
+
+Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some Monad ([ 'Wtf' ], 'A'))
+  =
+  Apply ('Wtf', Tuple (Int(12), String("no")))
+
+Value
+  (rec, 'h_rec', [ 'A' ],
+    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some
+    Monad ([ 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
+  Match
+    ('counter',
+      [
+        (Nat(0),
+          Lift
+            ([ 'NonTermination' ],
+              [ 'IO'; 'NonTermination'; 'TailLess' ],
+              Apply ('not_terminated', 'tt')));
+        (Constructor ('S', 'counter'),
+          Match
+            ('l',
+              [
+                (Constructor ('[]'),
+                  Lift
+                    ([
+                      'IO';
+                      'TailLess'
+                    ],
+                      [
+                        'IO';
+                        'NonTermination';
+                        'TailLess'
+                      ],
+                      Bind
+                        (Lift
+                          ([
+                            'IO'
+                          ],
+                            [
+                              'IO';
+                              'TailLess'
+                            ],
+                            Apply
+                              ('print_string',
+                                String("no tail"))),
+                          None,
+                          Lift
+                            ([
+                              'TailLess'
+                            ],
+                              [
+                                'IO';
+                                'TailLess'
+                              ],
+                              Apply
+                                ('TailLess',
+                                  Tuple
+                                    ())))));
+                (Constructor ('cons', 'x', Constructor ('[]')),
+                  Return ('x'));
+                (Constructor ('cons', Any, 'xs'),
+                  Apply
+                    (Apply
+                      ('h_rec',
+                        'counter'),
+                      'xs'))
+              ]))
+      ])
+
+Value
+  (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
+    Monad ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
+  Bind
+    (Lift
+      ([ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ],
+        Apply ('read_counter', 'tt')), Some 'counter',
+      Lift
+        ([ 'IO'; 'NonTermination'; 'TailLess' ],
+          [ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ],
+          Apply (Apply ('h_rec', 'counter'), 'l')))

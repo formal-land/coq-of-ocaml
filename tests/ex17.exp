@@ -1,3 +1,45 @@
-Exception ('Overflow', ())
+Exception ('TailLess', ())
 
 Exception ('Wtf', (Type ('Z') * Type ('string')))
+
+Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
+  Apply ('TailLess', Tuple ())
+
+Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
+  Apply ('Wtf', Tuple (Int(12), String("no")))
+
+Value
+  (rec, 'h_rec', [ 'A' ],
+    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some 'A') =
+  Match
+    ('counter',
+      [
+        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Constructor ('S', 'counter'),
+          Match
+            ('l',
+              [
+                (Constructor ('[]'),
+                  Sequence
+                    (Apply
+                      ('print_string',
+                        String("no tail")),
+                      Apply
+                        ('TailLess',
+                          Tuple
+                            ())));
+                (Constructor ('cons', 'x', Constructor ('[]')),
+                  'x');
+                (Constructor ('cons', Any, 'xs'),
+                  Apply
+                    (Apply
+                      ('h_rec',
+                        'counter'),
+                      'xs'))
+              ]))
+      ])
+
+Value (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some 'A') =
+  Let (non_rec, 'counter', [ ], [ ], None) =
+    Apply ('read_counter', 'tt') in
+  Apply (Apply ('h_rec', 'counter'), 'l')

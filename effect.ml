@@ -12,9 +12,9 @@ module Atom = struct
   end
 
   type t = {
-    name : PathName.t;
+    name : Name.t;
     kind : Kind.t;
-    coq_type : string }
+    coq_type : SmartPrint.t }
 
   type t' = t
   let compare (a1 : t) (a2 : t) : int =
@@ -25,22 +25,20 @@ module Atom = struct
 
   let pp (a : t) : SmartPrint.t =
     nest (!^ "Atom" ^^ Pp.list [
-      PathName.pp a.name; Kind.pp a.kind; OCaml.string a.coq_type])
+      Name.pp a.name; Kind.pp a.kind; a.coq_type])
 
   let to_coq (a : t) : SmartPrint.t =
-    PathName.to_coq {
-      PathName.path = a.name.PathName.path;
-      base =
-        (match a.kind with
-        | Kind.State -> "Ref_"
-        | Kind.Error -> "Err_") ^ a.name.PathName.base }
+    Name.to_coq (
+      (match a.kind with
+      | Kind.State -> "Ref_"
+      | Kind.Error -> "Err_") ^ a.name)
 end
 
 module Descriptor = struct
   type t = Atom.Set.t
 
   let pp (d : t) : SmartPrint.t =
-    OCaml.list (fun a -> PathName.pp a.Atom.name) (Atom.Set.elements d)
+    OCaml.list (fun a -> Name.pp a.Atom.name) (Atom.Set.elements d)
 
   let pure : t = Atom.Set.empty
 
