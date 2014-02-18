@@ -73,62 +73,6 @@ let rec pp (e : t) : SmartPrint.t =
     nest (!^ "Lift" ^^
       Pp.list [Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
 
-let rec free_variables (e : t) : Name.Set.t =
-  let aux (es : t list) : Name.Set.t =
-    List.fold_left (fun vars e -> Name.Set.union (free_variables e) vars)
-      Name.Set.empty es in
-  match e with
-  | Constant _ -> Name.Set.empty
-  | Variable x ->
-    (match x.PathName.path with
-    | [] -> Name.Set.singleton x.PathName.base
-    | _ :: _ -> Name.Set.empty)
-  | Tuple es | Constructor (_, es) -> aux es
-  | Apply (e1, e2) -> aux [e1; e2]
-  | Function (x, e) -> Name.Set.remove x (free_variables e)
-  | Bind (e1, Some x, e2) ->
-    Name.Set.union (free_variables e1) (Name.Set.remove x (free_variables e2))
-  | Let ((is_rec, f, _, args, _), e1, e2) ->
-    let vars_in_e1 =
-      List.fold_left (fun vars (x, _) -> Name.Set.remove x vars)
-      (free_variables e1) args in
-    let vars_in_e1 =
-      if Recursivity.to_bool is_rec then
-        Name.Set.remove f vars_in_e1
-      else
-        vars_in_e1 in
-    Name.Set.union vars_in_e1 (Name.Set.remove f (free_variables e2))
-  | Match (e, cases) ->
-    let cases_vars = cases |> List.map (fun (p, e) ->
-      Name.Set.diff (free_variables e) (Pattern.free_variables p)) in
-    List.fold_left Name.Set.union (free_variables e) cases_vars
-  | Record fields -> aux (List.map snd fields)
-  | Field (e, _) | Return e | Lift (_, _, e) -> free_variables e
-  | IfThenElse (e1, e2, e3) -> aux [e1; e2; e3]
-  | Sequence (e1, e2) | Bind (e1, None, e2) -> aux [e1; e2]
-
-(* TODO: optimize *)
-let rec sort_mutual_definitions (defs : (Pattern.t * t) list)
-  : (Pattern.t * t * Name.Set.t) list =
-  let names = List.fold_left (fun names (p, _) ->
-    Name.Set.union (Pattern.free_variables p) names)
-    Name.Set.empty defs in
-  let references (p, e) : Name.Set.t =
-    Name.Set.inter (Name.Set.diff names (Pattern.free_variables p))
-      (free_variables e) in
-  let defs_references = List.map references defs in
-  let nb_references = List.map Name.Set.cardinal defs_references in
-  let nb_referenced = defs |> List.map (fun (p, _) ->
-    Name.Set.fold (fun x n ->
-      n + (List.length @@ List.filter (Name.Set.mem x) defs_references))
-      (Pattern.free_variables p) 0) in
-  let defs = List.map fst @@ List.sort (fun (_, (a, b)) (_, (c, d)) ->
-    compare (a * d) (c * b))
-    (List.combine defs (List.combine nb_references nb_referenced)) in
-  match defs with
-  | [] -> []
-  | (p, e) :: defs -> (p, e, references (p, e)) :: sort_mutual_definitions defs
-
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
 let rec open_function (e : t) : Name.t list * t =

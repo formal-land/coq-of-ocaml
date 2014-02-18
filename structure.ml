@@ -137,6 +137,36 @@ module Exception = struct
       !^ "fun s => (inr (inl x), s).")
 end
 
+(*module Reference = struct
+  type t = {
+    name : Name.t;
+    typ : Type.t }
+
+  let pp (r : t) : SmartPrint.t =
+    nest (!^ "Reference" ^^ Pp.list [Name.pp r.name; Type.pp r.typ])
+
+  let effect_name (r : t) : string =
+    "Ref_" ^ r.name
+
+  let atom (r : t) : Effect.Atom.t = {
+    Effect.Atom.name = r.name;
+    kind = Effect.Atom.Kind.State;
+    coq_type = Type.to_coq false r.typ }
+
+  let read_write_effect_typ (r : t) : Effect.Type.t =
+    Effect.Type.Arrow (Effect.Descriptor.of_atom (atom r), Effect.Type.Pure)
+
+  let to_coq (r : t) : SmartPrint.t =
+    !^ "Definition" ^^ Name.to_coq (effect_name r) ^^ !^ ":=" ^^
+    !^ "Effect.new" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
+    newline ^^ newline ^^
+    !^ "Definition" ^^ Name.to_coq (r.name) ^^ !^ "{A : Type}" ^^
+    nest (parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false r.typ)) ^^ !^ ":" ^^
+    !^ "M" ^^ !^ "[" ^^ !^ (effect_name r) ^^ !^ "]" ^^ !^ "A" ^^ !^ ":=" ^^
+    newline ^^ indent (
+      !^ "fun s => (inr (inl x), s).")
+end*)
+
 (** The "open" construct to open a module. *)
 module Open = struct
   type t = PathName.t
