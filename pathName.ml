@@ -112,21 +112,34 @@ let of_path (p : Path'.t) : t =
   convert { path = List.rev p.path; base = p.base }
 
 module Env = struct
-  type t = Set.t list
+  type 'a t = 'a Map.t list
 
-  let empty : t = [Set.empty]
+  let pp (pp_v : 'a -> SmartPrint.t) (env : 'a t) : SmartPrint.t =
+    List.map Map.bindings env |>
+    List.concat |>
+    OCaml.list (fun (x, v) ->
+      nest (pp x ^^ !^ ":" ^^ pp_v v))
 
-  let rec mem (x : t') (env : t) : bool =
+  let empty : 'a t = [Map.empty]
+
+  let add (x : t') (v : 'a) (env : 'a t) : 'a t =
+    match env with
+    | map :: env -> Map.add x v map :: env
+    | [] -> failwith "The environment must be a non-empty list."
+
+  let rec find (x : t') (env : 'a t) : 'a =
+    match env with
+    | map :: env ->
+      (try Map.find x map with
+      | Not_found -> find x env)
+    | [] -> raise Not_found
+
+  let rec mem (x : t') (env : 'a t) : bool =
     match env with
     | [] -> false
-    | set :: env -> Set.mem x set || mem x env
+    | map :: env -> Map.mem x map || mem x env
 
-  let add (x : t') (env : t) : t =
-    match env with
-    | set :: env -> Set.add x set :: env
-    | [] -> failwith "Environment's list cannot be empty."
-
-  let fresh (prefix : string) (env : t) : Name.t * t =
+  let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
     let prefix_n s n =
       if n = 0 then
         Name.of_string s
@@ -138,18 +151,18 @@ module Env = struct
       else
         n in
     let x = prefix_n prefix (first_n 0) in
-    (x, add (of_name [] x) env)
+    (x, add (of_name [] x) v env)
 
-  let open_module (env : t) : t =
-    Set.empty :: env
+  let open_module (env : 'a t) : 'a t =
+    Map.empty :: env
 
-  let close_module (env : t) (name : string) : t =
+  let close_module (env : 'a t) (name : string) : 'a t =
     match env with
-    | set1 :: set2 :: env ->
-      Set.fold (fun x set ->
+    | map1 :: map2 :: env ->
+      Map.fold (fun x v map ->
         let { path = path; base = base } = x in
-        Set.add { path = name :: path; base = base } set)
-        set1 set2
+        Map.add { path = name :: path; base = base } v map)
+        map1 map2
         :: env
     | _ -> failwith "At least one module should be opened."
 end
