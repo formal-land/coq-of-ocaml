@@ -108,11 +108,10 @@ let rec open_function (e : 'a t) : Name.t list * 'a t =
   | _ -> ([], e)
 
 (** Import an OCaml expression. *)
-let rec of_expression (env : unit PathName.Env.t) (e : expression)
-  : unit PathName.Env.t t =
+let rec of_expression (env : unit PathName.Env.t) (e : expression) : unit t =
   match e.exp_desc with
-  | Texp_ident (path, _, _) -> Variable (env, PathName.of_path path)
-  | Texp_constant constant -> Constant (env, Constant.of_constant constant)
+  | Texp_ident (path, _, _) -> Variable ((), PathName.of_path path)
+  | Texp_constant constant -> Constant ((), Constant.of_constant constant)
   | Texp_let (rec_flag, [{ vb_pat = pattern; vb_expr = e1 }], e2) ->
     let (rec_flag, pattern, free_typ_vars, args, body_typ, body) =
       import_let_fun env rec_flag pattern e1 in
@@ -121,19 +120,19 @@ let rec of_expression (env : unit PathName.Env.t) (e : expression)
     let e2 = of_expression env_in_e2 e2 in
     (match (pattern, args) with
     | (Pattern.Variable name, []) ->
-      Let (env, (Recursivity.New false, name, [], [], None), body, e2)
-    | (_, []) -> Match (env, body, [pattern, e2])
+      Let ((), (Recursivity.New false, name, [], [], None), body, e2)
+    | (_, []) -> Match ((), body, [pattern, e2])
     | (Pattern.Variable name, _) ->
-      Let (env, (rec_flag, name, free_typ_vars, args, Some body_typ), body, e2)
+      Let ((), (rec_flag, name, free_typ_vars, args, Some body_typ), body, e2)
     | _ -> failwith "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
     ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->
     let x = Name.of_ident x in
-    Function (env, x, of_expression (PathName.Env.add_name x () env) e)
+    Function ((), x, of_expression (PathName.Env.add_name x () env) e)
   | Texp_function (_, cases, _) ->
     let (x, e) = open_cases env cases in
-    Function (env, x, e)
+    Function ((), x, e)
   | Texp_apply (e_f, e_xs) ->
     let e_f = of_expression env e_f in
     let e_xs = List.map (fun (_, e_x, _) ->
@@ -143,8 +142,8 @@ let rec of_expression (env : unit PathName.Env.t) (e : expression)
     (match (e_f, e_xs) with
     | (Variable (_, x), [Constructor (_, exn, es)])
       when x = PathName.of_name ["Pervasives"] "raise" ->
-      Apply (env, Variable (env, exn), Tuple (env, es))
-    | _ -> List.fold_left (fun e e_x -> Apply (env, e, e_x)) e_f e_xs)
+      Apply ((), Variable ((), exn), Tuple ((), es))
+    | _ -> List.fold_left (fun e e_x -> Apply ((), e, e_x)) e_f e_xs)
   | Texp_match (e, cases, _) ->
     let e = of_expression env e in
     let cases = List.map (fun {c_lhs = p; c_rhs = e} ->
@@ -153,39 +152,39 @@ let rec of_expression (env : unit PathName.Env.t) (e : expression)
         Name.Set.fold (fun x env -> PathName.Env.add_name x () env)
           (Pattern.free_variables p) env in
       (p, of_expression env_in_e e)) cases in
-    Match (env, e, cases)
-  | Texp_tuple es -> Tuple (env, List.map (of_expression env) es)
+    Match ((), e, cases)
+  | Texp_tuple es -> Tuple ((), List.map (of_expression env) es)
   | Texp_construct (x, _, es) ->
-    Constructor (env, PathName.of_loc x, List.map (of_expression env) es)
+    Constructor ((), PathName.of_loc x, List.map (of_expression env) es)
   | Texp_record (fields, _) ->
-    Record (env, fields |> List.map (fun (x, _, e) ->
+    Record ((), fields |> List.map (fun (x, _, e) ->
       (PathName.of_loc x, of_expression env e)))
-  | Texp_field (e, x, _) -> Field (env, of_expression env e, PathName.of_loc x)
+  | Texp_field (e, x, _) -> Field ((), of_expression env e, PathName.of_loc x)
   | Texp_ifthenelse (e1, e2, e3) ->
     let e3 = match e3 with
-      | None -> Tuple (env, [])
+      | None -> Tuple ((), [])
       | Some e3 -> of_expression env e3 in
-    IfThenElse (env, of_expression env e1, of_expression env e2, e3)
+    IfThenElse ((), of_expression env e1, of_expression env e2, e3)
   | Texp_sequence (e1, e2) ->
-    Sequence (env, of_expression env e1, of_expression env e2)
+    Sequence ((), of_expression env e1, of_expression env e2)
   | Texp_try _ | Texp_setfield _ | Texp_array _
     | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
 and open_cases (env : unit PathName.Env.t) (cases : case list)
-  : Name.t * unit PathName.Env.t t =
+  : Name.t * unit t =
   let (x, env) = PathName.Env.fresh "match_var" () env in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
     let p = Pattern.of_pattern p in
     let env = Name.Set.fold (fun x env -> PathName.Env.add_name x () env)
       (Pattern.free_variables p) env in
     (p, of_expression env e)) in
-  (x, Match (env, Variable (env, PathName.of_name [] x), cases))
+  (x, Match ((), Variable ((), PathName.of_name [] x), cases))
 and import_let_fun (env : unit PathName.Env.t) (rec_flag : Asttypes.rec_flag)
   (pattern : pattern) (e : expression)
   : Recursivity.t * Pattern.t * Name.t list * (Name.t * Type.t) list
-    * Type.t * unit PathName.Env.t t =
+    * Type.t * unit t =
   let rec_flag = Recursivity.of_rec_flag rec_flag in
   let pattern = Pattern.of_pattern pattern in
   let e_schema = Schema.of_type (Type.of_type_expr e.exp_type) in
@@ -257,40 +256,41 @@ let rec substitute (x : PathName.t) (e' : 'a t) (e : 'a t) : 'a t =
     Bind (a, e1, y, e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, substitute x e' e)
 
-let rec monadise_let_rec (e : unit PathName.Env.t t) : unit PathName.Env.t t =
+let rec monadise_let_rec (env : unit PathName.Env.t) (e : unit t) : unit t =
   match e with
   | Constant _ | Variable _ -> e
-  | Tuple (env, es) -> Tuple (env, List.map monadise_let_rec es)
-  | Constructor (env, x, es) ->
-    Constructor (env, x, List.map monadise_let_rec es)
-  | Apply (env, e1, e2) -> Apply (env, monadise_let_rec e1, monadise_let_rec e2)
-  | Function (env, x, e) -> Function (env, x, monadise_let_rec e)
-  | Let (env, header, e1, e2) ->
+  | Tuple (_, es) -> Tuple ((), List.map (monadise_let_rec env) es)
+  | Constructor (_, x, es) ->
+    Constructor ((), x, List.map (monadise_let_rec env) es)
+  | Apply (_, e1, e2) ->
+    Apply ((), monadise_let_rec env e1, monadise_let_rec env e2)
+  | Function (_, x, e) -> Function ((), x, monadise_let_rec env e)
+  | Let (_, header, e1, e2) ->
     let defs = monadise_let_rec_definition env header e1 in
-    let e2 = monadise_let_rec e2 in
-    List.fold_right (fun (header, e) e2 -> Let (env, header, e, e2)) defs e2
-  | Match (env, e, cases) ->
-    Match (env, monadise_let_rec e,
+    let e2 = monadise_let_rec env e2 in
+    List.fold_right (fun (header, e) e2 -> Let ((), header, e, e2)) defs e2
+  | Match (_, e, cases) ->
+    Match ((), monadise_let_rec e,
       List.map (fun (p, e) -> (p, monadise_let_rec e)) cases)
-  | Record (env, fields) ->
-    Record (env, List.map (fun (x, e) -> (x, monadise_let_rec e)) fields)
-  | Field (env, e, x) -> Field (env, monadise_let_rec e, x)
-  | IfThenElse (env, e1, e2, e3) ->
-    IfThenElse (env, monadise_let_rec e1, monadise_let_rec e2,
+  | Record (_, fields) ->
+    Record ((), List.map (fun (x, e) -> (x, monadise_let_rec e)) fields)
+  | Field (_, e, x) -> Field ((), monadise_let_rec e, x)
+  | IfThenElse (_, e1, e2, e3) ->
+    IfThenElse ((), monadise_let_rec e1, monadise_let_rec e2,
       monadise_let_rec e3)
-  | Sequence (env, e1, e2) ->
-    Sequence (env, monadise_let_rec e1, monadise_let_rec e2)
-  | Return (env, e) -> monadise_let_rec e
-  | Bind (env, e1, x, e2) ->
-    Bind (env, monadise_let_rec e1, x, monadise_let_rec e2)
-  | Lift (env, d1, d2, e) -> Lift (env, d1, d2, monadise_let_rec e)
+  | Sequence (_, e1, e2) ->
+    Sequence ((), monadise_let_rec e1, monadise_let_rec e2)
+  | Return (_, e) -> monadise_let_rec e
+  | Bind (_, e1, x, e2) ->
+    Bind ((), monadise_let_rec e1, x, monadise_let_rec e2)
+  | Lift (_, d1, d2, e) -> Lift ((), d1, d2, monadise_let_rec e)
 
 and monadise_let_rec_definition (env : unit PathName.Env.t) (header : Header.t)
-  (e : unit PathName.Env.t t) : (Header.t * unit PathName.Env.t t) list =
+  (e : unit t) : (Header.t * unit t) list =
   let (is_rec, x, typ_vars, args, typ) = header in
   let e = monadise_let_rec e in
   if Recursivity.to_bool is_rec then
-    let var env (x : Name.t) = Variable (env, PathName.of_name [] x) in
+    let var (x : Name.t) : unit t = Variable ((), PathName.of_name [] x) in
     let (x_rec, env) = PathName.Env.fresh (x ^ "_rec") () env in
     let args' =
       ("counter", Type.Apply (PathName.of_name [] "nat", [])) :: args in
