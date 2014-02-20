@@ -21,14 +21,14 @@ let of_string (s : string) : t =
   s
 
 (** Generate a fresh name from a given [prefix] using an internal counter. *)
-let unsafe_fresh : string -> t =
+(*let unsafe_fresh : string -> t =
   let counters : int Map.t ref = ref Map.empty in
   fun prefix ->
     if not (Map.mem prefix !counters) then
       counters := Map.add prefix 0 !counters;
     let n = Map.find prefix !counters in
     counters := Map.add prefix (n + 1) !counters;
-    Printf.sprintf "%s_%d" prefix n
+    Printf.sprintf "%s_%d" prefix n*)
 
 (** Pretty-print a name to Coq. *)
 let to_coq (x : t) : SmartPrint.t =
