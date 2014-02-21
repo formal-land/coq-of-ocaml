@@ -25,21 +25,21 @@ end
 
 (** The simplified OCaml AST we use. *)
 type 'a t =
-  | Constant of ('a -> Constant.t)
-  | Variable of ('a -> PathName.t)
-  | Tuple of ('a -> ('a * 'a t) list)
-  | Constructor of ('a -> PathName.t * ('a * 'a t) list)
-  | Apply of ('a -> ('a * 'a t) * ('a * 'a t))
-  | Function of ('a -> Name.t * ('a * 'a t))
-  | Let of ('a -> Header.t * ('a * 'a t) * ('a * 'a t))
-  | Match of ('a -> ('a * 'a t) * (Pattern.t * ('a * 'a t)) list)
-  | Record of ('a -> (PathName.t * ('a * 'a t)) list)
-  | Field of ('a -> ('a * 'a t) * PathName.t)
-  | IfThenElse of ('a -> ('a * 'a t) * ('a * 'a t) * ('a * 'a t))
-  | Sequence of ('a -> ('a * 'a t) * ('a * 'a t))
-  | Return of ('a -> ('a * 'a t))
-  | Bind of ('a -> ('a * 'a t) * Name.t option * ('a * 'a t))
-  | Lift of ('a -> Effect.Descriptor.t * Effect.Descriptor.t * ('a * 'a t))
+  | Constant of Constant.t
+  | Variable of PathName.t
+  | Tuple of 'a t list
+  | Constructor of PathName.t * 'a t list
+  | Apply of 'a t * 'a t
+  | Function of Name.t * 'a t
+  | Let of Header.t * 'a t * 'a t
+  | Match of 'a t * (Pattern.t * 'a t) list
+  | Record of (PathName.t * 'a t) list
+  | Field of 'a t * PathName.t
+  | IfThenElse of 'a t * 'a t * 'a t
+  | Sequence of 'a t * 'a t
+  | Return of 'a t
+  | Bind of 'a t * Name.t option * 'a t
+  | Lift of Effect.Descriptor.t * Effect.Descriptor.t * 'a t
 
 let rec clean (e : 'a t) : unit t =
   match e with
