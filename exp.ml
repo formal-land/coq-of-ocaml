@@ -25,23 +25,79 @@ end
 
 (** The simplified OCaml AST we use. *)
 type 'a t =
-  | Constant of Constant.t
-  | Variable of PathName.t
-  | Tuple of 'a t list
-  | Constructor of PathName.t * 'a t list
-  | Apply of 'a t * 'a t
-  | Function of Name.t * 'a t
-  | Let of Header.t * 'a t * 'a t
-  | Match of 'a t * (Pattern.t * 'a t) list
-  | Record of (PathName.t * 'a t) list
-  | Field of 'a t * PathName.t
-  | IfThenElse of 'a t * 'a t * 'a t
-  | Sequence of 'a t * 'a t
-  | Return of 'a t
-  | Bind of 'a t * Name.t option * 'a t
-  | Lift of Effect.Descriptor.t * Effect.Descriptor.t * 'a t
+  | Constant of 'a * Constant.t
+  | Variable of 'a * PathName.t
+  | Tuple of 'a * 'a t list
+  | Constructor of 'a * PathName.t * 'a t list
+  | Apply of 'a * 'a t * 'a t
+  | Function of 'a * Name.t * 'a t
+  | Let of 'a * Header.t * 'a t * 'a t
+  | Match of 'a * 'a t * (Pattern.t * 'a t) list
+  | Record of 'a * (PathName.t * 'a t) list
+  | Field of 'a * 'a t * PathName.t
+  | IfThenElse of 'a * 'a t * 'a t * 'a t
+  | Sequence of 'a * 'a t * 'a t
+  | Return of 'a * 'a t
+  | Bind of 'a * 'a t * Name.t option * 'a t
+  | Lift of 'a * Effect.Descriptor.t * Effect.Descriptor.t * 'a t
 
-let rec clean (e : 'a t) : unit t =
+module Action = struct
+  type 'a t' = 'a t
+
+  (** ['a] stands for annotation, ['r] for result, ['v] for value in the
+      environment. *)
+  type ('a, 'r, 'v) t = {
+    eq : 'v -> 'v -> bool;
+    constant : 'v PathName.Env.t -> 'a -> Constant.t -> 'r;
+    variable : 'v PathName.Env.t -> 'a -> PathName.t -> 'r;
+    tuple : 'v PathName.Env.t -> 'a -> 'r list -> 'r;
+    constructor : 'v PathName.Env.t -> 'a -> PathName.t -> 'r list -> 'r;
+    apply : 'v PathName.Env.t -> 'a -> 'r -> 'r -> 'r;
+    _function : 'v PathName.Env.t -> 'a -> Name.t -> 'v * ('r -> 'r);
+    _let : 'v PathName.Env.t -> 'a -> Header.t -> 'v * ('r -> 'v * ('r -> 'r))
+     }
+
+  let run (action : ('a, 'r, 'v) t) (env : 'v PathName.Env.t) (e : 'a t')
+    : 'r =
+    let rec aux env e : 'r =
+      match e with
+      | Constant (a, c) -> action.constant env a c
+      | Variable (a, x) -> action.variable env a x
+      | Tuple (a, es) -> action.tuple env a (List.map (aux env) es)
+      | Constructor (a, x, es) ->
+        action.constructor env a x (List.map (aux env) es)
+      | Apply (a, e1, e2) -> action.apply env a (aux env e1) (aux env e2)
+      | Function (a, x, e) ->
+        let (v, _function) = action._function env a x in
+        let env = PathName.Env.add_name x v env in
+        _function (aux env e)
+      | Let (a, header, e1, e2) ->
+        let (is_rec, x, _, _, _) = header in
+        let (v, _let) = action._let env a header in
+        let rec fixpoint v : 'v PathName.Env.t * ('r -> 'r) =
+          let env = PathName.Env.add_name x v env in
+          let (v', _let) = _let (aux env e1) in
+          if action.eq v v' then
+            (env, _let)
+          else
+            fixpoint v' in
+        let (env, _let) = fixpoint v in
+        _let (aux env e2) in
+    aux env e
+end
+
+let clean (e : 'a t) : unit t =
+  let action : ('a, unit t, unit) Action.t = {
+    Action.constant = (fun _ _ c -> Constant ((), c));
+    variable = (fun _ _ x -> Variable ((), x));
+    tuple = (fun _ _ es -> Tuple ((), es));
+    constructor = (fun _ _ x es -> Constructor ((), x, es));
+    apply = (fun _ _ e1 e2 -> Apply ((), e1, e2));
+    _function = (fun _ _ x -> ((), fun e -> Function ((), x, e)));
+    _let  } in
+  run PathName.Env.empty e
+
+(*let rec clean (e : 'a t) : unit t =
   match e with
   | Constant (_, c) -> Constant ((), c)
   | Variable (_, x) -> Variable ((), x)
@@ -59,7 +115,7 @@ let rec clean (e : 'a t) : unit t =
   | Sequence (_, e1, e2) -> Sequence ((), clean e1, clean e2)
   | Return (_, e) -> Return ((), clean e)
   | Bind (_, e1, x, e2) -> Bind ((), clean e1, x, clean e2)
-  | Lift (_, d1, d2, e) -> Lift ((), d1, d2, clean e)
+  | Lift (_, d1, d2, e) -> Lift ((), d1, d2, clean e)*)
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
