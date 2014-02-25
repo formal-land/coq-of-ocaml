@@ -41,32 +41,55 @@ type 'a t =
   | Bind of 'a * 'a t * Name.t option * 'a t
   | Lift of 'a * Effect.Descriptor.t * Effect.Descriptor.t * 'a t
 
+module InEnv = struct
+  type 'a t' = 'a t
+  type ('a, 'v) t = 'v PathName.Env.t -> 'a t'
+
+  let constant a c : ('a, 'v) t = fun _ -> Constant (a, c)
+
+  let variable a x : ('a, 'v) t = fun _ -> Variable (a, x)
+
+  let tuple a es : ('a, 'v) t = fun env ->
+    Tuple (a, List.map (fun e -> e env) es)
+
+  let constructor a x es : ('a, 'v) t = fun env ->
+    Constructor (a, x, List.map (fun e -> e env) es)
+
+  let apply a e1 e2 : ('a, 'v) t = fun env ->
+    Apply (a, e1 env, e2 env)
+
+  let _function a x v e : ('a, 'v) t = fun env ->
+    Function (a, x, e (PathName.Env.add_name x v env))
+end
+
 module Action = struct
   type 'a t' = 'a t
 
   (** ['a] stands for annotation, ['r] for result, ['v] for value in the
       environment. *)
   type ('a, 'r, 'v) t = {
-    eq : 'v -> 'v -> bool;
     constant : 'v PathName.Env.t -> 'a -> Constant.t -> 'r;
     variable : 'v PathName.Env.t -> 'a -> PathName.t -> 'r;
-    tuple : 'v PathName.Env.t -> 'a -> 'r list -> 'r;
-    constructor : 'v PathName.Env.t -> 'a -> PathName.t -> 'r list -> 'r;
-    apply : 'v PathName.Env.t -> 'a -> 'r -> 'r -> 'r;
+    tuple : 'v PathName.Env.t -> 'a -> ('v PathName.Env.t -> 'r) list -> 'r;
+    constructor : 'v PathName.Env.t -> 'a -> PathName.t ->
+      ('v PathName.Env.t -> 'r) list -> 'r;
+    apply : 'v PathName.Env.t -> 'a -> ('v PathName.Env.t -> 'r) ->
+      ('v PathName.Env.t -> 'r) -> 'r;
     _function : 'v PathName.Env.t -> 'a -> Name.t -> 'v * ('r -> 'r);
-    _let : 'v PathName.Env.t -> 'a -> Header.t -> 'v * ('r -> 'v * ('r -> 'r))
-     }
+    eq : 'v -> 'v -> bool;
+    _let : 'v PathName.Env.t -> 'a -> Header.t -> 'v * ('r -> 'v * ('r -> 'r));
+    _match : unit }
 
   let run (action : ('a, 'r, 'v) t) (env : 'v PathName.Env.t) (e : 'a t')
     : 'r =
-    let rec aux env e : 'r =
+    let rec aux e env : 'r =
       match e with
       | Constant (a, c) -> action.constant env a c
       | Variable (a, x) -> action.variable env a x
-      | Tuple (a, es) -> action.tuple env a (List.map (aux env) es)
+      | Tuple (a, es) -> action.tuple env a (List.map aux es)
       | Constructor (a, x, es) ->
-        action.constructor env a x (List.map (aux env) es)
-      | Apply (a, e1, e2) -> action.apply env a (aux env e1) (aux env e2)
+        action.constructor env a x (List.map aux es)
+      | Apply (a, e1, e2) -> action.apply env a (aux e1) (aux e2)
       | Function (a, x, e) ->
         let (v, _function) = action._function env a x in
         let env = PathName.Env.add_name x v env in
@@ -83,7 +106,7 @@ module Action = struct
             fixpoint v' in
         let (env, _let) = fixpoint v in
         _let (aux env e2) in
-    aux env e
+    aux e env
 end
 
 let clean (e : 'a t) : unit t =
@@ -94,8 +117,11 @@ let clean (e : 'a t) : unit t =
     constructor = (fun _ _ x es -> Constructor ((), x, es));
     apply = (fun _ _ e1 e2 -> Apply ((), e1, e2));
     _function = (fun _ _ x -> ((), fun e -> Function ((), x, e)));
-    _let  } in
-  run PathName.Env.empty e
+    eq = (fun () () -> true);
+    _let = (fun _ _ header -> ((), fun e1 -> ((), fun e2 ->
+      Let ((), header, e1, e2))));
+    _match = () } in
+  Action.run action PathName.Env.empty e
 
 (*let rec clean (e : 'a t) : unit t =
   match e with
