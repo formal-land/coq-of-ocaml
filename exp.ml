@@ -108,7 +108,7 @@ let rec open_function (e : 'a t) : Name.t list * 'a t =
   | _ -> ([], e)
 
 (** Import an OCaml expression. *)
-let rec of_expression (e : expression) : unit PathName.Env.t t =
+let rec of_expression (e : expression) : unit t =
   match e.exp_desc with
   | Texp_ident (path, _, _) -> Variable ((), PathName.of_path path)
   | Texp_constant constant -> Constant ((), Constant.of_constant constant)
