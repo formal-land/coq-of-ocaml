@@ -122,49 +122,6 @@ module Type = struct
     List.fold_left aux Pure typs
 end
 
-module Env = struct
-  (** A non-empty list of maps. *)
-  type t = Type.t PathName.Map.t list
-
-  let pp (effects : t) : SmartPrint.t =
-    List.map PathName.Map.bindings effects |>
-    List.concat |>
-    OCaml.list (fun (x, typ) ->
-      nest (PathName.pp x ^^ !^ ":" ^^ Type.pp false typ))
-
-  let empty : t = [PathName.Map.empty]
-
-  let add (x : PathName.t) (typ : Type.t) (effects : t) : t =
-    match effects with
-    | map :: effects -> PathName.Map.add x typ map :: effects
-    | [] -> failwith "Effects must be a non-empty list."
-
-  let rec find (x : PathName.t) (effects : t) : Type.t =
-    match effects with
-    | map :: effects ->
-      (try PathName.Map.find x map with
-      | Not_found -> find x effects)
-    | [] -> raise Not_found
-
-  let open_module (effects : t) : t =
-    PathName.Map.empty :: effects
-
-  let close_module (effects : t) (name : string) : t =
-    match effects with
-    | map1 :: map2 :: effects ->
-      PathName.Map.fold (fun x typ map ->
-        let { PathName.path = path; base = base } = x in
-        PathName.Map.add { PathName.path = name :: path; base = base } typ map)
-        map1 map2
-        :: effects
-    | _ -> failwith "At least one module should be opened."
-
-  let in_function (effects : t) (args_names : Name.t list) : t =
-    List.fold_left (fun effects x ->
-      add (PathName.of_name [] x) Type.Pure effects)
-      effects args_names
-end
-
 type t = { descriptor : Descriptor.t; typ : Type.t }
 
 let pp (effect : t) : SmartPrint.t =

@@ -2,7 +2,7 @@
 open Effect.Type
 open SmartPrint
 
-let effects : Effect.Env.t =
+let effects : Effect.Type.t PathName.Env.t =
   let exn_invalid_argument = Effect.Descriptor.of_atom
     { Effect.Atom.name = "Invalid_argument";
       kind = Effect.Atom.Kind.Error;
@@ -24,8 +24,8 @@ let effects : Effect.Env.t =
       kind = Effect.Atom.Kind.Error;
       coq_type = !^ "unit" } in
   List.fold_left (fun effects (path, x, typ) ->
-    Effect.Env.add (PathName.of_name path x) typ effects)
-    Effect.Env.empty
+    PathName.Env.add (PathName.of_name path x) typ effects)
+    PathName.Env.empty
     [ [], "tt", Pure;
       [], "equiv_decb", Pure;
       [], "nequiv_decb", Pure;

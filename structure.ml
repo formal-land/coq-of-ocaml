@@ -288,22 +288,22 @@ module Tree = struct
     separate (newline ^^ newline) (List.map pp trees)
 end
 
-let rec to_trees (effects : Effect.Env.t)
-  (defs : 'a t list) : Tree.t list * Effect.Env.t =
-  let rec to_tree (def : 'a t) (effects : Effect.Env.t)
-    : Tree.t * Effect.Env.t =
+let rec to_trees (effects : Effect.Type.t PathName.Env.t)
+  (defs : 'a t list) : Tree.t list * Effect.Type.t PathName.Env.t =
+  let rec to_tree (def : 'a t) (effects : Effect.Type.t PathName.Env.t)
+    : Tree.t * Effect.Type.t PathName.Env.t =
     match def with
     | Value {
       Value.header = (is_rec, x, _, args, _);
       body = e } ->
       let (tree, x_typ) = Exp.to_tree_let_fun effects is_rec x args e in
-      let effects = Effect.Env.add (PathName.of_name [] x) x_typ effects in
+      let effects = PathName.Env.add (PathName.of_name [] x) x_typ effects in
       (Tree.Value (tree, x_typ), effects)
     | Module (name, defs) ->
-      let (trees, effects) = to_trees (Effect.Env.open_module effects) defs in
-      (Tree.Module trees, Effect.Env.close_module effects name)
+      let (trees, effects) = to_trees (PathName.Env.open_module effects) defs in
+      (Tree.Module trees, PathName.Env.close_module effects name)
     | Exception exn ->
-      let effects = Effect.Env.add (PathName.of_name [] exn.Exception.name)
+      let effects = PathName.Env.add (PathName.of_name [] exn.Exception.name)
         (Exception.raise_effect_typ exn) effects in
       (Tree.Other, effects)
     | Inductive _ | Record _ | Synonym _ | Open _ ->

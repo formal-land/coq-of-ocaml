@@ -325,7 +325,7 @@ module Tree = struct
     | Sequence (tree1, tree2, _) -> aux "Sequence" [tree1; tree2]
 end
 
-let rec to_tree (effects : Effect.Env.t) (e : 'a t) : Tree.t =
+let rec to_tree (effects : Effect.Type.t PathName.Env.t) (e : 'a t) : Tree.t =
   let compound (es : 'a t list) : Tree.t =
     let trees = List.map (to_tree effects) es in
     let effects = List.map Tree.effect trees in
@@ -345,7 +345,7 @@ let rec to_tree (effects : Effect.Env.t) (e : 'a t) : Tree.t =
   | Variable (_, x) ->
     (try Tree.Leaf
       { Effect.descriptor = Effect.Descriptor.pure;
-        typ = Effect.Env.find x effects }
+        typ = PathName.Env.find x effects }
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (PathName.pp x ^^ !^ "not found.")))
   | Tuple (_, es) | Constructor (_, _, es) -> compound es
@@ -364,7 +364,7 @@ let rec to_tree (effects : Effect.Env.t) (e : 'a t) : Tree.t =
     else
       failwith "Function arguments cannot have functional effects."
   | Function (_, x, e) ->
-    let tree_e = to_tree (Effect.Env.add (PathName.of_name [] x)
+    let tree_e = to_tree (PathName.Env.add (PathName.of_name [] x)
       Effect.Type.Pure effects) e in
     let effect_e = Tree.effect tree_e in
     Tree.Function (tree_e,
@@ -374,7 +374,7 @@ let rec to_tree (effects : Effect.Env.t) (e : 'a t) : Tree.t =
   | Let (_, (is_rec, x, _, args, _), e1, e2) ->
     let (tree1, x_typ) = to_tree_let_fun effects is_rec x args e1 in
     let effect1 = Tree.effect tree1 in
-    let effects_in_e2 = Effect.Env.add (PathName.of_name [] x) x_typ effects in
+    let effects_in_e2 = PathName.Env.add (PathName.of_name [] x) x_typ effects in
     let tree2 = to_tree effects_in_e2 e2 in
     let effect2 = Tree.effect tree2 in
     let descriptor = Effect.Descriptor.union
@@ -389,7 +389,7 @@ let rec to_tree (effects : Effect.Env.t) (e : 'a t) : Tree.t =
       let trees = cases |> List.map (fun (p, e) ->
         let pattern_vars = Pattern.free_variables p in
         let effects = Name.Set.fold (fun x effects ->
-          Effect.Env.add (PathName.of_name [] x) Effect.Type.Pure effects)
+          PathName.Env.add (PathName.of_name [] x) Effect.Type.Pure effects)
           pattern_vars effects in
         to_tree effects e) in
       let effect = Effect.union (List.map Tree.effect trees) in
@@ -431,14 +431,17 @@ let rec to_tree (effects : Effect.Env.t) (e : 'a t) : Tree.t =
   | Return _ | Bind _ | Lift _ ->
     failwith "Cannot compute effects on an explicit return, bind or lift."
 
-  and to_tree_let_fun (effects : Effect.Env.t)
+  and to_tree_let_fun (effects : Effect.Type.t PathName.Env.t)
     (is_rec : Recursivity.t) (x : Name.t) (args : (Name.t * Type.t) list)
     (e : 'a t) : Tree.t * Effect.Type.t =
     let args_names = List.map fst args in
-    let effects_in_e = Effect.Env.in_function effects args_names in
+    let effects_in_e =
+      List.fold_left (fun effects x ->
+        PathName.Env.add (PathName.of_name [] x) Effect.Type.Pure effects)
+        effects args_names in
     if Recursivity.to_bool is_rec then
       let rec fix_tree x_typ =
-        let effects_in_e = Effect.Env.add (PathName.of_name [] x)
+        let effects_in_e = PathName.Env.add (PathName.of_name [] x)
           x_typ effects_in_e in
         let tree = to_tree effects_in_e e in
         let effect = Tree.effect tree in
