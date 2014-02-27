@@ -7,49 +7,98 @@ Value
     [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ], Some
     Type ('bool')) =
   Match
-    ('counter',
+    ((), Variable ((), 'counter'),
       [
-        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Nat(0),
+          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
         (Constructor ('S', 'counter'),
           Match
-            ('t',
+            ((), Variable ((), 't'),
               [
-                (Constructor ('Leaf'), Constructor ('false'));
+                (Constructor ('Leaf'),
+                  Constructor
+                    ((),
+                      'false'));
                 (Constructor ('Node', 't1', 'x'', 't2'),
                   IfThenElse
-                    (Apply
-                      (Apply
-                        ('Z.ltb',
-                          'x'),
-                        'x''),
+                    ((),
                       Apply
-                        (Apply
-                          (Apply
-                            ('find_rec',
-                              'counter'),
-                            'x'),
-                          't1'),
-                      IfThenElse
-                        (Apply
-                          (Apply
-                            ('Z.ltb',
-                              'x''),
-                            'x'),
+                        ((),
                           Apply
-                            (Apply
-                              (Apply
-                                ('find_rec',
-                                  'counter'),
-                                'x'),
-                              't2'),
+                            ((),
+                              Variable
+                                ((),
+                                  'Z.ltb'),
+                              Variable
+                                ((),
+                                  'x')),
+                          Variable
+                            ((),
+                              'x'')),
+                      Apply
+                        ((),
+                          Apply
+                            ((),
+                              Apply
+                                ((),
+                                  Variable
+                                    ((),
+                                      'find_rec'),
+                                  Variable
+                                    ((),
+                                      'counter')),
+                              Variable
+                                ((),
+                                  'x')),
+                          Variable
+                            ((),
+                              't1')),
+                      IfThenElse
+                        ((),
+                          Apply
+                            ((),
+                              Apply
+                                ((),
+                                  Variable
+                                    ((),
+                                      'Z.ltb'),
+                                  Variable
+                                    ((),
+                                      'x'')),
+                              Variable
+                                ((),
+                                  'x')),
+                          Apply
+                            ((),
+                              Apply
+                                ((),
+                                  Apply
+                                    ((),
+                                      Variable
+                                        ((),
+                                          'find_rec'),
+                                      Variable
+                                        ((),
+                                          'counter')),
+                                  Variable
+                                    ((),
+                                      'x')),
+                              Variable
+                                ((),
+                                  't2')),
                           Constructor
-                            ('true'))))
+                            ((),
+                              'true'))))
               ]))
       ])
 
 Value
   (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Some
     Type ('bool')) =
-  Let (non_rec, 'counter', [ ], [ ], None) =
-    Apply ('read_counter', 'tt') in
-  Apply (Apply (Apply ('find_rec', 'counter'), 'x'), 't')
+  Let () (non_rec, 'counter', [ ], [ ], None) =
+    Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
+  Apply
+    ((),
+      Apply
+        ((), Apply ((), Variable ((), 'find_rec'), Variable ((), 'counter')),
+          Variable ((), 'x')), Variable ((), 't'))

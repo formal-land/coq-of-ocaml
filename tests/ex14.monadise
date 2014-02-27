@@ -2,5 +2,10 @@ Value
   (non_rec, 'f', [ ], [ ('n', Type ('Z')); ('b', Type ('bool')) ], Some
     Type ('Z')) =
   IfThenElse
-    ('b', Apply (Apply ('Z.add', 'n'), Int(1)),
-      Apply (Apply ('Z.sub', 'n'), Int(1)))
+    ((), Variable ((), 'b'),
+      Apply
+        ((), Apply ((), Variable ((), 'Z.add'), Variable ((), 'n')),
+          Constant ((), Int(1))),
+      Apply
+        ((), Apply ((), Variable ((), 'Z.sub'), Variable ((), 'n')),
+          Constant ((), Int(1))))

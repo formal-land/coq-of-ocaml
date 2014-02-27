@@ -5,16 +5,16 @@ open SmartPrint
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
-  type t = {
+  type 'a t = {
     header : Exp.Header.t;
-    body : Exp.t (** Body expression. *) }
+    body : 'a Exp.t (** Body expression. *) }
 
-  let pp (value : t) : SmartPrint.t =
+  let pp (pp_a : 'a -> SmartPrint.t) (value : 'a t) : SmartPrint.t =
     nest (!^ "Value" ^^ Exp.Header.pp value.header ^^ !^ "=" ^^ newline ^^
-      indent (Exp.pp value.body))
+      indent (Exp.pp pp_a value.body))
   
   (** Pretty-print a value definition to Coq. *)
-  let to_coq (value : t) : SmartPrint.t =
+  let to_coq (value : 'a t) : SmartPrint.t =
     let (is_rec, x, typ_vars, args, typ) = value.header in
     nest (
       (if Recursivity.to_bool is_rec then
@@ -180,19 +180,19 @@ module Open = struct
 end
 
 (** A structure. *)
-type t =
-  | Value of Value.t
+type 'a t =
+  | Value of 'a Value.t
   | Inductive of Inductive.t
   | Record of Record.t
   | Synonym of Synonym.t
   | Exception of Exception.t
   | Open of Open.t
-  | Module of Name.t * t list
+  | Module of Name.t * 'a t list
 
-let rec pp (defs : t list) : SmartPrint.t =
-  let pp_one (def : t) : SmartPrint.t =
+let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
+  let pp_one (def : 'a t) : SmartPrint.t =
     match def with
-    | Value value -> Value.pp value
+    | Value value -> Value.pp pp_a value
     | Inductive ind -> Inductive.pp ind
     | Record record -> Record.pp record
     | Synonym synonym -> Synonym.pp synonym
@@ -201,12 +201,12 @@ let rec pp (defs : t list) : SmartPrint.t =
     | Module (name, defs) ->
       nest (
         !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (pp defs)) in
+        indent (pp pp_a defs)) in
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
-let rec of_structure (structure : structure) : t list =
-  let of_structure_item (item : structure_item) : t =
+let rec of_structure (structure : structure) : unit t list =
+  let of_structure_item (item : structure_item) : unit t =
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
       let (is_rec, pattern, typ_vars, args, typ, e) =
@@ -258,8 +258,8 @@ let rec of_structure (structure : structure) : t list =
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
 
-let rec monadise_let_rec (defs : t list) : t list =
-  let rec monadise_let_rec_one (def : t) : t list =
+let rec monadise_let_rec (defs : unit t list) : unit t list =
+  let rec monadise_let_rec_one (def : unit t) : unit t list =
     match def with
     | Value { Value.header = header; body = body } ->
       let defs = Exp.monadise_let_rec_definition header body in
@@ -289,8 +289,9 @@ module Tree = struct
 end
 
 let rec to_trees (effects : Effect.Env.t)
-  (defs : t list) : Tree.t list * Effect.Env.t =
-  let rec to_tree (def : t) (effects : Effect.Env.t) : Tree.t * Effect.Env.t =
+  (defs : 'a t list) : Tree.t list * Effect.Env.t =
+  let rec to_tree (def : 'a t) (effects : Effect.Env.t)
+    : Tree.t * Effect.Env.t =
     match def with
     | Value {
       Value.header = (is_rec, x, _, args, _);
@@ -314,10 +315,10 @@ let rec to_trees (effects : Effect.Env.t)
       ([], effects) defs in
   (List.rev trees, effects)
 
-let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
-  : PathName.Env.t * t list =
-  let rec monadise_one (env : PathName.Env.t) (def : t) (tree : Tree.t)
-    : PathName.Env.t * t =
+let rec monadise (env : unit PathName.Env.t) (defs : 'a t list)
+  (trees : Tree.t list) : unit PathName.Env.t * unit t list =
+  let rec monadise_one (env : unit PathName.Env.t) (def : 'a t) (tree : Tree.t)
+    : unit PathName.Env.t * unit t =
     match (def, tree) with
     | (
       Value {
@@ -329,11 +330,11 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
         | Some typ -> Some (Type.monadise typ (Exp.Tree.effect tree)) in
       let env_in_body =
         if Recursivity.to_bool is_rec then
-          PathName.Env.add (PathName.of_name [] x) env
+          PathName.Env.add (PathName.of_name [] x) () env
         else
           env in
       let body = Exp.monadise env_in_body body tree in
-      let env = PathName.Env.add (PathName.of_name [] x) env in
+      let env = PathName.Env.add (PathName.of_name [] x) () env in
       (env, Value {
         Value.header = (is_rec, x, typ_vars, args, typ);
         body = body })
@@ -341,7 +342,7 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
       let (env, defs) = monadise (PathName.Env.open_module env) defs trees in
       (PathName.Env.close_module env name, Module (name, defs))
     | (Exception exn, Tree.Other) ->
-      (PathName.Env.add (PathName.of_name [] exn.Exception.name) env, def)
+      (PathName.Env.add (PathName.of_name [] exn.Exception.name) () env, def)
     | (Inductive _, Tree.Other) | (Record _, Tree.Other)
       | (Synonym _, Tree.Other) | (Open _, Tree.Other) -> (env, def)
     | _ -> failwith "Unexpected arguments for 'monadise'." in
@@ -353,8 +354,8 @@ let rec monadise (env : PathName.Env.t) (defs : t list) (trees : Tree.t list)
   (env, List.rev defs)
 
 (** Pretty-print a structure to Coq. *)
-let rec to_coq (defs : t list) : SmartPrint.t =
-  let to_coq_one (def : t) : SmartPrint.t =
+let rec to_coq (defs : 'a t list) : SmartPrint.t =
+  let to_coq_one (def : 'a t) : SmartPrint.t =
     match def with
     | Value value -> Value.to_coq value
     | Inductive ind -> Inductive.to_coq ind

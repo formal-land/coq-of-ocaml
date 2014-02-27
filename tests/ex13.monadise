@@ -2,13 +2,15 @@ Value
   (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
     Monad ([ 'Failure' ], Type ('list', 'A'))) =
   Match
-    ('l',
+    ((), Variable ((), 'l'),
       [
-        (Constructor ('cons', Any, 'xs'), Return ('xs'));
+        (Constructor ('cons', Any, 'xs'), Return ((), Variable ((), 'xs')));
         (Constructor ('[]'),
           Apply
-            ('failwith',
-              String("Cannot take the tail of an empty list.")))
+            ((), Variable ((), 'failwith'),
+              Constant
+                ((),
+                  String("Cannot take the tail of an empty list."))))
       ])
 
 Value
@@ -18,39 +20,58 @@ Value
       ('match_var_0', Type ('list', Type ('string')))
     ], Some Monad ([ 'IO'; 'NonTermination' ], Type ('unit'))) =
   Match
-    ('counter',
+    ((), Variable ((), 'counter'),
       [
         (Nat(0),
           Lift
-            ([ 'NonTermination' ], [ 'IO'; 'NonTermination' ],
-              Apply ('not_terminated', 'tt')));
+            ((), [ 'NonTermination' ], [ 'IO'; 'NonTermination' ],
+              Apply
+                ((), Variable ((), 'not_terminated'),
+                  Variable ((), 'tt'))));
         (Constructor ('S', 'counter'),
           Match
-            ('match_var_0',
+            ((), Variable ((), 'match_var_0'),
               [
                 (Constructor ('[]'),
                   Return
-                    (Constructor
-                      ('tt')));
+                    ((),
+                      Constructor
+                        ((),
+                          'tt')));
                 (Constructor ('cons', 'x', 'xs'),
                   Bind
-                    (Lift
-                      ([
-                        'IO'
-                      ],
-                        [
-                          'IO';
-                          'NonTermination'
-                        ],
-                        Apply
-                          ('print_string',
-                            'x')),
+                    ((),
+                      Lift
+                        ((),
+                          [
+                            'IO'
+                          ],
+                          [
+                            'IO';
+                            'NonTermination'
+                          ],
+                          Apply
+                            ((),
+                              Variable
+                                ((),
+                                  'print_string'),
+                              Variable
+                                ((),
+                                  'x'))),
                       None,
                       Apply
-                        (Apply
-                          ('print_list_rec',
-                            'counter'),
-                          'xs')))
+                        ((),
+                          Apply
+                            ((),
+                              Variable
+                                ((),
+                                  'print_list_rec'),
+                              Variable
+                                ((),
+                                  'counter')),
+                          Variable
+                            ((),
+                              'xs'))))
               ]))
       ])
 
@@ -59,36 +80,44 @@ Value
     [ ('match_var_0', Type ('list', Type ('string'))) ], Some
     Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit'))) =
   Bind
-    (Lift
-      ([ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination' ],
-        Apply ('read_counter', 'tt')), Some 'counter',
+    ((),
       Lift
-        ([ 'IO'; 'NonTermination' ], [ 'Counter'; 'IO'; 'NonTermination' ],
-          Apply (Apply ('print_list_rec', 'counter'), 'match_var_0')))
+        ((), [ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination' ],
+          Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
+      Some 'counter',
+      Lift
+        ((), [ 'IO'; 'NonTermination' ], [ 'Counter'; 'IO'; 'NonTermination' ],
+          Apply
+            ((),
+              Apply
+                ((), Variable ((), 'print_list_rec'), Variable ((), 'counter')),
+              Variable ((), 'match_var_0'))))
 
 Value
   (non_rec, 'f', [ ], [ ], Some
     (Type ('list', Type ('string')) ->
       Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit')))) =
-  'print_list'
+  Variable ((), 'print_list')
 
 Value
   (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some
     Monad ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], Type ('unit'))) =
   Bind
-    (Lift
-      ([ 'Failure' ], [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
-        Apply
-          ('tail',
-            Constructor
-              ('cons', String("Stop"),
-                Constructor
-                  ('cons', String("Hello"),
-                    Constructor
-                      ('cons', String(" "),
-                        Constructor
-                          ('cons', String("world"), Constructor ('[]'))))))),
-      Some 'x',
+    ((),
       Lift
-        ([ 'Counter'; 'IO'; 'NonTermination' ],
-          [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], Apply ('f', 'x')))
+        ((), [ 'Failure' ], [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
+          Apply
+            ((), Variable ((), 'tail'),
+              Constructor
+                ((), 'cons', Constant ((), String("Stop")),
+                  Constructor
+                    ((), 'cons', Constant ((), String("Hello")),
+                      Constructor
+                        ((), 'cons', Constant ((), String(" ")),
+                          Constructor
+                            ((), 'cons', Constant ((), String("world")),
+                              Constructor ((), '[]'))))))), Some 'x',
+      Lift
+        ((), [ 'Counter'; 'IO'; 'NonTermination' ],
+          [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
+          Apply ((), Variable ((), 'f'), Variable ((), 'x'))))

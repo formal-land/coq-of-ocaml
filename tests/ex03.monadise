@@ -1,17 +1,21 @@
 Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
-  Let (non_rec, 'm', [ ], [ ], None) =
-    Int(12) in
-  Let (non_rec, 'n1', [ ], [ ], None) =
-    'm' in
-  'n1'
+  Let () (non_rec, 'm', [ ], [ ], None) =
+    Constant ((), Int(12)) in
+  Let () (non_rec, 'n1', [ ], [ ], None) =
+    Variable ((), 'm') in
+  Variable ((), 'n1')
 
 Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
-  Let
+  Let ()
     (non_rec, 'p1', [ 'A'; 'B'; 'C' ],
       [ ('c', (('B' -> ('C' -> 'B')) -> 'A')) ], Some 'A') =
-    Apply ('c', Function ('x', Function ('y', 'x'))) in
-  Let
+    Apply
+      ((), Variable ((), 'c'),
+        Function ((), 'x', Function ((), 'y', Variable ((), 'x')))) in
+  Let ()
     (non_rec, 'c', [ 'A' ], [ ('f', (Type ('Z') -> (Type ('Z') -> 'A'))) ], Some
       'A') =
-    Apply (Apply ('f', Int(12)), Int(23)) in
-  Apply ('p1', 'c')
+    Apply
+      ((), Apply ((), Variable ((), 'f'), Constant ((), Int(12))),
+        Constant ((), Int(23))) in
+  Apply ((), Variable ((), 'p1'), Variable ((), 'c'))

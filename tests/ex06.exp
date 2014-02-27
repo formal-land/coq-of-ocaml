@@ -3,27 +3,45 @@ Value
     [ ('counter', Type ('nat')); ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
     Some Type ('list', 'A')) =
   Match
-    ('counter',
+    ((), Variable ((), 'counter'),
       [
-        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Nat(0),
+          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
         (Constructor ('S', 'counter'),
           Match
-            ('l',
+            ((), Variable ((), 'l'),
               [
-                (Constructor ('[]'), Constructor ('[]'));
+                (Constructor ('[]'), Constructor ((), '[]'));
                 (Constructor ('cons', 'x', 'xs'),
                   Constructor
-                    ('cons',
+                    ((),
+                      'cons',
                       Apply
-                        ('f',
-                          'x'),
+                        ((),
+                          Variable
+                            ((),
+                              'f'),
+                          Variable
+                            ((),
+                              'x')),
                       Apply
-                        (Apply
-                          (Apply
-                            ('map_rec',
-                              'counter'),
-                            'f'),
-                          'xs')))
+                        ((),
+                          Apply
+                            ((),
+                              Apply
+                                ((),
+                                  Variable
+                                    ((),
+                                      'map_rec'),
+                                  Variable
+                                    ((),
+                                      'counter')),
+                              Variable
+                                ((),
+                                  'f')),
+                          Variable
+                            ((),
+                              'xs'))))
               ]))
       ])
 
@@ -31,9 +49,13 @@ Value
   (non_rec, 'map', [ 'A'; 'B' ],
     [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ], Some Type ('list', 'A'))
   =
-  Let (non_rec, 'counter', [ ], [ ], None) =
-    Apply ('read_counter', 'tt') in
-  Apply (Apply (Apply ('map_rec', 'counter'), 'f'), 'l')
+  Let () (non_rec, 'counter', [ ], [ ], None) =
+    Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
+  Apply
+    ((),
+      Apply
+        ((), Apply ((), Variable ((), 'map_rec'), Variable ((), 'counter')),
+          Variable ((), 'f')), Variable ((), 'l'))
 
 Value
   (rec, 'fold_rec', [ 'A'; 'B' ],
@@ -44,28 +66,49 @@ Value
       ('l', Type ('list', 'B'))
     ], Some 'A') =
   Match
-    ('counter',
+    ((), Variable ((), 'counter'),
       [
-        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Nat(0),
+          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
         (Constructor ('S', 'counter'),
           Match
-            ('l',
+            ((), Variable ((), 'l'),
               [
-                (Constructor ('[]'), 'a');
+                (Constructor ('[]'), Variable ((), 'a'));
                 (Constructor ('cons', 'x', 'xs'),
                   Apply
-                    (Apply
-                      (Apply
-                        (Apply
-                          ('fold_rec',
-                            'counter'),
-                          'f'),
-                        Apply
-                          (Apply
-                            ('f',
-                              'a'),
-                            'x')),
-                      'xs'))
+                    ((),
+                      Apply
+                        ((),
+                          Apply
+                            ((),
+                              Apply
+                                ((),
+                                  Variable
+                                    ((),
+                                      'fold_rec'),
+                                  Variable
+                                    ((),
+                                      'counter')),
+                              Variable
+                                ((),
+                                  'f')),
+                          Apply
+                            ((),
+                              Apply
+                                ((),
+                                  Variable
+                                    ((),
+                                      'f'),
+                                  Variable
+                                    ((),
+                                      'a')),
+                              Variable
+                                ((),
+                                  'x'))),
+                      Variable
+                        ((),
+                          'xs')))
               ]))
       ])
 
@@ -73,17 +116,26 @@ Value
   (non_rec, 'fold', [ 'A'; 'B' ],
     [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
     Some 'A') =
-  Let (non_rec, 'counter', [ ], [ ], None) =
-    Apply ('read_counter', 'tt') in
-  Apply (Apply (Apply (Apply ('fold_rec', 'counter'), 'f'), 'a'), 'l')
+  Let () (non_rec, 'counter', [ ], [ ], None) =
+    Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
+  Apply
+    ((),
+      Apply
+        ((),
+          Apply
+            ((),
+              Apply ((), Variable ((), 'fold_rec'), Variable ((), 'counter')),
+              Variable ((), 'f')), Variable ((), 'a')), Variable ((), 'l'))
 
 Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
   Constructor
-    ('cons', Int(5),
+    ((), 'cons', Constant ((), Int(5)),
       Constructor
-        ('cons', Int(6),
+        ((), 'cons', Constant ((), Int(6)),
           Constructor
-            ('cons', Int(7), Constructor ('cons', Int(2), Constructor ('[]')))))
+            ((), 'cons', Constant ((), Int(7)),
+              Constructor
+                ((), 'cons', Constant ((), Int(2)), Constructor ((), '[]')))))
 
 Value
   (non_rec, 'n', [ 'A' ],
@@ -92,8 +144,19 @@ Value
       ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
     ], Some Type ('Z')) =
   Apply
-    (Apply
-      (Apply
-        ('fold',
-          Function ('x', Function ('y', Apply (Apply ('plus', 'x'), 'y')))),
-        Int(0)), Apply (Apply ('map', 'incr'), 'l'))
+    ((),
+      Apply
+        ((),
+          Apply
+            ((), Variable ((), 'fold'),
+              Function
+                ((), 'x',
+                  Function
+                    ((), 'y',
+                      Apply
+                        ((),
+                          Apply ((), Variable ((), 'plus'), Variable ((), 'x')),
+                          Variable ((), 'y'))))), Constant ((), Int(0))),
+      Apply
+        ((), Apply ((), Variable ((), 'map'), Variable ((), 'incr')),
+          Variable ((), 'l')))

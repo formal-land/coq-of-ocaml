@@ -237,7 +237,7 @@ let rec substitute (x : PathName.t) (e' : 'a t) (e : 'a t) : 'a t =
     Bind (a, e1, y, e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, substitute x e' e)
 
-let rec monadise_let_rec (e : 'a t) : 'a t =
+let rec monadise_let_rec (e : unit t) : unit t =
   match e with
   | Constant _ | Variable _ -> e
   | Tuple (a, es) -> Tuple (a, List.map monadise_let_rec es)
@@ -265,28 +265,28 @@ let rec monadise_let_rec (e : 'a t) : 'a t =
     Bind (a, monadise_let_rec e1, x, monadise_let_rec e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, monadise_let_rec e)
 
-and monadise_let_rec_definition (header : Header.t) (e : 'a t)
-  : (Header.t * 'a t) list =
+and monadise_let_rec_definition (header : Header.t) (e : unit t)
+  : (Header.t * unit t) list =
   let (is_rec, x, typ_vars, args, typ) = header in
   let e = monadise_let_rec e in
   if Recursivity.to_bool is_rec then
-    let var (x : Name.t) : t = Variable (PathName.of_name [] x) in
+    let var (x : Name.t) : unit t = Variable ((), PathName.of_name [] x) in
     let x_rec = x ^ "_rec" in
     let args' =
       ("counter", Type.Apply (PathName.of_name [] "nat", [])) :: args in
-    let e = Match (var "counter", [
+    let e = Match ((), var "counter", [
       (Pattern.Constant (Constant.Nat 0),
-        Apply (var "not_terminated", var "tt"));
+        Apply ((), var "not_terminated", var "tt"));
       (Pattern.Constructor (PathName.of_name [] "S",
         [Pattern.Variable "counter"]),
         substitute (PathName.of_name [] x)
-          (Apply (var x_rec, var "counter")) e)]) in
+          (Apply ((), var x_rec, var "counter")) e)]) in
     [ ((is_rec, x_rec, typ_vars, args', typ), e);
       ((Recursivity.New false, x, typ_vars, args, typ),
-        Let (Header.variable "counter",
-          Apply (var "read_counter", var "tt"),
-        List.fold_left (fun e (x, _) -> Apply (e, var x))
-          (Apply (var x_rec, var "counter")) args)) ]
+        Let ((), Header.variable "counter",
+          Apply ((), var "read_counter", var "tt"),
+        List.fold_left (fun e (x, _) -> Apply ((), e, var x))
+          (Apply ((), var x_rec, var "counter")) args)) ]
   else
     [(header, e)]
 
@@ -325,8 +325,8 @@ module Tree = struct
     | Sequence (tree1, tree2, _) -> aux "Sequence" [tree1; tree2]
 end
 
-let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
-  let compound (es : t list) : Tree.t =
+let rec to_tree (effects : Effect.Env.t) (e : 'a t) : Tree.t =
+  let compound (es : 'a t list) : Tree.t =
     let trees = List.map (to_tree effects) es in
     let effects = List.map Tree.effect trees in
     let descriptor = Effect.Descriptor.union (
@@ -342,14 +342,14 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
   | Constant _ -> Tree.Leaf
     { Effect.descriptor = Effect.Descriptor.pure;
       typ = Effect.Type.Pure }
-  | Variable x ->
+  | Variable (_, x) ->
     (try Tree.Leaf
       { Effect.descriptor = Effect.Descriptor.pure;
         typ = Effect.Env.find x effects }
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (PathName.pp x ^^ !^ "not found.")))
-  | Tuple es | Constructor (_, es) -> compound es
-  | Apply (e_f, e_x) ->
+  | Tuple (_, es) | Constructor (_, _, es) -> compound es
+  | Apply (_, e_f, e_x) ->
     let tree_f = to_tree effects e_f in
     let effect_f = Tree.effect tree_f in
     let tree_x = to_tree effects e_x in
@@ -363,7 +363,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
         { Effect.descriptor = descriptor; typ = effect_typ })
     else
       failwith "Function arguments cannot have functional effects."
-  | Function (x, e) ->
+  | Function (_, x, e) ->
     let tree_e = to_tree (Effect.Env.add (PathName.of_name [] x)
       Effect.Type.Pure effects) e in
     let effect_e = Tree.effect tree_e in
@@ -371,7 +371,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       { Effect.descriptor = Effect.Descriptor.pure;
         typ = Effect.Type.Arrow (
           effect_e.Effect.descriptor, effect_e.Effect.typ) })
-  | Let ((is_rec, x, _, args, _), e1, e2) ->
+  | Let (_, (is_rec, x, _, args, _), e1, e2) ->
     let (tree1, x_typ) = to_tree_let_fun effects is_rec x args e1 in
     let effect1 = Tree.effect tree1 in
     let effects_in_e2 = Effect.Env.add (PathName.of_name [] x) x_typ effects in
@@ -382,7 +382,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
     Tree.Let (tree1, tree2,
       { Effect.descriptor = descriptor;
         typ = effect2.Effect.typ })
-  | Match (e, cases) ->
+  | Match (_, e, cases) ->
     let tree_e = to_tree effects e in
     let effect_e = Tree.effect tree_e in
     if Effect.Type.is_pure effect_e.Effect.typ then
@@ -399,15 +399,15 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
           typ = effect.Effect.typ })
     else
       failwith "Cannot match a value with functional effects."
-  | Record fields -> compound (List.map snd fields)
-  | Field (e, _) ->
+  | Record (_, fields) -> compound (List.map snd fields)
+  | Field (_, e, _) ->
     let tree = to_tree effects e in
     let effect = Tree.effect tree in
     if Effect.Type.is_pure effect.Effect.typ then
       Tree.Field (tree, effect)
     else
       failwith "Cannot take a field of a value with functional effects."
-  | IfThenElse (e1, e2, e3) ->
+  | IfThenElse (_, e1, e2, e3) ->
     let tree_e1 = to_tree effects e1 in
     let effect_e1 = Tree.effect tree_e1 in
     if Effect.Type.is_pure effect_e1.Effect.typ then
@@ -419,7 +419,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
           typ = effect.Effect.typ })
     else
       failwith "Cannot do an if on a value with functional effects."
-  | Sequence (e1, e2) ->
+  | Sequence (_, e1, e2) ->
     let tree_e1 = to_tree effects e1 in
     let effect_e1 = Tree.effect tree_e1 in
     let tree_e2 = to_tree effects e2 in
@@ -433,7 +433,7 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
 
   and to_tree_let_fun (effects : Effect.Env.t)
     (is_rec : Recursivity.t) (x : Name.t) (args : (Name.t * Type.t) list)
-    (e : t) : Tree.t * Effect.Type.t =
+    (e : 'a t) : Tree.t * Effect.Type.t =
     let args_names = List.map fst args in
     let effects_in_e = Effect.Env.in_function effects args_names in
     if Recursivity.to_bool is_rec then
@@ -454,23 +454,24 @@ let rec to_tree (effects : Effect.Env.t) (e : t) : Tree.t =
       let x_typ = Effect.function_typ args_names effect in
       (tree, x_typ)
 
-let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
-  let var (x : Name.t) : t = Variable (PathName.of_name [] x) in
+let rec monadise (env : unit PathName.Env.t) (e : 'a t) (tree : Tree.t)
+  : unit t =
+  let var (x : Name.t) : unit t = Variable ((), PathName.of_name [] x) in
   let lift d1 d2 e =
     if Effect.Descriptor.eq d1 d2 then
       e
     else if Effect.Descriptor.is_pure d1 then
-      Return e
+      Return ((), e)
     else
-      Lift (d1, d2, e) in
+      Lift ((), d1, d2, e) in
   (** [d1] is the descriptor of [e1], [d2] of [e2]. *)
   let bind d1 d2 d e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
       match x with
-      | Some x -> Let (Header.variable x, e1, e2)
+      | Some x -> Let ((), Header.variable x, e1, e2)
       | None -> e2
     else
-      Bind (lift d1 d e1, x, lift d2 d e2) in
+      Bind ((), lift d1 d e1, x, lift d2 d e2) in
   (** [k es'] is supposed to raise the effect [d]. *)
   let rec monadise_list env es trees d es' k =
     match (es, trees) with
@@ -481,105 +482,105 @@ let rec monadise (env : PathName.Env.t) (e : t) (tree : Tree.t) : t =
         monadise_list env es trees d (e :: es') k
       else
         let e' = monadise env e tree in
-        let (x, env) = PathName.Env.fresh "x" env in
+        let (x, env) = PathName.Env.fresh "x" () env in
         bind d_e d d e' (Some x)
           (monadise_list env es trees d (var x :: es') k)
     | _ -> failwith "Unexpected number of trees." in
   let d = Tree.descriptor tree in
   match (e, tree) with
   | (Constant _, Tree.Leaf _) | (Variable _, Tree.Leaf _) -> e
-  | (Tuple es, Tree.Compound (trees, _)) ->
+  | (Tuple (_, es), Tree.Compound (trees, _)) ->
     monadise_list env es trees d [] (fun es' ->
-      lift Effect.Descriptor.pure d (Tuple es'))
-  | (Constructor (x, es), Tree.Compound (trees, _)) ->
+      lift Effect.Descriptor.pure d (Tuple ((), es')))
+  | (Constructor (_, x, es), Tree.Compound (trees, _)) ->
     monadise_list env es trees d [] (fun es' ->
-      lift Effect.Descriptor.pure d (Constructor (x, es')))
-  | (Apply (e1, e2), Tree.Apply (tree1, tree2, _)) ->
+      lift Effect.Descriptor.pure d (Constructor ((), x, es')))
+  | (Apply (_, e1, e2), Tree.Apply (tree1, tree2, _)) ->
     monadise_list env [e1; e2] [tree1; tree2] d [] (fun es' ->
       match es' with
       | [e1; e2] ->
         let return_descriptor =
           Effect.Type.return_descriptor (Tree.effect tree1).Effect.typ in
-        lift return_descriptor d (Apply (e1, e2))
+        lift return_descriptor d (Apply ((), e1, e2))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (Function (x, e), Tree.Function (tree, _)) ->
-    let env = PathName.Env.add (PathName.of_name [] x) env in
-    Function (x, monadise env e tree)
-  | (Let ((_, x, _, [], _), e1, e2), Tree.Let (tree1, tree2, _)) ->
+  | (Function (_, x, e), Tree.Function (tree, _)) ->
+    let env = PathName.Env.add (PathName.of_name [] x) () env in
+    Function ((), x, monadise env e tree)
+  | (Let (_, (_, x, _, [], _), e1, e2), Tree.Let (tree1, tree2, _)) ->
     let e1 = monadise env e1 tree1 in
-    let env = PathName.Env.add (PathName.of_name [] x) env in
+    let env = PathName.Env.add (PathName.of_name [] x) () env in
     let e2 = monadise env e2 tree2 in
     bind (Tree.descriptor tree1) (Tree.descriptor tree2) d e1 (Some x) e2
-  | (Let ((is_rec, x, typ_args, args, Some typ), e1, e2),
+  | (Let (_, (is_rec, x, typ_args, args, Some typ), e1, e2),
     Tree.Let (tree1, tree2, _)) ->
     let typ = Type.monadise typ (Tree.effect tree1) in
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
-        PathName.Env.add (PathName.of_name [] x) env
+        PathName.Env.add (PathName.of_name [] x) () env
       else
         env in
     let e1 = monadise env_in_e1 e1 tree1 in
-    let env_in_e2 = PathName.Env.add (PathName.of_name [] x) env in
+    let env_in_e2 = PathName.Env.add (PathName.of_name [] x) () env in
     let e2 = monadise env_in_e2 e2 tree2 in
-    Let ((is_rec, x, typ_args, args, Some typ), e1, e2)
-  | (Match (e, cases), Tree.Match (tree, trees, _)) ->
+    Let ((), (is_rec, x, typ_args, args, Some typ), e1, e2)
+  | (Match (_, e, cases), Tree.Match (tree, trees, _)) ->
     monadise_list env [e] [tree] d [] (fun es' ->
       match es' with
       | [e] ->
         let cases = List.map2 (fun (p, e) tree ->
           let env = Name.Set.fold (fun x env ->
-            PathName.Env.add (PathName.of_name [] x) env)
+            PathName.Env.add (PathName.of_name [] x) () env)
             (Pattern.free_variables p) env in
           (p, lift (Tree.descriptor tree) d (monadise env e tree)))
           cases trees in
-        Match (e, cases)
+        Match ((), e, cases)
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (Record fields, Tree.Compound (trees, _)) ->
+  | (Record (_, fields), Tree.Compound (trees, _)) ->
     monadise_list env (List.map snd fields) trees d [] (fun es' ->
       let fields = List.map2 (fun (f, _) e -> (f, e)) fields es' in
-      lift Effect.Descriptor.pure d (Record fields))
-  | (Field (e, x), Tree.Field (tree, _)) ->
+      lift Effect.Descriptor.pure d (Record ((), fields)))
+  | (Field (_, e, x), Tree.Field (tree, _)) ->
     monadise_list env [e] [tree] d [] (fun es' ->
       match es' with
-      | [e] -> lift Effect.Descriptor.pure d (Field (e, x))
+      | [e] -> lift Effect.Descriptor.pure d (Field ((), e, x))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (IfThenElse (e1, e2, e3), Tree.Match (tree1, [tree2; tree3], _)) ->
+  | (IfThenElse (_, e1, e2, e3), Tree.Match (tree1, [tree2; tree3], _)) ->
     monadise_list env [e1] [tree1] d [] (fun es' ->
       match es' with
       | [e1] ->
         let e2 = lift (Tree.descriptor tree2) d (monadise env e2 tree2) in
         let e3 = lift (Tree.descriptor tree3) d (monadise env e3 tree3) in
-        IfThenElse (e1, e2, e3)
+        IfThenElse ((), e1, e2, e3)
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (Sequence (e1, e2), Tree.Sequence (tree1, tree2, _)) ->
+  | (Sequence (_, e1, e2), Tree.Sequence (tree1, tree2, _)) ->
     let e1 = monadise env e1 tree1 in
     let e2 = monadise env e2 tree2 in
     bind (Tree.descriptor tree1) (Tree.descriptor tree2) d e1 None e2
   | _ -> failwith "Unexpected arguments for 'monadise'."
  
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)
-let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
+let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
   match e with
-  | Constant c -> Constant.to_coq c
-  | Variable x -> PathName.to_coq x
-  | Tuple es ->
+  | Constant (_, c) -> Constant.to_coq c
+  | Variable (_, x) -> PathName.to_coq x
+  | Tuple (_, es) ->
     if es = [] then
       !^ "tt"
     else
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
-  | Constructor (x, es) ->
+  | Constructor (_, x, es) ->
     if es = [] then
       PathName.to_coq x
     else
       Pp.parens paren @@ nest @@ separate space (PathName.to_coq x :: List.map (to_coq true) es)
-  | Apply (e_f, e_x) ->
+  | Apply (_, e_f, e_x) ->
     Pp.parens paren @@ nest @@ (to_coq true e_f ^^ to_coq true e_x)
-  | Function (x, e) ->
+  | Function (_, x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
-  | Let ((_, x, _, [], _), e1, e2) ->
+  | Let (_, (_, x, _, [], _), e1, e2) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
-  | Let ((is_rec, f_name, typ_vars, xs, f_typ), e_f, e) ->
+  | Let (_, (is_rec, f_name, typ_vars, xs, f_typ), e_f, e) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^
       (if Recursivity.to_bool is_rec then !^ "fix" else empty) ^^
@@ -597,32 +598,32 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ ":=" ^^ newline ^^
       indent (to_coq false e_f) ^^ !^ "in" ^^ newline ^^
       to_coq false e)
-  | Match (e, cases) ->
+  | Match (_, e, cases) ->
     nest (
       !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
       separate space (cases |> List.map (fun (p, e) ->
         nest (!^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^ to_coq false e ^^ newline))) ^^
       !^ "end")
-  | Record fields ->
+  | Record (_, fields) ->
     nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
       nest (PathName.to_coq x ^^ !^ ":=" ^^ to_coq false e))) ^^ !^ "|}")
-  | Field (e, x) -> Pp.parens paren @@ nest (PathName.to_coq x ^^ to_coq true e)
-  | IfThenElse (e1, e2, e3) ->
+  | Field (_, e, x) -> Pp.parens paren @@ nest (PathName.to_coq x ^^ to_coq true e)
+  | IfThenElse (_, e1, e2, e3) ->
     nest (
       !^ "if" ^^ to_coq false e1 ^^ !^ "then" ^^ newline ^^
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Sequence (e1, e2) ->
+  | Sequence (_, e1, e2) ->
     nest (to_coq true e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
-  | Return e -> Pp.parens paren @@ nest (!^ "ret" ^^ to_coq true e)
-  | Bind (e1, x, e2) ->
+  | Return (_, e) -> Pp.parens paren @@ nest (!^ "ret" ^^ to_coq true e)
+  | Bind (_, e1, x, e2) ->
     Pp.parens paren @@ nest (
       !^ "let!" ^^ (match x with
         | None -> !^ "_"
         | Some x -> Name.to_coq x) ^^ !^ ":=" ^^
         to_coq false e1 ^^ !^ "in" ^^ newline ^^
       to_coq false e2)
-  | Lift (d1, d2, e) ->
+  | Lift (_, d1, d2, e) ->
     Pp.parens paren @@ nest (
       !^ "lift" ^^ Effect.Descriptor.subset_to_coq d1 d2 ^^ to_coq true e)

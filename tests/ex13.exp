@@ -2,13 +2,15 @@ Value
   (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
     Type ('list', 'A')) =
   Match
-    ('l',
+    ((), Variable ((), 'l'),
       [
-        (Constructor ('cons', Any, 'xs'), 'xs');
+        (Constructor ('cons', Any, 'xs'), Variable ((), 'xs'));
         (Constructor ('[]'),
           Apply
-            ('failwith',
-              String("Cannot take the tail of an empty list.")))
+            ((), Variable ((), 'failwith'),
+              Constant
+                ((),
+                  String("Cannot take the tail of an empty list."))))
       ])
 
 Value
@@ -18,48 +20,67 @@ Value
       ('match_var_0', Type ('list', Type ('string')))
     ], Some Type ('unit')) =
   Match
-    ('counter',
+    ((), Variable ((), 'counter'),
       [
-        (Nat(0), Apply ('not_terminated', 'tt'));
+        (Nat(0),
+          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
         (Constructor ('S', 'counter'),
           Match
-            ('match_var_0',
+            ((), Variable ((), 'match_var_0'),
               [
-                (Constructor ('[]'), Constructor ('tt'));
+                (Constructor ('[]'), Constructor ((), 'tt'));
                 (Constructor ('cons', 'x', 'xs'),
                   Sequence
-                    (Apply
-                      ('print_string',
-                        'x'),
+                    ((),
                       Apply
-                        (Apply
-                          ('print_list_rec',
-                            'counter'),
-                          'xs')))
+                        ((),
+                          Variable
+                            ((),
+                              'print_string'),
+                          Variable
+                            ((),
+                              'x')),
+                      Apply
+                        ((),
+                          Apply
+                            ((),
+                              Variable
+                                ((),
+                                  'print_list_rec'),
+                              Variable
+                                ((),
+                                  'counter')),
+                          Variable
+                            ((),
+                              'xs'))))
               ]))
       ])
 
 Value
   (non_rec, 'print_list', [ ],
     [ ('match_var_0', Type ('list', Type ('string'))) ], Some Type ('unit')) =
-  Let (non_rec, 'counter', [ ], [ ], None) =
-    Apply ('read_counter', 'tt') in
-  Apply (Apply ('print_list_rec', 'counter'), 'match_var_0')
+  Let () (non_rec, 'counter', [ ], [ ], None) =
+    Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
+  Apply
+    ((), Apply ((), Variable ((), 'print_list_rec'), Variable ((), 'counter')),
+      Variable ((), 'match_var_0'))
 
 Value
   (non_rec, 'f', [ ], [ ], Some
     (Type ('list', Type ('string')) -> Type ('unit'))) =
-  'print_list'
+  Variable ((), 'print_list')
 
 Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
   Apply
-    ('f',
+    ((), Variable ((), 'f'),
       Apply
-        ('tail',
+        ((), Variable ((), 'tail'),
           Constructor
-            ('cons', String("Stop"),
+            ((), 'cons', Constant ((), String("Stop")),
               Constructor
-                ('cons', String("Hello"),
+                ((), 'cons', Constant ((), String("Hello")),
                   Constructor
-                    ('cons', String(" "),
-                      Constructor ('cons', String("world"), Constructor ('[]')))))))
+                    ((), 'cons', Constant ((), String(" ")),
+                      Constructor
+                        ((), 'cons', Constant ((), String("world")),
+                          Constructor ((), '[]')))))))
