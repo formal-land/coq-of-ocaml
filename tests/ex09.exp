@@ -55,8 +55,8 @@ Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
         ]) in
   Let ()
     (non_rec, 'map', [ 'A'; 'B' ],
-      [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ], Some
-      Type ('list', 'A')) =
+      [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
+      Some Type ('list', 'A')) =
     Let () (non_rec, 'counter', [ ], [ ], None) =
       Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
     Apply
@@ -65,8 +65,8 @@ Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
           ((), Apply ((), Variable ((), 'map_rec'), Variable ((), 'counter')),
             Variable ((), 'f')), Variable ((), 'match_var_0')) in
   Let ()
-    (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ], Some
-      'A') =
+    (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ],
+      Some 'A') =
     Match
       ((), Variable ((), 'counter'),
         [

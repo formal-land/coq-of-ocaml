@@ -1,6 +1,6 @@
 Value
-  (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
-    Type ('list', 'A')) =
+  (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
+    Some Type ('list', 'A')) =
   Match
     ((), Variable ((), 'l'),
       [
@@ -66,8 +66,8 @@ Value
       Variable ((), 'match_var_0'))
 
 Value
-  (non_rec, 'f', [ ], [ ], Some
-    (Type ('list', Type ('string')) -> Type ('unit'))) =
+  (non_rec, 'f', [ ], [ ],
+    Some (Type ('list', Type ('string')) -> Type ('unit'))) =
   Variable ((), 'print_list')
 
 Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =

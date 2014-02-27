@@ -4,8 +4,8 @@ Module 'List2':
   
   Value
     (rec, 'sum_rec', [ ],
-      [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ], Some
-      Type ('Z')) =
+      [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ],
+      Some Type ('Z')) =
     Match
       ((), Variable ((), 'counter'),
         [
@@ -58,8 +58,8 @@ Module 'List2':
   
   Value
     (rec, 'of_list_rec', [ 'A' ],
-      [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ], Some
-      Type ('t', 'A')) =
+      [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ],
+      Some Type ('t', 'A')) =
     Match
       ((), Variable ((), 'counter'),
         [
@@ -99,8 +99,8 @@ Module 'List2':
         ])
   
   Value
-    (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ], Some
-      Type ('t', 'A')) =
+    (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ],
+      Some Type ('t', 'A')) =
     Let () (non_rec, 'counter', [ ], [ ], None) =
       Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
     Apply

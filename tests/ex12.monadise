@@ -4,8 +4,8 @@ Inductive 'tree':
 
 Value
   (rec, 'find_rec', [ ],
-    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ], Some
-    Monad ([ 'NonTermination' ], Type ('bool'))) =
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ],
+    Some Monad ([ 'NonTermination' ], Type ('bool'))) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -97,8 +97,8 @@ Value
       ])
 
 Value
-  (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
+  (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
   Bind
     ((),
       Lift

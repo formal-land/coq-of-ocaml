@@ -22,8 +22,8 @@ Inductive 't2':
 
 Value
   (rec, 'of_list_rec', [ 'A' ],
-    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some
-    Monad ([ 'NonTermination' ], Type ('t2', 'A'))) =
+    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
+    Some Monad ([ 'NonTermination' ], Type ('t2', 'A'))) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -72,8 +72,8 @@ Value
       ])
 
 Value
-  (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('t2', 'A'))) =
+  (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('t2', 'A'))) =
   Bind
     ((),
       Lift
@@ -89,8 +89,8 @@ Value
 
 Value
   (rec, 'sum_rec', [ ],
-    [ ('counter', Type ('nat')); ('l', Type ('t2', Type ('Z'))) ], Some
-    Monad ([ 'NonTermination' ], Type ('Z'))) =
+    [ ('counter', Type ('nat')); ('l', Type ('t2', Type ('Z'))) ],
+    Some Monad ([ 'NonTermination' ], Type ('Z'))) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -143,8 +143,8 @@ Value
       ])
 
 Value
-  (non_rec, 'sum', [ ], [ ('l', Type ('t2', Type ('Z'))) ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+  (non_rec, 'sum', [ ], [ ('l', Type ('t2', Type ('Z'))) ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
   Bind
     ((),
       Lift
@@ -158,8 +158,8 @@ Value
               Variable ((), 'l'))))
 
 Value
-  (non_rec, 's', [ ], [ ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+  (non_rec, 's', [ ], [ ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
   Bind
     ((),
       Apply

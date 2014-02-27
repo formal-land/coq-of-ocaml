@@ -61,8 +61,8 @@ Value
 
 Value
   (non_rec, 'map', [ 'A'; 'B' ],
-    [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
+    [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
   Bind
     ((),
       Lift

@@ -13,8 +13,8 @@ Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
       ((), Variable ((), 'c'),
         Function ((), 'x', Function ((), 'y', Variable ((), 'x')))) in
   Let ()
-    (non_rec, 'c', [ 'A' ], [ ('f', (Type ('Z') -> (Type ('Z') -> 'A'))) ], Some
-      'A') =
+    (non_rec, 'c', [ 'A' ], [ ('f', (Type ('Z') -> (Type ('Z') -> 'A'))) ],
+      Some 'A') =
     Apply
       ((), Apply ((), Variable ((), 'f'), Constant ((), Int(12))),
         Constant ((), Int(23))) in

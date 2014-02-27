@@ -22,8 +22,8 @@ Inductive 't2':
 
 Value
   (rec, 'of_list_rec', [ 'A' ],
-    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some
-    Type ('t2', 'A')) =
+    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
+    Some Type ('t2', 'A')) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -58,8 +58,8 @@ Value
       ])
 
 Value
-  (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
-    Type ('t2', 'A')) =
+  (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ],
+    Some Type ('t2', 'A')) =
   Let () (non_rec, 'counter', [ ], [ ], None) =
     Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
   Apply
@@ -68,8 +68,8 @@ Value
 
 Value
   (rec, 'sum_rec', [ ],
-    [ ('counter', Type ('nat')); ('l', Type ('t2', Type ('Z'))) ], Some
-    Type ('Z')) =
+    [ ('counter', Type ('nat')); ('l', Type ('t2', Type ('Z'))) ],
+    Some Type ('Z')) =
   Match
     ((), Variable ((), 'counter'),
       [

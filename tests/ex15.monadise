@@ -6,8 +6,8 @@ Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
 
 Value
   (rec, 'member_rec', [ ],
-    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Monad ([ 'NonTermination' ], Type ('bool'))) =
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Monad ([ 'NonTermination' ], Type ('bool'))) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -99,8 +99,8 @@ Value
       ])
 
 Value
-  (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
+  (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
   Bind
     ((),
       Lift
@@ -119,8 +119,8 @@ Value
 
 Value
   (rec, 'insert_rec', [ ],
-    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Monad ([ 'NonTermination' ], Type ('set'))) =
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Monad ([ 'NonTermination' ], Type ('set'))) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -257,8 +257,8 @@ Value
       ])
 
 Value
-  (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('set'))) =
+  (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('set'))) =
   Bind
     ((),
       Lift

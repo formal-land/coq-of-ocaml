@@ -21,8 +21,8 @@ Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
       Field ((), Variable ((), 'r''), 'SizedString.size'))
 
 Value
-  (non_rec, 'f', [ ], [ ('match_var_0', Type ('SizedString.t')) ], Some
-    Type ('bool')) =
+  (non_rec, 'f', [ ], [ ('match_var_0', Type ('SizedString.t')) ],
+    Some Type ('bool')) =
   Match
     ((), Variable ((), 'match_var_0'),
       [

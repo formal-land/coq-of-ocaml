@@ -15,8 +15,8 @@ Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some Monad ([ 'Wtf' ], 'A'))
 
 Value
   (rec, 'h_rec', [ 'A' ],
-    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some
-    Monad ([ 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
+    [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
+    Some Monad ([ 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -103,8 +103,8 @@ Value
       ])
 
 Value
-  (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
-    Monad ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
+  (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ],
+    Some Monad ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
   Bind
     ((),
       Lift

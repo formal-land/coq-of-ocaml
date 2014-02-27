@@ -14,9 +14,9 @@ module Header = struct
 
   let pp (header : t) : SmartPrint.t =
     let (is_rec, x, typ_vars, args, typ) = header in
-    Pp.list [
+    OCaml.tuple [
       Recursivity.pp is_rec; Name.pp x; OCaml.list Name.pp typ_vars;
-      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) args;
+      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) args;
       OCaml.option Type.pp typ]
 
   let variable (x : Name.t) : t =
@@ -64,39 +64,39 @@ let rec clean (e : 'a t) : unit t =
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
   match e with
-  | Constant (a, c) -> nest (!^ "Constant" ^^ Pp.list [pp_a a; Constant.pp c])
-  | Variable (a, x) -> nest (!^ "Variable" ^^ Pp.list [pp_a a; PathName.pp x])
+  | Constant (a, c) -> nest (!^ "Constant" ^^ OCaml.tuple [pp_a a; Constant.pp c])
+  | Variable (a, x) -> nest (!^ "Variable" ^^ OCaml.tuple [pp_a a; PathName.pp x])
   | Tuple (a, es) ->
-    nest (!^ "Tuple" ^^ Pp.list (pp_a a :: List.map pp es))
+    nest (!^ "Tuple" ^^ OCaml.tuple (pp_a a :: List.map pp es))
   | Constructor (a, x, es) ->
-    nest (!^ "Constructor" ^^ Pp.list (pp_a a :: PathName.pp x :: List.map pp es))
+    nest (!^ "Constructor" ^^ OCaml.tuple (pp_a a :: PathName.pp x :: List.map pp es))
   | Apply (a, e_f, e_x) ->
-    nest (!^ "Apply" ^^ Pp.list [pp_a a; pp e_f; pp e_x])
+    nest (!^ "Apply" ^^ OCaml.tuple [pp_a a; pp e_f; pp e_x])
   | Function (a, x, e) ->
-    nest (!^ "Function" ^^ Pp.list [pp_a a; Name.pp x; pp e])
+    nest (!^ "Function" ^^ OCaml.tuple [pp_a a; Name.pp x; pp e])
   | Let (a, header, e1, e2) ->
     nest (!^ "Let" ^^ pp_a a ^^ Header.pp header ^^ !^ "=" ^^ newline ^^
       indent (pp e1) ^^ !^ "in" ^^ newline ^^
       pp e2)
   | Match (a, e, cases) ->
-    nest (!^ "Match" ^^ Pp.list [pp_a a; pp e;
+    nest (!^ "Match" ^^ OCaml.tuple [pp_a a; pp e;
       cases |> OCaml.list (fun (p, e) ->
         nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
   | Record (a, fields) ->
-    nest (!^ "Record" ^^ Pp.list (pp_a a :: (fields |> List.map (fun (x, e) ->
+    nest (!^ "Record" ^^ OCaml.tuple (pp_a a :: (fields |> List.map (fun (x, e) ->
       nest @@ parens (PathName.pp x ^-^ !^ "," ^^ pp e)))))
   | Field (a, e, x) ->
-    nest (!^ "Field" ^^ Pp.list [pp_a a; pp e; PathName.pp x])
+    nest (!^ "Field" ^^ OCaml.tuple [pp_a a; pp e; PathName.pp x])
   | IfThenElse (a, e1, e2, e3) ->
-    nest (!^ "IfThenElse" ^^ Pp.list [pp_a a; pp e1; pp e2; pp e3])
+    nest (!^ "IfThenElse" ^^ OCaml.tuple [pp_a a; pp e1; pp e2; pp e3])
   | Sequence (a, e1, e2) ->
-    nest (!^ "Sequence" ^^ Pp.list [pp_a a; pp e1; pp e2])
-  | Return (a, e) -> nest (!^ "Return" ^^ Pp.list [pp_a a; pp e])
-  | Bind (a, e1, x, e2) -> nest (!^ "Bind" ^^ Pp.list
+    nest (!^ "Sequence" ^^ OCaml.tuple [pp_a a; pp e1; pp e2])
+  | Return (a, e) -> nest (!^ "Return" ^^ OCaml.tuple [pp_a a; pp e])
+  | Bind (a, e1, x, e2) -> nest (!^ "Bind" ^^ OCaml.tuple
     [pp_a a; pp e1; nest (OCaml.option Name.pp x); pp e2])
   | Lift (a, d1, d2, e) ->
     nest (!^ "Lift" ^^
-      Pp.list [pp_a a; Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
+      OCaml.tuple [pp_a a; Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -312,7 +312,7 @@ module Tree = struct
 
   let rec pp (tree : t) : SmartPrint.t =
     let aux constructor trees =
-      nest (!^ constructor ^^ Pp.list (
+      nest (!^ constructor ^^ OCaml.tuple (
         Effect.pp (effect tree) :: List.map pp trees)) in
     match tree with
     | Leaf _ -> aux "Leaf" []

@@ -5,8 +5,9 @@ Value (non_rec, 't1', [ ], [ ], Some (Type ('ascii') * Type ('string'))) =
   Tuple ((), Constant ((), Char("c")), Constant ((), String("one")))
 
 Value
-  (non_rec, 't2', [ ], [ ], Some
-    (Type ('Z') * Type ('Z') * Type ('Z') * Type ('bool') * Type ('bool'))) =
+  (non_rec, 't2', [ ], [ ],
+    Some (Type ('Z') * Type ('Z') * Type ('Z') * Type ('bool') * Type ('bool')))
+  =
   Tuple
     ((), Constant ((), Int(1)), Constant ((), Int(2)), Constant ((), Int(3)),
       Constructor ((), 'false'), Constructor ((), 'true'))

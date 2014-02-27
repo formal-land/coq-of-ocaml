@@ -1,6 +1,6 @@
 Value
-  (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some
-    Monad ([ 'Failure' ], Type ('list', 'A'))) =
+  (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
+    Some Monad ([ 'Failure' ], Type ('list', 'A'))) =
   Match
     ((), Variable ((), 'l'),
       [
@@ -77,8 +77,8 @@ Value
 
 Value
   (non_rec, 'print_list', [ ],
-    [ ('match_var_0', Type ('list', Type ('string'))) ], Some
-    Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit'))) =
+    [ ('match_var_0', Type ('list', Type ('string'))) ],
+    Some Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit'))) =
   Bind
     ((),
       Lift
@@ -94,14 +94,16 @@ Value
               Variable ((), 'match_var_0'))))
 
 Value
-  (non_rec, 'f', [ ], [ ], Some
-    (Type ('list', Type ('string')) ->
-      Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit')))) =
+  (non_rec, 'f', [ ], [ ],
+    Some
+      (Type ('list', Type ('string')) ->
+        Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit')))) =
   Variable ((), 'print_list')
 
 Value
-  (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some
-    Monad ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], Type ('unit'))) =
+  (non_rec, 'x', [ 'A' ], [ ('z', 'A') ],
+    Some Monad ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], Type ('unit')))
+  =
   Bind
     ((),
       Lift

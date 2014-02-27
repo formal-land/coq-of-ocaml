@@ -6,8 +6,8 @@ Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
 
 Value
   (rec, 'member_rec', [ ],
-    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Type ('bool')) =
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Type ('bool')) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -95,8 +95,8 @@ Value
       ])
 
 Value
-  (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Type ('bool')) =
+  (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Type ('bool')) =
   Let () (non_rec, 'counter', [ ], [ ], None) =
     Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
   Apply
@@ -107,8 +107,8 @@ Value
 
 Value
   (rec, 'insert_rec', [ ],
-    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Type ('set')) =
+    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Type ('set')) =
   Match
     ((), Variable ((), 'counter'),
       [
@@ -223,8 +223,8 @@ Value
       ])
 
 Value
-  (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ], Some
-    Type ('set')) =
+  (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
+    Some Type ('set')) =
   Let () (non_rec, 'counter', [ ], [ ], None) =
     Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
   Apply

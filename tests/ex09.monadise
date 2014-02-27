@@ -1,6 +1,6 @@
 Value
-  (non_rec, 'l', [ ], [ ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('list', Type ('Z')))) =
+  (non_rec, 'l', [ ], [ ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', Type ('Z')))) =
   Let ()
     (rec, 'map_rec', [ 'A'; 'B' ],
       [
@@ -68,8 +68,8 @@ Value
         ]) in
   Let ()
     (non_rec, 'map', [ 'A'; 'B' ],
-      [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ], Some
-      Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
+      [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
+      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
     Bind
       ((),
         Lift
@@ -86,8 +86,8 @@ Value
                       ((), Variable ((), 'map_rec'), Variable ((), 'counter')),
                     Variable ((), 'f')), Variable ((), 'match_var_0')))) in
   Let ()
-    (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ], Some
-      Monad ([ 'NonTermination' ], 'A')) =
+    (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ],
+      Some Monad ([ 'NonTermination' ], 'A')) =
     Match
       ((), Variable ((), 'counter'),
         [
@@ -98,8 +98,8 @@ Value
           (Constructor ('S', 'counter'), Return ((), Variable ((), 'x')))
         ]) in
   Let ()
-    (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ], Some
-      Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
+    (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ],
+      Some Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
     Bind
       ((),
         Lift

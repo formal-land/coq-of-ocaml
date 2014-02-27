@@ -17,12 +17,12 @@ let rec pp (p : t) : SmartPrint.t =
   | Any -> !^ "Any"
   | Constant c -> Constant.pp c
   | Variable x -> Name.pp x
-  | Tuple ps -> nest (!^ "Tuple" ^^ Pp.list (List.map pp ps))
+  | Tuple ps -> nest (!^ "Tuple" ^^ OCaml.tuple (List.map pp ps))
   | Constructor (x, ps) ->
-    nest (!^ "Constructor" ^^ Pp.list (PathName.pp x :: List.map pp ps))
-  | Alias (p, x) -> nest (!^ "Alias" ^^ Pp.list [pp p; Name.pp x])
+    nest (!^ "Constructor" ^^ OCaml.tuple (PathName.pp x :: List.map pp ps))
+  | Alias (p, x) -> nest (!^ "Alias" ^^ OCaml.tuple [pp p; Name.pp x])
   | Record fields ->
-    nest (!^ "Record" ^^ Pp.list (fields |> List.map (fun (x, p) ->
+    nest (!^ "Record" ^^ OCaml.tuple (fields |> List.map (fun (x, p) ->
       nest @@ parens (PathName.pp x ^-^ !^ "," ^^ pp p))))
 
 (** Import an OCaml pattern. *)

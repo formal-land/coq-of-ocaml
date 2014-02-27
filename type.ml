@@ -17,7 +17,7 @@ let rec pp (typ : t) : SmartPrint.t =
   | Apply (x, typs) ->
     nest (!^ "Type" ^^ nest (parens (
       separate (!^ "," ^^ space) (PathName.pp x :: List.map pp typs))))
-  | Monad (d, typ) -> nest (!^ "Monad" ^^ Pp.list [
+  | Monad (d, typ) -> nest (!^ "Monad" ^^ OCaml.tuple [
     Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. *)

@@ -7,7 +7,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     | "exp" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      Structure.pp (fun _ -> !^ "()") definitions
+      Structure.pp OCaml.unit definitions
     | "effects" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
@@ -19,7 +19,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
       let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
       let (_, definitions) =
         Structure.monadise PathName.Env.empty definitions trees in
-      Structure.pp (fun _ -> !^ "()") definitions
+      Structure.pp OCaml.unit definitions
     | "v" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in

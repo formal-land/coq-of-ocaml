@@ -1,6 +1,6 @@
 Value
-  (non_rec, 'f', [ ], [ ('n', Type ('Z')); ('b', Type ('bool')) ], Some
-    Type ('Z')) =
+  (non_rec, 'f', [ ], [ ('n', Type ('Z')); ('b', Type ('bool')) ],
+    Some Type ('Z')) =
   IfThenElse
     ((), Variable ((), 'b'),
       Apply

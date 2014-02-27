@@ -4,8 +4,8 @@ Module 'List2':
   
   Value
     (rec, 'sum_rec', [ ],
-      [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ], Some
-      Monad ([ 'NonTermination' ], Type ('Z'))) =
+      [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ],
+      Some Monad ([ 'NonTermination' ], Type ('Z'))) =
     Match
       ((), Variable ((), 'counter'),
         [
@@ -60,8 +60,8 @@ Module 'List2':
         ])
   
   Value
-    (non_rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ], Some
-      Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+    (non_rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ],
+      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
     Bind
       ((),
         Lift
@@ -77,8 +77,8 @@ Module 'List2':
   
   Value
     (rec, 'of_list_rec', [ 'A' ],
-      [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ], Some
-      Monad ([ 'NonTermination' ], Type ('t', 'A'))) =
+      [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ],
+      Some Monad ([ 'NonTermination' ], Type ('t', 'A'))) =
     Match
       ((), Variable ((), 'counter'),
         [
@@ -129,8 +129,8 @@ Module 'List2':
         ])
   
   Value
-    (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ], Some
-      Monad ([ 'Counter'; 'NonTermination' ], Type ('t', 'A'))) =
+    (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ],
+      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('t', 'A'))) =
     Bind
       ((),
         Lift
@@ -150,8 +150,8 @@ Module 'List2':
       Constant ((), Int(12))
 
 Value
-  (non_rec, 'n', [ ], [ ], Some
-    Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+  (non_rec, 'n', [ ], [ ],
+    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
   Bind
     ((),
       Apply

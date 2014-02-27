@@ -44,9 +44,9 @@ module Inductive = struct
       (** The list of constructors, each with a name and the list of the types of the arguments. *) }
   
   let pp (ind : t) : SmartPrint.t =
-    nest (!^ "Inductive" ^^ Name.pp ind.name ^-^ !^ ":" ^^ newline ^^ indent (Pp.list [
+    nest (!^ "Inductive" ^^ Name.pp ind.name ^-^ !^ ":" ^^ newline ^^ indent (OCaml.tuple [
       OCaml.list Name.pp ind.typ_vars;
-      OCaml.list (fun (x, typs) -> Pp.list [Name.pp x; OCaml.list Type.pp typs]) ind.constructors]))
+      OCaml.list (fun (x, typs) -> OCaml.tuple [Name.pp x; OCaml.list Type.pp typs]) ind.constructors]))
 
   (** Pretty-print a sum type definition to Coq. *)
   let to_coq (ind : t) : SmartPrint.t =
@@ -77,8 +77,8 @@ module Record = struct
     fields : (Name.t * Type.t) list (** The names of the fields with their types. *) }
 
   let pp (r : t) : SmartPrint.t =
-    nest (!^ "Record" ^^ Name.pp r.name ^-^ !^ ":" ^^ newline ^^ indent (Pp.list [
-      OCaml.list (fun (x, typ) -> Pp.list [Name.pp x; Type.pp typ]) r.fields]))
+    nest (!^ "Record" ^^ Name.pp r.name ^-^ !^ ":" ^^ newline ^^ indent (OCaml.tuple [
+      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) r.fields]))
 
   (** Pretty-print a record definition to Coq. *)
   let to_coq (r : t) : SmartPrint.t =
@@ -97,7 +97,7 @@ module Synonym = struct
     value : Type.t }
 
   let pp (s : t) : SmartPrint.t =
-    nest (!^ "Synonym" ^^ Pp.list [
+    nest (!^ "Synonym" ^^ OCaml.tuple [
       Name.pp s.name; OCaml.list Name.pp s.typ_vars; Type.pp s.value])
 
   let to_coq (s : t) : SmartPrint.t =
@@ -113,7 +113,7 @@ module Exception = struct
     typ : Type.t }
 
   let pp (exn : t) : SmartPrint.t =
-    nest (!^ "Exception" ^^ Pp.list [Name.pp exn.name; Type.pp exn.typ])
+    nest (!^ "Exception" ^^ OCaml.tuple [Name.pp exn.name; Type.pp exn.typ])
 
   let effect_name (exn : t) : string =
     "Err_" ^ exn.name
@@ -143,7 +143,7 @@ end
     typ : Type.t }
 
   let pp (r : t) : SmartPrint.t =
-    nest (!^ "Reference" ^^ Pp.list [Name.pp r.name; Type.pp r.typ])
+    nest (!^ "Reference" ^^ OCaml.tuple [Name.pp r.name; Type.pp r.typ])
 
   let effect_name (r : t) : string =
     "Ref_" ^ r.name
@@ -172,7 +172,7 @@ module Open = struct
   type t = PathName.t
 
   let pp (o : t) : SmartPrint.t =
-    nest (!^ "Open" ^^ Pp.list [PathName.pp o])
+    nest (!^ "Open" ^^ OCaml.tuple [PathName.pp o])
 
   (** Pretty-print an open construct to Coq. *)
   let to_coq (o : t): SmartPrint.t =
@@ -278,7 +278,7 @@ module Tree = struct
   let rec pps (trees : t list) : SmartPrint.t =
     let pp (tree : t) : SmartPrint.t =
       match tree with
-      | Value (tree, typ) -> nest (!^ "Value" ^^ Pp.list [
+      | Value (tree, typ) -> nest (!^ "Value" ^^ OCaml.tuple [
         Effect.Type.pp false typ; Exp.Tree.pp tree])
       | Module trees ->
         nest (

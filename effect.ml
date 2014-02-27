@@ -24,7 +24,7 @@ module Atom = struct
   module Map = Map.Make (struct type t = t' let compare = compare end)
 
   let pp (a : t) : SmartPrint.t =
-    nest (!^ "Atom" ^^ Pp.list [
+    nest (!^ "Atom" ^^ OCaml.tuple [
       Name.pp a.name; Kind.pp a.kind; a.coq_type])
 
   let to_coq (a : t) : SmartPrint.t =
@@ -168,7 +168,7 @@ end
 type t = { descriptor : Descriptor.t; typ : Type.t }
 
 let pp (effect : t) : SmartPrint.t =
-  nest (!^ "Effect" ^^ Pp.list [
+  nest (!^ "Effect" ^^ OCaml.tuple [
     Descriptor.pp effect.descriptor; Type.pp false effect.typ])
 
 let function_typ (args_names : Name.t list) (body_effect : t) : Type.t =
