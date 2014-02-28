@@ -288,6 +288,9 @@ module Tree = struct
     separate (newline ^^ newline) (List.map pp trees)
 end
 
+(*let rec effects (env : Effect.Type.t PathName.Env.t)
+  (def : 'a t list) : ('a * )*)
+
 let rec to_trees (effects : Effect.Type.t PathName.Env.t)
   (defs : 'a t list) : Tree.t list * Effect.Type.t PathName.Env.t =
   let rec to_tree (def : 'a t) (effects : Effect.Type.t PathName.Env.t)

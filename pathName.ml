@@ -127,6 +127,9 @@ module Env = struct
     | map :: env -> Map.add x v map :: env
     | [] -> failwith "The environment must be a non-empty list."
 
+  let add_name (x : Name.t) (v : 'a) (env : 'a t) : 'a t =
+    add (of_name [] x) v env
+
   let rec find (x : t') (env : 'a t) : 'a =
     match env with
     | map :: env ->
