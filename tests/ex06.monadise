@@ -1,200 +1,214 @@
-Value
-  (rec, 'map_rec', [ 'A'; 'B' ],
-    [ ('counter', Type ('nat')); ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
-    Some Monad ([ 'NonTermination' ], Type ('list', 'A'))) =
-  Match
-    ((), Variable ((), 'counter'),
+((),
+  Value
+    (rec, 'map_rec', [ 'A'; 'B' ],
       [
-        (Nat(0),
-          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
-        (Constructor ('S', 'counter'),
-          Match
-            ((), Variable ((), 'l'),
-              [
-                (Constructor ('[]'),
-                  Return
-                    ((),
-                      Constructor
-                        ((),
-                          '[]')));
-                (Constructor ('cons', 'x', 'xs'),
-                  Bind
-                    ((),
-                      Apply
-                        ((),
-                          Apply
-                            ((),
-                              Apply
-                                ((),
-                                  Variable
-                                    ((),
-                                      'map_rec'),
-                                  Variable
-                                    ((),
-                                      'counter')),
-                              Variable
-                                ((),
-                                  'f')),
-                          Variable
-                            ((),
-                              'xs')),
-                      Some
-                        'x_1',
-                      Return
-                        ((),
-                          Constructor
-                            ((),
-                              'cons',
-                              Apply
-                                ((),
-                                  Variable
-                                    ((),
-                                      'f'),
-                                  Variable
-                                    ((),
-                                      'x')),
-                              Variable
-                                ((),
-                                  'x_1')))))
-              ]))
-      ])
+        ('counter', Type ('nat'));
+        ('f', ('B' -> 'A'));
+        ('l', Type ('list', 'B'))
+      ], Some Monad ([ 'NonTermination' ], Type ('list', 'A'))) =
+    Match
+      ((), Variable ((), 'counter'),
+        [
+          (Nat(0),
+            Apply
+              ((), Variable ((), 'not_terminated'),
+                Variable ((), 'tt')));
+          (Constructor ('S', 'counter'),
+            Match
+              ((), Variable ((), 'l'),
+                [
+                  (Constructor ('[]'),
+                    Return
+                      ((),
+                        Constructor
+                          ((),
+                            '[]')));
+                  (Constructor ('cons', 'x', 'xs'),
+                    Bind
+                      ((),
+                        Apply
+                          ((),
+                            Apply
+                              ((),
+                                Apply
+                                  ((),
+                                    Variable
+                                      ((),
+                                        'map_rec'),
+                                    Variable
+                                      ((),
+                                        'counter')),
+                                Variable
+                                  ((),
+                                    'f')),
+                            Variable
+                              ((),
+                                'xs')),
+                        Some
+                          'x_1',
+                        Return
+                          ((),
+                            Constructor
+                              ((),
+                                'cons',
+                                Apply
+                                  ((),
+                                    Variable
+                                      ((),
+                                        'f'),
+                                    Variable
+                                      ((),
+                                        'x')),
+                                Variable
+                                  ((),
+                                    'x_1')))))
+                ]))
+        ]))
 
-Value
-  (non_rec, 'map', [ 'A'; 'B' ],
-    [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
-    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
-  Bind
-    ((),
-      Lift
-        ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-          Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-      Some 'counter',
-      Lift
-        ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
-          Apply
-            ((),
-              Apply
-                ((),
-                  Apply ((), Variable ((), 'map_rec'), Variable ((), 'counter')),
-                  Variable ((), 'f')), Variable ((), 'l'))))
+((),
+  Value
+    (non_rec, 'map', [ 'A'; 'B' ],
+      [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
+      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
+    Bind
+      ((),
+        Lift
+          ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
+        Some 'counter',
+        Lift
+          ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply
+              ((),
+                Apply
+                  ((),
+                    Apply
+                      ((), Variable ((), 'map_rec'), Variable ((), 'counter')),
+                    Variable ((), 'f')), Variable ((), 'l')))))
 
-Value
-  (rec, 'fold_rec', [ 'A'; 'B' ],
-    [
-      ('counter', Type ('nat'));
-      ('f', ('A' -> ('B' -> 'A')));
-      ('a', 'A');
-      ('l', Type ('list', 'B'))
-    ], Some Monad ([ 'NonTermination' ], 'A')) =
-  Match
-    ((), Variable ((), 'counter'),
+((),
+  Value
+    (rec, 'fold_rec', [ 'A'; 'B' ],
       [
-        (Nat(0),
-          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
-        (Constructor ('S', 'counter'),
-          Match
-            ((), Variable ((), 'l'),
-              [
-                (Constructor ('[]'),
-                  Return
-                    ((),
-                      Variable
-                        ((),
-                          'a')));
-                (Constructor ('cons', 'x', 'xs'),
-                  Apply
-                    ((),
-                      Apply
-                        ((),
-                          Apply
-                            ((),
-                              Apply
-                                ((),
-                                  Variable
-                                    ((),
-                                      'fold_rec'),
-                                  Variable
-                                    ((),
-                                      'counter')),
-                              Variable
-                                ((),
-                                  'f')),
-                          Apply
-                            ((),
-                              Apply
-                                ((),
-                                  Variable
-                                    ((),
-                                      'f'),
-                                  Variable
-                                    ((),
-                                      'a')),
-                              Variable
-                                ((),
-                                  'x'))),
-                      Variable
-                        ((),
-                          'xs')))
-              ]))
-      ])
+        ('counter', Type ('nat'));
+        ('f', ('A' -> ('B' -> 'A')));
+        ('a', 'A');
+        ('l', Type ('list', 'B'))
+      ], Some Monad ([ 'NonTermination' ], 'A')) =
+    Match
+      ((), Variable ((), 'counter'),
+        [
+          (Nat(0),
+            Apply
+              ((), Variable ((), 'not_terminated'),
+                Variable ((), 'tt')));
+          (Constructor ('S', 'counter'),
+            Match
+              ((), Variable ((), 'l'),
+                [
+                  (Constructor ('[]'),
+                    Return
+                      ((),
+                        Variable
+                          ((),
+                            'a')));
+                  (Constructor ('cons', 'x', 'xs'),
+                    Apply
+                      ((),
+                        Apply
+                          ((),
+                            Apply
+                              ((),
+                                Apply
+                                  ((),
+                                    Variable
+                                      ((),
+                                        'fold_rec'),
+                                    Variable
+                                      ((),
+                                        'counter')),
+                                Variable
+                                  ((),
+                                    'f')),
+                            Apply
+                              ((),
+                                Apply
+                                  ((),
+                                    Variable
+                                      ((),
+                                        'f'),
+                                    Variable
+                                      ((),
+                                        'a')),
+                                Variable
+                                  ((),
+                                    'x'))),
+                        Variable
+                          ((),
+                            'xs')))
+                ]))
+        ]))
 
-Value
-  (non_rec, 'fold', [ 'A'; 'B' ],
-    [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
-    Some Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
-  Bind
-    ((),
-      Lift
-        ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-          Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-      Some 'counter',
-      Lift
-        ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
-          Apply
-            ((),
-              Apply
-                ((),
-                  Apply
-                    ((),
-                      Apply
-                        ((), Variable ((), 'fold_rec'), Variable ((), 'counter')),
-                      Variable ((), 'f')), Variable ((), 'a')),
-              Variable ((), 'l'))))
+((),
+  Value
+    (non_rec, 'fold', [ 'A'; 'B' ],
+      [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
+      Some Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
+    Bind
+      ((),
+        Lift
+          ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
+        Some 'counter',
+        Lift
+          ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply
+              ((),
+                Apply
+                  ((),
+                    Apply
+                      ((),
+                        Apply
+                          ((), Variable ((), 'fold_rec'),
+                            Variable ((), 'counter')), Variable ((), 'f')),
+                    Variable ((), 'a')), Variable ((), 'l')))))
 
-Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
-  Constructor
-    ((), 'cons', Constant ((), Int(5)),
-      Constructor
-        ((), 'cons', Constant ((), Int(6)),
-          Constructor
-            ((), 'cons', Constant ((), Int(7)),
-              Constructor
-                ((), 'cons', Constant ((), Int(2)), Constructor ((), '[]')))))
+((),
+  Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
+    Constructor
+      ((), 'cons', Constant ((), Int(5)),
+        Constructor
+          ((), 'cons', Constant ((), Int(6)),
+            Constructor
+              ((), 'cons', Constant ((), Int(7)),
+                Constructor
+                  ((), 'cons', Constant ((), Int(2)), Constructor ((), '[]'))))))
 
-Value
-  (non_rec, 'n', [ 'A' ],
-    [
-      ('incr', (Type ('Z') -> 'A'));
-      ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
-    ], Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
-  Bind
-    ((),
-      Apply
-        ((), Apply ((), Variable ((), 'map'), Variable ((), 'incr')),
-          Variable ((), 'l')), Some 'x',
-      Apply
-        ((),
-          Apply
-            ((),
-              Apply
-                ((), Variable ((), 'fold'),
-                  Function
-                    ((), 'x',
-                      Function
-                        ((), 'y',
-                          Apply
-                            ((),
-                              Apply
-                                ((), Variable ((), 'plus'), Variable ((), 'x')),
-                              Variable ((), 'y'))))), Constant ((), Int(0))),
-          Variable ((), 'x')))
+((),
+  Value
+    (non_rec, 'n', [ 'A' ],
+      [
+        ('incr', (Type ('Z') -> 'A'));
+        ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
+      ], Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+    Bind
+      ((),
+        Apply
+          ((), Apply ((), Variable ((), 'map'), Variable ((), 'incr')),
+            Variable ((), 'l')), Some 'x',
+        Apply
+          ((),
+            Apply
+              ((),
+                Apply
+                  ((), Variable ((), 'fold'),
+                    Function
+                      ((), 'x',
+                        Function
+                          ((), 'y',
+                            Apply
+                              ((),
+                                Apply
+                                  ((), Variable ((), 'plus'), Variable ((), 'x')),
+                                Variable ((), 'y'))))), Constant ((), Int(0))),
+            Variable ((), 'x'))))

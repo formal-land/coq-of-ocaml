@@ -1,32 +1,41 @@
-Value (non_rec, 'u', [ ], [ ], Some Type ('unit')) =
-  Constructor ((), 'tt')
+((),
+  Value (non_rec, 'u', [ ], [ ], Some Type ('unit')) =
+    Constructor ((), 'tt'))
 
-Value (non_rec, 'l1', [ 'A' ], [ ], Some Type ('list', 'A')) =
-  Constructor ((), '[]')
+((),
+  Value (non_rec, 'l1', [ 'A' ], [ ], Some Type ('list', 'A')) =
+    Constructor ((), '[]'))
 
-Value (non_rec, 'l2', [ ], [ ], Some Type ('list', Type ('Z'))) =
-  Constructor ((), 'cons', Constant ((), Int(1)), Constructor ((), '[]'))
+((),
+  Value (non_rec, 'l2', [ ], [ ], Some Type ('list', Type ('Z'))) =
+    Constructor ((), 'cons', Constant ((), Int(1)), Constructor ((), '[]')))
 
-Value (non_rec, 'l3', [ ], [ ], Some Type ('list', Type ('Z'))) =
-  Constructor
-    ((), 'cons', Constant ((), Int(1)),
-      Constructor
-        ((), 'cons', Constant ((), Int(5)),
-          Constructor
-            ((), 'cons', Constant ((), Int(7)),
-              Constructor
-                ((), 'cons', Constant ((), Int(32)),
-                  Constructor
-                    ((), 'cons', Constant ((), Int(15)), Constructor ((), '[]'))))))
+((),
+  Value (non_rec, 'l3', [ ], [ ], Some Type ('list', Type ('Z'))) =
+    Constructor
+      ((), 'cons', Constant ((), Int(1)),
+        Constructor
+          ((), 'cons', Constant ((), Int(5)),
+            Constructor
+              ((), 'cons', Constant ((), Int(7)),
+                Constructor
+                  ((), 'cons', Constant ((), Int(32)),
+                    Constructor
+                      ((), 'cons', Constant ((), Int(15)),
+                        Constructor ((), '[]')))))))
 
-Value (non_rec, 'o1', [ 'A' ], [ ], Some Type ('option', 'A')) =
-  Constructor ((), 'None')
+((),
+  Value (non_rec, 'o1', [ 'A' ], [ ], Some Type ('option', 'A')) =
+    Constructor ((), 'None'))
 
-Value (non_rec, 'o2', [ ], [ ], Some Type ('option', Type ('Z'))) =
-  Constructor ((), 'Some', Constant ((), Int(12)))
+((),
+  Value (non_rec, 'o2', [ ], [ ], Some Type ('option', Type ('Z'))) =
+    Constructor ((), 'Some', Constant ((), Int(12))))
 
-Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
-  Constant ((), Char("g"))
+((),
+  Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
+    Constant ((), Char("g")))
 
-Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
-  Constant ((), String("bla"))
+((),
+  Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
+    Constant ((), String("bla")))

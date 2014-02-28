@@ -2,115 +2,123 @@ Inductive 'tree':
   ([ ],
     [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
 
-Value
-  (rec, 'find_rec', [ ],
-    [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ],
-    Some Monad ([ 'NonTermination' ], Type ('bool'))) =
-  Match
-    ((), Variable ((), 'counter'),
-      [
-        (Nat(0),
-          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
-        (Constructor ('S', 'counter'),
-          Match
-            ((), Variable ((), 't'),
-              [
-                (Constructor ('Leaf'),
-                  Return
-                    ((),
-                      Constructor
-                        ((),
-                          'false')));
-                (Constructor ('Node', 't1', 'x'', 't2'),
-                  IfThenElse
-                    ((),
-                      Apply
-                        ((),
-                          Apply
-                            ((),
-                              Variable
-                                ((),
-                                  'Z.ltb'),
-                              Variable
-                                ((),
-                                  'x')),
-                          Variable
-                            ((),
-                              'x'')),
-                      Apply
-                        ((),
-                          Apply
-                            ((),
-                              Apply
-                                ((),
-                                  Variable
-                                    ((),
-                                      'find_rec'),
-                                  Variable
-                                    ((),
-                                      'counter')),
-                              Variable
-                                ((),
-                                  'x')),
-                          Variable
-                            ((),
-                              't1')),
-                      IfThenElse
-                        ((),
-                          Apply
-                            ((),
-                              Apply
-                                ((),
-                                  Variable
-                                    ((),
-                                      'Z.ltb'),
-                                  Variable
-                                    ((),
-                                      'x'')),
-                              Variable
-                                ((),
-                                  'x')),
-                          Apply
-                            ((),
-                              Apply
-                                ((),
-                                  Apply
-                                    ((),
-                                      Variable
-                                        ((),
-                                          'find_rec'),
-                                      Variable
-                                        ((),
-                                          'counter')),
-                                  Variable
-                                    ((),
-                                      'x')),
-                              Variable
-                                ((),
-                                  't2')),
-                          Return
-                            ((),
-                              Constructor
-                                ((),
-                                  'true')))))
-              ]))
-      ])
+((),
+  Value
+    (rec, 'find_rec', [ ],
+      [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ],
+      Some Monad ([ 'NonTermination' ], Type ('bool'))) =
+    Match
+      ((), Variable ((), 'counter'),
+        [
+          (Nat(0),
+            Apply
+              ((), Variable ((), 'not_terminated'),
+                Variable ((), 'tt')));
+          (Constructor ('S', 'counter'),
+            Match
+              ((), Variable ((), 't'),
+                [
+                  (Constructor ('Leaf'),
+                    Return
+                      ((),
+                        Constructor
+                          ((),
+                            'false')));
+                  (Constructor
+                    ('Node',
+                      't1',
+                      'x'',
+                      't2'),
+                    IfThenElse
+                      ((),
+                        Apply
+                          ((),
+                            Apply
+                              ((),
+                                Variable
+                                  ((),
+                                    'Z.ltb'),
+                                Variable
+                                  ((),
+                                    'x')),
+                            Variable
+                              ((),
+                                'x'')),
+                        Apply
+                          ((),
+                            Apply
+                              ((),
+                                Apply
+                                  ((),
+                                    Variable
+                                      ((),
+                                        'find_rec'),
+                                    Variable
+                                      ((),
+                                        'counter')),
+                                Variable
+                                  ((),
+                                    'x')),
+                            Variable
+                              ((),
+                                't1')),
+                        IfThenElse
+                          ((),
+                            Apply
+                              ((),
+                                Apply
+                                  ((),
+                                    Variable
+                                      ((),
+                                        'Z.ltb'),
+                                    Variable
+                                      ((),
+                                        'x'')),
+                                Variable
+                                  ((),
+                                    'x')),
+                            Apply
+                              ((),
+                                Apply
+                                  ((),
+                                    Apply
+                                      ((),
+                                        Variable
+                                          ((),
+                                            'find_rec'),
+                                        Variable
+                                          ((),
+                                            'counter')),
+                                    Variable
+                                      ((),
+                                        'x')),
+                                Variable
+                                  ((),
+                                    't2')),
+                            Return
+                              ((),
+                                Constructor
+                                  ((),
+                                    'true')))))
+                ]))
+        ]))
 
-Value
-  (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
-    Some Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
-  Bind
-    ((),
-      Lift
-        ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-          Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-      Some 'counter',
-      Lift
-        ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
-          Apply
-            ((),
-              Apply
-                ((),
-                  Apply
-                    ((), Variable ((), 'find_rec'), Variable ((), 'counter')),
-                  Variable ((), 'x')), Variable ((), 't'))))
+((),
+  Value
+    (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
+      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
+    Bind
+      ((),
+        Lift
+          ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
+        Some 'counter',
+        Lift
+          ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply
+              ((),
+                Apply
+                  ((),
+                    Apply
+                      ((), Variable ((), 'find_rec'), Variable ((), 'counter')),
+                    Variable ((), 'x')), Variable ((), 't')))))

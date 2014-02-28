@@ -1,7 +1,9 @@
-Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'A'); ('y', 'B') ], Some 'A') =
-  Variable ((), 'x')
+((),
+  Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'A'); ('y', 'B') ], Some 'A') =
+    Variable ((), 'x'))
 
-Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((), Apply ((), Variable ((), 'f'), Constant ((), Int(12))),
-      Constant ((), Int(3)))
+((),
+  Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((), Apply ((), Variable ((), 'f'), Constant ((), Int(12))),
+        Constant ((), Int(3))))

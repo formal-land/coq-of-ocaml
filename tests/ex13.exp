@@ -1,86 +1,97 @@
-Value
-  (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
-    Some Type ('list', 'A')) =
-  Match
-    ((), Variable ((), 'l'),
+((),
+  Value
+    (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
+      Some Type ('list', 'A')) =
+    Match
+      ((), Variable ((), 'l'),
+        [
+          (Constructor ('cons', Any, 'xs'), Variable ((), 'xs'));
+          (Constructor ('[]'),
+            Apply
+              ((), Variable ((), 'failwith'),
+                Constant
+                  ((),
+                    String("Cannot take the tail of an empty list."))))
+        ]))
+
+((),
+  Value
+    (rec, 'print_list_rec', [ ],
       [
-        (Constructor ('cons', Any, 'xs'), Variable ((), 'xs'));
-        (Constructor ('[]'),
-          Apply
-            ((), Variable ((), 'failwith'),
-              Constant
-                ((),
-                  String("Cannot take the tail of an empty list."))))
-      ])
+        ('counter', Type ('nat'));
+        ('match_var_0', Type ('list', Type ('string')))
+      ], Some Type ('unit')) =
+    Match
+      ((), Variable ((), 'counter'),
+        [
+          (Nat(0),
+            Apply
+              ((), Variable ((), 'not_terminated'),
+                Variable ((), 'tt')));
+          (Constructor ('S', 'counter'),
+            Match
+              ((), Variable ((), 'match_var_0'),
+                [
+                  (Constructor ('[]'),
+                    Constructor
+                      ((),
+                        'tt'));
+                  (Constructor ('cons', 'x', 'xs'),
+                    Sequence
+                      ((),
+                        Apply
+                          ((),
+                            Variable
+                              ((),
+                                'print_string'),
+                            Variable
+                              ((),
+                                'x')),
+                        Apply
+                          ((),
+                            Apply
+                              ((),
+                                Variable
+                                  ((),
+                                    'print_list_rec'),
+                                Variable
+                                  ((),
+                                    'counter')),
+                            Variable
+                              ((),
+                                'xs'))))
+                ]))
+        ]))
 
-Value
-  (rec, 'print_list_rec', [ ],
-    [
-      ('counter', Type ('nat'));
-      ('match_var_0', Type ('list', Type ('string')))
-    ], Some Type ('unit')) =
-  Match
-    ((), Variable ((), 'counter'),
-      [
-        (Nat(0),
-          Apply ((), Variable ((), 'not_terminated'), Variable ((), 'tt')));
-        (Constructor ('S', 'counter'),
-          Match
-            ((), Variable ((), 'match_var_0'),
-              [
-                (Constructor ('[]'), Constructor ((), 'tt'));
-                (Constructor ('cons', 'x', 'xs'),
-                  Sequence
-                    ((),
-                      Apply
-                        ((),
-                          Variable
-                            ((),
-                              'print_string'),
-                          Variable
-                            ((),
-                              'x')),
-                      Apply
-                        ((),
-                          Apply
-                            ((),
-                              Variable
-                                ((),
-                                  'print_list_rec'),
-                              Variable
-                                ((),
-                                  'counter')),
-                          Variable
-                            ((),
-                              'xs'))))
-              ]))
-      ])
+((),
+  Value
+    (non_rec, 'print_list', [ ],
+      [ ('match_var_0', Type ('list', Type ('string'))) ], Some Type ('unit')) =
+    Let () (non_rec, 'counter', [ ], [ ], None) =
+      Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
+    Apply
+      ((),
+        Apply ((), Variable ((), 'print_list_rec'), Variable ((), 'counter')),
+        Variable ((), 'match_var_0')))
 
-Value
-  (non_rec, 'print_list', [ ],
-    [ ('match_var_0', Type ('list', Type ('string'))) ], Some Type ('unit')) =
-  Let () (non_rec, 'counter', [ ], [ ], None) =
-    Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt')) in
-  Apply
-    ((), Apply ((), Variable ((), 'print_list_rec'), Variable ((), 'counter')),
-      Variable ((), 'match_var_0'))
+((),
+  Value
+    (non_rec, 'f', [ ], [ ],
+      Some (Type ('list', Type ('string')) -> Type ('unit'))) =
+    Variable ((), 'print_list'))
 
-Value
-  (non_rec, 'f', [ ], [ ],
-    Some (Type ('list', Type ('string')) -> Type ('unit'))) =
-  Variable ((), 'print_list')
-
-Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
-  Apply
-    ((), Variable ((), 'f'),
-      Apply
-        ((), Variable ((), 'tail'),
-          Constructor
-            ((), 'cons', Constant ((), String("Stop")),
-              Constructor
-                ((), 'cons', Constant ((), String("Hello")),
-                  Constructor
-                    ((), 'cons', Constant ((), String(" ")),
-                      Constructor
-                        ((), 'cons', Constant ((), String("world")),
-                          Constructor ((), '[]')))))))
+((),
+  Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
+    Apply
+      ((), Variable ((), 'f'),
+        Apply
+          ((), Variable ((), 'tail'),
+            Constructor
+              ((), 'cons', Constant ((), String("Stop")),
+                Constructor
+                  ((), 'cons', Constant ((), String("Hello")),
+                    Constructor
+                      ((), 'cons', Constant ((), String(" ")),
+                        Constructor
+                          ((), 'cons', Constant ((), String("world")),
+                            Constructor ((), '[]'))))))))

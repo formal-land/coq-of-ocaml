@@ -1,136 +1,152 @@
-Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
-  Apply
-    ((),
-      Apply
-        ((), Variable ((), 'orb'),
-          Apply
-            ((),
-              Apply ((), Variable ((), 'equiv_decb'), Constructor ((), 'false')),
-              Constructor ((), 'true'))),
-      Apply
-        ((),
-          Apply
-            ((), Variable ((), 'andb'),
-              Apply
-                ((),
-                  Apply
-                    ((), Variable ((), 'nequiv_decb'), Constructor ((), 'tt')),
-                  Constructor ((), 'tt'))),
-          Apply ((), Variable ((), 'negb'), Constructor ((), 'true'))))
+((),
+  Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
+    Apply
+      ((),
+        Apply
+          ((), Variable ((), 'orb'),
+            Apply
+              ((),
+                Apply
+                  ((), Variable ((), 'equiv_decb'), Constructor ((), 'false')),
+                Constructor ((), 'true'))),
+        Apply
+          ((),
+            Apply
+              ((), Variable ((), 'andb'),
+                Apply
+                  ((),
+                    Apply
+                      ((), Variable ((), 'nequiv_decb'), Constructor ((), 'tt')),
+                    Constructor ((), 'tt'))),
+            Apply ((), Variable ((), 'negb'), Constructor ((), 'true')))))
 
-Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((), Apply ((), Variable ((), 'Z.add'), Constant ((), Int(1))),
-      Apply
-        ((), Apply ((), Variable ((), 'Z.mul'), Constant ((), Int(2))),
-          Constant ((), Int(3))))
+((),
+  Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((), Apply ((), Variable ((), 'Z.add'), Constant ((), Int(1))),
+        Apply
+          ((), Apply ((), Variable ((), 'Z.mul'), Constant ((), Int(2))),
+            Constant ((), Int(3)))))
 
-Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((),
-      Apply
-        ((), Variable ((), 'Z.sub'),
-          Apply
-            ((),
-              Apply
-                ((), Variable ((), 'Z.add'),
-                  Apply ((), Variable ((), 'Z.abs'), Constant ((), Int(-1)))),
-              Constant ((), Int(1)))),
-      Apply
-        ((),
-          Apply
-            ((), Variable ((), 'Z.mul'),
-              Apply
-                ((),
-                  Apply
-                    ((), Variable ((), 'Z.modulo'),
-                      Apply
-                        ((),
-                          Apply
-                            ((), Variable ((), 'Z.div'), Constant ((), Int(5))),
-                          Constant ((), Int(23)))), Constant ((), Int(4)))),
-          Constant ((), Int(3))))
+((),
+  Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((),
+        Apply
+          ((), Variable ((), 'Z.sub'),
+            Apply
+              ((),
+                Apply
+                  ((), Variable ((), 'Z.add'),
+                    Apply ((), Variable ((), 'Z.abs'), Constant ((), Int(-1)))),
+                Constant ((), Int(1)))),
+        Apply
+          ((),
+            Apply
+              ((), Variable ((), 'Z.mul'),
+                Apply
+                  ((),
+                    Apply
+                      ((), Variable ((), 'Z.modulo'),
+                        Apply
+                          ((),
+                            Apply
+                              ((), Variable ((), 'Z.div'), Constant ((), Int(5))),
+                            Constant ((), Int(23)))), Constant ((), Int(4)))),
+            Constant ((), Int(3)))))
 
-Value (non_rec, 'n3', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((), Variable ((), 'Z.pred'),
-      Apply ((), Variable ((), 'Z.succ'), Constant ((), Int(12))))
+((),
+  Value (non_rec, 'n3', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((), Variable ((), 'Z.pred'),
+        Apply ((), Variable ((), 'Z.succ'), Constant ((), Int(12)))))
 
-Value (non_rec, 'n4', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((),
-      Apply
-        ((), Variable ((), 'Z.lxor'),
-          Apply
-            ((),
-              Apply
-                ((), Variable ((), 'Z.lor'),
-                  Apply
-                    ((),
-                      Apply ((), Variable ((), 'Z.land'), Constant ((), Int(5))),
-                      Constant ((), Int(7)))), Constant ((), Int(3)))),
-      Constant ((), Int(9)))
+((),
+  Value (non_rec, 'n4', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((),
+        Apply
+          ((), Variable ((), 'Z.lxor'),
+            Apply
+              ((),
+                Apply
+                  ((), Variable ((), 'Z.lor'),
+                    Apply
+                      ((),
+                        Apply
+                          ((), Variable ((), 'Z.land'), Constant ((), Int(5))),
+                        Constant ((), Int(7)))), Constant ((), Int(3)))),
+        Constant ((), Int(9))))
 
-Value (non_rec, 'n5', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((),
-      Apply
-        ((), Variable ((), 'Z.add'),
-          Apply
-            ((), Apply ((), Variable ((), 'Z.shiftl'), Constant ((), Int(156))),
-              Constant ((), Int(4)))),
-      Apply
-        ((), Apply ((), Variable ((), 'Z.shiftr'), Constant ((), Int(12))),
-          Constant ((), Int(1))))
+((),
+  Value (non_rec, 'n5', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((),
+        Apply
+          ((), Variable ((), 'Z.add'),
+            Apply
+              ((),
+                Apply ((), Variable ((), 'Z.shiftl'), Constant ((), Int(156))),
+                Constant ((), Int(4)))),
+        Apply
+          ((), Apply ((), Variable ((), 'Z.shiftr'), Constant ((), Int(12))),
+            Constant ((), Int(1)))))
 
-Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
-  Apply
-    ((), Apply ((), Variable ((), 'append'), Constant ((), String("ghj"))),
-      Constant ((), String("klm")))
+((),
+  Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
+    Apply
+      ((), Apply ((), Variable ((), 'append'), Constant ((), String("ghj"))),
+        Constant ((), String("klm"))))
 
-Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
-  Apply
-    ((), Variable ((), 'char_of_int'),
-      Apply
-        ((),
-          Apply
-            ((), Variable ((), 'Z.add'),
-              Apply ((), Variable ((), 'int_of_char'), Constant ((), Char("c")))),
-          Constant ((), Int(1))))
+((),
+  Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
+    Apply
+      ((), Variable ((), 'char_of_int'),
+        Apply
+          ((),
+            Apply
+              ((), Variable ((), 'Z.add'),
+                Apply
+                  ((), Variable ((), 'int_of_char'), Constant ((), Char("c")))),
+            Constant ((), Int(1)))))
 
-Value (non_rec, 'x', [ ], [ ], Some Type ('unit')) =
-  Apply ((), Variable ((), 'ignore'), Constant ((), Int(23)))
+((),
+  Value (non_rec, 'x', [ ], [ ], Some Type ('unit')) =
+    Apply ((), Variable ((), 'ignore'), Constant ((), Int(23))))
 
-Value (non_rec, 'p', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((),
-      Apply
-        ((), Variable ((), 'Z.add'),
-          Apply
-            ((), Variable ((), 'fst'),
-              Tuple ((), Constant ((), Int(1)), Constant ((), Int(2))))),
-      Apply
-        ((), Variable ((), 'snd'),
-          Tuple ((), Constant ((), Int(3)), Constant ((), Int(4)))))
+((),
+  Value (non_rec, 'p', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((),
+        Apply
+          ((), Variable ((), 'Z.add'),
+            Apply
+              ((), Variable ((), 'fst'),
+                Tuple ((), Constant ((), Int(1)), Constant ((), Int(2))))),
+        Apply
+          ((), Variable ((), 'snd'),
+            Tuple ((), Constant ((), Int(3)), Constant ((), Int(4))))))
 
-Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
-  Apply
-    ((),
-      Apply
-        ((), Variable ((), 'app'),
-          Constructor
-            ((), 'cons', Constant ((), Int(1)),
-              Constructor
-                ((), 'cons', Constant ((), Int(2)), Constructor ((), '[]')))),
-      Constructor ((), 'cons', Constant ((), Int(3)), Constructor ((), '[]')))
+((),
+  Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
+    Apply
+      ((),
+        Apply
+          ((), Variable ((), 'app'),
+            Constructor
+              ((), 'cons', Constant ((), Int(1)),
+                Constructor
+                  ((), 'cons', Constant ((), Int(2)), Constructor ((), '[]')))),
+        Constructor ((), 'cons', Constant ((), Int(3)), Constructor ((), '[]'))))
 
-Value (non_rec, 'y', [ ], [ ], Some Type ('Z')) =
-  Apply
-    ((),
-      Apply
-        ((), Variable ((), 'apply'),
-          Function
-            ((), 'n',
-              Apply
-                ((), Apply ((), Variable ((), 'Z.add'), Variable ((), 'n')),
-                  Constant ((), Int(1))))), Constant ((), Int(12)))
+((),
+  Value (non_rec, 'y', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((),
+        Apply
+          ((), Variable ((), 'apply'),
+            Function
+              ((), 'n',
+                Apply
+                  ((), Apply ((), Variable ((), 'Z.add'), Variable ((), 'n')),
+                    Constant ((), Int(1))))), Constant ((), Int(12))))
