@@ -1,9 +1,13 @@
-Value (. -> . -> ., Leaf (Effect ([ ], .)))
+(. -> . -> .,
+  Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'A'); ('y', 'B') ], Some 'A') =
+    Variable ((unknown, Effect ([ ], .)), 'x'))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], . -> .), Leaf (Effect ([ ], . -> . -> .)),
-            Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))))
+          ((unknown, Effect ([ ], . -> .)),
+            Variable ((unknown, Effect ([ ], . -> . -> .)), 'f'),
+            Constant ((unknown, Effect ([ ], .)), Int(12))),
+        Constant ((unknown, Effect ([ ], .)), Int(3))))

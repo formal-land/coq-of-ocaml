@@ -1,14 +1,20 @@
-Value
-  (. -> . -> .,
-    Match
-      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+(. -> . -> .,
+  Value
+    (non_rec, 'f', [ ], [ ('n', Type ('Z')); ('b', Type ('bool')) ],
+      Some Type ('Z')) =
+    IfThenElse
+      ((unknown, Effect ([ ], .)), Variable ((unknown, Effect ([ ], .)), 'b'),
         Apply
-          (Effect ([ ], .),
+          ((unknown, Effect ([ ], .)),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
-            Leaf (Effect ([ ], .))),
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+                Variable ((unknown, Effect ([ ], .)), 'n')),
+            Constant ((unknown, Effect ([ ], .)), Int(1))),
         Apply
-          (Effect ([ ], .),
+          ((unknown, Effect ([ ], .)),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
-            Leaf (Effect ([ ], .)))))
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'Z.sub'),
+                Variable ((unknown, Effect ([ ], .)), 'n')),
+            Constant ((unknown, Effect ([ ], .)), Int(1)))))

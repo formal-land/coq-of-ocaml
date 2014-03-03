@@ -1,46 +1,82 @@
-Module
-  Other
+Module 'SizedString':
+  Record 't':
+    ([ ('name', Type ('string')); ('size', Type ('Z')) ])
 
-Value
-  (., Compound (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
+(.,
+  Value (non_rec, 'r', [ ], [ ], Some Type ('SizedString.t')) =
+    Record
+      ((unknown, Effect ([ ], .)),
+        ('SizedString.name',
+          Constant ((unknown, Effect ([ ], .)), String("gre"))),
+        ('SizedString.size', Constant ((unknown, Effect ([ ], .)), Int(3)))))
 
-Value
-  (., Compound (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
+(.,
+  Value (non_rec, 'r'', [ ], [ ], Some Type ('SizedString.t')) =
+    Record
+      ((unknown, Effect ([ ], .)),
+        ('SizedString.name',
+          Constant ((unknown, Effect ([ ], .)), String("haha"))),
+        ('SizedString.size', Constant ((unknown, Effect ([ ], .)), Int(4)))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-            Field (Effect ([ ], .), Leaf (Effect ([ ], .)))),
-        Field (Effect ([ ], .), Leaf (Effect ([ ], .)))))
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+            Field
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'r'), 'SizedString.size')),
+        Field
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'r''), 'SizedString.size')))
 
-Value
-  (. -> .,
+(. -> .,
+  Value
+    (non_rec, 'f', [ ], [ ('match_var_0', Type ('SizedString.t')) ],
+      Some Type ('bool')) =
     Match
-      (Effect ([ ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
-        Compound (Effect ([ ], .))))
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], .)), 'match_var_0'),
+        [
+          (Record (('SizedString.size', Int(3))),
+            Constructor ((unknown, Effect ([ ], .)), 'true'));
+          (Any, Constructor ((unknown, Effect ([ ], .)), 'false'))
+        ]))
 
-Value
-  (.,
-    Apply (Effect ([ ], .), Leaf (Effect ([ ], . -> .)), Leaf (Effect ([ ], .))))
+(.,
+  Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
+    Apply
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], . -> .)), 'f'),
+        Variable ((unknown, Effect ([ ], .)), 'r')))
 
-Value
-  (.,
-    Apply (Effect ([ ], .), Leaf (Effect ([ ], . -> .)), Leaf (Effect ([ ], .))))
+(.,
+  Value (non_rec, 'b'', [ ], [ ], Some Type ('bool')) =
+    Apply
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], . -> .)), 'f'),
+        Variable ((unknown, Effect ([ ], .)), 'r'')))
 
-Module
-  Other
+Module 'Point':
+  Record 't':
+    ([ ('x', Type ('Z')); ('y', Type ('Z')); ('z', Type ('Z')) ])
   
-  Value
-    (.,
-      Compound
-        (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)),
-          Leaf (Effect ([ ], .))))
+  (.,
+    Value (non_rec, 'p', [ ], [ ], Some Type ('t')) =
+      Record
+        ((unknown, Effect ([ ], .)),
+          ('x', Constant ((unknown, Effect ([ ], .)), Int(5))),
+          ('y', Constant ((unknown, Effect ([ ], .)), Int(-3))),
+          ('z', Constant ((unknown, Effect ([ ], .)), Int(1)))))
   
-  Value
-    (.,
+  (.,
+    Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
       Match
-        (Effect ([ ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
-          Compound (Effect ([ ], .))))
+        ((unknown, Effect ([ ], .)), Variable ((unknown, Effect ([ ], .)), 'p'),
+          [
+            (Record (('x', Int(5)), ('z', Int(1))),
+              Constructor ((unknown, Effect ([ ], .)), 'true'));
+            (Any, Constructor ((unknown, Effect ([ ], .)), 'false'))
+          ]))

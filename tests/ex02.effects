@@ -1,19 +1,37 @@
-Value (., Compound (Effect ([ ], .)))
+(.,
+  Value (non_rec, 't0', [ ], [ ], Some Type ('unit')) =
+    Constructor ((unknown, Effect ([ ], .)), 'tt'))
 
-Value
-  (., Compound (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
+(.,
+  Value (non_rec, 't1', [ ], [ ], Some (Type ('ascii') * Type ('string'))) =
+    Tuple
+      ((unknown, Effect ([ ], .)),
+        Constant ((unknown, Effect ([ ], .)), Char("c")),
+        Constant ((unknown, Effect ([ ], .)), String("one"))))
 
-Value
-  (.,
-    Compound
-      (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)),
-        Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)),
-        Compound (Effect ([ ], .))))
+(.,
+  Value
+    (non_rec, 't2', [ ], [ ],
+      Some
+        (Type ('Z') * Type ('Z') * Type ('Z') * Type ('bool') * Type ('bool')))
+    =
+    Tuple
+      ((unknown, Effect ([ ], .)),
+        Constant ((unknown, Effect ([ ], .)), Int(1)),
+        Constant ((unknown, Effect ([ ], .)), Int(2)),
+        Constant ((unknown, Effect ([ ], .)), Int(3)),
+        Constructor ((unknown, Effect ([ ], .)), 'false'),
+        Constructor ((unknown, Effect ([ ], .)), 'true')))
 
-Value
-  (. -> .,
-    Compound (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
+(. -> .,
+  Value (non_rec, 'f', [ 'A' ], [ ('x', 'A') ], Some ('A' * 'A')) =
+    Tuple
+      ((unknown, Effect ([ ], .)), Variable ((unknown, Effect ([ ], .)), 'x'),
+        Variable ((unknown, Effect ([ ], .)), 'x')))
 
-Value
-  (.,
-    Apply (Effect ([ ], .), Leaf (Effect ([ ], . -> .)), Leaf (Effect ([ ], .))))
+(.,
+  Value (non_rec, 't3', [ ], [ ], Some (Type ('Z') * Type ('Z'))) =
+    Apply
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], . -> .)), 'f'),
+        Constant ((unknown, Effect ([ ], .)), Int(12))))

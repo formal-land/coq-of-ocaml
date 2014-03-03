@@ -1,66 +1,287 @@
-Other
+Inductive 'tree':
+  ([ ],
+    [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
 
-Value
-  (. -> . -> . -[ 'NonTermination' ]-> .,
+(. -> . -> . -[ 'NonTermination' ]-> .,
+  Value
+    (rec, 'find_rec', [ ],
+      [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ],
+      Some Type ('bool')) =
     Match
-      (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
-        Apply
-          (Effect ([ 'NonTermination' ], .),
-            Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
-            Leaf (Effect ([ ], .))),
-        Match
-          (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
-            Compound (Effect ([ ], .)),
-            Match
-              (Effect ([ 'NonTermination' ], .),
-                Apply
-                  (Effect ([ ], .),
-                    Apply
-                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                        Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
-                Apply
-                  (Effect ([ 'NonTermination' ], .),
-                    Apply
-                      (Effect ([ ], . -[ 'NonTermination' ]-> .),
-                        Apply
-                          (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
-                            Leaf
-                              (Effect
-                                ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                            Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
-                    Leaf (Effect ([ ], .))),
-                Match
-                  (Effect ([ 'NonTermination' ], .),
-                    Apply
-                      (Effect ([ ], .),
-                        Apply
-                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                            Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
-                    Apply
-                      (Effect ([ 'NonTermination' ], .),
-                        Apply
-                          (Effect ([ ], . -[ 'NonTermination' ]-> .),
-                            Apply
-                              (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
-                                Leaf
-                                  (Effect
-                                    ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
-                        Leaf (Effect ([ ], .))), Compound (Effect ([ ], .)))))))
-
-Value
-  (. -> . -[ 'Counter'; 'NonTermination' ]-> .,
-    Let
-      (Effect ([ 'Counter'; 'NonTermination' ], .),
-        Apply
-          (Effect ([ 'Counter' ], .), Leaf (Effect ([ ], . -[ 'Counter' ]-> .)),
-            Leaf (Effect ([ ], .))),
-        Apply
-          (Effect ([ 'NonTermination' ], .),
+      ((unknown, Effect ([ 'NonTermination' ], .)),
+        Variable ((unknown, Effect ([ ], .)), 'counter'),
+        [
+          (Nat(0),
             Apply
-              (Effect ([ ], . -[ 'NonTermination' ]-> .),
-                Apply
-                  (Effect ([ ], . -> . -[ 'NonTermination' ]-> .),
-                    Leaf (Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
-            Leaf (Effect ([ ], .)))))
+              ((unknown, Effect ([ 'NonTermination' ], .)),
+                Variable
+                  ((unknown,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            'NonTermination'
+                          ]-> .)),
+                    'not_terminated'),
+                Variable ((unknown, Effect ([ ], .)), 'tt')));
+          (Constructor ('S', 'counter'),
+            Match
+              ((unknown, Effect ([ 'NonTermination' ], .)),
+                Variable ((unknown, Effect ([ ], .)), 't'),
+                [
+                  (Constructor ('Leaf'),
+                    Constructor
+                      ((unknown,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        'false'));
+                  (Constructor
+                    ('Node',
+                      't1',
+                      'x'',
+                      't2'),
+                    IfThenElse
+                      ((unknown,
+                        Effect
+                          ([
+                            'NonTermination'
+                          ],
+                            .)),
+                        Apply
+                          ((unknown,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Apply
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Variable
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    'Z.ltb'),
+                                Variable
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    'x')),
+                            Variable
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                'x'')),
+                        Apply
+                          ((unknown,
+                            Effect
+                              ([
+                                'NonTermination'
+                              ],
+                                .)),
+                            Apply
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      -[
+                                        'NonTermination'
+                                      ]->
+                                      .)),
+                                Apply
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          ->
+                                          .
+                                            -[
+                                              'NonTermination'
+                                            ]->
+                                            .)),
+                                    Variable
+                                      ((unknown,
+                                        Effect
+                                          ([
+                                          ],
+                                            .
+                                              ->
+                                              .
+                                                ->
+                                                .
+                                                  -[
+                                                    'NonTermination'
+                                                  ]->
+                                                  .)),
+                                        'find_rec'),
+                                    Variable
+                                      ((unknown,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        'counter')),
+                                Variable
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    'x')),
+                            Variable
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                't1')),
+                        IfThenElse
+                          ((unknown,
+                            Effect
+                              ([
+                                'NonTermination'
+                              ],
+                                .)),
+                            Apply
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Apply
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    Variable
+                                      ((unknown,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        'Z.ltb'),
+                                    Variable
+                                      ((unknown,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        'x'')),
+                                Variable
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    'x')),
+                            Apply
+                              ((unknown,
+                                Effect
+                                  ([
+                                    'NonTermination'
+                                  ],
+                                    .)),
+                                Apply
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          -[
+                                            'NonTermination'
+                                          ]->
+                                          .)),
+                                    Apply
+                                      ((unknown,
+                                        Effect
+                                          ([
+                                          ],
+                                            .
+                                              ->
+                                              .
+                                                -[
+                                                  'NonTermination'
+                                                ]->
+                                                .)),
+                                        Variable
+                                          ((unknown,
+                                            Effect
+                                              ([
+                                              ],
+                                                .
+                                                  ->
+                                                  .
+                                                    ->
+                                                    .
+                                                      -[
+                                                        'NonTermination'
+                                                      ]->
+                                                      .)),
+                                            'find_rec'),
+                                        Variable
+                                          ((unknown,
+                                            Effect
+                                              ([
+                                              ],
+                                                .)),
+                                            'counter')),
+                                    Variable
+                                      ((unknown,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        'x')),
+                                Variable
+                                  ((unknown,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    't2')),
+                            Constructor
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                'true'))))
+                ]))
+        ]))
+
+(. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+  Value
+    (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
+      Some Type ('bool')) =
+    Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+      (non_rec, 'counter', [ ], [ ], None) =
+      Apply
+        ((unknown, Effect ([ 'Counter' ], .)),
+          Variable
+            ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+          Variable ((unknown, Effect ([ ], .)), 'tt')) in
+    Apply
+      ((unknown, Effect ([ 'NonTermination' ], .)),
+        Apply
+          ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            Apply
+              ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+                Variable
+                  ((unknown, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                    'find_rec'),
+                Variable ((unknown, Effect ([ ], .)), 'counter')),
+            Variable ((unknown, Effect ([ ], .)), 'x')),
+        Variable ((unknown, Effect ([ ], .)), 't')))

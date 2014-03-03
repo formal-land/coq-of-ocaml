@@ -1,25 +1,34 @@
-Value
-  (.,
-    Let
-      (Effect ([ ], .), Leaf (Effect ([ ], .)),
-        Let (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)))))
+(.,
+  Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
+    Let (unknown, Effect ([ ], .)) (non_rec, 'm', [ ], [ ], None) =
+      Constant ((unknown, Effect ([ ], .)), Int(12)) in
+    Let (unknown, Effect ([ ], .)) (non_rec, 'n1', [ ], [ ], None) =
+      Variable ((unknown, Effect ([ ], .)), 'm') in
+    Variable ((unknown, Effect ([ ], .)), 'n1'))
 
-Value
-  (.,
-    Let
-      (Effect ([ ], .),
-        Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-            Function
-              (Effect ([ ], . -> . -> .),
-                Function (Effect ([ ], . -> .), Leaf (Effect ([ ], .))))),
-        Let
-          (Effect ([ ], .),
-            Apply
-              (Effect ([ ], .),
-                Apply
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))),
-            Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], . -> .)),
-                Leaf (Effect ([ ], . -> .))))))
+(.,
+  Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
+    Let (unknown, Effect ([ ], .))
+      (non_rec, 'p1', [ 'A'; 'B'; 'C' ],
+        [ ('c', (('B' -> ('C' -> 'B')) -> 'A')) ], Some 'A') =
+      Apply
+        ((unknown, Effect ([ ], .)), Variable ((unknown, Effect ([ ], .)), 'c'),
+          Function
+            ((unknown, Effect ([ ], . -> . -> .)), 'x',
+              Function
+                ((unknown, Effect ([ ], . -> .)), 'y',
+                  Variable ((unknown, Effect ([ ], .)), 'x')))) in
+    Let (unknown, Effect ([ ], .))
+      (non_rec, 'c', [ 'A' ], [ ('f', (Type ('Z') -> (Type ('Z') -> 'A'))) ],
+        Some 'A') =
+      Apply
+        ((unknown, Effect ([ ], .)),
+          Apply
+            ((unknown, Effect ([ ], .)),
+              Variable ((unknown, Effect ([ ], .)), 'f'),
+              Constant ((unknown, Effect ([ ], .)), Int(12))),
+          Constant ((unknown, Effect ([ ], .)), Int(23))) in
+    Apply
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], . -> .)), 'p1'),
+        Variable ((unknown, Effect ([ ], . -> .)), 'c')))

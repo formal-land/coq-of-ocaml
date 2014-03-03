@@ -11,8 +11,11 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     | "effects" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
-      Structure.Tree.pps trees
+      let (definitions, _) =
+        Structure.effects PervasivesModule.effects definitions in
+      let pp_annotation (l, effect) =
+        OCaml.tuple [Loc.pp l; Effect.pp effect] in
+      Structure.pp (Effect.Type.pp false) pp_annotation definitions
     | "monadise" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in

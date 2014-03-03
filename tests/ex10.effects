@@ -1,94 +1,300 @@
-Module
-  Other
+Module 'List2':
+  Inductive 't':
+    ([ 'a' ], [ ('Nil', [ ]); ('Cons', [ 'a'; Type ('t', 'a') ]) ])
   
-  Value
-    (. -> . -[ 'NonTermination' ]-> .,
+  (. -> . -[ 'NonTermination' ]-> .,
+    Value
+      (rec, 'sum_rec', [ ],
+        [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ],
+        Some Type ('Z')) =
       Match
-        (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
-          Apply
-            (Effect ([ 'NonTermination' ], .),
-              Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
-              Leaf (Effect ([ ], .))),
-          Match
-            (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
-              Leaf (Effect ([ ], .)),
+        ((unknown, Effect ([ 'NonTermination' ], .)),
+          Variable ((unknown, Effect ([ ], .)), 'counter'),
+          [
+            (Nat(0),
               Apply
-                (Effect ([ 'NonTermination' ], .),
-                  Apply
-                    (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                      Leaf (Effect ([ ], .))),
-                  Apply
-                    (Effect ([ 'NonTermination' ], .),
+                ((unknown, Effect ([ 'NonTermination' ], .)),
+                  Variable
+                    ((unknown,
+                      Effect
+                        ([ ],
+                          .
+                            -[
+                              'NonTermination'
+                            ]->
+                            .)),
+                      'not_terminated'),
+                  Variable
+                    ((unknown, Effect ([ ], .)),
+                      'tt')));
+            (Constructor ('S', 'counter'),
+              Match
+                ((unknown, Effect ([ 'NonTermination' ], .)),
+                  Variable
+                    ((unknown, Effect ([ ], .)),
+                      'l'),
+                  [
+                    (Constructor ('Nil'),
+                      Constant
+                        ((unknown,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Int(0)));
+                    (Constructor
+                      ('Cons',
+                        'x',
+                        'xs'),
                       Apply
-                        (Effect ([ ], . -[ 'NonTermination' ]-> .),
-                          Leaf (Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                          Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))))
+                        ((unknown,
+                          Effect
+                            ([
+                              'NonTermination'
+                            ],
+                              .)),
+                          Apply
+                            ((unknown,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Variable
+                                ((unknown,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  'Z.add'),
+                              Variable
+                                ((unknown,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  'x')),
+                          Apply
+                            ((unknown,
+                              Effect
+                                ([
+                                  'NonTermination'
+                                ],
+                                  .)),
+                              Apply
+                                ((unknown,
+                                  Effect
+                                    ([
+                                    ],
+                                      .
+                                        -[
+                                          'NonTermination'
+                                        ]->
+                                        .)),
+                                  Variable
+                                    ((unknown,
+                                      Effect
+                                        ([
+                                        ],
+                                          .
+                                            ->
+                                            .
+                                              -[
+                                                'NonTermination'
+                                              ]->
+                                              .)),
+                                      'sum_rec'),
+                                  Variable
+                                    ((unknown,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      'counter')),
+                              Variable
+                                ((unknown,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  'xs'))))
+                  ]))
+          ]))
   
-  Value
-    (. -[ 'Counter'; 'NonTermination' ]-> .,
-      Let
-        (Effect ([ 'Counter'; 'NonTermination' ], .),
-          Apply
-            (Effect ([ 'Counter' ], .),
-              Leaf (Effect ([ ], . -[ 'Counter' ]-> .)), Leaf (Effect ([ ], .))),
-          Apply
-            (Effect ([ 'NonTermination' ], .),
-              Apply
-                (Effect ([ ], . -[ 'NonTermination' ]-> .),
-                  Leaf (Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                  Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))
-  
-  Value
-    (. -> . -[ 'NonTermination' ]-> .,
-      Match
-        (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
-          Apply
-            (Effect ([ 'NonTermination' ], .),
-              Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
-              Leaf (Effect ([ ], .))),
-          Match
-            (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
-              Compound (Effect ([ ], .)),
-              Compound
-                (Effect ([ 'NonTermination' ], .), Leaf (Effect ([ ], .)),
-                  Apply
-                    (Effect ([ 'NonTermination' ], .),
-                      Apply
-                        (Effect ([ ], . -[ 'NonTermination' ]-> .),
-                          Leaf (Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                          Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))))
-  
-  Value
-    (. -[ 'Counter'; 'NonTermination' ]-> .,
-      Let
-        (Effect ([ 'Counter'; 'NonTermination' ], .),
-          Apply
-            (Effect ([ 'Counter' ], .),
-              Leaf (Effect ([ ], . -[ 'Counter' ]-> .)), Leaf (Effect ([ ], .))),
-          Apply
-            (Effect ([ 'NonTermination' ], .),
-              Apply
-                (Effect ([ ], . -[ 'NonTermination' ]-> .),
-                  Leaf (Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                  Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))
-  
-  Module
-    Value (., Leaf (Effect ([ ], .)))
-
-Value
-  (.,
-    Apply
-      (Effect ([ 'Counter'; 'NonTermination' ], .),
-        Leaf (Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+  (. -[ 'Counter'; 'NonTermination' ]-> .,
+    Value
+      (non_rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ], Some Type ('Z'))
+      =
+      Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+        (non_rec, 'counter', [ ], [ ], None) =
         Apply
-          (Effect ([ 'Counter'; 'NonTermination' ], .),
-            Leaf (Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
-            Compound
-              (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                Compound
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                    Compound
-                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                        Compound
-                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                            Compound (Effect ([ ], .)))))))))
+          ((unknown, Effect ([ 'Counter' ], .)),
+            Variable
+              ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+            Variable ((unknown, Effect ([ ], .)), 'tt')) in
+      Apply
+        ((unknown, Effect ([ 'NonTermination' ], .)),
+          Apply
+            ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+              Variable
+                ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+                  'sum_rec'), Variable ((unknown, Effect ([ ], .)), 'counter')),
+          Variable ((unknown, Effect ([ ], .)), 'l')))
+  
+  (. -> . -[ 'NonTermination' ]-> .,
+    Value
+      (rec, 'of_list_rec', [ 'A' ],
+        [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ],
+        Some Type ('t', 'A')) =
+      Match
+        ((unknown, Effect ([ 'NonTermination' ], .)),
+          Variable ((unknown, Effect ([ ], .)), 'counter'),
+          [
+            (Nat(0),
+              Apply
+                ((unknown, Effect ([ 'NonTermination' ], .)),
+                  Variable
+                    ((unknown,
+                      Effect
+                        ([ ],
+                          .
+                            -[
+                              'NonTermination'
+                            ]->
+                            .)),
+                      'not_terminated'),
+                  Variable
+                    ((unknown, Effect ([ ], .)),
+                      'tt')));
+            (Constructor ('S', 'counter'),
+              Match
+                ((unknown, Effect ([ 'NonTermination' ], .)),
+                  Variable
+                    ((unknown, Effect ([ ], .)),
+                      'match_var_0'),
+                  [
+                    (Constructor ('[]'),
+                      Constructor
+                        ((unknown,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          'Nil'));
+                    (Constructor
+                      ('cons',
+                        'x',
+                        'xs'),
+                      Constructor
+                        ((unknown,
+                          Effect
+                            ([
+                              'NonTermination'
+                            ],
+                              .)),
+                          'Cons',
+                          Variable
+                            ((unknown,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              'x'),
+                          Apply
+                            ((unknown,
+                              Effect
+                                ([
+                                  'NonTermination'
+                                ],
+                                  .)),
+                              Apply
+                                ((unknown,
+                                  Effect
+                                    ([
+                                    ],
+                                      .
+                                        -[
+                                          'NonTermination'
+                                        ]->
+                                        .)),
+                                  Variable
+                                    ((unknown,
+                                      Effect
+                                        ([
+                                        ],
+                                          .
+                                            ->
+                                            .
+                                              -[
+                                                'NonTermination'
+                                              ]->
+                                              .)),
+                                      'of_list_rec'),
+                                  Variable
+                                    ((unknown,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      'counter')),
+                              Variable
+                                ((unknown,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  'xs'))))
+                  ]))
+          ]))
+  
+  (. -[ 'Counter'; 'NonTermination' ]-> .,
+    Value
+      (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ],
+        Some Type ('t', 'A')) =
+      Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+        (non_rec, 'counter', [ ], [ ], None) =
+        Apply
+          ((unknown, Effect ([ 'Counter' ], .)),
+            Variable
+              ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+            Variable ((unknown, Effect ([ ], .)), 'tt')) in
+      Apply
+        ((unknown, Effect ([ 'NonTermination' ], .)),
+          Apply
+            ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+              Variable
+                ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+                  'of_list_rec'),
+              Variable ((unknown, Effect ([ ], .)), 'counter')),
+          Variable ((unknown, Effect ([ ], .)), 'match_var_0')))
+  
+  Module 'Inside':
+    (.,
+      Value (non_rec, 'x', [ ], [ ], Some Type ('Z')) =
+        Constant ((unknown, Effect ([ ], .)), Int(12)))
+
+(.,
+  Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((unknown, Effect ([ 'Counter'; 'NonTermination' ], .)),
+        Variable
+          ((unknown, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+            'List2.sum'),
+        Apply
+          ((unknown, Effect ([ 'Counter'; 'NonTermination' ], .)),
+            Variable
+              ((unknown, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+                'List2.of_list'),
+            Constructor
+              ((unknown, Effect ([ ], .)), 'cons',
+                Constant ((unknown, Effect ([ ], .)), Int(5)),
+                Constructor
+                  ((unknown, Effect ([ ], .)), 'cons',
+                    Constant ((unknown, Effect ([ ], .)), Int(7)),
+                    Constructor
+                      ((unknown, Effect ([ ], .)), 'cons',
+                        Constant ((unknown, Effect ([ ], .)), Int(6)),
+                        Constructor
+                          ((unknown, Effect ([ ], .)), 'cons',
+                            Variable
+                              ((unknown, Effect ([ ], .)), 'List2.Inside.x'),
+                            Constructor ((unknown, Effect ([ ], .)), '[]'))))))))

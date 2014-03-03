@@ -1,62 +1,192 @@
-Other
+Exception ('TailLess', ())
 
-Other
+Exception ('Wtf', (Type ('Z') * Type ('string')))
 
-Value
-  (. -[ 'TailLess' ]-> .,
+(. -[ 'TailLess' ]-> .,
+  Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
     Apply
-      (Effect ([ 'TailLess' ], .), Leaf (Effect ([ ], . -[ 'TailLess' ]-> .)),
-        Compound (Effect ([ ], .))))
+      ((unknown, Effect ([ 'TailLess' ], .)),
+        Variable ((unknown, Effect ([ ], . -[ 'TailLess' ]-> .)), 'TailLess'),
+        Tuple ((unknown, Effect ([ ], .)))))
 
-Value
-  (. -[ 'Wtf' ]-> .,
+(. -[ 'Wtf' ]-> .,
+  Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
     Apply
-      (Effect ([ 'Wtf' ], .), Leaf (Effect ([ ], . -[ 'Wtf' ]-> .)),
-        Compound
-          (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)))))
+      ((unknown, Effect ([ 'Wtf' ], .)),
+        Variable ((unknown, Effect ([ ], . -[ 'Wtf' ]-> .)), 'Wtf'),
+        Tuple
+          ((unknown, Effect ([ ], .)),
+            Constant ((unknown, Effect ([ ], .)), Int(12)),
+            Constant ((unknown, Effect ([ ], .)), String("no")))))
 
-Value
-  (. -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .,
+(. -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .,
+  Value
+    (rec, 'h_rec', [ 'A' ],
+      [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some 'A') =
     Match
-      (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
-        Leaf (Effect ([ ], .)),
-        Apply
-          (Effect ([ 'NonTermination' ], .),
-            Leaf (Effect ([ ], . -[ 'NonTermination' ]-> .)),
-            Leaf (Effect ([ ], .))),
-        Match
-          (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
-            Leaf (Effect ([ ], .)),
-            Sequence
-              (Effect ([ 'IO'; 'TailLess' ], .),
-                Apply
-                  (Effect ([ 'IO' ], .), Leaf (Effect ([ ], . -[ 'IO' ]-> .)),
-                    Leaf (Effect ([ ], .))),
-                Apply
-                  (Effect ([ 'TailLess' ], .),
-                    Leaf (Effect ([ ], . -[ 'TailLess' ]-> .)),
-                    Compound (Effect ([ ], .)))), Leaf (Effect ([ ], .)),
+      ((unknown, Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .)),
+        Variable ((unknown, Effect ([ ], .)), 'counter'),
+        [
+          (Nat(0),
             Apply
-              (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
-                Apply
-                  (Effect ([ ], . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .),
-                    Leaf
-                      (Effect
-                        ([ ], . -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
-                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))))))
+              ((unknown, Effect ([ 'NonTermination' ], .)),
+                Variable
+                  ((unknown,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            'NonTermination'
+                          ]-> .)),
+                    'not_terminated'),
+                Variable ((unknown, Effect ([ ], .)), 'tt')));
+          (Constructor ('S', 'counter'),
+            Match
+              ((unknown,
+                Effect
+                  ([ 'IO'; 'NonTermination'; 'TailLess' ],
+                    .)),
+                Variable ((unknown, Effect ([ ], .)), 'l'),
+                [
+                  (Constructor ('[]'),
+                    Sequence
+                      ((unknown,
+                        Effect
+                          ([
+                            'IO';
+                            'TailLess'
+                          ],
+                            .)),
+                        Apply
+                          ((unknown,
+                            Effect
+                              ([
+                                'IO'
+                              ],
+                                .)),
+                            Variable
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      -[
+                                        'IO'
+                                      ]->
+                                      .)),
+                                'print_string'),
+                            Constant
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                String("no tail"))),
+                        Apply
+                          ((unknown,
+                            Effect
+                              ([
+                                'TailLess'
+                              ],
+                                .)),
+                            Variable
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      -[
+                                        'TailLess'
+                                      ]->
+                                      .)),
+                                'TailLess'),
+                            Tuple
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .))))));
+                  (Constructor
+                    ('cons',
+                      'x',
+                      Constructor
+                        ('[]')),
+                    Variable
+                      ((unknown,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        'x'));
+                  (Constructor ('cons', Any, 'xs'),
+                    Apply
+                      ((unknown,
+                        Effect
+                          ([
+                            'IO';
+                            'NonTermination';
+                            'TailLess'
+                          ],
+                            .)),
+                        Apply
+                          ((unknown,
+                            Effect
+                              ([
+                              ],
+                                .
+                                  -[
+                                    'IO';
+                                    'NonTermination';
+                                    'TailLess'
+                                  ]->
+                                  .)),
+                            Variable
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      ->
+                                      .
+                                        -[
+                                          'IO';
+                                          'NonTermination';
+                                          'TailLess'
+                                        ]->
+                                        .)),
+                                'h_rec'),
+                            Variable
+                              ((unknown,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                'counter')),
+                        Variable
+                          ((unknown,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            'xs')))
+                ]))
+        ]))
 
-Value
-  (. -[ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ]-> .,
-    Let
-      (Effect ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], .),
+(. -[ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ]-> .,
+  Value (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some 'A') =
+    Let (unknown, Effect ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], .))
+      (non_rec, 'counter', [ ], [ ], None) =
+      Apply
+        ((unknown, Effect ([ 'Counter' ], .)),
+          Variable
+            ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+          Variable ((unknown, Effect ([ ], .)), 'tt')) in
+    Apply
+      ((unknown, Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .)),
         Apply
-          (Effect ([ 'Counter' ], .), Leaf (Effect ([ ], . -[ 'Counter' ]-> .)),
-            Leaf (Effect ([ ], .))),
-        Apply
-          (Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .),
-            Apply
-              (Effect ([ ], . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .),
-                Leaf
-                  (Effect
-                    ([ ], . -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
-                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))))
+          ((unknown, Effect ([ ], . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
+            Variable
+              ((unknown,
+                Effect ([ ], . -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
+                'h_rec'), Variable ((unknown, Effect ([ ], .)), 'counter')),
+        Variable ((unknown, Effect ([ ], .)), 'l')))

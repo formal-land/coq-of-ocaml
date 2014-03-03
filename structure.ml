@@ -271,25 +271,6 @@ let rec monadise_let_rec (defs : (unit, Loc.t) t list) : (unit, Loc.t) t list =
     | Inductive _ | Record _ | Synonym _ | Exception _ | Open _ -> [def] in
   List.concat (List.map monadise_let_rec_one defs)
 
-module Tree = struct
-  type t =
-    | Value of Exp.Tree.t * Effect.Type.t
-    | Module of t list
-    | Other
-
-  let rec pps (trees : t list) : SmartPrint.t =
-    let pp (tree : t) : SmartPrint.t =
-      match tree with
-      | Value (tree, typ) -> nest (!^ "Value" ^^ OCaml.tuple [
-        Effect.Type.pp false typ; Exp.Tree.pp tree])
-      | Module trees ->
-        nest (
-          !^ "Module" ^^ newline ^^
-          indent (pps trees))
-      | Other -> !^ "Other" in
-    separate (newline ^^ newline) (List.map pp trees)
-end
-
 let rec effects (env : Effect.Type.t PathName.Env.t) (defs : (unit, 'a) t list)
   : (Effect.Type.t, 'a * Effect.t) t list * Effect.Type.t PathName.Env.t =
   let rec effects_one (def : (unit, 'a) t) (env : Effect.Type.t PathName.Env.t)
@@ -318,33 +299,6 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (defs : (unit, 'a) t list)
       (def :: defs, env))
       ([], env) defs in
   (List.rev defs, env)
-
-let rec to_trees (effects : Effect.Type.t PathName.Env.t)
-  (defs : (unit, 'a) t list) : Tree.t list * Effect.Type.t PathName.Env.t =
-  let rec to_tree (def : (unit, 'a) t) (effects : Effect.Type.t PathName.Env.t)
-    : Tree.t * Effect.Type.t PathName.Env.t =
-    match def with
-    | Value ((), {
-      Value.header = (is_rec, x, _, args, _);
-      body = e }) ->
-      let (tree, x_typ) = Exp.to_tree_let_fun effects is_rec x args e in
-      let effects = PathName.Env.add (PathName.of_name [] x) x_typ effects in
-      (Tree.Value (tree, x_typ), effects)
-    | Module (name, defs) ->
-      let (trees, effects) = to_trees (PathName.Env.open_module effects) defs in
-      (Tree.Module trees, PathName.Env.close_module effects name)
-    | Exception exn ->
-      let effects = PathName.Env.add (PathName.of_name [] exn.Exception.name)
-        (Exception.raise_effect_typ exn) effects in
-      (Tree.Other, effects)
-    | Inductive _ | Record _ | Synonym _ | Open _ ->
-      (Tree.Other, effects) in
-  let (trees, effects) =
-    List.fold_left (fun (trees, effects) def ->
-      let (tree, effects) = to_tree def effects in
-      (tree :: trees, effects))
-      ([], effects) defs in
-  (List.rev trees, effects)
 
 let rec monadise (env : unit PathName.Env.t)
   (defs : (Effect.Type.t, Loc.t * Effect.t) t list)

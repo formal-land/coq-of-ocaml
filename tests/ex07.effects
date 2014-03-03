@@ -1,169 +1,229 @@
-Value
-  (.,
+(.,
+  Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'orb'),
             Apply
-              (Effect ([ ], .),
+              ((unknown, Effect ([ ], .)),
                 Apply
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                    Compound (Effect ([ ], .))), Compound (Effect ([ ], .)))),
+                  ((unknown, Effect ([ ], .)),
+                    Variable ((unknown, Effect ([ ], .)), 'equiv_decb'),
+                    Constructor ((unknown, Effect ([ ], .)), 'false')),
+                Constructor ((unknown, Effect ([ ], .)), 'true'))),
         Apply
-          (Effect ([ ], .),
+          ((unknown, Effect ([ ], .)),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)),
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'andb'),
                 Apply
-                  (Effect ([ ], .),
+                  ((unknown, Effect ([ ], .)),
                     Apply
-                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                        Compound (Effect ([ ], .))), Compound (Effect ([ ], .)))),
+                      ((unknown, Effect ([ ], .)),
+                        Variable ((unknown, Effect ([ ], .)), 'nequiv_decb'),
+                        Constructor ((unknown, Effect ([ ], .)), 'tt')),
+                    Constructor ((unknown, Effect ([ ], .)), 'tt'))),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                Compound (Effect ([ ], .))))))
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'negb'),
+                Constructor ((unknown, Effect ([ ], .)), 'true')))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
     Apply
-      (Effect ([ ], .),
-        Apply (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+            Constant ((unknown, Effect ([ ], .)), Int(1))),
+        Apply
+          ((unknown, Effect ([ ], .)),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
-            Leaf (Effect ([ ], .)))))
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'Z.mul'),
+                Constant ((unknown, Effect ([ ], .)), Int(2))),
+            Constant ((unknown, Effect ([ ], .)), Int(3)))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'Z.sub'),
             Apply
-              (Effect ([ ], .),
+              ((unknown, Effect ([ ], .)),
                 Apply
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                  ((unknown, Effect ([ ], .)),
+                    Variable ((unknown, Effect ([ ], .)), 'Z.add'),
                     Apply
-                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                        Leaf (Effect ([ ], .)))), Leaf (Effect ([ ], .)))),
+                      ((unknown, Effect ([ ], .)),
+                        Variable ((unknown, Effect ([ ], .)), 'Z.abs'),
+                        Constant ((unknown, Effect ([ ], .)), Int(-1)))),
+                Constant ((unknown, Effect ([ ], .)), Int(1)))),
         Apply
-          (Effect ([ ], .),
+          ((unknown, Effect ([ ], .)),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)),
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'Z.mul'),
                 Apply
-                  (Effect ([ ], .),
+                  ((unknown, Effect ([ ], .)),
                     Apply
-                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                      ((unknown, Effect ([ ], .)),
+                        Variable ((unknown, Effect ([ ], .)), 'Z.modulo'),
                         Apply
-                          (Effect ([ ], .),
+                          ((unknown, Effect ([ ], .)),
                             Apply
-                              (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                                Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))),
-                    Leaf (Effect ([ ], .)))), Leaf (Effect ([ ], .)))))
+                              ((unknown, Effect ([ ], .)),
+                                Variable ((unknown, Effect ([ ], .)), 'Z.div'),
+                                Constant ((unknown, Effect ([ ], .)), Int(5))),
+                            Constant ((unknown, Effect ([ ], .)), Int(23)))),
+                    Constant ((unknown, Effect ([ ], .)), Int(4)))),
+            Constant ((unknown, Effect ([ ], .)), Int(3)))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 'n3', [ ], [ ], Some Type ('Z')) =
     Apply
-      (Effect ([ ], .), Leaf (Effect ([ ], .)),
-        Apply (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .)))))
-
-Value
-  (.,
-    Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], .)), 'Z.pred'),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'Z.succ'),
+            Constant ((unknown, Effect ([ ], .)), Int(12)))))
+
+(.,
+  Value (non_rec, 'n4', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((unknown, Effect ([ ], .)),
+        Apply
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'Z.lxor'),
             Apply
-              (Effect ([ ], .),
+              ((unknown, Effect ([ ], .)),
                 Apply
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
+                  ((unknown, Effect ([ ], .)),
+                    Variable ((unknown, Effect ([ ], .)), 'Z.lor'),
                     Apply
-                      (Effect ([ ], .),
+                      ((unknown, Effect ([ ], .)),
                         Apply
-                          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                            Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))),
-                Leaf (Effect ([ ], .)))), Leaf (Effect ([ ], .))))
+                          ((unknown, Effect ([ ], .)),
+                            Variable ((unknown, Effect ([ ], .)), 'Z.land'),
+                            Constant ((unknown, Effect ([ ], .)), Int(5))),
+                        Constant ((unknown, Effect ([ ], .)), Int(7)))),
+                Constant ((unknown, Effect ([ ], .)), Int(3)))),
+        Constant ((unknown, Effect ([ ], .)), Int(9))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 'n5', [ ], [ ], Some Type ('Z')) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
             Apply
-              (Effect ([ ], .),
+              ((unknown, Effect ([ ], .)),
                 Apply
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                    Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .)))),
+                  ((unknown, Effect ([ ], .)),
+                    Variable ((unknown, Effect ([ ], .)), 'Z.shiftl'),
+                    Constant ((unknown, Effect ([ ], .)), Int(156))),
+                Constant ((unknown, Effect ([ ], .)), Int(4)))),
         Apply
-          (Effect ([ ], .),
+          ((unknown, Effect ([ ], .)),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
-            Leaf (Effect ([ ], .)))))
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'Z.shiftr'),
+                Constant ((unknown, Effect ([ ], .)), Int(12))),
+            Constant ((unknown, Effect ([ ], .)), Int(1)))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
     Apply
-      (Effect ([ ], .),
-        Apply (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))),
-        Leaf (Effect ([ ], .))))
-
-Value
-  (.,
-    Apply
-      (Effect ([ ], .), Leaf (Effect ([ ], .)),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'append'),
+            Constant ((unknown, Effect ([ ], .)), String("ghj"))),
+        Constant ((unknown, Effect ([ ], .)), String("klm"))))
+
+(.,
+  Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
+    Apply
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], .)), 'char_of_int'),
+        Apply
+          ((unknown, Effect ([ ], .)),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)),
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'Z.add'),
                 Apply
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                    Leaf (Effect ([ ], .)))), Leaf (Effect ([ ], .)))))
+                  ((unknown, Effect ([ ], .)),
+                    Variable ((unknown, Effect ([ ], .)), 'int_of_char'),
+                    Constant ((unknown, Effect ([ ], .)), Char("c")))),
+            Constant ((unknown, Effect ([ ], .)), Int(1)))))
 
-Value
-  (., Apply (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))
-
-Value
-  (.,
+(.,
+  Value (non_rec, 'x', [ ], [ ], Some Type ('unit')) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
+        Variable ((unknown, Effect ([ ], .)), 'ignore'),
+        Constant ((unknown, Effect ([ ], .)), Int(23))))
+
+(.,
+  Value (non_rec, 'p', [ ], [ ], Some Type ('Z')) =
+    Apply
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
             Apply
-              (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                Compound
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                    Leaf (Effect ([ ], .))))),
+              ((unknown, Effect ([ ], .)),
+                Variable ((unknown, Effect ([ ], .)), 'fst'),
+                Tuple
+                  ((unknown, Effect ([ ], .)),
+                    Constant ((unknown, Effect ([ ], .)), Int(1)),
+                    Constant ((unknown, Effect ([ ], .)), Int(2))))),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-            Compound
-              (Effect ([ ], .), Leaf (Effect ([ ], .)), Leaf (Effect ([ ], .))))))
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'snd'),
+            Tuple
+              ((unknown, Effect ([ ], .)),
+                Constant ((unknown, Effect ([ ], .)), Int(3)),
+                Constant ((unknown, Effect ([ ], .)), Int(4))))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
-            Compound
-              (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                Compound
-                  (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                    Compound (Effect ([ ], .))))),
-        Compound
-          (Effect ([ ], .), Leaf (Effect ([ ], .)), Compound (Effect ([ ], .)))))
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'app'),
+            Constructor
+              ((unknown, Effect ([ ], .)), 'cons',
+                Constant ((unknown, Effect ([ ], .)), Int(1)),
+                Constructor
+                  ((unknown, Effect ([ ], .)), 'cons',
+                    Constant ((unknown, Effect ([ ], .)), Int(2)),
+                    Constructor ((unknown, Effect ([ ], .)), '[]')))),
+        Constructor
+          ((unknown, Effect ([ ], .)), 'cons',
+            Constant ((unknown, Effect ([ ], .)), Int(3)),
+            Constructor ((unknown, Effect ([ ], .)), '[]'))))
 
-Value
-  (.,
+(.,
+  Value (non_rec, 'y', [ ], [ ], Some Type ('Z')) =
     Apply
-      (Effect ([ ], .),
+      ((unknown, Effect ([ ], .)),
         Apply
-          (Effect ([ ], .), Leaf (Effect ([ ], .)),
+          ((unknown, Effect ([ ], .)),
+            Variable ((unknown, Effect ([ ], .)), 'apply'),
             Function
-              (Effect ([ ], . -> .),
+              ((unknown, Effect ([ ], . -> .)), 'n',
                 Apply
-                  (Effect ([ ], .),
+                  ((unknown, Effect ([ ], .)),
                     Apply
-                      (Effect ([ ], .), Leaf (Effect ([ ], .)),
-                        Leaf (Effect ([ ], .))), Leaf (Effect ([ ], .))))),
-        Leaf (Effect ([ ], .))))
+                      ((unknown, Effect ([ ], .)),
+                        Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+                        Variable ((unknown, Effect ([ ], .)), 'n')),
+                    Constant ((unknown, Effect ([ ], .)), Int(1))))),
+        Constant ((unknown, Effect ([ ], .)), Int(12))))
