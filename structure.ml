@@ -289,32 +289,34 @@ module Tree = struct
     separate (newline ^^ newline) (List.map pp trees)
 end
 
-(*let rec effects (env : Effect.Type.t PathName.Env.t)
-  (defs : 'a t list) : ('a * Effect.t) t list * Effect.Type.t PathName.Env.t =
-  let rec effects_one (def : 'a t) (env : Effect.Type.t PathName.Env.t)
-    : ('a * Effect.t) t * Effect.Type.t PathName.Env.t =
+let rec effects (env : Effect.Type.t PathName.Env.t) (defs : (unit, 'a) t list)
+  : (Effect.Type.t, 'a * Effect.t) t list * Effect.Type.t PathName.Env.t =
+  let rec effects_one (def : (unit, 'a) t) (env : Effect.Type.t PathName.Env.t)
+    : (Effect.Type.t, 'a * Effect.t) t * Effect.Type.t PathName.Env.t =
     match def with
-    | Value {
-      Value.header = (is_rec, x, _, args, _);
-      body = e } ->
+    | Value ((), {
+      Value.header = (is_rec, x, _, args, _) as header;
+      body = e }) ->
       let (e, x_typ) = Exp.effects_of_let env is_rec x args e in
       let env = PathName.Env.add_name x x_typ env in
-      (Value (e, x_typ), env)
+      (Value (x_typ, { Value.header = header; body = e }), env)
     | Module (name, defs) ->
-      let (trees, effects) = to_trees (PathName.Env.open_module effects) defs in
-      (Tree.Module trees, PathName.Env.close_module effects name)
+      let (defs, env) = effects (PathName.Env.open_module env) defs in
+      (Module (name, defs), PathName.Env.close_module env name)
     | Exception exn ->
-      let effects = PathName.Env.add (PathName.of_name [] exn.Exception.name)
-        (Exception.raise_effect_typ exn) effects in
-      (Tree.Other, effects)
-    | Inductive _ | Record _ | Synonym _ | Open _ ->
-      (Tree.Other, effects) in
-  let (trees, effects) =
-    List.fold_left (fun (trees, effects) def ->
-      let (tree, effects) = to_tree def effects in
-      (tree :: trees, effects))
-      ([], effects) defs in
-  (List.rev trees, effects)*)
+      let env = PathName.Env.add_name exn.Exception.name
+        (Exception.raise_effect_typ exn) env in
+      (Exception exn, env)
+    | Inductive ind -> (Inductive ind, env)
+    | Record record -> (Record record, env)
+    | Synonym synonym -> (Synonym synonym, env)
+    | Open name -> (Open name, env) in
+  let (defs, env) =
+    List.fold_left (fun (defs, env) def ->
+      let (def, env) = effects_one def env in
+      (def :: defs, env))
+      ([], env) defs in
+  (List.rev defs, env)
 
 let rec to_trees (effects : Effect.Type.t PathName.Env.t)
   (defs : (unit, 'a) t list) : Tree.t list * Effect.Type.t PathName.Env.t =

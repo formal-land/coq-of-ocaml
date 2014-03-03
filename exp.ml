@@ -717,7 +717,7 @@ let rec monadise (env : unit PathName.Env.t) (e : 'a t) (tree : Tree.t)
     let e2 = monadise env e2 tree2 in
     bind (Tree.descriptor tree1) (Tree.descriptor tree2) d e1 None e2
   | _ -> failwith "Unexpected arguments for 'monadise'."
- 
+
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
   match e with
