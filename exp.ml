@@ -50,25 +50,26 @@ let annotation (e : 'a t) : 'a =
     | Sequence (a, _, _) | Return (a, _) | Bind (a, _, _, _)
     | Lift (a, _, _, _) -> a
 
-let rec clean (e : 'a t) : unit t =
+let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   match e with
-  | Constant (_, c) -> Constant ((), c)
-  | Variable (_, x) -> Variable ((), x)
-  | Tuple (_, es) -> Tuple ((), List.map clean es)
-  | Constructor (_, x, es) -> Constructor ((), x, List.map clean es)
-  | Apply (_, e_f, e_x) -> Apply ((), clean e_f, clean e_x)
-  | Function (_, x, e) -> Function ((), x, clean e)
-  | Let (_, header, e1, e2) -> Let ((), header, clean e1, clean e2)
-  | Match (_, e, cases) ->
-    Match ((), clean e, List.map (fun (p, e) -> (p, clean e)) cases)
-  | Record (_, fields) ->
-    Record ((), List.map (fun (x, e) -> (x, clean e)) fields)
-  | Field (_, e, x) -> Field ((), clean e, x)
-  | IfThenElse (_, e1, e2, e3) -> IfThenElse ((), clean e1, clean e2, clean e3)
-  | Sequence (_, e1, e2) -> Sequence ((), clean e1, clean e2)
-  | Return (_, e) -> Return ((), clean e)
-  | Bind (_, e1, x, e2) -> Bind ((), clean e1, x, clean e2)
-  | Lift (_, d1, d2, e) -> Lift ((), d1, d2, clean e)
+  | Constant (a, c) -> Constant (f a, c)
+  | Variable (a, x) -> Variable (f a, x)
+  | Tuple (a, es) -> Tuple (f a, List.map (map f) es)
+  | Constructor (a, x, es) -> Constructor (f a, x, List.map (map f) es)
+  | Apply (a, e_f, e_x) -> Apply (f a, map f e_f, map f e_x)
+  | Function (a, x, e) -> Function (f a, x, map f e)
+  | Let (a, header, e1, e2) -> Let (f a, header, map f e1, map f e2)
+  | Match (a, e, cases) ->
+    Match (f a, map f e, List.map (fun (p, e) -> (p, map f e)) cases)
+  | Record (a, fields) ->
+    Record (f a, List.map (fun (x, e) -> (x, map f e)) fields)
+  | Field (a, e, x) -> Field (f a, map f e, x)
+  | IfThenElse (a, e1, e2, e3) ->
+    IfThenElse (f a, map f e1, map f e2, map f e3)
+  | Sequence (a, e1, e2) -> Sequence (f a, map f e1, map f e2)
+  | Return (a, e) -> Return (f a, map f e)
+  | Bind (a, e1, x, e2) -> Bind (f a, map f e1, x, map f e2)
+  | Lift (a, d1, d2, e) -> Lift (f a, d1, d2, map f e)
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
@@ -246,7 +247,7 @@ let rec substitute (x : PathName.t) (e' : 'a t) (e : 'a t) : 'a t =
     Bind (a, e1, y, e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, substitute x e' e)
 
-let rec monadise_let_rec (e : unit t) : unit t =
+let rec monadise_let_rec (e : Loc.t t) : Loc.t t =
   match e with
   | Constant _ | Variable _ -> e
   | Tuple (a, es) -> Tuple (a, List.map monadise_let_rec es)
@@ -274,28 +275,29 @@ let rec monadise_let_rec (e : unit t) : unit t =
     Bind (a, monadise_let_rec e1, x, monadise_let_rec e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, monadise_let_rec e)
 
-and monadise_let_rec_definition (header : Header.t) (e : unit t)
-  : (Header.t * unit t) list =
+and monadise_let_rec_definition (header : Header.t) (e : Loc.t t)
+  : (Header.t * Loc.t t) list =
   let (is_rec, x, typ_vars, args, typ) = header in
   let e = monadise_let_rec e in
   if Recursivity.to_bool is_rec then
-    let var (x : Name.t) : unit t = Variable ((), PathName.of_name [] x) in
+    let var (x : Name.t) : Loc.t t =
+      Variable (Loc.unknown, PathName.of_name [] x) in
     let x_rec = x ^ "_rec" in
     let args' =
       ("counter", Type.Apply (PathName.of_name [] "nat", [])) :: args in
-    let e = Match ((), var "counter", [
+    let e = Match (Loc.unknown, var "counter", [
       (Pattern.Constant (Constant.Nat 0),
-        Apply ((), var "not_terminated", var "tt"));
+        Apply (Loc.unknown, var "not_terminated", var "tt"));
       (Pattern.Constructor (PathName.of_name [] "S",
         [Pattern.Variable "counter"]),
         substitute (PathName.of_name [] x)
-          (Apply ((), var x_rec, var "counter")) e)]) in
+          (Apply (Loc.unknown, var x_rec, var "counter")) e)]) in
     [ ((is_rec, x_rec, typ_vars, args', typ), e);
       ((Recursivity.New false, x, typ_vars, args, typ),
-        Let ((), Header.variable "counter",
-          Apply ((), var "read_counter", var "tt"),
-        List.fold_left (fun e (x, _) -> Apply ((), e, var x))
-          (Apply ((), var x_rec, var "counter")) args)) ]
+        Let (Loc.unknown, Header.variable "counter",
+          Apply (Loc.unknown, var "read_counter", var "tt"),
+        List.fold_left (fun e (x, _) -> Apply (Loc.unknown, e, var x))
+          (Apply (Loc.unknown, var x_rec, var "counter")) args)) ]
   else
     [(header, e)]
 
@@ -614,108 +616,108 @@ and to_tree_let_fun (effects : Effect.Type.t PathName.Env.t)
     let x_typ = Effect.function_typ args_names effect in
     (tree, x_typ)
 
-let rec monadise (env : unit PathName.Env.t) (e : 'a t) (tree : Tree.t)
-  : unit t =
-  let var (x : Name.t) : unit t = Variable ((), PathName.of_name [] x) in
+let rec monadise (env : unit PathName.Env.t) (e : (Loc.t * Effect.t) t)
+  : Loc.t t =
+  let descriptor e = (snd (annotation e)).Effect.descriptor in
   let lift d1 d2 e =
     if Effect.Descriptor.eq d1 d2 then
       e
     else if Effect.Descriptor.is_pure d1 then
-      Return ((), e)
+      Return (Loc.unknown, e)
     else
-      Lift ((), d1, d2, e) in
+      Lift (Loc.unknown, d1, d2, e) in
   (** [d1] is the descriptor of [e1], [d2] of [e2]. *)
   let bind d1 d2 d e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
       match x with
-      | Some x -> Let ((), Header.variable x, e1, e2)
+      | Some x -> Let (Loc.unknown, Header.variable x, e1, e2)
       | None -> e2
     else
-      Bind ((), lift d1 d e1, x, lift d2 d e2) in
+      Bind (Loc.unknown, lift d1 d e1, x, lift d2 d e2) in
   (** [k es'] is supposed to raise the effect [d]. *)
-  let rec monadise_list env es trees d es' k =
-    match (es, trees) with
-    | ([], []) -> k (List.rev es')
-    | (e :: es, tree :: trees) ->
-      let d_e = Tree.descriptor tree in
+  let rec monadise_list env es d es' k =
+    match es with
+    | [] -> k (List.rev es')
+    | e :: es ->
+      let d_e = descriptor e in
       if Effect.Descriptor.is_pure d_e then
-        monadise_list env es trees d (e :: es') k
+        monadise_list env es d (map fst e :: es') k
       else
-        let e' = monadise env e tree in
+        let e' = monadise env e in
         let (x, env) = PathName.Env.fresh "x" () env in
-        bind d_e d d e' (Some x)
-          (monadise_list env es trees d (var x :: es') k)
-    | _ -> failwith "Unexpected number of trees." in
-  let d = Tree.descriptor tree in
-  match (e, tree) with
-  | (Constant _, Tree.Leaf _) | (Variable _, Tree.Leaf _) -> e
-  | (Tuple (_, es), Tree.Compound (trees, _)) ->
-    monadise_list env es trees d [] (fun es' ->
-      lift Effect.Descriptor.pure d (Tuple ((), es')))
-  | (Constructor (_, x, es), Tree.Compound (trees, _)) ->
-    monadise_list env es trees d [] (fun es' ->
-      lift Effect.Descriptor.pure d (Constructor ((), x, es')))
-  | (Apply (_, e1, e2), Tree.Apply (tree1, tree2, _)) ->
-    monadise_list env [e1; e2] [tree1; tree2] d [] (fun es' ->
+        bind d_e d d e' (Some x) (monadise_list env es d
+          (Variable (Loc.unknown, PathName.of_name [] x) :: es') k) in
+  let d = descriptor e in
+  match e with
+  | Constant ((l, _), c) -> Constant (l, c)
+  | Variable ((l, _), x) -> Variable (l, x)
+  | Tuple ((l, _), es) ->
+    monadise_list env es d [] (fun es' ->
+      lift Effect.Descriptor.pure d (Tuple (l, es')))
+  | Constructor ((l, _), x, es) ->
+    monadise_list env es d [] (fun es' ->
+      lift Effect.Descriptor.pure d (Constructor (l, x, es')))
+  | Apply ((l, _), e1, e2) ->
+    let effect_e1 = (snd (annotation e1)).Effect.typ in
+    monadise_list env [e1; e2] d [] (fun es' ->
       match es' with
       | [e1; e2] ->
-        let return_descriptor =
-          Effect.Type.return_descriptor (Tree.effect tree1).Effect.typ in
-        lift return_descriptor d (Apply ((), e1, e2))
+        let return_descriptor = Effect.Type.return_descriptor effect_e1 in
+        lift return_descriptor d (Apply (l, e1, e2))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (Function (_, x, e), Tree.Function (tree, _)) ->
-    let env = PathName.Env.add (PathName.of_name [] x) () env in
-    Function ((), x, monadise env e tree)
-  | (Let (_, (_, x, _, [], _), e1, e2), Tree.Let (tree1, tree2, _)) ->
-    let e1 = monadise env e1 tree1 in
-    let env = PathName.Env.add (PathName.of_name [] x) () env in
-    let e2 = monadise env e2 tree2 in
-    bind (Tree.descriptor tree1) (Tree.descriptor tree2) d e1 (Some x) e2
-  | (Let (_, (is_rec, x, typ_args, args, Some typ), e1, e2),
-    Tree.Let (tree1, tree2, _)) ->
-    let typ = Type.monadise typ (Tree.effect tree1) in
+  | Function ((l, _), x, e) ->
+    let env = PathName.Env.add_name x () env in
+    Function (l, x, monadise env e)
+  | Let ((l, _), (_, x, _, [], _), e1, e2) -> (* TODO: use l *)
+    let (d1, d2) = (descriptor e1, descriptor e2) in
+    let e1 = monadise env e1 in
+    let env = PathName.Env.add_name x () env in
+    let e2 = monadise env e2 in
+    bind d1 d2 d e1 (Some x) e2
+  | Let ((l, _), (is_rec, x, typ_args, args, Some typ), e1, e2) ->
+    let typ = Type.monadise typ (snd (annotation e1)) in
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
-        PathName.Env.add (PathName.of_name [] x) () env
+        PathName.Env.add_name x () env
       else
         env in
-    let e1 = monadise env_in_e1 e1 tree1 in
-    let env_in_e2 = PathName.Env.add (PathName.of_name [] x) () env in
-    let e2 = monadise env_in_e2 e2 tree2 in
-    Let ((), (is_rec, x, typ_args, args, Some typ), e1, e2)
-  | (Match (_, e, cases), Tree.Match (tree, trees, _)) ->
-    monadise_list env [e] [tree] d [] (fun es' ->
+    let e1 = monadise env_in_e1 e1 in
+    let env_in_e2 = PathName.Env.add_name x () env in
+    let e2 = monadise env_in_e2 e2 in
+    Let (l, (is_rec, x, typ_args, args, Some typ), e1, e2)
+  | Match ((l, _), e, cases) ->
+    monadise_list env [e] d [] (fun es' ->
       match es' with
       | [e] ->
-        let cases = List.map2 (fun (p, e) tree ->
-          let env = Name.Set.fold (fun x env ->
-            PathName.Env.add (PathName.of_name [] x) () env)
+        let cases = cases |> List.map (fun (p, e)->
+          let env = Name.Set.fold (fun x env -> PathName.Env.add_name x () env)
             (Pattern.free_variables p) env in
-          (p, lift (Tree.descriptor tree) d (monadise env e tree)))
-          cases trees in
-        Match ((), e, cases)
+          (p, lift (descriptor e) d (monadise env e))) in
+        Match (l, e, cases)
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (Record (_, fields), Tree.Compound (trees, _)) ->
-    monadise_list env (List.map snd fields) trees d [] (fun es' ->
+  | Record ((l, _), fields) ->
+    monadise_list env (List.map snd fields) d [] (fun es' ->
       let fields = List.map2 (fun (f, _) e -> (f, e)) fields es' in
-      lift Effect.Descriptor.pure d (Record ((), fields)))
-  | (Field (_, e, x), Tree.Field (tree, _)) ->
-    monadise_list env [e] [tree] d [] (fun es' ->
+      lift Effect.Descriptor.pure d (Record (l, fields)))
+  | Field ((l, _), e, x) ->
+    monadise_list env [e] d [] (fun es' ->
       match es' with
-      | [e] -> lift Effect.Descriptor.pure d (Field ((), e, x))
+      | [e] -> lift Effect.Descriptor.pure d (Field (l, e, x))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (IfThenElse (_, e1, e2, e3), Tree.Match (tree1, [tree2; tree3], _)) ->
-    monadise_list env [e1] [tree1] d [] (fun es' ->
+  | IfThenElse ((l, _), e1, e2, e3) ->
+    let (d2, d3) = (descriptor e2, descriptor e3) in
+    monadise_list env [e1] d [] (fun es' ->
       match es' with
       | [e1] ->
-        let e2 = lift (Tree.descriptor tree2) d (monadise env e2 tree2) in
-        let e3 = lift (Tree.descriptor tree3) d (monadise env e3 tree3) in
-        IfThenElse ((), e1, e2, e3)
+        let e2 = lift d2 d (monadise env e2) in
+        let e3 = lift d3 d (monadise env e3) in
+        IfThenElse (l, e1, e2, e3)
       | _ -> failwith "Wrong answer from 'monadise_list'.")
-  | (Sequence (_, e1, e2), Tree.Sequence (tree1, tree2, _)) ->
-    let e1 = monadise env e1 tree1 in
-    let e2 = monadise env e2 tree2 in
-    bind (Tree.descriptor tree1) (Tree.descriptor tree2) d e1 None e2
+  | Sequence ((l, _), e1, e2) -> (* TODO: use l *)
+    let (d1, d2) = (descriptor e1, descriptor e2) in
+    let e1 = monadise env e1 in
+    let e2 = monadise env e2 in
+    bind d1 d2 d e1 None e2
   | _ -> failwith "Unexpected arguments for 'monadise'."
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)

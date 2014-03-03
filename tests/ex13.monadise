@@ -3,14 +3,15 @@
     (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Monad ([ 'Failure' ], Type ('list', 'A'))) =
     Match
-      ((), Variable ((), 'l'),
+      (unknown, Variable (unknown, 'l'),
         [
-          (Constructor ('cons', Any, 'xs'), Return ((), Variable ((), 'xs')));
+          (Constructor ('cons', Any, 'xs'),
+            Return (unknown, Variable (unknown, 'xs')));
           (Constructor ('[]'),
             Apply
-              ((), Variable ((), 'failwith'),
+              (unknown, Variable (unknown, 'failwith'),
                 Constant
-                  ((),
+                  (unknown,
                     String("Cannot take the tail of an empty list."))))
         ]))
 
@@ -22,29 +23,33 @@
         ('match_var_0', Type ('list', Type ('string')))
       ], Some Monad ([ 'IO'; 'NonTermination' ], Type ('unit'))) =
     Match
-      ((), Variable ((), 'counter'),
+      (unknown, Variable (unknown, 'counter'),
         [
           (Nat(0),
             Lift
-              ((), [ 'NonTermination' ], [ 'IO'; 'NonTermination' ],
+              (unknown, [ 'NonTermination' ],
+                [ 'IO'; 'NonTermination' ],
                 Apply
-                  ((), Variable ((), 'not_terminated'),
-                    Variable ((), 'tt'))));
+                  (unknown,
+                    Variable
+                      (unknown,
+                        'not_terminated'),
+                    Variable (unknown, 'tt'))));
           (Constructor ('S', 'counter'),
             Match
-              ((), Variable ((), 'match_var_0'),
+              (unknown, Variable (unknown, 'match_var_0'),
                 [
                   (Constructor ('[]'),
                     Return
-                      ((),
+                      (unknown,
                         Constructor
-                          ((),
+                          (unknown,
                             'tt')));
                   (Constructor ('cons', 'x', 'xs'),
                     Bind
-                      ((),
+                      (unknown,
                         Lift
-                          ((),
+                          (unknown,
                             [
                               'IO'
                             ],
@@ -53,26 +58,26 @@
                               'NonTermination'
                             ],
                             Apply
-                              ((),
+                              (unknown,
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'print_string'),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x'))),
                         None,
                         Apply
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'print_list_rec'),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'counter')),
                             Variable
-                              ((),
+                              (unknown,
                                 'xs'))))
                 ]))
         ]))
@@ -83,19 +88,21 @@
       [ ('match_var_0', Type ('list', Type ('string'))) ],
       Some Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit'))) =
     Bind
-      ((),
+      (unknown,
         Lift
-          ((), [ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination' ],
-            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-        Some 'counter',
+          (unknown, [ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination' ],
+            Apply
+              (unknown, Variable (unknown, 'read_counter'),
+                Variable (unknown, 'tt'))), Some 'counter',
         Lift
-          ((), [ 'IO'; 'NonTermination' ],
+          (unknown, [ 'IO'; 'NonTermination' ],
             [ 'Counter'; 'IO'; 'NonTermination' ],
             Apply
-              ((),
+              (unknown,
                 Apply
-                  ((), Variable ((), 'print_list_rec'), Variable ((), 'counter')),
-                Variable ((), 'match_var_0')))))
+                  (unknown, Variable (unknown, 'print_list_rec'),
+                    Variable (unknown, 'counter')),
+                Variable (unknown, 'match_var_0')))))
 
 ((),
   Value
@@ -103,7 +110,7 @@
       Some
         (Type ('list', Type ('string')) ->
           Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit')))) =
-    Variable ((), 'print_list'))
+    Variable (unknown, 'print_list'))
 
 ((),
   Value
@@ -112,21 +119,23 @@
         Monad ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], Type ('unit')))
     =
     Bind
-      ((),
+      (unknown,
         Lift
-          ((), [ 'Failure' ], [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
-            Apply
-              ((), Variable ((), 'tail'),
-                Constructor
-                  ((), 'cons', Constant ((), String("Stop")),
-                    Constructor
-                      ((), 'cons', Constant ((), String("Hello")),
-                        Constructor
-                          ((), 'cons', Constant ((), String(" ")),
-                            Constructor
-                              ((), 'cons', Constant ((), String("world")),
-                                Constructor ((), '[]'))))))), Some 'x',
-        Lift
-          ((), [ 'Counter'; 'IO'; 'NonTermination' ],
+          (unknown, [ 'Failure' ],
             [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
-            Apply ((), Variable ((), 'f'), Variable ((), 'x')))))
+            Apply
+              (unknown, Variable (unknown, 'tail'),
+                Constructor
+                  (unknown, 'cons', Constant (unknown, String("Stop")),
+                    Constructor
+                      (unknown, 'cons', Constant (unknown, String("Hello")),
+                        Constructor
+                          (unknown, 'cons', Constant (unknown, String(" ")),
+                            Constructor
+                              (unknown, 'cons',
+                                Constant (unknown, String("world")),
+                                Constructor (unknown, '[]'))))))), Some 'x',
+        Lift
+          (unknown, [ 'Counter'; 'IO'; 'NonTermination' ],
+            [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
+            Apply (unknown, Variable (unknown, 'f'), Variable (unknown, 'x')))))

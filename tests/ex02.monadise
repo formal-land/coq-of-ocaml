@@ -1,10 +1,11 @@
 ((),
   Value (non_rec, 't0', [ ], [ ], Some Type ('unit')) =
-    Constructor ((), 'tt'))
+    Constructor (unknown, 'tt'))
 
 ((),
   Value (non_rec, 't1', [ ], [ ], Some (Type ('ascii') * Type ('string'))) =
-    Tuple ((), Constant ((), Char("c")), Constant ((), String("one"))))
+    Tuple
+      (unknown, Constant (unknown, Char("c")), Constant (unknown, String("one"))))
 
 ((),
   Value
@@ -13,13 +14,14 @@
         (Type ('Z') * Type ('Z') * Type ('Z') * Type ('bool') * Type ('bool')))
     =
     Tuple
-      ((), Constant ((), Int(1)), Constant ((), Int(2)), Constant ((), Int(3)),
-        Constructor ((), 'false'), Constructor ((), 'true')))
+      (unknown, Constant (unknown, Int(1)), Constant (unknown, Int(2)),
+        Constant (unknown, Int(3)), Constructor (unknown, 'false'),
+        Constructor (unknown, 'true')))
 
 ((),
   Value (non_rec, 'f', [ 'A' ], [ ('x', 'A') ], Some ('A' * 'A')) =
-    Tuple ((), Variable ((), 'x'), Variable ((), 'x')))
+    Tuple (unknown, Variable (unknown, 'x'), Variable (unknown, 'x')))
 
 ((),
   Value (non_rec, 't3', [ ], [ ], Some (Type ('Z') * Type ('Z'))) =
-    Apply ((), Variable ((), 'f'), Constant ((), Int(12))))
+    Apply (unknown, Variable (unknown, 'f'), Constant (unknown, Int(12))))

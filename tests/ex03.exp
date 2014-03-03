@@ -1,23 +1,25 @@
 ((),
   Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
-    Let () (non_rec, 'm', [ ], [ ], None) =
-      Constant ((), Int(12)) in
-    Let () (non_rec, 'n1', [ ], [ ], None) =
-      Variable ((), 'm') in
-    Variable ((), 'n1'))
+    Let unknown (non_rec, 'm', [ ], [ ], None) =
+      Constant (unknown, Int(12)) in
+    Let unknown (non_rec, 'n1', [ ], [ ], None) =
+      Variable (unknown, 'm') in
+    Variable (unknown, 'n1'))
 
 ((),
   Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
-    Let ()
+    Let unknown
       (non_rec, 'p1', [ 'A'; 'B'; 'C' ],
         [ ('c', (('B' -> ('C' -> 'B')) -> 'A')) ], Some 'A') =
       Apply
-        ((), Variable ((), 'c'),
-          Function ((), 'x', Function ((), 'y', Variable ((), 'x')))) in
-    Let ()
+        (unknown, Variable (unknown, 'c'),
+          Function
+            (unknown, 'x', Function (unknown, 'y', Variable (unknown, 'x')))) in
+    Let unknown
       (non_rec, 'c', [ 'A' ], [ ('f', (Type ('Z') -> (Type ('Z') -> 'A'))) ],
         Some 'A') =
       Apply
-        ((), Apply ((), Variable ((), 'f'), Constant ((), Int(12))),
-          Constant ((), Int(23))) in
-    Apply ((), Variable ((), 'p1'), Variable ((), 'c')))
+        (unknown,
+          Apply (unknown, Variable (unknown, 'f'), Constant (unknown, Int(12))),
+          Constant (unknown, Int(23))) in
+    Apply (unknown, Variable (unknown, 'p1'), Variable (unknown, 'c')))

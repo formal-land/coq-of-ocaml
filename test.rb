@@ -64,9 +64,9 @@ class Tests
     puts "\e[1mChecking '-#{mode}':\e[0m"
     for test in @tests do
       if test.check(mode)
-        print "  \e[1;32m✓\e[0m "
+        print " \e[1;32m✓\e[0m "
       else
-        print "  \e[31m✗\e[0m "
+        print " \e[31m✗\e[0m "
       end
       puts test.coq_of_ocaml_cmd(mode).join(" ")
     end
@@ -76,9 +76,9 @@ class Tests
     puts "\e[1mRunning coqc (compiles the reference files):\e[0m"
     for test in @tests do
       if test.coq
-        print "  \e[1;32m✓\e[0m "
+        print " \e[1;32m✓\e[0m "
       else
-        print "  \e[31m✗\e[0m "
+        print " \e[31m✗\e[0m "
       end
       puts test.coq_cmd
     end

@@ -7,7 +7,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     | "exp" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      Structure.pp OCaml.unit OCaml.unit definitions
+      Structure.pp OCaml.unit Loc.pp definitions
     | "effects" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
@@ -16,16 +16,18 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     | "monadise" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
+      let (definitions, _) =
+        Structure.effects PervasivesModule.effects definitions in
       let (_, definitions) =
-        Structure.monadise PathName.Env.empty definitions trees in
-      Structure.pp OCaml.unit OCaml.unit definitions
+        Structure.monadise PathName.Env.empty definitions in
+      Structure.pp OCaml.unit Loc.pp definitions
     | "v" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (trees, _) = Structure.to_trees PervasivesModule.effects definitions in
+      let (definitions, _) =
+        Structure.effects PervasivesModule.effects definitions in
       let (_, definitions) =
-        Structure.monadise PathName.Env.empty definitions trees in
+        Structure.monadise PathName.Env.empty definitions in
       concat (List.map (fun d -> d ^^ newline) [
         !^ "Require Import CoqOfOCaml." ^^ newline;
         !^ "Local Open Scope Z_scope.";

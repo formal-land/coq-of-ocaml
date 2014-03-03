@@ -1,24 +1,25 @@
 ((),
   Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Match
-      ((),
+      (unknown,
         Tuple
-          ((),
+          (unknown,
             Constructor
-              ((), 'cons', Constant ((), Int(1)),
+              (unknown, 'cons', Constant (unknown, Int(1)),
                 Constructor
-                  ((), 'cons', Constant ((), Int(2)), Constructor ((), '[]'))),
-            Constructor ((), 'false')),
+                  (unknown, 'cons', Constant (unknown, Int(2)),
+                    Constructor (unknown, '[]'))),
+            Constructor (unknown, 'false')),
         [
           (Tuple
             (Constructor
               ('cons', 'x',
                 Constructor ('cons', Any, Constructor ('[]'))),
-              Constructor ('true')), Variable ((), 'x'));
+              Constructor ('true')), Variable (unknown, 'x'));
           (Tuple
             (Constructor
               ('cons', Any,
                 Constructor ('cons', 'y', Constructor ('[]'))),
-              Constructor ('false')), Variable ((), 'y'));
-          (Any, Constant ((), Int(0)))
+              Constructor ('false')), Variable (unknown, 'y'));
+          (Any, Constant (unknown, Int(0)))
         ]))

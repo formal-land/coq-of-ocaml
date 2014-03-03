@@ -7,60 +7,60 @@
         ('l', Type ('list', 'B'))
       ], Some Monad ([ 'NonTermination' ], Type ('list', 'A'))) =
     Match
-      ((), Variable ((), 'counter'),
+      (unknown, Variable (unknown, 'counter'),
         [
           (Nat(0),
             Apply
-              ((), Variable ((), 'not_terminated'),
-                Variable ((), 'tt')));
+              (unknown, Variable (unknown, 'not_terminated'),
+                Variable (unknown, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((), Variable ((), 'l'),
+              (unknown, Variable (unknown, 'l'),
                 [
                   (Constructor ('[]'),
                     Return
-                      ((),
+                      (unknown,
                         Constructor
-                          ((),
+                          (unknown,
                             '[]')));
                   (Constructor ('cons', 'x', 'xs'),
                     Bind
-                      ((),
+                      (unknown,
                         Apply
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'map_rec'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'counter')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'f')),
                             Variable
-                              ((),
+                              (unknown,
                                 'xs')),
                         Some
                           'x_1',
                         Return
-                          ((),
+                          (unknown,
                             Constructor
-                              ((),
+                              (unknown,
                                 'cons',
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'f'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'x')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x_1')))))
                 ]))
         ]))
@@ -71,20 +71,22 @@
       [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
       Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
     Bind
-      ((),
+      (unknown,
         Lift
-          ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-        Some 'counter',
-        Lift
-          ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (unknown, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
             Apply
-              ((),
+              (unknown, Variable (unknown, 'read_counter'),
+                Variable (unknown, 'tt'))), Some 'counter',
+        Lift
+          (unknown, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply
+              (unknown,
                 Apply
-                  ((),
+                  (unknown,
                     Apply
-                      ((), Variable ((), 'map_rec'), Variable ((), 'counter')),
-                    Variable ((), 'f')), Variable ((), 'l')))))
+                      (unknown, Variable (unknown, 'map_rec'),
+                        Variable (unknown, 'counter')), Variable (unknown, 'f')),
+                Variable (unknown, 'l')))))
 
 ((),
   Value
@@ -96,55 +98,55 @@
         ('l', Type ('list', 'B'))
       ], Some Monad ([ 'NonTermination' ], 'A')) =
     Match
-      ((), Variable ((), 'counter'),
+      (unknown, Variable (unknown, 'counter'),
         [
           (Nat(0),
             Apply
-              ((), Variable ((), 'not_terminated'),
-                Variable ((), 'tt')));
+              (unknown, Variable (unknown, 'not_terminated'),
+                Variable (unknown, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((), Variable ((), 'l'),
+              (unknown, Variable (unknown, 'l'),
                 [
                   (Constructor ('[]'),
                     Return
-                      ((),
+                      (unknown,
                         Variable
-                          ((),
+                          (unknown,
                             'a')));
                   (Constructor ('cons', 'x', 'xs'),
                     Apply
-                      ((),
+                      (unknown,
                         Apply
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'fold_rec'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'counter')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'f')),
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'f'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'a')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x'))),
                         Variable
-                          ((),
+                          (unknown,
                             'xs')))
                 ]))
         ]))
@@ -155,34 +157,37 @@
       [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
       Some Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
     Bind
-      ((),
+      (unknown,
         Lift
-          ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-        Some 'counter',
-        Lift
-          ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (unknown, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
             Apply
-              ((),
+              (unknown, Variable (unknown, 'read_counter'),
+                Variable (unknown, 'tt'))), Some 'counter',
+        Lift
+          (unknown, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply
+              (unknown,
                 Apply
-                  ((),
+                  (unknown,
                     Apply
-                      ((),
+                      (unknown,
                         Apply
-                          ((), Variable ((), 'fold_rec'),
-                            Variable ((), 'counter')), Variable ((), 'f')),
-                    Variable ((), 'a')), Variable ((), 'l')))))
+                          (unknown, Variable (unknown, 'fold_rec'),
+                            Variable (unknown, 'counter')),
+                        Variable (unknown, 'f')), Variable (unknown, 'a')),
+                Variable (unknown, 'l')))))
 
 ((),
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Constructor
-      ((), 'cons', Constant ((), Int(5)),
+      (unknown, 'cons', Constant (unknown, Int(5)),
         Constructor
-          ((), 'cons', Constant ((), Int(6)),
+          (unknown, 'cons', Constant (unknown, Int(6)),
             Constructor
-              ((), 'cons', Constant ((), Int(7)),
+              (unknown, 'cons', Constant (unknown, Int(7)),
                 Constructor
-                  ((), 'cons', Constant ((), Int(2)), Constructor ((), '[]'))))))
+                  (unknown, 'cons', Constant (unknown, Int(2)),
+                    Constructor (unknown, '[]'))))))
 
 ((),
   Value
@@ -192,23 +197,26 @@
         ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
       ], Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
     Bind
-      ((),
+      (unknown,
         Apply
-          ((), Apply ((), Variable ((), 'map'), Variable ((), 'incr')),
-            Variable ((), 'l')), Some 'x',
-        Apply
-          ((),
+          (unknown,
             Apply
-              ((),
+              (unknown, Variable (unknown, 'map'), Variable (unknown, 'incr')),
+            Variable (unknown, 'l')), Some 'x',
+        Apply
+          (unknown,
+            Apply
+              (unknown,
                 Apply
-                  ((), Variable ((), 'fold'),
+                  (unknown, Variable (unknown, 'fold'),
                     Function
-                      ((), 'x',
+                      (unknown, 'x',
                         Function
-                          ((), 'y',
+                          (unknown, 'y',
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((), Variable ((), 'plus'), Variable ((), 'x')),
-                                Variable ((), 'y'))))), Constant ((), Int(0))),
-            Variable ((), 'x'))))
+                                  (unknown, Variable (unknown, 'plus'),
+                                    Variable (unknown, 'x')),
+                                Variable (unknown, 'y'))))),
+                Constant (unknown, Int(0))), Variable (unknown, 'x'))))

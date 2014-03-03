@@ -5,42 +5,42 @@ Module 'SizedString':
 ((),
   Value (non_rec, 'r', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      ((), ('SizedString.name', Constant ((), String("gre"))),
-        ('SizedString.size', Constant ((), Int(3)))))
+      (unknown, ('SizedString.name', Constant (unknown, String("gre"))),
+        ('SizedString.size', Constant (unknown, Int(3)))))
 
 ((),
   Value (non_rec, 'r'', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      ((), ('SizedString.name', Constant ((), String("haha"))),
-        ('SizedString.size', Constant ((), Int(4)))))
+      (unknown, ('SizedString.name', Constant (unknown, String("haha"))),
+        ('SizedString.size', Constant (unknown, Int(4)))))
 
 ((),
   Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((),
+      (unknown,
         Apply
-          ((), Variable ((), 'Z.add'),
-            Field ((), Variable ((), 'r'), 'SizedString.size')),
-        Field ((), Variable ((), 'r''), 'SizedString.size')))
+          (unknown, Variable (unknown, 'Z.add'),
+            Field (unknown, Variable (unknown, 'r'), 'SizedString.size')),
+        Field (unknown, Variable (unknown, 'r''), 'SizedString.size')))
 
 ((),
   Value
     (non_rec, 'f', [ ], [ ('match_var_0', Type ('SizedString.t')) ],
       Some Type ('bool')) =
     Match
-      ((), Variable ((), 'match_var_0'),
+      (unknown, Variable (unknown, 'match_var_0'),
         [
-          (Record (('SizedString.size', Int(3))), Constructor ((), 'true'));
-          (Any, Constructor ((), 'false'))
+          (Record (('SizedString.size', Int(3))), Constructor (unknown, 'true'));
+          (Any, Constructor (unknown, 'false'))
         ]))
 
 ((),
   Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
-    Apply ((), Variable ((), 'f'), Variable ((), 'r')))
+    Apply (unknown, Variable (unknown, 'f'), Variable (unknown, 'r')))
 
 ((),
   Value (non_rec, 'b'', [ ], [ ], Some Type ('bool')) =
-    Apply ((), Variable ((), 'f'), Variable ((), 'r'')))
+    Apply (unknown, Variable (unknown, 'f'), Variable (unknown, 'r'')))
 
 Module 'Point':
   Record 't':
@@ -49,14 +49,15 @@ Module 'Point':
   ((),
     Value (non_rec, 'p', [ ], [ ], Some Type ('t')) =
       Record
-        ((), ('x', Constant ((), Int(5))), ('y', Constant ((), Int(-3))),
-          ('z', Constant ((), Int(1)))))
+        (unknown, ('x', Constant (unknown, Int(5))),
+          ('y', Constant (unknown, Int(-3))), ('z', Constant (unknown, Int(1)))))
   
   ((),
     Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
       Match
-        ((), Variable ((), 'p'),
+        (unknown, Variable (unknown, 'p'),
           [
-            (Record (('x', Int(5)), ('z', Int(1))), Constructor ((), 'true'));
-            (Any, Constructor ((), 'false'))
+            (Record (('x', Int(5)), ('z', Int(1))),
+              Constructor (unknown, 'true'));
+            (Any, Constructor (unknown, 'false'))
           ]))

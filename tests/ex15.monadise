@@ -3,7 +3,7 @@ Inductive 'set':
 
 ((),
   Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
-    Constructor ((), 'Empty'))
+    Constructor (unknown, 'Empty'))
 
 ((),
   Value
@@ -11,93 +11,93 @@ Inductive 'set':
       [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Monad ([ 'NonTermination' ], Type ('bool'))) =
     Match
-      ((), Variable ((), 'counter'),
+      (unknown, Variable (unknown, 'counter'),
         [
           (Nat(0),
             Apply
-              ((), Variable ((), 'not_terminated'),
-                Variable ((), 'tt')));
+              (unknown, Variable (unknown, 'not_terminated'),
+                Variable (unknown, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((), Variable ((), 's'),
+              (unknown, Variable (unknown, 's'),
                 [
                   (Constructor ('Empty'),
                     Return
-                      ((),
+                      (unknown,
                         Constructor
-                          ((),
+                          (unknown,
                             'false')));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      ((),
+                      (unknown,
                         Apply
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'Z.ltb'),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x')),
                             Variable
-                              ((),
+                              (unknown,
                                 'y')),
                         Apply
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'member_rec'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'counter')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x')),
                             Variable
-                              ((),
+                              (unknown,
                                 's1')),
                         IfThenElse
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'Z.ltb'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'y')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x')),
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Apply
-                                      ((),
+                                      (unknown,
                                         Variable
-                                          ((),
+                                          (unknown,
                                             'member_rec'),
                                         Variable
-                                          ((),
+                                          (unknown,
                                             'counter')),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'x')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     's2')),
                             Return
-                              ((),
+                              (unknown,
                                 Constructor
-                                  ((),
+                                  (unknown,
                                     'true')))))
                 ]))
         ]))
@@ -107,20 +107,22 @@ Inductive 'set':
     (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
     Bind
-      ((),
+      (unknown,
         Lift
-          ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-        Some 'counter',
-        Lift
-          ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (unknown, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
             Apply
-              ((),
+              (unknown, Variable (unknown, 'read_counter'),
+                Variable (unknown, 'tt'))), Some 'counter',
+        Lift
+          (unknown, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply
+              (unknown,
                 Apply
-                  ((),
+                  (unknown,
                     Apply
-                      ((), Variable ((), 'member_rec'), Variable ((), 'counter')),
-                    Variable ((), 'x')), Variable ((), 's')))))
+                      (unknown, Variable (unknown, 'member_rec'),
+                        Variable (unknown, 'counter')), Variable (unknown, 'x')),
+                Variable (unknown, 's')))))
 
 ((),
   Value
@@ -128,138 +130,138 @@ Inductive 'set':
       [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Monad ([ 'NonTermination' ], Type ('set'))) =
     Match
-      ((), Variable ((), 'counter'),
+      (unknown, Variable (unknown, 'counter'),
         [
           (Nat(0),
             Apply
-              ((), Variable ((), 'not_terminated'),
-                Variable ((), 'tt')));
+              (unknown, Variable (unknown, 'not_terminated'),
+                Variable (unknown, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((), Variable ((), 's'),
+              (unknown, Variable (unknown, 's'),
                 [
                   (Constructor ('Empty'),
                     Return
-                      ((),
+                      (unknown,
                         Constructor
-                          ((),
+                          (unknown,
                             'Node',
                             Constructor
-                              ((),
+                              (unknown,
                                 'Empty'),
                             Variable
-                              ((),
+                              (unknown,
                                 'x'),
                             Constructor
-                              ((),
+                              (unknown,
                                 'Empty'))));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      ((),
+                      (unknown,
                         Apply
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'Z.ltb'),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x')),
                             Variable
-                              ((),
+                              (unknown,
                                 'y')),
                         Bind
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Apply
-                                      ((),
+                                      (unknown,
                                         Variable
-                                          ((),
+                                          (unknown,
                                             'insert_rec'),
                                         Variable
-                                          ((),
+                                          (unknown,
                                             'counter')),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'x')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     's1')),
                             Some
                               'x',
                             Return
-                              ((),
+                              (unknown,
                                 Constructor
-                                  ((),
+                                  (unknown,
                                     'Node',
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'x'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'y'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         's2')))),
                         IfThenElse
-                          ((),
+                          (unknown,
                             Apply
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'Z.ltb'),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         'y')),
                                 Variable
-                                  ((),
+                                  (unknown,
                                     'x')),
                             Bind
-                              ((),
+                              (unknown,
                                 Apply
-                                  ((),
+                                  (unknown,
                                     Apply
-                                      ((),
+                                      (unknown,
                                         Apply
-                                          ((),
+                                          (unknown,
                                             Variable
-                                              ((),
+                                              (unknown,
                                                 'insert_rec'),
                                             Variable
-                                              ((),
+                                              (unknown,
                                                 'counter')),
                                         Variable
-                                          ((),
+                                          (unknown,
                                             'x')),
                                     Variable
-                                      ((),
+                                      (unknown,
                                         's2')),
                                 Some
                                   'x',
                                 Return
-                                  ((),
+                                  (unknown,
                                     Constructor
-                                      ((),
+                                      (unknown,
                                         'Node',
                                         Variable
-                                          ((),
+                                          (unknown,
                                             's1'),
                                         Variable
-                                          ((),
+                                          (unknown,
                                             'y'),
                                         Variable
-                                          ((),
+                                          (unknown,
                                             'x')))),
                             Return
-                              ((),
+                              (unknown,
                                 Variable
-                                  ((),
+                                  (unknown,
                                     's')))))
                 ]))
         ]))
@@ -269,17 +271,19 @@ Inductive 'set':
     (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Monad ([ 'Counter'; 'NonTermination' ], Type ('set'))) =
     Bind
-      ((),
+      (unknown,
         Lift
-          ((), [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply ((), Variable ((), 'read_counter'), Variable ((), 'tt'))),
-        Some 'counter',
-        Lift
-          ((), [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (unknown, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
             Apply
-              ((),
+              (unknown, Variable (unknown, 'read_counter'),
+                Variable (unknown, 'tt'))), Some 'counter',
+        Lift
+          (unknown, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+            Apply
+              (unknown,
                 Apply
-                  ((),
+                  (unknown,
                     Apply
-                      ((), Variable ((), 'insert_rec'), Variable ((), 'counter')),
-                    Variable ((), 'x')), Variable ((), 's')))))
+                      (unknown, Variable (unknown, 'insert_rec'),
+                        Variable (unknown, 'counter')), Variable (unknown, 'x')),
+                Variable (unknown, 's')))))

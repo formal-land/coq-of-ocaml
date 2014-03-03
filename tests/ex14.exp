@@ -3,10 +3,14 @@
     (non_rec, 'f', [ ], [ ('n', Type ('Z')); ('b', Type ('bool')) ],
       Some Type ('Z')) =
     IfThenElse
-      ((), Variable ((), 'b'),
+      (unknown, Variable (unknown, 'b'),
         Apply
-          ((), Apply ((), Variable ((), 'Z.add'), Variable ((), 'n')),
-            Constant ((), Int(1))),
+          (unknown,
+            Apply
+              (unknown, Variable (unknown, 'Z.add'), Variable (unknown, 'n')),
+            Constant (unknown, Int(1))),
         Apply
-          ((), Apply ((), Variable ((), 'Z.sub'), Variable ((), 'n')),
-            Constant ((), Int(1)))))
+          (unknown,
+            Apply
+              (unknown, Variable (unknown, 'Z.sub'), Variable (unknown, 'n')),
+            Constant (unknown, Int(1)))))

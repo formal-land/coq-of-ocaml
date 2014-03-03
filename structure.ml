@@ -206,12 +206,13 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
-let rec of_structure (structure : structure) : (unit, unit) t list =
-  let of_structure_item (item : structure_item) : (unit, unit) t =
+let rec of_structure (structure : structure) : (unit, Loc.t) t list =
+  let of_structure_item (item : structure_item) : (unit, Loc.t) t =
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
       let (is_rec, pattern, typ_vars, args, typ, e) =
         Exp.import_let_fun is_rec pattern e in
+      let e = Exp.map (fun _ -> Loc.unknown) e in
       (match pattern with
       | Pattern.Variable x ->
         Value ((), {
@@ -259,8 +260,8 @@ let rec of_structure (structure : structure) : (unit, unit) t list =
     | _ -> failwith "Structure item not handled." in
   List.map of_structure_item structure.str_items
 
-let rec monadise_let_rec (defs : (unit, unit) t list) : (unit, unit) t list =
-  let rec monadise_let_rec_one (def : (unit, unit) t) : (unit, unit) t list =
+let rec monadise_let_rec (defs : (unit, Loc.t) t list) : (unit, Loc.t) t list =
+  let rec monadise_let_rec_one (def : (unit, Loc.t) t) : (unit, Loc.t) t list =
     match def with
     | Value ((), { Value.header = header; body = body }) ->
       let defs = Exp.monadise_let_rec_definition header body in
@@ -345,42 +346,43 @@ let rec to_trees (effects : Effect.Type.t PathName.Env.t)
       ([], effects) defs in
   (List.rev trees, effects)
 
-let rec monadise (env : unit PathName.Env.t) (defs : (unit, 'a) t list)
-  (trees : Tree.t list) : unit PathName.Env.t * (unit, unit) t list =
-  let rec monadise_one (env : unit PathName.Env.t) (def : (unit, 'a) t)
-    (tree : Tree.t) : unit PathName.Env.t * (unit, unit) t =
-    match (def, tree) with
-    | (
-      Value ((), {
-        Value.header = (is_rec, x, typ_vars, args, typ);
-        body = body }),
-      Tree.Value (tree, effect)) ->
+let rec monadise (env : unit PathName.Env.t)
+  (defs : (Effect.Type.t, Loc.t * Effect.t) t list)
+  : unit PathName.Env.t * (unit, Loc.t) t list =
+  let rec monadise_one (env : unit PathName.Env.t)
+    (def : (Effect.Type.t, Loc.t * Effect.t) t)
+    : unit PathName.Env.t * (unit, Loc.t) t =
+    match def with
+    | Value (effect, {
+      Value.header = (is_rec, x, typ_vars, args, typ);
+      body = body }) ->
       let typ = match typ with
         | None -> None
-        | Some typ -> Some (Type.monadise typ (Exp.Tree.effect tree)) in
+        | Some typ -> Some (Type.monadise typ (snd (Exp.annotation body))) in
       let env_in_body =
         if Recursivity.to_bool is_rec then
-          PathName.Env.add (PathName.of_name [] x) () env
+          PathName.Env.add_name x () env
         else
           env in
-      let body = Exp.monadise env_in_body body tree in
-      let env = PathName.Env.add (PathName.of_name [] x) () env in
+      let body = Exp.monadise env_in_body body in
+      let env = PathName.Env.add_name x () env in
       (env, Value ((), {
         Value.header = (is_rec, x, typ_vars, args, typ);
         body = body }))
-    | (Module (name, defs), Tree.Module trees) ->
-      let (env, defs) = monadise (PathName.Env.open_module env) defs trees in
+    | Module (name, defs) ->
+      let (env, defs) = monadise (PathName.Env.open_module env) defs in
       (PathName.Env.close_module env name, Module (name, defs))
-    | (Exception exn, Tree.Other) ->
-      (PathName.Env.add (PathName.of_name [] exn.Exception.name) () env, def)
-    | (Inductive _, Tree.Other) | (Record _, Tree.Other)
-      | (Synonym _, Tree.Other) | (Open _, Tree.Other) -> (env, def)
-    | _ -> failwith "Unexpected arguments for 'monadise'." in
+    | Exception exn ->
+      (PathName.Env.add_name exn.Exception.name () env, Exception exn)
+    | Inductive ind -> (env, Inductive ind)
+    | Record record -> (env, Record record)
+    | Synonym synonym -> (env, Synonym synonym)
+    | Open name -> (env, Open name) in
   let (env, defs) =
-    List.fold_left2 (fun (env, defs) def tree ->
-      let (env, def) = monadise_one env def tree in
+    List.fold_left (fun (env, defs) def ->
+      let (env, def) = monadise_one env def in
       (env, def :: defs))
-      (env, []) defs trees in
+      (env, []) defs in
   (env, List.rev defs)
 
 (** Pretty-print a structure to Coq. *)
