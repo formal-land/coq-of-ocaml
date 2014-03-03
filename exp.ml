@@ -118,28 +118,29 @@ let rec open_function (e : 'a t) : Name.t list * 'a t =
   | _ -> ([], e)
 
 (** Import an OCaml expression. *)
-let rec of_expression (e : expression) : unit t =
+let rec of_expression (e : expression) : Loc.t t =
+  let l = Loc.of_location e.exp_loc in
   match e.exp_desc with
-  | Texp_ident (path, _, _) -> Variable ((), PathName.of_path path)
-  | Texp_constant constant -> Constant ((), Constant.of_constant constant)
+  | Texp_ident (path, _, _) -> Variable (l, PathName.of_path path)
+  | Texp_constant constant -> Constant (l, Constant.of_constant constant)
   | Texp_let (rec_flag, [{ vb_pat = pattern; vb_expr = e1 }], e2) ->
     let (rec_flag, pattern, free_typ_vars, args, body_typ, body) =
       import_let_fun rec_flag pattern e1 in
     let e2 = of_expression e2 in
     (match (pattern, args) with
     | (Pattern.Variable name, []) ->
-      Let ((), (Recursivity.New false, name, [], [], None), body, e2)
-    | (_, []) -> Match ((), body, [pattern, e2])
+      Let (l, (Recursivity.New false, name, [], [], None), body, e2)
+    | (_, []) -> Match (l, body, [pattern, e2])
     | (Pattern.Variable name, _) ->
-      Let ((), (rec_flag, name, free_typ_vars, args, Some body_typ), body, e2)
+      Let (l, (rec_flag, name, free_typ_vars, args, Some body_typ), body, e2)
     | _ -> failwith "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
     ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->
-    Function ((), Name.of_ident x, of_expression e)
+    Function (l, Name.of_ident x, of_expression e)
   | Texp_function (_, cases, _) ->
     let (x, e) = open_cases cases in
-    Function ((), x, e)
+    Function (l, x, e)
   | Texp_apply (e_f, e_xs) ->
     let e_f = of_expression e_f in
     let e_xs = List.map (fun (_, e_x, _) ->
@@ -147,42 +148,45 @@ let rec of_expression (e : expression) : unit t =
       | Some e_x -> of_expression e_x
       | None -> failwith "expected an argument") e_xs in
     (match (e_f, e_xs) with
-    | (Variable ((), x), [Constructor ((), exn, es)])
+    | (Variable (_, x), [Constructor (l_exn, exn, es)])
       when x = PathName.of_name ["Pervasives"] "raise" ->
-      Apply ((), Variable ((), exn), Tuple ((), es))
-    | _ -> List.fold_left (fun e e_x -> Apply ((), e, e_x)) e_f e_xs)
+      Apply (l, Variable (l_exn, exn), Tuple (Loc.unknown, es))
+    | _ -> List.fold_left (fun e e_x -> Apply (Loc.unknown, e, e_x))
+      (Apply (l, e_f, List.hd e_xs)) (List.tl e_xs))
   | Texp_match (e, cases, _) ->
     let e = of_expression e in
     let cases = List.map (fun {c_lhs = p; c_rhs = e} ->
       (Pattern.of_pattern p, of_expression e)) cases in
-    Match ((), e, cases)
-  | Texp_tuple es -> Tuple ((), List.map of_expression es)
+    Match (l, e, cases)
+  | Texp_tuple es -> Tuple (l, List.map of_expression es)
   | Texp_construct (x, _, es) ->
-    Constructor ((), PathName.of_loc x, List.map of_expression es)
+    Constructor (l, PathName.of_loc x, List.map of_expression es)
   | Texp_record (fields, _) ->
-    Record ((), fields |> List.map (fun (x, _, e) ->
+    Record (l, fields |> List.map (fun (x, _, e) ->
       (PathName.of_loc x, of_expression e)))
-  | Texp_field (e, x, _) -> Field ((), of_expression e, PathName.of_loc x)
+  | Texp_field (e, x, _) -> Field (l, of_expression e, PathName.of_loc x)
   | Texp_ifthenelse (e1, e2, e3) ->
     let e3 = match e3 with
-      | None -> Constructor ((), { PathName.path = []; base = "tt" }, [])
+      | None ->
+        Constructor (Loc.unknown, { PathName.path = []; base = "tt" }, [])
       | Some e3 -> of_expression e3 in
-    IfThenElse ((), of_expression e1, of_expression e2, e3)
-  | Texp_sequence (e1, e2) -> Sequence ((), of_expression e1, of_expression e2)
+    IfThenElse (l, of_expression e1, of_expression e2, e3)
+  | Texp_sequence (e1, e2) -> Sequence (l, of_expression e1, of_expression e2)
   | Texp_try _ | Texp_setfield _ | Texp_array _
     | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
-and open_cases (cases : case list) : Name.t * unit t =
+and open_cases (cases : case list) : Name.t * Loc.t t =
   let x = Name.unsafe_fresh "match_var" in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
     (Pattern.of_pattern p, of_expression e)) in
-  (x, Match ((), Variable ((), PathName.of_name [] x), cases))
+  (x, Match (Loc.unknown, Variable (Loc.unknown, PathName.of_name [] x),
+    cases))
 and import_let_fun (rec_flag : Asttypes.rec_flag) (pattern : pattern)
   (e : expression)
   : Recursivity.t * Pattern.t * Name.t list * (Name.t * Type.t) list
-    * Type.t * unit t =
+    * Type.t * Loc.t t =
   let pattern = Pattern.of_pattern pattern in
   let e_schema = Schema.of_type (Type.of_type_expr e.exp_type) in
   let e = of_expression e in

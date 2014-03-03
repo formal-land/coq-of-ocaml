@@ -8,15 +8,15 @@ Inductive 't1':
 
 ((),
   Value (non_rec, 'n', [ ], [ ], Some Type ('t1')) =
-    Constructor (?, 'C2', Constructor (?, 'false'), Constant (?, Int(3))))
+    Constructor (8, 'C2', Constructor (8, 'false'), Constant (8, Int(3))))
 
 ((),
   Value (non_rec, 'm', [ ], [ ], Some Type ('bool')) =
     Match
-      (?, Variable (?, 'n'),
+      (10, Variable (10, 'n'),
         [
-          (Constructor ('C2', 'b', Any), Variable (?, 'b'));
-          (Any, Constructor (?, 'true'))
+          (Constructor ('C2', 'b', Any), Variable (11, 'b'));
+          (Any, Constructor (12, 'true'))
         ]))
 
 Inductive 't2':
@@ -34,19 +34,19 @@ Inductive 't2':
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 'l'),
+              (19, Variable (19, 'l'),
                 [
                   (Constructor ('[]'),
                     Return
                       (?,
                         Constructor
-                          (?,
+                          (20,
                             'D1')));
                   (Constructor ('cons', 'x', 'xs'),
                     Bind
                       (?,
                         Apply
-                          (?,
+                          (21,
                             Apply
                               (?,
                                 Variable
@@ -56,17 +56,17 @@ Inductive 't2':
                                   (?,
                                     'counter')),
                             Variable
-                              (?,
+                              (21,
                                 'xs')),
                         Some
                           'x_1',
                         Return
                           (?,
                             Constructor
-                              (?,
+                              (21,
                                 'D2',
                                 Variable
-                                  (?,
+                                  (21,
                                     'x'),
                                 Variable
                                   (?,
@@ -103,19 +103,19 @@ Inductive 't2':
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 'l'),
+              (24, Variable (24, 'l'),
                 [
                   (Constructor ('D1'),
                     Return
                       (?,
                         Constant
-                          (?,
+                          (25,
                             Int(0))));
                   (Constructor ('D2', 'x', 'xs'),
                     Bind
                       (?,
                         Apply
-                          (?,
+                          (26,
                             Apply
                               (?,
                                 Variable
@@ -125,7 +125,7 @@ Inductive 't2':
                                   (?,
                                     'counter')),
                             Variable
-                              (?,
+                              (26,
                                 'xs')),
                         Some
                           'x_1',
@@ -134,12 +134,12 @@ Inductive 't2':
                             Apply
                               (?,
                                 Apply
-                                  (?,
+                                  (26,
                                     Variable
-                                      (?,
+                                      (26,
                                         'Z.add'),
                                     Variable
-                                      (?,
+                                      (26,
                                         'x')),
                                 Variable
                                   (?,
@@ -170,11 +170,11 @@ Inductive 't2':
     Bind
       (?,
         Apply
-          (?, Variable (?, 'of_list'),
+          (28, Variable (28, 'of_list'),
             Constructor
-              (?, 'cons', Constant (?, Int(5)),
+              (28, 'cons', Constant (28, Int(5)),
                 Constructor
-                  (?, 'cons', Constant (?, Int(7)),
+                  (28, 'cons', Constant (28, Int(7)),
                     Constructor
-                      (?, 'cons', Constant (?, Int(3)), Constructor (?, '[]'))))),
-        Some 'x', Apply (?, Variable (?, 'sum'), Variable (?, 'x'))))
+                      (28, 'cons', Constant (28, Int(3)), Constructor (28, '[]'))))),
+        Some 'x', Apply (28, Variable (28, 'sum'), Variable (?, 'x'))))

@@ -3,7 +3,7 @@ Inductive 'set':
 
 (.,
   Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
-    Constructor ((?, Effect ([ ], .)), 'Empty'))
+    Constructor ((7, Effect ([ ], .)), 'Empty'))
 
 (. -> . -> . -[ 'NonTermination' ]-> .,
   Value
@@ -29,12 +29,12 @@ Inductive 'set':
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?, Effect ([ 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 's'),
+              ((10, Effect ([ 'NonTermination' ], .)),
+                Variable ((10, Effect ([ ], .)), 's'),
                 [
                   (Constructor ('Empty'),
                     Constructor
-                      ((?,
+                      ((11,
                         Effect
                           ([
                           ],
@@ -42,7 +42,7 @@ Inductive 'set':
                         'false'));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      ((?,
+                      ((13,
                         Effect
                           ([
                             'NonTermination'
@@ -55,27 +55,27 @@ Inductive 'set':
                               ],
                                 .)),
                             Apply
-                              ((?,
+                              ((13,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 Variable
-                                  ((?,
+                                  ((13,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'Z.ltb'),
                                 Variable
-                                  ((?,
+                                  ((13,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((?,
+                              ((13,
                                 Effect
                                   ([
                                   ],
@@ -89,7 +89,7 @@ Inductive 'set':
                               ],
                                 .)),
                             Apply
-                              ((?,
+                              ((14,
                                 Effect
                                   ([
                                   ],
@@ -133,21 +133,21 @@ Inductive 'set':
                                             .)),
                                         'counter')),
                                 Variable
-                                  ((?,
+                                  ((14,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((?,
+                              ((14,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 's1')),
                         IfThenElse
-                          ((?,
+                          ((15,
                             Effect
                               ([
                                 'NonTermination'
@@ -160,27 +160,27 @@ Inductive 'set':
                                   ],
                                     .)),
                                 Apply
-                                  ((?,
+                                  ((15,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     Variable
-                                      ((?,
+                                      ((15,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'Z.ltb'),
                                     Variable
-                                      ((?,
+                                      ((15,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'y')),
                                 Variable
-                                  ((?,
+                                  ((15,
                                     Effect
                                       ([
                                       ],
@@ -194,7 +194,7 @@ Inductive 'set':
                                   ],
                                     .)),
                                 Apply
-                                  ((?,
+                                  ((16,
                                     Effect
                                       ([
                                       ],
@@ -238,21 +238,21 @@ Inductive 'set':
                                                 .)),
                                             'counter')),
                                     Variable
-                                      ((?,
+                                      ((16,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'x')),
                                 Variable
-                                  ((?,
+                                  ((16,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     's2')),
                             Constructor
-                              ((?,
+                              ((18,
                                 Effect
                                   ([
                                   ],
@@ -307,33 +307,33 @@ Inductive 'set':
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?, Effect ([ 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 's'),
+              ((21, Effect ([ 'NonTermination' ], .)),
+                Variable ((21, Effect ([ ], .)), 's'),
                 [
                   (Constructor ('Empty'),
                     Constructor
-                      ((?,
+                      ((22,
                         Effect
                           ([
                           ],
                             .)),
                         'Node',
                         Constructor
-                          ((?,
+                          ((22,
                             Effect
                               ([
                               ],
                                 .)),
                             'Empty'),
                         Variable
-                          ((?,
+                          ((22,
                             Effect
                               ([
                               ],
                                 .)),
                             'x'),
                         Constructor
-                          ((?,
+                          ((22,
                             Effect
                               ([
                               ],
@@ -341,7 +341,7 @@ Inductive 'set':
                             'Empty')));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      ((?,
+                      ((24,
                         Effect
                           ([
                             'NonTermination'
@@ -354,34 +354,34 @@ Inductive 'set':
                               ],
                                 .)),
                             Apply
-                              ((?,
+                              ((24,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 Variable
-                                  ((?,
+                                  ((24,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'Z.ltb'),
                                 Variable
-                                  ((?,
+                                  ((24,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((?,
+                              ((24,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'y')),
                         Constructor
-                          ((?,
+                          ((25,
                             Effect
                               ([
                                 'NonTermination'
@@ -396,7 +396,7 @@ Inductive 'set':
                                   ],
                                     .)),
                                 Apply
-                                  ((?,
+                                  ((25,
                                     Effect
                                       ([
                                       ],
@@ -440,35 +440,35 @@ Inductive 'set':
                                                 .)),
                                             'counter')),
                                     Variable
-                                      ((?,
+                                      ((25,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'x')),
                                 Variable
-                                  ((?,
+                                  ((25,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     's1')),
                             Variable
-                              ((?,
+                              ((25,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'y'),
                             Variable
-                              ((?,
+                              ((25,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 's2')),
                         IfThenElse
-                          ((?,
+                          ((26,
                             Effect
                               ([
                                 'NonTermination'
@@ -481,34 +481,34 @@ Inductive 'set':
                                   ],
                                     .)),
                                 Apply
-                                  ((?,
+                                  ((26,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     Variable
-                                      ((?,
+                                      ((26,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'Z.ltb'),
                                     Variable
-                                      ((?,
+                                      ((26,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'y')),
                                 Variable
-                                  ((?,
+                                  ((26,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Constructor
-                              ((?,
+                              ((27,
                                 Effect
                                   ([
                                     'NonTermination'
@@ -516,14 +516,14 @@ Inductive 'set':
                                     .)),
                                 'Node',
                                 Variable
-                                  ((?,
+                                  ((27,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     's1'),
                                 Variable
-                                  ((?,
+                                  ((27,
                                     Effect
                                       ([
                                       ],
@@ -537,7 +537,7 @@ Inductive 'set':
                                       ],
                                         .)),
                                     Apply
-                                      ((?,
+                                      ((27,
                                         Effect
                                           ([
                                           ],
@@ -581,21 +581,21 @@ Inductive 'set':
                                                     .)),
                                                 'counter')),
                                         Variable
-                                          ((?,
+                                          ((27,
                                             Effect
                                               ([
                                               ],
                                                 .)),
                                             'x')),
                                     Variable
-                                      ((?,
+                                      ((27,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         's2'))),
                             Variable
-                              ((?,
+                              ((28,
                                 Effect
                                   ([
                                   ],

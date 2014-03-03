@@ -2,7 +2,7 @@
   Value
     (non_rec, 'l', [ ], [ ],
       Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', Type ('Z')))) =
-    Let ?
+    Let 4
       (rec, 'map_rec', [ 'A'; 'B' ],
         [
           ('counter', Type ('nat'));
@@ -24,7 +24,7 @@
                       Return
                         (?,
                           Constructor
-                            (?,
+                            (5,
                               '[]')));
                     (Constructor
                       ('cons',
@@ -35,7 +35,7 @@
                           Apply
                             (?,
                               Apply
-                                (?,
+                                (6,
                                   Apply
                                     (?,
                                       Variable
@@ -45,32 +45,32 @@
                                         (?,
                                           'counter')),
                                   Variable
-                                    (?,
+                                    (6,
                                       'f')),
                               Variable
-                                (?,
+                                (6,
                                   'xs')),
                           Some
                             'x_1',
                           Return
                             (?,
                               Constructor
-                                (?,
+                                (6,
                                   'cons',
                                   Apply
-                                    (?,
+                                    (6,
                                       Variable
-                                        (?,
+                                        (6,
                                           'f'),
                                       Variable
-                                        (?,
+                                        (6,
                                           'x')),
                                   Variable
                                     (?,
                                       'x_1')))))
                   ]))
           ]) in
-    Let ?
+    Let 4
       (non_rec, 'map', [ 'A'; 'B' ],
         [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
         Some Monad ([ 'Counter'; 'NonTermination' ], Type ('list', 'A'))) =
@@ -89,7 +89,7 @@
                       Apply
                         (?, Variable (?, 'map_rec'), Variable (?, 'counter')),
                       Variable (?, 'f')), Variable (?, 'match_var_0')))) in
-    Let ?
+    Let 7
       (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ],
         Some Monad ([ 'NonTermination' ], 'A')) =
       Match
@@ -99,9 +99,9 @@
               Apply
                 (?, Variable (?, 'not_terminated'),
                   Variable (?, 'tt')));
-            (Constructor ('S', 'counter'), Return (?, Variable (?, 'x')))
+            (Constructor ('S', 'counter'), Return (?, Variable (7, 'x')))
           ]) in
-    Let ?
+    Let 7
       (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ],
         Some Monad ([ 'Counter'; 'NonTermination' ], 'A')) =
       Bind
@@ -119,15 +119,15 @@
     Apply
       (?,
         Apply
-          (?, Variable (?, 'map'),
+          (8, Variable (8, 'map'),
             Function
-              (?, 'n',
+              (8, 'n',
                 Apply
-                  (?, Apply (?, Variable (?, 'Z.add'), Variable (?, 'n')),
-                    Constant (?, Int(1))))),
+                  (?, Apply (8, Variable (8, 'Z.add'), Variable (8, 'n')),
+                    Constant (8, Int(1))))),
         Constructor
-          (?, 'cons', Constant (?, Int(5)),
+          (8, 'cons', Constant (8, Int(5)),
             Constructor
-              (?, 'cons', Constant (?, Int(7)),
+              (8, 'cons', Constant (8, Int(7)),
                 Constructor
-                  (?, 'cons', Constant (?, Int(8)), Constructor (?, '[]'))))))
+                  (8, 'cons', Constant (8, Int(8)), Constructor (8, '[]'))))))

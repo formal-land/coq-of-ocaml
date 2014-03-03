@@ -5,28 +5,28 @@ Module 'SizedString':
 (.,
   Value (non_rec, 'r', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      ((?, Effect ([ ], .)),
-        ('SizedString.name', Constant ((?, Effect ([ ], .)), String("gre"))),
-        ('SizedString.size', Constant ((?, Effect ([ ], .)), Int(3)))))
+      ((9, Effect ([ ], .)),
+        ('SizedString.name', Constant ((9, Effect ([ ], .)), String("gre"))),
+        ('SizedString.size', Constant ((9, Effect ([ ], .)), Int(3)))))
 
 (.,
   Value (non_rec, 'r'', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      ((?, Effect ([ ], .)),
-        ('SizedString.name', Constant ((?, Effect ([ ], .)), String("haha"))),
-        ('SizedString.size', Constant ((?, Effect ([ ], .)), Int(4)))))
+      ((10, Effect ([ ], .)),
+        ('SizedString.name', Constant ((10, Effect ([ ], .)), String("haha"))),
+        ('SizedString.size', Constant ((10, Effect ([ ], .)), Int(4)))))
 
 (.,
   Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
       ((?, Effect ([ ], .)),
         Apply
-          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.add'),
+          ((12, Effect ([ ], .)), Variable ((12, Effect ([ ], .)), 'Z.add'),
             Field
-              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'r'),
+              ((12, Effect ([ ], .)), Variable ((12, Effect ([ ], .)), 'r'),
                 'SizedString.size')),
         Field
-          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'r''),
+          ((12, Effect ([ ], .)), Variable ((12, Effect ([ ], .)), 'r''),
             'SizedString.size')))
 
 (. -> .,
@@ -37,21 +37,21 @@ Module 'SizedString':
       ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'match_var_0'),
         [
           (Record (('SizedString.size', Int(3))),
-            Constructor ((?, Effect ([ ], .)), 'true'));
-          (Any, Constructor ((?, Effect ([ ], .)), 'false'))
+            Constructor ((15, Effect ([ ], .)), 'true'));
+          (Any, Constructor ((16, Effect ([ ], .)), 'false'))
         ]))
 
 (.,
   Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
     Apply
-      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], . -> .)), 'f'),
-        Variable ((?, Effect ([ ], .)), 'r')))
+      ((18, Effect ([ ], .)), Variable ((18, Effect ([ ], . -> .)), 'f'),
+        Variable ((18, Effect ([ ], .)), 'r')))
 
 (.,
   Value (non_rec, 'b'', [ ], [ ], Some Type ('bool')) =
     Apply
-      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], . -> .)), 'f'),
-        Variable ((?, Effect ([ ], .)), 'r'')))
+      ((19, Effect ([ ], .)), Variable ((19, Effect ([ ], . -> .)), 'f'),
+        Variable ((19, Effect ([ ], .)), 'r'')))
 
 Module 'Point':
   Record 't':
@@ -60,16 +60,16 @@ Module 'Point':
   (.,
     Value (non_rec, 'p', [ ], [ ], Some Type ('t')) =
       Record
-        ((?, Effect ([ ], .)), ('x', Constant ((?, Effect ([ ], .)), Int(5))),
-          ('y', Constant ((?, Effect ([ ], .)), Int(-3))),
-          ('z', Constant ((?, Effect ([ ], .)), Int(1)))))
+        ((27, Effect ([ ], .)), ('x', Constant ((27, Effect ([ ], .)), Int(5))),
+          ('y', Constant ((27, Effect ([ ], .)), Int(-3))),
+          ('z', Constant ((27, Effect ([ ], .)), Int(1)))))
   
   (.,
     Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
       Match
-        ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'p'),
+        ((29, Effect ([ ], .)), Variable ((29, Effect ([ ], .)), 'p'),
           [
             (Record (('x', Int(5)), ('z', Int(1))),
-              Constructor ((?, Effect ([ ], .)), 'true'));
-            (Any, Constructor ((?, Effect ([ ], .)), 'false'))
+              Constructor ((30, Effect ([ ], .)), 'true'));
+            (Any, Constructor ((31, Effect ([ ], .)), 'false'))
           ]))

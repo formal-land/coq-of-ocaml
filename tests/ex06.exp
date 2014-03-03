@@ -13,28 +13,28 @@
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 'l'),
+              (4, Variable (4, 'l'),
                 [
                   (Constructor ('[]'),
                     Constructor
-                      (?,
+                      (5,
                         '[]'));
                   (Constructor ('cons', 'x', 'xs'),
                     Constructor
-                      (?,
+                      (6,
                         'cons',
                         Apply
-                          (?,
+                          (6,
                             Variable
-                              (?,
+                              (6,
                                 'f'),
                             Variable
-                              (?,
+                              (6,
                                 'x')),
                         Apply
                           (?,
                             Apply
-                              (?,
+                              (6,
                                 Apply
                                   (?,
                                     Variable
@@ -44,10 +44,10 @@
                                       (?,
                                         'counter')),
                                 Variable
-                                  (?,
+                                  (6,
                                     'f')),
                             Variable
-                              (?,
+                              (6,
                                 'xs'))))
                 ]))
         ]))
@@ -81,11 +81,11 @@
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 'l'),
+              (9, Variable (9, 'l'),
                 [
                   (Constructor ('[]'),
                     Variable
-                      (?,
+                      (10,
                         'a'));
                   (Constructor ('cons', 'x', 'xs'),
                     Apply
@@ -93,7 +93,7 @@
                         Apply
                           (?,
                             Apply
-                              (?,
+                              (11,
                                 Apply
                                   (?,
                                     Variable
@@ -103,23 +103,23 @@
                                       (?,
                                         'counter')),
                                 Variable
-                                  (?,
+                                  (11,
                                     'f')),
                             Apply
                               (?,
                                 Apply
-                                  (?,
+                                  (11,
                                     Variable
-                                      (?,
+                                      (11,
                                         'f'),
                                     Variable
-                                      (?,
+                                      (11,
                                         'a')),
                                 Variable
-                                  (?,
+                                  (11,
                                     'x'))),
                         Variable
-                          (?,
+                          (11,
                             'xs')))
                 ]))
         ]))
@@ -142,13 +142,13 @@
 ((),
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Constructor
-      (?, 'cons', Constant (?, Int(5)),
+      (13, 'cons', Constant (13, Int(5)),
         Constructor
-          (?, 'cons', Constant (?, Int(6)),
+          (13, 'cons', Constant (13, Int(6)),
             Constructor
-              (?, 'cons', Constant (?, Int(7)),
+              (13, 'cons', Constant (13, Int(7)),
                 Constructor
-                  (?, 'cons', Constant (?, Int(2)), Constructor (?, '[]'))))))
+                  (13, 'cons', Constant (13, Int(2)), Constructor (13, '[]'))))))
 
 ((),
   Value
@@ -162,15 +162,16 @@
         Apply
           (?,
             Apply
-              (?, Variable (?, 'fold'),
+              (16, Variable (16, 'fold'),
                 Function
-                  (?, 'x',
+                  (16, 'x',
                     Function
-                      (?, 'y',
+                      (16, 'y',
                         Apply
                           (?,
-                            Apply (?, Variable (?, 'plus'), Variable (?, 'x')),
-                            Variable (?, 'y'))))), Constant (?, Int(0))),
+                            Apply
+                              (16, Variable (16, 'plus'), Variable (16, 'x')),
+                            Variable (16, 'y'))))), Constant (16, Int(0))),
         Apply
-          (?, Apply (?, Variable (?, 'map'), Variable (?, 'incr')),
-            Variable (?, 'l'))))
+          (?, Apply (16, Variable (16, 'map'), Variable (16, 'incr')),
+            Variable (16, 'l'))))

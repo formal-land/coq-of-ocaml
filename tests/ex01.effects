@@ -1,13 +1,13 @@
 (. -> . -> .,
   Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'A'); ('y', 'B') ], Some 'A') =
-    Variable ((?, Effect ([ ], .)), 'x'))
+    Variable ((3, Effect ([ ], .)), 'x'))
 
 (.,
   Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Apply
       ((?, Effect ([ ], .)),
         Apply
-          ((?, Effect ([ ], . -> .)),
-            Variable ((?, Effect ([ ], . -> . -> .)), 'f'),
-            Constant ((?, Effect ([ ], .)), Int(12))),
-        Constant ((?, Effect ([ ], .)), Int(3))))
+          ((5, Effect ([ ], . -> .)),
+            Variable ((5, Effect ([ ], . -> . -> .)), 'f'),
+            Constant ((5, Effect ([ ], .)), Int(12))),
+        Constant ((5, Effect ([ ], .)), Int(3))))

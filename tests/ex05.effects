@@ -1,29 +1,29 @@
 (.,
   Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Match
-      ((?, Effect ([ ], .)),
+      ((3, Effect ([ ], .)),
         Tuple
-          ((?, Effect ([ ], .)),
+          ((3, Effect ([ ], .)),
             Constructor
-              ((?, Effect ([ ], .)), 'cons',
-                Constant ((?, Effect ([ ], .)), Int(1)),
+              ((3, Effect ([ ], .)), 'cons',
+                Constant ((3, Effect ([ ], .)), Int(1)),
                 Constructor
-                  ((?, Effect ([ ], .)), 'cons',
-                    Constant ((?, Effect ([ ], .)), Int(2)),
-                    Constructor ((?, Effect ([ ], .)), '[]'))),
-            Constructor ((?, Effect ([ ], .)), 'false')),
+                  ((3, Effect ([ ], .)), 'cons',
+                    Constant ((3, Effect ([ ], .)), Int(2)),
+                    Constructor ((3, Effect ([ ], .)), '[]'))),
+            Constructor ((3, Effect ([ ], .)), 'false')),
         [
           (Tuple
             (Constructor
               ('cons', 'x',
                 Constructor ('cons', Any, Constructor ('[]'))),
               Constructor ('true')),
-            Variable ((?, Effect ([ ], .)), 'x'));
+            Variable ((4, Effect ([ ], .)), 'x'));
           (Tuple
             (Constructor
               ('cons', Any,
                 Constructor ('cons', 'y', Constructor ('[]'))),
               Constructor ('false')),
-            Variable ((?, Effect ([ ], .)), 'y'));
-          (Any, Constant ((?, Effect ([ ], .)), Int(0)))
+            Variable ((5, Effect ([ ], .)), 'y'));
+          (Any, Constant ((6, Effect ([ ], .)), Int(0)))
         ]))

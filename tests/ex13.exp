@@ -3,14 +3,14 @@
     (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Type ('list', 'A')) =
     Match
-      (?, Variable (?, 'l'),
+      (4, Variable (4, 'l'),
         [
-          (Constructor ('cons', Any, 'xs'), Variable (?, 'xs'));
+          (Constructor ('cons', Any, 'xs'), Variable (5, 'xs'));
           (Constructor ('[]'),
             Apply
-              (?, Variable (?, 'failwith'),
+              (6, Variable (6, 'failwith'),
                 Constant
-                  (?,
+                  (6,
                     String("Cannot take the tail of an empty list."))))
         ]))
 
@@ -32,21 +32,21 @@
                 [
                   (Constructor ('[]'),
                     Constructor
-                      (?,
+                      (9,
                         'tt'));
                   (Constructor ('cons', 'x', 'xs'),
                     Sequence
-                      (?,
+                      (11,
                         Apply
-                          (?,
+                          (11,
                             Variable
-                              (?,
+                              (11,
                                 'print_string'),
                             Variable
-                              (?,
+                              (11,
                                 'x')),
                         Apply
-                          (?,
+                          (12,
                             Apply
                               (?,
                                 Variable
@@ -56,7 +56,7 @@
                                   (?,
                                     'counter')),
                             Variable
-                              (?,
+                              (12,
                                 'xs'))))
                 ]))
         ]))
@@ -75,20 +75,20 @@
   Value
     (non_rec, 'f', [ ], [ ],
       Some (Type ('list', Type ('string')) -> Type ('unit'))) =
-    Variable (?, 'print_list'))
+    Variable (14, 'print_list'))
 
 ((),
   Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
     Apply
-      (?, Variable (?, 'f'),
+      (16, Variable (16, 'f'),
         Apply
-          (?, Variable (?, 'tail'),
+          (16, Variable (16, 'tail'),
             Constructor
-              (?, 'cons', Constant (?, String("Stop")),
+              (16, 'cons', Constant (16, String("Stop")),
                 Constructor
-                  (?, 'cons', Constant (?, String("Hello")),
+                  (16, 'cons', Constant (16, String("Hello")),
                     Constructor
-                      (?, 'cons', Constant (?, String(" ")),
+                      (16, 'cons', Constant (16, String(" ")),
                         Constructor
-                          (?, 'cons', Constant (?, String("world")),
-                            Constructor (?, '[]'))))))))
+                          (16, 'cons', Constant (16, String("world")),
+                            Constructor (16, '[]'))))))))

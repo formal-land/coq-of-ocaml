@@ -27,12 +27,12 @@ Module 'List2':
                   Variable ((?, Effect ([ ], .)), 'tt')));
             (Constructor ('S', 'counter'),
               Match
-                ((?, Effect ([ 'NonTermination' ], .)),
-                  Variable ((?, Effect ([ ], .)), 'l'),
+                ((9, Effect ([ 'NonTermination' ], .)),
+                  Variable ((9, Effect ([ ], .)), 'l'),
                   [
                     (Constructor ('Nil'),
                       Constant
-                        ((?,
+                        ((10,
                           Effect
                             ([
                             ],
@@ -50,27 +50,27 @@ Module 'List2':
                             ],
                               .)),
                           Apply
-                            ((?,
+                            ((11,
                               Effect
                                 ([
                                 ],
                                   .)),
                               Variable
-                                ((?,
+                                ((11,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   'Z.add'),
                               Variable
-                                ((?,
+                                ((11,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   'x')),
                           Apply
-                            ((?,
+                            ((11,
                               Effect
                                 ([
                                   'NonTermination'
@@ -107,7 +107,7 @@ Module 'List2':
                                           .)),
                                       'counter')),
                               Variable
-                                ((?,
+                                ((11,
                                   Effect
                                     ([
                                     ],
@@ -167,7 +167,7 @@ Module 'List2':
                   [
                     (Constructor ('[]'),
                       Constructor
-                        ((?,
+                        ((14,
                           Effect
                             ([
                             ],
@@ -178,7 +178,7 @@ Module 'List2':
                         'x',
                         'xs'),
                       Constructor
-                        ((?,
+                        ((15,
                           Effect
                             ([
                               'NonTermination'
@@ -186,14 +186,14 @@ Module 'List2':
                               .)),
                           'Cons',
                           Variable
-                            ((?,
+                            ((15,
                               Effect
                                 ([
                                 ],
                                   .)),
                               'x'),
                           Apply
-                            ((?,
+                            ((15,
                               Effect
                                 ([
                                   'NonTermination'
@@ -230,7 +230,7 @@ Module 'List2':
                                           .)),
                                       'counter')),
                               Variable
-                                ((?,
+                                ((15,
                                   Effect
                                     ([
                                     ],
@@ -261,30 +261,30 @@ Module 'List2':
   Module 'Inside':
     (.,
       Value (non_rec, 'x', [ ], [ ], Some Type ('Z')) =
-        Constant ((?, Effect ([ ], .)), Int(12)))
+        Constant ((18, Effect ([ ], .)), Int(12)))
 
 (.,
   Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
+      ((22, Effect ([ 'Counter'; 'NonTermination' ], .)),
         Variable
-          ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+          ((22, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
             'List2.sum'),
         Apply
-          ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
+          ((22, Effect ([ 'Counter'; 'NonTermination' ], .)),
             Variable
-              ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((22, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
                 'List2.of_list'),
             Constructor
-              ((?, Effect ([ ], .)), 'cons',
-                Constant ((?, Effect ([ ], .)), Int(5)),
+              ((22, Effect ([ ], .)), 'cons',
+                Constant ((22, Effect ([ ], .)), Int(5)),
                 Constructor
-                  ((?, Effect ([ ], .)), 'cons',
-                    Constant ((?, Effect ([ ], .)), Int(7)),
+                  ((22, Effect ([ ], .)), 'cons',
+                    Constant ((22, Effect ([ ], .)), Int(7)),
                     Constructor
-                      ((?, Effect ([ ], .)), 'cons',
-                        Constant ((?, Effect ([ ], .)), Int(6)),
+                      ((22, Effect ([ ], .)), 'cons',
+                        Constant ((22, Effect ([ ], .)), Int(6)),
                         Constructor
-                          ((?, Effect ([ ], .)), 'cons',
-                            Variable ((?, Effect ([ ], .)), 'List2.Inside.x'),
-                            Constructor ((?, Effect ([ ], .)), '[]'))))))))
+                          ((22, Effect ([ ], .)), 'cons',
+                            Variable ((22, Effect ([ ], .)), 'List2.Inside.x'),
+                            Constructor ((22, Effect ([ ], .)), '[]'))))))))

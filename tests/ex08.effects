@@ -9,16 +9,16 @@ Inductive 't1':
 (.,
   Value (non_rec, 'n', [ ], [ ], Some Type ('t1')) =
     Constructor
-      ((?, Effect ([ ], .)), 'C2', Constructor ((?, Effect ([ ], .)), 'false'),
-        Constant ((?, Effect ([ ], .)), Int(3))))
+      ((8, Effect ([ ], .)), 'C2', Constructor ((8, Effect ([ ], .)), 'false'),
+        Constant ((8, Effect ([ ], .)), Int(3))))
 
 (.,
   Value (non_rec, 'm', [ ], [ ], Some Type ('bool')) =
     Match
-      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'n'),
+      ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), 'n'),
         [
-          (Constructor ('C2', 'b', Any), Variable ((?, Effect ([ ], .)), 'b'));
-          (Any, Constructor ((?, Effect ([ ], .)), 'true'))
+          (Constructor ('C2', 'b', Any), Variable ((11, Effect ([ ], .)), 'b'));
+          (Any, Constructor ((12, Effect ([ ], .)), 'true'))
         ]))
 
 Inductive 't2':
@@ -48,12 +48,12 @@ Inductive 't2':
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?, Effect ([ 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 'l'),
+              ((19, Effect ([ 'NonTermination' ], .)),
+                Variable ((19, Effect ([ ], .)), 'l'),
                 [
                   (Constructor ('[]'),
                     Constructor
-                      ((?,
+                      ((20,
                         Effect
                           ([
                           ],
@@ -61,7 +61,7 @@ Inductive 't2':
                         'D1'));
                   (Constructor ('cons', 'x', 'xs'),
                     Constructor
-                      ((?,
+                      ((21,
                         Effect
                           ([
                             'NonTermination'
@@ -69,14 +69,14 @@ Inductive 't2':
                             .)),
                         'D2',
                         Variable
-                          ((?,
+                          ((21,
                             Effect
                               ([
                               ],
                                 .)),
                             'x'),
                         Apply
-                          ((?,
+                          ((21,
                             Effect
                               ([
                                 'NonTermination'
@@ -113,7 +113,7 @@ Inductive 't2':
                                         .)),
                                     'counter')),
                             Variable
-                              ((?,
+                              ((21,
                                 Effect
                                   ([
                                   ],
@@ -165,12 +165,12 @@ Inductive 't2':
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?, Effect ([ 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 'l'),
+              ((24, Effect ([ 'NonTermination' ], .)),
+                Variable ((24, Effect ([ ], .)), 'l'),
                 [
                   (Constructor ('D1'),
                     Constant
-                      ((?,
+                      ((25,
                         Effect
                           ([
                           ],
@@ -185,27 +185,27 @@ Inductive 't2':
                           ],
                             .)),
                         Apply
-                          ((?,
+                          ((26,
                             Effect
                               ([
                               ],
                                 .)),
                             Variable
-                              ((?,
+                              ((26,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'Z.add'),
                             Variable
-                              ((?,
+                              ((26,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'x')),
                         Apply
-                          ((?,
+                          ((26,
                             Effect
                               ([
                                 'NonTermination'
@@ -242,7 +242,7 @@ Inductive 't2':
                                         .)),
                                     'counter')),
                             Variable
-                              ((?,
+                              ((26,
                                 Effect
                                   ([
                                   ],
@@ -272,21 +272,21 @@ Inductive 't2':
 (.,
   Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
+      ((28, Effect ([ 'Counter'; 'NonTermination' ], .)),
         Variable
-          ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)), 'sum'),
+          ((28, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)), 'sum'),
         Apply
-          ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
+          ((28, Effect ([ 'Counter'; 'NonTermination' ], .)),
             Variable
-              ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((28, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
                 'of_list'),
             Constructor
-              ((?, Effect ([ ], .)), 'cons',
-                Constant ((?, Effect ([ ], .)), Int(5)),
+              ((28, Effect ([ ], .)), 'cons',
+                Constant ((28, Effect ([ ], .)), Int(5)),
                 Constructor
-                  ((?, Effect ([ ], .)), 'cons',
-                    Constant ((?, Effect ([ ], .)), Int(7)),
+                  ((28, Effect ([ ], .)), 'cons',
+                    Constant ((28, Effect ([ ], .)), Int(7)),
                     Constructor
-                      ((?, Effect ([ ], .)), 'cons',
-                        Constant ((?, Effect ([ ], .)), Int(3)),
-                        Constructor ((?, Effect ([ ], .)), '[]')))))))
+                      ((28, Effect ([ ], .)), 'cons',
+                        Constant ((28, Effect ([ ], .)), Int(3)),
+                        Constructor ((28, Effect ([ ], .)), '[]')))))))

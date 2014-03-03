@@ -8,15 +8,15 @@ Inductive 't1':
 
 ((),
   Value (non_rec, 'n', [ ], [ ], Some Type ('t1')) =
-    Constructor (?, 'C2', Constructor (?, 'false'), Constant (?, Int(3))))
+    Constructor (8, 'C2', Constructor (8, 'false'), Constant (8, Int(3))))
 
 ((),
   Value (non_rec, 'm', [ ], [ ], Some Type ('bool')) =
     Match
-      (?, Variable (?, 'n'),
+      (10, Variable (10, 'n'),
         [
-          (Constructor ('C2', 'b', Any), Variable (?, 'b'));
-          (Any, Constructor (?, 'true'))
+          (Constructor ('C2', 'b', Any), Variable (11, 'b'));
+          (Any, Constructor (12, 'true'))
         ]))
 
 Inductive 't2':
@@ -34,21 +34,21 @@ Inductive 't2':
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 'l'),
+              (19, Variable (19, 'l'),
                 [
                   (Constructor ('[]'),
                     Constructor
-                      (?,
+                      (20,
                         'D1'));
                   (Constructor ('cons', 'x', 'xs'),
                     Constructor
-                      (?,
+                      (21,
                         'D2',
                         Variable
-                          (?,
+                          (21,
                             'x'),
                         Apply
-                          (?,
+                          (21,
                             Apply
                               (?,
                                 Variable
@@ -58,7 +58,7 @@ Inductive 't2':
                                   (?,
                                     'counter')),
                             Variable
-                              (?,
+                              (21,
                                 'xs'))))
                 ]))
         ]))
@@ -85,25 +85,25 @@ Inductive 't2':
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 'l'),
+              (24, Variable (24, 'l'),
                 [
                   (Constructor ('D1'),
                     Constant
-                      (?,
+                      (25,
                         Int(0)));
                   (Constructor ('D2', 'x', 'xs'),
                     Apply
                       (?,
                         Apply
-                          (?,
+                          (26,
                             Variable
-                              (?,
+                              (26,
                                 'Z.add'),
                             Variable
-                              (?,
+                              (26,
                                 'x')),
                         Apply
-                          (?,
+                          (26,
                             Apply
                               (?,
                                 Variable
@@ -113,7 +113,7 @@ Inductive 't2':
                                   (?,
                                     'counter')),
                             Variable
-                              (?,
+                              (26,
                                 'xs'))))
                 ]))
         ]))
@@ -130,12 +130,12 @@ Inductive 't2':
 ((),
   Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
-      (?, Variable (?, 'sum'),
+      (28, Variable (28, 'sum'),
         Apply
-          (?, Variable (?, 'of_list'),
+          (28, Variable (28, 'of_list'),
             Constructor
-              (?, 'cons', Constant (?, Int(5)),
+              (28, 'cons', Constant (28, Int(5)),
                 Constructor
-                  (?, 'cons', Constant (?, Int(7)),
+                  (28, 'cons', Constant (28, Int(7)),
                     Constructor
-                      (?, 'cons', Constant (?, Int(3)), Constructor (?, '[]')))))))
+                      (28, 'cons', Constant (28, Int(3)), Constructor (28, '[]')))))))

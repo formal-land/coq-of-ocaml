@@ -1,23 +1,23 @@
 ((),
   Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
-    Let ? (non_rec, 'm', [ ], [ ], None) =
-      Constant (?, Int(12)) in
-    Let ? (non_rec, 'n1', [ ], [ ], None) =
-      Variable (?, 'm') in
-    Variable (?, 'n1'))
+    Let 4 (non_rec, 'm', [ ], [ ], None) =
+      Constant (4, Int(12)) in
+    Let 5 (non_rec, 'n1', [ ], [ ], None) =
+      Variable (5, 'm') in
+    Variable (6, 'n1'))
 
 ((),
   Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
-    Let ?
+    Let 9
       (non_rec, 'p1', [ 'A'; 'B'; 'C' ],
         [ ('c', (('B' -> ('C' -> 'B')) -> 'A')) ], Some 'A') =
       Apply
-        (?, Variable (?, 'c'),
-          Function (?, 'x', Function (?, 'y', Variable (?, 'x')))) in
-    Let ?
+        (9, Variable (9, 'c'),
+          Function (9, 'x', Function (9, 'y', Variable (9, 'x')))) in
+    Let 10
       (non_rec, 'c', [ 'A' ], [ ('f', (Type ('Z') -> (Type ('Z') -> 'A'))) ],
         Some 'A') =
       Apply
-        (?, Apply (?, Variable (?, 'f'), Constant (?, Int(12))),
-          Constant (?, Int(23))) in
-    Apply (?, Variable (?, 'p1'), Variable (?, 'c')))
+        (?, Apply (10, Variable (10, 'f'), Constant (10, Int(12))),
+          Constant (10, Int(23))) in
+    Apply (11, Variable (11, 'p1'), Variable (11, 'c')))

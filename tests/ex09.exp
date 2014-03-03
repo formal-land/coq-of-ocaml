@@ -1,6 +1,6 @@
 ((),
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
-    Let ?
+    Let 4
       (rec, 'map_rec', [ 'A'; 'B' ],
         [
           ('counter', Type ('nat'));
@@ -20,27 +20,27 @@
                   [
                     (Constructor ('[]'),
                       Constructor
-                        (?,
+                        (5,
                           '[]'));
                     (Constructor
                       ('cons',
                         'x',
                         'xs'),
                       Constructor
-                        (?,
+                        (6,
                           'cons',
                           Apply
-                            (?,
+                            (6,
                               Variable
-                                (?,
+                                (6,
                                   'f'),
                               Variable
-                                (?,
+                                (6,
                                   'x')),
                           Apply
                             (?,
                               Apply
-                                (?,
+                                (6,
                                   Apply
                                     (?,
                                       Variable
@@ -50,14 +50,14 @@
                                         (?,
                                           'counter')),
                                   Variable
-                                    (?,
+                                    (6,
                                       'f')),
                               Variable
-                                (?,
+                                (6,
                                   'xs'))))
                   ]))
           ]) in
-    Let ?
+    Let 4
       (non_rec, 'map', [ 'A'; 'B' ],
         [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
         Some Type ('list', 'A')) =
@@ -68,7 +68,7 @@
           Apply
             (?, Apply (?, Variable (?, 'map_rec'), Variable (?, 'counter')),
               Variable (?, 'f')), Variable (?, 'match_var_0')) in
-    Let ?
+    Let 7
       (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ],
         Some 'A') =
       Match
@@ -78,9 +78,9 @@
               Apply
                 (?, Variable (?, 'not_terminated'),
                   Variable (?, 'tt')));
-            (Constructor ('S', 'counter'), Variable (?, 'x'))
+            (Constructor ('S', 'counter'), Variable (7, 'x'))
           ]) in
-    Let ? (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ], Some 'A') =
+    Let 7 (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ], Some 'A') =
       Let ? (non_rec, 'counter', [ ], [ ], None) =
         Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
       Apply
@@ -89,15 +89,15 @@
     Apply
       (?,
         Apply
-          (?, Variable (?, 'map'),
+          (8, Variable (8, 'map'),
             Function
-              (?, 'n',
+              (8, 'n',
                 Apply
-                  (?, Apply (?, Variable (?, 'Z.add'), Variable (?, 'n')),
-                    Constant (?, Int(1))))),
+                  (?, Apply (8, Variable (8, 'Z.add'), Variable (8, 'n')),
+                    Constant (8, Int(1))))),
         Constructor
-          (?, 'cons', Constant (?, Int(5)),
+          (8, 'cons', Constant (8, Int(5)),
             Constructor
-              (?, 'cons', Constant (?, Int(7)),
+              (8, 'cons', Constant (8, Int(7)),
                 Constructor
-                  (?, 'cons', Constant (?, Int(8)), Constructor (?, '[]'))))))
+                  (8, 'cons', Constant (8, Int(8)), Constructor (8, '[]'))))))

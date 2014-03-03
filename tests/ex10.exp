@@ -16,11 +16,11 @@ Module 'List2':
                   Variable (?, 'tt')));
             (Constructor ('S', 'counter'),
               Match
-                (?, Variable (?, 'l'),
+                (9, Variable (9, 'l'),
                   [
                     (Constructor ('Nil'),
                       Constant
-                        (?,
+                        (10,
                           Int(0)));
                     (Constructor
                       ('Cons',
@@ -29,15 +29,15 @@ Module 'List2':
                       Apply
                         (?,
                           Apply
-                            (?,
+                            (11,
                               Variable
-                                (?,
+                                (11,
                                   'Z.add'),
                               Variable
-                                (?,
+                                (11,
                                   'x')),
                           Apply
-                            (?,
+                            (11,
                               Apply
                                 (?,
                                   Variable
@@ -47,7 +47,7 @@ Module 'List2':
                                     (?,
                                       'counter')),
                               Variable
-                                (?,
+                                (11,
                                   'xs'))))
                   ]))
           ]))
@@ -80,20 +80,20 @@ Module 'List2':
                   [
                     (Constructor ('[]'),
                       Constructor
-                        (?,
+                        (14,
                           'Nil'));
                     (Constructor
                       ('cons',
                         'x',
                         'xs'),
                       Constructor
-                        (?,
+                        (15,
                           'Cons',
                           Variable
-                            (?,
+                            (15,
                               'x'),
                           Apply
-                            (?,
+                            (15,
                               Apply
                                 (?,
                                   Variable
@@ -103,7 +103,7 @@ Module 'List2':
                                     (?,
                                       'counter')),
                               Variable
-                                (?,
+                                (15,
                                   'xs'))))
                   ]))
           ]))
@@ -121,20 +121,20 @@ Module 'List2':
   Module 'Inside':
     ((),
       Value (non_rec, 'x', [ ], [ ], Some Type ('Z')) =
-        Constant (?, Int(12)))
+        Constant (18, Int(12)))
 
 ((),
   Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Apply
-      (?, Variable (?, 'List2.sum'),
+      (22, Variable (22, 'List2.sum'),
         Apply
-          (?, Variable (?, 'List2.of_list'),
+          (22, Variable (22, 'List2.of_list'),
             Constructor
-              (?, 'cons', Constant (?, Int(5)),
+              (22, 'cons', Constant (22, Int(5)),
                 Constructor
-                  (?, 'cons', Constant (?, Int(7)),
+                  (22, 'cons', Constant (22, Int(7)),
                     Constructor
-                      (?, 'cons', Constant (?, Int(6)),
+                      (22, 'cons', Constant (22, Int(6)),
                         Constructor
-                          (?, 'cons', Variable (?, 'List2.Inside.x'),
-                            Constructor (?, '[]'))))))))
+                          (22, 'cons', Variable (22, 'List2.Inside.x'),
+                            Constructor (22, '[]'))))))))

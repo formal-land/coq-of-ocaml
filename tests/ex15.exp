@@ -3,7 +3,7 @@ Inductive 'set':
 
 ((),
   Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
-    Constructor (?, 'Empty'))
+    Constructor (7, 'Empty'))
 
 ((),
   Value
@@ -17,32 +17,32 @@ Inductive 'set':
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 's'),
+              (10, Variable (10, 's'),
                 [
                   (Constructor ('Empty'),
                     Constructor
-                      (?,
+                      (11,
                         'false'));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      (?,
+                      (13,
                         Apply
                           (?,
                             Apply
-                              (?,
+                              (13,
                                 Variable
-                                  (?,
+                                  (13,
                                     'Z.ltb'),
                                 Variable
-                                  (?,
+                                  (13,
                                     'x')),
                             Variable
-                              (?,
+                              (13,
                                 'y')),
                         Apply
                           (?,
                             Apply
-                              (?,
+                              (14,
                                 Apply
                                   (?,
                                     Variable
@@ -52,30 +52,30 @@ Inductive 'set':
                                       (?,
                                         'counter')),
                                 Variable
-                                  (?,
+                                  (14,
                                     'x')),
                             Variable
-                              (?,
+                              (14,
                                 's1')),
                         IfThenElse
-                          (?,
+                          (15,
                             Apply
                               (?,
                                 Apply
-                                  (?,
+                                  (15,
                                     Variable
-                                      (?,
+                                      (15,
                                         'Z.ltb'),
                                     Variable
-                                      (?,
+                                      (15,
                                         'y')),
                                 Variable
-                                  (?,
+                                  (15,
                                     'x')),
                             Apply
                               (?,
                                 Apply
-                                  (?,
+                                  (16,
                                     Apply
                                       (?,
                                         Variable
@@ -85,13 +85,13 @@ Inductive 'set':
                                           (?,
                                             'counter')),
                                     Variable
-                                      (?,
+                                      (16,
                                         'x')),
                                 Variable
-                                  (?,
+                                  (16,
                                     's2')),
                             Constructor
-                              (?,
+                              (18,
                                 'true'))))
                 ]))
         ]))
@@ -120,44 +120,44 @@ Inductive 'set':
             Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (?, Variable (?, 's'),
+              (21, Variable (21, 's'),
                 [
                   (Constructor ('Empty'),
                     Constructor
-                      (?,
+                      (22,
                         'Node',
                         Constructor
-                          (?,
+                          (22,
                             'Empty'),
                         Variable
-                          (?,
+                          (22,
                             'x'),
                         Constructor
-                          (?,
+                          (22,
                             'Empty')));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      (?,
+                      (24,
                         Apply
                           (?,
                             Apply
-                              (?,
+                              (24,
                                 Variable
-                                  (?,
+                                  (24,
                                     'Z.ltb'),
                                 Variable
-                                  (?,
+                                  (24,
                                     'x')),
                             Variable
-                              (?,
+                              (24,
                                 'y')),
                         Constructor
-                          (?,
+                          (25,
                             'Node',
                             Apply
                               (?,
                                 Apply
-                                  (?,
+                                  (25,
                                     Apply
                                       (?,
                                         Variable
@@ -167,45 +167,45 @@ Inductive 'set':
                                           (?,
                                             'counter')),
                                     Variable
-                                      (?,
+                                      (25,
                                         'x')),
                                 Variable
-                                  (?,
+                                  (25,
                                     's1')),
                             Variable
-                              (?,
+                              (25,
                                 'y'),
                             Variable
-                              (?,
+                              (25,
                                 's2')),
                         IfThenElse
-                          (?,
+                          (26,
                             Apply
                               (?,
                                 Apply
-                                  (?,
+                                  (26,
                                     Variable
-                                      (?,
+                                      (26,
                                         'Z.ltb'),
                                     Variable
-                                      (?,
+                                      (26,
                                         'y')),
                                 Variable
-                                  (?,
+                                  (26,
                                     'x')),
                             Constructor
-                              (?,
+                              (27,
                                 'Node',
                                 Variable
-                                  (?,
+                                  (27,
                                     's1'),
                                 Variable
-                                  (?,
+                                  (27,
                                     'y'),
                                 Apply
                                   (?,
                                     Apply
-                                      (?,
+                                      (27,
                                         Apply
                                           (?,
                                             Variable
@@ -215,13 +215,13 @@ Inductive 'set':
                                               (?,
                                                 'counter')),
                                         Variable
-                                          (?,
+                                          (27,
                                             'x')),
                                     Variable
-                                      (?,
+                                      (27,
                                         's2'))),
                             Variable
-                              (?,
+                              (28,
                                 's'))))
                 ]))
         ]))

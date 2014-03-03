@@ -3,16 +3,16 @@
     (non_rec, 'f', [ ], [ ('n', Type ('Z')); ('b', Type ('bool')) ],
       Some Type ('Z')) =
     IfThenElse
-      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'b'),
+      ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), 'b'),
         Apply
           ((?, Effect ([ ], .)),
             Apply
-              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.add'),
-                Variable ((?, Effect ([ ], .)), 'n')),
-            Constant ((?, Effect ([ ], .)), Int(1))),
+              ((5, Effect ([ ], .)), Variable ((5, Effect ([ ], .)), 'Z.add'),
+                Variable ((5, Effect ([ ], .)), 'n')),
+            Constant ((5, Effect ([ ], .)), Int(1))),
         Apply
           ((?, Effect ([ ], .)),
             Apply
-              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.sub'),
-                Variable ((?, Effect ([ ], .)), 'n')),
-            Constant ((?, Effect ([ ], .)), Int(1)))))
+              ((7, Effect ([ ], .)), Variable ((7, Effect ([ ], .)), 'Z.sub'),
+                Variable ((7, Effect ([ ], .)), 'n')),
+            Constant ((7, Effect ([ ], .)), Int(1)))))

@@ -3,15 +3,15 @@
     (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Type ('list', 'A')) =
     Match
-      ((?, Effect ([ 'Failure' ], .)), Variable ((?, Effect ([ ], .)), 'l'),
+      ((4, Effect ([ 'Failure' ], .)), Variable ((4, Effect ([ ], .)), 'l'),
         [
           (Constructor ('cons', Any, 'xs'),
-            Variable ((?, Effect ([ ], .)), 'xs'));
+            Variable ((5, Effect ([ ], .)), 'xs'));
           (Constructor ('[]'),
             Apply
-              ((?, Effect ([ 'Failure' ], .)),
+              ((6, Effect ([ 'Failure' ], .)),
                 Variable
-                  ((?,
+                  ((6,
                     Effect
                       ([ ],
                         .
@@ -20,7 +20,7 @@
                           ]-> .)),
                     'failwith'),
                 Constant
-                  ((?, Effect ([ ], .)),
+                  ((6, Effect ([ ], .)),
                     String("Cannot take the tail of an empty list."))))
         ]))
 
@@ -55,7 +55,7 @@
                 [
                   (Constructor ('[]'),
                     Constructor
-                      ((?,
+                      ((9,
                         Effect
                           ([
                           ],
@@ -63,7 +63,7 @@
                         'tt'));
                   (Constructor ('cons', 'x', 'xs'),
                     Sequence
-                      ((?,
+                      ((11,
                         Effect
                           ([
                             'IO';
@@ -71,14 +71,14 @@
                           ],
                             .)),
                         Apply
-                          ((?,
+                          ((11,
                             Effect
                               ([
                                 'IO'
                               ],
                                 .)),
                             Variable
-                              ((?,
+                              ((11,
                                 Effect
                                   ([
                                   ],
@@ -89,14 +89,14 @@
                                       .)),
                                 'print_string'),
                             Variable
-                              ((?,
+                              ((11,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'x')),
                         Apply
-                          ((?,
+                          ((12,
                             Effect
                               ([
                                 'IO';
@@ -136,7 +136,7 @@
                                         .)),
                                     'counter')),
                             Variable
-                              ((?,
+                              ((12,
                                 Effect
                                   ([
                                   ],
@@ -169,28 +169,28 @@
     (non_rec, 'f', [ ], [ ],
       Some (Type ('list', Type ('string')) -> Type ('unit'))) =
     Variable
-      ((?, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
+      ((14, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
         'print_list'))
 
 (. -[ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ]-> .,
   Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
     Apply
-      ((?, Effect ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], .)),
+      ((16, Effect ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], .)),
         Variable
-          ((?, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)), 'f'),
+          ((16, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)), 'f'),
         Apply
-          ((?, Effect ([ 'Failure' ], .)),
-            Variable ((?, Effect ([ ], . -[ 'Failure' ]-> .)), 'tail'),
+          ((16, Effect ([ 'Failure' ], .)),
+            Variable ((16, Effect ([ ], . -[ 'Failure' ]-> .)), 'tail'),
             Constructor
-              ((?, Effect ([ ], .)), 'cons',
-                Constant ((?, Effect ([ ], .)), String("Stop")),
+              ((16, Effect ([ ], .)), 'cons',
+                Constant ((16, Effect ([ ], .)), String("Stop")),
                 Constructor
-                  ((?, Effect ([ ], .)), 'cons',
-                    Constant ((?, Effect ([ ], .)), String("Hello")),
+                  ((16, Effect ([ ], .)), 'cons',
+                    Constant ((16, Effect ([ ], .)), String("Hello")),
                     Constructor
-                      ((?, Effect ([ ], .)), 'cons',
-                        Constant ((?, Effect ([ ], .)), String(" ")),
+                      ((16, Effect ([ ], .)), 'cons',
+                        Constant ((16, Effect ([ ], .)), String(" ")),
                         Constructor
-                          ((?, Effect ([ ], .)), 'cons',
-                            Constant ((?, Effect ([ ], .)), String("world")),
-                            Constructor ((?, Effect ([ ], .)), '[]'))))))))
+                          ((16, Effect ([ ], .)), 'cons',
+                            Constant ((16, Effect ([ ], .)), String("world")),
+                            Constructor ((16, Effect ([ ], .)), '[]'))))))))

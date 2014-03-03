@@ -212,7 +212,6 @@ let rec of_structure (structure : structure) : (unit, Loc.t) t list =
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
       let (is_rec, pattern, typ_vars, args, typ, e) =
         Exp.import_let_fun is_rec pattern e in
-      let e = Exp.map (fun _ -> Loc.unknown) e in
       (match pattern with
       | Pattern.Variable x ->
         Value ((), {

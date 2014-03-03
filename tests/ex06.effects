@@ -25,12 +25,12 @@
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?, Effect ([ 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 'l'),
+              ((4, Effect ([ 'NonTermination' ], .)),
+                Variable ((4, Effect ([ ], .)), 'l'),
                 [
                   (Constructor ('[]'),
                     Constructor
-                      ((?,
+                      ((5,
                         Effect
                           ([
                           ],
@@ -38,7 +38,7 @@
                         '[]'));
                   (Constructor ('cons', 'x', 'xs'),
                     Constructor
-                      ((?,
+                      ((6,
                         Effect
                           ([
                             'NonTermination'
@@ -46,20 +46,20 @@
                             .)),
                         'cons',
                         Apply
-                          ((?,
+                          ((6,
                             Effect
                               ([
                               ],
                                 .)),
                             Variable
-                              ((?,
+                              ((6,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'f'),
                             Variable
-                              ((?,
+                              ((6,
                                 Effect
                                   ([
                                   ],
@@ -73,7 +73,7 @@
                               ],
                                 .)),
                             Apply
-                              ((?,
+                              ((6,
                                 Effect
                                   ([
                                   ],
@@ -117,14 +117,14 @@
                                             .)),
                                         'counter')),
                                 Variable
-                                  ((?,
+                                  ((6,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'f')),
                             Variable
-                              ((?,
+                              ((6,
                                 Effect
                                   ([
                                   ],
@@ -184,12 +184,12 @@
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?, Effect ([ 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 'l'),
+              ((9, Effect ([ 'NonTermination' ], .)),
+                Variable ((9, Effect ([ ], .)), 'l'),
                 [
                   (Constructor ('[]'),
                     Variable
-                      ((?,
+                      ((10,
                         Effect
                           ([
                           ],
@@ -214,7 +214,7 @@
                                   ]->
                                   .)),
                             Apply
-                              ((?,
+                              ((11,
                                 Effect
                                   ([
                                   ],
@@ -264,7 +264,7 @@
                                             .)),
                                         'counter')),
                                 Variable
-                                  ((?,
+                                  ((11,
                                     Effect
                                       ([
                                       ],
@@ -277,34 +277,34 @@
                                   ],
                                     .)),
                                 Apply
-                                  ((?,
+                                  ((11,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     Variable
-                                      ((?,
+                                      ((11,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'f'),
                                     Variable
-                                      ((?,
+                                      ((11,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'a')),
                                 Variable
-                                  ((?,
+                                  ((11,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x'))),
                         Variable
-                          ((?,
+                          ((11,
                             Effect
                               ([
                               ],
@@ -343,17 +343,17 @@
 (.,
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Constructor
-      ((?, Effect ([ ], .)), 'cons', Constant ((?, Effect ([ ], .)), Int(5)),
+      ((13, Effect ([ ], .)), 'cons', Constant ((13, Effect ([ ], .)), Int(5)),
         Constructor
-          ((?, Effect ([ ], .)), 'cons',
-            Constant ((?, Effect ([ ], .)), Int(6)),
+          ((13, Effect ([ ], .)), 'cons',
+            Constant ((13, Effect ([ ], .)), Int(6)),
             Constructor
-              ((?, Effect ([ ], .)), 'cons',
-                Constant ((?, Effect ([ ], .)), Int(7)),
+              ((13, Effect ([ ], .)), 'cons',
+                Constant ((13, Effect ([ ], .)), Int(7)),
                 Constructor
-                  ((?, Effect ([ ], .)), 'cons',
-                    Constant ((?, Effect ([ ], .)), Int(2)),
-                    Constructor ((?, Effect ([ ], .)), '[]'))))))
+                  ((13, Effect ([ ], .)), 'cons',
+                    Constant ((13, Effect ([ ], .)), Int(2)),
+                    Constructor ((13, Effect ([ ], .)), '[]'))))))
 
 (. -> . -[ 'Counter'; 'NonTermination' ]-> .,
   Value
@@ -367,29 +367,30 @@
         Apply
           ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((16, Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
                 Variable
-                  ((?,
+                  ((16,
                     Effect
                       ([ ], . -> . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
                     'fold'),
                 Function
-                  ((?, Effect ([ ], . -> . -> .)), 'x',
+                  ((16, Effect ([ ], . -> . -> .)), 'x',
                     Function
-                      ((?, Effect ([ ], . -> .)), 'y',
+                      ((16, Effect ([ ], . -> .)), 'y',
                         Apply
                           ((?, Effect ([ ], .)),
                             Apply
-                              ((?, Effect ([ ], .)),
-                                Variable ((?, Effect ([ ], .)), 'plus'),
-                                Variable ((?, Effect ([ ], .)), 'x')),
-                            Variable ((?, Effect ([ ], .)), 'y'))))),
-            Constant ((?, Effect ([ ], .)), Int(0))),
+                              ((16, Effect ([ ], .)),
+                                Variable ((16, Effect ([ ], .)), 'plus'),
+                                Variable ((16, Effect ([ ], .)), 'x')),
+                            Variable ((16, Effect ([ ], .)), 'y'))))),
+            Constant ((16, Effect ([ ], .)), Int(0))),
         Apply
           ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
             Apply
-              ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((16, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
                 Variable
-                  ((?, Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
-                    'map'), Variable ((?, Effect ([ ], .)), 'incr')),
-            Variable ((?, Effect ([ ], .)), 'l'))))
+                  ((16,
+                    Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
+                    'map'), Variable ((16, Effect ([ ], .)), 'incr')),
+            Variable ((16, Effect ([ ], .)), 'l'))))

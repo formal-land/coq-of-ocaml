@@ -26,12 +26,12 @@ Inductive 'tree':
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?, Effect ([ 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 't'),
+              ((8, Effect ([ 'NonTermination' ], .)),
+                Variable ((8, Effect ([ ], .)), 't'),
                 [
                   (Constructor ('Leaf'),
                     Constructor
-                      ((?,
+                      ((9,
                         Effect
                           ([
                           ],
@@ -43,7 +43,7 @@ Inductive 'tree':
                       'x'',
                       't2'),
                     IfThenElse
-                      ((?,
+                      ((11,
                         Effect
                           ([
                             'NonTermination'
@@ -56,27 +56,27 @@ Inductive 'tree':
                               ],
                                 .)),
                             Apply
-                              ((?,
+                              ((11,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 Variable
-                                  ((?,
+                                  ((11,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'Z.ltb'),
                                 Variable
-                                  ((?,
+                                  ((11,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((?,
+                              ((11,
                                 Effect
                                   ([
                                   ],
@@ -90,7 +90,7 @@ Inductive 'tree':
                               ],
                                 .)),
                             Apply
-                              ((?,
+                              ((12,
                                 Effect
                                   ([
                                   ],
@@ -134,21 +134,21 @@ Inductive 'tree':
                                             .)),
                                         'counter')),
                                 Variable
-                                  ((?,
+                                  ((12,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((?,
+                              ((12,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 't1')),
                         IfThenElse
-                          ((?,
+                          ((13,
                             Effect
                               ([
                                 'NonTermination'
@@ -161,27 +161,27 @@ Inductive 'tree':
                                   ],
                                     .)),
                                 Apply
-                                  ((?,
+                                  ((13,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     Variable
-                                      ((?,
+                                      ((13,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'Z.ltb'),
                                     Variable
-                                      ((?,
+                                      ((13,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'x'')),
                                 Variable
-                                  ((?,
+                                  ((13,
                                     Effect
                                       ([
                                       ],
@@ -195,7 +195,7 @@ Inductive 'tree':
                                   ],
                                     .)),
                                 Apply
-                                  ((?,
+                                  ((14,
                                     Effect
                                       ([
                                       ],
@@ -239,21 +239,21 @@ Inductive 'tree':
                                                 .)),
                                             'counter')),
                                     Variable
-                                      ((?,
+                                      ((14,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'x')),
                                 Variable
-                                  ((?,
+                                  ((14,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     't2')),
                             Constructor
-                              ((?,
+                              ((16,
                                 Effect
                                   ([
                                   ],

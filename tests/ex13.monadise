@@ -3,14 +3,14 @@
     (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Monad ([ 'Failure' ], Type ('list', 'A'))) =
     Match
-      (?, Variable (?, 'l'),
+      (4, Variable (4, 'l'),
         [
-          (Constructor ('cons', Any, 'xs'), Return (?, Variable (?, 'xs')));
+          (Constructor ('cons', Any, 'xs'), Return (?, Variable (5, 'xs')));
           (Constructor ('[]'),
             Apply
-              (?, Variable (?, 'failwith'),
+              (6, Variable (6, 'failwith'),
                 Constant
-                  (?,
+                  (6,
                     String("Cannot take the tail of an empty list."))))
         ]))
 
@@ -38,7 +38,7 @@
                     Return
                       (?,
                         Constructor
-                          (?,
+                          (9,
                             'tt')));
                   (Constructor ('cons', 'x', 'xs'),
                     Bind
@@ -53,16 +53,16 @@
                               'NonTermination'
                             ],
                             Apply
-                              (?,
+                              (11,
                                 Variable
-                                  (?,
+                                  (11,
                                     'print_string'),
                                 Variable
-                                  (?,
+                                  (11,
                                     'x'))),
                         None,
                         Apply
-                          (?,
+                          (12,
                             Apply
                               (?,
                                 Variable
@@ -72,7 +72,7 @@
                                   (?,
                                     'counter')),
                             Variable
-                              (?,
+                              (12,
                                 'xs'))))
                 ]))
         ]))
@@ -102,7 +102,7 @@
       Some
         (Type ('list', Type ('string')) ->
           Monad ([ 'Counter'; 'IO'; 'NonTermination' ], Type ('unit')))) =
-    Variable (?, 'print_list'))
+    Variable (14, 'print_list'))
 
 ((),
   Value
@@ -115,17 +115,17 @@
         Lift
           (?, [ 'Failure' ], [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
             Apply
-              (?, Variable (?, 'tail'),
+              (16, Variable (16, 'tail'),
                 Constructor
-                  (?, 'cons', Constant (?, String("Stop")),
+                  (16, 'cons', Constant (16, String("Stop")),
                     Constructor
-                      (?, 'cons', Constant (?, String("Hello")),
+                      (16, 'cons', Constant (16, String("Hello")),
                         Constructor
-                          (?, 'cons', Constant (?, String(" ")),
+                          (16, 'cons', Constant (16, String(" ")),
                             Constructor
-                              (?, 'cons', Constant (?, String("world")),
-                                Constructor (?, '[]'))))))), Some 'x',
+                              (16, 'cons', Constant (16, String("world")),
+                                Constructor (16, '[]'))))))), Some 'x',
         Lift
           (?, [ 'Counter'; 'IO'; 'NonTermination' ],
             [ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ],
-            Apply (?, Variable (?, 'f'), Variable (?, 'x')))))
+            Apply (16, Variable (16, 'f'), Variable (?, 'x')))))

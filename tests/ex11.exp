@@ -5,23 +5,23 @@ Module 'SizedString':
 ((),
   Value (non_rec, 'r', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      (?, ('SizedString.name', Constant (?, String("gre"))),
-        ('SizedString.size', Constant (?, Int(3)))))
+      (9, ('SizedString.name', Constant (9, String("gre"))),
+        ('SizedString.size', Constant (9, Int(3)))))
 
 ((),
   Value (non_rec, 'r'', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      (?, ('SizedString.name', Constant (?, String("haha"))),
-        ('SizedString.size', Constant (?, Int(4)))))
+      (10, ('SizedString.name', Constant (10, String("haha"))),
+        ('SizedString.size', Constant (10, Int(4)))))
 
 ((),
   Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
       (?,
         Apply
-          (?, Variable (?, 'Z.add'),
-            Field (?, Variable (?, 'r'), 'SizedString.size')),
-        Field (?, Variable (?, 'r''), 'SizedString.size')))
+          (12, Variable (12, 'Z.add'),
+            Field (12, Variable (12, 'r'), 'SizedString.size')),
+        Field (12, Variable (12, 'r''), 'SizedString.size')))
 
 ((),
   Value
@@ -30,17 +30,17 @@ Module 'SizedString':
     Match
       (?, Variable (?, 'match_var_0'),
         [
-          (Record (('SizedString.size', Int(3))), Constructor (?, 'true'));
-          (Any, Constructor (?, 'false'))
+          (Record (('SizedString.size', Int(3))), Constructor (15, 'true'));
+          (Any, Constructor (16, 'false'))
         ]))
 
 ((),
   Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
-    Apply (?, Variable (?, 'f'), Variable (?, 'r')))
+    Apply (18, Variable (18, 'f'), Variable (18, 'r')))
 
 ((),
   Value (non_rec, 'b'', [ ], [ ], Some Type ('bool')) =
-    Apply (?, Variable (?, 'f'), Variable (?, 'r'')))
+    Apply (19, Variable (19, 'f'), Variable (19, 'r'')))
 
 Module 'Point':
   Record 't':
@@ -49,14 +49,14 @@ Module 'Point':
   ((),
     Value (non_rec, 'p', [ ], [ ], Some Type ('t')) =
       Record
-        (?, ('x', Constant (?, Int(5))), ('y', Constant (?, Int(-3))),
-          ('z', Constant (?, Int(1)))))
+        (27, ('x', Constant (27, Int(5))), ('y', Constant (27, Int(-3))),
+          ('z', Constant (27, Int(1)))))
   
   ((),
     Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
       Match
-        (?, Variable (?, 'p'),
+        (29, Variable (29, 'p'),
           [
-            (Record (('x', Int(5)), ('z', Int(1))), Constructor (?, 'true'));
-            (Any, Constructor (?, 'false'))
+            (Record (('x', Int(5)), ('z', Int(1))), Constructor (30, 'true'));
+            (Any, Constructor (31, 'false'))
           ]))

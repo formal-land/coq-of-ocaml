@@ -5,18 +5,18 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
 (. -[ 'TailLess' ]-> .,
   Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
     Apply
-      ((?, Effect ([ 'TailLess' ], .)),
-        Variable ((?, Effect ([ ], . -[ 'TailLess' ]-> .)), 'TailLess'),
+      ((7, Effect ([ 'TailLess' ], .)),
+        Variable ((7, Effect ([ ], . -[ 'TailLess' ]-> .)), 'TailLess'),
         Tuple ((?, Effect ([ ], .)))))
 
 (. -[ 'Wtf' ]-> .,
   Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
     Apply
-      ((?, Effect ([ 'Wtf' ], .)),
-        Variable ((?, Effect ([ ], . -[ 'Wtf' ]-> .)), 'Wtf'),
+      ((9, Effect ([ 'Wtf' ], .)),
+        Variable ((9, Effect ([ ], . -[ 'Wtf' ]-> .)), 'Wtf'),
         Tuple
-          ((?, Effect ([ ], .)), Constant ((?, Effect ([ ], .)), Int(12)),
-            Constant ((?, Effect ([ ], .)), String("no")))))
+          ((?, Effect ([ ], .)), Constant ((9, Effect ([ ], .)), Int(12)),
+            Constant ((9, Effect ([ ], .)), String("no")))))
 
 (. -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .,
   Value
@@ -41,15 +41,15 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((?,
+              ((12,
                 Effect
                   ([ 'IO'; 'NonTermination'; 'TailLess' ],
                     .)),
-                Variable ((?, Effect ([ ], .)), 'l'),
+                Variable ((12, Effect ([ ], .)), 'l'),
                 [
                   (Constructor ('[]'),
                     Sequence
-                      ((?,
+                      ((13,
                         Effect
                           ([
                             'IO';
@@ -57,14 +57,14 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                           ],
                             .)),
                         Apply
-                          ((?,
+                          ((13,
                             Effect
                               ([
                                 'IO'
                               ],
                                 .)),
                             Variable
-                              ((?,
+                              ((13,
                                 Effect
                                   ([
                                   ],
@@ -75,21 +75,21 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                       .)),
                                 'print_string'),
                             Constant
-                              ((?,
+                              ((13,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 String("no tail"))),
                         Apply
-                          ((?,
+                          ((13,
                             Effect
                               ([
                                 'TailLess'
                               ],
                                 .)),
                             Variable
-                              ((?,
+                              ((13,
                                 Effect
                                   ([
                                   ],
@@ -111,7 +111,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                       Constructor
                         ('[]')),
                     Variable
-                      ((?,
+                      ((14,
                         Effect
                           ([
                           ],
@@ -119,7 +119,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                         'x'));
                   (Constructor ('cons', Any, 'xs'),
                     Apply
-                      ((?,
+                      ((15,
                         Effect
                           ([
                             'IO';
@@ -162,7 +162,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                     .)),
                                 'counter')),
                         Variable
-                          ((?,
+                          ((15,
                             Effect
                               ([
                               ],

@@ -1,6 +1,6 @@
 (.,
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (4, Effect ([ 'Counter'; 'NonTermination' ], .))
       (rec, 'map_rec', [ 'A'; 'B' ],
         [
           ('counter', Type ('nat'));
@@ -34,7 +34,7 @@
                   [
                     (Constructor ('[]'),
                       Constructor
-                        ((?,
+                        ((5,
                           Effect
                             ([
                             ],
@@ -45,7 +45,7 @@
                         'x',
                         'xs'),
                       Constructor
-                        ((?,
+                        ((6,
                           Effect
                             ([
                               'NonTermination'
@@ -53,20 +53,20 @@
                               .)),
                           'cons',
                           Apply
-                            ((?,
+                            ((6,
                               Effect
                                 ([
                                 ],
                                   .)),
                               Variable
-                                ((?,
+                                ((6,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   'f'),
                               Variable
-                                ((?,
+                                ((6,
                                   Effect
                                     ([
                                     ],
@@ -80,7 +80,7 @@
                                 ],
                                   .)),
                               Apply
-                                ((?,
+                                ((6,
                                   Effect
                                     ([
                                     ],
@@ -124,14 +124,14 @@
                                               .)),
                                           'counter')),
                                   Variable
-                                    ((?,
+                                    ((6,
                                       Effect
                                         ([
                                         ],
                                           .)),
                                       'f')),
                               Variable
-                                ((?,
+                                ((6,
                                   Effect
                                     ([
                                     ],
@@ -139,7 +139,7 @@
                                   'xs'))))
                   ]))
           ]) in
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (4, Effect ([ 'Counter'; 'NonTermination' ], .))
       (non_rec, 'map', [ 'A'; 'B' ],
         [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
         Some Type ('list', 'A')) =
@@ -160,7 +160,7 @@
                       'map_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
               Variable ((?, Effect ([ ], .)), 'f')),
           Variable ((?, Effect ([ ], .)), 'match_var_0')) in
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (7, Effect ([ 'Counter'; 'NonTermination' ], .))
       (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ],
         Some 'A') =
       Match
@@ -181,9 +181,9 @@
                             .)),
                       'not_terminated'),
                   Variable ((?, Effect ([ ], .)), 'tt')));
-            (Constructor ('S', 'counter'), Variable ((?, Effect ([ ], .)), 'x'))
+            (Constructor ('S', 'counter'), Variable ((7, Effect ([ ], .)), 'x'))
           ]) in
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (7, Effect ([ 'Counter'; 'NonTermination' ], .))
       (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ], Some 'A') =
       Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
         (non_rec, 'counter', [ ], [ ], None) =
@@ -202,26 +202,26 @@
     Apply
       ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+          ((8, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((8, Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
                 'map'),
             Function
-              ((?, Effect ([ ], . -> .)), 'n',
+              ((8, Effect ([ ], . -> .)), 'n',
                 Apply
                   ((?, Effect ([ ], .)),
                     Apply
-                      ((?, Effect ([ ], .)),
-                        Variable ((?, Effect ([ ], .)), 'Z.add'),
-                        Variable ((?, Effect ([ ], .)), 'n')),
-                    Constant ((?, Effect ([ ], .)), Int(1))))),
+                      ((8, Effect ([ ], .)),
+                        Variable ((8, Effect ([ ], .)), 'Z.add'),
+                        Variable ((8, Effect ([ ], .)), 'n')),
+                    Constant ((8, Effect ([ ], .)), Int(1))))),
         Constructor
-          ((?, Effect ([ ], .)), 'cons',
-            Constant ((?, Effect ([ ], .)), Int(5)),
+          ((8, Effect ([ ], .)), 'cons',
+            Constant ((8, Effect ([ ], .)), Int(5)),
             Constructor
-              ((?, Effect ([ ], .)), 'cons',
-                Constant ((?, Effect ([ ], .)), Int(7)),
+              ((8, Effect ([ ], .)), 'cons',
+                Constant ((8, Effect ([ ], .)), Int(7)),
                 Constructor
-                  ((?, Effect ([ ], .)), 'cons',
-                    Constant ((?, Effect ([ ], .)), Int(8)),
-                    Constructor ((?, Effect ([ ], .)), '[]'))))))
+                  ((8, Effect ([ ], .)), 'cons',
+                    Constant ((8, Effect ([ ], .)), Int(8)),
+                    Constructor ((8, Effect ([ ], .)), '[]'))))))
