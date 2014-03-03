@@ -1,229 +1,208 @@
 (.,
   Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'orb'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'orb'),
             Apply
-              ((unknown, Effect ([ ], .)),
+              ((?, Effect ([ ], .)),
                 Apply
-                  ((unknown, Effect ([ ], .)),
-                    Variable ((unknown, Effect ([ ], .)), 'equiv_decb'),
-                    Constructor ((unknown, Effect ([ ], .)), 'false')),
-                Constructor ((unknown, Effect ([ ], .)), 'true'))),
+                  ((?, Effect ([ ], .)),
+                    Variable ((?, Effect ([ ], .)), 'equiv_decb'),
+                    Constructor ((?, Effect ([ ], .)), 'false')),
+                Constructor ((?, Effect ([ ], .)), 'true'))),
         Apply
-          ((unknown, Effect ([ ], .)),
+          ((?, Effect ([ ], .)),
             Apply
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'andb'),
+              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'andb'),
                 Apply
-                  ((unknown, Effect ([ ], .)),
+                  ((?, Effect ([ ], .)),
                     Apply
-                      ((unknown, Effect ([ ], .)),
-                        Variable ((unknown, Effect ([ ], .)), 'nequiv_decb'),
-                        Constructor ((unknown, Effect ([ ], .)), 'tt')),
-                    Constructor ((unknown, Effect ([ ], .)), 'tt'))),
+                      ((?, Effect ([ ], .)),
+                        Variable ((?, Effect ([ ], .)), 'nequiv_decb'),
+                        Constructor ((?, Effect ([ ], .)), 'tt')),
+                    Constructor ((?, Effect ([ ], .)), 'tt'))),
             Apply
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'negb'),
-                Constructor ((unknown, Effect ([ ], .)), 'true')))))
+              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'negb'),
+                Constructor ((?, Effect ([ ], .)), 'true')))))
 
 (.,
   Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
-            Constant ((unknown, Effect ([ ], .)), Int(1))),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.add'),
+            Constant ((?, Effect ([ ], .)), Int(1))),
         Apply
-          ((unknown, Effect ([ ], .)),
+          ((?, Effect ([ ], .)),
             Apply
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'Z.mul'),
-                Constant ((unknown, Effect ([ ], .)), Int(2))),
-            Constant ((unknown, Effect ([ ], .)), Int(3)))))
+              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.mul'),
+                Constant ((?, Effect ([ ], .)), Int(2))),
+            Constant ((?, Effect ([ ], .)), Int(3)))))
 
 (.,
   Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'Z.sub'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.sub'),
             Apply
-              ((unknown, Effect ([ ], .)),
+              ((?, Effect ([ ], .)),
                 Apply
-                  ((unknown, Effect ([ ], .)),
-                    Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+                  ((?, Effect ([ ], .)),
+                    Variable ((?, Effect ([ ], .)), 'Z.add'),
                     Apply
-                      ((unknown, Effect ([ ], .)),
-                        Variable ((unknown, Effect ([ ], .)), 'Z.abs'),
-                        Constant ((unknown, Effect ([ ], .)), Int(-1)))),
-                Constant ((unknown, Effect ([ ], .)), Int(1)))),
+                      ((?, Effect ([ ], .)),
+                        Variable ((?, Effect ([ ], .)), 'Z.abs'),
+                        Constant ((?, Effect ([ ], .)), Int(-1)))),
+                Constant ((?, Effect ([ ], .)), Int(1)))),
         Apply
-          ((unknown, Effect ([ ], .)),
+          ((?, Effect ([ ], .)),
             Apply
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'Z.mul'),
+              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.mul'),
                 Apply
-                  ((unknown, Effect ([ ], .)),
+                  ((?, Effect ([ ], .)),
                     Apply
-                      ((unknown, Effect ([ ], .)),
-                        Variable ((unknown, Effect ([ ], .)), 'Z.modulo'),
+                      ((?, Effect ([ ], .)),
+                        Variable ((?, Effect ([ ], .)), 'Z.modulo'),
                         Apply
-                          ((unknown, Effect ([ ], .)),
+                          ((?, Effect ([ ], .)),
                             Apply
-                              ((unknown, Effect ([ ], .)),
-                                Variable ((unknown, Effect ([ ], .)), 'Z.div'),
-                                Constant ((unknown, Effect ([ ], .)), Int(5))),
-                            Constant ((unknown, Effect ([ ], .)), Int(23)))),
-                    Constant ((unknown, Effect ([ ], .)), Int(4)))),
-            Constant ((unknown, Effect ([ ], .)), Int(3)))))
+                              ((?, Effect ([ ], .)),
+                                Variable ((?, Effect ([ ], .)), 'Z.div'),
+                                Constant ((?, Effect ([ ], .)), Int(5))),
+                            Constant ((?, Effect ([ ], .)), Int(23)))),
+                    Constant ((?, Effect ([ ], .)), Int(4)))),
+            Constant ((?, Effect ([ ], .)), Int(3)))))
 
 (.,
   Value (non_rec, 'n3', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'Z.pred'),
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.pred'),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'Z.succ'),
-            Constant ((unknown, Effect ([ ], .)), Int(12)))))
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.succ'),
+            Constant ((?, Effect ([ ], .)), Int(12)))))
 
 (.,
   Value (non_rec, 'n4', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'Z.lxor'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.lxor'),
             Apply
-              ((unknown, Effect ([ ], .)),
+              ((?, Effect ([ ], .)),
                 Apply
-                  ((unknown, Effect ([ ], .)),
-                    Variable ((unknown, Effect ([ ], .)), 'Z.lor'),
+                  ((?, Effect ([ ], .)),
+                    Variable ((?, Effect ([ ], .)), 'Z.lor'),
                     Apply
-                      ((unknown, Effect ([ ], .)),
+                      ((?, Effect ([ ], .)),
                         Apply
-                          ((unknown, Effect ([ ], .)),
-                            Variable ((unknown, Effect ([ ], .)), 'Z.land'),
-                            Constant ((unknown, Effect ([ ], .)), Int(5))),
-                        Constant ((unknown, Effect ([ ], .)), Int(7)))),
-                Constant ((unknown, Effect ([ ], .)), Int(3)))),
-        Constant ((unknown, Effect ([ ], .)), Int(9))))
+                          ((?, Effect ([ ], .)),
+                            Variable ((?, Effect ([ ], .)), 'Z.land'),
+                            Constant ((?, Effect ([ ], .)), Int(5))),
+                        Constant ((?, Effect ([ ], .)), Int(7)))),
+                Constant ((?, Effect ([ ], .)), Int(3)))),
+        Constant ((?, Effect ([ ], .)), Int(9))))
 
 (.,
   Value (non_rec, 'n5', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.add'),
             Apply
-              ((unknown, Effect ([ ], .)),
+              ((?, Effect ([ ], .)),
                 Apply
-                  ((unknown, Effect ([ ], .)),
-                    Variable ((unknown, Effect ([ ], .)), 'Z.shiftl'),
-                    Constant ((unknown, Effect ([ ], .)), Int(156))),
-                Constant ((unknown, Effect ([ ], .)), Int(4)))),
+                  ((?, Effect ([ ], .)),
+                    Variable ((?, Effect ([ ], .)), 'Z.shiftl'),
+                    Constant ((?, Effect ([ ], .)), Int(156))),
+                Constant ((?, Effect ([ ], .)), Int(4)))),
         Apply
-          ((unknown, Effect ([ ], .)),
+          ((?, Effect ([ ], .)),
             Apply
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'Z.shiftr'),
-                Constant ((unknown, Effect ([ ], .)), Int(12))),
-            Constant ((unknown, Effect ([ ], .)), Int(1)))))
+              ((?, Effect ([ ], .)),
+                Variable ((?, Effect ([ ], .)), 'Z.shiftr'),
+                Constant ((?, Effect ([ ], .)), Int(12))),
+            Constant ((?, Effect ([ ], .)), Int(1)))))
 
 (.,
   Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'append'),
-            Constant ((unknown, Effect ([ ], .)), String("ghj"))),
-        Constant ((unknown, Effect ([ ], .)), String("klm"))))
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'append'),
+            Constant ((?, Effect ([ ], .)), String("ghj"))),
+        Constant ((?, Effect ([ ], .)), String("klm"))))
 
 (.,
   Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
     Apply
-      ((unknown, Effect ([ ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'char_of_int'),
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'char_of_int'),
         Apply
-          ((unknown, Effect ([ ], .)),
+          ((?, Effect ([ ], .)),
             Apply
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.add'),
                 Apply
-                  ((unknown, Effect ([ ], .)),
-                    Variable ((unknown, Effect ([ ], .)), 'int_of_char'),
-                    Constant ((unknown, Effect ([ ], .)), Char("c")))),
-            Constant ((unknown, Effect ([ ], .)), Int(1)))))
+                  ((?, Effect ([ ], .)),
+                    Variable ((?, Effect ([ ], .)), 'int_of_char'),
+                    Constant ((?, Effect ([ ], .)), Char("c")))),
+            Constant ((?, Effect ([ ], .)), Int(1)))))
 
 (.,
   Value (non_rec, 'x', [ ], [ ], Some Type ('unit')) =
     Apply
-      ((unknown, Effect ([ ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'ignore'),
-        Constant ((unknown, Effect ([ ], .)), Int(23))))
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'ignore'),
+        Constant ((?, Effect ([ ], .)), Int(23))))
 
 (.,
   Value (non_rec, 'p', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.add'),
             Apply
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'fst'),
+              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'fst'),
                 Tuple
-                  ((unknown, Effect ([ ], .)),
-                    Constant ((unknown, Effect ([ ], .)), Int(1)),
-                    Constant ((unknown, Effect ([ ], .)), Int(2))))),
+                  ((?, Effect ([ ], .)),
+                    Constant ((?, Effect ([ ], .)), Int(1)),
+                    Constant ((?, Effect ([ ], .)), Int(2))))),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'snd'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'snd'),
             Tuple
-              ((unknown, Effect ([ ], .)),
-                Constant ((unknown, Effect ([ ], .)), Int(3)),
-                Constant ((unknown, Effect ([ ], .)), Int(4))))))
+              ((?, Effect ([ ], .)), Constant ((?, Effect ([ ], .)), Int(3)),
+                Constant ((?, Effect ([ ], .)), Int(4))))))
 
 (.,
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'app'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'app'),
             Constructor
-              ((unknown, Effect ([ ], .)), 'cons',
-                Constant ((unknown, Effect ([ ], .)), Int(1)),
+              ((?, Effect ([ ], .)), 'cons',
+                Constant ((?, Effect ([ ], .)), Int(1)),
                 Constructor
-                  ((unknown, Effect ([ ], .)), 'cons',
-                    Constant ((unknown, Effect ([ ], .)), Int(2)),
-                    Constructor ((unknown, Effect ([ ], .)), '[]')))),
+                  ((?, Effect ([ ], .)), 'cons',
+                    Constant ((?, Effect ([ ], .)), Int(2)),
+                    Constructor ((?, Effect ([ ], .)), '[]')))),
         Constructor
-          ((unknown, Effect ([ ], .)), 'cons',
-            Constant ((unknown, Effect ([ ], .)), Int(3)),
-            Constructor ((unknown, Effect ([ ], .)), '[]'))))
+          ((?, Effect ([ ], .)), 'cons',
+            Constant ((?, Effect ([ ], .)), Int(3)),
+            Constructor ((?, Effect ([ ], .)), '[]'))))
 
 (.,
   Value (non_rec, 'y', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'apply'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'apply'),
             Function
-              ((unknown, Effect ([ ], . -> .)), 'n',
+              ((?, Effect ([ ], . -> .)), 'n',
                 Apply
-                  ((unknown, Effect ([ ], .)),
+                  ((?, Effect ([ ], .)),
                     Apply
-                      ((unknown, Effect ([ ], .)),
-                        Variable ((unknown, Effect ([ ], .)), 'Z.add'),
-                        Variable ((unknown, Effect ([ ], .)), 'n')),
-                    Constant ((unknown, Effect ([ ], .)), Int(1))))),
-        Constant ((unknown, Effect ([ ], .)), Int(12))))
+                      ((?, Effect ([ ], .)),
+                        Variable ((?, Effect ([ ], .)), 'Z.add'),
+                        Variable ((?, Effect ([ ], .)), 'n')),
+                    Constant ((?, Effect ([ ], .)), Int(1))))),
+        Constant ((?, Effect ([ ], .)), Int(12))))

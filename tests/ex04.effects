@@ -1,51 +1,48 @@
 (.,
   Value (non_rec, 'u', [ ], [ ], Some Type ('unit')) =
-    Constructor ((unknown, Effect ([ ], .)), 'tt'))
+    Constructor ((?, Effect ([ ], .)), 'tt'))
 
 (.,
   Value (non_rec, 'l1', [ 'A' ], [ ], Some Type ('list', 'A')) =
-    Constructor ((unknown, Effect ([ ], .)), '[]'))
+    Constructor ((?, Effect ([ ], .)), '[]'))
 
 (.,
   Value (non_rec, 'l2', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Constructor
-      ((unknown, Effect ([ ], .)), 'cons',
-        Constant ((unknown, Effect ([ ], .)), Int(1)),
-        Constructor ((unknown, Effect ([ ], .)), '[]')))
+      ((?, Effect ([ ], .)), 'cons', Constant ((?, Effect ([ ], .)), Int(1)),
+        Constructor ((?, Effect ([ ], .)), '[]')))
 
 (.,
   Value (non_rec, 'l3', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Constructor
-      ((unknown, Effect ([ ], .)), 'cons',
-        Constant ((unknown, Effect ([ ], .)), Int(1)),
+      ((?, Effect ([ ], .)), 'cons', Constant ((?, Effect ([ ], .)), Int(1)),
         Constructor
-          ((unknown, Effect ([ ], .)), 'cons',
-            Constant ((unknown, Effect ([ ], .)), Int(5)),
+          ((?, Effect ([ ], .)), 'cons',
+            Constant ((?, Effect ([ ], .)), Int(5)),
             Constructor
-              ((unknown, Effect ([ ], .)), 'cons',
-                Constant ((unknown, Effect ([ ], .)), Int(7)),
+              ((?, Effect ([ ], .)), 'cons',
+                Constant ((?, Effect ([ ], .)), Int(7)),
                 Constructor
-                  ((unknown, Effect ([ ], .)), 'cons',
-                    Constant ((unknown, Effect ([ ], .)), Int(32)),
+                  ((?, Effect ([ ], .)), 'cons',
+                    Constant ((?, Effect ([ ], .)), Int(32)),
                     Constructor
-                      ((unknown, Effect ([ ], .)), 'cons',
-                        Constant ((unknown, Effect ([ ], .)), Int(15)),
-                        Constructor ((unknown, Effect ([ ], .)), '[]')))))))
+                      ((?, Effect ([ ], .)), 'cons',
+                        Constant ((?, Effect ([ ], .)), Int(15)),
+                        Constructor ((?, Effect ([ ], .)), '[]')))))))
 
 (.,
   Value (non_rec, 'o1', [ 'A' ], [ ], Some Type ('option', 'A')) =
-    Constructor ((unknown, Effect ([ ], .)), 'None'))
+    Constructor ((?, Effect ([ ], .)), 'None'))
 
 (.,
   Value (non_rec, 'o2', [ ], [ ], Some Type ('option', Type ('Z'))) =
     Constructor
-      ((unknown, Effect ([ ], .)), 'Some',
-        Constant ((unknown, Effect ([ ], .)), Int(12))))
+      ((?, Effect ([ ], .)), 'Some', Constant ((?, Effect ([ ], .)), Int(12))))
 
 (.,
   Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
-    Constant ((unknown, Effect ([ ], .)), Char("g")))
+    Constant ((?, Effect ([ ], .)), Char("g")))
 
 (.,
   Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
-    Constant ((unknown, Effect ([ ], .)), String("bla")))
+    Constant ((?, Effect ([ ], .)), String("bla")))

@@ -1,6 +1,6 @@
 (.,
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
-    Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
       (rec, 'map_rec', [ 'A'; 'B' ],
         [
           ('counter', Type ('nat'));
@@ -8,14 +8,14 @@
           ('match_var_0', Type ('list', 'B'))
         ], Some Type ('list', 'A')) =
       Match
-        ((unknown, Effect ([ 'NonTermination' ], .)),
-          Variable ((unknown, Effect ([ ], .)), 'counter'),
+        ((?, Effect ([ 'NonTermination' ], .)),
+          Variable ((?, Effect ([ ], .)), 'counter'),
           [
             (Nat(0),
               Apply
-                ((unknown, Effect ([ 'NonTermination' ], .)),
+                ((?, Effect ([ 'NonTermination' ], .)),
                   Variable
-                    ((unknown,
+                    ((?,
                       Effect
                         ([ ],
                           .
@@ -24,19 +24,17 @@
                             ]->
                             .)),
                       'not_terminated'),
-                  Variable
-                    ((unknown, Effect ([ ], .)),
-                      'tt')));
+                  Variable ((?, Effect ([ ], .)), 'tt')));
             (Constructor ('S', 'counter'),
               Match
-                ((unknown, Effect ([ 'NonTermination' ], .)),
+                ((?, Effect ([ 'NonTermination' ], .)),
                   Variable
-                    ((unknown, Effect ([ ], .)),
+                    ((?, Effect ([ ], .)),
                       'match_var_0'),
                   [
                     (Constructor ('[]'),
                       Constructor
-                        ((unknown,
+                        ((?,
                           Effect
                             ([
                             ],
@@ -47,7 +45,7 @@
                         'x',
                         'xs'),
                       Constructor
-                        ((unknown,
+                        ((?,
                           Effect
                             ([
                               'NonTermination'
@@ -55,34 +53,34 @@
                               .)),
                           'cons',
                           Apply
-                            ((unknown,
+                            ((?,
                               Effect
                                 ([
                                 ],
                                   .)),
                               Variable
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   'f'),
                               Variable
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   'x')),
                           Apply
-                            ((unknown,
+                            ((?,
                               Effect
                                 ([
                                   'NonTermination'
                                 ],
                                   .)),
                               Apply
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
@@ -92,7 +90,7 @@
                                         ]->
                                         .)),
                                   Apply
-                                    ((unknown,
+                                    ((?,
                                       Effect
                                         ([
                                         ],
@@ -104,7 +102,7 @@
                                               ]->
                                               .)),
                                       Variable
-                                        ((unknown,
+                                        ((?,
                                           Effect
                                             ([
                                             ],
@@ -119,21 +117,21 @@
                                                     .)),
                                           'map_rec'),
                                       Variable
-                                        ((unknown,
+                                        ((?,
                                           Effect
                                             ([
                                             ],
                                               .)),
                                           'counter')),
                                   Variable
-                                    ((unknown,
+                                    ((?,
                                       Effect
                                         ([
                                         ],
                                           .)),
                                       'f')),
                               Variable
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
@@ -141,42 +139,39 @@
                                   'xs'))))
                   ]))
           ]) in
-    Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
       (non_rec, 'map', [ 'A'; 'B' ],
         [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list', 'B')) ],
         Some Type ('list', 'A')) =
-      Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+      Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
         (non_rec, 'counter', [ ], [ ], None) =
         Apply
-          ((unknown, Effect ([ 'Counter' ], .)),
-            Variable
-              ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-            Variable ((unknown, Effect ([ ], .)), 'tt')) in
+          ((?, Effect ([ 'Counter' ], .)),
+            Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+            Variable ((?, Effect ([ ], .)), 'tt')) in
       Apply
-        ((unknown, Effect ([ 'NonTermination' ], .)),
+        ((?, Effect ([ 'NonTermination' ], .)),
           Apply
-            ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
               Apply
-                ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+                ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
                   Variable
-                    ((unknown,
-                      Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                      'map_rec'),
-                  Variable ((unknown, Effect ([ ], .)), 'counter')),
-              Variable ((unknown, Effect ([ ], .)), 'f')),
-          Variable ((unknown, Effect ([ ], .)), 'match_var_0')) in
-    Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+                    ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                      'map_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
+              Variable ((?, Effect ([ ], .)), 'f')),
+          Variable ((?, Effect ([ ], .)), 'match_var_0')) in
+    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
       (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat')); ('x', 'A') ],
         Some 'A') =
       Match
-        ((unknown, Effect ([ 'NonTermination' ], .)),
-          Variable ((unknown, Effect ([ ], .)), 'counter'),
+        ((?, Effect ([ 'NonTermination' ], .)),
+          Variable ((?, Effect ([ ], .)), 'counter'),
           [
             (Nat(0),
               Apply
-                ((unknown, Effect ([ 'NonTermination' ], .)),
+                ((?, Effect ([ 'NonTermination' ], .)),
                   Variable
-                    ((unknown,
+                    ((?,
                       Effect
                         ([ ],
                           .
@@ -185,53 +180,48 @@
                             ]->
                             .)),
                       'not_terminated'),
-                  Variable
-                    ((unknown, Effect ([ ], .)),
-                      'tt')));
-            (Constructor ('S', 'counter'),
-              Variable ((unknown, Effect ([ ], .)), 'x'))
+                  Variable ((?, Effect ([ ], .)), 'tt')));
+            (Constructor ('S', 'counter'), Variable ((?, Effect ([ ], .)), 'x'))
           ]) in
-    Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
       (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ], Some 'A') =
-      Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+      Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
         (non_rec, 'counter', [ ], [ ], None) =
         Apply
-          ((unknown, Effect ([ 'Counter' ], .)),
-            Variable
-              ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-            Variable ((unknown, Effect ([ ], .)), 'tt')) in
+          ((?, Effect ([ 'Counter' ], .)),
+            Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+            Variable ((?, Effect ([ ], .)), 'tt')) in
       Apply
-        ((unknown, Effect ([ 'NonTermination' ], .)),
+        ((?, Effect ([ 'NonTermination' ], .)),
           Apply
-            ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
               Variable
-                ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                  'loop_rec'), Variable ((unknown, Effect ([ ], .)), 'counter')),
-          Variable ((unknown, Effect ([ ], .)), 'x')) in
+                ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)), 'loop_rec'),
+              Variable ((?, Effect ([ ], .)), 'counter')),
+          Variable ((?, Effect ([ ], .)), 'x')) in
     Apply
-      ((unknown, Effect ([ 'Counter'; 'NonTermination' ], .)),
+      ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
         Apply
-          ((unknown, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
             Variable
-              ((unknown,
-                Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
                 'map'),
             Function
-              ((unknown, Effect ([ ], . -> .)), 'n',
+              ((?, Effect ([ ], . -> .)), 'n',
                 Apply
-                  ((unknown, Effect ([ ], .)),
+                  ((?, Effect ([ ], .)),
                     Apply
-                      ((unknown, Effect ([ ], .)),
-                        Variable ((unknown, Effect ([ ], .)), 'Z.add'),
-                        Variable ((unknown, Effect ([ ], .)), 'n')),
-                    Constant ((unknown, Effect ([ ], .)), Int(1))))),
+                      ((?, Effect ([ ], .)),
+                        Variable ((?, Effect ([ ], .)), 'Z.add'),
+                        Variable ((?, Effect ([ ], .)), 'n')),
+                    Constant ((?, Effect ([ ], .)), Int(1))))),
         Constructor
-          ((unknown, Effect ([ ], .)), 'cons',
-            Constant ((unknown, Effect ([ ], .)), Int(5)),
+          ((?, Effect ([ ], .)), 'cons',
+            Constant ((?, Effect ([ ], .)), Int(5)),
             Constructor
-              ((unknown, Effect ([ ], .)), 'cons',
-                Constant ((unknown, Effect ([ ], .)), Int(7)),
+              ((?, Effect ([ ], .)), 'cons',
+                Constant ((?, Effect ([ ], .)), Int(7)),
                 Constructor
-                  ((unknown, Effect ([ ], .)), 'cons',
-                    Constant ((unknown, Effect ([ ], .)), Int(8)),
-                    Constructor ((unknown, Effect ([ ], .)), '[]'))))))
+                  ((?, Effect ([ ], .)), 'cons',
+                    Constant ((?, Effect ([ ], .)), Int(8)),
+                    Constructor ((?, Effect ([ ], .)), '[]'))))))

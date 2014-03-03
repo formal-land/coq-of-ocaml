@@ -3,14 +3,14 @@
     (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Type ('list', 'A')) =
     Match
-      (unknown, Variable (unknown, 'l'),
+      (?, Variable (?, 'l'),
         [
-          (Constructor ('cons', Any, 'xs'), Variable (unknown, 'xs'));
+          (Constructor ('cons', Any, 'xs'), Variable (?, 'xs'));
           (Constructor ('[]'),
             Apply
-              (unknown, Variable (unknown, 'failwith'),
+              (?, Variable (?, 'failwith'),
                 Constant
-                  (unknown,
+                  (?,
                     String("Cannot take the tail of an empty list."))))
         ]))
 
@@ -22,43 +22,41 @@
         ('match_var_0', Type ('list', Type ('string')))
       ], Some Type ('unit')) =
     Match
-      (unknown, Variable (unknown, 'counter'),
+      (?, Variable (?, 'counter'),
         [
           (Nat(0),
-            Apply
-              (unknown, Variable (unknown, 'not_terminated'),
-                Variable (unknown, 'tt')));
+            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (unknown, Variable (unknown, 'match_var_0'),
+              (?, Variable (?, 'match_var_0'),
                 [
                   (Constructor ('[]'),
                     Constructor
-                      (unknown,
+                      (?,
                         'tt'));
                   (Constructor ('cons', 'x', 'xs'),
                     Sequence
-                      (unknown,
+                      (?,
                         Apply
-                          (unknown,
+                          (?,
                             Variable
-                              (unknown,
+                              (?,
                                 'print_string'),
                             Variable
-                              (unknown,
+                              (?,
                                 'x')),
                         Apply
-                          (unknown,
+                          (?,
                             Apply
-                              (unknown,
+                              (?,
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'print_list_rec'),
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'counter')),
                             Variable
-                              (unknown,
+                              (?,
                                 'xs'))))
                 ]))
         ]))
@@ -67,34 +65,30 @@
   Value
     (non_rec, 'print_list', [ ],
       [ ('match_var_0', Type ('list', Type ('string'))) ], Some Type ('unit')) =
-    Let unknown (non_rec, 'counter', [ ], [ ], None) =
-      Apply
-        (unknown, Variable (unknown, 'read_counter'), Variable (unknown, 'tt'))
-      in
+    Let ? (non_rec, 'counter', [ ], [ ], None) =
+      Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
     Apply
-      (unknown,
-        Apply
-          (unknown, Variable (unknown, 'print_list_rec'),
-            Variable (unknown, 'counter')), Variable (unknown, 'match_var_0')))
+      (?, Apply (?, Variable (?, 'print_list_rec'), Variable (?, 'counter')),
+        Variable (?, 'match_var_0')))
 
 ((),
   Value
     (non_rec, 'f', [ ], [ ],
       Some (Type ('list', Type ('string')) -> Type ('unit'))) =
-    Variable (unknown, 'print_list'))
+    Variable (?, 'print_list'))
 
 ((),
   Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
     Apply
-      (unknown, Variable (unknown, 'f'),
+      (?, Variable (?, 'f'),
         Apply
-          (unknown, Variable (unknown, 'tail'),
+          (?, Variable (?, 'tail'),
             Constructor
-              (unknown, 'cons', Constant (unknown, String("Stop")),
+              (?, 'cons', Constant (?, String("Stop")),
                 Constructor
-                  (unknown, 'cons', Constant (unknown, String("Hello")),
+                  (?, 'cons', Constant (?, String("Hello")),
                     Constructor
-                      (unknown, 'cons', Constant (unknown, String(" ")),
+                      (?, 'cons', Constant (?, String(" ")),
                         Constructor
-                          (unknown, 'cons', Constant (unknown, String("world")),
-                            Constructor (unknown, '[]'))))))))
+                          (?, 'cons', Constant (?, String("world")),
+                            Constructor (?, '[]'))))))))

@@ -5,33 +5,32 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
 (. -[ 'TailLess' ]-> .,
   Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
     Apply
-      ((unknown, Effect ([ 'TailLess' ], .)),
-        Variable ((unknown, Effect ([ ], . -[ 'TailLess' ]-> .)), 'TailLess'),
-        Tuple ((unknown, Effect ([ ], .)))))
+      ((?, Effect ([ 'TailLess' ], .)),
+        Variable ((?, Effect ([ ], . -[ 'TailLess' ]-> .)), 'TailLess'),
+        Tuple ((?, Effect ([ ], .)))))
 
 (. -[ 'Wtf' ]-> .,
   Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
     Apply
-      ((unknown, Effect ([ 'Wtf' ], .)),
-        Variable ((unknown, Effect ([ ], . -[ 'Wtf' ]-> .)), 'Wtf'),
+      ((?, Effect ([ 'Wtf' ], .)),
+        Variable ((?, Effect ([ ], . -[ 'Wtf' ]-> .)), 'Wtf'),
         Tuple
-          ((unknown, Effect ([ ], .)),
-            Constant ((unknown, Effect ([ ], .)), Int(12)),
-            Constant ((unknown, Effect ([ ], .)), String("no")))))
+          ((?, Effect ([ ], .)), Constant ((?, Effect ([ ], .)), Int(12)),
+            Constant ((?, Effect ([ ], .)), String("no")))))
 
 (. -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .,
   Value
     (rec, 'h_rec', [ 'A' ],
       [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some 'A') =
     Match
-      ((unknown, Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .)),
+        Variable ((?, Effect ([ ], .)), 'counter'),
         [
           (Nat(0),
             Apply
-              ((unknown, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ 'NonTermination' ], .)),
                 Variable
-                  ((unknown,
+                  ((?,
                     Effect
                       ([ ],
                         .
@@ -39,18 +38,18 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                             'NonTermination'
                           ]-> .)),
                     'not_terminated'),
-                Variable ((unknown, Effect ([ ], .)), 'tt')));
+                Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((unknown,
+              ((?,
                 Effect
                   ([ 'IO'; 'NonTermination'; 'TailLess' ],
                     .)),
-                Variable ((unknown, Effect ([ ], .)), 'l'),
+                Variable ((?, Effect ([ ], .)), 'l'),
                 [
                   (Constructor ('[]'),
                     Sequence
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                             'IO';
@@ -58,14 +57,14 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                           ],
                             .)),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'IO'
                               ],
                                 .)),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -76,21 +75,21 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                       .)),
                                 'print_string'),
                             Constant
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 String("no tail"))),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'TailLess'
                               ],
                                 .)),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -101,7 +100,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                       .)),
                                 'TailLess'),
                             Tuple
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -112,7 +111,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                       Constructor
                         ('[]')),
                     Variable
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                           ],
@@ -120,7 +119,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                         'x'));
                   (Constructor ('cons', Any, 'xs'),
                     Apply
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                             'IO';
@@ -129,7 +128,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                           ],
                             .)),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                               ],
@@ -141,7 +140,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                   ]->
                                   .)),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -156,14 +155,14 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                         .)),
                                 'h_rec'),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'counter')),
                         Variable
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                               ],
@@ -174,19 +173,18 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
 
 (. -[ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ]-> .,
   Value (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some 'A') =
-    Let (unknown, Effect ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], .))
+    Let (?, Effect ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], .))
       (non_rec, 'counter', [ ], [ ], None) =
       Apply
-        ((unknown, Effect ([ 'Counter' ], .)),
-          Variable
-            ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((unknown, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ 'Counter' ], .)),
+          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+          Variable ((?, Effect ([ ], .)), 'tt')) in
     Apply
-      ((unknown, Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .)),
+      ((?, Effect ([ 'IO'; 'NonTermination'; 'TailLess' ], .)),
         Apply
-          ((unknown, Effect ([ ], . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
+          ((?, Effect ([ ], . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
             Variable
-              ((unknown,
+              ((?,
                 Effect ([ ], . -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .)),
-                'h_rec'), Variable ((unknown, Effect ([ ], .)), 'counter')),
-        Variable ((unknown, Effect ([ ], .)), 'l')))
+                'h_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
+        Variable ((?, Effect ([ ], .)), 'l')))

@@ -5,59 +5,53 @@ Module 'SizedString':
 (.,
   Value (non_rec, 'r', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      ((unknown, Effect ([ ], .)),
-        ('SizedString.name',
-          Constant ((unknown, Effect ([ ], .)), String("gre"))),
-        ('SizedString.size', Constant ((unknown, Effect ([ ], .)), Int(3)))))
+      ((?, Effect ([ ], .)),
+        ('SizedString.name', Constant ((?, Effect ([ ], .)), String("gre"))),
+        ('SizedString.size', Constant ((?, Effect ([ ], .)), Int(3)))))
 
 (.,
   Value (non_rec, 'r'', [ ], [ ], Some Type ('SizedString.t')) =
     Record
-      ((unknown, Effect ([ ], .)),
-        ('SizedString.name',
-          Constant ((unknown, Effect ([ ], .)), String("haha"))),
-        ('SizedString.size', Constant ((unknown, Effect ([ ], .)), Int(4)))))
+      ((?, Effect ([ ], .)),
+        ('SizedString.name', Constant ((?, Effect ([ ], .)), String("haha"))),
+        ('SizedString.size', Constant ((?, Effect ([ ], .)), Int(4)))))
 
 (.,
   Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ ], .)),
+      ((?, Effect ([ ], .)),
         Apply
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'Z.add'),
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'Z.add'),
             Field
-              ((unknown, Effect ([ ], .)),
-                Variable ((unknown, Effect ([ ], .)), 'r'), 'SizedString.size')),
+              ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'r'),
+                'SizedString.size')),
         Field
-          ((unknown, Effect ([ ], .)),
-            Variable ((unknown, Effect ([ ], .)), 'r''), 'SizedString.size')))
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'r''),
+            'SizedString.size')))
 
 (. -> .,
   Value
     (non_rec, 'f', [ ], [ ('match_var_0', Type ('SizedString.t')) ],
       Some Type ('bool')) =
     Match
-      ((unknown, Effect ([ ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'match_var_0'),
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'match_var_0'),
         [
           (Record (('SizedString.size', Int(3))),
-            Constructor ((unknown, Effect ([ ], .)), 'true'));
-          (Any, Constructor ((unknown, Effect ([ ], .)), 'false'))
+            Constructor ((?, Effect ([ ], .)), 'true'));
+          (Any, Constructor ((?, Effect ([ ], .)), 'false'))
         ]))
 
 (.,
   Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
     Apply
-      ((unknown, Effect ([ ], .)),
-        Variable ((unknown, Effect ([ ], . -> .)), 'f'),
-        Variable ((unknown, Effect ([ ], .)), 'r')))
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], . -> .)), 'f'),
+        Variable ((?, Effect ([ ], .)), 'r')))
 
 (.,
   Value (non_rec, 'b'', [ ], [ ], Some Type ('bool')) =
     Apply
-      ((unknown, Effect ([ ], .)),
-        Variable ((unknown, Effect ([ ], . -> .)), 'f'),
-        Variable ((unknown, Effect ([ ], .)), 'r'')))
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], . -> .)), 'f'),
+        Variable ((?, Effect ([ ], .)), 'r'')))
 
 Module 'Point':
   Record 't':
@@ -66,17 +60,16 @@ Module 'Point':
   (.,
     Value (non_rec, 'p', [ ], [ ], Some Type ('t')) =
       Record
-        ((unknown, Effect ([ ], .)),
-          ('x', Constant ((unknown, Effect ([ ], .)), Int(5))),
-          ('y', Constant ((unknown, Effect ([ ], .)), Int(-3))),
-          ('z', Constant ((unknown, Effect ([ ], .)), Int(1)))))
+        ((?, Effect ([ ], .)), ('x', Constant ((?, Effect ([ ], .)), Int(5))),
+          ('y', Constant ((?, Effect ([ ], .)), Int(-3))),
+          ('z', Constant ((?, Effect ([ ], .)), Int(1)))))
   
   (.,
     Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
       Match
-        ((unknown, Effect ([ ], .)), Variable ((unknown, Effect ([ ], .)), 'p'),
+        ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'p'),
           [
             (Record (('x', Int(5)), ('z', Int(1))),
-              Constructor ((unknown, Effect ([ ], .)), 'true'));
-            (Any, Constructor ((unknown, Effect ([ ], .)), 'false'))
+              Constructor ((?, Effect ([ ], .)), 'true'));
+            (Any, Constructor ((?, Effect ([ ], .)), 'false'))
           ]))

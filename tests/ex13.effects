@@ -3,16 +3,15 @@
     (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Type ('list', 'A')) =
     Match
-      ((unknown, Effect ([ 'Failure' ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'l'),
+      ((?, Effect ([ 'Failure' ], .)), Variable ((?, Effect ([ ], .)), 'l'),
         [
           (Constructor ('cons', Any, 'xs'),
-            Variable ((unknown, Effect ([ ], .)), 'xs'));
+            Variable ((?, Effect ([ ], .)), 'xs'));
           (Constructor ('[]'),
             Apply
-              ((unknown, Effect ([ 'Failure' ], .)),
+              ((?, Effect ([ 'Failure' ], .)),
                 Variable
-                  ((unknown,
+                  ((?,
                     Effect
                       ([ ],
                         .
@@ -21,7 +20,7 @@
                           ]-> .)),
                     'failwith'),
                 Constant
-                  ((unknown, Effect ([ ], .)),
+                  ((?, Effect ([ ], .)),
                     String("Cannot take the tail of an empty list."))))
         ]))
 
@@ -33,14 +32,14 @@
         ('match_var_0', Type ('list', Type ('string')))
       ], Some Type ('unit')) =
     Match
-      ((unknown, Effect ([ 'IO'; 'NonTermination' ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ 'IO'; 'NonTermination' ], .)),
+        Variable ((?, Effect ([ ], .)), 'counter'),
         [
           (Nat(0),
             Apply
-              ((unknown, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ 'NonTermination' ], .)),
                 Variable
-                  ((unknown,
+                  ((?,
                     Effect
                       ([ ],
                         .
@@ -48,17 +47,15 @@
                             'NonTermination'
                           ]-> .)),
                     'not_terminated'),
-                Variable ((unknown, Effect ([ ], .)), 'tt')));
+                Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((unknown, Effect ([ 'IO'; 'NonTermination' ], .)),
-                Variable
-                  ((unknown, Effect ([ ], .)),
-                    'match_var_0'),
+              ((?, Effect ([ 'IO'; 'NonTermination' ], .)),
+                Variable ((?, Effect ([ ], .)), 'match_var_0'),
                 [
                   (Constructor ('[]'),
                     Constructor
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                           ],
@@ -66,7 +63,7 @@
                         'tt'));
                   (Constructor ('cons', 'x', 'xs'),
                     Sequence
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                             'IO';
@@ -74,14 +71,14 @@
                           ],
                             .)),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'IO'
                               ],
                                 .)),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -92,14 +89,14 @@
                                       .)),
                                 'print_string'),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'x')),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'IO';
@@ -107,7 +104,7 @@
                               ],
                                 .)),
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -118,7 +115,7 @@
                                       ]->
                                       .)),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
@@ -132,14 +129,14 @@
                                             .)),
                                     'print_list_rec'),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'counter')),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -152,52 +149,48 @@
   Value
     (non_rec, 'print_list', [ ],
       [ ('match_var_0', Type ('list', Type ('string'))) ], Some Type ('unit')) =
-    Let (unknown, Effect ([ 'Counter'; 'IO'; 'NonTermination' ], .))
+    Let (?, Effect ([ 'Counter'; 'IO'; 'NonTermination' ], .))
       (non_rec, 'counter', [ ], [ ], None) =
       Apply
-        ((unknown, Effect ([ 'Counter' ], .)),
-          Variable
-            ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((unknown, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ 'Counter' ], .)),
+          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+          Variable ((?, Effect ([ ], .)), 'tt')) in
     Apply
-      ((unknown, Effect ([ 'IO'; 'NonTermination' ], .)),
+      ((?, Effect ([ 'IO'; 'NonTermination' ], .)),
         Apply
-          ((unknown, Effect ([ ], . -[ 'IO'; 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ 'IO'; 'NonTermination' ]-> .)),
             Variable
-              ((unknown, Effect ([ ], . -> . -[ 'IO'; 'NonTermination' ]-> .)),
-                'print_list_rec'),
-            Variable ((unknown, Effect ([ ], .)), 'counter')),
-        Variable ((unknown, Effect ([ ], .)), 'match_var_0')))
+              ((?, Effect ([ ], . -> . -[ 'IO'; 'NonTermination' ]-> .)),
+                'print_list_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
+        Variable ((?, Effect ([ ], .)), 'match_var_0')))
 
 (. -[ 'Counter'; 'IO'; 'NonTermination' ]-> .,
   Value
     (non_rec, 'f', [ ], [ ],
       Some (Type ('list', Type ('string')) -> Type ('unit'))) =
     Variable
-      ((unknown, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
+      ((?, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
         'print_list'))
 
 (. -[ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ]-> .,
   Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
     Apply
-      ((unknown, Effect ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], .)),
+      ((?, Effect ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], .)),
         Variable
-          ((unknown, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
-            'f'),
+          ((?, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)), 'f'),
         Apply
-          ((unknown, Effect ([ 'Failure' ], .)),
-            Variable ((unknown, Effect ([ ], . -[ 'Failure' ]-> .)), 'tail'),
+          ((?, Effect ([ 'Failure' ], .)),
+            Variable ((?, Effect ([ ], . -[ 'Failure' ]-> .)), 'tail'),
             Constructor
-              ((unknown, Effect ([ ], .)), 'cons',
-                Constant ((unknown, Effect ([ ], .)), String("Stop")),
+              ((?, Effect ([ ], .)), 'cons',
+                Constant ((?, Effect ([ ], .)), String("Stop")),
                 Constructor
-                  ((unknown, Effect ([ ], .)), 'cons',
-                    Constant ((unknown, Effect ([ ], .)), String("Hello")),
+                  ((?, Effect ([ ], .)), 'cons',
+                    Constant ((?, Effect ([ ], .)), String("Hello")),
                     Constructor
-                      ((unknown, Effect ([ ], .)), 'cons',
-                        Constant ((unknown, Effect ([ ], .)), String(" ")),
+                      ((?, Effect ([ ], .)), 'cons',
+                        Constant ((?, Effect ([ ], .)), String(" ")),
                         Constructor
-                          ((unknown, Effect ([ ], .)), 'cons',
-                            Constant
-                              ((unknown, Effect ([ ], .)), String("world")),
-                            Constructor ((unknown, Effect ([ ], .)), '[]'))))))))
+                          ((?, Effect ([ ], .)), 'cons',
+                            Constant ((?, Effect ([ ], .)), String("world")),
+                            Constructor ((?, Effect ([ ], .)), '[]'))))))))

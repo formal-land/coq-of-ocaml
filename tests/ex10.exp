@@ -8,46 +8,46 @@ Module 'List2':
         [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ],
         Some Type ('Z')) =
       Match
-        (unknown, Variable (unknown, 'counter'),
+        (?, Variable (?, 'counter'),
           [
             (Nat(0),
               Apply
-                (unknown, Variable (unknown, 'not_terminated'),
-                  Variable (unknown, 'tt')));
+                (?, Variable (?, 'not_terminated'),
+                  Variable (?, 'tt')));
             (Constructor ('S', 'counter'),
               Match
-                (unknown, Variable (unknown, 'l'),
+                (?, Variable (?, 'l'),
                   [
                     (Constructor ('Nil'),
                       Constant
-                        (unknown,
+                        (?,
                           Int(0)));
                     (Constructor
                       ('Cons',
                         'x',
                         'xs'),
                       Apply
-                        (unknown,
+                        (?,
                           Apply
-                            (unknown,
+                            (?,
                               Variable
-                                (unknown,
+                                (?,
                                   'Z.add'),
                               Variable
-                                (unknown,
+                                (?,
                                   'x')),
                           Apply
-                            (unknown,
+                            (?,
                               Apply
-                                (unknown,
+                                (?,
                                   Variable
-                                    (unknown,
+                                    (?,
                                       'sum_rec'),
                                   Variable
-                                    (unknown,
+                                    (?,
                                       'counter')),
                               Variable
-                                (unknown,
+                                (?,
                                   'xs'))))
                   ]))
           ]))
@@ -56,15 +56,11 @@ Module 'List2':
     Value
       (non_rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ], Some Type ('Z'))
       =
-      Let unknown (non_rec, 'counter', [ ], [ ], None) =
-        Apply
-          (unknown, Variable (unknown, 'read_counter'), Variable (unknown, 'tt'))
-        in
+      Let ? (non_rec, 'counter', [ ], [ ], None) =
+        Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
       Apply
-        (unknown,
-          Apply
-            (unknown, Variable (unknown, 'sum_rec'),
-              Variable (unknown, 'counter')), Variable (unknown, 'l')))
+        (?, Apply (?, Variable (?, 'sum_rec'), Variable (?, 'counter')),
+          Variable (?, 'l')))
   
   ((),
     Value
@@ -72,42 +68,42 @@ Module 'List2':
         [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ],
         Some Type ('t', 'A')) =
       Match
-        (unknown, Variable (unknown, 'counter'),
+        (?, Variable (?, 'counter'),
           [
             (Nat(0),
               Apply
-                (unknown, Variable (unknown, 'not_terminated'),
-                  Variable (unknown, 'tt')));
+                (?, Variable (?, 'not_terminated'),
+                  Variable (?, 'tt')));
             (Constructor ('S', 'counter'),
               Match
-                (unknown, Variable (unknown, 'match_var_0'),
+                (?, Variable (?, 'match_var_0'),
                   [
                     (Constructor ('[]'),
                       Constructor
-                        (unknown,
+                        (?,
                           'Nil'));
                     (Constructor
                       ('cons',
                         'x',
                         'xs'),
                       Constructor
-                        (unknown,
+                        (?,
                           'Cons',
                           Variable
-                            (unknown,
+                            (?,
                               'x'),
                           Apply
-                            (unknown,
+                            (?,
                               Apply
-                                (unknown,
+                                (?,
                                   Variable
-                                    (unknown,
+                                    (?,
                                       'of_list_rec'),
                                   Variable
-                                    (unknown,
+                                    (?,
                                       'counter')),
                               Variable
-                                (unknown,
+                                (?,
                                   'xs'))))
                   ]))
           ]))
@@ -116,34 +112,29 @@ Module 'List2':
     Value
       (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ],
         Some Type ('t', 'A')) =
-      Let unknown (non_rec, 'counter', [ ], [ ], None) =
-        Apply
-          (unknown, Variable (unknown, 'read_counter'), Variable (unknown, 'tt'))
-        in
+      Let ? (non_rec, 'counter', [ ], [ ], None) =
+        Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
       Apply
-        (unknown,
-          Apply
-            (unknown, Variable (unknown, 'of_list_rec'),
-              Variable (unknown, 'counter')), Variable (unknown, 'match_var_0')))
+        (?, Apply (?, Variable (?, 'of_list_rec'), Variable (?, 'counter')),
+          Variable (?, 'match_var_0')))
   
   Module 'Inside':
     ((),
       Value (non_rec, 'x', [ ], [ ], Some Type ('Z')) =
-        Constant (unknown, Int(12)))
+        Constant (?, Int(12)))
 
 ((),
   Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown, Variable (unknown, 'List2.sum'),
+      (?, Variable (?, 'List2.sum'),
         Apply
-          (unknown, Variable (unknown, 'List2.of_list'),
+          (?, Variable (?, 'List2.of_list'),
             Constructor
-              (unknown, 'cons', Constant (unknown, Int(5)),
+              (?, 'cons', Constant (?, Int(5)),
                 Constructor
-                  (unknown, 'cons', Constant (unknown, Int(7)),
+                  (?, 'cons', Constant (?, Int(7)),
                     Constructor
-                      (unknown, 'cons', Constant (unknown, Int(6)),
+                      (?, 'cons', Constant (?, Int(6)),
                         Constructor
-                          (unknown, 'cons',
-                            Variable (unknown, 'List2.Inside.x'),
-                            Constructor (unknown, '[]'))))))))
+                          (?, 'cons', Variable (?, 'List2.Inside.x'),
+                            Constructor (?, '[]'))))))))

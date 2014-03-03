@@ -3,7 +3,7 @@ Inductive 'set':
 
 (.,
   Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
-    Constructor ((unknown, Effect ([ ], .)), 'Empty'))
+    Constructor ((?, Effect ([ ], .)), 'Empty'))
 
 (. -> . -> . -[ 'NonTermination' ]-> .,
   Value
@@ -11,14 +11,14 @@ Inductive 'set':
       [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Type ('bool')) =
     Match
-      ((unknown, Effect ([ 'NonTermination' ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ 'NonTermination' ], .)),
+        Variable ((?, Effect ([ ], .)), 'counter'),
         [
           (Nat(0),
             Apply
-              ((unknown, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ 'NonTermination' ], .)),
                 Variable
-                  ((unknown,
+                  ((?,
                     Effect
                       ([ ],
                         .
@@ -26,15 +26,15 @@ Inductive 'set':
                             'NonTermination'
                           ]-> .)),
                     'not_terminated'),
-                Variable ((unknown, Effect ([ ], .)), 'tt')));
+                Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((unknown, Effect ([ 'NonTermination' ], .)),
-                Variable ((unknown, Effect ([ ], .)), 's'),
+              ((?, Effect ([ 'NonTermination' ], .)),
+                Variable ((?, Effect ([ ], .)), 's'),
                 [
                   (Constructor ('Empty'),
                     Constructor
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                           ],
@@ -42,54 +42,54 @@ Inductive 'set':
                         'false'));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                             'NonTermination'
                           ],
                             .)),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                               ],
                                 .)),
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'Z.ltb'),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'y')),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'NonTermination'
                               ],
                                 .)),
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -99,7 +99,7 @@ Inductive 'set':
                                       ]->
                                       .)),
                                 Apply
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
@@ -111,7 +111,7 @@ Inductive 'set':
                                             ]->
                                             .)),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
@@ -126,75 +126,75 @@ Inductive 'set':
                                                   .)),
                                         'member_rec'),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'counter')),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 's1')),
                         IfThenElse
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'NonTermination'
                               ],
                                 .)),
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 Apply
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'Z.ltb'),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'y')),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                     'NonTermination'
                                   ],
                                     .)),
                                 Apply
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
@@ -204,7 +204,7 @@ Inductive 'set':
                                           ]->
                                           .)),
                                     Apply
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
@@ -216,7 +216,7 @@ Inductive 'set':
                                                 ]->
                                                 .)),
                                         Variable
-                                          ((unknown,
+                                          ((?,
                                             Effect
                                               ([
                                               ],
@@ -231,28 +231,28 @@ Inductive 'set':
                                                       .)),
                                             'member_rec'),
                                         Variable
-                                          ((unknown,
+                                          ((?,
                                             Effect
                                               ([
                                               ],
                                                 .)),
                                             'counter')),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'x')),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     's2')),
                             Constructor
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -265,25 +265,23 @@ Inductive 'set':
   Value
     (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Type ('bool')) =
-    Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
       (non_rec, 'counter', [ ], [ ], None) =
       Apply
-        ((unknown, Effect ([ 'Counter' ], .)),
-          Variable
-            ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((unknown, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ 'Counter' ], .)),
+          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+          Variable ((?, Effect ([ ], .)), 'tt')) in
     Apply
-      ((unknown, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ 'NonTermination' ], .)),
         Apply
-          ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
             Apply
-              ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
                 Variable
-                  ((unknown, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                    'member_rec'),
-                Variable ((unknown, Effect ([ ], .)), 'counter')),
-            Variable ((unknown, Effect ([ ], .)), 'x')),
-        Variable ((unknown, Effect ([ ], .)), 's')))
+                  ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                    'member_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
+            Variable ((?, Effect ([ ], .)), 'x')),
+        Variable ((?, Effect ([ ], .)), 's')))
 
 (. -> . -> . -[ 'NonTermination' ]-> .,
   Value
@@ -291,14 +289,14 @@ Inductive 'set':
       [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Type ('set')) =
     Match
-      ((unknown, Effect ([ 'NonTermination' ], .)),
-        Variable ((unknown, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ 'NonTermination' ], .)),
+        Variable ((?, Effect ([ ], .)), 'counter'),
         [
           (Nat(0),
             Apply
-              ((unknown, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ 'NonTermination' ], .)),
                 Variable
-                  ((unknown,
+                  ((?,
                     Effect
                       ([ ],
                         .
@@ -306,36 +304,36 @@ Inductive 'set':
                             'NonTermination'
                           ]-> .)),
                     'not_terminated'),
-                Variable ((unknown, Effect ([ ], .)), 'tt')));
+                Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((unknown, Effect ([ 'NonTermination' ], .)),
-                Variable ((unknown, Effect ([ ], .)), 's'),
+              ((?, Effect ([ 'NonTermination' ], .)),
+                Variable ((?, Effect ([ ], .)), 's'),
                 [
                   (Constructor ('Empty'),
                     Constructor
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                           ],
                             .)),
                         'Node',
                         Constructor
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                               ],
                                 .)),
                             'Empty'),
                         Variable
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                               ],
                                 .)),
                             'x'),
                         Constructor
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                               ],
@@ -343,47 +341,47 @@ Inductive 'set':
                             'Empty')));
                   (Constructor ('Node', 's1', 'y', 's2'),
                     IfThenElse
-                      ((unknown,
+                      ((?,
                         Effect
                           ([
                             'NonTermination'
                           ],
                             .)),
                         Apply
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                               ],
                                 .)),
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'Z.ltb'),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'y')),
                         Constructor
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'NonTermination'
@@ -391,14 +389,14 @@ Inductive 'set':
                                 .)),
                             'Node',
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                     'NonTermination'
                                   ],
                                     .)),
                                 Apply
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
@@ -408,7 +406,7 @@ Inductive 'set':
                                           ]->
                                           .)),
                                     Apply
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
@@ -420,7 +418,7 @@ Inductive 'set':
                                                 ]->
                                                 .)),
                                         Variable
-                                          ((unknown,
+                                          ((?,
                                             Effect
                                               ([
                                               ],
@@ -435,82 +433,82 @@ Inductive 'set':
                                                       .)),
                                             'insert_rec'),
                                         Variable
-                                          ((unknown,
+                                          ((?,
                                             Effect
                                               ([
                                               ],
                                                 .)),
                                             'counter')),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'x')),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     's1')),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 'y'),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 's2')),
                         IfThenElse
-                          ((unknown,
+                          ((?,
                             Effect
                               ([
                                 'NonTermination'
                               ],
                                 .)),
                             Apply
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 Apply
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'Z.ltb'),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         'y')),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'x')),
                             Constructor
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                     'NonTermination'
@@ -518,28 +516,28 @@ Inductive 'set':
                                     .)),
                                 'Node',
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     's1'),
                                 Variable
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
                                     'y'),
                                 Apply
-                                  ((unknown,
+                                  ((?,
                                     Effect
                                       ([
                                         'NonTermination'
                                       ],
                                         .)),
                                     Apply
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
@@ -549,7 +547,7 @@ Inductive 'set':
                                               ]->
                                               .)),
                                         Apply
-                                          ((unknown,
+                                          ((?,
                                             Effect
                                               ([
                                               ],
@@ -561,7 +559,7 @@ Inductive 'set':
                                                     ]->
                                                     .)),
                                             Variable
-                                              ((unknown,
+                                              ((?,
                                                 Effect
                                                   ([
                                                   ],
@@ -576,28 +574,28 @@ Inductive 'set':
                                                           .)),
                                                 'insert_rec'),
                                             Variable
-                                              ((unknown,
+                                              ((?,
                                                 Effect
                                                   ([
                                                   ],
                                                     .)),
                                                 'counter')),
                                         Variable
-                                          ((unknown,
+                                          ((?,
                                             Effect
                                               ([
                                               ],
                                                 .)),
                                             'x')),
                                     Variable
-                                      ((unknown,
+                                      ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
                                         's2'))),
                             Variable
-                              ((unknown,
+                              ((?,
                                 Effect
                                   ([
                                   ],
@@ -610,22 +608,20 @@ Inductive 'set':
   Value
     (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
       Some Type ('set')) =
-    Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
       (non_rec, 'counter', [ ], [ ], None) =
       Apply
-        ((unknown, Effect ([ 'Counter' ], .)),
-          Variable
-            ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((unknown, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ 'Counter' ], .)),
+          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+          Variable ((?, Effect ([ ], .)), 'tt')) in
     Apply
-      ((unknown, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ 'NonTermination' ], .)),
         Apply
-          ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
             Apply
-              ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
                 Variable
-                  ((unknown, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                    'insert_rec'),
-                Variable ((unknown, Effect ([ ], .)), 'counter')),
-            Variable ((unknown, Effect ([ ], .)), 'x')),
-        Variable ((unknown, Effect ([ ], .)), 's')))
+                  ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                    'insert_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
+            Variable ((?, Effect ([ ], .)), 'x')),
+        Variable ((?, Effect ([ ], .)), 's')))

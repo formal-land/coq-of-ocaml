@@ -1,42 +1,40 @@
 ((),
   Value (non_rec, 'u', [ ], [ ], Some Type ('unit')) =
-    Constructor (unknown, 'tt'))
+    Constructor (?, 'tt'))
 
 ((),
   Value (non_rec, 'l1', [ 'A' ], [ ], Some Type ('list', 'A')) =
-    Constructor (unknown, '[]'))
+    Constructor (?, '[]'))
 
 ((),
   Value (non_rec, 'l2', [ ], [ ], Some Type ('list', Type ('Z'))) =
-    Constructor
-      (unknown, 'cons', Constant (unknown, Int(1)), Constructor (unknown, '[]')))
+    Constructor (?, 'cons', Constant (?, Int(1)), Constructor (?, '[]')))
 
 ((),
   Value (non_rec, 'l3', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Constructor
-      (unknown, 'cons', Constant (unknown, Int(1)),
+      (?, 'cons', Constant (?, Int(1)),
         Constructor
-          (unknown, 'cons', Constant (unknown, Int(5)),
+          (?, 'cons', Constant (?, Int(5)),
             Constructor
-              (unknown, 'cons', Constant (unknown, Int(7)),
+              (?, 'cons', Constant (?, Int(7)),
                 Constructor
-                  (unknown, 'cons', Constant (unknown, Int(32)),
+                  (?, 'cons', Constant (?, Int(32)),
                     Constructor
-                      (unknown, 'cons', Constant (unknown, Int(15)),
-                        Constructor (unknown, '[]')))))))
+                      (?, 'cons', Constant (?, Int(15)), Constructor (?, '[]')))))))
 
 ((),
   Value (non_rec, 'o1', [ 'A' ], [ ], Some Type ('option', 'A')) =
-    Constructor (unknown, 'None'))
+    Constructor (?, 'None'))
 
 ((),
   Value (non_rec, 'o2', [ ], [ ], Some Type ('option', Type ('Z'))) =
-    Constructor (unknown, 'Some', Constant (unknown, Int(12))))
+    Constructor (?, 'Some', Constant (?, Int(12))))
 
 ((),
   Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
-    Constant (unknown, Char("g")))
+    Constant (?, Char("g")))
 
 ((),
   Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
-    Constant (unknown, String("bla")))
+    Constant (?, String("bla")))

@@ -6,5 +6,5 @@ let unknown : t = None
 
 let pp (l : t) : SmartPrint.t =
   match l with
-  | None -> !^ "unknown"
+  | None -> !^ "?"
   | Some n -> OCaml.int n

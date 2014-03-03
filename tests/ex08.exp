@@ -8,16 +8,15 @@ Inductive 't1':
 
 ((),
   Value (non_rec, 'n', [ ], [ ], Some Type ('t1')) =
-    Constructor
-      (unknown, 'C2', Constructor (unknown, 'false'), Constant (unknown, Int(3))))
+    Constructor (?, 'C2', Constructor (?, 'false'), Constant (?, Int(3))))
 
 ((),
   Value (non_rec, 'm', [ ], [ ], Some Type ('bool')) =
     Match
-      (unknown, Variable (unknown, 'n'),
+      (?, Variable (?, 'n'),
         [
-          (Constructor ('C2', 'b', Any), Variable (unknown, 'b'));
-          (Any, Constructor (unknown, 'true'))
+          (Constructor ('C2', 'b', Any), Variable (?, 'b'));
+          (Any, Constructor (?, 'true'))
         ]))
 
 Inductive 't2':
@@ -29,39 +28,37 @@ Inductive 't2':
       [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
       Some Type ('t2', 'A')) =
     Match
-      (unknown, Variable (unknown, 'counter'),
+      (?, Variable (?, 'counter'),
         [
           (Nat(0),
-            Apply
-              (unknown, Variable (unknown, 'not_terminated'),
-                Variable (unknown, 'tt')));
+            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (unknown, Variable (unknown, 'l'),
+              (?, Variable (?, 'l'),
                 [
                   (Constructor ('[]'),
                     Constructor
-                      (unknown,
+                      (?,
                         'D1'));
                   (Constructor ('cons', 'x', 'xs'),
                     Constructor
-                      (unknown,
+                      (?,
                         'D2',
                         Variable
-                          (unknown,
+                          (?,
                             'x'),
                         Apply
-                          (unknown,
+                          (?,
                             Apply
-                              (unknown,
+                              (?,
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'of_list_rec'),
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'counter')),
                             Variable
-                              (unknown,
+                              (?,
                                 'xs'))))
                 ]))
         ]))
@@ -70,15 +67,11 @@ Inductive 't2':
   Value
     (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Type ('t2', 'A')) =
-    Let unknown (non_rec, 'counter', [ ], [ ], None) =
-      Apply
-        (unknown, Variable (unknown, 'read_counter'), Variable (unknown, 'tt'))
-      in
+    Let ? (non_rec, 'counter', [ ], [ ], None) =
+      Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
     Apply
-      (unknown,
-        Apply
-          (unknown, Variable (unknown, 'of_list_rec'),
-            Variable (unknown, 'counter')), Variable (unknown, 'l')))
+      (?, Apply (?, Variable (?, 'of_list_rec'), Variable (?, 'counter')),
+        Variable (?, 'l')))
 
 ((),
   Value
@@ -86,43 +79,41 @@ Inductive 't2':
       [ ('counter', Type ('nat')); ('l', Type ('t2', Type ('Z'))) ],
       Some Type ('Z')) =
     Match
-      (unknown, Variable (unknown, 'counter'),
+      (?, Variable (?, 'counter'),
         [
           (Nat(0),
-            Apply
-              (unknown, Variable (unknown, 'not_terminated'),
-                Variable (unknown, 'tt')));
+            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (unknown, Variable (unknown, 'l'),
+              (?, Variable (?, 'l'),
                 [
                   (Constructor ('D1'),
                     Constant
-                      (unknown,
+                      (?,
                         Int(0)));
                   (Constructor ('D2', 'x', 'xs'),
                     Apply
-                      (unknown,
+                      (?,
                         Apply
-                          (unknown,
+                          (?,
                             Variable
-                              (unknown,
+                              (?,
                                 'Z.add'),
                             Variable
-                              (unknown,
+                              (?,
                                 'x')),
                         Apply
-                          (unknown,
+                          (?,
                             Apply
-                              (unknown,
+                              (?,
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'sum_rec'),
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'counter')),
                             Variable
-                              (unknown,
+                              (?,
                                 'xs'))))
                 ]))
         ]))
@@ -130,26 +121,21 @@ Inductive 't2':
 ((),
   Value
     (non_rec, 'sum', [ ], [ ('l', Type ('t2', Type ('Z'))) ], Some Type ('Z')) =
-    Let unknown (non_rec, 'counter', [ ], [ ], None) =
-      Apply
-        (unknown, Variable (unknown, 'read_counter'), Variable (unknown, 'tt'))
-      in
+    Let ? (non_rec, 'counter', [ ], [ ], None) =
+      Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
     Apply
-      (unknown,
-        Apply
-          (unknown, Variable (unknown, 'sum_rec'), Variable (unknown, 'counter')),
-        Variable (unknown, 'l')))
+      (?, Apply (?, Variable (?, 'sum_rec'), Variable (?, 'counter')),
+        Variable (?, 'l')))
 
 ((),
   Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown, Variable (unknown, 'sum'),
+      (?, Variable (?, 'sum'),
         Apply
-          (unknown, Variable (unknown, 'of_list'),
+          (?, Variable (?, 'of_list'),
             Constructor
-              (unknown, 'cons', Constant (unknown, Int(5)),
+              (?, 'cons', Constant (?, Int(5)),
                 Constructor
-                  (unknown, 'cons', Constant (unknown, Int(7)),
+                  (?, 'cons', Constant (?, Int(7)),
                     Constructor
-                      (unknown, 'cons', Constant (unknown, Int(3)),
-                        Constructor (unknown, '[]')))))))
+                      (?, 'cons', Constant (?, Int(3)), Constructor (?, '[]')))))))

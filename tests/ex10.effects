@@ -8,14 +8,14 @@ Module 'List2':
         [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ],
         Some Type ('Z')) =
       Match
-        ((unknown, Effect ([ 'NonTermination' ], .)),
-          Variable ((unknown, Effect ([ ], .)), 'counter'),
+        ((?, Effect ([ 'NonTermination' ], .)),
+          Variable ((?, Effect ([ ], .)), 'counter'),
           [
             (Nat(0),
               Apply
-                ((unknown, Effect ([ 'NonTermination' ], .)),
+                ((?, Effect ([ 'NonTermination' ], .)),
                   Variable
-                    ((unknown,
+                    ((?,
                       Effect
                         ([ ],
                           .
@@ -24,19 +24,15 @@ Module 'List2':
                             ]->
                             .)),
                       'not_terminated'),
-                  Variable
-                    ((unknown, Effect ([ ], .)),
-                      'tt')));
+                  Variable ((?, Effect ([ ], .)), 'tt')));
             (Constructor ('S', 'counter'),
               Match
-                ((unknown, Effect ([ 'NonTermination' ], .)),
-                  Variable
-                    ((unknown, Effect ([ ], .)),
-                      'l'),
+                ((?, Effect ([ 'NonTermination' ], .)),
+                  Variable ((?, Effect ([ ], .)), 'l'),
                   [
                     (Constructor ('Nil'),
                       Constant
-                        ((unknown,
+                        ((?,
                           Effect
                             ([
                             ],
@@ -47,41 +43,41 @@ Module 'List2':
                         'x',
                         'xs'),
                       Apply
-                        ((unknown,
+                        ((?,
                           Effect
                             ([
                               'NonTermination'
                             ],
                               .)),
                           Apply
-                            ((unknown,
+                            ((?,
                               Effect
                                 ([
                                 ],
                                   .)),
                               Variable
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   'Z.add'),
                               Variable
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   'x')),
                           Apply
-                            ((unknown,
+                            ((?,
                               Effect
                                 ([
                                   'NonTermination'
                                 ],
                                   .)),
                               Apply
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
@@ -91,7 +87,7 @@ Module 'List2':
                                         ]->
                                         .)),
                                   Variable
-                                    ((unknown,
+                                    ((?,
                                       Effect
                                         ([
                                         ],
@@ -104,14 +100,14 @@ Module 'List2':
                                               .)),
                                       'sum_rec'),
                                   Variable
-                                    ((unknown,
+                                    ((?,
                                       Effect
                                         ([
                                         ],
                                           .)),
                                       'counter')),
                               Variable
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
@@ -124,21 +120,20 @@ Module 'List2':
     Value
       (non_rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ], Some Type ('Z'))
       =
-      Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+      Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
         (non_rec, 'counter', [ ], [ ], None) =
         Apply
-          ((unknown, Effect ([ 'Counter' ], .)),
-            Variable
-              ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-            Variable ((unknown, Effect ([ ], .)), 'tt')) in
+          ((?, Effect ([ 'Counter' ], .)),
+            Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+            Variable ((?, Effect ([ ], .)), 'tt')) in
       Apply
-        ((unknown, Effect ([ 'NonTermination' ], .)),
+        ((?, Effect ([ 'NonTermination' ], .)),
           Apply
-            ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
               Variable
-                ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                  'sum_rec'), Variable ((unknown, Effect ([ ], .)), 'counter')),
-          Variable ((unknown, Effect ([ ], .)), 'l')))
+                ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)), 'sum_rec'),
+              Variable ((?, Effect ([ ], .)), 'counter')),
+          Variable ((?, Effect ([ ], .)), 'l')))
   
   (. -> . -[ 'NonTermination' ]-> .,
     Value
@@ -146,14 +141,14 @@ Module 'List2':
         [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ],
         Some Type ('t', 'A')) =
       Match
-        ((unknown, Effect ([ 'NonTermination' ], .)),
-          Variable ((unknown, Effect ([ ], .)), 'counter'),
+        ((?, Effect ([ 'NonTermination' ], .)),
+          Variable ((?, Effect ([ ], .)), 'counter'),
           [
             (Nat(0),
               Apply
-                ((unknown, Effect ([ 'NonTermination' ], .)),
+                ((?, Effect ([ 'NonTermination' ], .)),
                   Variable
-                    ((unknown,
+                    ((?,
                       Effect
                         ([ ],
                           .
@@ -162,19 +157,17 @@ Module 'List2':
                             ]->
                             .)),
                       'not_terminated'),
-                  Variable
-                    ((unknown, Effect ([ ], .)),
-                      'tt')));
+                  Variable ((?, Effect ([ ], .)), 'tt')));
             (Constructor ('S', 'counter'),
               Match
-                ((unknown, Effect ([ 'NonTermination' ], .)),
+                ((?, Effect ([ 'NonTermination' ], .)),
                   Variable
-                    ((unknown, Effect ([ ], .)),
+                    ((?, Effect ([ ], .)),
                       'match_var_0'),
                   [
                     (Constructor ('[]'),
                       Constructor
-                        ((unknown,
+                        ((?,
                           Effect
                             ([
                             ],
@@ -185,7 +178,7 @@ Module 'List2':
                         'x',
                         'xs'),
                       Constructor
-                        ((unknown,
+                        ((?,
                           Effect
                             ([
                               'NonTermination'
@@ -193,21 +186,21 @@ Module 'List2':
                               .)),
                           'Cons',
                           Variable
-                            ((unknown,
+                            ((?,
                               Effect
                                 ([
                                 ],
                                   .)),
                               'x'),
                           Apply
-                            ((unknown,
+                            ((?,
                               Effect
                                 ([
                                   'NonTermination'
                                 ],
                                   .)),
                               Apply
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
@@ -217,7 +210,7 @@ Module 'List2':
                                         ]->
                                         .)),
                                   Variable
-                                    ((unknown,
+                                    ((?,
                                       Effect
                                         ([
                                         ],
@@ -230,14 +223,14 @@ Module 'List2':
                                               .)),
                                       'of_list_rec'),
                                   Variable
-                                    ((unknown,
+                                    ((?,
                                       Effect
                                         ([
                                         ],
                                           .)),
                                       'counter')),
                               Variable
-                                ((unknown,
+                                ((?,
                                   Effect
                                     ([
                                     ],
@@ -250,51 +243,48 @@ Module 'List2':
     Value
       (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ],
         Some Type ('t', 'A')) =
-      Let (unknown, Effect ([ 'Counter'; 'NonTermination' ], .))
+      Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
         (non_rec, 'counter', [ ], [ ], None) =
         Apply
-          ((unknown, Effect ([ 'Counter' ], .)),
-            Variable
-              ((unknown, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-            Variable ((unknown, Effect ([ ], .)), 'tt')) in
+          ((?, Effect ([ 'Counter' ], .)),
+            Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
+            Variable ((?, Effect ([ ], .)), 'tt')) in
       Apply
-        ((unknown, Effect ([ 'NonTermination' ], .)),
+        ((?, Effect ([ 'NonTermination' ], .)),
           Apply
-            ((unknown, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+            ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
               Variable
-                ((unknown, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                  'of_list_rec'),
-              Variable ((unknown, Effect ([ ], .)), 'counter')),
-          Variable ((unknown, Effect ([ ], .)), 'match_var_0')))
+                ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+                  'of_list_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
+          Variable ((?, Effect ([ ], .)), 'match_var_0')))
   
   Module 'Inside':
     (.,
       Value (non_rec, 'x', [ ], [ ], Some Type ('Z')) =
-        Constant ((unknown, Effect ([ ], .)), Int(12)))
+        Constant ((?, Effect ([ ], .)), Int(12)))
 
 (.,
   Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
     Apply
-      ((unknown, Effect ([ 'Counter'; 'NonTermination' ], .)),
+      ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
         Variable
-          ((unknown, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
             'List2.sum'),
         Apply
-          ((unknown, Effect ([ 'Counter'; 'NonTermination' ], .)),
+          ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
             Variable
-              ((unknown, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
                 'List2.of_list'),
             Constructor
-              ((unknown, Effect ([ ], .)), 'cons',
-                Constant ((unknown, Effect ([ ], .)), Int(5)),
+              ((?, Effect ([ ], .)), 'cons',
+                Constant ((?, Effect ([ ], .)), Int(5)),
                 Constructor
-                  ((unknown, Effect ([ ], .)), 'cons',
-                    Constant ((unknown, Effect ([ ], .)), Int(7)),
+                  ((?, Effect ([ ], .)), 'cons',
+                    Constant ((?, Effect ([ ], .)), Int(7)),
                     Constructor
-                      ((unknown, Effect ([ ], .)), 'cons',
-                        Constant ((unknown, Effect ([ ], .)), Int(6)),
+                      ((?, Effect ([ ], .)), 'cons',
+                        Constant ((?, Effect ([ ], .)), Int(6)),
                         Constructor
-                          ((unknown, Effect ([ ], .)), 'cons',
-                            Variable
-                              ((unknown, Effect ([ ], .)), 'List2.Inside.x'),
-                            Constructor ((unknown, Effect ([ ], .)), '[]'))))))))
+                          ((?, Effect ([ ], .)), 'cons',
+                            Variable ((?, Effect ([ ], .)), 'List2.Inside.x'),
+                            Constructor ((?, Effect ([ ], .)), '[]'))))))))

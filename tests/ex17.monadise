@@ -6,16 +6,14 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
   Value
     (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ],
       Some Monad ([ 'TailLess' ], 'A')) =
-    Apply (unknown, Variable (unknown, 'TailLess'), Tuple (unknown)))
+    Apply (?, Variable (?, 'TailLess'), Tuple (?)))
 
 ((),
   Value
     (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some Monad ([ 'Wtf' ], 'A')) =
     Apply
-      (unknown, Variable (unknown, 'Wtf'),
-        Tuple
-          (unknown, Constant (unknown, Int(12)),
-            Constant (unknown, String("no")))))
+      (?, Variable (?, 'Wtf'),
+        Tuple (?, Constant (?, Int(12)), Constant (?, String("no")))))
 
 ((),
   Value
@@ -23,25 +21,22 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
       [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
       Some Monad ([ 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
     Match
-      (unknown, Variable (unknown, 'counter'),
+      (?, Variable (?, 'counter'),
         [
           (Nat(0),
             Lift
-              (unknown, [ 'NonTermination' ],
+              (?, [ 'NonTermination' ],
                 [ 'IO'; 'NonTermination'; 'TailLess' ],
                 Apply
-                  (unknown,
-                    Variable
-                      (unknown,
-                        'not_terminated'),
-                    Variable (unknown, 'tt'))));
+                  (?, Variable (?, 'not_terminated'),
+                    Variable (?, 'tt'))));
           (Constructor ('S', 'counter'),
             Match
-              (unknown, Variable (unknown, 'l'),
+              (?, Variable (?, 'l'),
                 [
                   (Constructor ('[]'),
                     Lift
-                      (unknown,
+                      (?,
                         [
                           'IO';
                           'TailLess'
@@ -52,9 +47,9 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                           'TailLess'
                         ],
                         Bind
-                          (unknown,
+                          (?,
                             Lift
-                              (unknown,
+                              (?,
                                 [
                                   'IO'
                                 ],
@@ -63,16 +58,16 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                   'TailLess'
                                 ],
                                 Apply
-                                  (unknown,
+                                  (?,
                                     Variable
-                                      (unknown,
+                                      (?,
                                         'print_string'),
                                     Constant
-                                      (unknown,
+                                      (?,
                                         String("no tail")))),
                             None,
                             Lift
-                              (unknown,
+                              (?,
                                 [
                                   'TailLess'
                                 ],
@@ -81,35 +76,35 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                   'TailLess'
                                 ],
                                 Apply
-                                  (unknown,
+                                  (?,
                                     Variable
-                                      (unknown,
+                                      (?,
                                         'TailLess'),
                                     Tuple
-                                      (unknown))))));
+                                      (?))))));
                   (Constructor
                     ('cons',
                       'x',
                       Constructor
                         ('[]')),
                     Return
-                      (unknown,
+                      (?,
                         Variable
-                          (unknown,
+                          (?,
                             'x')));
                   (Constructor ('cons', Any, 'xs'),
                     Apply
-                      (unknown,
+                      (?,
                         Apply
-                          (unknown,
+                          (?,
                             Variable
-                              (unknown,
+                              (?,
                                 'h_rec'),
                             Variable
-                              (unknown,
+                              (?,
                                 'counter')),
                         Variable
-                          (unknown,
+                          (?,
                             'xs')))
                 ]))
         ]))
@@ -119,18 +114,14 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
     (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ],
       Some Monad ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
     Bind
-      (unknown,
+      (?,
         Lift
-          (unknown, [ 'Counter' ],
+          (?, [ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ],
+            Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt'))),
+        Some 'counter',
+        Lift
+          (?, [ 'IO'; 'NonTermination'; 'TailLess' ],
             [ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ],
             Apply
-              (unknown, Variable (unknown, 'read_counter'),
-                Variable (unknown, 'tt'))), Some 'counter',
-        Lift
-          (unknown, [ 'IO'; 'NonTermination'; 'TailLess' ],
-            [ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ],
-            Apply
-              (unknown,
-                Apply
-                  (unknown, Variable (unknown, 'h_rec'),
-                    Variable (unknown, 'counter')), Variable (unknown, 'l')))))
+              (?, Apply (?, Variable (?, 'h_rec'), Variable (?, 'counter')),
+                Variable (?, 'l')))))

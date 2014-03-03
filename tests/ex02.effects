@@ -1,13 +1,12 @@
 (.,
   Value (non_rec, 't0', [ ], [ ], Some Type ('unit')) =
-    Constructor ((unknown, Effect ([ ], .)), 'tt'))
+    Constructor ((?, Effect ([ ], .)), 'tt'))
 
 (.,
   Value (non_rec, 't1', [ ], [ ], Some (Type ('ascii') * Type ('string'))) =
     Tuple
-      ((unknown, Effect ([ ], .)),
-        Constant ((unknown, Effect ([ ], .)), Char("c")),
-        Constant ((unknown, Effect ([ ], .)), String("one"))))
+      ((?, Effect ([ ], .)), Constant ((?, Effect ([ ], .)), Char("c")),
+        Constant ((?, Effect ([ ], .)), String("one"))))
 
 (.,
   Value
@@ -16,22 +15,20 @@
         (Type ('Z') * Type ('Z') * Type ('Z') * Type ('bool') * Type ('bool')))
     =
     Tuple
-      ((unknown, Effect ([ ], .)),
-        Constant ((unknown, Effect ([ ], .)), Int(1)),
-        Constant ((unknown, Effect ([ ], .)), Int(2)),
-        Constant ((unknown, Effect ([ ], .)), Int(3)),
-        Constructor ((unknown, Effect ([ ], .)), 'false'),
-        Constructor ((unknown, Effect ([ ], .)), 'true')))
+      ((?, Effect ([ ], .)), Constant ((?, Effect ([ ], .)), Int(1)),
+        Constant ((?, Effect ([ ], .)), Int(2)),
+        Constant ((?, Effect ([ ], .)), Int(3)),
+        Constructor ((?, Effect ([ ], .)), 'false'),
+        Constructor ((?, Effect ([ ], .)), 'true')))
 
 (. -> .,
   Value (non_rec, 'f', [ 'A' ], [ ('x', 'A') ], Some ('A' * 'A')) =
     Tuple
-      ((unknown, Effect ([ ], .)), Variable ((unknown, Effect ([ ], .)), 'x'),
-        Variable ((unknown, Effect ([ ], .)), 'x')))
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), 'x'),
+        Variable ((?, Effect ([ ], .)), 'x')))
 
 (.,
   Value (non_rec, 't3', [ ], [ ], Some (Type ('Z') * Type ('Z'))) =
     Apply
-      ((unknown, Effect ([ ], .)),
-        Variable ((unknown, Effect ([ ], . -> .)), 'f'),
-        Constant ((unknown, Effect ([ ], .)), Int(12))))
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], . -> .)), 'f'),
+        Constant ((?, Effect ([ ], .)), Int(12))))

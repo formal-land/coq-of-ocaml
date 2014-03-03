@@ -1,179 +1,148 @@
 ((),
   Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
     Apply
-      (unknown,
+      (?,
         Apply
-          (unknown, Variable (unknown, 'orb'),
+          (?, Variable (?, 'orb'),
             Apply
-              (unknown,
-                Apply
-                  (unknown, Variable (unknown, 'equiv_decb'),
-                    Constructor (unknown, 'false')),
-                Constructor (unknown, 'true'))),
+              (?,
+                Apply (?, Variable (?, 'equiv_decb'), Constructor (?, 'false')),
+                Constructor (?, 'true'))),
         Apply
-          (unknown,
+          (?,
             Apply
-              (unknown, Variable (unknown, 'andb'),
+              (?, Variable (?, 'andb'),
                 Apply
-                  (unknown,
+                  (?,
                     Apply
-                      (unknown, Variable (unknown, 'nequiv_decb'),
-                        Constructor (unknown, 'tt')),
-                    Constructor (unknown, 'tt'))),
-            Apply
-              (unknown, Variable (unknown, 'negb'),
-                Constructor (unknown, 'true')))))
+                      (?, Variable (?, 'nequiv_decb'), Constructor (?, 'tt')),
+                    Constructor (?, 'tt'))),
+            Apply (?, Variable (?, 'negb'), Constructor (?, 'true')))))
 
 ((),
   Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown,
-        Apply (unknown, Variable (unknown, 'Z.add'), Constant (unknown, Int(1))),
+      (?, Apply (?, Variable (?, 'Z.add'), Constant (?, Int(1))),
         Apply
-          (unknown,
-            Apply
-              (unknown, Variable (unknown, 'Z.mul'), Constant (unknown, Int(2))),
-            Constant (unknown, Int(3)))))
+          (?, Apply (?, Variable (?, 'Z.mul'), Constant (?, Int(2))),
+            Constant (?, Int(3)))))
 
 ((),
   Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown,
+      (?,
         Apply
-          (unknown, Variable (unknown, 'Z.sub'),
+          (?, Variable (?, 'Z.sub'),
             Apply
-              (unknown,
+              (?,
                 Apply
-                  (unknown, Variable (unknown, 'Z.add'),
-                    Apply
-                      (unknown, Variable (unknown, 'Z.abs'),
-                        Constant (unknown, Int(-1)))),
-                Constant (unknown, Int(1)))),
+                  (?, Variable (?, 'Z.add'),
+                    Apply (?, Variable (?, 'Z.abs'), Constant (?, Int(-1)))),
+                Constant (?, Int(1)))),
         Apply
-          (unknown,
+          (?,
             Apply
-              (unknown, Variable (unknown, 'Z.mul'),
+              (?, Variable (?, 'Z.mul'),
                 Apply
-                  (unknown,
+                  (?,
                     Apply
-                      (unknown, Variable (unknown, 'Z.modulo'),
+                      (?, Variable (?, 'Z.modulo'),
                         Apply
-                          (unknown,
+                          (?,
                             Apply
-                              (unknown, Variable (unknown, 'Z.div'),
-                                Constant (unknown, Int(5))),
-                            Constant (unknown, Int(23)))),
-                    Constant (unknown, Int(4)))), Constant (unknown, Int(3)))))
+                              (?, Variable (?, 'Z.div'), Constant (?, Int(5))),
+                            Constant (?, Int(23)))), Constant (?, Int(4)))),
+            Constant (?, Int(3)))))
 
 ((),
   Value (non_rec, 'n3', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown, Variable (unknown, 'Z.pred'),
-        Apply
-          (unknown, Variable (unknown, 'Z.succ'), Constant (unknown, Int(12)))))
+      (?, Variable (?, 'Z.pred'),
+        Apply (?, Variable (?, 'Z.succ'), Constant (?, Int(12)))))
 
 ((),
   Value (non_rec, 'n4', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown,
+      (?,
         Apply
-          (unknown, Variable (unknown, 'Z.lxor'),
+          (?, Variable (?, 'Z.lxor'),
             Apply
-              (unknown,
+              (?,
                 Apply
-                  (unknown, Variable (unknown, 'Z.lor'),
+                  (?, Variable (?, 'Z.lor'),
                     Apply
-                      (unknown,
-                        Apply
-                          (unknown, Variable (unknown, 'Z.land'),
-                            Constant (unknown, Int(5))),
-                        Constant (unknown, Int(7)))), Constant (unknown, Int(3)))),
-        Constant (unknown, Int(9))))
+                      (?,
+                        Apply (?, Variable (?, 'Z.land'), Constant (?, Int(5))),
+                        Constant (?, Int(7)))), Constant (?, Int(3)))),
+        Constant (?, Int(9))))
 
 ((),
   Value (non_rec, 'n5', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown,
+      (?,
         Apply
-          (unknown, Variable (unknown, 'Z.add'),
+          (?, Variable (?, 'Z.add'),
             Apply
-              (unknown,
-                Apply
-                  (unknown, Variable (unknown, 'Z.shiftl'),
-                    Constant (unknown, Int(156))), Constant (unknown, Int(4)))),
+              (?, Apply (?, Variable (?, 'Z.shiftl'), Constant (?, Int(156))),
+                Constant (?, Int(4)))),
         Apply
-          (unknown,
-            Apply
-              (unknown, Variable (unknown, 'Z.shiftr'),
-                Constant (unknown, Int(12))), Constant (unknown, Int(1)))))
+          (?, Apply (?, Variable (?, 'Z.shiftr'), Constant (?, Int(12))),
+            Constant (?, Int(1)))))
 
 ((),
   Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
     Apply
-      (unknown,
-        Apply
-          (unknown, Variable (unknown, 'append'),
-            Constant (unknown, String("ghj"))),
-        Constant (unknown, String("klm"))))
+      (?, Apply (?, Variable (?, 'append'), Constant (?, String("ghj"))),
+        Constant (?, String("klm"))))
 
 ((),
   Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
     Apply
-      (unknown, Variable (unknown, 'char_of_int'),
+      (?, Variable (?, 'char_of_int'),
         Apply
-          (unknown,
+          (?,
             Apply
-              (unknown, Variable (unknown, 'Z.add'),
-                Apply
-                  (unknown, Variable (unknown, 'int_of_char'),
-                    Constant (unknown, Char("c")))), Constant (unknown, Int(1)))))
+              (?, Variable (?, 'Z.add'),
+                Apply (?, Variable (?, 'int_of_char'), Constant (?, Char("c")))),
+            Constant (?, Int(1)))))
 
 ((),
   Value (non_rec, 'x', [ ], [ ], Some Type ('unit')) =
-    Apply (unknown, Variable (unknown, 'ignore'), Constant (unknown, Int(23))))
+    Apply (?, Variable (?, 'ignore'), Constant (?, Int(23))))
 
 ((),
   Value (non_rec, 'p', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown,
+      (?,
         Apply
-          (unknown, Variable (unknown, 'Z.add'),
+          (?, Variable (?, 'Z.add'),
             Apply
-              (unknown, Variable (unknown, 'fst'),
-                Tuple
-                  (unknown, Constant (unknown, Int(1)),
-                    Constant (unknown, Int(2))))),
+              (?, Variable (?, 'fst'),
+                Tuple (?, Constant (?, Int(1)), Constant (?, Int(2))))),
         Apply
-          (unknown, Variable (unknown, 'snd'),
-            Tuple
-              (unknown, Constant (unknown, Int(3)), Constant (unknown, Int(4))))))
+          (?, Variable (?, 'snd'),
+            Tuple (?, Constant (?, Int(3)), Constant (?, Int(4))))))
 
 ((),
   Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
     Apply
-      (unknown,
+      (?,
         Apply
-          (unknown, Variable (unknown, 'app'),
+          (?, Variable (?, 'app'),
             Constructor
-              (unknown, 'cons', Constant (unknown, Int(1)),
+              (?, 'cons', Constant (?, Int(1)),
                 Constructor
-                  (unknown, 'cons', Constant (unknown, Int(2)),
-                    Constructor (unknown, '[]')))),
-        Constructor
-          (unknown, 'cons', Constant (unknown, Int(3)),
-            Constructor (unknown, '[]'))))
+                  (?, 'cons', Constant (?, Int(2)), Constructor (?, '[]')))),
+        Constructor (?, 'cons', Constant (?, Int(3)), Constructor (?, '[]'))))
 
 ((),
   Value (non_rec, 'y', [ ], [ ], Some Type ('Z')) =
     Apply
-      (unknown,
+      (?,
         Apply
-          (unknown, Variable (unknown, 'apply'),
+          (?, Variable (?, 'apply'),
             Function
-              (unknown, 'n',
+              (?, 'n',
                 Apply
-                  (unknown,
-                    Apply
-                      (unknown, Variable (unknown, 'Z.add'),
-                        Variable (unknown, 'n')), Constant (unknown, Int(1))))),
-        Constant (unknown, Int(12))))
+                  (?, Apply (?, Variable (?, 'Z.add'), Variable (?, 'n')),
+                    Constant (?, Int(1))))), Constant (?, Int(12))))

@@ -8,21 +8,19 @@ Inductive 'tree':
       [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ],
       Some Monad ([ 'NonTermination' ], Type ('bool'))) =
     Match
-      (unknown, Variable (unknown, 'counter'),
+      (?, Variable (?, 'counter'),
         [
           (Nat(0),
-            Apply
-              (unknown, Variable (unknown, 'not_terminated'),
-                Variable (unknown, 'tt')));
+            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              (unknown, Variable (unknown, 't'),
+              (?, Variable (?, 't'),
                 [
                   (Constructor ('Leaf'),
                     Return
-                      (unknown,
+                      (?,
                         Constructor
-                          (unknown,
+                          (?,
                             'false')));
                   (Constructor
                     ('Node',
@@ -30,75 +28,75 @@ Inductive 'tree':
                       'x'',
                       't2'),
                     IfThenElse
-                      (unknown,
+                      (?,
                         Apply
-                          (unknown,
+                          (?,
                             Apply
-                              (unknown,
+                              (?,
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'Z.ltb'),
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'x')),
                             Variable
-                              (unknown,
+                              (?,
                                 'x'')),
                         Apply
-                          (unknown,
+                          (?,
                             Apply
-                              (unknown,
+                              (?,
                                 Apply
-                                  (unknown,
+                                  (?,
                                     Variable
-                                      (unknown,
+                                      (?,
                                         'find_rec'),
                                     Variable
-                                      (unknown,
+                                      (?,
                                         'counter')),
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'x')),
                             Variable
-                              (unknown,
+                              (?,
                                 't1')),
                         IfThenElse
-                          (unknown,
+                          (?,
                             Apply
-                              (unknown,
+                              (?,
                                 Apply
-                                  (unknown,
+                                  (?,
                                     Variable
-                                      (unknown,
+                                      (?,
                                         'Z.ltb'),
                                     Variable
-                                      (unknown,
+                                      (?,
                                         'x'')),
                                 Variable
-                                  (unknown,
+                                  (?,
                                     'x')),
                             Apply
-                              (unknown,
+                              (?,
                                 Apply
-                                  (unknown,
+                                  (?,
                                     Apply
-                                      (unknown,
+                                      (?,
                                         Variable
-                                          (unknown,
+                                          (?,
                                             'find_rec'),
                                         Variable
-                                          (unknown,
+                                          (?,
                                             'counter')),
                                     Variable
-                                      (unknown,
+                                      (?,
                                         'x')),
                                 Variable
-                                  (unknown,
+                                  (?,
                                     't2')),
                             Return
-                              (unknown,
+                              (?,
                                 Constructor
-                                  (unknown,
+                                  (?,
                                     'true')))))
                 ]))
         ]))
@@ -108,19 +106,16 @@ Inductive 'tree':
     (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
       Some Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
     Bind
-      (unknown,
+      (?,
         Lift
-          (unknown, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply
-              (unknown, Variable (unknown, 'read_counter'),
-                Variable (unknown, 'tt'))), Some 'counter',
+          (?, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
+            Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt'))),
+        Some 'counter',
         Lift
-          (unknown, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (?, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
             Apply
-              (unknown,
+              (?,
                 Apply
-                  (unknown,
-                    Apply
-                      (unknown, Variable (unknown, 'find_rec'),
-                        Variable (unknown, 'counter')), Variable (unknown, 'x')),
-                Variable (unknown, 't')))))
+                  (?,
+                    Apply (?, Variable (?, 'find_rec'), Variable (?, 'counter')),
+                    Variable (?, 'x')), Variable (?, 't')))))
