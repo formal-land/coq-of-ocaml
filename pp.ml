@@ -1,4 +1,3 @@
-(** Pretty-printing helpers. *)
 open SmartPrint
 
 let parens (b : bool) (d : SmartPrint.t) : SmartPrint.t =

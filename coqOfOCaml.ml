@@ -2,6 +2,8 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
+  let env_atoms : Effect.Atom.t PathName.Env.t = PathName.Env.empty in
+  let env_effects : Effect.Type.t PathName.Env.t = PervasivesModule.effects in
   let document =
     match mode with
     | "exp" ->
@@ -11,24 +13,24 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     | "effects" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (definitions, _) =
-        Structure.effects PervasivesModule.effects definitions in
+      let (_, _, definitions) =
+        Structure.effects env_atoms env_effects definitions in
       let pp_annotation (l, effect) =
         OCaml.tuple [Loc.pp l; Effect.pp effect] in
       Structure.pp (Effect.Type.pp false) pp_annotation definitions
     | "monadise" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (definitions, _) =
-        Structure.effects PervasivesModule.effects definitions in
+      let (_, _, definitions) =
+        Structure.effects env_atoms env_effects definitions in
       let (_, definitions) =
         Structure.monadise PathName.Env.empty definitions in
       Structure.pp OCaml.unit Loc.pp definitions
     | "v" ->
       let definitions =
         Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (definitions, _) =
-        Structure.effects PervasivesModule.effects definitions in
+      let (_, _, definitions) =
+        Structure.effects env_atoms env_effects definitions in
       let (_, definitions) =
         Structure.monadise PathName.Env.empty definitions in
       concat (List.map (fun d -> d ^^ newline) [

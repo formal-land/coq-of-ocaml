@@ -2,6 +2,7 @@
 open Typedtree
 open Types
 open SmartPrint
+open Common
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
@@ -270,34 +271,41 @@ let rec monadise_let_rec (defs : (unit, Loc.t) t list) : (unit, Loc.t) t list =
     | Inductive _ | Record _ | Synonym _ | Exception _ | Open _ -> [def] in
   List.concat (List.map monadise_let_rec_one defs)
 
-let rec effects (env : Effect.Type.t PathName.Env.t) (defs : (unit, 'a) t list)
-  : (Effect.Type.t, 'a * Effect.t) t list * Effect.Type.t PathName.Env.t =
-  let rec effects_one (def : (unit, 'a) t) (env : Effect.Type.t PathName.Env.t)
-    : (Effect.Type.t, 'a * Effect.t) t * Effect.Type.t PathName.Env.t =
+let rec effects (env_atoms : env_atoms) (env_effects : env_effects)
+  (defs : (unit, 'a) t list)
+  : env_atoms * env_effects * (Effect.Type.t, 'a * Effect.t) t list =
+  let rec effects_one (env_atoms : env_atoms) (env_effects : env_effects)
+    (def : (unit, 'a) t)
+    : env_atoms * env_effects * (Effect.Type.t, 'a * Effect.t) t =
     match def with
     | Value ((), {
       Value.header = (is_rec, x, _, args, _) as header;
       body = e }) ->
-      let (e, x_typ) = Exp.effects_of_let env is_rec x args e in
-      let env = PathName.Env.add_name x x_typ env in
-      (Value (x_typ, { Value.header = header; body = e }), env)
+      let (e, x_typ) = Exp.effects_of_let env_effects is_rec x args e in
+      let env_effects = PathName.Env.add_name x x_typ env_effects in
+      (env_atoms, env_effects,
+        Value (x_typ, { Value.header = header; body = e }))
     | Module (name, defs) ->
-      let (defs, env) = effects (PathName.Env.open_module env) defs in
-      (Module (name, defs), PathName.Env.close_module env name)
+      let (env_atoms, env_effects, defs) =
+        effects (PathName.Env.open_module env_atoms)
+          (PathName.Env.open_module env_effects) defs in
+      (PathName.Env.close_module env_atoms name,
+        PathName.Env.close_module env_effects name, Module (name, defs))
     | Exception exn ->
-      let env = PathName.Env.add_name exn.Exception.name
-        (Exception.raise_effect_typ exn) env in
-      (Exception exn, env)
-    | Inductive ind -> (Inductive ind, env)
-    | Record record -> (Record record, env)
-    | Synonym synonym -> (Synonym synonym, env)
-    | Open name -> (Open name, env) in
-  let (defs, env) =
-    List.fold_left (fun (defs, env) def ->
-      let (def, env) = effects_one def env in
-      (def :: defs, env))
-      ([], env) defs in
-  (List.rev defs, env)
+      let env_effects = PathName.Env.add_name exn.Exception.name
+        (Exception.raise_effect_typ exn) env_effects in
+      (env_atoms, env_effects, Exception exn)
+    | Inductive ind -> (env_atoms, env_effects, Inductive ind)
+    | Record record -> (env_atoms, env_effects, Record record)
+    | Synonym synonym -> (env_atoms, env_effects, Synonym synonym)
+    | Open name -> (env_atoms, env_effects, Open name) in
+  let (env_atoms, env_effects, defs) =
+    List.fold_left (fun (env_atoms, env_effects, defs) def ->
+      let (env_atoms, env_effects, def) =
+        effects_one env_atoms env_effects def in
+      (env_atoms, env_effects, def :: defs))
+      (env_atoms, env_effects, []) defs in
+  (env_atoms, env_effects, List.rev defs)
 
 let rec monadise (env : unit PathName.Env.t)
   (defs : (Effect.Type.t, Loc.t * Effect.t) t list)
