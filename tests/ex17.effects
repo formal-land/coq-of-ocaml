@@ -9,14 +9,15 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
         Variable ((7, Effect ([ ], . -[ 'TailLess' ]-> .)), 'raise_TailLess'),
         Tuple ((?, Effect ([ ], .)))))
 
-(. -[ 'Wtf' ]-> .,
-  Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
-    Apply
-      ((9, Effect ([ 'Wtf' ], .)),
-        Variable ((9, Effect ([ ], . -[ 'Wtf' ]-> .)), 'raise_Wtf'),
-        Tuple
-          ((?, Effect ([ ], .)), Constant ((9, Effect ([ ], .)), Int(12)),
-            Constant ((9, Effect ([ ], .)), String("no")))))
+Module 'G':
+  (. -[ 'Wtf' ]-> .,
+    Value (non_rec, 'g', [ 'A' ], [ ('x', Type ('Z')) ], Some 'A') =
+      Apply
+        ((10, Effect ([ 'Wtf' ], .)),
+          Variable ((10, Effect ([ ], . -[ 'Wtf' ]-> .)), 'raise_Wtf'),
+          Tuple
+            ((?, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), 'x'),
+              Constant ((10, Effect ([ ], .)), String("no")))))
 
 (. -> . -[ 'IO'; 'NonTermination'; 'TailLess' ]-> .,
   Value
@@ -41,15 +42,15 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                 Variable ((?, Effect ([ ], .)), 'tt')));
           (Constructor ('S', 'counter'),
             Match
-              ((12,
+              ((14,
                 Effect
                   ([ 'IO'; 'NonTermination'; 'TailLess' ],
                     .)),
-                Variable ((12, Effect ([ ], .)), 'l'),
+                Variable ((14, Effect ([ ], .)), 'l'),
                 [
                   (Constructor ('[]'),
                     Sequence
-                      ((13,
+                      ((15,
                         Effect
                           ([
                             'IO';
@@ -57,14 +58,14 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                           ],
                             .)),
                         Apply
-                          ((13,
+                          ((15,
                             Effect
                               ([
                                 'IO'
                               ],
                                 .)),
                             Variable
-                              ((13,
+                              ((15,
                                 Effect
                                   ([
                                   ],
@@ -75,21 +76,21 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                       .)),
                                 'print_string'),
                             Constant
-                              ((13,
+                              ((15,
                                 Effect
                                   ([
                                   ],
                                     .)),
                                 String("no tail"))),
                         Apply
-                          ((13,
+                          ((15,
                             Effect
                               ([
                                 'TailLess'
                               ],
                                 .)),
                             Variable
-                              ((13,
+                              ((15,
                                 Effect
                                   ([
                                   ],
@@ -111,7 +112,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                       Constructor
                         ('[]')),
                     Variable
-                      ((14,
+                      ((16,
                         Effect
                           ([
                           ],
@@ -119,7 +120,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                         'x'));
                   (Constructor ('cons', Any, 'xs'),
                     Apply
-                      ((15,
+                      ((17,
                         Effect
                           ([
                             'IO';
@@ -162,7 +163,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                     .)),
                                 'counter')),
                         Variable
-                          ((15,
+                          ((17,
                             Effect
                               ([
                               ],

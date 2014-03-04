@@ -1,24 +1,6 @@
 (** Types for the effects. *)
 open SmartPrint
 
-module Atom = struct
-  module Kind = struct
-    type t = State | Error
-
-    let pp (kind : t) : SmartPrint.t =
-      match kind with
-      | State -> !^ "State"
-      | Error -> !^ "Error"
-  end
-
-  type t = {
-    kind : Kind.t;
-    coq_type : SmartPrint.t }
-
-  let pp (a : t) : SmartPrint.t =
-    nest (!^ "Atom" ^^ OCaml.tuple [Kind.pp a.kind; a.coq_type])
-end
-
 module Descriptor = struct
   type t = PathName.Set.t
 

@@ -2,34 +2,7 @@
 open Effect.Type
 open SmartPrint
 
-let env_atoms : Common.env_atoms =
-  List.fold_left (fun env_atoms (x, kind, coq_type) ->
-    PathName.Env.add_name x { Effect.Atom.kind = kind; coq_type = coq_type }
-      env_atoms)
-    PathName.Env.empty
-    [ "Invalid_argument", Effect.Atom.Kind.Error, !^ "string" ]
-
 let env_effects : Common.env_effects =
-  (*let exn_invalid_argument = Effect.Descriptor.of_atom
-    { Effect.Atom.name = "Invalid_argument";
-      kind = Effect.Atom.Kind.Error;
-      coq_type = !^ "string" } in
-  let exn_failure = Effect.Descriptor.of_atom
-    { Effect.Atom.name = "Failure";
-      kind = Effect.Atom.Kind.Error;
-      coq_type = !^ "string" } in
-  let io = Effect.Descriptor.of_atom
-    { Effect.Atom.name = "IO";
-      kind = Effect.Atom.Kind.State;
-      coq_type = !^ "list string * list string" } in
-  let counter = Effect.Descriptor.of_atom
-    { Effect.Atom.name = "Counter";
-      kind = Effect.Atom.Kind.State;
-      coq_type = !^ "nat" } in
-  let non_termination = Effect.Descriptor.of_atom
-    { Effect.Atom.name = "NonTermination";
-      kind = Effect.Atom.Kind.Error;
-      coq_type = !^ "unit" } in*)
   let descriptor x = Effect.Descriptor.singleton (PathName.of_name [] x) in
   List.fold_left (fun env_effects (path, x, typ) ->
     PathName.Env.add (PathName.of_name path x) typ env_effects)

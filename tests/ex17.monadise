@@ -8,12 +8,14 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
       Some Monad ([ 'TailLess' ], 'A')) =
     Apply (7, Variable (7, 'raise_TailLess'), Tuple (?)))
 
-((),
-  Value
-    (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some Monad ([ 'Wtf' ], 'A')) =
-    Apply
-      (9, Variable (9, 'raise_Wtf'),
-        Tuple (?, Constant (9, Int(12)), Constant (9, String("no")))))
+Module 'G':
+  ((),
+    Value
+      (non_rec, 'g', [ 'A' ], [ ('x', Type ('Z')) ], Some Monad ([ 'Wtf' ], 'A'))
+      =
+      Apply
+        (10, Variable (10, 'raise_Wtf'),
+          Tuple (?, Variable (10, 'x'), Constant (10, String("no")))))
 
 ((),
   Value
@@ -32,7 +34,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                     Variable (?, 'tt'))));
           (Constructor ('S', 'counter'),
             Match
-              (12, Variable (12, 'l'),
+              (14, Variable (14, 'l'),
                 [
                   (Constructor ('[]'),
                     Lift
@@ -58,12 +60,12 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                   'TailLess'
                                 ],
                                 Apply
-                                  (13,
+                                  (15,
                                     Variable
-                                      (13,
+                                      (15,
                                         'print_string'),
                                     Constant
-                                      (13,
+                                      (15,
                                         String("no tail")))),
                             None,
                             Lift
@@ -76,9 +78,9 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                                   'TailLess'
                                 ],
                                 Apply
-                                  (13,
+                                  (15,
                                     Variable
-                                      (13,
+                                      (15,
                                         'raise_TailLess'),
                                     Tuple
                                       (?))))));
@@ -90,11 +92,11 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                     Return
                       (?,
                         Variable
-                          (14,
+                          (16,
                             'x')));
                   (Constructor ('cons', Any, 'xs'),
                     Apply
-                      (15,
+                      (17,
                         Apply
                           (?,
                             Variable
@@ -104,7 +106,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                               (?,
                                 'counter')),
                         Variable
-                          (15,
+                          (17,
                             'xs')))
                 ]))
         ]))

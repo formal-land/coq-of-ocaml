@@ -16,8 +16,9 @@ Definition raise_Wtf {A : Type} (x : Z * string) : M [ Wtf ] A :=
 
 Definition f {A B : Type} (x : B) : M [ TailLess ] A := raise_TailLess tt.
 
-Definition g {A B : Type} (x : B) : M [ Wtf ] A :=
-  raise_Wtf (12, "no" % string).
+Module G.
+  Definition g {A : Type} (x : Z) : M [ Wtf ] A := raise_Wtf (x, "no" % string).
+End G.
 
 Fixpoint h_rec {A : Type} (counter : nat) (l : list A) :
   M [ IO; NonTermination; TailLess ] A :=

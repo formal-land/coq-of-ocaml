@@ -2,7 +2,6 @@
 open Typedtree
 open Types
 open SmartPrint
-open Common
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
@@ -115,10 +114,6 @@ module Exception = struct
 
   let pp (exn : t) : SmartPrint.t =
     nest (!^ "Exception" ^^ OCaml.tuple [Name.pp exn.name; Type.pp exn.typ])
-
-  let atom (exn : t) : Effect.Atom.t = {
-    Effect.Atom.kind = Effect.Atom.Kind.Error;
-    coq_type = Type.to_coq false exn.typ }
 
   let raise_effect_typ (exn : t) : Effect.Type.t =
     Effect.Type.Arrow (
@@ -269,51 +264,45 @@ let rec monadise_let_rec (defs : (unit, Loc.t) t list) : (unit, Loc.t) t list =
     | Inductive _ | Record _ | Synonym _ | Exception _ | Open _ -> [def] in
   List.concat (List.map monadise_let_rec_one defs)
 
-let rec effects (env_atoms : env_atoms) (env_effects : env_effects)
-  (defs : (unit, 'a) t list)
-  : env_atoms * env_effects * (Effect.Type.t, 'a * Effect.t) t list =
-  let rec effects_one (env_atoms : env_atoms) (env_effects : env_effects)
-    (def : (unit, 'a) t)
-    : env_atoms * env_effects * (Effect.Type.t, 'a * Effect.t) t =
+let rec effects (env_effects : Common.env_effects) (defs : (unit, 'a) t list)
+  : Common.env_effects * (Effect.Type.t, 'a * Effect.t) t list =
+  let rec effects_one (env_effects : Common.env_effects) (def : (unit, 'a) t)
+    : Common.env_effects * (Effect.Type.t, 'a * Effect.t) t =
     match def with
     | Value ((), {
       Value.header = (is_rec, x, _, args, _) as header;
       body = e }) ->
       let (e, x_typ) =
-        Exp.effects_of_let env_atoms env_effects is_rec x args e in
+        Exp.effects_of_let env_effects is_rec x args e in
       let env_effects = PathName.Env.add_name x x_typ env_effects in
-      (env_atoms, env_effects,
+      (env_effects,
         Value (x_typ, { Value.header = header; body = e }))
     | Module (name, defs) ->
-      let (env_atoms, env_effects, defs) =
-        effects (PathName.Env.open_module env_atoms)
-          (PathName.Env.open_module env_effects) defs in
-      (PathName.Env.close_module env_atoms name,
-        PathName.Env.close_module env_effects name, Module (name, defs))
+      let (env_effects, defs) =
+        effects (PathName.Env.open_module env_effects) defs in
+      (PathName.Env.close_module env_effects name, Module (name, defs))
     | Exception exn ->
-      let env_atoms = PathName.Env.add_name exn.Exception.name
-        (Exception.atom exn) env_atoms in
       let env_effects = PathName.Env.add_name ("raise_" ^ exn.Exception.name)
         (Exception.raise_effect_typ exn) env_effects in
-      (env_atoms, env_effects, Exception exn)
-    | Inductive ind -> (env_atoms, env_effects, Inductive ind)
-    | Record record -> (env_atoms, env_effects, Record record)
-    | Synonym synonym -> (env_atoms, env_effects, Synonym synonym)
-    | Open name -> (env_atoms, env_effects, Open name) in
-  let (env_atoms, env_effects, defs) =
-    List.fold_left (fun (env_atoms, env_effects, defs) def ->
-      let (env_atoms, env_effects, def) =
-        effects_one env_atoms env_effects def in
-      (env_atoms, env_effects, def :: defs))
-      (env_atoms, env_effects, []) defs in
-  (env_atoms, env_effects, List.rev defs)
+      (env_effects, Exception exn)
+    | Inductive ind -> (env_effects, Inductive ind)
+    | Record record -> (env_effects, Record record)
+    | Synonym synonym -> (env_effects, Synonym synonym)
+    | Open name -> (env_effects, Open name) in
+  let (env_effects, defs) =
+    List.fold_left (fun (env_effects, defs) def ->
+      let (env_effects, def) =
+        effects_one env_effects def in
+      (env_effects, def :: defs))
+      (env_effects, []) defs in
+  (env_effects, List.rev defs)
 
-let rec monadise (env : env_units)
+let rec monadise (env : Common.env_units)
   (defs : (Effect.Type.t, Loc.t * Effect.t) t list)
-  : env_units * (unit, Loc.t) t list =
-  let rec monadise_one (env : env_units)
+  : Common.env_units * (unit, Loc.t) t list =
+  let rec monadise_one (env : Common.env_units)
     (def : (Effect.Type.t, Loc.t * Effect.t) t)
-    : env_units * (unit, Loc.t) t =
+    : Common.env_units * (unit, Loc.t) t =
     match def with
     | Value (effect, {
       Value.header = (is_rec, x, typ_vars, args, typ);

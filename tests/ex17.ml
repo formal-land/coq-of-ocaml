@@ -6,7 +6,9 @@ exception Wtf of int * string
 
 let f x = raise TailLess
 
-let g x = raise (Wtf (12, "no"))
+module G = struct
+  let g x = raise (Wtf (x, "no"))
+end
 
 let rec h l =
   match l with
