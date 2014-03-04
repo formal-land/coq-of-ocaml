@@ -2,8 +2,8 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
-  let env_atoms : Effect.Atom.t PathName.Env.t = PathName.Env.empty in
-  let env_effects : Effect.Type.t PathName.Env.t = PervasivesModule.effects in
+  let env_atoms : Effect.Atom.t PathName.Env.t = PervasivesModule.env_atoms in
+  let env_effects : Effect.Type.t PathName.Env.t = PervasivesModule.env_effects in
   let document =
     match mode with
     | "exp" ->

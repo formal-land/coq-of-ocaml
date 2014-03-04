@@ -2,8 +2,15 @@
 open Effect.Type
 open SmartPrint
 
-let effects : Effect.Type.t PathName.Env.t =
-  let exn_invalid_argument = Effect.Descriptor.of_atom
+let env_atoms : Common.env_atoms =
+  List.fold_left (fun env_atoms (x, kind, coq_type) ->
+    PathName.Env.add_name x { Effect.Atom.kind = kind; coq_type = coq_type }
+      env_atoms)
+    PathName.Env.empty
+    [ "Invalid_argument", Effect.Atom.Kind.Error, !^ "string" ]
+
+let env_effects : Common.env_effects =
+  (*let exn_invalid_argument = Effect.Descriptor.of_atom
     { Effect.Atom.name = "Invalid_argument";
       kind = Effect.Atom.Kind.Error;
       coq_type = !^ "string" } in
@@ -22,9 +29,10 @@ let effects : Effect.Type.t PathName.Env.t =
   let non_termination = Effect.Descriptor.of_atom
     { Effect.Atom.name = "NonTermination";
       kind = Effect.Atom.Kind.Error;
-      coq_type = !^ "unit" } in
-  List.fold_left (fun effects (path, x, typ) ->
-    PathName.Env.add (PathName.of_name path x) typ effects)
+      coq_type = !^ "unit" } in*)
+  let descriptor x = Effect.Descriptor.singleton (PathName.of_name [] x) in
+  List.fold_left (fun env_effects (path, x, typ) ->
+    PathName.Env.add (PathName.of_name path x) typ env_effects)
     PathName.Env.empty
     [ [], "tt", Pure;
       [], "equiv_decb", Pure;
@@ -57,19 +65,19 @@ let effects : Effect.Type.t PathName.Env.t =
       [], "fst", Pure;
       [], "snd", Pure;
       [], "app", Pure;
-      [], "invalid_arg", Arrow (exn_invalid_argument, Pure);
-      [], "failwith", Arrow (exn_failure, Pure);
-      [], "print_char", Arrow (io, Pure);
-      [], "print_string", Arrow (io, Pure);
-      [], "print_int", Arrow (io, Pure);
-      [], "print_endline", Arrow (io, Pure);
-      [], "print_newline", Arrow (io, Pure);
-      [], "prerr_char", Arrow (io, Pure);
-      [], "prerr_string", Arrow (io, Pure);
-      [], "prerr_int", Arrow (io, Pure);
-      [], "prerr_endline", Arrow (io, Pure);
-      [], "prerr_newline", Arrow (io, Pure);
-      [], "read_line", Arrow (io, Pure);
-      [], "read_int", Arrow (io, Pure);
-      [], "read_counter", Arrow (counter, Pure);
-      [], "not_terminated", Arrow (non_termination, Pure) ]
+      [], "invalid_arg", Arrow (descriptor "Invalid_argument", Pure);
+      [], "failwith", Arrow (descriptor "Failure", Pure);
+      [], "print_char", Arrow (descriptor "IO", Pure);
+      [], "print_string", Arrow (descriptor "IO", Pure);
+      [], "print_int", Arrow (descriptor "IO", Pure);
+      [], "print_endline", Arrow (descriptor "IO", Pure);
+      [], "print_newline", Arrow (descriptor "IO", Pure);
+      [], "prerr_char", Arrow (descriptor "IO", Pure);
+      [], "prerr_string", Arrow (descriptor "IO", Pure);
+      [], "prerr_int", Arrow (descriptor "IO", Pure);
+      [], "prerr_endline", Arrow (descriptor "IO", Pure);
+      [], "prerr_newline", Arrow (descriptor "IO", Pure);
+      [], "read_line", Arrow (descriptor "IO", Pure);
+      [], "read_int", Arrow (descriptor "IO", Pure);
+      [], "read_counter", Arrow (descriptor "Counter", Pure);
+      [], "not_terminated", Arrow (descriptor "NonTermination", Pure) ]

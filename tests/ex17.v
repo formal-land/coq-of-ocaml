@@ -4,22 +4,23 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Definition Err_TailLess := Effect.new unit unit.
+Definition TailLess := Effect.new unit unit.
 
-Definition TailLess {A : Type} (x : unit) : M [ Err_TailLess ] A :=
+Definition raise_TailLess {A : Type} (x : unit) : M [ TailLess ] A :=
   fun s => (inr (inl x), s).
 
-Definition Err_Wtf := Effect.new unit (Z * string).
+Definition Wtf := Effect.new unit (Z * string).
 
-Definition Wtf {A : Type} (x : Z * string) : M [ Err_Wtf ] A :=
+Definition raise_Wtf {A : Type} (x : Z * string) : M [ Wtf ] A :=
   fun s => (inr (inl x), s).
 
-Definition f {A B : Type} (x : B) : M [ Err_TailLess ] A := TailLess tt.
+Definition f {A B : Type} (x : B) : M [ TailLess ] A := raise_TailLess tt.
 
-Definition g {A B : Type} (x : B) : M [ Err_Wtf ] A := Wtf (12, "no" % string).
+Definition g {A B : Type} (x : B) : M [ Wtf ] A :=
+  raise_Wtf (12, "no" % string).
 
 Fixpoint h_rec {A : Type} (counter : nat) (l : list A) :
-  M [ Ref_IO; Err_NonTermination; Err_TailLess ] A :=
+  M [ IO; NonTermination; TailLess ] A :=
   match counter with
   | 0 % nat => lift [_;_;_] "010" (not_terminated tt)
   | S counter =>
@@ -27,13 +28,13 @@ Fixpoint h_rec {A : Type} (counter : nat) (l : list A) :
     | [] =>
       lift [_;_;_] "101"
         (let! _ := lift [_;_] "10" (print_string "no tail" % string) in
-        lift [_;_] "01" (TailLess tt))
+        lift [_;_] "01" (raise_TailLess tt))
     | cons x [] => ret x
     | cons _ xs => (h_rec counter) xs
     end
   end.
 
 Definition h {A : Type} (l : list A) :
-  M [ Ref_Counter; Ref_IO; Err_NonTermination; Err_TailLess ] A :=
+  M [ Counter; IO; NonTermination; TailLess ] A :=
   let! counter := lift [_;_;_;_] "1000" (read_counter tt) in
   lift [_;_;_;_] "0111" ((h_rec counter) l).

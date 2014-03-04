@@ -172,10 +172,10 @@
       ((14, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
         'print_list'))
 
-(. -[ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ]-> .,
+(. -[ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ]-> .,
   Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
     Apply
-      ((16, Effect ([ 'Counter'; 'IO'; 'Failure'; 'NonTermination' ], .)),
+      ((16, Effect ([ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], .)),
         Variable
           ((16, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)), 'f'),
         Apply

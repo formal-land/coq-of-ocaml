@@ -150,7 +150,9 @@ let rec of_expression (e : expression) : Loc.t t =
     (match (e_f, e_xs) with
     | (Variable (_, x), [Constructor (l_exn, exn, es)])
       when x = PathName.of_name ["Pervasives"] "raise" ->
-      Apply (l, Variable (l_exn, exn), Tuple (Loc.unknown, es))
+      Apply (l, Variable (l_exn,
+        {exn with PathName.base = "raise_" ^ exn.PathName.base}),
+        Tuple (Loc.unknown, es))
     | _ -> List.fold_left (fun e e_x -> Apply (Loc.unknown, e, e_x))
       (Apply (l, e_f, List.hd e_xs)) (List.tl e_xs))
   | Texp_match (e, cases, _) ->
@@ -305,10 +307,10 @@ and monadise_let_rec_definition (header : Header.t) (e : Loc.t t)
   else
     [(header, e)]
 
-let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
-  : ('a * Effect.t) t =
+let rec effects (env_atoms : Common.env_atoms)
+  (env_effects : Common.env_effects) (e : 'a t) : ('a * Effect.t) t =
   let compound (es : 'a t list) : ('a * Effect.t) t list * Effect.t =
-    let es = List.map (effects env) es in
+    let es = List.map (effects env_atoms env_effects) es in
     let effects = List.map (fun e -> snd (annotation e)) es in
     let descriptor = Effect.Descriptor.union (
       List.map (fun effect -> effect.Effect.descriptor) effects) in
@@ -328,7 +330,7 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
     (try
       let effect =
         { Effect.descriptor = Effect.Descriptor.pure;
-          typ = PathName.Env.find x env } in
+          typ = PathName.Env.find x env_effects } in
       Variable ((a, effect), x)
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (PathName.pp x ^^ !^ "not found.")))
@@ -339,9 +341,9 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
     let (es, effect) = compound es in
     Constructor ((a, effect), x, es)
   | Apply (a, e_f, e_x) ->
-    let e_f = effects env e_f in
+    let e_f = effects env_atoms env_effects e_f in
     let effect_f = snd (annotation e_f) in
-    let e_x = effects env e_x in
+    let e_x = effects env_atoms env_effects e_x in
     let effect_x = snd (annotation e_x) in
     if Effect.Type.is_pure effect_x.Effect.typ then
       let descriptor = Effect.Descriptor.union [
@@ -353,7 +355,8 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
     else
       failwith "Function arguments cannot have functional effects."
   | Function (a, x, e) ->
-    let e = effects (PathName.Env.add_name x Effect.Type.Pure env) e in
+    let env_effects = PathName.Env.add_name x Effect.Type.Pure env_effects in
+    let e = effects env_atoms env_effects e in
     let effect_e = snd (annotation e) in
     let effect = {
       Effect.descriptor = Effect.Descriptor.pure;
@@ -361,10 +364,10 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
         effect_e.Effect.descriptor, effect_e.Effect.typ) } in
     Function ((a, effect), x, e)
   | Let (a, ((is_rec, x, _, args, _) as header), e1, e2) ->
-    let (e1, x_typ) = effects_of_let env is_rec x args e1 in
+    let (e1, x_typ) = effects_of_let env_atoms env_effects is_rec x args e1 in
     let effect1 = snd (annotation e1) in
-    let env_in_e2 = PathName.Env.add_name x x_typ env in
-    let e2 = effects env_in_e2 e2 in
+    let env_in_e2 = PathName.Env.add_name x x_typ env_effects in
+    let e2 = effects env_atoms env_in_e2 e2 in
     let effect2 = snd (annotation e2) in
     let descriptor = Effect.Descriptor.union
       [effect1.Effect.descriptor; effect2.Effect.descriptor] in
@@ -373,15 +376,15 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
       typ = effect2.Effect.typ } in
     Let ((a, effect), header, e1, e2)
   | Match (a, e, cases) ->
-    let e = effects env e in
+    let e = effects env_atoms env_effects e in
     let effect_e = snd (annotation e) in
     if Effect.Type.is_pure effect_e.Effect.typ then
       let cases = cases |> List.map (fun (p, e) ->
         let pattern_vars = Pattern.free_variables p in
-        let env = Name.Set.fold (fun x env ->
-          PathName.Env.add_name x Effect.Type.Pure env)
-          pattern_vars env in
-        (p, effects env e)) in
+        let env_effects = Name.Set.fold (fun x env_effects ->
+          PathName.Env.add_name x Effect.Type.Pure env_effects)
+          pattern_vars env_effects in
+        (p, effects env_atoms env_effects e)) in
       let effect = Effect.union (cases |> List.map (fun (_, e) ->
         snd (annotation e))) in
       let effect = {
@@ -395,18 +398,18 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
     let (es, effect) = compound (List.map snd fields) in
     Record ((a, effect), List.map2 (fun (x, _) e -> (x, e)) fields es)
   | Field (a, e, x) ->
-    let e = effects env e in
+    let e = effects env_atoms env_effects e in
     let effect = snd (annotation e) in
     if Effect.Type.is_pure effect.Effect.typ then
       Field ((a, effect), e, x)
     else
       failwith "Cannot take a field of a value with functional effects."
   | IfThenElse (a, e1, e2, e3) ->
-    let e1 = effects env e1 in
+    let e1 = effects env_atoms env_effects e1 in
     let effect_e1 = snd (annotation e1) in
     if Effect.Type.is_pure effect_e1.Effect.typ then
-      let e2 = effects env e2 in
-      let e3 = effects env e3 in
+      let e2 = effects env_atoms env_effects e2 in
+      let e3 = effects env_atoms env_effects e3 in
       let effect = Effect.union ([e2; e3] |> List.map (fun e ->
         snd (annotation e))) in
       let effect = {
@@ -417,9 +420,9 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
     else
       failwith "Cannot do an if on a value with functional effects."
   | Sequence (a, e1, e2) ->
-    let e1 = effects env e1 in
+    let e1 = effects env_atoms env_effects e1 in
     let effect_e1 = snd (annotation e1) in
-    let e2 = effects env e2 in
+    let e2 = effects env_atoms env_effects e2 in
     let effect_e2 = snd (annotation e2) in
     let effect = {
       Effect.descriptor = Effect.Descriptor.union
@@ -429,17 +432,19 @@ let rec effects (env : Effect.Type.t PathName.Env.t) (e : 'a t)
   | Return _ | Bind _ | Lift _ ->
     failwith "Cannot compute effects on an explicit return, bind or lift."
 
-and effects_of_let (env : Effect.Type.t PathName.Env.t)
-  (is_rec : Recursivity.t) (x : Name.t) (args : (Name.t * Type.t) list)
-  (e : 'a t) : ('a * Effect.t) t * Effect.Type.t =
+and effects_of_let (env_atoms : Common.env_atoms)
+  (env_effects : Common.env_effects) (is_rec : Recursivity.t) (x : Name.t)
+  (args : (Name.t * Type.t) list) (e : 'a t)
+  : ('a * Effect.t) t * Effect.Type.t =
   let args_names = List.map fst args in
   let env_in_e =
-    List.fold_left (fun env x -> PathName.Env.add_name x Effect.Type.Pure env)
-      env args_names in
+    List.fold_left (fun env_effects x ->
+      PathName.Env.add_name x Effect.Type.Pure env_effects)
+      env_effects args_names in
   if Recursivity.to_bool is_rec then
     let rec fix_effect x_typ =
       let env_in_e = PathName.Env.add_name x x_typ env_in_e in
-      let e = effects env_in_e e in
+      let e = effects env_atoms env_in_e e in
       let effect = snd (annotation e) in
       let x_typ' = Effect.function_typ args_names effect in
       if Effect.Type.eq x_typ x_typ' then
@@ -448,7 +453,7 @@ and effects_of_let (env : Effect.Type.t PathName.Env.t)
         fix_effect x_typ' in
     fix_effect Effect.Type.Pure
   else
-    let e = effects env_in_e e in
+    let e = effects env_atoms env_in_e e in
     let effect = snd (annotation e) in
     let x_typ = Effect.function_typ args_names effect in
     (e, x_typ)

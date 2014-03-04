@@ -4,12 +4,12 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
 
 ((),
   Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
-    Apply (7, Variable (7, 'TailLess'), Tuple (?)))
+    Apply (7, Variable (7, 'raise_TailLess'), Tuple (?)))
 
 ((),
   Value (non_rec, 'g', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
     Apply
-      (9, Variable (9, 'Wtf'),
+      (9, Variable (9, 'raise_Wtf'),
         Tuple (?, Constant (9, Int(12)), Constant (9, String("no")))))
 
 ((),
@@ -40,7 +40,7 @@ Exception ('Wtf', (Type ('Z') * Type ('string')))
                           (13,
                             Variable
                               (13,
-                                'TailLess'),
+                                'raise_TailLess'),
                             Tuple
                               (?))));
                   (Constructor

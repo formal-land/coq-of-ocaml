@@ -13,7 +13,7 @@ Arguments Node _ _ _.
 Definition empty : set := Empty.
 
 Fixpoint member_rec (counter : nat) (x : Z) (s : set) :
-  M [ Err_NonTermination ] bool :=
+  M [ NonTermination ] bool :=
   match counter with
   | 0 % nat => not_terminated tt
   | S counter =>
@@ -30,13 +30,12 @@ Fixpoint member_rec (counter : nat) (x : Z) (s : set) :
     end
   end.
 
-Definition member (x : Z) (s : set) : M [ Ref_Counter; Err_NonTermination ] bool
-  :=
+Definition member (x : Z) (s : set) : M [ Counter; NonTermination ] bool :=
   let! counter := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (((member_rec counter) x) s).
 
-Fixpoint insert_rec (counter : nat) (x : Z) (s : set) :
-  M [ Err_NonTermination ] set :=
+Fixpoint insert_rec (counter : nat) (x : Z) (s : set) : M [ NonTermination ] set
+  :=
   match counter with
   | 0 % nat => not_terminated tt
   | S counter =>
@@ -55,7 +54,6 @@ Fixpoint insert_rec (counter : nat) (x : Z) (s : set) :
     end
   end.
 
-Definition insert (x : Z) (s : set) : M [ Ref_Counter; Err_NonTermination ] set
-  :=
+Definition insert (x : Z) (s : set) : M [ Counter; NonTermination ] set :=
   let! counter := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (((insert_rec counter) x) s).

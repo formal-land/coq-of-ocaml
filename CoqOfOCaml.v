@@ -129,33 +129,33 @@ Definition lift {A : Type} (es : list Effect.t) (bs : string)
     end in
   aux (List.combine es (bool_list bs)) x.
 
-Definition Err_Invalid_argument := Effect.new unit string.
+Definition Invalid_argument := Effect.new unit string.
 
-Definition Err_Failure := Effect.new unit string.
+Definition Failure := Effect.new unit string.
 
-Definition Ref_IO := Effect.new (list string * list string) Empty_set.
+Definition IO := Effect.new (list string * list string) Empty_set.
 
-Definition Ref_Counter := Effect.new nat Empty_set.
+Definition Counter := Effect.new nat Empty_set.
 
-Definition Err_NonTermination := Effect.new unit unit.
+Definition NonTermination := Effect.new unit unit.
 
 Definition invalid_arg {A : Type} (message : string)
-  : M [Err_Invalid_argument] A :=
+  : M [Invalid_argument] A :=
   fun s => (inr (inl message), s).
 
 Definition failwith {A : Type} (message : string)
-  : M [Err_Failure] A :=
+  : M [Failure] A :=
   fun s => (inr (inl message), s).
 
-Definition print_string (message : string) : M [Ref_IO] unit :=
+Definition print_string (message : string) : M [IO] unit :=
   fun s =>
     match s with
     | ((stream_i, stream_o), _) =>
       (inl tt, ((stream_i, message :: stream_o), tt))
     end.
 
-Definition read_counter (_ : unit) : M [Ref_Counter] nat :=
+Definition read_counter (_ : unit) : M [Counter] nat :=
   fun s => (inl (fst s), s).
 
-Definition not_terminated {A : Type} (_ : unit) : M [Err_NonTermination] A :=
+Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
   fun s => (inr (inl tt), s).
