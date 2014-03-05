@@ -31,10 +31,10 @@ let rec of_pattern (p : pattern) : t =
   | Tpat_any -> Any
   | Tpat_var (x, _) -> Variable (Name.of_ident x)
   | Tpat_tuple ps -> Tuple (List.map of_pattern ps)
-  | Tpat_construct (x, _, ps) -> Constructor (PathName.of_loc x, List.map of_pattern ps)
+  | Tpat_construct (x, _, ps) -> Constructor (PathName.of_loc 0 x, List.map of_pattern ps)
   | Tpat_alias (p, x, _) -> Alias (of_pattern p, Name.of_ident x)
   | Tpat_constant c -> Constant (Constant.of_constant c)
-  | Tpat_record (fields, _) -> Record (List.map (fun (x, _, p) -> (PathName.of_loc x, of_pattern p)) fields)
+  | Tpat_record (fields, _) -> Record (List.map (fun (x, _, p) -> (PathName.of_loc 0 x, of_pattern p)) fields)
   | _ -> failwith "unhandled pattern"
 
 (** Free variables in a pattern. *)

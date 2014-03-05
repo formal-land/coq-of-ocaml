@@ -117,7 +117,7 @@ module Exception = struct
 
   let raise_effect_typ (exn : t) : Effect.Type.t =
     Effect.Type.Arrow (
-      Effect.Descriptor.singleton (PathName.of_name [] exn.name),
+      Effect.Descriptor.singleton (PathName.of_name 0 [] exn.name),
       Effect.Type.Pure)
 
   let to_coq (exn : t) : SmartPrint.t =
@@ -244,7 +244,7 @@ let rec of_structure (structure : structure) : (unit, Loc.t) t list =
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
           Type.of_type_expr typ)) in
       Exception { Exception.name = Name.of_ident name; typ = typ}
-    | Tstr_open (_, path, _, _) -> Open (PathName.of_path path)
+    | Tstr_open (_, path, _, _) -> Open (PathName.of_path 0 path)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
       let name = Name.of_ident name in

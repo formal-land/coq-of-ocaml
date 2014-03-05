@@ -27,7 +27,7 @@ let rec of_type_expr (typ : Types.type_expr) : t =
   | Tvar (Some x) -> Variable x
   | Tarrow (_, typ_x, typ_y, _) -> Arrow (of_type_expr typ_x, of_type_expr typ_y)
   | Ttuple typs -> Tuple (List.map of_type_expr typs)
-  | Tconstr (path, typs, _) -> Apply (PathName.of_path path, List.map of_type_expr typs)
+  | Tconstr (path, typs, _) -> Apply (PathName.of_path 0 path, List.map of_type_expr typs)
   | Tlink typ -> of_type_expr typ
   | Tpoly (typ, []) -> of_type_expr typ
   | _ -> failwith "type not handled"

@@ -9,6 +9,7 @@ module Path = struct
 end
 
 type t = {
+  depth : int;
   path : Path.t;
   base : Name.t}
 
@@ -17,68 +18,68 @@ module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
 
 (* Convert an identifier from OCaml to its Coq's equivalent. *)
-let convert (p : t) : t =
-  match p with
-  | { path = []; base = "()" } -> { path = []; base = "tt" }
-  | { path = []; base = "int" } -> { path = []; base = "Z" }
-  | { path = []; base = "char" } -> { path = []; base = "ascii" }
-  | { path = []; base = "::" } -> { path = []; base = "cons" }
-  | { path = ["Pervasives"]; base = x } ->
-    (match x with
-    | "=" -> { path = []; base = "equiv_decb" }
-    | "<>" -> { path = []; base = "nequiv_decb" }
-    | "<" -> { path = ["Z"]; base = "ltb" }
-    | "not" -> { path = []; base = "negb" }
-    | "&&" -> { path = []; base = "andb" }
+let convert (path : Path.t) (base : Name.t) : Path.t * Name.t =
+  match (path, base) with
+  | ([], "()") -> ([], "tt")
+  | ([], "int") -> ([], "Z")
+  | ([], "char") -> ([], "ascii")
+  | ([], "::") -> ([], "cons")
+  | (["Pervasives"], x) ->
+    (match base with
+    | "=" -> ([], "equiv_decb")
+    | "<>" -> ([], "nequiv_decb")
+    | "<" -> (["Z"], "ltb")
+    | "not" -> ([], "negb")
+    | "&&" -> ([], "andb")
     | "&" -> failwith "\"&\" is deprecated. Use \"&&\" instead."
-    | "||" -> { path = []; base = "orb" }
+    | "||" -> ([], "orb")
     | "or" -> failwith "\"or\" is deprecated. Use \"||\" instead."
-    | "|>" -> { path = []; base = "reverse_apply" }
-    | "@@" -> { path = []; base = "apply" }
-    | "~-" -> { path = ["Z"]; base = "opp" }
-    | "~+" -> { path = []; base = "" }
-    | "succ" -> { path = ["Z"]; base = "succ" }
-    | "pred" -> { path = ["Z"]; base = "pred" }
-    | "+" -> { path = ["Z"]; base = "add" }
-    | "-" -> { path = ["Z"]; base = "sub" }
-    | "*" -> { path = ["Z"]; base = "mul" }
-    | "/" -> { path = ["Z"]; base = "div" }
-    | "mod" -> { path = ["Z"]; base = "modulo" }
-    | "abs" -> { path = ["Z"]; base = "abs" }
-    | "land" -> { path = ["Z"]; base = "land" }
-    | "lor" -> { path = ["Z"]; base = "lor" }
-    | "lxor" -> { path = ["Z"]; base = "lxor" }
+    | "|>" -> ([], "reverse_apply")
+    | "@@" -> ([], "apply")
+    | "~-" -> (["Z"], "opp")
+    | "~+" -> ([], "")
+    | "succ" -> (["Z"], "succ")
+    | "pred" -> (["Z"], "pred")
+    | "+" -> (["Z"], "add")
+    | "-" -> (["Z"], "sub")
+    | "*" -> (["Z"], "mul")
+    | "/" -> (["Z"], "div")
+    | "mod" -> (["Z"], "modulo")
+    | "abs" -> (["Z"], "abs")
+    | "land" -> (["Z"], "land")
+    | "lor" -> (["Z"], "lor")
+    | "lxor" -> (["Z"], "lxor")
     | "lnot" -> failwith "\"lnot\" not handled."
     | "asr" -> failwith "\"asr\" not handled."
-    | "lsl" -> { path = ["Z"]; base = "shiftl" }
-    | "lsr" -> { path = ["Z"]; base = "shiftr" }
-    | "^" -> { path = []; base = "append" }
-    | "int_of_char" -> { path = []; base = "int_of_char" }
-    | "char_of_int" -> { path = []; base = "char_of_int" }
-    | "ignore" -> { path = []; base = "ignore" }
+    | "lsl" -> (["Z"], "shiftl")
+    | "lsr" -> (["Z"], "shiftr")
+    | "^" -> ([], "append")
+    | "int_of_char" -> ([], "int_of_char")
+    | "char_of_int" -> ([], "char_of_int")
+    | "ignore" -> ([], "ignore")
     | "string_of_bool" -> failwith "string_of_bool not handled."
     | "bool_of_string" -> failwith "bool_of_string not handled."
     | "string_of_int" -> failwith "string_of_int not handled."
     | "int_of_string" -> failwith "int_of_string not handled."
-    | "fst" -> { path = []; base = "fst" }
-    | "snd" -> { path = []; base = "snd" }
-    | "@" -> { path = []; base = "app" }
-    | "invalid_arg" -> { path = []; base = "invalid_arg" }
-    | "failwith" -> { path = []; base = "failwith" }
-    | "print_char" -> { path = []; base = "print_char" }
-    | "print_string" -> { path = []; base = "print_string" }
-    | "print_int" -> { path = []; base = "print_int" }
-    | "print_endline" -> { path = []; base = "print_endline" }
-    | "print_newline" -> { path = []; base = "print_newline" }
-    | "prerr_char" -> { path = []; base = "prerr_char" }
-    | "prerr_string" -> { path = []; base = "prerr_string" }
-    | "prerr_int" -> { path = []; base = "prerr_int" }
-    | "prerr_endline" -> { path = []; base = "prerr_endline" }
-    | "prerr_newline" -> { path = []; base = "prerr_newline" }
-    | "read_line" -> { path = []; base = "read_line" }
-    | "read_int" -> { path = []; base = "read_int" }
-    | _ -> p)
-  | _ -> p
+    | "fst" -> ([], "fst")
+    | "snd" -> ([], "snd")
+    | "@" -> ([], "app")
+    | "invalid_arg" -> ([], "invalid_arg")
+    | "failwith" -> ([], "failwith")
+    | "print_char" -> ([], "print_char")
+    | "print_string" -> ([], "print_string")
+    | "print_int" -> ([], "print_int")
+    | "print_endline" -> ([], "print_endline")
+    | "print_newline" -> ([], "print_newline")
+    | "prerr_char" -> ([], "prerr_char")
+    | "prerr_string" -> ([], "prerr_string")
+    | "prerr_int" -> ([], "prerr_int")
+    | "prerr_endline" -> ([], "prerr_endline")
+    | "prerr_newline" -> ([], "prerr_newline")
+    | "read_line" -> ([], "read_line")
+    | "read_int" -> ([], "read_int")
+    | _ -> (path, base))
+  | _ -> (path, base)
 
 (** Pretty-print a global name. *)
 let pp (x : t) : SmartPrint.t =
@@ -86,30 +87,31 @@ let pp (x : t) : SmartPrint.t =
     (List.map (fun s -> !^ s) (x.path @ [x.base]))
 
 (** Lift a local name to a global name. *)
-let of_name (path : Path.t) (x : Name.t) : t =
-  convert { path = path; base = x }
+let of_name (depth : int) (path : Path.t) (base : Name.t) : t =
+  let (path, base) = convert path base in
+  { depth = depth; path = path; base = base }
 
 (** Import an OCaml [Longident.t]. *)
-let of_longident (longident : Longident.t) : t =
+let of_longident (depth : int) (longident : Longident.t) : t =
   match List.rev (Longident.flatten longident) with
-  | [] -> assert false
-  | x :: xs -> convert { path = xs; base = x }
+  | [] -> failwith "Expected a non empty list."
+  | x :: xs -> of_name depth xs x
 
 (** Import an OCaml location. *)
-let of_loc (loc : Longident.t loc) : t = 
-  of_longident loc.txt
+let of_loc (depth : int) (loc : Longident.t loc) : t = 
+  of_longident depth loc.txt
 
 (** Import an OCaml [Path.t]. *)
-let of_path (p : Path'.t) : t =
-  let rec aux p =
+let of_path (depth : int) (p : Path'.t) : t =
+  let rec aux p : Path.t * Name.t =
     match p with
-    | Path'.Pident x -> { path = []; base = Name.of_ident x }
+    | Path'.Pident x -> ([], Name.of_ident x)
     | Path'.Pdot (p, s, _) ->
-      let p = aux p in
-      { path = p.base :: p.path; base = s }
+      let (path, base) = aux p in
+      (base :: path, s)
     | Path'.Papply _ -> failwith "application of paths not handled" in
-  let p = aux p in
-  convert { path = List.rev p.path; base = p.base }
+  let (path, base) = aux p in
+  of_name depth (List.rev path) base
 
 module Env = struct
   type 'a t = 'a Map.t list
@@ -118,7 +120,7 @@ module Env = struct
     List.map Map.bindings env |>
     List.concat |>
     OCaml.list (fun (x, v) ->
-      nest (pp x ^^ !^ ":" ^^ pp_v v))
+      nest (pp x ^^ !^ "=>" ^^ pp_v v))
 
   let empty : 'a t = [Map.empty]
 
@@ -128,19 +130,17 @@ module Env = struct
     | [] -> failwith "The environment must be a non-empty list."
 
   let add_name (x : Name.t) (v : 'a) (env : 'a t) : 'a t =
-    add (of_name [] x) v env
+    add (of_name 0 [] x) v env
 
   let rec find (x : t') (env : 'a t) : 'a =
-    match env with
-    | map :: env ->
-      (try Map.find x map with
-      | Not_found -> find x env)
-    | [] -> raise Not_found
+    let map =
+      try List.nth env x.depth with
+      | Failure "nth" -> raise Not_found in
+    Map.find x map
 
-  let rec mem (x : t') (env : 'a t) : bool =
-    match env with
-    | [] -> false
-    | map :: env -> Map.mem x map || mem x env
+  let mem (x : t') (env : 'a t) : bool =
+    try let _ = find x env in true with
+    | Not_found -> false
 
   let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
     let prefix_n s n =
@@ -149,12 +149,12 @@ module Env = struct
       else
         Name.of_string @@ Printf.sprintf "%s_%d" s n in
     let rec first_n (n : int) : int =
-      if mem (of_name [] @@ prefix_n prefix n) env then
+      if mem (of_name 0 [] @@ prefix_n prefix n) env then
         first_n (n + 1)
       else
         n in
     let x = prefix_n prefix (first_n 0) in
-    (x, add (of_name [] x) v env)
+    (x, add_name x v env)
 
   let open_module (env : 'a t) : 'a t =
     Map.empty :: env
