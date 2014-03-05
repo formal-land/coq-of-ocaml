@@ -39,6 +39,11 @@ module Descriptor = struct
     brakets (separate (!^ ";") (List.map (fun _ -> !^ "_") bs)) ^^
     double_quotes (separate empty
       (List.map (fun b -> if b then !^ "1" else !^ "0") bs))
+
+  let lift (d : t) (x : Name.t) : t =
+    PathName.Set.fold (fun y d ->
+      PathName.Set.add {y with PathName.path = x :: y.PathName.path} d)
+      d PathName.Set.empty
 end
 
 module Type = struct
@@ -87,6 +92,11 @@ module Type = struct
       | (Arrow (d1, typ1), Arrow (d2, typ2)) ->
         Arrow (Descriptor.union [d1; d2], aux typ1 typ2) in
     List.fold_left aux Pure typs
+
+  let rec lift (typ : t) (x : Name.t) : t =
+    match typ with
+    | Pure -> Pure
+    | Arrow (d, typ) -> Arrow (Descriptor.lift d x, lift typ x)
 end
 
 type t = { descriptor : Descriptor.t; typ : Type.t }

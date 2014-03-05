@@ -5,7 +5,7 @@ open SmartPrint
 module Path' = Path
 
 module Path = struct
-  type t = string list
+  type t = Name.t list
 end
 
 type t = {
@@ -159,12 +159,12 @@ module Env = struct
   let open_module (env : 'a t) : 'a t =
     Map.empty :: env
 
-  let close_module (env : 'a t) (name : string) : 'a t =
+  let close_module (env : 'a t) (lift : 'a -> Name.t -> 'a) (name : Name.t)
+    : 'a t =
     match env with
     | map1 :: map2 :: env ->
-      Map.fold (fun x v map ->
-        let { path = path; base = base } = x in
-        Map.add { path = name :: path; base = base } v map)
+      Map.fold (fun x v map2 ->
+        Map.add { x with path = name :: x.path } (lift v name) map2)
         map1 map2
         :: env
     | _ -> failwith "At least one module should be opened."

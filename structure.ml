@@ -280,7 +280,9 @@ let rec effects (env_effects : Common.env_effects) (defs : (unit, 'a) t list)
     | Module (name, defs) ->
       let (env_effects, defs) =
         effects (PathName.Env.open_module env_effects) defs in
-      (PathName.Env.close_module env_effects name, Module (name, defs))
+      (* TODO: use the lift function. *)
+      (PathName.Env.close_module env_effects (fun typ _ -> typ) (*Effect.Type.lift*) name,
+        Module (name, defs))
     | Exception exn ->
       let env_effects = PathName.Env.add_name ("raise_" ^ exn.Exception.name)
         (Exception.raise_effect_typ exn) env_effects in
@@ -322,7 +324,7 @@ let rec monadise (env : Common.env_units)
         body = body }))
     | Module (name, defs) ->
       let (env, defs) = monadise (PathName.Env.open_module env) defs in
-      (PathName.Env.close_module env name, Module (name, defs))
+      (PathName.Env.close_module env (fun _ _ -> ()) name, Module (name, defs))
     | Exception exn ->
       (PathName.Env.add_name exn.Exception.name () env, Exception exn)
     | Inductive ind -> (env, Inductive ind)
