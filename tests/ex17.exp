@@ -1,39 +1,41 @@
 Exception ('TailLess', ())
 
-Exception ('Wtf', (Type ('Z') * Type ('string')))
+Exception ('Wtf', (Type ('Z/1') * Type ('string/1')))
 
 ((),
   Value (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ], Some 'A') =
-    Apply (7, Variable (7, 'raise_TailLess'), Tuple (?)))
+    Apply (7, Variable (7, 'raise_TailLess/0'), Tuple (?)))
 
 Module 'G':
   ((),
-    Value (non_rec, 'g', [ 'A' ], [ ('x', Type ('Z')) ], Some 'A') =
+    Value (non_rec, 'g', [ 'A' ], [ ('x', Type ('Z/2')) ], Some 'A') =
       Apply
-        (10, Variable (10, 'raise_Wtf'),
-          Tuple (?, Variable (10, 'x'), Constant (10, String("no")))))
+        (10, Variable (10, 'raise_Wtf/0'),
+          Tuple (?, Variable (10, 'x/0'), Constant (10, String("no")))))
 
 ((),
   Value
     (rec, 'h_rec', [ 'A' ],
-      [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ], Some 'A') =
+      [ ('counter', Type ('nat/0')); ('l', Type ('list/1', 'A')) ], Some 'A') =
     Match
-      (?, Variable (?, 'counter'),
+      (?, Variable (?, 'counter/0'),
         [
           (Nat(0),
-            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
-          (Constructor ('S', 'counter'),
+            Apply
+              (?, Variable (?, 'not_terminated/0'),
+                Variable (?, 'tt/0')));
+          (Constructor ('S/0', 'counter'),
             Match
-              (14, Variable (14, 'l'),
+              (14, Variable (14, 'l/0'),
                 [
-                  (Constructor ('[]'),
+                  (Constructor ('[]/0'),
                     Sequence
                       (15,
                         Apply
                           (15,
                             Variable
                               (15,
-                                'print_string'),
+                                'print_string/0'),
                             Constant
                               (15,
                                 String("no tail"))),
@@ -41,38 +43,38 @@ Module 'G':
                           (15,
                             Variable
                               (15,
-                                'raise_TailLess'),
+                                'raise_TailLess/0'),
                             Tuple
                               (?))));
                   (Constructor
-                    ('cons',
+                    ('cons/0',
                       'x',
                       Constructor
-                        ('[]')),
+                        ('[]/0')),
                     Variable
                       (16,
-                        'x'));
-                  (Constructor ('cons', Any, 'xs'),
+                        'x/0'));
+                  (Constructor ('cons/0', Any, 'xs'),
                     Apply
                       (17,
                         Apply
                           (?,
                             Variable
                               (?,
-                                'h_rec'),
+                                'h_rec/0'),
                             Variable
                               (?,
-                                'counter')),
+                                'counter/0')),
                         Variable
                           (17,
-                            'xs')))
+                            'xs/0')))
                 ]))
         ]))
 
 ((),
-  Value (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ], Some 'A') =
+  Value (non_rec, 'h', [ 'A' ], [ ('l', Type ('list/1', 'A')) ], Some 'A') =
     Let ? (non_rec, 'counter', [ ], [ ], None) =
-      Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
+      Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
     Apply
-      (?, Apply (?, Variable (?, 'h_rec'), Variable (?, 'counter')),
-        Variable (?, 'l')))
+      (?, Apply (?, Variable (?, 'h_rec/0'), Variable (?, 'counter/0')),
+        Variable (?, 'l/0')))

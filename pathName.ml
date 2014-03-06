@@ -15,7 +15,6 @@ type t = {
 
 type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
-module Map = Map.Make (struct type t = t' let compare = compare end)
 
 (* Convert an identifier from OCaml to its Coq's equivalent. *)
 let convert (path : Path.t) (base : Name.t) : Path.t * Name.t =
@@ -83,8 +82,8 @@ let convert (path : Path.t) (base : Name.t) : Path.t * Name.t =
 
 (** Pretty-print a global name. *)
 let pp (x : t) : SmartPrint.t =
-  single_quotes @@ separate (!^ ".")
-    (List.map (fun s -> !^ s) (x.path @ [x.base]))
+  single_quotes @@ (separate (!^ ".")
+    (List.map (fun s -> !^ s) (x.path @ [x.base])) ^-^ !^ "/" ^-^ OCaml.int x.depth)
 
 (** Lift a local name to a global name. *)
 let of_name (depth : int) (path : Path.t) (base : Name.t) : t =
@@ -113,30 +112,44 @@ let of_path (depth : int) (p : Path'.t) : t =
   let (path, base) = aux p in
   of_name depth (List.rev path) base
 
+(** Pretty-print a global name to Coq. *)
+let to_coq (x : t) : SmartPrint.t =
+  separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
+
 module Env = struct
+  module Map =
+    Map.Make (struct type t = Path.t * Name.t let compare = compare end)
+
   type 'a t = 'a Map.t list
 
-  let pp (pp_v : 'a -> SmartPrint.t) (env : 'a t) : SmartPrint.t =
+  (*let pp (pp_v : 'a -> SmartPrint.t) (env : 'a t) : SmartPrint.t =
     List.map Map.bindings env |>
     List.concat |>
     OCaml.list (fun (x, v) ->
-      nest (pp x ^^ !^ "=>" ^^ pp_v v))
+      nest (pp x ^^ !^ "=>" ^^ pp_v v))*)
 
   let empty : 'a t = [Map.empty]
 
-  let add (x : t') (v : 'a) (env : 'a t) : 'a t =
+  let add (path : Path.t) (base : Name.t) (v : 'a) (env : 'a t) : 'a t =
     match env with
-    | map :: env -> Map.add x v map :: env
+    | map :: env -> Map.add (path, base) v map :: env
     | [] -> failwith "The environment must be a non-empty list."
 
   let add_name (x : Name.t) (v : 'a) (env : 'a t) : 'a t =
-    add (of_name 0 [] x) v env
+    add [] x v env
+
+  let reference (path : Path.t) (base : Name.t) (env : 'a t) : t' =
+    let rec depth env =
+      match env with
+      | map :: env -> if Map.mem (path, base) map then 0 else 1 + depth env
+      | [] -> failwith (base ^ " not found.") in
+    { depth = depth env; path = path; base = base }
 
   let rec find (x : t') (env : 'a t) : 'a =
     let map =
       try List.nth env x.depth with
       | Failure "nth" -> raise Not_found in
-    Map.find x map
+    Map.find (x.path, x.base) map
 
   let mem (x : t') (env : 'a t) : bool =
     try let _ = find x env in true with
@@ -163,13 +176,9 @@ module Env = struct
     : 'a t =
     match env with
     | map1 :: map2 :: env ->
-      Map.fold (fun x v map2 ->
-        Map.add { x with path = name :: x.path } (lift v name) map2)
+      Map.fold (fun (path, base) v map2 ->
+        Map.add (name :: path, base) (lift v name) map2)
         map1 map2
         :: env
     | _ -> failwith "At least one module should be opened."
 end
-
-(** Pretty-print a global name to Coq. *)
-let to_coq (x : t) : SmartPrint.t =
-  separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))

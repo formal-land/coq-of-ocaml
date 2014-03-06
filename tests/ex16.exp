@@ -1,3 +1,3 @@
-Synonym ('t1', [ ], Type ('string'))
+Synonym ('t1', [ ], Type ('string/1'))
 
 Synonym ('t2', [ 'a'; 'b' ], ('a' * 'b'))

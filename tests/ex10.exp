@@ -1,29 +1,29 @@
 Module 'List2':
   Inductive 't':
-    ([ 'a' ], [ ('Nil', [ ]); ('Cons', [ 'a'; Type ('t', 'a') ]) ])
+    ([ 'a' ], [ ('Nil', [ ]); ('Cons', [ 'a'; Type ('t/0', 'a') ]) ])
   
   ((),
     Value
       (rec, 'sum_rec', [ ],
-        [ ('counter', Type ('nat')); ('l', Type ('t', Type ('Z'))) ],
-        Some Type ('Z')) =
+        [ ('counter', Type ('nat/0')); ('l', Type ('t/0', Type ('Z/2'))) ],
+        Some Type ('Z/2')) =
       Match
-        (?, Variable (?, 'counter'),
+        (?, Variable (?, 'counter/0'),
           [
             (Nat(0),
               Apply
-                (?, Variable (?, 'not_terminated'),
-                  Variable (?, 'tt')));
-            (Constructor ('S', 'counter'),
+                (?, Variable (?, 'not_terminated/0'),
+                  Variable (?, 'tt/0')));
+            (Constructor ('S/0', 'counter'),
               Match
-                (9, Variable (9, 'l'),
+                (9, Variable (9, 'l/0'),
                   [
-                    (Constructor ('Nil'),
+                    (Constructor ('Nil/0'),
                       Constant
                         (10,
                           Int(0)));
                     (Constructor
-                      ('Cons',
+                      ('Cons/0',
                         'x',
                         'xs'),
                       Apply
@@ -32,109 +32,109 @@ Module 'List2':
                             (11,
                               Variable
                                 (11,
-                                  'Z.add'),
+                                  'Z.add/0'),
                               Variable
                                 (11,
-                                  'x')),
+                                  'x/0')),
                           Apply
                             (11,
                               Apply
                                 (?,
                                   Variable
                                     (?,
-                                      'sum_rec'),
+                                      'sum_rec/0'),
                                   Variable
                                     (?,
-                                      'counter')),
+                                      'counter/0')),
                               Variable
                                 (11,
-                                  'xs'))))
+                                  'xs/0'))))
                   ]))
           ]))
   
   ((),
     Value
-      (non_rec, 'sum', [ ], [ ('l', Type ('t', Type ('Z'))) ], Some Type ('Z'))
-      =
+      (non_rec, 'sum', [ ], [ ('l', Type ('t/0', Type ('Z/2'))) ],
+        Some Type ('Z/2')) =
       Let ? (non_rec, 'counter', [ ], [ ], None) =
-        Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
+        Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
       Apply
-        (?, Apply (?, Variable (?, 'sum_rec'), Variable (?, 'counter')),
-          Variable (?, 'l')))
+        (?, Apply (?, Variable (?, 'sum_rec/0'), Variable (?, 'counter/0')),
+          Variable (?, 'l/0')))
   
   ((),
     Value
       (rec, 'of_list_rec', [ 'A' ],
-        [ ('counter', Type ('nat')); ('match_var_0', Type ('list', 'A')) ],
-        Some Type ('t', 'A')) =
+        [ ('counter', Type ('nat/0')); ('match_var_0', Type ('list/2', 'A')) ],
+        Some Type ('t/0', 'A')) =
       Match
-        (?, Variable (?, 'counter'),
+        (?, Variable (?, 'counter/0'),
           [
             (Nat(0),
               Apply
-                (?, Variable (?, 'not_terminated'),
-                  Variable (?, 'tt')));
-            (Constructor ('S', 'counter'),
+                (?, Variable (?, 'not_terminated/0'),
+                  Variable (?, 'tt/0')));
+            (Constructor ('S/0', 'counter'),
               Match
-                (?, Variable (?, 'match_var_0'),
+                (?, Variable (?, 'match_var_0/0'),
                   [
-                    (Constructor ('[]'),
+                    (Constructor ('[]/0'),
                       Constructor
                         (14,
-                          'Nil'));
+                          'Nil/0'));
                     (Constructor
-                      ('cons',
+                      ('cons/0',
                         'x',
                         'xs'),
                       Constructor
                         (15,
-                          'Cons',
+                          'Cons/0',
                           Variable
                             (15,
-                              'x'),
+                              'x/0'),
                           Apply
                             (15,
                               Apply
                                 (?,
                                   Variable
                                     (?,
-                                      'of_list_rec'),
+                                      'of_list_rec/0'),
                                   Variable
                                     (?,
-                                      'counter')),
+                                      'counter/0')),
                               Variable
                                 (15,
-                                  'xs'))))
+                                  'xs/0'))))
                   ]))
           ]))
   
   ((),
     Value
-      (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list', 'A')) ],
-        Some Type ('t', 'A')) =
+      (non_rec, 'of_list', [ 'A' ], [ ('match_var_0', Type ('list/2', 'A')) ],
+        Some Type ('t/0', 'A')) =
       Let ? (non_rec, 'counter', [ ], [ ], None) =
-        Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt')) in
+        Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
       Apply
-        (?, Apply (?, Variable (?, 'of_list_rec'), Variable (?, 'counter')),
-          Variable (?, 'match_var_0')))
+        (?, Apply (?, Variable (?, 'of_list_rec/0'), Variable (?, 'counter/0')),
+          Variable (?, 'match_var_0/0')))
   
   Module 'Inside':
     ((),
-      Value (non_rec, 'x', [ ], [ ], Some Type ('Z')) =
+      Value (non_rec, 'x', [ ], [ ], Some Type ('Z/3')) =
         Constant (18, Int(12)))
 
 ((),
-  Value (non_rec, 'n', [ ], [ ], Some Type ('Z')) =
+  Value (non_rec, 'n', [ ], [ ], Some Type ('Z/1')) =
     Apply
-      (22, Variable (22, 'List2.sum'),
+      (22, Variable (22, 'List2.sum/0'),
         Apply
-          (22, Variable (22, 'List2.of_list'),
+          (22, Variable (22, 'List2.of_list/0'),
             Constructor
-              (22, 'cons', Constant (22, Int(5)),
+              (22, 'cons/0', Constant (22, Int(5)),
                 Constructor
-                  (22, 'cons', Constant (22, Int(7)),
+                  (22, 'cons/0', Constant (22, Int(7)),
                     Constructor
-                      (22, 'cons', Constant (22, Int(6)),
+                      (22, 'cons/0', Constant (22, Int(6)),
                         Constructor
-                          (22, 'cons', Variable (22, 'List2.Inside.x'),
-                            Constructor (22, '[]'))))))))
+                          (22, 'cons/0', Variable (22, 'List2.Inside.x/0'),
+                            Constructor (22, '[]/0'))))))))

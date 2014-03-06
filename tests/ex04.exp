@@ -1,40 +1,41 @@
 ((),
-  Value (non_rec, 'u', [ ], [ ], Some Type ('unit')) =
-    Constructor (3, 'tt'))
+  Value (non_rec, 'u', [ ], [ ], Some Type ('unit/1')) =
+    Constructor (3, 'tt/0'))
 
 ((),
-  Value (non_rec, 'l1', [ 'A' ], [ ], Some Type ('list', 'A')) =
-    Constructor (5, '[]'))
+  Value (non_rec, 'l1', [ 'A' ], [ ], Some Type ('list/1', 'A')) =
+    Constructor (5, '[]/0'))
 
 ((),
-  Value (non_rec, 'l2', [ ], [ ], Some Type ('list', Type ('Z'))) =
-    Constructor (7, 'cons', Constant (7, Int(1)), Constructor (7, '[]')))
+  Value (non_rec, 'l2', [ ], [ ], Some Type ('list/1', Type ('Z/1'))) =
+    Constructor (7, 'cons/0', Constant (7, Int(1)), Constructor (7, '[]/0')))
 
 ((),
-  Value (non_rec, 'l3', [ ], [ ], Some Type ('list', Type ('Z'))) =
+  Value (non_rec, 'l3', [ ], [ ], Some Type ('list/1', Type ('Z/1'))) =
     Constructor
-      (9, 'cons', Constant (9, Int(1)),
+      (9, 'cons/0', Constant (9, Int(1)),
         Constructor
-          (9, 'cons', Constant (9, Int(5)),
+          (9, 'cons/0', Constant (9, Int(5)),
             Constructor
-              (9, 'cons', Constant (9, Int(7)),
+              (9, 'cons/0', Constant (9, Int(7)),
                 Constructor
-                  (9, 'cons', Constant (9, Int(32)),
+                  (9, 'cons/0', Constant (9, Int(32)),
                     Constructor
-                      (9, 'cons', Constant (9, Int(15)), Constructor (9, '[]')))))))
+                      (9, 'cons/0', Constant (9, Int(15)),
+                        Constructor (9, '[]/0')))))))
 
 ((),
-  Value (non_rec, 'o1', [ 'A' ], [ ], Some Type ('option', 'A')) =
-    Constructor (11, 'None'))
+  Value (non_rec, 'o1', [ 'A' ], [ ], Some Type ('option/1', 'A')) =
+    Constructor (11, 'None/0'))
 
 ((),
-  Value (non_rec, 'o2', [ ], [ ], Some Type ('option', Type ('Z'))) =
-    Constructor (13, 'Some', Constant (13, Int(12))))
+  Value (non_rec, 'o2', [ ], [ ], Some Type ('option/1', Type ('Z/1'))) =
+    Constructor (13, 'Some/0', Constant (13, Int(12))))
 
 ((),
-  Value (non_rec, 'c', [ ], [ ], Some Type ('ascii')) =
+  Value (non_rec, 'c', [ ], [ ], Some Type ('ascii/1')) =
     Constant (15, Char("g")))
 
 ((),
-  Value (non_rec, 's', [ ], [ ], Some Type ('string')) =
+  Value (non_rec, 's', [ ], [ ], Some Type ('string/1')) =
     Constant (17, String("bla")))

@@ -21,16 +21,25 @@ let rec pp (typ : t) : SmartPrint.t =
     Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. *)
-let rec of_type_expr (typ : Types.type_expr) : t =
+let rec of_type_expr (env_typs : unit PathName.Env.t) (typ : Types.type_expr) : t =
   match typ.desc with
   | Tvar None -> Variable (Printf.sprintf "A%d" typ.id)
   | Tvar (Some x) -> Variable x
-  | Tarrow (_, typ_x, typ_y, _) -> Arrow (of_type_expr typ_x, of_type_expr typ_y)
-  | Ttuple typs -> Tuple (List.map of_type_expr typs)
-  | Tconstr (path, typs, _) -> Apply (PathName.of_path 0 path, List.map of_type_expr typs)
-  | Tlink typ -> of_type_expr typ
-  | Tpoly (typ, []) -> of_type_expr typ
+  | Tarrow (_, typ_x, typ_y, _) ->
+    Arrow (of_type_expr env_typs typ_x, of_type_expr env_typs typ_y)
+  | Ttuple typs -> Tuple (List.map (of_type_expr env_typs) typs)
+  | Tconstr (path, typs, _) ->
+    let { PathName.path = path; base = base } = PathName.of_path 0 path in
+    Apply (PathName.Env.reference path base env_typs,
+      List.map (of_type_expr env_typs) typs)
+  | Tlink typ -> of_type_expr env_typs typ
+  | Tpoly (typ, []) -> of_type_expr env_typs typ
   | _ -> failwith "type not handled"
+
+let of_type_expr_variable (typ : Types.type_expr) : Name.t =
+  match typ.desc with
+  | Tvar (Some x) -> x
+  | _ -> failwith "The type parameter was expected to be a variable."
 
 (** The set of free variables in a type (the polymorphic arguments). *)
 let rec free_vars (typ : t) : Name.Set.t =

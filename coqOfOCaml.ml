@@ -2,39 +2,40 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
-  let env_effects : Effect.Type.t PathName.Env.t = PervasivesModule.env_effects in
+  let env_typs : Common.env_units = PervasivesModule.env_typs in
+  let env_effects : Common.env_effects = PervasivesModule.env_effects in
   let document =
     match mode with
     | "exp" ->
-      let definitions =
-        Structure.monadise_let_rec (Structure.of_structure structure) in
-      Structure.pp OCaml.unit Loc.pp definitions
+      let (_, defs) = Structure.of_structure env_typs structure in
+      let defs = Structure.monadise_let_rec defs in
+      Structure.pp OCaml.unit Loc.pp defs
     | "effects" ->
-      let definitions =
-        Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (_, definitions) = Structure.effects env_effects definitions in
+      let (_, defs) = Structure.of_structure env_typs structure in
+      let defs = Structure.monadise_let_rec defs in
+      let (_, defs) = Structure.effects env_effects defs in
       let pp_annotation (l, effect) =
         OCaml.tuple [Loc.pp l; Effect.pp effect] in
-      Structure.pp (Effect.Type.pp false) pp_annotation definitions
+      Structure.pp (Effect.Type.pp false) pp_annotation defs
     | "monadise" ->
-      let definitions =
-        Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (_, definitions) = Structure.effects env_effects definitions in
-      let (_, definitions) =
-        Structure.monadise PathName.Env.empty definitions in
-      Structure.pp OCaml.unit Loc.pp definitions
+      let (_, defs) = Structure.of_structure env_typs structure in
+      let defs = Structure.monadise_let_rec defs in
+      let (_, defs) = Structure.effects env_effects defs in
+      let (_, defs) =
+        Structure.monadise PathName.Env.empty defs in
+      Structure.pp OCaml.unit Loc.pp defs
     | "v" ->
-      let definitions =
-        Structure.monadise_let_rec (Structure.of_structure structure) in
-      let (_, definitions) = Structure.effects env_effects definitions in
-      let (_, definitions) =
-        Structure.monadise PathName.Env.empty definitions in
+      let (_, defs) = Structure.of_structure env_typs structure in
+      let defs = Structure.monadise_let_rec defs in
+      let (_, defs) = Structure.effects env_effects defs in
+      let (_, defs) =
+        Structure.monadise PathName.Env.empty defs in
       concat (List.map (fun d -> d ^^ newline) [
         !^ "Require Import CoqOfOCaml." ^^ newline;
         !^ "Local Open Scope Z_scope.";
         !^ "Import ListNotations.";
         !^ "Set Implicit Arguments."]) ^^ newline ^^
-      Structure.to_coq definitions
+      Structure.to_coq defs
     | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
   to_stdout 80 2 document;
   print_newline ();

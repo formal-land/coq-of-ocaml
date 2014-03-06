@@ -2,11 +2,24 @@
 open Effect.Type
 open SmartPrint
 
+let env_typs : Common.env_units =
+  PathName.Env.open_module @@
+  List.fold_left (fun env_typs (path, base) ->
+    PathName.Env.add path base () env_typs)
+    PathName.Env.empty
+    [ [], "unit";
+      [], "bool";
+      [], "Z";
+      [], "ascii";
+      [], "string";
+      [], "option";
+      [], "list" ]
+
 let env_effects : Common.env_effects =
   let descriptor x = Effect.Descriptor.singleton (PathName.of_name 0 [] x) in
   PathName.Env.open_module @@
-  List.fold_left (fun env_effects (path, x, typ) ->
-    PathName.Env.add (PathName.of_name 0 path x) typ env_effects)
+  List.fold_left (fun env_effects (path, base, typ) ->
+    PathName.Env.add path base typ env_effects)
     PathName.Env.empty
     [ [], "tt", Pure;
       [], "equiv_decb", Pure;
