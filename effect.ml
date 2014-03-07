@@ -2,27 +2,27 @@
 open SmartPrint
 
 module Descriptor = struct
-  type t = PathName.Set.t
+  type t = BoundName.Set.t
 
   let pp (d : t) : SmartPrint.t =
-    OCaml.list PathName.pp (PathName.Set.elements d)
+    OCaml.list BoundName.pp (BoundName.Set.elements d)
 
-  let pure : t = PathName.Set.empty
+  let pure : t = BoundName.Set.empty
 
   let is_pure (d : t) : bool =
-    PathName.Set.is_empty d
+    BoundName.Set.is_empty d
 
   let eq (d1 : t) (d2 : t) : bool =
-    PathName.Set.equal d1 d2
+    BoundName.Set.equal d1 d2
 
-  let singleton (x : PathName.t) : t =
-    PathName.Set.singleton x
+  let singleton (x : BoundName.t) : t =
+    BoundName.Set.singleton x
 
   let union (ds : t list) : t =
-    List.fold_left (PathName.Set.union) pure ds
+    List.fold_left (BoundName.Set.union) pure ds
 
   let to_coq (d : t) : SmartPrint.t =
-    OCaml.list PathName.to_coq (PathName.Set.elements d)
+    OCaml.list BoundName.to_coq (BoundName.Set.elements d)
 
   let subset_to_coq (d1 : t) (d2 : t) : SmartPrint.t =
     let rec aux xs1 xs2 : bool list =
@@ -35,15 +35,15 @@ module Descriptor = struct
           false :: aux xs1 xs2'
       | (_ :: _, []) ->
         failwith "Must be a subset to display the subset." in
-    let bs = aux (PathName.Set.elements d1) (PathName.Set.elements d2) in
+    let bs = aux (BoundName.Set.elements d1) (BoundName.Set.elements d2) in
     brakets (separate (!^ ";") (List.map (fun _ -> !^ "_") bs)) ^^
     double_quotes (separate empty
       (List.map (fun b -> if b then !^ "1" else !^ "0") bs))
 
-  let lift (d : t) (x : Name.t) : t =
-    PathName.Set.fold (fun y d ->
-      PathName.Set.add {y with PathName.path = x :: y.PathName.path} d)
-      d PathName.Set.empty
+  let lift (d : t) (name : Name.t) : t =
+    BoundName.Set.fold (fun x d ->
+      BoundName.Set.add (BoundName.lift x name) d)
+      d BoundName.Set.empty
 end
 
 module Type = struct

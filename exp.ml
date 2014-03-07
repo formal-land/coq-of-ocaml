@@ -27,15 +27,15 @@ end
     simplify the importation in Coq. *)
 type 'a t =
   | Constant of 'a * Constant.t
-  | Variable of 'a * PathName.t
+  | Variable of 'a * BoundName.t
   | Tuple of 'a * 'a t list (** A tuple of expressions. *)
-  | Constructor of 'a * PathName.t * 'a t list (** A constructor name and a list of arguments. *)
+  | Constructor of 'a * BoundName.t * 'a t list (** A constructor name and a list of arguments. *)
   | Apply of 'a * 'a t * 'a t (** An application. *)
   | Function of 'a * Name.t * 'a t (** An argument name and a body. *)
   | Let of 'a * Header.t * 'a t * 'a t
   | Match of 'a * 'a t * (Pattern.t * 'a t) list (** Match an expression to a list of patterns. *)
-  | Record of 'a * (PathName.t * 'a t) list (** Construct a record giving an expression for each field. *)
-  | Field of 'a * 'a t * PathName.t (** Access to a field of a record. *)
+  | Record of 'a * (BoundName.t * 'a t) list (** Construct a record giving an expression for each field. *)
+  | Field of 'a * 'a t * BoundName.t (** Access to a field of a record. *)
   | IfThenElse of 'a * 'a t * 'a t * 'a t (** The "else" part may be unit. *)
   | Sequence of 'a * 'a t * 'a t (** A sequence of two expressions. *)
   | Return of 'a * 'a t (** Monadic return. *)
@@ -75,11 +75,11 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
   match e with
   | Constant (a, c) -> nest (!^ "Constant" ^^ OCaml.tuple [pp_a a; Constant.pp c])
-  | Variable (a, x) -> nest (!^ "Variable" ^^ OCaml.tuple [pp_a a; PathName.pp x])
+  | Variable (a, x) -> nest (!^ "Variable" ^^ OCaml.tuple [pp_a a; BoundName.pp x])
   | Tuple (a, es) ->
     nest (!^ "Tuple" ^^ OCaml.tuple (pp_a a :: List.map pp es))
   | Constructor (a, x, es) ->
-    nest (!^ "Constructor" ^^ OCaml.tuple (pp_a a :: PathName.pp x :: List.map pp es))
+    nest (!^ "Constructor" ^^ OCaml.tuple (pp_a a :: BoundName.pp x :: List.map pp es))
   | Apply (a, e_f, e_x) ->
     nest (!^ "Apply" ^^ OCaml.tuple [pp_a a; pp e_f; pp e_x])
   | Function (a, x, e) ->
@@ -94,9 +94,9 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
         nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
   | Record (a, fields) ->
     nest (!^ "Record" ^^ OCaml.tuple (pp_a a :: (fields |> List.map (fun (x, e) ->
-      nest @@ parens (PathName.pp x ^-^ !^ "," ^^ pp e)))))
+      nest @@ parens (BoundName.pp x ^-^ !^ "," ^^ pp e)))))
   | Field (a, e, x) ->
-    nest (!^ "Field" ^^ OCaml.tuple [pp_a a; pp e; PathName.pp x])
+    nest (!^ "Field" ^^ OCaml.tuple [pp_a a; pp e; BoundName.pp x])
   | IfThenElse (a, e1, e2, e3) ->
     nest (!^ "IfThenElse" ^^ OCaml.tuple [pp_a a; pp e1; pp e2; pp e3])
   | Sequence (a, e1, e2) ->
@@ -118,15 +118,18 @@ let rec open_function (e : 'a t) : Name.t list * 'a t =
   | _ -> ([], e)
 
 (** Import an OCaml expression. *)
-let rec of_expression (env_typs : Common.env_units) (e : expression) : Loc.t t =
+let rec of_expression (env_typs : unit Envi.t) (env_vars : unit Envi.t)
+  (e : expression) : Loc.t t =
   let l = Loc.of_location e.exp_loc in
   match e.exp_desc with
-  | Texp_ident (path, _, _) -> Variable (l, PathName.of_path 0 path)
+  | Texp_ident (path, _, _) ->
+    let x = Envi.bound_name (PathName.of_path path) env_vars in
+    Variable (l, x)
   | Texp_constant constant -> Constant (l, Constant.of_constant constant)
   | Texp_let (rec_flag, [{ vb_pat = pattern; vb_expr = e1 }], e2) ->
-    let (rec_flag, pattern, free_typ_vars, args, body_typ, body) =
-      import_let_fun env_typs rec_flag pattern e1 in
-    let e2 = of_expression env_typs e2 in
+    let (env_vars, rec_flag, pattern, free_typ_vars, args, body_typ, body) =
+      import_let_fun env_typs env_vars rec_flag pattern e1 in
+    let e2 = of_expression env_typs env_vars e2 in
     (match (pattern, args) with
     | (Pattern.Variable name, []) ->
       Let (l, (Recursivity.New false, name, [], [], None), body, e2)
@@ -137,70 +140,86 @@ let rec of_expression (env_typs : Common.env_units) (e : expression) : Loc.t t =
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
     ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->
-    Function (l, Name.of_ident x, of_expression env_typs e)
+    let x = Name.of_ident x in
+    let env_vars = Envi.add_name x () env_vars in
+    Function (l, x, of_expression env_typs env_vars e)
   | Texp_function (_, cases, _) ->
-    let (x, e) = open_cases env_typs cases in
+    let (x, e) = open_cases env_typs env_vars cases in
     Function (l, x, e)
   | Texp_apply (e_f, e_xs) ->
-    let e_f = of_expression env_typs e_f in
+    let e_f = of_expression env_typs env_vars e_f in
     let e_xs = List.map (fun (_, e_x, _) ->
       match e_x with
-      | Some e_x -> of_expression env_typs e_x
+      | Some e_x -> of_expression env_typs env_vars e_x
       | None -> failwith "expected an argument") e_xs in
     (match (e_f, e_xs) with
     | (Variable (_, x), [Constructor (l_exn, exn, es)])
-      when x = PathName.of_name 0 ["Pervasives"] "raise" ->
-      Apply (l, Variable (l_exn,
-        {exn with PathName.base = "raise_" ^ exn.PathName.base}),
-        Tuple (Loc.unknown, es))
+      when x.BoundName.path_name = PathName.of_name ["Pervasives"] "raise" ->
+      (*Apply (l, Variable (l_exn,
+        {exn with BoundName.base = "raise_" ^ exn.BoundName.base}),
+        Tuple (Loc.unknown, es))*)
+      failwith "TODO"
     | _ -> List.fold_left (fun e e_x -> Apply (Loc.unknown, e, e_x))
       (Apply (l, e_f, List.hd e_xs)) (List.tl e_xs))
   | Texp_match (e, cases, _) ->
-    let e = of_expression env_typs e in
-    let cases = List.map (fun {c_lhs = p; c_rhs = e} ->
-      (Pattern.of_pattern p, of_expression env_typs e)) cases in
+    let e = of_expression env_typs env_vars e in
+    let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
+      (Pattern.of_pattern env_vars p, of_expression env_typs env_vars e)) in
     Match (l, e, cases)
-  | Texp_tuple es -> Tuple (l, List.map (of_expression env_typs) es)
+  | Texp_tuple es -> Tuple (l, List.map (of_expression env_typs env_vars) es)
   | Texp_construct (x, _, es) ->
-    Constructor (l, PathName.of_loc 0 x, List.map (of_expression env_typs) es)
+    let x = Envi.bound_name (PathName.of_loc x) env_vars in
+    Constructor (l, x, List.map (of_expression env_typs env_vars) es)
   | Texp_record (fields, _) ->
     Record (l, fields |> List.map (fun (x, _, e) ->
-      (PathName.of_loc 0 x, of_expression env_typs e)))
+      let x = Envi.bound_name (PathName.of_loc x) env_vars in
+      (x, of_expression env_typs env_vars e)))
   | Texp_field (e, x, _) ->
-    Field (l, of_expression env_typs e, PathName.of_loc 0 x)
+    let x = Envi.bound_name (PathName.of_loc x) env_vars in
+    Field (l, of_expression env_typs env_vars e, x)
   | Texp_ifthenelse (e1, e2, e3) ->
     let e3 = match e3 with
       | None -> Tuple (Loc.unknown, [])
-      | Some e3 -> of_expression env_typs e3 in
-    IfThenElse (l, of_expression env_typs e1, of_expression env_typs e2, e3)
+      | Some e3 -> of_expression env_typs env_vars e3 in
+    IfThenElse (l, of_expression env_typs env_vars e1, of_expression env_typs env_vars e2, e3)
   | Texp_sequence (e1, e2) ->
-    Sequence (l, of_expression env_typs e1, of_expression env_typs e2)
+    Sequence (l, of_expression env_typs env_vars e1, of_expression env_typs env_vars e2)
   | Texp_try _ | Texp_setfield _ | Texp_array _
     | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
-and open_cases (env_typs : Common.env_units) (cases : case list)
-  : Name.t * Loc.t t =
-  let x = Name.unsafe_fresh "match_var" in
+and open_cases (env_typs : unit Envi.t) (env_vars : unit Envi.t)
+  (cases : case list) : Name.t * Loc.t t =
+  let (x, env_vars) = Envi.fresh "x" () env_vars in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
-    (Pattern.of_pattern p, of_expression env_typs e)) in
-  (x, Match (Loc.unknown, Variable (Loc.unknown, PathName.of_name 0 [] x),
-    cases))
-and import_let_fun (env_typs : Common.env_units) (rec_flag : Asttypes.rec_flag)
-  (pattern : pattern) (e : expression)
-  : Recursivity.t * Pattern.t * Name.t list * (Name.t * Type.t) list
-    * Type.t * Loc.t t =
-  let pattern = Pattern.of_pattern pattern in
+    let p = Pattern.of_pattern env_vars p in
+    let env_vars = Pattern.add_to_env p env_vars in
+    (p, of_expression env_typs env_vars e)) in
+  (*(x, Match (Loc.unknown, Variable (Loc.unknown, BoundName.of_name 0 [] x),
+    cases))*)
+  failwith "TODO"
+and import_let_fun (env_typs : unit Envi.t) (env_vars : unit Envi.t)
+  (rec_flag : Asttypes.rec_flag) (pattern : pattern) (e : expression)
+  : unit Envi.t * Recursivity.t * Pattern.t * Name.t list *
+    (Name.t * Type.t) list * Type.t * Loc.t t =
+  let pattern = Pattern.of_pattern env_vars pattern in
+  let is_rec = Recursivity.of_rec_flag rec_flag in
+  let env_vars_with_let = Pattern.add_to_env pattern env_vars in
+  let env_vars =
+    if Recursivity.to_bool is_rec then
+      env_vars_with_let
+    else
+      env_vars in
   let e_schema = Schema.of_type (Type.of_type_expr env_typs e.exp_type) in
-  let e = of_expression env_typs e in
+  let e = of_expression env_typs env_vars e in
   let (args_names, e_body) = open_function e in
   let e_typ = e_schema.Schema.typ in
   let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
-  (Recursivity.of_rec_flag rec_flag, pattern, e_schema.Schema.variables,
+  (env_vars_with_let, is_rec, pattern, e_schema.Schema.variables,
     List.combine args_names args_typs, e_body_typ, e_body)
 
-let rec substitute (x : PathName.t) (e' : 'a t) (e : 'a t) : 'a t =
+let rec substitute (x : BoundName.t) (e' : 'a t) (e : 'a t) : 'a t =
   match e with
   | Constant _ -> e
   | Variable (_, y) -> if x = y then e' else e
@@ -208,19 +227,19 @@ let rec substitute (x : PathName.t) (e' : 'a t) (e : 'a t) : 'a t =
   | Constructor (a, y, es) -> Constructor (a, y, List.map (substitute x e') es)
   | Apply (a, e1, e2) -> Apply (a, substitute x e' e1, substitute x e' e2)
   | Function (a, y, e) ->
-    if PathName.of_name 0 [] y = x then
+    if BoundName.of_name 0 [] y = x then
       Function (a, y, e)
     else
       Function (a, y, substitute x e' e)
   | Let (a, (is_rec, y, typ_args, args, typ), e1, e2) ->
     let e1 =
-      if (Recursivity.to_bool is_rec && PathName.of_name 0 [] y = x)
-        || List.exists (fun (y, _) -> PathName.of_name 0 [] y = x) args then
+      if (Recursivity.to_bool is_rec && BoundName.of_name 0 [] y = x)
+        || List.exists (fun (y, _) -> BoundName.of_name 0 [] y = x) args then
         e1
       else
         substitute x e' e1 in
     let e2 =
-      if PathName.of_name 0 [] y = x then
+      if BoundName.of_name 0 [] y = x then
         e2
       else
         substitute x e' e2 in
@@ -229,7 +248,7 @@ let rec substitute (x : PathName.t) (e' : 'a t) (e : 'a t) : 'a t =
     let e = substitute x e' e in
     let cases = cases |> List.map (fun (p, e) ->
       let ys = Pattern.free_variables p in
-      if Name.Set.exists (fun y -> PathName.of_name 0 [] y = x) ys then
+      if Name.Set.exists (fun y -> BoundName.of_name 0 [] y = x) ys then
         (p, e)
       else
         (p, substitute x e' e)) in
@@ -248,7 +267,7 @@ let rec substitute (x : PathName.t) (e' : 'a t) (e : 'a t) : 'a t =
       match y with
       | None -> substitute x e' e2
       | Some y ->
-        if PathName.of_name 0 [] y = x then
+        if BoundName.of_name 0 [] y = x then
           e2
         else
           substitute x e' e2 in
@@ -289,16 +308,16 @@ and monadise_let_rec_definition (header : Header.t) (e : Loc.t t)
   let e = monadise_let_rec e in
   if Recursivity.to_bool is_rec then
     let var (x : Name.t) : Loc.t t =
-      Variable (Loc.unknown, PathName.of_name 0 [] x) in
+      Variable (Loc.unknown, BoundName.of_name 0 [] x) in
     let x_rec = x ^ "_rec" in
     let args' =
-      ("counter", Type.Apply (PathName.of_name 0 [] "nat", [])) :: args in
+      ("counter", Type.Apply (BoundName.of_name 0 [] "nat", [])) :: args in
     let e = Match (Loc.unknown, var "counter", [
       (Pattern.Constant (Constant.Nat 0),
         Apply (Loc.unknown, var "not_terminated", var "tt"));
-      (Pattern.Constructor (PathName.of_name 0 [] "S",
+      (Pattern.Constructor (BoundName.of_name 0 [] "S",
         [Pattern.Variable "counter"]),
-        substitute (PathName.of_name 0 [] x)
+        substitute (BoundName.of_name 0 [] x)
           (Apply (Loc.unknown, var x_rec, var "counter")) e)]) in
     [ ((is_rec, x_rec, typ_vars, args', typ), e);
       ((Recursivity.New false, x, typ_vars, args, typ),
@@ -332,10 +351,10 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
     (try
       let effect =
         { Effect.descriptor = Effect.Descriptor.pure;
-          typ = PathName.Env.find x env_effects } in
+          typ = BoundName.Env.find x env_effects } in
       Variable ((a, effect), x)
     with Not_found -> failwith (SmartPrint.to_string 80 2
-      (PathName.pp x ^^ !^ "not found.")))
+      (BoundName.pp x ^^ !^ "not found.")))
   | Tuple (a, es) ->
     let (es, effect) = compound es in
     Tuple ((a, effect), es)
@@ -357,7 +376,7 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
     else
       failwith "Function arguments cannot have functional effects."
   | Function (a, x, e) ->
-    let env_effects = PathName.Env.add_name x Effect.Type.Pure env_effects in
+    let env_effects = BoundName.Env.add_name x Effect.Type.Pure env_effects in
     let e = effects env_effects e in
     let effect_e = snd (annotation e) in
     let effect = {
@@ -368,7 +387,7 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
   | Let (a, ((is_rec, x, _, args, _) as header), e1, e2) ->
     let (e1, x_typ) = effects_of_let env_effects is_rec x args e1 in
     let effect1 = snd (annotation e1) in
-    let env_in_e2 = PathName.Env.add_name x x_typ env_effects in
+    let env_in_e2 = BoundName.Env.add_name x x_typ env_effects in
     let e2 = effects env_in_e2 e2 in
     let effect2 = snd (annotation e2) in
     let descriptor = Effect.Descriptor.union
@@ -384,7 +403,7 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
       let cases = cases |> List.map (fun (p, e) ->
         let pattern_vars = Pattern.free_variables p in
         let env_effects = Name.Set.fold (fun x env_effects ->
-          PathName.Env.add_name x Effect.Type.Pure env_effects)
+          BoundName.Env.add_name x Effect.Type.Pure env_effects)
           pattern_vars env_effects in
         (p, effects env_effects e)) in
       let effect = Effect.union (cases |> List.map (fun (_, e) ->
@@ -440,11 +459,11 @@ and effects_of_let (env_effects : Common.env_effects) (is_rec : Recursivity.t)
   let args_names = List.map fst args in
   let env_in_e =
     List.fold_left (fun env_effects x ->
-      PathName.Env.add_name x Effect.Type.Pure env_effects)
+      BoundName.Env.add_name x Effect.Type.Pure env_effects)
       env_effects args_names in
   if Recursivity.to_bool is_rec then
     let rec fix_effect x_typ =
-      let env_in_e = PathName.Env.add_name x x_typ env_in_e in
+      let env_in_e = BoundName.Env.add_name x x_typ env_in_e in
       let e = effects env_in_e e in
       let effect = snd (annotation e) in
       let x_typ' = Effect.function_typ args_names effect in
@@ -459,7 +478,7 @@ and effects_of_let (env_effects : Common.env_effects) (is_rec : Recursivity.t)
     let x_typ = Effect.function_typ args_names effect in
     (e, x_typ)
 
-let rec monadise (env : Common.env_units) (e : (Loc.t * Effect.t) t)
+let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t)
   : Loc.t t =
   let descriptor e = (snd (annotation e)).Effect.descriptor in
   let lift d1 d2 e =
@@ -487,9 +506,9 @@ let rec monadise (env : Common.env_units) (e : (Loc.t * Effect.t) t)
         monadise_list env es d (map fst e :: es') k
       else
         let e' = monadise env e in
-        let (x, env) = PathName.Env.fresh "x" () env in
+        let (x, env) = BoundName.Env.fresh "x" () env in
         bind d_e d d e' (Some x) (monadise_list env es d
-          (Variable (Loc.unknown, PathName.of_name 0 [] x) :: es') k) in
+          (Variable (Loc.unknown, BoundName.of_name 0 [] x) :: es') k) in
   let d = descriptor e in
   match e with
   | Constant ((l, _), c) -> Constant (l, c)
@@ -509,23 +528,23 @@ let rec monadise (env : Common.env_units) (e : (Loc.t * Effect.t) t)
         lift return_descriptor d (Apply (l, e1, e2))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
   | Function ((l, _), x, e) ->
-    let env = PathName.Env.add_name x () env in
+    let env = BoundName.Env.add_name x () env in
     Function (l, x, monadise env e)
   | Let ((l, _), (_, x, _, [], _), e1, e2) -> (* TODO: use l *)
     let (d1, d2) = (descriptor e1, descriptor e2) in
     let e1 = monadise env e1 in
-    let env = PathName.Env.add_name x () env in
+    let env = BoundName.Env.add_name x () env in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 (Some x) e2
   | Let ((l, _), (is_rec, x, typ_args, args, Some typ), e1, e2) ->
     let typ = Type.monadise typ (snd (annotation e1)) in
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
-        PathName.Env.add_name x () env
+        BoundName.Env.add_name x () env
       else
         env in
     let e1 = monadise env_in_e1 e1 in
-    let env_in_e2 = PathName.Env.add_name x () env in
+    let env_in_e2 = BoundName.Env.add_name x () env in
     let e2 = monadise env_in_e2 e2 in
     Let (l, (is_rec, x, typ_args, args, Some typ), e1, e2)
   | Match ((l, _), e, cases) ->
@@ -533,7 +552,7 @@ let rec monadise (env : Common.env_units) (e : (Loc.t * Effect.t) t)
       match es' with
       | [e] ->
         let cases = cases |> List.map (fun (p, e)->
-          let env = Name.Set.fold (fun x env -> PathName.Env.add_name x () env)
+          let env = Name.Set.fold (fun x env -> BoundName.Env.add_name x () env)
             (Pattern.free_variables p) env in
           (p, lift (descriptor e) d (monadise env e))) in
         Match (l, e, cases)
@@ -567,7 +586,7 @@ let rec monadise (env : Common.env_units) (e : (Loc.t * Effect.t) t)
 let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
   match e with
   | Constant (_, c) -> Constant.to_coq c
-  | Variable (_, x) -> PathName.to_coq x
+  | Variable (_, x) -> BoundName.to_coq x
   | Tuple (_, es) ->
     if es = [] then
       !^ "tt"
@@ -575,9 +594,9 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
   | Constructor (_, x, es) ->
     if es = [] then
-      PathName.to_coq x
+      BoundName.to_coq x
     else
-      Pp.parens paren @@ nest @@ separate space (PathName.to_coq x :: List.map (to_coq true) es)
+      Pp.parens paren @@ nest @@ separate space (BoundName.to_coq x :: List.map (to_coq true) es)
   | Apply (_, e_f, e_x) ->
     Pp.parens paren @@ nest @@ (to_coq true e_f ^^ to_coq true e_x)
   | Function (_, x, e) ->
@@ -611,8 +630,8 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
       !^ "end")
   | Record (_, fields) ->
     nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
-      nest (PathName.to_coq x ^^ !^ ":=" ^^ to_coq false e))) ^^ !^ "|}")
-  | Field (_, e, x) -> Pp.parens paren @@ nest (PathName.to_coq x ^^ to_coq true e)
+      nest (BoundName.to_coq x ^^ !^ ":=" ^^ to_coq false e))) ^^ !^ "|}")
+  | Field (_, e, x) -> Pp.parens paren @@ nest (BoundName.to_coq x ^^ to_coq true e)
   | IfThenElse (_, e1, e2, e3) ->
     nest (
       !^ "if" ^^ to_coq false e1 ^^ !^ "then" ^^ newline ^^

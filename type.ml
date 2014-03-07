@@ -6,7 +6,7 @@ type t =
   | Variable of Name.t
   | Arrow of t * t
   | Tuple of t list
-  | Apply of PathName.t * t list
+  | Apply of BoundName.t * t list
   | Monad of Effect.Descriptor.t * t
 
 let rec pp (typ : t) : SmartPrint.t =
@@ -16,12 +16,12 @@ let rec pp (typ : t) : SmartPrint.t =
   | Tuple typs -> nest @@ parens (separate (space ^^ !^ "*" ^^ space) (List.map pp typs))
   | Apply (x, typs) ->
     nest (!^ "Type" ^^ nest (parens (
-      separate (!^ "," ^^ space) (PathName.pp x :: List.map pp typs))))
+      separate (!^ "," ^^ space) (BoundName.pp x :: List.map pp typs))))
   | Monad (d, typ) -> nest (!^ "Monad" ^^ OCaml.tuple [
     Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. *)
-let rec of_type_expr (env_typs : unit PathName.Env.t) (typ : Types.type_expr) : t =
+let rec of_type_expr (env_typs : unit Envi.t) (typ : Types.type_expr) : t =
   match typ.desc with
   | Tvar None -> Variable (Printf.sprintf "A%d" typ.id)
   | Tvar (Some x) -> Variable x
@@ -29,8 +29,7 @@ let rec of_type_expr (env_typs : unit PathName.Env.t) (typ : Types.type_expr) : 
     Arrow (of_type_expr env_typs typ_x, of_type_expr env_typs typ_y)
   | Ttuple typs -> Tuple (List.map (of_type_expr env_typs) typs)
   | Tconstr (path, typs, _) ->
-    let { PathName.path = path; base = base } = PathName.of_path 0 path in
-    Apply (PathName.Env.reference path base env_typs,
+    Apply (Envi.bound_name (PathName.of_path path) env_typs,
       List.map (of_type_expr env_typs) typs)
   | Tlink typ -> of_type_expr env_typs typ
   | Tpoly (typ, []) -> of_type_expr env_typs typ
@@ -104,7 +103,7 @@ let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
         (List.map (to_coq true) typs))
   | Apply (path, typs) ->
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
-      (PathName.to_coq path :: List.map (to_coq true) typs)
+      (BoundName.to_coq path :: List.map (to_coq true) typs)
   | Monad (d, typ) ->
     Pp.parens paren @@ nest (
       !^ "M" ^^ Effect.Descriptor.to_coq d ^^ to_coq true typ)
