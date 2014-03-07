@@ -147,24 +147,35 @@ let rec of_expression (env_typs : unit Envi.t) (env_vars : unit Envi.t)
     let (x, e) = open_cases env_typs env_vars cases in
     Function (l, x, e)
   | Texp_apply (e_f, e_xs) ->
-    let e_f = of_expression env_typs env_vars e_f in
-    let e_xs = List.map (fun (_, e_x, _) ->
-      match e_x with
-      | Some e_x -> of_expression env_typs env_vars e_x
-      | None -> failwith "expected an argument") e_xs in
-    (match (e_f, e_xs) with
-    | (Variable (_, x), [Constructor (l_exn, exn, es)])
-      when x.BoundName.path_name = PathName.of_name ["Pervasives"] "raise" ->
-      (*Apply (l, Variable (l_exn,
-        {exn with BoundName.base = "raise_" ^ exn.BoundName.base}),
-        Tuple (Loc.unknown, es))*)
-      failwith "TODO"
-    | _ -> List.fold_left (fun e e_x -> Apply (Loc.unknown, e, e_x))
-      (Apply (l, e_f, List.hd e_xs)) (List.tl e_xs))
+    (match e_f.exp_desc with
+    | Texp_ident (path, _, _)
+      when PathName.of_path path = PathName.of_name ["Pervasives"] "raise" ->
+      (match e_xs with
+      | [(_, Some e_x, _)] ->
+        (match e_x.exp_desc with
+        | Texp_construct (x, _, es) ->
+          let l_exn = Loc.of_location e_x.exp_loc in
+          let x = PathName.of_loc x in
+          let x = { x with PathName.base = "raise_" ^ x.PathName.base } in
+          let x = Envi.bound_name x env_vars in
+          let es = List.map (of_expression env_typs env_vars) es in
+          Apply (l, Variable (l_exn, x), Tuple (Loc.unknown, es))
+        | _ -> failwith "Constructor of an exception expected after a 'raise'.")
+      | _ -> failwith "Expected one argument for 'raise'.")
+    | _ ->
+      let e_f = of_expression env_typs env_vars e_f in
+      let e_xs = List.map (fun (_, e_x, _) ->
+        match e_x with
+        | Some e_x -> of_expression env_typs env_vars e_x
+        | None -> failwith "expected an argument") e_xs in
+      List.fold_left (fun e e_x -> Apply (Loc.unknown, e, e_x))
+        (Apply (l, e_f, List.hd e_xs)) (List.tl e_xs))
   | Texp_match (e, cases, _) ->
     let e = of_expression env_typs env_vars e in
     let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
-      (Pattern.of_pattern env_vars p, of_expression env_typs env_vars e)) in
+      let p = Pattern.of_pattern env_vars p in
+      let env_vars = Pattern.add_to_env p env_vars in
+      (p, of_expression env_typs env_vars e)) in
     Match (l, e, cases)
   | Texp_tuple es -> Tuple (l, List.map (of_expression env_typs env_vars) es)
   | Texp_construct (x, _, es) ->
@@ -181,9 +192,11 @@ let rec of_expression (env_typs : unit Envi.t) (env_vars : unit Envi.t)
     let e3 = match e3 with
       | None -> Tuple (Loc.unknown, [])
       | Some e3 -> of_expression env_typs env_vars e3 in
-    IfThenElse (l, of_expression env_typs env_vars e1, of_expression env_typs env_vars e2, e3)
+    IfThenElse (l, of_expression env_typs env_vars e1,
+      of_expression env_typs env_vars e2, e3)
   | Texp_sequence (e1, e2) ->
-    Sequence (l, of_expression env_typs env_vars e1, of_expression env_typs env_vars e2)
+    Sequence (l, of_expression env_typs env_vars e1,
+      of_expression env_typs env_vars e2)
   | Texp_try _ | Texp_setfield _ | Texp_array _
     | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
@@ -196,9 +209,8 @@ and open_cases (env_typs : unit Envi.t) (env_vars : unit Envi.t)
     let p = Pattern.of_pattern env_vars p in
     let env_vars = Pattern.add_to_env p env_vars in
     (p, of_expression env_typs env_vars e)) in
-  (*(x, Match (Loc.unknown, Variable (Loc.unknown, BoundName.of_name 0 [] x),
-    cases))*)
-  failwith "TODO"
+  let bound_x = Envi.bound_name (PathName.of_name [] x) env_vars in
+  (x, Match (Loc.unknown, Variable (Loc.unknown, bound_x), cases))
 and import_let_fun (env_typs : unit Envi.t) (env_vars : unit Envi.t)
   (rec_flag : Asttypes.rec_flag) (pattern : pattern) (e : expression)
   : unit Envi.t * Recursivity.t * Pattern.t * Name.t list *
@@ -219,7 +231,7 @@ and import_let_fun (env_typs : unit Envi.t) (env_vars : unit Envi.t)
   (env_vars_with_let, is_rec, pattern, e_schema.Schema.variables,
     List.combine args_names args_typs, e_body_typ, e_body)
 
-let rec substitute (x : BoundName.t) (e' : 'a t) (e : 'a t) : 'a t =
+let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
   match e with
   | Constant _ -> e
   | Variable (_, y) -> if x = y then e' else e
