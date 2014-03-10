@@ -10,7 +10,7 @@ module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
 
 let pp (x : t) : SmartPrint.t =
-  single_quotes (!^ x)
+  !^ x
 
 (** Import an OCaml identifier. *)
 let of_ident (i : Ident.t) : t =

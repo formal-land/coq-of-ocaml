@@ -2,11 +2,11 @@
 open Effect.Type
 open SmartPrint
 
-let env_typs : Common.env_units =
-  PathName.Env.open_module @@
+let env_typs : unit Envi.t =
+  Envi.open_module @@
   List.fold_left (fun env_typs (path, base) ->
-    PathName.Env.add path base () env_typs)
-    PathName.Env.empty
+    Envi.add (PathName.of_name path base) () env_typs)
+    Envi.empty
     [ [], "unit";
       [], "bool";
       [], "Z";
@@ -15,12 +15,24 @@ let env_typs : Common.env_units =
       [], "option";
       [], "list" ]
 
-let env_effects : Common.env_effects =
-  let descriptor x = Effect.Descriptor.singleton (PathName.of_name 0 [] x) in
-  PathName.Env.open_module @@
+let env_descriptors : unit Envi.t =
+  Envi.open_module @@
+  List.fold_left (fun env_descriptors (path, base) ->
+    Envi.add (PathName.of_name path base) () env_descriptors)
+    Envi.empty
+    [ [], "Invalid_argument";
+      [], "Failure";
+      [], "IO";
+      [], "Counter";
+      [], "NonTermination" ]
+
+let env_effects : Effect.Type.t Envi.t =
+  let descriptor x =
+    Effect.Descriptor.singleton (Envi.bound_name (PathName.of_name [] x) env_descriptors) in
+  Envi.open_module @@
   List.fold_left (fun env_effects (path, base, typ) ->
-    PathName.Env.add path base typ env_effects)
-    PathName.Env.empty
+    Envi.add (PathName.of_name path base) typ env_effects)
+    Envi.empty
     [ [], "tt", Pure;
       [], "equiv_decb", Pure;
       [], "nequiv_decb", Pure;

@@ -115,10 +115,10 @@ module Exception = struct
   let pp (exn : t) : SmartPrint.t =
     nest (!^ "Exception" ^^ OCaml.tuple [Name.pp exn.name; Type.pp exn.typ])
 
-  let raise_effect_typ (exn : t) : Effect.Type.t =
+  (*let raise_effect_typ (exn : t) : Effect.Type.t =
     Effect.Type.Arrow (
       Effect.Descriptor.singleton (PathName.of_name 0 [] exn.name),
-      Effect.Type.Pure)
+      Effect.Type.Pure)*)
 
   let to_coq (exn : t) : SmartPrint.t =
     !^ "Definition" ^^ Name.to_coq exn.name ^^ !^ ":=" ^^
@@ -161,6 +161,7 @@ end
       !^ "fun s => (inr (inl x), s).")
 end*)
 
+(*
 (** The "open" construct to open a module. *)
 module Open = struct
   type t = PathName.t
@@ -172,6 +173,7 @@ module Open = struct
   let to_coq (o : t): SmartPrint.t =
     nest (!^ "Require Import" ^^ PathName.to_coq o ^-^ !^ ".")
 end
+*)
 
 (** A structure. *)
 type ('a, 'b) t =
@@ -180,7 +182,7 @@ type ('a, 'b) t =
   | Record of Record.t
   | Synonym of Synonym.t
   | Exception of Exception.t
-  | Open of Open.t
+  (* | Open of Open.t *)
   | Module of Name.t * ('a, 'b) t list
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
@@ -192,7 +194,7 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
     | Record record -> Record.pp record
     | Synonym synonym -> Synonym.pp synonym
     | Exception exn -> Exception.pp exn
-    | Open o -> Open.pp o
+    (* | Open o -> Open.pp o *)
     | Module (name, defs) ->
       nest (
         !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
@@ -200,17 +202,17 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
-let rec of_structure (env_typs : Common.env_units) (structure : structure)
-  : Common.env_units * (unit, Loc.t) t list =
-  let of_structure_item (env_typs : Common.env_units) (item : structure_item)
-  : Common.env_units * (unit, Loc.t) t =
+let rec of_structure (env_typs : unit Envi.t) (env_vars : unit Envi.t)
+  (structure : structure) : unit Envi.t * unit Envi.t * (unit, Loc.t) t list =
+  let of_structure_item (env_typs : unit Envi.t) (env_vars : unit Envi.t)
+  (item : structure_item) : unit Envi.t * unit Envi.t * (unit, Loc.t) t =
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
-      let (is_rec, pattern, typ_vars, args, typ, e) =
-        Exp.import_let_fun env_typs is_rec pattern e in
+      let (env_vars, is_rec, pattern, typ_vars, args, typ, e) =
+        Exp.import_let_fun env_typs env_vars is_rec pattern e in
       (match pattern with
       | Pattern.Variable x ->
-        (env_typs, Value ((), {
+        (env_typs, env_vars, Value ((), {
           Value.header = (is_rec, x, typ_vars, args, Some typ);
           body = e }))
       | _ -> failwith "Cannot match a function definition on a pattern.")
@@ -219,24 +221,24 @@ let rec of_structure (env_typs : Common.env_units) (structure : structure)
       let typ_vars = List.map Type.of_type_expr_variable typ.type_params in
       (match typ.type_kind with
       | Type_variant cases ->
-        let env_typs = PathName.Env.add [] name () env_typs in
+        let env_typs = Envi.add_name name () env_typs in
         let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
           (Name.of_ident constr, typs |> List.map (fun typ ->
             Type.of_type_expr env_typs typ)))
           cases in
-        (env_typs, Inductive {
+        (env_typs, env_vars, Inductive { (* TODO: add constructors *)
           Inductive.name = name;
           typ_vars = typ_vars;
           constructors = constructors })
-      | Type_record (fields, _) ->
-        (PathName.Env.add [] name () env_typs, Record {
+      | Type_record (fields, _) -> (* TODO: add fields *)
+        (Envi.add_name name () env_typs, env_vars, Record {
           Record.name = name;
           fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
             (Name.of_ident x, Type.of_type_expr env_typs typ)) })
       | Type_abstract ->
         (match typ.type_manifest with
         | Some typ ->
-          (PathName.Env.add [] name () env_typs, Synonym {
+          (Envi.add_name name () env_typs, env_vars, Synonym {
             Synonym.name = name;
             typ_vars = typ_vars;
             value = Type.of_type_expr env_typs typ })
@@ -245,31 +247,39 @@ let rec of_structure (env_typs : Common.env_units) (structure : structure)
       let typ =
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
           Type.of_type_expr env_typs typ)) in
-      (env_typs, Exception { Exception.name = Name.of_ident name; typ = typ})
-    | Tstr_open (_, path, _, _) -> (failwith "TODO", Open (PathName.of_path 0 path))
+      (* TODO: add raise *)
+      (env_typs, env_vars, Exception { Exception.name = Name.of_ident name; typ = typ})
+    (* | Tstr_open (_, path, _, _) -> (failwith "TODO", Open (PathName.of_path 0 path)) *)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
       let name = Name.of_ident name in
-      let env_typs = PathName.Env.open_module env_typs in
-      let (env_typs, structures) = of_structure env_typs structure in
-      (PathName.Env.close_module env_typs (fun _ _ -> ()) name, Module (name, structures))
+      let env_typs = Envi.open_module env_typs in
+      let (env_typs, env_vars, structures) = of_structure env_typs env_vars structure in
+      let env_typs = Envi.close_module env_typs (fun _ _ -> ()) name in
+      let env_vars = Envi.close_module env_vars (fun _ _ -> ()) name in
+      (env_typs, env_vars, Module (name, structures))
     | _ -> failwith "Structure item not handled." in
-  let (env_typs, defs) = List.fold_left (fun (env_typs, defs) item ->
-    let (env_typs, def) = of_structure_item env_typs item in
-    (env_typs, def :: defs))
-    (env_typs, []) structure.str_items in
-  (env_typs, List.rev defs)
+  let (env_typs, env_vars, defs) =
+    List.fold_left (fun (env_typs, env_vars, defs) item ->
+      let (env_typs, env_vars, def) = of_structure_item env_typs env_vars item in
+      (env_typs, env_vars, def :: defs))
+    (env_typs, env_vars, []) structure.str_items in
+  (env_typs, env_vars, List.rev defs)
 
-let rec monadise_let_rec (defs : (unit, Loc.t) t list) : (unit, Loc.t) t list =
-  let rec monadise_let_rec_one (def : (unit, Loc.t) t) : (unit, Loc.t) t list =
+(*let rec monadise_let_rec (env_typs : unit Envi.t) (env_vars : unit Envi.t)
+  (defs : (unit, Loc.t) t list)
+  : unit Envi.t * unit Envi.t * (unit, Loc.t) t list =
+  let rec monadise_let_rec_one (env_typs : unit Envi.t) (env_vars : unit Envi.t)
+    (def : (unit, Loc.t) t)
+    : unit Envi.t * unit Envi.t * (unit, Loc.t) t list =
     match def with
     | Value ((), { Value.header = header; body = body }) ->
-      let defs = Exp.monadise_let_rec_definition header body in
+      let defs = Exp.monadise_let_rec_definition env_typs env_vars header body in
       defs |> List.map (fun (header, body) ->
         Value ((), { Value.header = header; body = body }))
-    | Module (name, defs) -> [Module (name, monadise_let_rec defs)]
-    | Inductive _ | Record _ | Synonym _ | Exception _ | Open _ -> [def] in
-  List.concat (List.map monadise_let_rec_one defs)
+    | Module (name, defs) -> [Module (name, monadise_let_rec env_typs env_vars defs)]
+    | Inductive _ | Record _ | Synonym _ | Exception _ -> [def] in
+  List.concat (List.map monadise_let_rec_one env_typs env_vars defs)
 
 let rec effects (env_effects : Common.env_effects) (defs : (unit, 'a) t list)
   : Common.env_effects * (Effect.Type.t, 'a * Effect.t) t list =
@@ -281,7 +291,7 @@ let rec effects (env_effects : Common.env_effects) (defs : (unit, 'a) t list)
       body = e }) ->
       let (e, x_typ) =
         Exp.effects_of_let env_effects is_rec x args e in
-      let env_effects = PathName.Env.add_name x x_typ env_effects in
+      let env_effects = Envi.add_name x x_typ env_effects in
       (env_effects,
         Value (x_typ, { Value.header = header; body = e }))
     | Module (name, defs) ->
@@ -343,7 +353,7 @@ let rec monadise (env : Common.env_units)
       let (env_units, def) = monadise_one env def in
       (env, def :: defs))
       (env, []) defs in
-  (env, List.rev defs)
+  (env, List.rev defs)*)
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : ('a, 'b) t list) : SmartPrint.t =
@@ -354,7 +364,7 @@ let rec to_coq (defs : ('a, 'b) t list) : SmartPrint.t =
     | Record record -> Record.to_coq record
     | Synonym s -> Synonym.to_coq s
     | Exception exn -> Exception.to_coq exn
-    | Open o -> Open.to_coq o
+    (* | Open o -> Open.to_coq o *)
     | Module (name, defs) ->
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^

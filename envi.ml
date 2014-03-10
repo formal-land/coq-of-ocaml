@@ -50,6 +50,9 @@ let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
   let x = prefix_n prefix (first_n 0) in
   (x, add_name x v env)
 
+let map (env : 'a t) (f : 'a -> 'b) : 'b t =
+  List.map (fun map -> PathName.Map.map f map) env
+
 let open_module (env : 'a t) : 'a t =
   PathName.Map.empty :: env
 
