@@ -226,15 +226,24 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
           (Name.of_ident constr, typs |> List.map (fun typ ->
             Type.of_type_expr env'.FullEnvi.typs typ)))
           cases in
-        (env', Inductive { (* TODO: add constructors *)
+        let env' =
+          List.fold_left (fun env' (x, _) ->
+            { env' with FullEnvi.constructors = Envi.add_name x () env'.FullEnvi.constructors })
+            env' constructors in
+        (env', Inductive {
           Inductive.name = name;
           typ_vars = typ_vars;
           constructors = constructors })
-      | Type_record (fields, _) -> (* TODO: add fields *)
+      | Type_record (fields, _) ->
+        let fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
+          (Name.of_ident x, Type.of_type_expr env.FullEnvi.typs typ)) in
+        let env' =
+          List.fold_left (fun env' (x, _) ->
+            { env' with FullEnvi.fields = Envi.add_name x () env'.FullEnvi.fields })
+            env' fields in
         (env', Record {
           Record.name = name;
-          fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
-            (Name.of_ident x, Type.of_type_expr env.FullEnvi.typs typ)) })
+          fields = fields })
       | Type_abstract ->
         (match typ.type_manifest with
         | Some typ ->
@@ -244,11 +253,12 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
             value = Type.of_type_expr env.FullEnvi.typs typ })
         | None -> failwith "Type definition not handled."))
     | Tstr_exception { cd_id = name; cd_args = args } ->
+      let name = Name.of_ident name in
       let typ =
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
           Type.of_type_expr env.FullEnvi.typs typ)) in
-      (* TODO: add raise *)
-      (env, Exception { Exception.name = Name.of_ident name; typ = typ})
+      let env = { env with FullEnvi.vars = Envi.add_name ("raise_" ^ name) () env.FullEnvi.vars } in
+      (env, Exception { Exception.name = name; typ = typ})
     (* | Tstr_open (_, path, _, _) -> (failwith "TODO", Open (PathName.of_path 0 path)) *)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->

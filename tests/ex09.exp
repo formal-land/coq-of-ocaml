@@ -1,103 +1,44 @@
 ((),
-  Value (non_rec, 'l', [ ], [ ], Some Type ('list/1', Type ('Z/1'))) =
+  Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Let 4
-      (rec, 'map_rec', [ 'A'; 'B' ],
-        [
-          ('counter', Type ('nat/0'));
-          ('f', ('B' -> 'A'));
-          ('match_var_0', Type ('list/1', 'B'))
-        ], Some Type ('list/1', 'A')) =
+      (rec, map, [ A; B ], [ (f, (B -> A)); (x, Type (list/1, B)) ],
+        Some Type (list/1, A)) =
       Match
-        (?, Variable (?, 'counter/0'),
+        (?, Variable (?, x/0),
           [
-            (Nat(0),
-              Apply
-                (?, Variable (?, 'not_terminated/0'),
-                  Variable (?, 'tt/0')));
-            (Constructor ('S/0', 'counter'),
-              Match
-                (?, Variable (?, 'match_var_0/0'),
-                  [
-                    (Constructor ('[]/0'),
-                      Constructor
-                        (5,
-                          '[]/0'));
-                    (Constructor
-                      ('cons/0',
-                        'x',
-                        'xs'),
-                      Constructor
+            (Constructor ([]/1), Constructor (5, []/1));
+            (Constructor (cons/1, x, xs),
+              Constructor
+                (6, cons/1,
+                  Apply
+                    (6, Variable (6, f/0),
+                      Variable (6, x/0)),
+                  Apply
+                    (?,
+                      Apply
                         (6,
-                          'cons/0',
-                          Apply
+                          Variable
                             (6,
-                              Variable
-                                (6,
-                                  'f/0'),
-                              Variable
-                                (6,
-                                  'x/0')),
-                          Apply
-                            (?,
-                              Apply
-                                (6,
-                                  Apply
-                                    (?,
-                                      Variable
-                                        (?,
-                                          'map_rec/0'),
-                                      Variable
-                                        (?,
-                                          'counter/0')),
-                                  Variable
-                                    (6,
-                                      'f/0')),
-                              Variable
-                                (6,
-                                  'xs/0'))))
-                  ]))
+                              map/0),
+                          Variable
+                            (6,
+                              f/0)),
+                      Variable (6, xs/0))))
           ]) in
-    Let 4
-      (non_rec, 'map', [ 'A'; 'B' ],
-        [ ('f', ('B' -> 'A')); ('match_var_0', Type ('list/1', 'B')) ],
-        Some Type ('list/1', 'A')) =
-      Let ? (non_rec, 'counter', [ ], [ ], None) =
-        Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
-      Apply
-        (?,
-          Apply
-            (?, Apply (?, Variable (?, 'map_rec/0'), Variable (?, 'counter/0')),
-              Variable (?, 'f/0')), Variable (?, 'match_var_0/0')) in
-    Let 7
-      (rec, 'loop_rec', [ 'A' ], [ ('counter', Type ('nat/0')); ('x', 'A') ],
-        Some 'A') =
-      Match
-        (?, Variable (?, 'counter/0'),
-          [
-            (Nat(0),
-              Apply
-                (?, Variable (?, 'not_terminated/0'),
-                  Variable (?, 'tt/0')));
-            (Constructor ('S/0', 'counter'), Variable (7, 'x/0'))
-          ]) in
-    Let 7 (non_rec, 'loop', [ 'A' ], [ ('x', 'A') ], Some 'A') =
-      Let ? (non_rec, 'counter', [ ], [ ], None) =
-        Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
-      Apply
-        (?, Apply (?, Variable (?, 'loop_rec/0'), Variable (?, 'counter/0')),
-          Variable (?, 'x/0')) in
+    Let 7 (rec, loop, [ A ], [ (x, A) ], Some A) =
+      Variable (7, x/0) in
     Apply
       (?,
         Apply
-          (8, Variable (8, 'map/0'),
+          (8, Variable (8, map/0),
             Function
-              (8, 'n',
+              (8, n,
                 Apply
-                  (?, Apply (8, Variable (8, 'Z.add/0'), Variable (8, 'n/0')),
+                  (?, Apply (8, Variable (8, Z.add/1), Variable (8, n/0)),
                     Constant (8, Int(1))))),
         Constructor
-          (8, 'cons/0', Constant (8, Int(5)),
+          (8, cons/1, Constant (8, Int(5)),
             Constructor
-              (8, 'cons/0', Constant (8, Int(7)),
+              (8, cons/1, Constant (8, Int(7)),
                 Constructor
-                  (8, 'cons/0', Constant (8, Int(8)), Constructor (8, '[]/0'))))))
+                  (8, cons/1, Constant (8, Int(8)), Constructor (8, []/1))))))

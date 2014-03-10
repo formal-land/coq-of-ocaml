@@ -1,147 +1,62 @@
-Inductive 't1':
-  ([ ],
-    [
-      ('C1', [ Type ('Z/1') ]);
-      ('C2', [ Type ('bool/1'); Type ('Z/1') ]);
-      ('C3', [ ])
-    ])
+Inductive t1:
+  ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
 
 ((),
-  Value (non_rec, 'n', [ ], [ ], Some Type ('t1/0')) =
-    Constructor (8, 'C2/0', Constructor (8, 'false/0'), Constant (8, Int(3))))
+  Value (non_rec, n, [ ], [ ], Some Type (t1/0)) =
+    Constructor (8, C2/0, Constructor (8, false/1), Constant (8, Int(3))))
 
 ((),
-  Value (non_rec, 'm', [ ], [ ], Some Type ('bool/1')) =
+  Value (non_rec, m, [ ], [ ], Some Type (bool/1)) =
     Match
-      (10, Variable (10, 'n/0'),
+      (10, Variable (10, n/0),
         [
-          (Constructor ('C2/0', 'b', Any), Variable (11, 'b/0'));
-          (Any, Constructor (12, 'true/0'))
+          (Constructor (C2/0, b, Any), Variable (11, b/0));
+          (Any, Constructor (12, true/1))
         ]))
 
-Inductive 't2':
-  ([ 'a' ], [ ('D1', [ ]); ('D2', [ 'a'; Type ('t2/0', 'a') ]) ])
+Inductive t2:
+  ([ a ], [ (D1, [ ]); (D2, [ a; Type (t2/0, a) ]) ])
 
 ((),
-  Value
-    (rec, 'of_list_rec', [ 'A' ],
-      [ ('counter', Type ('nat/0')); ('l', Type ('list/1', 'A')) ],
-      Some Type ('t2/0', 'A')) =
+  Value (rec, of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)) =
     Match
-      (?, Variable (?, 'counter/0'),
+      (19, Variable (19, l/0),
         [
-          (Nat(0),
-            Apply
-              (?, Variable (?, 'not_terminated/0'),
-                Variable (?, 'tt/0')));
-          (Constructor ('S/0', 'counter'),
-            Match
-              (19, Variable (19, 'l/0'),
-                [
-                  (Constructor ('[]/0'),
-                    Constructor
-                      (20,
-                        'D1/0'));
-                  (Constructor ('cons/0', 'x', 'xs'),
-                    Constructor
-                      (21,
-                        'D2/0',
-                        Variable
-                          (21,
-                            'x/0'),
-                        Apply
-                          (21,
-                            Apply
-                              (?,
-                                Variable
-                                  (?,
-                                    'of_list_rec/0'),
-                                Variable
-                                  (?,
-                                    'counter/0')),
-                            Variable
-                              (21,
-                                'xs/0'))))
-                ]))
-        ]))
-
-((),
-  Value
-    (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list/1', 'A')) ],
-      Some Type ('t2/0', 'A')) =
-    Let ? (non_rec, 'counter', [ ], [ ], None) =
-      Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
-    Apply
-      (?, Apply (?, Variable (?, 'of_list_rec/0'), Variable (?, 'counter/0')),
-        Variable (?, 'l/0')))
-
-((),
-  Value
-    (rec, 'sum_rec', [ ],
-      [ ('counter', Type ('nat/0')); ('l', Type ('t2/0', Type ('Z/1'))) ],
-      Some Type ('Z/1')) =
-    Match
-      (?, Variable (?, 'counter/0'),
-        [
-          (Nat(0),
-            Apply
-              (?, Variable (?, 'not_terminated/0'),
-                Variable (?, 'tt/0')));
-          (Constructor ('S/0', 'counter'),
-            Match
-              (24, Variable (24, 'l/0'),
-                [
-                  (Constructor ('D1/0'),
-                    Constant
-                      (25,
-                        Int(0)));
-                  (Constructor ('D2/0', 'x', 'xs'),
-                    Apply
-                      (?,
-                        Apply
-                          (26,
-                            Variable
-                              (26,
-                                'Z.add/0'),
-                            Variable
-                              (26,
-                                'x/0')),
-                        Apply
-                          (26,
-                            Apply
-                              (?,
-                                Variable
-                                  (?,
-                                    'sum_rec/0'),
-                                Variable
-                                  (?,
-                                    'counter/0')),
-                            Variable
-                              (26,
-                                'xs/0'))))
-                ]))
-        ]))
-
-((),
-  Value
-    (non_rec, 'sum', [ ], [ ('l', Type ('t2/0', Type ('Z/1'))) ],
-      Some Type ('Z/1')) =
-    Let ? (non_rec, 'counter', [ ], [ ], None) =
-      Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
-    Apply
-      (?, Apply (?, Variable (?, 'sum_rec/0'), Variable (?, 'counter/0')),
-        Variable (?, 'l/0')))
-
-((),
-  Value (non_rec, 's', [ ], [ ], Some Type ('Z/1')) =
-    Apply
-      (28, Variable (28, 'sum/0'),
-        Apply
-          (28, Variable (28, 'of_list/0'),
+          (Constructor ([]/1), Constructor (20, D1/0));
+          (Constructor (cons/1, x, xs),
             Constructor
-              (28, 'cons/0', Constant (28, Int(5)),
+              (21, D2/0, Variable (21, x/0),
+                Apply
+                  (21, Variable (21, of_list/0),
+                    Variable (21, xs/0))))
+        ]))
+
+((),
+  Value (rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)) =
+    Match
+      (24, Variable (24, l/0),
+        [
+          (Constructor (D1/0), Constant (25, Int(0)));
+          (Constructor (D2/0, x, xs),
+            Apply
+              (?,
+                Apply
+                  (26, Variable (26, Z.add/1),
+                    Variable (26, x/0)),
+                Apply
+                  (26, Variable (26, sum/0),
+                    Variable (26, xs/0))))
+        ]))
+
+((),
+  Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
+    Apply
+      (28, Variable (28, sum/0),
+        Apply
+          (28, Variable (28, of_list/0),
+            Constructor
+              (28, cons/1, Constant (28, Int(5)),
                 Constructor
-                  (28, 'cons/0', Constant (28, Int(7)),
+                  (28, cons/1, Constant (28, Int(7)),
                     Constructor
-                      (28, 'cons/0', Constant (28, Int(3)),
-                        Constructor (28, '[]/0')))))))
+                      (28, cons/1, Constant (28, Int(3)), Constructor (28, []/1)))))))

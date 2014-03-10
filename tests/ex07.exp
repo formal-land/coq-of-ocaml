@@ -1,154 +1,151 @@
 ((),
-  Value (non_rec, 'b', [ ], [ ], Some Type ('bool/1')) =
+  Value (non_rec, b, [ ], [ ], Some Type (bool/1)) =
     Apply
       (?,
         Apply
-          (3, Variable (3, 'orb/0'),
+          (3, Variable (3, orb/1),
             Apply
               (?,
-                Apply
-                  (3, Variable (3, 'equiv_decb/0'), Constructor (3, 'false/0')),
-                Constructor (3, 'true/0'))),
+                Apply (3, Variable (3, equiv_decb/1), Constructor (3, false/1)),
+                Constructor (3, true/1))),
         Apply
           (?,
             Apply
-              (3, Variable (3, 'andb/0'),
+              (3, Variable (3, andb/1),
                 Apply
                   (?,
                     Apply
-                      (3, Variable (3, 'nequiv_decb/0'), Constructor (3, 'tt/0')),
-                    Constructor (3, 'tt/0'))),
-            Apply (3, Variable (3, 'negb/0'), Constructor (3, 'true/0')))))
+                      (3, Variable (3, nequiv_decb/1), Constructor (3, tt/1)),
+                    Constructor (3, tt/1))),
+            Apply (3, Variable (3, negb/1), Constructor (3, true/1)))))
 
 ((),
-  Value (non_rec, 'n1', [ ], [ ], Some Type ('Z/1')) =
+  Value (non_rec, n1, [ ], [ ], Some Type (Z/1)) =
     Apply
-      (?, Apply (5, Variable (5, 'Z.add/0'), Constant (5, Int(1))),
+      (?, Apply (5, Variable (5, Z.add/1), Constant (5, Int(1))),
         Apply
-          (?, Apply (5, Variable (5, 'Z.mul/0'), Constant (5, Int(2))),
+          (?, Apply (5, Variable (5, Z.mul/1), Constant (5, Int(2))),
             Constant (5, Int(3)))))
 
 ((),
-  Value (non_rec, 'n2', [ ], [ ], Some Type ('Z/1')) =
+  Value (non_rec, n2, [ ], [ ], Some Type (Z/1)) =
     Apply
       (?,
         Apply
-          (7, Variable (7, 'Z.sub/0'),
+          (7, Variable (7, Z.sub/1),
             Apply
               (?,
                 Apply
-                  (7, Variable (7, 'Z.add/0'),
-                    Apply (7, Variable (7, 'Z.abs/0'), Constant (7, Int(-1)))),
+                  (7, Variable (7, Z.add/1),
+                    Apply (7, Variable (7, Z.abs/1), Constant (7, Int(-1)))),
                 Constant (7, Int(1)))),
         Apply
           (?,
             Apply
-              (7, Variable (7, 'Z.mul/0'),
+              (7, Variable (7, Z.mul/1),
                 Apply
                   (?,
                     Apply
-                      (7, Variable (7, 'Z.modulo/0'),
+                      (7, Variable (7, Z.modulo/1),
                         Apply
                           (?,
                             Apply
-                              (7, Variable (7, 'Z.div/0'), Constant (7, Int(5))),
+                              (7, Variable (7, Z.div/1), Constant (7, Int(5))),
                             Constant (7, Int(23)))), Constant (7, Int(4)))),
             Constant (7, Int(3)))))
 
 ((),
-  Value (non_rec, 'n3', [ ], [ ], Some Type ('Z/1')) =
+  Value (non_rec, n3, [ ], [ ], Some Type (Z/1)) =
     Apply
-      (9, Variable (9, 'Z.pred/0'),
-        Apply (9, Variable (9, 'Z.succ/0'), Constant (9, Int(12)))))
+      (9, Variable (9, Z.pred/1),
+        Apply (9, Variable (9, Z.succ/1), Constant (9, Int(12)))))
 
 ((),
-  Value (non_rec, 'n4', [ ], [ ], Some Type ('Z/1')) =
+  Value (non_rec, n4, [ ], [ ], Some Type (Z/1)) =
     Apply
       (?,
         Apply
-          (11, Variable (11, 'Z.lxor/0'),
+          (11, Variable (11, Z.lxor/1),
             Apply
               (?,
                 Apply
-                  (11, Variable (11, 'Z.lor/0'),
+                  (11, Variable (11, Z.lor/1),
                     Apply
                       (?,
                         Apply
-                          (11, Variable (11, 'Z.land/0'), Constant (11, Int(5))),
+                          (11, Variable (11, Z.land/1), Constant (11, Int(5))),
                         Constant (11, Int(7)))), Constant (11, Int(3)))),
         Constant (11, Int(9))))
 
 ((),
-  Value (non_rec, 'n5', [ ], [ ], Some Type ('Z/1')) =
+  Value (non_rec, n5, [ ], [ ], Some Type (Z/1)) =
     Apply
       (?,
         Apply
-          (13, Variable (13, 'Z.add/0'),
+          (13, Variable (13, Z.add/1),
             Apply
               (?,
-                Apply (13, Variable (13, 'Z.shiftl/0'), Constant (13, Int(156))),
+                Apply (13, Variable (13, Z.shiftl/1), Constant (13, Int(156))),
                 Constant (13, Int(4)))),
         Apply
-          (?, Apply (13, Variable (13, 'Z.shiftr/0'), Constant (13, Int(12))),
+          (?, Apply (13, Variable (13, Z.shiftr/1), Constant (13, Int(12))),
             Constant (13, Int(1)))))
 
 ((),
-  Value (non_rec, 's', [ ], [ ], Some Type ('string/1')) =
+  Value (non_rec, s, [ ], [ ], Some Type (string/1)) =
     Apply
-      (?, Apply (15, Variable (15, 'append/0'), Constant (15, String("ghj"))),
+      (?, Apply (15, Variable (15, append/1), Constant (15, String("ghj"))),
         Constant (15, String("klm"))))
 
 ((),
-  Value (non_rec, 'c', [ ], [ ], Some Type ('ascii/1')) =
+  Value (non_rec, c, [ ], [ ], Some Type (ascii/1)) =
     Apply
-      (17, Variable (17, 'char_of_int/0'),
+      (17, Variable (17, char_of_int/1),
         Apply
           (?,
             Apply
-              (17, Variable (17, 'Z.add/0'),
+              (17, Variable (17, Z.add/1),
                 Apply
-                  (17, Variable (17, 'int_of_char/0'), Constant (17, Char("c")))),
+                  (17, Variable (17, int_of_char/1), Constant (17, Char("c")))),
             Constant (17, Int(1)))))
 
 ((),
-  Value (non_rec, 'x', [ ], [ ], Some Type ('unit/1')) =
-    Apply (19, Variable (19, 'ignore/0'), Constant (19, Int(23))))
+  Value (non_rec, x, [ ], [ ], Some Type (unit/1)) =
+    Apply (19, Variable (19, ignore/1), Constant (19, Int(23))))
 
 ((),
-  Value (non_rec, 'p', [ ], [ ], Some Type ('Z/1')) =
+  Value (non_rec, p, [ ], [ ], Some Type (Z/1)) =
     Apply
       (?,
         Apply
-          (21, Variable (21, 'Z.add/0'),
+          (21, Variable (21, Z.add/1),
             Apply
-              (21, Variable (21, 'fst/0'),
+              (21, Variable (21, fst/1),
                 Tuple (21, Constant (21, Int(1)), Constant (21, Int(2))))),
         Apply
-          (21, Variable (21, 'snd/0'),
+          (21, Variable (21, snd/1),
             Tuple (21, Constant (21, Int(3)), Constant (21, Int(4))))))
 
 ((),
-  Value (non_rec, 'l', [ ], [ ], Some Type ('list/1', Type ('Z/1'))) =
+  Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (?,
         Apply
-          (23, Variable (23, 'app/0'),
+          (23, Variable (23, app/1),
             Constructor
-              (23, 'cons/0', Constant (23, Int(1)),
+              (23, cons/1, Constant (23, Int(1)),
                 Constructor
-                  (23, 'cons/0', Constant (23, Int(2)), Constructor (23, '[]/0')))),
-        Constructor
-          (23, 'cons/0', Constant (23, Int(3)), Constructor (23, '[]/0'))))
+                  (23, cons/1, Constant (23, Int(2)), Constructor (23, []/1)))),
+        Constructor (23, cons/1, Constant (23, Int(3)), Constructor (23, []/1))))
 
 ((),
-  Value (non_rec, 'y', [ ], [ ], Some Type ('Z/1')) =
+  Value (non_rec, y, [ ], [ ], Some Type (Z/1)) =
     Apply
       (?,
         Apply
-          (25, Variable (25, 'apply/0'),
+          (25, Variable (25, apply/1),
             Function
-              (25, 'n',
+              (25, n,
                 Apply
-                  (?,
-                    Apply (25, Variable (25, 'Z.add/0'), Variable (25, 'n/0')),
+                  (?, Apply (25, Variable (25, Z.add/1), Variable (25, n/0)),
                     Constant (25, Int(1))))), Constant (25, Int(12))))

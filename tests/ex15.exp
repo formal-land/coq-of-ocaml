@@ -1,257 +1,151 @@
-Inductive 'set':
-  ([ ],
-    [
-      ('Empty', [ ]);
-      ('Node', [ Type ('set/0'); Type ('Z/1'); Type ('set/0') ])
-    ])
+Inductive set:
+  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/1); Type (set/0) ]) ])
 
 ((),
-  Value (non_rec, 'empty', [ ], [ ], Some Type ('set/0')) =
-    Constructor (7, 'Empty/0'))
+  Value (non_rec, empty, [ ], [ ], Some Type (set/0)) =
+    Constructor (7, Empty/0))
 
 ((),
   Value
-    (rec, 'member_rec', [ ],
-      [ ('counter', Type ('nat/0')); ('x', Type ('Z/1')); ('s', Type ('set/0')) ],
-      Some Type ('bool/1')) =
+    (rec, member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
+      Some Type (bool/1)) =
     Match
-      (?, Variable (?, 'counter/0'),
+      (10, Variable (10, s/0),
         [
-          (Nat(0),
-            Apply
-              (?, Variable (?, 'not_terminated/0'),
-                Variable (?, 'tt/0')));
-          (Constructor ('S/0', 'counter'),
-            Match
-              (10, Variable (10, 's/0'),
-                [
-                  (Constructor ('Empty/0'),
-                    Constructor
-                      (11,
-                        'false/0'));
-                  (Constructor
-                    ('Node/0',
-                      's1',
-                      'y',
-                      's2'),
-                    IfThenElse
+          (Constructor (Empty/0), Constructor (11, false/1));
+          (Constructor (Node/0, s1, y, s2),
+            IfThenElse
+              (13,
+                Apply
+                  (?,
+                    Apply
                       (13,
-                        Apply
-                          (?,
-                            Apply
-                              (13,
-                                Variable
-                                  (13,
-                                    'Z.ltb/0'),
-                                Variable
-                                  (13,
-                                    'x/0')),
-                            Variable
-                              (13,
-                                'y/0')),
-                        Apply
-                          (?,
-                            Apply
-                              (14,
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        'member_rec/0'),
-                                    Variable
-                                      (?,
-                                        'counter/0')),
-                                Variable
-                                  (14,
-                                    'x/0')),
-                            Variable
-                              (14,
-                                's1/0')),
-                        IfThenElse
-                          (15,
-                            Apply
-                              (?,
-                                Apply
-                                  (15,
-                                    Variable
-                                      (15,
-                                        'Z.ltb/0'),
-                                    Variable
-                                      (15,
-                                        'y/0')),
-                                Variable
-                                  (15,
-                                    'x/0')),
-                            Apply
-                              (?,
-                                Apply
-                                  (16,
-                                    Apply
-                                      (?,
-                                        Variable
-                                          (?,
-                                            'member_rec/0'),
-                                        Variable
-                                          (?,
-                                            'counter/0')),
-                                    Variable
-                                      (16,
-                                        'x/0')),
-                                Variable
-                                  (16,
-                                    's2/0')),
-                            Constructor
-                              (18,
-                                'true/0'))))
-                ]))
-        ]))
-
-((),
-  Value
-    (non_rec, 'member', [ ], [ ('x', Type ('Z/1')); ('s', Type ('set/0')) ],
-      Some Type ('bool/1')) =
-    Let ? (non_rec, 'counter', [ ], [ ], None) =
-      Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
-    Apply
-      (?,
-        Apply
-          (?,
-            Apply (?, Variable (?, 'member_rec/0'), Variable (?, 'counter/0')),
-            Variable (?, 'x/0')), Variable (?, 's/0')))
-
-((),
-  Value
-    (rec, 'insert_rec', [ ],
-      [ ('counter', Type ('nat/0')); ('x', Type ('Z/1')); ('s', Type ('set/0')) ],
-      Some Type ('set/0')) =
-    Match
-      (?, Variable (?, 'counter/0'),
-        [
-          (Nat(0),
-            Apply
-              (?, Variable (?, 'not_terminated/0'),
-                Variable (?, 'tt/0')));
-          (Constructor ('S/0', 'counter'),
-            Match
-              (21, Variable (21, 's/0'),
-                [
-                  (Constructor ('Empty/0'),
-                    Constructor
-                      (22,
-                        'Node/0',
-                        Constructor
-                          (22,
-                            'Empty/0'),
                         Variable
-                          (22,
-                            'x/0'),
-                        Constructor
-                          (22,
-                            'Empty/0')));
-                  (Constructor
-                    ('Node/0',
-                      's1',
-                      'y',
-                      's2'),
-                    IfThenElse
-                      (24,
+                          (13,
+                            Z.ltb/1),
+                        Variable
+                          (13,
+                            x/0)),
+                    Variable (13, y/0)),
+                Apply
+                  (?,
+                    Apply
+                      (14,
+                        Variable
+                          (14,
+                            member/0),
+                        Variable
+                          (14,
+                            x/0)),
+                    Variable (14, s1/0)),
+                IfThenElse
+                  (15,
+                    Apply
+                      (?,
                         Apply
-                          (?,
-                            Apply
-                              (24,
-                                Variable
-                                  (24,
-                                    'Z.ltb/0'),
-                                Variable
-                                  (24,
-                                    'x/0')),
+                          (15,
                             Variable
-                              (24,
-                                'y/0')),
-                        Constructor
-                          (25,
-                            'Node/0',
-                            Apply
-                              (?,
-                                Apply
-                                  (25,
-                                    Apply
-                                      (?,
-                                        Variable
-                                          (?,
-                                            'insert_rec/0'),
-                                        Variable
-                                          (?,
-                                            'counter/0')),
-                                    Variable
-                                      (25,
-                                        'x/0')),
-                                Variable
-                                  (25,
-                                    's1/0')),
+                              (15,
+                                Z.ltb/1),
                             Variable
-                              (25,
-                                'y/0'),
+                              (15,
+                                y/0)),
+                        Variable
+                          (15,
+                            x/0)),
+                    Apply
+                      (?,
+                        Apply
+                          (16,
                             Variable
-                              (25,
-                                's2/0')),
-                        IfThenElse
-                          (26,
-                            Apply
-                              (?,
-                                Apply
-                                  (26,
-                                    Variable
-                                      (26,
-                                        'Z.ltb/0'),
-                                    Variable
-                                      (26,
-                                        'y/0')),
-                                Variable
-                                  (26,
-                                    'x/0')),
-                            Constructor
-                              (27,
-                                'Node/0',
-                                Variable
-                                  (27,
-                                    's1/0'),
-                                Variable
-                                  (27,
-                                    'y/0'),
-                                Apply
-                                  (?,
-                                    Apply
-                                      (27,
-                                        Apply
-                                          (?,
-                                            Variable
-                                              (?,
-                                                'insert_rec/0'),
-                                            Variable
-                                              (?,
-                                                'counter/0')),
-                                        Variable
-                                          (27,
-                                            'x/0')),
-                                    Variable
-                                      (27,
-                                        's2/0'))),
+                              (16,
+                                member/0),
                             Variable
-                              (28,
-                                's/0'))))
-                ]))
+                              (16,
+                                x/0)),
+                        Variable
+                          (16,
+                            s2/0)),
+                    Constructor (18, true/1))))
         ]))
 
 ((),
   Value
-    (non_rec, 'insert', [ ], [ ('x', Type ('Z/1')); ('s', Type ('set/0')) ],
-      Some Type ('set/0')) =
-    Let ? (non_rec, 'counter', [ ], [ ], None) =
-      Apply (?, Variable (?, 'read_counter/0'), Variable (?, 'tt/0')) in
-    Apply
-      (?,
-        Apply
-          (?,
-            Apply (?, Variable (?, 'insert_rec/0'), Variable (?, 'counter/0')),
-            Variable (?, 'x/0')), Variable (?, 's/0')))
+    (rec, insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ], Some Type (set/0))
+    =
+    Match
+      (21, Variable (21, s/0),
+        [
+          (Constructor (Empty/0),
+            Constructor
+              (22, Node/0, Constructor (22, Empty/0),
+                Variable (22, x/0), Constructor (22, Empty/0)));
+          (Constructor (Node/0, s1, y, s2),
+            IfThenElse
+              (24,
+                Apply
+                  (?,
+                    Apply
+                      (24,
+                        Variable
+                          (24,
+                            Z.ltb/1),
+                        Variable
+                          (24,
+                            x/0)),
+                    Variable (24, y/0)),
+                Constructor
+                  (25, Node/0,
+                    Apply
+                      (?,
+                        Apply
+                          (25,
+                            Variable
+                              (25,
+                                insert/0),
+                            Variable
+                              (25,
+                                x/0)),
+                        Variable
+                          (25,
+                            s1/0)),
+                    Variable (25, y/0),
+                    Variable (25, s2/0)),
+                IfThenElse
+                  (26,
+                    Apply
+                      (?,
+                        Apply
+                          (26,
+                            Variable
+                              (26,
+                                Z.ltb/1),
+                            Variable
+                              (26,
+                                y/0)),
+                        Variable
+                          (26,
+                            x/0)),
+                    Constructor
+                      (27, Node/0,
+                        Variable
+                          (27,
+                            s1/0),
+                        Variable
+                          (27,
+                            y/0),
+                        Apply
+                          (?,
+                            Apply
+                              (27,
+                                Variable
+                                  (27,
+                                    insert/0),
+                                Variable
+                                  (27,
+                                    x/0)),
+                            Variable
+                              (27,
+                                s2/0))),
+                    Variable (28, s/0))))
+        ]))
