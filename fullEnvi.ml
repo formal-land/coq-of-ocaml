@@ -2,7 +2,8 @@ type 'a t = {
   vars : 'a Envi.t;
   typs : unit Envi.t;
   descriptors: unit Envi.t;
-  constructors : unit Envi.t
+  constructors : unit Envi.t;
+  fields : unit Envi.t
 }
 
 let open_module (env : 'a t) : 'a t = {
@@ -10,6 +11,7 @@ let open_module (env : 'a t) : 'a t = {
   typs = Envi.open_module env.typs;
   descriptors = Envi.open_module env.descriptors;
   constructors = Envi.open_module env.constructors;
+  fields = Envi.open_module env.fields
 }
 
 let close_module (env : 'a t) (lift : 'a -> Name.t -> 'a) (name : Name.t)
@@ -20,4 +22,5 @@ let close_module (env : 'a t) (lift : 'a -> Name.t -> 'a) (name : Name.t)
     typs = Envi.close_module env.typs lift_unit name;
     descriptors = Envi.close_module env.descriptors lift_unit name;
     constructors = Envi.close_module env.constructors lift_unit name;
+    fields = Envi.close_module env.fields lift_unit name
   }

@@ -89,6 +89,7 @@ tests = Tests.new(Dir.glob('tests/ex*.ml'))
 tests.compile
 puts
 tests.check('exp')
+exit(0)
 puts
 tests.check('effects')
 puts

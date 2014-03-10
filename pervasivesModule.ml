@@ -31,8 +31,16 @@ let env_constructors : unit Envi.t =
   List.fold_left (fun env_constructors (path, base) ->
     Envi.add (PathName.of_name path base) () env_constructors)
     Envi.empty
-    [ [], "false";
-      [], "true" ]
+    [ [], "tt";
+      [], "false";
+      [], "true";
+      [], "None";
+      [], "Some";
+      [], "[]";
+      [], "cons" ]
+
+let env_fields : unit Envi.t =
+  Envi.open_module Envi.empty
 
 let env_effects : Effect.Type.t Envi.t =
   let descriptor x =
@@ -41,8 +49,7 @@ let env_effects : Effect.Type.t Envi.t =
   List.fold_left (fun env_effects (path, base, typ) ->
     Envi.add (PathName.of_name path base) typ env_effects)
     Envi.empty
-    [ [], "tt", Pure;
-      [], "equiv_decb", Pure;
+    [ [], "equiv_decb", Pure;
       [], "nequiv_decb", Pure;
       ["Z"], "ltb", Pure;
       [], "negb", Pure;
@@ -93,5 +100,6 @@ let env : unit FullEnvi.t = {
   FullEnvi.vars = Envi.map env_effects (fun _ -> ());
   typs = env_typs;
   descriptors = env_descriptors;
-  constructors = env_constructors
+  constructors = env_constructors;
+  fields = env_fields
 }

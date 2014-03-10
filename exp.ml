@@ -184,20 +184,20 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
   | Texp_match (e, cases, _) ->
     let e = of_expression env e in
     let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
-      let p = Pattern.of_pattern env.FullEnvi.vars p in
-      let env = { env with FullEnvi.vars = Pattern.add_to_env p env.FullEnvi.vars } in
+      let p = Pattern.of_pattern env p in
+      let env = Pattern.add_to_env p env in
       (p, of_expression env e)) in
     Match (l, e, cases)
   | Texp_tuple es -> Tuple (l, List.map (of_expression env) es)
   | Texp_construct (x, _, es) ->
-    let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.vars in
+    let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.constructors in
     Constructor (l, x, List.map (of_expression env) es)
   | Texp_record (fields, _) ->
     Record (l, fields |> List.map (fun (x, _, e) ->
-      let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.vars in
+      let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.fields in
       (x, of_expression env e)))
   | Texp_field (e, x, _) ->
-    let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.vars in
+    let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.fields in
     Field (l, of_expression env e, x)
   | Texp_ifthenelse (e1, e2, e3) ->
     let e3 = match e3 with
@@ -216,9 +216,10 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
 and open_cases (env : unit FullEnvi.t) (cases : case list)
   : Name.t * Loc.t t =
   let (x, env_vars) = Envi.fresh "x" () env.FullEnvi.vars in
+  let env = { env with FullEnvi.vars = env_vars } in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
-    let p = Pattern.of_pattern env_vars p in
-    let env_vars = Pattern.add_to_env p env_vars in
+    let p = Pattern.of_pattern env p in
+    let env = Pattern.add_to_env p env in
     (p, of_expression env e)) in
   let bound_x = Envi.bound_name (PathName.of_name [] x) env_vars in
   (x, Match (Loc.unknown, Variable (Loc.unknown, bound_x), cases))
@@ -226,10 +227,10 @@ and import_let_fun (env : unit FullEnvi.t) (rec_flag : Asttypes.rec_flag)
   (pattern : pattern) (e : expression)
   : unit FullEnvi.t * Recursivity.t * Pattern.t * Name.t list *
     (Name.t * Type.t) list * Type.t * Loc.t t =
-  let pattern = Pattern.of_pattern env.FullEnvi.vars pattern in
+  let pattern = Pattern.of_pattern env pattern in
   let is_rec = Recursivity.of_rec_flag rec_flag in
   let env_with_let =
-    { env with FullEnvi.vars = Pattern.add_to_env pattern env.FullEnvi.vars } in
+    Pattern.add_to_env pattern env in
   let env =
     if Recursivity.to_bool is_rec then
       env_with_let

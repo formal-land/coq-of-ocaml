@@ -26,20 +26,20 @@ let rec pp (p : t) : SmartPrint.t =
       nest @@ parens (BoundName.pp x ^-^ !^ "," ^^ pp p))))
 
 (** Import an OCaml pattern. *)
-let rec of_pattern (env_vars : unit Envi.t) (p : pattern) : t =
+let rec of_pattern (env : 'a FullEnvi.t) (p : pattern) : t =
   match p.pat_desc with
   | Tpat_any -> Any
   | Tpat_var (x, _) -> Variable (Name.of_ident x)
-  | Tpat_tuple ps -> Tuple (List.map (of_pattern env_vars) ps)
+  | Tpat_tuple ps -> Tuple (List.map (of_pattern env) ps)
   | Tpat_construct (x, _, ps) ->
-    let x = Envi.bound_name (PathName.of_loc x) env_vars in
-    Constructor (x, List.map (of_pattern env_vars) ps)
-  | Tpat_alias (p, x, _) -> Alias (of_pattern env_vars p, Name.of_ident x)
+    let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.constructors in
+    Constructor (x, List.map (of_pattern env) ps)
+  | Tpat_alias (p, x, _) -> Alias (of_pattern env p, Name.of_ident x)
   | Tpat_constant c -> Constant (Constant.of_constant c)
   | Tpat_record (fields, _) ->
     Record (fields |> List.map (fun (x, _, p) ->
-      let x = Envi.bound_name (PathName.of_loc x) env_vars in
-      (x, of_pattern env_vars p)))
+      let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.fields in
+      (x, of_pattern env p)))
   | _ -> failwith "unhandled pattern"
 
 (** Free variables in a pattern. *)
@@ -54,9 +54,11 @@ let rec free_variables (p : t) : Name.Set.t =
   | Alias (p, x) -> Name.Set.union (Name.Set.singleton x) (free_variables p)
   | Record fields -> aux (List.map snd fields)
 
-let add_to_env (p : t) (env : unit Envi.t) : unit Envi.t =
-  Name.Set.fold (fun x env -> Envi.add_name x () env)
-    (free_variables p) env
+let add_to_env (p : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
+  let env_vars =
+    Name.Set.fold (fun x env_vars -> Envi.add_name x () env_vars)
+      (free_variables p) env.FullEnvi.vars in
+  { env with FullEnvi.vars = env_vars }
 
 (** Pretty-print a pattern to Coq (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
