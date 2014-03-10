@@ -385,7 +385,7 @@ and monadise_let_rec_definition (env_typs : unit Envi.t)
     let env_vars = Envi.add_name x () env_vars in
     (env_vars, [(header, e)])
 
-let rec effects (env_effects : Common.env_effects) (e : 'a t)
+let rec effects (env_effects : Effect.Type.t Envi.t) (e : 'a t)
   : ('a * Effect.t) t =
   let compound (es : 'a t list) : ('a * Effect.t) t list * Effect.t =
     let es = List.map (effects env_effects) es in
@@ -408,7 +408,7 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
     (try
       let effect =
         { Effect.descriptor = Effect.Descriptor.pure;
-          typ = BoundName.Env.find x env_effects } in
+          typ = Envi.find x env_effects } in
       Variable ((a, effect), x)
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (BoundName.pp x ^^ !^ "not found.")))
@@ -433,7 +433,7 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
     else
       failwith "Function arguments cannot have functional effects."
   | Function (a, x, e) ->
-    let env_effects = BoundName.Env.add_name x Effect.Type.Pure env_effects in
+    let env_effects = Envi.add_name x Effect.Type.Pure env_effects in
     let e = effects env_effects e in
     let effect_e = snd (annotation e) in
     let effect = {
@@ -444,7 +444,7 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
   | Let (a, ((is_rec, x, _, args, _) as header), e1, e2) ->
     let (e1, x_typ) = effects_of_let env_effects is_rec x args e1 in
     let effect1 = snd (annotation e1) in
-    let env_in_e2 = BoundName.Env.add_name x x_typ env_effects in
+    let env_in_e2 = Envi.add_name x x_typ env_effects in
     let e2 = effects env_in_e2 e2 in
     let effect2 = snd (annotation e2) in
     let descriptor = Effect.Descriptor.union
@@ -460,7 +460,7 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
       let cases = cases |> List.map (fun (p, e) ->
         let pattern_vars = Pattern.free_variables p in
         let env_effects = Name.Set.fold (fun x env_effects ->
-          BoundName.Env.add_name x Effect.Type.Pure env_effects)
+          Envi.add_name x Effect.Type.Pure env_effects)
           pattern_vars env_effects in
         (p, effects env_effects e)) in
       let effect = Effect.union (cases |> List.map (fun (_, e) ->
@@ -510,17 +510,17 @@ let rec effects (env_effects : Common.env_effects) (e : 'a t)
   | Return _ | Bind _ | Lift _ ->
     failwith "Cannot compute effects on an explicit return, bind or lift."
 
-and effects_of_let (env_effects : Common.env_effects) (is_rec : Recursivity.t)
+and effects_of_let (env_effects : Effect.Type.t Envi.t) (is_rec : Recursivity.t)
   (x : Name.t) (args : (Name.t * Type.t) list) (e : 'a t)
   : ('a * Effect.t) t * Effect.Type.t =
   let args_names = List.map fst args in
   let env_in_e =
     List.fold_left (fun env_effects x ->
-      BoundName.Env.add_name x Effect.Type.Pure env_effects)
+      Envi.add_name x Effect.Type.Pure env_effects)
       env_effects args_names in
   if Recursivity.to_bool is_rec then
     let rec fix_effect x_typ =
-      let env_in_e = BoundName.Env.add_name x x_typ env_in_e in
+      let env_in_e = Envi.add_name x x_typ env_in_e in
       let e = effects env_in_e e in
       let effect = snd (annotation e) in
       let x_typ' = Effect.function_typ args_names effect in
@@ -563,9 +563,9 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t)
         monadise_list env es d (map fst e :: es') k
       else
         let e' = monadise env e in
-        let (x, env) = BoundName.Env.fresh "x" () env in
+        let (x, env) = Envi.fresh "x" () env in
         bind d_e d d e' (Some x) (monadise_list env es d
-          (Variable (Loc.unknown, BoundName.of_name 0 [] x) :: es') k) in
+          (Variable (Loc.unknown, Envi.bound_name (PathName.of_name [] x) env) :: es') k) in
   let d = descriptor e in
   match e with
   | Constant ((l, _), c) -> Constant (l, c)
@@ -585,23 +585,23 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t)
         lift return_descriptor d (Apply (l, e1, e2))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
   | Function ((l, _), x, e) ->
-    let env = BoundName.Env.add_name x () env in
+    let env = Envi.add_name x () env in
     Function (l, x, monadise env e)
   | Let ((l, _), (_, x, _, [], _), e1, e2) -> (* TODO: use l *)
     let (d1, d2) = (descriptor e1, descriptor e2) in
     let e1 = monadise env e1 in
-    let env = BoundName.Env.add_name x () env in
+    let env = Envi.add_name x () env in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 (Some x) e2
   | Let ((l, _), (is_rec, x, typ_args, args, Some typ), e1, e2) ->
     let typ = Type.monadise typ (snd (annotation e1)) in
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
-        BoundName.Env.add_name x () env
+        Envi.add_name x () env
       else
         env in
     let e1 = monadise env_in_e1 e1 in
-    let env_in_e2 = BoundName.Env.add_name x () env in
+    let env_in_e2 = Envi.add_name x () env in
     let e2 = monadise env_in_e2 e2 in
     Let (l, (is_rec, x, typ_args, args, Some typ), e1, e2)
   | Match ((l, _), e, cases) ->
@@ -609,7 +609,7 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t)
       match es' with
       | [e] ->
         let cases = cases |> List.map (fun (p, e)->
-          let env = Name.Set.fold (fun x env -> BoundName.Env.add_name x () env)
+          let env = Name.Set.fold (fun x env -> Envi.add_name x () env)
             (Pattern.free_variables p) env in
           (p, lift (descriptor e) d (monadise env e))) in
         Match (l, e, cases)
