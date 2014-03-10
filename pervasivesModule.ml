@@ -26,6 +26,14 @@ let env_descriptors : unit Envi.t =
       [], "Counter";
       [], "NonTermination" ]
 
+let env_constructors : unit Envi.t =
+  Envi.open_module @@
+  List.fold_left (fun env_constructors (path, base) ->
+    Envi.add (PathName.of_name path base) () env_constructors)
+    Envi.empty
+    [ [], "false";
+      [], "true" ]
+
 let env_effects : Effect.Type.t Envi.t =
   let descriptor x =
     Effect.Descriptor.singleton (Envi.bound_name (PathName.of_name [] x) env_descriptors) in
@@ -80,3 +88,10 @@ let env_effects : Effect.Type.t Envi.t =
       [], "read_int", Arrow (descriptor "IO", Pure);
       [], "read_counter", Arrow (descriptor "Counter", Pure);
       [], "not_terminated", Arrow (descriptor "NonTermination", Pure) ]
+
+let env : unit FullEnvi.t = {
+  FullEnvi.vars = Envi.map env_effects (fun _ -> ());
+  typs = env_typs;
+  descriptors = env_descriptors;
+  constructors = env_constructors
+}

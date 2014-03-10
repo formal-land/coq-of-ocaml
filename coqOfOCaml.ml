@@ -2,46 +2,44 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
-  let env_typs : unit Envi.t = PervasivesModule.env_typs in
-  let env_descriptors : unit Envi.t = PervasivesModule.env_descriptors in
-  let env_effects : Effect.Type.t Envi.t = PervasivesModule.env_effects in
-  let env_vars : unit Envi.t = Envi.map env_effects (fun _ -> ()) in
-  let document =
-    match mode with
-    | "exp" ->
-      let (_, _, defs) = Structure.of_structure env_typs env_vars structure in
-      (* let defs = Structure.monadise_let_rec env_typs env_vars defs in *)
-      Structure.pp OCaml.unit Loc.pp defs
-    (*| "effects" ->
-      let (_, defs) = Structure.of_structure env_typs structure in
-      let defs = Structure.monadise_let_rec defs in
-      let (_, defs) = Structure.effects env_effects defs in
-      let pp_annotation (l, effect) =
-        OCaml.tuple [Loc.pp l; Effect.pp effect] in
-      Structure.pp (Effect.Type.pp false) pp_annotation defs
-    | "monadise" ->
-      let (_, defs) = Structure.of_structure env_typs structure in
-      let defs = Structure.monadise_let_rec defs in
-      let (_, defs) = Structure.effects env_effects defs in
-      let (_, defs) =
-        Structure.monadise PathName.Env.empty defs in
-      Structure.pp OCaml.unit Loc.pp defs
-    | "v" ->
-      let (_, defs) = Structure.of_structure env_typs structure in
-      let defs = Structure.monadise_let_rec defs in
-      let (_, defs) = Structure.effects env_effects defs in
-      let (_, defs) =
-        Structure.monadise PathName.Env.empty defs in
-      concat (List.map (fun d -> d ^^ newline) [
-        !^ "Require Import CoqOfOCaml." ^^ newline;
-        !^ "Local Open Scope Z_scope.";
-        !^ "Import ListNotations.";
-        !^ "Set Implicit Arguments."]) ^^ newline ^^
-      Structure.to_coq defs*)
-    | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
-  to_stdout 80 2 document;
-  print_newline ();
-  flush stdout
+  try
+    let document =
+      match mode with
+      | "exp" ->
+        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
+        (* let defs = Structure.monadise_let_rec env_typs env_vars defs in *)
+        Structure.pp OCaml.unit Loc.pp defs
+      (*| "effects" ->
+        let (_, defs) = Structure.of_structure env_typs structure in
+        let defs = Structure.monadise_let_rec defs in
+        let (_, defs) = Structure.effects env_effects defs in
+        let pp_annotation (l, effect) =
+          OCaml.tuple [Loc.pp l; Effect.pp effect] in
+        Structure.pp (Effect.Type.pp false) pp_annotation defs
+      | "monadise" ->
+        let (_, defs) = Structure.of_structure env_typs structure in
+        let defs = Structure.monadise_let_rec defs in
+        let (_, defs) = Structure.effects env_effects defs in
+        let (_, defs) =
+          Structure.monadise PathName.Env.empty defs in
+        Structure.pp OCaml.unit Loc.pp defs
+      | "v" ->
+        let (_, defs) = Structure.of_structure env_typs structure in
+        let defs = Structure.monadise_let_rec defs in
+        let (_, defs) = Structure.effects env_effects defs in
+        let (_, defs) =
+          Structure.monadise PathName.Env.empty defs in
+        concat (List.map (fun d -> d ^^ newline) [
+          !^ "Require Import CoqOfOCaml." ^^ newline;
+          !^ "Local Open Scope Z_scope.";
+          !^ "Import ListNotations.";
+          !^ "Set Implicit Arguments."]) ^^ newline ^^
+        Structure.to_coq defs*)
+      | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
+    to_stdout 80 2 document;
+    print_newline ();
+    flush stdout
+  with Envi.NotFound x -> failwith (to_string 80 2 @@ (PathName.pp x ^^ !^ "not found."))
 
 (** Parse a .cmt file to a typed AST. *)
 let parse_cmt (file_name : string) : Typedtree.structure =

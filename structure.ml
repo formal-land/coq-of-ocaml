@@ -202,69 +202,68 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
-let rec of_structure (env_typs : unit Envi.t) (env_vars : unit Envi.t)
-  (structure : structure) : unit Envi.t * unit Envi.t * (unit, Loc.t) t list =
-  let of_structure_item (env_typs : unit Envi.t) (env_vars : unit Envi.t)
-  (item : structure_item) : unit Envi.t * unit Envi.t * (unit, Loc.t) t =
+let rec of_structure (env : unit FullEnvi.t) (structure : structure)
+  : unit FullEnvi.t * (unit, Loc.t) t list =
+  let of_structure_item (env : unit FullEnvi.t) (item : structure_item)
+    : unit FullEnvi.t * (unit, Loc.t) t =
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
-      let (env_vars, is_rec, pattern, typ_vars, args, typ, e) =
-        Exp.import_let_fun env_typs env_vars is_rec pattern e in
+      let (env, is_rec, pattern, typ_vars, args, typ, e) =
+        Exp.import_let_fun env is_rec pattern e in
       (match pattern with
       | Pattern.Variable x ->
-        (env_typs, env_vars, Value ((), {
+        (env, Value ((), {
           Value.header = (is_rec, x, typ_vars, args, Some typ);
           body = e }))
       | _ -> failwith "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       let name = Name.of_ident name in
       let typ_vars = List.map Type.of_type_expr_variable typ.type_params in
+      let env' = { env with FullEnvi.typs = Envi.add_name name () env.FullEnvi.typs } in
       (match typ.type_kind with
       | Type_variant cases ->
-        let env_typs = Envi.add_name name () env_typs in
         let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
           (Name.of_ident constr, typs |> List.map (fun typ ->
-            Type.of_type_expr env_typs typ)))
+            Type.of_type_expr env'.FullEnvi.typs typ)))
           cases in
-        (env_typs, env_vars, Inductive { (* TODO: add constructors *)
+        (env', Inductive { (* TODO: add constructors *)
           Inductive.name = name;
           typ_vars = typ_vars;
           constructors = constructors })
       | Type_record (fields, _) -> (* TODO: add fields *)
-        (Envi.add_name name () env_typs, env_vars, Record {
+        (env', Record {
           Record.name = name;
           fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
-            (Name.of_ident x, Type.of_type_expr env_typs typ)) })
+            (Name.of_ident x, Type.of_type_expr env.FullEnvi.typs typ)) })
       | Type_abstract ->
         (match typ.type_manifest with
         | Some typ ->
-          (Envi.add_name name () env_typs, env_vars, Synonym {
+          (env', Synonym {
             Synonym.name = name;
             typ_vars = typ_vars;
-            value = Type.of_type_expr env_typs typ })
+            value = Type.of_type_expr env.FullEnvi.typs typ })
         | None -> failwith "Type definition not handled."))
     | Tstr_exception { cd_id = name; cd_args = args } ->
       let typ =
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
-          Type.of_type_expr env_typs typ)) in
+          Type.of_type_expr env.FullEnvi.typs typ)) in
       (* TODO: add raise *)
-      (env_typs, env_vars, Exception { Exception.name = Name.of_ident name; typ = typ})
+      (env, Exception { Exception.name = Name.of_ident name; typ = typ})
     (* | Tstr_open (_, path, _, _) -> (failwith "TODO", Open (PathName.of_path 0 path)) *)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
       let name = Name.of_ident name in
-      let env_typs = Envi.open_module env_typs in
-      let (env_typs, env_vars, structures) = of_structure env_typs env_vars structure in
-      let env_typs = Envi.close_module env_typs (fun _ _ -> ()) name in
-      let env_vars = Envi.close_module env_vars (fun _ _ -> ()) name in
-      (env_typs, env_vars, Module (name, structures))
+      let env = FullEnvi.open_module env in
+      let (env, structures) = of_structure env structure in
+      let env = FullEnvi.close_module env (fun _ _ -> ()) name in
+      (env, Module (name, structures))
     | _ -> failwith "Structure item not handled." in
-  let (env_typs, env_vars, defs) =
-    List.fold_left (fun (env_typs, env_vars, defs) item ->
-      let (env_typs, env_vars, def) = of_structure_item env_typs env_vars item in
-      (env_typs, env_vars, def :: defs))
-    (env_typs, env_vars, []) structure.str_items in
-  (env_typs, env_vars, List.rev defs)
+  let (env, defs) =
+    List.fold_left (fun (env, defs) item ->
+      let (env, def) = of_structure_item env item in
+      (env, def :: defs))
+    (env, []) structure.str_items in
+  (env, List.rev defs)
 
 (*let rec monadise_let_rec (env_typs : unit Envi.t) (env_vars : unit Envi.t)
   (defs : (unit, Loc.t) t list)

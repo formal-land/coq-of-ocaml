@@ -30,10 +30,6 @@ let rec find (x : BoundName.t) (env : 'a t) : 'a =
     | Failure "nth" -> raise Not_found in
   PathName.Map.find x.BoundName.path_name map
 
-(*let mem (x : BoundName.t) (env : 'a t) : bool =
-  try let _ = find x env in true with
-  | Not_found -> false*)
-
 let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
   let mem (x : PathName.t) : bool =
     try let _ = depth x env in true with NotFound _ -> false in
