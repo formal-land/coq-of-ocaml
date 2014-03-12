@@ -14,21 +14,65 @@ Module G:
           Tuple (?, Variable (10, x/0), Constant (10, String("no")))))
 
 ((),
-  Value (rec, h, [ A ], [ (l, Type (list/1, A)) ], Some A) =
+  Value
+    (rec, h_rec, [ A ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+      Some A) =
     Match
-      (14, Variable (14, l/0),
+      (?, Variable (?, counter/0),
         [
-          (Constructor ([]/1),
-            Sequence
-              (15,
-                Apply
-                  (15, Variable (15, print_string/1),
-                    Constant
-                      (15, String("no tail"))),
-                Apply
-                  (15, Variable (15, raise_TailLess/0),
-                    Tuple (?))));
-          (Constructor (cons/1, x, Constructor ([]/1)), Variable (16, x/0));
-          (Constructor (cons/1, Any, xs),
-            Apply (17, Variable (17, h/0), Variable (17, xs/0)))
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
+            Match
+              (14, Variable (14, l/0),
+                [
+                  (Constructor ([]/1),
+                    Sequence
+                      (15,
+                        Apply
+                          (15,
+                            Variable
+                              (15,
+                                print_string/1),
+                            Constant
+                              (15,
+                                String("no tail"))),
+                        Apply
+                          (15,
+                            Variable
+                              (15,
+                                raise_TailLess/0),
+                            Tuple
+                              (?))));
+                  (Constructor
+                    (cons/1,
+                      x,
+                      Constructor
+                        ([]/1)),
+                    Variable
+                      (16,
+                        x/0));
+                  (Constructor (cons/1, Any, xs),
+                    Apply
+                      (17,
+                        Apply
+                          (?,
+                            Variable
+                              (?,
+                                h_rec/0),
+                            Variable
+                              (?,
+                                counter/0)),
+                        Variable
+                          (17,
+                            xs/0)))
+                ]))
         ]))
+
+((),
+  Value (non_rec, h, [ A ], [ (l, Type (list/1, A)) ], Some A) =
+    Let ? (non_rec, counter, [ ], [ ], None) =
+      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
+    Apply
+      (?, Apply (?, Variable (?, h_rec/0), Variable (?, counter/0)),
+        Variable (?, l/0)))

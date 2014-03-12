@@ -265,7 +265,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let name = Name.of_ident name in
       let env = FullEnvi.open_module env in
       let (env, structures) = of_structure env structure in
-      let env = FullEnvi.close_module env (fun _ _ -> ()) name in
+      let env = FullEnvi.close_module env name in
       (env, Module (name, structures))
     | _ -> failwith "Structure item not handled." in
   let (env, defs) =
@@ -275,22 +275,28 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
     (env, []) structure.str_items in
   (env, List.rev defs)
 
-(*let rec monadise_let_rec (env_typs : unit Envi.t) (env_vars : unit Envi.t)
-  (defs : (unit, Loc.t) t list)
-  : unit Envi.t * unit Envi.t * (unit, Loc.t) t list =
-  let rec monadise_let_rec_one (env_typs : unit Envi.t) (env_vars : unit Envi.t)
-    (def : (unit, Loc.t) t)
-    : unit Envi.t * unit Envi.t * (unit, Loc.t) t list =
+let rec monadise_let_rec (env : unit FullEnvi.t) (defs : (unit, Loc.t) t list)
+  : unit FullEnvi.t * (unit, Loc.t) t list =
+  let rec monadise_let_rec_one (env : unit FullEnvi.t) (def : (unit, Loc.t) t)
+    : unit FullEnvi.t * (unit, Loc.t) t list =
     match def with
     | Value ((), { Value.header = header; body = body }) ->
-      let defs = Exp.monadise_let_rec_definition env_typs env_vars header body in
-      defs |> List.map (fun (header, body) ->
-        Value ((), { Value.header = header; body = body }))
-    | Module (name, defs) -> [Module (name, monadise_let_rec env_typs env_vars defs)]
-    | Inductive _ | Record _ | Synonym _ | Exception _ -> [def] in
-  List.concat (List.map monadise_let_rec_one env_typs env_vars defs)
+      let (env, defs) = Exp.monadise_let_rec_definition env header body in
+      (env, defs |> List.rev |> List.map (fun (header, body) ->
+        Value ((), { Value.header = header; body = body })))
+    | Module (name, defs) ->
+      let env = FullEnvi.open_module env in
+      let (env, defs) = monadise_let_rec env defs in
+      let env = FullEnvi.close_module env name in
+      (env, [Module (name, defs)])
+    | Inductive _ | Record _ | Synonym _ | Exception _ -> (env, [def]) in
+  let (env, defs) = List.fold_left (fun (env, defs) def ->
+    let (env, defs') = monadise_let_rec_one env def in
+    (env, defs' @ defs))
+    (env, []) defs in
+  (env, List.rev defs)
 
-let rec effects (env_effects : Common.env_effects) (defs : (unit, 'a) t list)
+(*let rec effects (env_effects : Common.env_effects) (defs : (unit, 'a) t list)
   : Common.env_effects * (Effect.Type.t, 'a * Effect.t) t list =
   let rec effects_one (env_effects : Common.env_effects) (def : (unit, 'a) t)
     : Common.env_effects * (Effect.Type.t, 'a * Effect.t) t =

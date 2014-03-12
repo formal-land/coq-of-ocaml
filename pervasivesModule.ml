@@ -9,6 +9,7 @@ let env_typs : unit Envi.t =
     Envi.empty
     [ [], "unit";
       [], "bool";
+      [], "nat";
       [], "Z";
       [], "ascii";
       [], "string";
@@ -34,6 +35,8 @@ let env_constructors : unit Envi.t =
     [ [], "tt";
       [], "false";
       [], "true";
+      [], "O";
+      [], "S";
       [], "None";
       [], "Some";
       [], "[]";
@@ -98,6 +101,7 @@ let env_effects : Effect.Type.t Envi.t =
 
 let env : unit FullEnvi.t = {
   FullEnvi.vars = Envi.map env_effects (fun _ -> ());
+  lift_vars = (fun _ _ -> ());
   typs = env_typs;
   descriptors = env_descriptors;
   constructors = env_constructors;

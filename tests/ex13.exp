@@ -15,22 +15,58 @@
 
 ((),
   Value
-    (rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+    (rec, print_list_rec, [ ],
+      [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
       Some Type (unit/1)) =
     Match
-      (?, Variable (?, x/0),
+      (?, Variable (?, counter/0),
         [
-          (Constructor ([]/1), Constructor (9, tt/1));
-          (Constructor (cons/1, x, xs),
-            Sequence
-              (11,
-                Apply
-                  (11, Variable (11, print_string/1),
-                    Variable (11, x/0)),
-                Apply
-                  (12, Variable (12, print_list/0),
-                    Variable (12, xs/0))))
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
+            Match
+              (?, Variable (?, x/0),
+                [
+                  (Constructor ([]/1),
+                    Constructor
+                      (9,
+                        tt/1));
+                  (Constructor (cons/1, x, xs),
+                    Sequence
+                      (11,
+                        Apply
+                          (11,
+                            Variable
+                              (11,
+                                print_string/1),
+                            Variable
+                              (11,
+                                x/0)),
+                        Apply
+                          (12,
+                            Apply
+                              (?,
+                                Variable
+                                  (?,
+                                    print_list_rec/0),
+                                Variable
+                                  (?,
+                                    counter/0)),
+                            Variable
+                              (12,
+                                xs/0))))
+                ]))
         ]))
+
+((),
+  Value
+    (non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+      Some Type (unit/1)) =
+    Let ? (non_rec, counter, [ ], [ ], None) =
+      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
+    Apply
+      (?, Apply (?, Variable (?, print_list_rec/0), Variable (?, counter/0)),
+        Variable (?, x/0)))
 
 ((),
   Value

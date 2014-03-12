@@ -1,66 +1,138 @@
 ((),
   Value
-    (rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
+    (rec, map_rec, [ A; B ],
+      [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Type (list/1, A)) =
     Match
-      (4, Variable (4, l/0),
+      (?, Variable (?, counter/0),
         [
-          (Constructor ([]/1), Constructor (5, []/1));
-          (Constructor (cons/1, x, xs),
-            Constructor
-              (6, cons/1,
-                Apply
-                  (6, Variable (6, f/0),
-                    Variable (6, x/0)),
-                Apply
-                  (?,
-                    Apply
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
+            Match
+              (4, Variable (4, l/0),
+                [
+                  (Constructor ([]/1),
+                    Constructor
+                      (5,
+                        []/1));
+                  (Constructor (cons/1, x, xs),
+                    Constructor
                       (6,
-                        Variable
+                        cons/1,
+                        Apply
                           (6,
-                            map/0),
-                        Variable
-                          (6,
-                            f/0)),
-                    Variable (6, xs/0))))
+                            Variable
+                              (6,
+                                f/0),
+                            Variable
+                              (6,
+                                x/0)),
+                        Apply
+                          (?,
+                            Apply
+                              (6,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        map_rec/0),
+                                    Variable
+                                      (?,
+                                        counter/0)),
+                                Variable
+                                  (6,
+                                    f/0)),
+                            Variable
+                              (6,
+                                xs/0))))
+                ]))
         ]))
 
 ((),
   Value
-    (rec, fold, [ A; B ],
-      [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
+    (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Let ? (non_rec, counter, [ ], [ ], None) =
+      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
+    Apply
+      (?,
+        Apply
+          (?, Apply (?, Variable (?, map_rec/0), Variable (?, counter/0)),
+            Variable (?, f/0)), Variable (?, l/0)))
+
+((),
+  Value
+    (rec, fold_rec, [ A; B ],
+      [
+        (counter, Type (nat/1));
+        (f, (A -> (B -> A)));
+        (a, A);
+        (l, Type (list/1, B))
+      ], Some A) =
     Match
-      (9, Variable (9, l/0),
+      (?, Variable (?, counter/0),
         [
-          (Constructor ([]/1), Variable (10, a/0));
-          (Constructor (cons/1, x, xs),
-            Apply
-              (?,
-                Apply
-                  (?,
-                    Apply
-                      (11,
-                        Variable
-                          (11,
-                            fold/0),
-                        Variable
-                          (11,
-                            f/0)),
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
+            Match
+              (9, Variable (9, l/0),
+                [
+                  (Constructor ([]/1),
+                    Variable
+                      (10,
+                        a/0));
+                  (Constructor (cons/1, x, xs),
                     Apply
                       (?,
                         Apply
-                          (11,
-                            Variable
+                          (?,
+                            Apply
                               (11,
-                                f/0),
-                            Variable
-                              (11,
-                                a/0)),
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        fold_rec/0),
+                                    Variable
+                                      (?,
+                                        counter/0)),
+                                Variable
+                                  (11,
+                                    f/0)),
+                            Apply
+                              (?,
+                                Apply
+                                  (11,
+                                    Variable
+                                      (11,
+                                        f/0),
+                                    Variable
+                                      (11,
+                                        a/0)),
+                                Variable
+                                  (11,
+                                    x/0))),
                         Variable
                           (11,
-                            x/0))),
-                Variable (11, xs/0)))
+                            xs/0)))
+                ]))
         ]))
+
+((),
+  Value
+    (non_rec, fold, [ A; B ],
+      [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
+    Let ? (non_rec, counter, [ ], [ ], None) =
+      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
+    Apply
+      (?,
+        Apply
+          (?,
+            Apply
+              (?, Apply (?, Variable (?, fold_rec/0), Variable (?, counter/0)),
+                Variable (?, f/0)), Variable (?, a/0)), Variable (?, l/0)))
 
 ((),
   Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =

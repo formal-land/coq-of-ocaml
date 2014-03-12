@@ -305,91 +305,89 @@ let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
     Bind (a, e1, y, e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, substitute x e' e)
 
-(*let rec monadise_let_rec (env_typs : unit Envi.t) (env_vars : unit Envi.t)
-  (e : Loc.t t) : Loc.t t =
+let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
   match e with
   | Constant _ | Variable _ -> e
   | Tuple (a, es) ->
-    Tuple (a, List.map (monadise_let_rec env_typs env_vars) es)
+    Tuple (a, List.map (monadise_let_rec env) es)
   | Constructor (a, x, es) ->
-    Constructor (a, x, List.map (monadise_let_rec env_typs env_vars) es)
+    Constructor (a, x, List.map (monadise_let_rec env) es)
   | Apply (a, e1, e2) ->
-    Apply (a, monadise_let_rec env_typs env_vars e1,
-      monadise_let_rec env_typs env_vars e2)
+    Apply (a, monadise_let_rec env e1, monadise_let_rec env e2)
   | Function (a, x, e) ->
-    let env_vars = Envi.add_name x () env_vars in
-    Function (a, x, monadise_let_rec env_typs env_vars e)
+    let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
+    Function (a, x, monadise_let_rec env e)
   | Let (a, header, e1, e2) ->
-    let (env_vars, defs) =
-      monadise_let_rec_definition env_typs env_vars header e1 in
-    let e2 = monadise_let_rec env_typs env_vars e2 in
+    let (env, defs) = monadise_let_rec_definition env header e1 in
+    let e2 = monadise_let_rec env e2 in
     List.fold_right (fun (header, e) e2 -> Let (a, header, e, e2)) defs e2
   | Match (a, e, cases) ->
-    Match (a, monadise_let_rec env_typs env_vars e,
+    Match (a, monadise_let_rec env e,
       cases |> List.map (fun (p, e) ->
-        let env_vars = Pattern.add_to_env p env_vars in
-        (p, monadise_let_rec env_typs env_vars e)))
+        let env = Pattern.add_to_env p env in
+        (p, monadise_let_rec env e)))
   | Record (a, fields) ->
     Record (a, fields |> List.map (fun (x, e) ->
-      (x, monadise_let_rec env_typs env_vars e)))
-  | Field (a, e, x) -> Field (a, monadise_let_rec env_typs env_vars e, x)
+      (x, monadise_let_rec env e)))
+  | Field (a, e, x) -> Field (a, monadise_let_rec env e, x)
   | IfThenElse (a, e1, e2, e3) ->
-    IfThenElse (a, monadise_let_rec env_typs env_vars e1,
-      monadise_let_rec env_typs env_vars e2,
-      monadise_let_rec env_typs env_vars e3)
+    IfThenElse (a, monadise_let_rec env e1,
+      monadise_let_rec env e2,
+      monadise_let_rec env e3)
   | Sequence (a, e1, e2) ->
-    Sequence (a, monadise_let_rec env_typs env_vars e1,
-      monadise_let_rec env_typs env_vars e2)
-  | Return (a, e) -> monadise_let_rec env_typs env_vars e
+    Sequence (a, monadise_let_rec env e1,
+      monadise_let_rec env e2)
+  | Return (a, e) -> monadise_let_rec env e
   | Bind (a, e1, x, e2) ->
-    let e1 = monadise_let_rec env_typs env_vars e1 in
-    let env_vars = match x with
-      | None -> env_vars
-      | Some x -> Envi.add_name x () env_vars in
-    Bind (a, e1, x, monadise_let_rec env_typs env_vars e2)
+    let e1 = monadise_let_rec env e1 in
+    let env = match x with
+      | None -> env
+      | Some x ->
+        { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
+    Bind (a, e1, x, monadise_let_rec env e2)
   | Lift (a, d1, d2, e) ->
-    Lift (a, d1, d2, monadise_let_rec env_typs env_vars e)
+    Lift (a, d1, d2, monadise_let_rec env e)
 
-and monadise_let_rec_definition (env_typs : unit Envi.t)
-  (env_vars : unit Envi.t) (header : Header.t) (e : Loc.t t)
-  : unit Envi.t * (Header.t * Loc.t t) list =
+and monadise_let_rec_definition (env : unit FullEnvi.t)
+  (header : Header.t) (e : Loc.t t)
+  : unit FullEnvi.t * (Header.t * Loc.t t) list =
   let (is_rec, x, typ_vars, args, typ) = header in
   if Recursivity.to_bool is_rec then
-    let var (x : Name.t) (env_vars : unit Envi.t) : Loc.t t =
+    let var (x : Name.t) env : Loc.t t =
       Variable (Loc.unknown,
-        Envi.bound_name (PathName.of_name [] x) env_vars) in
-    let (x_rec, _) = Envi.fresh (x ^ "_rec") () env_vars in
+        Envi.bound_name (PathName.of_name [] x) env.FullEnvi.vars) in
+    let (x_rec, _) = Envi.fresh (x ^ "_rec") () env.FullEnvi.vars in
     let args_x_rec =
       ("counter",
-        Type.Apply (Envi.bound_name (PathName.of_name [] "nat") env_typs, []))
+        Type.Apply (Envi.bound_name (PathName.of_name [] "nat") env.FullEnvi.typs, []))
           :: args in
     let header_x_rec = (is_rec, x_rec, typ_vars, args_x_rec, typ) in
-    let env_vars_in_x_rec = Header.env_in_header header_x_rec env_vars in
-    let e_x_rec = monadise_let_rec env_typs env_vars_in_x_rec e in
-    let e_x_rec = Match (Loc.unknown, var "counter" env_vars_in_x_rec, [
-      (Pattern.Constant (Constant.Nat 0),
-        Apply (Loc.unknown, var "not_terminated" env_vars_in_x_rec, var "tt" env_vars_in_x_rec));
-      (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env_vars_in_x_rec,
+    let env_in_x_rec = Header.env_in_header header_x_rec env in
+    let e_x_rec = monadise_let_rec env_in_x_rec e in
+    let e_x_rec = Match (Loc.unknown, var "counter" env_in_x_rec, [
+      (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O") env_in_x_rec.FullEnvi.constructors, []),
+        Apply (Loc.unknown, var "not_terminated" env_in_x_rec, Tuple (Loc.unknown, [])));
+      (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env_in_x_rec.FullEnvi.constructors,
         [Pattern.Variable "counter"]),
         substitute x
-          (Apply (Loc.unknown, var x_rec env_vars_in_x_rec, var "counter" env_vars_in_x_rec)) e_x_rec)]) in
-    let env_vars = Envi.add_name x_rec () env_vars in
+          (Apply (Loc.unknown, var x_rec env_in_x_rec, var "counter" env_in_x_rec)) e_x_rec)]) in
+    let env = { env with FullEnvi.vars = Envi.add_name x_rec () env.FullEnvi.vars } in
     let header_x = (Recursivity.New false, x, typ_vars, args, typ) in
-    let env_vars_in_x = Header.env_in_header header_x env_vars in
+    let env_in_x = Header.env_in_header header_x env in
     let e_x =
       Let (Loc.unknown, Header.variable "counter",
-        Apply (Loc.unknown, var "read_counter" env_vars_in_x, var "tt" env_vars_in_x),
-      let env_vars_in_x = Envi.add_name "counter" () env_vars_in_x in
-      List.fold_left (fun e (x, _) -> Apply (Loc.unknown, e, var x env_vars_in_x))
-        (Apply (Loc.unknown, var x_rec env_vars_in_x, var "counter" env_vars_in_x)) args) in
-    let env_vars = Envi.add_name x () env_vars in
-    (env_vars, [ (header_x_rec, e_x_rec); (header_x, e_x) ])
+        Apply (Loc.unknown, var "read_counter" env_in_x, Tuple (Loc.unknown, [])),
+      let env_in_x = { env with FullEnvi.vars = Envi.add_name "counter" () env_in_x.FullEnvi.vars } in
+      List.fold_left (fun e (x, _) -> Apply (Loc.unknown, e, var x env_in_x))
+        (Apply (Loc.unknown, var x_rec env_in_x, var "counter" env_in_x)) args) in
+    let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
+    (env, [ (header_x_rec, e_x_rec); (header_x, e_x) ])
   else
-    let e = monadise_let_rec env_typs (Header.env_in_header header env_vars) e in
-    let env_vars = Envi.add_name x () env_vars in
-    (env_vars, [(header, e)])
+    let e = monadise_let_rec (Header.env_in_header header env) e in
+    let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
+    (env, [(header, e)])
 
-let rec effects (env_effects : Effect.Type.t Envi.t) (e : 'a t)
+(*let rec effects (env_effects : Effect.Type.t Envi.t) (e : 'a t)
   : ('a * Effect.t) t =
   let compound (es : 'a t list) : ('a * Effect.t) t list * Effect.t =
     let es = List.map (effects env_effects) es in

@@ -2,12 +2,13 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
+  let env = PervasivesModule.env in
   try
     let document =
       match mode with
       | "exp" ->
-        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
-        (* let defs = Structure.monadise_let_rec env_typs env_vars defs in *)
+        let (_, defs) = Structure.of_structure env structure in
+        let (_, defs) = Structure.monadise_let_rec env defs in
         Structure.pp OCaml.unit Loc.pp defs
       (*| "effects" ->
         let (_, defs) = Structure.of_structure env_typs structure in
@@ -39,7 +40,8 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
     to_stdout 80 2 document;
     print_newline ();
     flush stdout
-  with Envi.NotFound x -> failwith (to_string 80 2 @@ (PathName.pp x ^^ !^ "not found."))
+  with Envi.NotFound x ->
+    failwith (to_string 80 2 @@ (PathName.pp x ^^ !^ "not found."))
 
 (** Parse a .cmt file to a typed AST. *)
 let parse_cmt (file_name : string) : Typedtree.structure =

@@ -3,64 +3,103 @@ Inductive tree:
 
 ((),
   Value
-    (rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ], Some Type (bool/1))
-    =
+    (rec, find_rec, [ ],
+      [ (counter, Type (nat/1)); (x, Type (Z/1)); (t, Type (tree/0)) ],
+      Some Type (bool/1)) =
     Match
-      (8, Variable (8, t/0),
+      (?, Variable (?, counter/0),
         [
-          (Constructor (Leaf/0), Constructor (9, false/1));
-          (Constructor (Node/0, t1, x', t2),
-            IfThenElse
-              (11,
-                Apply
-                  (?,
-                    Apply
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
+            Match
+              (8, Variable (8, t/0),
+                [
+                  (Constructor (Leaf/0),
+                    Constructor
+                      (9,
+                        false/1));
+                  (Constructor (Node/0, t1, x', t2),
+                    IfThenElse
                       (11,
-                        Variable
-                          (11,
-                            Z.ltb/1),
-                        Variable
-                          (11,
-                            x/0)),
-                    Variable (11, x'/0)),
-                Apply
-                  (?,
-                    Apply
-                      (12,
-                        Variable
-                          (12,
-                            find/0),
-                        Variable
-                          (12,
-                            x/0)),
-                    Variable (12, t1/0)),
-                IfThenElse
-                  (13,
-                    Apply
-                      (?,
                         Apply
-                          (13,
+                          (?,
+                            Apply
+                              (11,
+                                Variable
+                                  (11,
+                                    Z.ltb/1),
+                                Variable
+                                  (11,
+                                    x/0)),
                             Variable
-                              (13,
-                                Z.ltb/1),
-                            Variable
-                              (13,
+                              (11,
                                 x'/0)),
-                        Variable
-                          (13,
-                            x/0)),
-                    Apply
-                      (?,
                         Apply
-                          (14,
+                          (?,
+                            Apply
+                              (12,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        find_rec/0),
+                                    Variable
+                                      (?,
+                                        counter/0)),
+                                Variable
+                                  (12,
+                                    x/0)),
                             Variable
-                              (14,
-                                find/0),
-                            Variable
-                              (14,
-                                x/0)),
-                        Variable
-                          (14,
-                            t2/0)),
-                    Constructor (16, true/1))))
+                              (12,
+                                t1/0)),
+                        IfThenElse
+                          (13,
+                            Apply
+                              (?,
+                                Apply
+                                  (13,
+                                    Variable
+                                      (13,
+                                        Z.ltb/1),
+                                    Variable
+                                      (13,
+                                        x'/0)),
+                                Variable
+                                  (13,
+                                    x/0)),
+                            Apply
+                              (?,
+                                Apply
+                                  (14,
+                                    Apply
+                                      (?,
+                                        Variable
+                                          (?,
+                                            find_rec/0),
+                                        Variable
+                                          (?,
+                                            counter/0)),
+                                    Variable
+                                      (14,
+                                        x/0)),
+                                Variable
+                                  (14,
+                                    t2/0)),
+                            Constructor
+                              (16,
+                                true/1))))
+                ]))
         ]))
+
+((),
+  Value
+    (non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
+      Some Type (bool/1)) =
+    Let ? (non_rec, counter, [ ], [ ], None) =
+      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
+    Apply
+      (?,
+        Apply
+          (?, Apply (?, Variable (?, find_rec/0), Variable (?, counter/0)),
+            Variable (?, x/0)), Variable (?, t/0)))
