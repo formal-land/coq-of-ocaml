@@ -13,6 +13,10 @@ module Value = struct
     nest (!^ "Value" ^^ Exp.Header.pp value.header ^^ !^ "=" ^^ newline ^^
       indent (Exp.pp pp_a value.body))
   
+  let update_env (value : 'a t) (v : 'b) (env : 'b FullEnvi.t) : 'b FullEnvi.t =
+    let (_, x, _, _, _) = value.header in
+    { env with FullEnvi.vars = Envi.add_name x v env.FullEnvi.vars }
+
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : 'a t) : SmartPrint.t =
     let (is_rec, x, typ_vars, args, typ) = value.header in
@@ -48,6 +52,14 @@ module Inductive = struct
       OCaml.list Name.pp ind.typ_vars;
       OCaml.list (fun (x, typs) -> OCaml.tuple [Name.pp x; OCaml.list Type.pp typs]) ind.constructors]))
 
+  let update_env (ind : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+    { env with
+      FullEnvi.typs = Envi.add_name ind.name () env.FullEnvi.typs;
+      constructors =
+        List.fold_left (fun constructors (x, _) ->
+          Envi.add_name x () constructors)
+          env.FullEnvi.constructors ind.constructors }
+
   (** Pretty-print a sum type definition to Coq. *)
   let to_coq (ind : t) : SmartPrint.t =
     nest (
@@ -80,6 +92,14 @@ module Record = struct
     nest (!^ "Record" ^^ Name.pp r.name ^-^ !^ ":" ^^ newline ^^ indent (OCaml.tuple [
       OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) r.fields]))
 
+  let update_env (r : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+    { env with
+      FullEnvi.typs = Envi.add_name r.name () env.FullEnvi.typs;
+      fields =
+        List.fold_left (fun fields (x, _) ->
+          Envi.add_name x () fields)
+          env.FullEnvi.fields r.fields }
+
   (** Pretty-print a record definition to Coq. *)
   let to_coq (r : t) : SmartPrint.t =
     nest (
@@ -100,6 +120,9 @@ module Synonym = struct
     nest (!^ "Synonym" ^^ OCaml.tuple [
       Name.pp s.name; OCaml.list Name.pp s.typ_vars; Type.pp s.value])
 
+  let update_env (s : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+    { env with FullEnvi.typs = Envi.add_name s.name () env.FullEnvi.typs }
+
   let to_coq (s : t) : SmartPrint.t =
     nest (
       !^ "Definition" ^^ Name.to_coq s.name ^^
@@ -115,13 +138,21 @@ module Exception = struct
   let pp (exn : t) : SmartPrint.t =
     nest (!^ "Exception" ^^ OCaml.tuple [Name.pp exn.name; Type.pp exn.typ])
 
-  (*let raise_effect_typ (exn : t) : Effect.Type.t =
-    Effect.Type.Arrow (
-      Effect.Descriptor.singleton (PathName.of_name 0 [] exn.name),
-      Effect.Type.Pure)*)
+  let update_env (exn : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
+    { env with
+      FullEnvi.vars = Envi.add_name ("raise_" ^ exn.name) () env.FullEnvi.vars;
+      descriptors = Envi.add_name exn.name () env.FullEnvi.descriptors }
 
-  let raise_effect_typ (exn : t) : Effect.Type.t =
-    failwith "TODO"
+  let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t)
+    : Effect.Type.t FullEnvi.t =
+    let env = { env with
+      FullEnvi.descriptors = Envi.add_name exn.name () env.FullEnvi.descriptors } in
+    let effect_typ =
+      Effect.Type.Arrow (
+        Effect.Descriptor.singleton (Envi.bound_name (PathName.of_name [] exn.name) env.FullEnvi.descriptors),
+        Effect.Type.Pure) in
+    { env with
+      FullEnvi.vars = Envi.add_name ("raise_" ^ exn.name) effect_typ env.FullEnvi.vars }
 
   let to_coq (exn : t) : SmartPrint.t =
     !^ "Definition" ^^ Name.to_coq exn.name ^^ !^ ":=" ^^
@@ -222,46 +253,41 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       let name = Name.of_ident name in
       let typ_vars = List.map Type.of_type_expr_variable typ.type_params in
-      let env' = { env with FullEnvi.typs = Envi.add_name name () env.FullEnvi.typs } in
       (match typ.type_kind with
       | Type_variant cases ->
-        let constructors = List.map (fun {cd_id = constr; cd_args = typs} ->
-          (Name.of_ident constr, typs |> List.map (fun typ ->
-            Type.of_type_expr env'.FullEnvi.typs typ)))
-          cases in
-        let env' =
-          List.fold_left (fun env' (x, _) ->
-            { env' with FullEnvi.constructors = Envi.add_name x () env'.FullEnvi.constructors })
-            env' constructors in
-        (env', Inductive {
+        let constructors =
+          let env_typs = Envi.add_name name () env.FullEnvi.typs in
+          cases |> List.map (fun {cd_id = constr; cd_args = typs} ->
+            (Name.of_ident constr, typs |> List.map (fun typ ->
+              Type.of_type_expr env_typs typ))) in
+        let ind = {
           Inductive.name = name;
           typ_vars = typ_vars;
-          constructors = constructors })
+          constructors = constructors } in
+        (Inductive.update_env ind env, Inductive ind)
       | Type_record (fields, _) ->
         let fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
           (Name.of_ident x, Type.of_type_expr env.FullEnvi.typs typ)) in
-        let env' =
-          List.fold_left (fun env' (x, _) ->
-            { env' with FullEnvi.fields = Envi.add_name x () env'.FullEnvi.fields })
-            env' fields in
-        (env', Record {
+        let r = {
           Record.name = name;
-          fields = fields })
+          fields = fields } in
+        (Record.update_env r env, Record r)
       | Type_abstract ->
         (match typ.type_manifest with
         | Some typ ->
-          (env', Synonym {
+          let syn = {
             Synonym.name = name;
             typ_vars = typ_vars;
-            value = Type.of_type_expr env.FullEnvi.typs typ })
+            value = Type.of_type_expr env.FullEnvi.typs typ } in
+          (Synonym.update_env syn env, Synonym syn)
         | None -> failwith "Type definition not handled."))
     | Tstr_exception { cd_id = name; cd_args = args } ->
       let name = Name.of_ident name in
       let typ =
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
           Type.of_type_expr env.FullEnvi.typs typ)) in
-      let env = { env with FullEnvi.vars = Envi.add_name ("raise_" ^ name) () env.FullEnvi.vars } in
-      (env, Exception { Exception.name = name; typ = typ})
+      let exn = { Exception.name = name; typ = typ} in
+      (Exception.update_env exn env, Exception exn)
     (* | Tstr_open (_, path, _, _) -> (failwith "TODO", Open (PathName.of_path 0 path)) *)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
@@ -292,7 +318,10 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : (unit, Loc.t) t list)
       let (env, defs) = monadise_let_rec env defs in
       let env = FullEnvi.close_module env name in
       (env, [Module (name, defs)])
-    | Inductive _ | Record _ | Synonym _ | Exception _ -> (env, [def]) in
+    | Inductive ind -> (Inductive.update_env ind env, [def])
+    | Record record -> (Record.update_env record env, [def])
+    | Synonym synonym -> (Synonym.update_env synonym env, [def])
+    | Exception exn -> (Exception.update_env exn env, [def]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))
@@ -309,22 +338,17 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
       body = e }) ->
       let (e, x_typ) =
         Exp.effects_of_let env is_rec x args e in
-      let env = { env with FullEnvi.vars = Envi.add_name x x_typ env.FullEnvi.vars } in
-      (env,
-        Value (x_typ, { Value.header = header; body = e }))
+      let value = { Value.header = header; body = e } in
+      (Value.update_env value x_typ env, Value (x_typ, value))
     | Module (name, defs) ->
-      let (env, defs) =
-        effects (FullEnvi.open_module env) defs in
-      (FullEnvi.close_module env name,
-        Module (name, defs))
-    | Exception exn ->
-      let env = { env with
-        FullEnvi.vars = Envi.add_name ("raise_" ^ exn.Exception.name)
-          (Exception.raise_effect_typ exn) env.FullEnvi.vars } in
-      (env, Exception exn)
-    | Inductive ind -> (env, Inductive ind)
-    | Record record -> (env, Record record)
-    | Synonym synonym -> (env, Synonym synonym) in
+      let env = FullEnvi.open_module env in
+      let (env, defs) = effects env defs in
+      let env = FullEnvi.close_module env name in
+      (env, Module (name, defs))
+    | Exception exn -> (Exception.update_env_with_effects exn env, Exception exn)
+    | Inductive ind -> (Inductive.update_env ind env, Inductive ind)
+    | Record record -> (Record.update_env record env, Record record)
+    | Synonym synonym -> (Synonym.update_env synonym env, Synonym synonym) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env, def) =

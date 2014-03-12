@@ -1,17 +1,21 @@
 (** Exceptions. *)
 
-exception TailLess
+exception Outside
 
-exception Wtf of int * string
-
-let f x = raise TailLess
+let f x = raise Outside
 
 module G = struct
-  let g x = raise (Wtf (x, "no"))
+  exception Inside of int * string
+
+  let g b =
+    if b then
+      raise (Inside (12, "no"))
+    else
+      raise Outside
 end
 
 let rec h l =
   match l with
-  | [] -> print_string "no tail"; raise TailLess
-  | [x] -> x
+  | [] -> print_string "no tail"; G.g false
+  | [x] -> raise (G.Inside (0, "gg"))
   | _ :: xs -> h xs
