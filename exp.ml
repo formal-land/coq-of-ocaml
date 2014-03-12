@@ -387,10 +387,10 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     (env, [(header, e)])
 
-(*let rec effects (env_effects : Effect.Type.t Envi.t) (e : 'a t)
+let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
   : ('a * Effect.t) t =
   let compound (es : 'a t list) : ('a * Effect.t) t list * Effect.t =
-    let es = List.map (effects env_effects) es in
+    let es = List.map (effects env) es in
     let effects = List.map (fun e -> snd (annotation e)) es in
     let descriptor = Effect.Descriptor.union (
       List.map (fun effect -> effect.Effect.descriptor) effects) in
@@ -410,7 +410,7 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     (try
       let effect =
         { Effect.descriptor = Effect.Descriptor.pure;
-          typ = Envi.find x env_effects } in
+          typ = Envi.find x env.FullEnvi.vars } in
       Variable ((a, effect), x)
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (BoundName.pp x ^^ !^ "not found.")))
@@ -421,9 +421,9 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     let (es, effect) = compound es in
     Constructor ((a, effect), x, es)
   | Apply (a, e_f, e_x) ->
-    let e_f = effects env_effects e_f in
+    let e_f = effects env e_f in
     let effect_f = snd (annotation e_f) in
-    let e_x = effects env_effects e_x in
+    let e_x = effects env e_x in
     let effect_x = snd (annotation e_x) in
     if Effect.Type.is_pure effect_x.Effect.typ then
       let descriptor = Effect.Descriptor.union [
@@ -435,8 +435,8 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     else
       failwith "Function arguments cannot have functional effects."
   | Function (a, x, e) ->
-    let env_effects = Envi.add_name x Effect.Type.Pure env_effects in
-    let e = effects env_effects e in
+    let env = { env with FullEnvi.vars = Envi.add_name x Effect.Type.Pure env.FullEnvi.vars } in
+    let e = effects env e in
     let effect_e = snd (annotation e) in
     let effect = {
       Effect.descriptor = Effect.Descriptor.pure;
@@ -444,9 +444,9 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
         effect_e.Effect.descriptor, effect_e.Effect.typ) } in
     Function ((a, effect), x, e)
   | Let (a, ((is_rec, x, _, args, _) as header), e1, e2) ->
-    let (e1, x_typ) = effects_of_let env_effects is_rec x args e1 in
+    let (e1, x_typ) = effects_of_let env is_rec x args e1 in
     let effect1 = snd (annotation e1) in
-    let env_in_e2 = Envi.add_name x x_typ env_effects in
+    let env_in_e2 = { env with FullEnvi.vars = Envi.add_name x x_typ env.FullEnvi.vars } in
     let e2 = effects env_in_e2 e2 in
     let effect2 = snd (annotation e2) in
     let descriptor = Effect.Descriptor.union
@@ -456,15 +456,15 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
       typ = effect2.Effect.typ } in
     Let ((a, effect), header, e1, e2)
   | Match (a, e, cases) ->
-    let e = effects env_effects e in
+    let e = effects env e in
     let effect_e = snd (annotation e) in
     if Effect.Type.is_pure effect_e.Effect.typ then
       let cases = cases |> List.map (fun (p, e) ->
         let pattern_vars = Pattern.free_variables p in
-        let env_effects = Name.Set.fold (fun x env_effects ->
-          Envi.add_name x Effect.Type.Pure env_effects)
-          pattern_vars env_effects in
-        (p, effects env_effects e)) in
+        let env = Name.Set.fold (fun x env ->
+          { env with FullEnvi.vars = Envi.add_name x Effect.Type.Pure env.FullEnvi.vars })
+          pattern_vars env in
+        (p, effects env e)) in
       let effect = Effect.union (cases |> List.map (fun (_, e) ->
         snd (annotation e))) in
       let effect = {
@@ -478,18 +478,18 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     let (es, effect) = compound (List.map snd fields) in
     Record ((a, effect), List.map2 (fun (x, _) e -> (x, e)) fields es)
   | Field (a, e, x) ->
-    let e = effects env_effects e in
+    let e = effects env e in
     let effect = snd (annotation e) in
     if Effect.Type.is_pure effect.Effect.typ then
       Field ((a, effect), e, x)
     else
       failwith "Cannot take a field of a value with functional effects."
   | IfThenElse (a, e1, e2, e3) ->
-    let e1 = effects env_effects e1 in
+    let e1 = effects env e1 in
     let effect_e1 = snd (annotation e1) in
     if Effect.Type.is_pure effect_e1.Effect.typ then
-      let e2 = effects env_effects e2 in
-      let e3 = effects env_effects e3 in
+      let e2 = effects env e2 in
+      let e3 = effects env e3 in
       let effect = Effect.union ([e2; e3] |> List.map (fun e ->
         snd (annotation e))) in
       let effect = {
@@ -500,9 +500,9 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     else
       failwith "Cannot do an if on a value with functional effects."
   | Sequence (a, e1, e2) ->
-    let e1 = effects env_effects e1 in
+    let e1 = effects env e1 in
     let effect_e1 = snd (annotation e1) in
-    let e2 = effects env_effects e2 in
+    let e2 = effects env e2 in
     let effect_e2 = snd (annotation e2) in
     let effect = {
       Effect.descriptor = Effect.Descriptor.union
@@ -512,17 +512,17 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
   | Return _ | Bind _ | Lift _ ->
     failwith "Cannot compute effects on an explicit return, bind or lift."
 
-and effects_of_let (env_effects : Effect.Type.t Envi.t) (is_rec : Recursivity.t)
+and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
   (x : Name.t) (args : (Name.t * Type.t) list) (e : 'a t)
   : ('a * Effect.t) t * Effect.Type.t =
   let args_names = List.map fst args in
   let env_in_e =
-    List.fold_left (fun env_effects x ->
-      Envi.add_name x Effect.Type.Pure env_effects)
-      env_effects args_names in
+    List.fold_left (fun env x ->
+      { env with FullEnvi.vars = Envi.add_name x Effect.Type.Pure env.FullEnvi.vars })
+      env args_names in
   if Recursivity.to_bool is_rec then
     let rec fix_effect x_typ =
-      let env_in_e = Envi.add_name x x_typ env_in_e in
+      let env_in_e = { env with FullEnvi.vars = Envi.add_name x x_typ env_in_e.FullEnvi.vars } in
       let e = effects env_in_e e in
       let effect = snd (annotation e) in
       let x_typ' = Effect.function_typ args_names effect in
@@ -537,7 +537,7 @@ and effects_of_let (env_effects : Effect.Type.t Envi.t) (is_rec : Recursivity.t)
     let x_typ = Effect.function_typ args_names effect in
     (e, x_typ)
 
-let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t)
+(*let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t)
   : Loc.t t =
   let descriptor e = (snd (annotation e)).Effect.descriptor in
   let lift d1 d2 e =

@@ -1,85 +1,79 @@
-Inductive 't1':
-  ([ ],
-    [
-      ('C1', [ Type ('Z') ]);
-      ('C2', [ Type ('bool'); Type ('Z') ]);
-      ('C3', [ ])
-    ])
+Inductive t1:
+  ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
 
 (.,
-  Value (non_rec, 'n', [ ], [ ], Some Type ('t1')) =
+  Value (non_rec, n, [ ], [ ], Some Type (t1/0)) =
     Constructor
-      ((8, Effect ([ ], .)), 'C2', Constructor ((8, Effect ([ ], .)), 'false'),
+      ((8, Effect ([ ], .)), C2/0, Constructor ((8, Effect ([ ], .)), false/1),
         Constant ((8, Effect ([ ], .)), Int(3))))
 
 (.,
-  Value (non_rec, 'm', [ ], [ ], Some Type ('bool')) =
+  Value (non_rec, m, [ ], [ ], Some Type (bool/1)) =
     Match
-      ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), 'n'),
+      ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), n/0),
         [
-          (Constructor ('C2', 'b', Any), Variable ((11, Effect ([ ], .)), 'b'));
-          (Any, Constructor ((12, Effect ([ ], .)), 'true'))
+          (Constructor (C2/0, b, Any), Variable ((11, Effect ([ ], .)), b/0));
+          (Any, Constructor ((12, Effect ([ ], .)), true/1))
         ]))
 
-Inductive 't2':
-  ([ 'a' ], [ ('D1', [ ]); ('D2', [ 'a'; Type ('t2', 'a') ]) ])
+Inductive t2:
+  ([ a ], [ (D1, [ ]); (D2, [ a; Type (t2/0, a) ]) ])
 
-(. -> . -[ 'NonTermination' ]-> .,
+(. -> . -[ NonTermination/1 ]-> .,
   Value
-    (rec, 'of_list_rec', [ 'A' ],
-      [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
-      Some Type ('t2', 'A')) =
+    (rec, of_list_rec, [ A ],
+      [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some Type (t2/0, A)) =
     Match
-      ((?, Effect ([ 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((19, Effect ([ 'NonTermination' ], .)),
-                Variable ((19, Effect ([ ], .)), 'l'),
+              ((19, Effect ([ NonTermination/1 ], .)),
+                Variable ((19, Effect ([ ], .)), l/0),
                 [
-                  (Constructor ('[]'),
+                  (Constructor ([]/1),
                     Constructor
                       ((20,
                         Effect
                           ([
                           ],
                             .)),
-                        'D1'));
-                  (Constructor ('cons', 'x', 'xs'),
+                        D1/0));
+                  (Constructor (cons/1, x, xs),
                     Constructor
                       ((21,
                         Effect
                           ([
-                            'NonTermination'
+                            NonTermination/1
                           ],
                             .)),
-                        'D2',
+                        D2/0,
                         Variable
                           ((21,
                             Effect
                               ([
                               ],
                                 .)),
-                            'x'),
+                            x/0),
                         Apply
                           ((21,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -89,7 +83,7 @@ Inductive 't2':
                                   ],
                                     .
                                       -[
-                                        'NonTermination'
+                                        NonTermination/1
                                       ]->
                                       .)),
                                 Variable
@@ -101,74 +95,73 @@ Inductive 't2':
                                           ->
                                           .
                                             -[
-                                              'NonTermination'
+                                              NonTermination/1
                                             ]->
                                             .)),
-                                    'of_list_rec'),
+                                    of_list_rec/0),
                                 Variable
                                   ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'counter')),
+                                    counter/0)),
                             Variable
                               ((21,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'xs'))))
+                                xs/0))))
                 ]))
         ]))
 
-(. -[ 'Counter'; 'NonTermination' ]-> .,
+(. -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ],
-      Some Type ('t2', 'A')) =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+    (non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)) =
+    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
-                'of_list_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
-        Variable ((?, Effect ([ ], .)), 'l')))
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+                of_list_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+        Variable ((?, Effect ([ ], .)), l/0)))
 
-(. -> . -[ 'NonTermination' ]-> .,
+(. -> . -[ NonTermination/1 ]-> .,
   Value
-    (rec, 'sum_rec', [ ],
-      [ ('counter', Type ('nat')); ('l', Type ('t2', Type ('Z'))) ],
-      Some Type ('Z')) =
+    (rec, sum_rec, [ ],
+      [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1))
+    =
     Match
-      ((?, Effect ([ 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((24, Effect ([ 'NonTermination' ], .)),
-                Variable ((24, Effect ([ ], .)), 'l'),
+              ((24, Effect ([ NonTermination/1 ], .)),
+                Variable ((24, Effect ([ ], .)), l/0),
                 [
-                  (Constructor ('D1'),
+                  (Constructor (D1/0),
                     Constant
                       ((25,
                         Effect
@@ -176,12 +169,12 @@ Inductive 't2':
                           ],
                             .)),
                         Int(0)));
-                  (Constructor ('D2', 'x', 'xs'),
+                  (Constructor (D2/0, x, xs),
                     Apply
                       ((?,
                         Effect
                           ([
-                            'NonTermination'
+                            NonTermination/1
                           ],
                             .)),
                         Apply
@@ -196,19 +189,19 @@ Inductive 't2':
                                   ([
                                   ],
                                     .)),
-                                'Z.add'),
+                                Z.add/1),
                             Variable
                               ((26,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'x')),
+                                x/0)),
                         Apply
                           ((26,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -218,7 +211,7 @@ Inductive 't2':
                                   ],
                                     .
                                       -[
-                                        'NonTermination'
+                                        NonTermination/1
                                       ]->
                                       .)),
                                 Variable
@@ -230,63 +223,62 @@ Inductive 't2':
                                           ->
                                           .
                                             -[
-                                              'NonTermination'
+                                              NonTermination/1
                                             ]->
                                             .)),
-                                    'sum_rec'),
+                                    sum_rec/0),
                                 Variable
                                   ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'counter')),
+                                    counter/0)),
                             Variable
                               ((26,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'xs'))))
+                                xs/0))))
                 ]))
         ]))
 
-(. -[ 'Counter'; 'NonTermination' ]-> .,
-  Value
-    (non_rec, 'sum', [ ], [ ('l', Type ('t2', Type ('Z'))) ], Some Type ('Z')) =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+(. -[ Counter/1; NonTermination/1 ]-> .,
+  Value (non_rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)) =
+    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)), 'sum_rec'),
-            Variable ((?, Effect ([ ], .)), 'counter')),
-        Variable ((?, Effect ([ ], .)), 'l')))
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)), sum_rec/0),
+            Variable ((?, Effect ([ ], .)), counter/0)),
+        Variable ((?, Effect ([ ], .)), l/0)))
 
 (.,
-  Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
+  Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
     Apply
-      ((28, Effect ([ 'Counter'; 'NonTermination' ], .)),
+      ((28, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable
-          ((28, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)), 'sum'),
+          ((28, Effect ([ ], . -[ Counter/1; NonTermination/1 ]-> .)), sum/0),
         Apply
-          ((28, Effect ([ 'Counter'; 'NonTermination' ], .)),
+          ((28, Effect ([ Counter/1; NonTermination/1 ], .)),
             Variable
-              ((28, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
-                'of_list'),
+              ((28, Effect ([ ], . -[ Counter/1; NonTermination/1 ]-> .)),
+                of_list/0),
             Constructor
-              ((28, Effect ([ ], .)), 'cons',
+              ((28, Effect ([ ], .)), cons/1,
                 Constant ((28, Effect ([ ], .)), Int(5)),
                 Constructor
-                  ((28, Effect ([ ], .)), 'cons',
+                  ((28, Effect ([ ], .)), cons/1,
                     Constant ((28, Effect ([ ], .)), Int(7)),
                     Constructor
-                      ((28, Effect ([ ], .)), 'cons',
+                      ((28, Effect ([ ], .)), cons/1,
                         Constant ((28, Effect ([ ], .)), Int(3)),
-                        Constructor ((28, Effect ([ ], .)), '[]')))))))
+                        Constructor ((28, Effect ([ ], .)), []/1)))))))

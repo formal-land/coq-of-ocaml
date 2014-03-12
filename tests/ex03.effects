@@ -1,32 +1,30 @@
 (.,
-  Value (non_rec, 'n1', [ ], [ ], Some Type ('Z')) =
-    Let (4, Effect ([ ], .)) (non_rec, 'm', [ ], [ ], None) =
+  Value (non_rec, n1, [ ], [ ], Some Type (Z/1)) =
+    Let (4, Effect ([ ], .)) (non_rec, m, [ ], [ ], None) =
       Constant ((4, Effect ([ ], .)), Int(12)) in
-    Let (5, Effect ([ ], .)) (non_rec, 'n1', [ ], [ ], None) =
-      Variable ((5, Effect ([ ], .)), 'm') in
-    Variable ((6, Effect ([ ], .)), 'n1'))
+    Let (5, Effect ([ ], .)) (non_rec, n1, [ ], [ ], None) =
+      Variable ((5, Effect ([ ], .)), m/0) in
+    Variable ((6, Effect ([ ], .)), n1/0))
 
 (.,
-  Value (non_rec, 'n2', [ ], [ ], Some Type ('Z')) =
+  Value (non_rec, n2, [ ], [ ], Some Type (Z/1)) =
     Let (9, Effect ([ ], .))
-      (non_rec, 'p1', [ 'A'; 'B'; 'C' ],
-        [ ('c', (('B' -> ('C' -> 'B')) -> 'A')) ], Some 'A') =
+      (non_rec, p1, [ A; B; C ], [ (c, ((B -> (C -> B)) -> A)) ], Some A) =
       Apply
-        ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), 'c'),
+        ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), c/0),
           Function
-            ((9, Effect ([ ], . -> . -> .)), 'x',
+            ((9, Effect ([ ], . -> . -> .)), x,
               Function
-                ((9, Effect ([ ], . -> .)), 'y',
-                  Variable ((9, Effect ([ ], .)), 'x')))) in
+                ((9, Effect ([ ], . -> .)), y,
+                  Variable ((9, Effect ([ ], .)), x/0)))) in
     Let (10, Effect ([ ], .))
-      (non_rec, 'c', [ 'A' ], [ ('f', (Type ('Z') -> (Type ('Z') -> 'A'))) ],
-        Some 'A') =
+      (non_rec, c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ], Some A) =
       Apply
         ((?, Effect ([ ], .)),
           Apply
-            ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), 'f'),
+            ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), f/0),
               Constant ((10, Effect ([ ], .)), Int(12))),
           Constant ((10, Effect ([ ], .)), Int(23))) in
     Apply
-      ((11, Effect ([ ], .)), Variable ((11, Effect ([ ], . -> .)), 'p1'),
-        Variable ((11, Effect ([ ], . -> .)), 'c')))
+      ((11, Effect ([ ], .)), Variable ((11, Effect ([ ], . -> .)), p1/0),
+        Variable ((11, Effect ([ ], . -> .)), c/0)))

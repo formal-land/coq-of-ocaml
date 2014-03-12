@@ -1,80 +1,76 @@
-(. -[ 'Failure' ]-> .,
-  Value
-    (non_rec, 'tail', [ 'A' ], [ ('l', Type ('list', 'A')) ],
-      Some Type ('list', 'A')) =
+(. -[ Failure/1 ]-> .,
+  Value (non_rec, tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
+    =
     Match
-      ((4, Effect ([ 'Failure' ], .)), Variable ((4, Effect ([ ], .)), 'l'),
+      ((4, Effect ([ Failure/1 ], .)), Variable ((4, Effect ([ ], .)), l/0),
         [
-          (Constructor ('cons', Any, 'xs'),
-            Variable ((5, Effect ([ ], .)), 'xs'));
-          (Constructor ('[]'),
+          (Constructor (cons/1, Any, xs), Variable ((5, Effect ([ ], .)), xs/0));
+          (Constructor ([]/1),
             Apply
-              ((6, Effect ([ 'Failure' ], .)),
+              ((6, Effect ([ Failure/1 ], .)),
                 Variable
                   ((6,
                     Effect
                       ([ ],
                         .
                           -[
-                            'Failure'
+                            Failure/1
                           ]-> .)),
-                    'failwith'),
+                    failwith/1),
                 Constant
                   ((6, Effect ([ ], .)),
                     String("Cannot take the tail of an empty list."))))
         ]))
 
-(. -> . -[ 'IO'; 'NonTermination' ]-> .,
+(. -> . -[ IO/1; NonTermination/1 ]-> .,
   Value
-    (rec, 'print_list_rec', [ ],
-      [
-        ('counter', Type ('nat'));
-        ('match_var_0', Type ('list', Type ('string')))
-      ], Some Type ('unit')) =
+    (rec, print_list_rec, [ ],
+      [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
+      Some Type (unit/1)) =
     Match
-      ((?, Effect ([ 'IO'; 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ IO/1; NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((?, Effect ([ 'IO'; 'NonTermination' ], .)),
-                Variable ((?, Effect ([ ], .)), 'match_var_0'),
+              ((?, Effect ([ IO/1; NonTermination/1 ], .)),
+                Variable ((?, Effect ([ ], .)), x/0),
                 [
-                  (Constructor ('[]'),
+                  (Constructor ([]/1),
                     Constructor
                       ((9,
                         Effect
                           ([
                           ],
                             .)),
-                        'tt'));
-                  (Constructor ('cons', 'x', 'xs'),
+                        tt/1));
+                  (Constructor (cons/1, x, xs),
                     Sequence
                       ((11,
                         Effect
                           ([
-                            'IO';
-                            'NonTermination'
+                            IO/1;
+                            NonTermination/1
                           ],
                             .)),
                         Apply
                           ((11,
                             Effect
                               ([
-                                'IO'
+                                IO/1
                               ],
                                 .)),
                             Variable
@@ -84,23 +80,23 @@
                                   ],
                                     .
                                       -[
-                                        'IO'
+                                        IO/1
                                       ]->
                                       .)),
-                                'print_string'),
+                                print_string/1),
                             Variable
                               ((11,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'x')),
+                                x/0)),
                         Apply
                           ((12,
                             Effect
                               ([
-                                'IO';
-                                'NonTermination'
+                                IO/1;
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -110,8 +106,8 @@
                                   ],
                                     .
                                       -[
-                                        'IO';
-                                        'NonTermination'
+                                        IO/1;
+                                        NonTermination/1
                                       ]->
                                       .)),
                                 Variable
@@ -123,74 +119,74 @@
                                           ->
                                           .
                                             -[
-                                              'IO';
-                                              'NonTermination'
+                                              IO/1;
+                                              NonTermination/1
                                             ]->
                                             .)),
-                                    'print_list_rec'),
+                                    print_list_rec/0),
                                 Variable
                                   ((?,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'counter')),
+                                    counter/0)),
                             Variable
                               ((12,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'xs'))))
+                                xs/0))))
                 ]))
         ]))
 
-(. -[ 'Counter'; 'IO'; 'NonTermination' ]-> .,
+(. -[ Counter/1; IO/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'print_list', [ ],
-      [ ('match_var_0', Type ('list', Type ('string'))) ], Some Type ('unit')) =
-    Let (?, Effect ([ 'Counter'; 'IO'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+    (non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+      Some Type (unit/1)) =
+    Let (?, Effect ([ Counter/1; IO/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'IO'; 'NonTermination' ], .)),
+      ((?, Effect ([ IO/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'IO'; 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ IO/1; NonTermination/1 ]-> .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ 'IO'; 'NonTermination' ]-> .)),
-                'print_list_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
-        Variable ((?, Effect ([ ], .)), 'match_var_0')))
+              ((?, Effect ([ ], . -> . -[ IO/1; NonTermination/1 ]-> .)),
+                print_list_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+        Variable ((?, Effect ([ ], .)), x/0)))
 
-(. -[ 'Counter'; 'IO'; 'NonTermination' ]-> .,
+(. -[ Counter/1; IO/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'f', [ ], [ ],
-      Some (Type ('list', Type ('string')) -> Type ('unit'))) =
+    (non_rec, f, [ ], [ ],
+      Some (Type (list/1, Type (string/1)) -> Type (unit/1))) =
     Variable
-      ((14, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)),
-        'print_list'))
+      ((14, Effect ([ ], . -[ Counter/1; IO/1; NonTermination/1 ]-> .)),
+        print_list/0))
 
-(. -[ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ]-> .,
-  Value (non_rec, 'x', [ 'A' ], [ ('z', 'A') ], Some Type ('unit')) =
+(. -[ Counter/1; Failure/1; IO/1; NonTermination/1 ]-> .,
+  Value (non_rec, x, [ A ], [ (z, A) ], Some Type (unit/1)) =
     Apply
-      ((16, Effect ([ 'Counter'; 'Failure'; 'IO'; 'NonTermination' ], .)),
+      ((16, Effect ([ Counter/1; Failure/1; IO/1; NonTermination/1 ], .)),
         Variable
-          ((16, Effect ([ ], . -[ 'Counter'; 'IO'; 'NonTermination' ]-> .)), 'f'),
+          ((16, Effect ([ ], . -[ Counter/1; IO/1; NonTermination/1 ]-> .)), f/0),
         Apply
-          ((16, Effect ([ 'Failure' ], .)),
-            Variable ((16, Effect ([ ], . -[ 'Failure' ]-> .)), 'tail'),
+          ((16, Effect ([ Failure/1 ], .)),
+            Variable ((16, Effect ([ ], . -[ Failure/1 ]-> .)), tail/0),
             Constructor
-              ((16, Effect ([ ], .)), 'cons',
+              ((16, Effect ([ ], .)), cons/1,
                 Constant ((16, Effect ([ ], .)), String("Stop")),
                 Constructor
-                  ((16, Effect ([ ], .)), 'cons',
+                  ((16, Effect ([ ], .)), cons/1,
                     Constant ((16, Effect ([ ], .)), String("Hello")),
                     Constructor
-                      ((16, Effect ([ ], .)), 'cons',
+                      ((16, Effect ([ ], .)), cons/1,
                         Constant ((16, Effect ([ ], .)), String(" ")),
                         Constructor
-                          ((16, Effect ([ ], .)), 'cons',
+                          ((16, Effect ([ ], .)), cons/1,
                             Constant ((16, Effect ([ ], .)), String("world")),
-                            Constructor ((16, Effect ([ ], .)), '[]'))))))))
+                            Constructor ((16, Effect ([ ], .)), []/1))))))))

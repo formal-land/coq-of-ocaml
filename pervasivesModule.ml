@@ -99,11 +99,16 @@ let env_effects : Effect.Type.t Envi.t =
       [], "read_counter", Arrow (descriptor "Counter", Pure);
       [], "not_terminated", Arrow (descriptor "NonTermination", Pure) ]
 
-let env : unit FullEnvi.t = {
-  FullEnvi.vars = Envi.map env_effects (fun _ -> ());
-  lift_vars = (fun _ _ -> ());
+let env_with_effects : Effect.Type.t FullEnvi.t = {
+  FullEnvi.vars = env_effects;
+  lift_vars = (fun effect_typ _ -> effect_typ); (* TODO *)
   typs = env_typs;
   descriptors = env_descriptors;
   constructors = env_constructors;
   fields = env_fields
 }
+
+let env : unit FullEnvi.t =
+  { env_with_effects with
+    FullEnvi.vars = Envi.map env_effects (fun _ -> ());
+    lift_vars = (fun _ _ -> ()) }

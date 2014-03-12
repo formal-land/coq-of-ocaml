@@ -1,52 +1,47 @@
-Inductive 'tree':
-  ([ ],
-    [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
+Inductive tree:
+  ([ ], [ (Leaf, [ ]); (Node, [ Type (tree/0); Type (Z/1); Type (tree/0) ]) ])
 
-(. -> . -> . -[ 'NonTermination' ]-> .,
+(. -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (rec, 'find_rec', [ ],
-      [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ],
-      Some Type ('bool')) =
+    (rec, find_rec, [ ],
+      [ (counter, Type (nat/1)); (x, Type (Z/1)); (t, Type (tree/0)) ],
+      Some Type (bool/1)) =
     Match
-      ((?, Effect ([ 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((8, Effect ([ 'NonTermination' ], .)),
-                Variable ((8, Effect ([ ], .)), 't'),
+              ((8, Effect ([ NonTermination/1 ], .)),
+                Variable ((8, Effect ([ ], .)), t/0),
                 [
-                  (Constructor ('Leaf'),
+                  (Constructor (Leaf/0),
                     Constructor
                       ((9,
                         Effect
                           ([
                           ],
                             .)),
-                        'false'));
-                  (Constructor
-                    ('Node',
-                      't1',
-                      'x'',
-                      't2'),
+                        false/1));
+                  (Constructor (Node/0, t1, x', t2),
                     IfThenElse
                       ((11,
                         Effect
                           ([
-                            'NonTermination'
+                            NonTermination/1
                           ],
                             .)),
                         Apply
@@ -67,26 +62,26 @@ Inductive 'tree':
                                       ([
                                       ],
                                         .)),
-                                    'Z.ltb'),
+                                    Z.ltb/1),
                                 Variable
                                   ((11,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Variable
                               ((11,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'x'')),
+                                x'/0)),
                         Apply
                           ((?,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -96,7 +91,7 @@ Inductive 'tree':
                                   ],
                                     .
                                       -[
-                                        'NonTermination'
+                                        NonTermination/1
                                       ]->
                                       .)),
                                 Apply
@@ -108,7 +103,7 @@ Inductive 'tree':
                                           ->
                                           .
                                             -[
-                                              'NonTermination'
+                                              NonTermination/1
                                             ]->
                                             .)),
                                     Variable
@@ -122,36 +117,36 @@ Inductive 'tree':
                                                 ->
                                                 .
                                                   -[
-                                                    'NonTermination'
+                                                    NonTermination/1
                                                   ]->
                                                   .)),
-                                        'find_rec'),
+                                        find_rec/0),
                                     Variable
                                       ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'counter')),
+                                        counter/0)),
                                 Variable
                                   ((12,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Variable
                               ((12,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                't1')),
+                                t1/0)),
                         IfThenElse
                           ((13,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -172,26 +167,26 @@ Inductive 'tree':
                                           ([
                                           ],
                                             .)),
-                                        'Z.ltb'),
+                                        Z.ltb/1),
                                     Variable
                                       ((13,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'x'')),
+                                        x'/0)),
                                 Variable
                                   ((13,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Apply
                               ((?,
                                 Effect
                                   ([
-                                    'NonTermination'
+                                    NonTermination/1
                                   ],
                                     .)),
                                 Apply
@@ -201,7 +196,7 @@ Inductive 'tree':
                                       ],
                                         .
                                           -[
-                                            'NonTermination'
+                                            NonTermination/1
                                           ]->
                                           .)),
                                     Apply
@@ -213,7 +208,7 @@ Inductive 'tree':
                                               ->
                                               .
                                                 -[
-                                                  'NonTermination'
+                                                  NonTermination/1
                                                 ]->
                                                 .)),
                                         Variable
@@ -227,59 +222,59 @@ Inductive 'tree':
                                                     ->
                                                     .
                                                       -[
-                                                        'NonTermination'
+                                                        NonTermination/1
                                                       ]->
                                                       .)),
-                                            'find_rec'),
+                                            find_rec/0),
                                         Variable
                                           ((?,
                                             Effect
                                               ([
                                               ],
                                                 .)),
-                                            'counter')),
+                                            counter/0)),
                                     Variable
                                       ((14,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'x')),
+                                        x/0)),
                                 Variable
                                   ((14,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    't2')),
+                                    t2/0)),
                             Constructor
                               ((16,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'true'))))
+                                true/1))))
                 ]))
         ]))
 
-(. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+(. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
-      Some Type ('bool')) =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+    (non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
+      Some Type (bool/1)) =
+    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
-                  ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                    'find_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
-            Variable ((?, Effect ([ ], .)), 'x')),
-        Variable ((?, Effect ([ ], .)), 't')))
+                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
+                    find_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+            Variable ((?, Effect ([ ], .)), x/0)),
+        Variable ((?, Effect ([ ], .)), t/0)))

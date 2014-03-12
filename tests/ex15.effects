@@ -1,51 +1,51 @@
-Inductive 'set':
-  ([ ], [ ('Empty', [ ]); ('Node', [ Type ('set'); Type ('Z'); Type ('set') ]) ])
+Inductive set:
+  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/1); Type (set/0) ]) ])
 
 (.,
-  Value (non_rec, 'empty', [ ], [ ], Some Type ('set')) =
-    Constructor ((7, Effect ([ ], .)), 'Empty'))
+  Value (non_rec, empty, [ ], [ ], Some Type (set/0)) =
+    Constructor ((7, Effect ([ ], .)), Empty/0))
 
-(. -> . -> . -[ 'NonTermination' ]-> .,
+(. -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (rec, 'member_rec', [ ],
-      [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
-      Some Type ('bool')) =
+    (rec, member_rec, [ ],
+      [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
+      Some Type (bool/1)) =
     Match
-      ((?, Effect ([ 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((10, Effect ([ 'NonTermination' ], .)),
-                Variable ((10, Effect ([ ], .)), 's'),
+              ((10, Effect ([ NonTermination/1 ], .)),
+                Variable ((10, Effect ([ ], .)), s/0),
                 [
-                  (Constructor ('Empty'),
+                  (Constructor (Empty/0),
                     Constructor
                       ((11,
                         Effect
                           ([
                           ],
                             .)),
-                        'false'));
-                  (Constructor ('Node', 's1', 'y', 's2'),
+                        false/1));
+                  (Constructor (Node/0, s1, y, s2),
                     IfThenElse
                       ((13,
                         Effect
                           ([
-                            'NonTermination'
+                            NonTermination/1
                           ],
                             .)),
                         Apply
@@ -66,26 +66,26 @@ Inductive 'set':
                                       ([
                                       ],
                                         .)),
-                                    'Z.ltb'),
+                                    Z.ltb/1),
                                 Variable
                                   ((13,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Variable
                               ((13,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'y')),
+                                y/0)),
                         Apply
                           ((?,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -95,7 +95,7 @@ Inductive 'set':
                                   ],
                                     .
                                       -[
-                                        'NonTermination'
+                                        NonTermination/1
                                       ]->
                                       .)),
                                 Apply
@@ -107,7 +107,7 @@ Inductive 'set':
                                           ->
                                           .
                                             -[
-                                              'NonTermination'
+                                              NonTermination/1
                                             ]->
                                             .)),
                                     Variable
@@ -121,36 +121,36 @@ Inductive 'set':
                                                 ->
                                                 .
                                                   -[
-                                                    'NonTermination'
+                                                    NonTermination/1
                                                   ]->
                                                   .)),
-                                        'member_rec'),
+                                        member_rec/0),
                                     Variable
                                       ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'counter')),
+                                        counter/0)),
                                 Variable
                                   ((14,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Variable
                               ((14,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                's1')),
+                                s1/0)),
                         IfThenElse
                           ((15,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -171,26 +171,26 @@ Inductive 'set':
                                           ([
                                           ],
                                             .)),
-                                        'Z.ltb'),
+                                        Z.ltb/1),
                                     Variable
                                       ((15,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'y')),
+                                        y/0)),
                                 Variable
                                   ((15,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Apply
                               ((?,
                                 Effect
                                   ([
-                                    'NonTermination'
+                                    NonTermination/1
                                   ],
                                     .)),
                                 Apply
@@ -200,7 +200,7 @@ Inductive 'set':
                                       ],
                                         .
                                           -[
-                                            'NonTermination'
+                                            NonTermination/1
                                           ]->
                                           .)),
                                     Apply
@@ -212,7 +212,7 @@ Inductive 'set':
                                               ->
                                               .
                                                 -[
-                                                  'NonTermination'
+                                                  NonTermination/1
                                                 ]->
                                                 .)),
                                         Variable
@@ -226,125 +226,125 @@ Inductive 'set':
                                                     ->
                                                     .
                                                       -[
-                                                        'NonTermination'
+                                                        NonTermination/1
                                                       ]->
                                                       .)),
-                                            'member_rec'),
+                                            member_rec/0),
                                         Variable
                                           ((?,
                                             Effect
                                               ([
                                               ],
                                                 .)),
-                                            'counter')),
+                                            counter/0)),
                                     Variable
                                       ((16,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'x')),
+                                        x/0)),
                                 Variable
                                   ((16,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    's2')),
+                                    s2/0)),
                             Constructor
                               ((18,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'true'))))
+                                true/1))))
                 ]))
         ]))
 
-(. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+(. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'member', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
-      Some Type ('bool')) =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+    (non_rec, member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
+      Some Type (bool/1)) =
+    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
-                  ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                    'member_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
-            Variable ((?, Effect ([ ], .)), 'x')),
-        Variable ((?, Effect ([ ], .)), 's')))
+                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
+                    member_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+            Variable ((?, Effect ([ ], .)), x/0)),
+        Variable ((?, Effect ([ ], .)), s/0)))
 
-(. -> . -> . -[ 'NonTermination' ]-> .,
+(. -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (rec, 'insert_rec', [ ],
-      [ ('counter', Type ('nat')); ('x', Type ('Z')); ('s', Type ('set')) ],
-      Some Type ('set')) =
+    (rec, insert_rec, [ ],
+      [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
+      Some Type (set/0)) =
     Match
-      ((?, Effect ([ 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((21, Effect ([ 'NonTermination' ], .)),
-                Variable ((21, Effect ([ ], .)), 's'),
+              ((21, Effect ([ NonTermination/1 ], .)),
+                Variable ((21, Effect ([ ], .)), s/0),
                 [
-                  (Constructor ('Empty'),
+                  (Constructor (Empty/0),
                     Constructor
                       ((22,
                         Effect
                           ([
                           ],
                             .)),
-                        'Node',
+                        Node/0,
                         Constructor
                           ((22,
                             Effect
                               ([
                               ],
                                 .)),
-                            'Empty'),
+                            Empty/0),
                         Variable
                           ((22,
                             Effect
                               ([
                               ],
                                 .)),
-                            'x'),
+                            x/0),
                         Constructor
                           ((22,
                             Effect
                               ([
                               ],
                                 .)),
-                            'Empty')));
-                  (Constructor ('Node', 's1', 'y', 's2'),
+                            Empty/0)));
+                  (Constructor (Node/0, s1, y, s2),
                     IfThenElse
                       ((24,
                         Effect
                           ([
-                            'NonTermination'
+                            NonTermination/1
                           ],
                             .)),
                         Apply
@@ -365,34 +365,34 @@ Inductive 'set':
                                       ([
                                       ],
                                         .)),
-                                    'Z.ltb'),
+                                    Z.ltb/1),
                                 Variable
                                   ((24,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Variable
                               ((24,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'y')),
+                                y/0)),
                         Constructor
                           ((25,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
-                            'Node',
+                            Node/0,
                             Apply
                               ((?,
                                 Effect
                                   ([
-                                    'NonTermination'
+                                    NonTermination/1
                                   ],
                                     .)),
                                 Apply
@@ -402,7 +402,7 @@ Inductive 'set':
                                       ],
                                         .
                                           -[
-                                            'NonTermination'
+                                            NonTermination/1
                                           ]->
                                           .)),
                                     Apply
@@ -414,7 +414,7 @@ Inductive 'set':
                                               ->
                                               .
                                                 -[
-                                                  'NonTermination'
+                                                  NonTermination/1
                                                 ]->
                                                 .)),
                                         Variable
@@ -428,50 +428,50 @@ Inductive 'set':
                                                     ->
                                                     .
                                                       -[
-                                                        'NonTermination'
+                                                        NonTermination/1
                                                       ]->
                                                       .)),
-                                            'insert_rec'),
+                                            insert_rec/0),
                                         Variable
                                           ((?,
                                             Effect
                                               ([
                                               ],
                                                 .)),
-                                            'counter')),
+                                            counter/0)),
                                     Variable
                                       ((25,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'x')),
+                                        x/0)),
                                 Variable
                                   ((25,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    's1')),
+                                    s1/0)),
                             Variable
                               ((25,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'y'),
+                                y/0),
                             Variable
                               ((25,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                's2')),
+                                s2/0)),
                         IfThenElse
                           ((26,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -492,48 +492,48 @@ Inductive 'set':
                                           ([
                                           ],
                                             .)),
-                                        'Z.ltb'),
+                                        Z.ltb/1),
                                     Variable
                                       ((26,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'y')),
+                                        y/0)),
                                 Variable
                                   ((26,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x')),
+                                    x/0)),
                             Constructor
                               ((27,
                                 Effect
                                   ([
-                                    'NonTermination'
+                                    NonTermination/1
                                   ],
                                     .)),
-                                'Node',
+                                Node/0,
                                 Variable
                                   ((27,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    's1'),
+                                    s1/0),
                                 Variable
                                   ((27,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'y'),
+                                    y/0),
                                 Apply
                                   ((?,
                                     Effect
                                       ([
-                                        'NonTermination'
+                                        NonTermination/1
                                       ],
                                         .)),
                                     Apply
@@ -543,7 +543,7 @@ Inductive 'set':
                                           ],
                                             .
                                               -[
-                                                'NonTermination'
+                                                NonTermination/1
                                               ]->
                                               .)),
                                         Apply
@@ -555,7 +555,7 @@ Inductive 'set':
                                                   ->
                                                   .
                                                     -[
-                                                      'NonTermination'
+                                                      NonTermination/1
                                                     ]->
                                                     .)),
                                             Variable
@@ -569,59 +569,59 @@ Inductive 'set':
                                                         ->
                                                         .
                                                           -[
-                                                            'NonTermination'
+                                                            NonTermination/1
                                                           ]->
                                                           .)),
-                                                'insert_rec'),
+                                                insert_rec/0),
                                             Variable
                                               ((?,
                                                 Effect
                                                   ([
                                                   ],
                                                     .)),
-                                                'counter')),
+                                                counter/0)),
                                         Variable
                                           ((27,
                                             Effect
                                               ([
                                               ],
                                                 .)),
-                                            'x')),
+                                            x/0)),
                                     Variable
                                       ((27,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        's2'))),
+                                        s2/0))),
                             Variable
                               ((28,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                's'))))
+                                s/0))))
                 ]))
         ]))
 
-(. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+(. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'insert', [ ], [ ('x', Type ('Z')); ('s', Type ('set')) ],
-      Some Type ('set')) =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+    (non_rec, insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
+      Some Type (set/0)) =
+    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
-                  ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                    'insert_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
-            Variable ((?, Effect ([ ], .)), 'x')),
-        Variable ((?, Effect ([ ], .)), 's')))
+                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
+                    insert_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+            Variable ((?, Effect ([ ], .)), x/0)),
+        Variable ((?, Effect ([ ], .)), s/0)))

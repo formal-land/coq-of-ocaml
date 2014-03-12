@@ -2,22 +2,21 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
-  let env = PervasivesModule.env in
   try
     let document =
       match mode with
       | "exp" ->
-        let (_, defs) = Structure.of_structure env structure in
-        let (_, defs) = Structure.monadise_let_rec env defs in
+        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
+        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
         Structure.pp OCaml.unit Loc.pp defs
-      (*| "effects" ->
-        let (_, defs) = Structure.of_structure env_typs structure in
-        let defs = Structure.monadise_let_rec defs in
-        let (_, defs) = Structure.effects env_effects defs in
+      | "effects" ->
+        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
+        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
+        let (_, defs) = Structure.effects PervasivesModule.env_with_effects defs in
         let pp_annotation (l, effect) =
           OCaml.tuple [Loc.pp l; Effect.pp effect] in
         Structure.pp (Effect.Type.pp false) pp_annotation defs
-      | "monadise" ->
+      (*| "monadise" ->
         let (_, defs) = Structure.of_structure env_typs structure in
         let defs = Structure.monadise_let_rec defs in
         let (_, defs) = Structure.effects env_effects defs in

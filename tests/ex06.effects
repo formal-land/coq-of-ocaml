@@ -1,50 +1,47 @@
-(. -> . -> . -[ 'NonTermination' ]-> .,
+(. -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (rec, 'map_rec', [ 'A'; 'B' ],
-      [
-        ('counter', Type ('nat'));
-        ('f', ('B' -> 'A'));
-        ('l', Type ('list', 'B'))
-      ], Some Type ('list', 'A')) =
+    (rec, map_rec, [ A; B ],
+      [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
     Match
-      ((?, Effect ([ 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((4, Effect ([ 'NonTermination' ], .)),
-                Variable ((4, Effect ([ ], .)), 'l'),
+              ((4, Effect ([ NonTermination/1 ], .)),
+                Variable ((4, Effect ([ ], .)), l/0),
                 [
-                  (Constructor ('[]'),
+                  (Constructor ([]/1),
                     Constructor
                       ((5,
                         Effect
                           ([
                           ],
                             .)),
-                        '[]'));
-                  (Constructor ('cons', 'x', 'xs'),
+                        []/1));
+                  (Constructor (cons/1, x, xs),
                     Constructor
                       ((6,
                         Effect
                           ([
-                            'NonTermination'
+                            NonTermination/1
                           ],
                             .)),
-                        'cons',
+                        cons/1,
                         Apply
                           ((6,
                             Effect
@@ -57,19 +54,19 @@
                                   ([
                                   ],
                                     .)),
-                                'f'),
+                                f/0),
                             Variable
                               ((6,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'x')),
+                                x/0)),
                         Apply
                           ((?,
                             Effect
                               ([
-                                'NonTermination'
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -79,7 +76,7 @@
                                   ],
                                     .
                                       -[
-                                        'NonTermination'
+                                        NonTermination/1
                                       ]->
                                       .)),
                                 Apply
@@ -91,7 +88,7 @@
                                           ->
                                           .
                                             -[
-                                              'NonTermination'
+                                              NonTermination/1
                                             ]->
                                             .)),
                                     Variable
@@ -105,102 +102,101 @@
                                                 ->
                                                 .
                                                   -[
-                                                    'NonTermination'
+                                                    NonTermination/1
                                                   ]->
                                                   .)),
-                                        'map_rec'),
+                                        map_rec/0),
                                     Variable
                                       ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'counter')),
+                                        counter/0)),
                                 Variable
                                   ((6,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'f')),
+                                    f/0)),
                             Variable
                               ((6,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                'xs'))))
+                                xs/0))))
                 ]))
         ]))
 
-(. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+(. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'map', [ 'A'; 'B' ],
-      [ ('f', ('B' -> 'A')); ('l', Type ('list', 'B')) ],
-      Some Type ('list', 'A')) =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+    (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
-                  ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
-                    'map_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
-            Variable ((?, Effect ([ ], .)), 'f')),
-        Variable ((?, Effect ([ ], .)), 'l')))
+                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
+                    map_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+            Variable ((?, Effect ([ ], .)), f/0)),
+        Variable ((?, Effect ([ ], .)), l/0)))
 
-(. -> . -> . -> . -[ 'NonTermination' ]-> .,
+(. -> . -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (rec, 'fold_rec', [ 'A'; 'B' ],
+    (rec, fold_rec, [ A; B ],
       [
-        ('counter', Type ('nat'));
-        ('f', ('A' -> ('B' -> 'A')));
-        ('a', 'A');
-        ('l', Type ('list', 'B'))
-      ], Some 'A') =
+        (counter, Type (nat/1));
+        (f, (A -> (B -> A)));
+        (a, A);
+        (l, Type (list/1, B))
+      ], Some A) =
     Match
-      ((?, Effect ([ 'NonTermination' ], .)),
-        Variable ((?, Effect ([ ], .)), 'counter'),
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Apply
-              ((?, Effect ([ 'NonTermination' ], .)),
+              ((?, Effect ([ NonTermination/1 ], .)),
                 Variable
                   ((?,
                     Effect
                       ([ ],
                         .
                           -[
-                            'NonTermination'
+                            NonTermination/1
                           ]-> .)),
-                    'not_terminated'),
-                Variable ((?, Effect ([ ], .)), 'tt')));
-          (Constructor ('S', 'counter'),
+                    not_terminated/1),
+                Tuple ((?, Effect ([ ], .)))));
+          (Constructor (S/1, counter),
             Match
-              ((9, Effect ([ 'NonTermination' ], .)),
-                Variable ((9, Effect ([ ], .)), 'l'),
+              ((9, Effect ([ NonTermination/1 ], .)),
+                Variable ((9, Effect ([ ], .)), l/0),
                 [
-                  (Constructor ('[]'),
+                  (Constructor ([]/1),
                     Variable
                       ((10,
                         Effect
                           ([
                           ],
                             .)),
-                        'a'));
-                  (Constructor ('cons', 'x', 'xs'),
+                        a/0));
+                  (Constructor (cons/1, x, xs),
                     Apply
                       ((?,
                         Effect
                           ([
-                            'NonTermination'
+                            NonTermination/1
                           ],
                             .)),
                         Apply
@@ -210,7 +206,7 @@
                               ],
                                 .
                                   -[
-                                    'NonTermination'
+                                    NonTermination/1
                                   ]->
                                   .)),
                             Apply
@@ -222,7 +218,7 @@
                                       ->
                                       .
                                         -[
-                                          'NonTermination'
+                                          NonTermination/1
                                         ]->
                                         .)),
                                 Apply
@@ -236,7 +232,7 @@
                                             ->
                                             .
                                               -[
-                                                'NonTermination'
+                                                NonTermination/1
                                               ]->
                                               .)),
                                     Variable
@@ -252,24 +248,24 @@
                                                   ->
                                                   .
                                                     -[
-                                                      'NonTermination'
+                                                      NonTermination/1
                                                     ]->
                                                     .)),
-                                        'fold_rec'),
+                                        fold_rec/0),
                                     Variable
                                       ((?,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'counter')),
+                                        counter/0)),
                                 Variable
                                   ((11,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'f')),
+                                    f/0)),
                             Apply
                               ((?,
                                 Effect
@@ -288,109 +284,106 @@
                                           ([
                                           ],
                                             .)),
-                                        'f'),
+                                        f/0),
                                     Variable
                                       ((11,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        'a')),
+                                        a/0)),
                                 Variable
                                   ((11,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    'x'))),
+                                    x/0))),
                         Variable
                           ((11,
                             Effect
                               ([
                               ],
                                 .)),
-                            'xs')))
+                            xs/0)))
                 ]))
         ]))
 
-(. -> . -> . -[ 'Counter'; 'NonTermination' ]-> .,
+(. -> . -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'fold', [ 'A'; 'B' ],
-      [ ('f', ('A' -> ('B' -> 'A'))); ('a', 'A'); ('l', Type ('list', 'B')) ],
-      Some 'A') =
-    Let (?, Effect ([ 'Counter'; 'NonTermination' ], .))
-      (non_rec, 'counter', [ ], [ ], None) =
+    (non_rec, fold, [ A; B ],
+      [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
+    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
+      (non_rec, counter, [ ], [ ], None) =
       Apply
-        ((?, Effect ([ 'Counter' ], .)),
-          Variable ((?, Effect ([ ], . -[ 'Counter' ]-> .)), 'read_counter'),
-          Variable ((?, Effect ([ ], .)), 'tt')) in
+        ((?, Effect ([ Counter/1 ], .)),
+          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ 'NonTermination' ], .)),
+      ((?, Effect ([ NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ 'NonTermination' ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
                 Apply
-                  ((?, Effect ([ ], . -> . -> . -[ 'NonTermination' ]-> .)),
+                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
                     Variable
                       ((?,
-                        Effect ([ ], . -> . -> . -> . -[ 'NonTermination' ]-> .)),
-                        'fold_rec'), Variable ((?, Effect ([ ], .)), 'counter')),
-                Variable ((?, Effect ([ ], .)), 'f')),
-            Variable ((?, Effect ([ ], .)), 'a')),
-        Variable ((?, Effect ([ ], .)), 'l')))
+                        Effect ([ ], . -> . -> . -> . -[ NonTermination/1 ]-> .)),
+                        fold_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                Variable ((?, Effect ([ ], .)), f/0)),
+            Variable ((?, Effect ([ ], .)), a/0)),
+        Variable ((?, Effect ([ ], .)), l/0)))
 
 (.,
-  Value (non_rec, 'l', [ ], [ ], Some Type ('list', Type ('Z'))) =
+  Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Constructor
-      ((13, Effect ([ ], .)), 'cons', Constant ((13, Effect ([ ], .)), Int(5)),
+      ((13, Effect ([ ], .)), cons/1, Constant ((13, Effect ([ ], .)), Int(5)),
         Constructor
-          ((13, Effect ([ ], .)), 'cons',
+          ((13, Effect ([ ], .)), cons/1,
             Constant ((13, Effect ([ ], .)), Int(6)),
             Constructor
-              ((13, Effect ([ ], .)), 'cons',
+              ((13, Effect ([ ], .)), cons/1,
                 Constant ((13, Effect ([ ], .)), Int(7)),
                 Constructor
-                  ((13, Effect ([ ], .)), 'cons',
+                  ((13, Effect ([ ], .)), cons/1,
                     Constant ((13, Effect ([ ], .)), Int(2)),
-                    Constructor ((13, Effect ([ ], .)), '[]'))))))
+                    Constructor ((13, Effect ([ ], .)), []/1))))))
 
-(. -> . -[ 'Counter'; 'NonTermination' ]-> .,
+(. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (non_rec, 'n', [ 'A' ],
-      [
-        ('incr', (Type ('Z') -> 'A'));
-        ('plus', (Type ('Z') -> ('A' -> Type ('Z'))))
-      ], Some Type ('Z')) =
+    (non_rec, n, [ A ],
+      [ (incr, (Type (Z/1) -> A)); (plus, (Type (Z/1) -> (A -> Type (Z/1)))) ],
+      Some Type (Z/1)) =
     Apply
-      ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+          ((?, Effect ([ ], . -[ Counter/1; NonTermination/1 ]-> .)),
             Apply
-              ((16, Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((16, Effect ([ ], . -> . -[ Counter/1; NonTermination/1 ]-> .)),
                 Variable
                   ((16,
                     Effect
-                      ([ ], . -> . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
-                    'fold'),
+                      ([ ], . -> . -> . -[ Counter/1; NonTermination/1 ]-> .)),
+                    fold/0),
                 Function
-                  ((16, Effect ([ ], . -> . -> .)), 'x',
+                  ((16, Effect ([ ], . -> . -> .)), x,
                     Function
-                      ((16, Effect ([ ], . -> .)), 'y',
+                      ((16, Effect ([ ], . -> .)), y,
                         Apply
                           ((?, Effect ([ ], .)),
                             Apply
                               ((16, Effect ([ ], .)),
-                                Variable ((16, Effect ([ ], .)), 'plus'),
-                                Variable ((16, Effect ([ ], .)), 'x')),
-                            Variable ((16, Effect ([ ], .)), 'y'))))),
+                                Variable ((16, Effect ([ ], .)), plus/0),
+                                Variable ((16, Effect ([ ], .)), x/0)),
+                            Variable ((16, Effect ([ ], .)), y/0))))),
             Constant ((16, Effect ([ ], .)), Int(0))),
         Apply
-          ((?, Effect ([ 'Counter'; 'NonTermination' ], .)),
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
             Apply
-              ((16, Effect ([ ], . -[ 'Counter'; 'NonTermination' ]-> .)),
+              ((16, Effect ([ ], . -[ Counter/1; NonTermination/1 ]-> .)),
                 Variable
                   ((16,
-                    Effect ([ ], . -> . -[ 'Counter'; 'NonTermination' ]-> .)),
-                    'map'), Variable ((16, Effect ([ ], .)), 'incr')),
-            Variable ((16, Effect ([ ], .)), 'l'))))
+                    Effect ([ ], . -> . -[ Counter/1; NonTermination/1 ]-> .)),
+                    map/0), Variable ((16, Effect ([ ], .)), incr/0)),
+            Variable ((16, Effect ([ ], .)), l/0))))
