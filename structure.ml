@@ -203,11 +203,15 @@ module Reference = struct
     !^ "Definition" ^^ Name.to_coq r.name ^^ !^ ":=" ^^
       !^ "Effect.new" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
     newline ^^ newline ^^
-    !^ "Definition" ^^ Name.to_coq ("read_" ^ r.name) ^^ !^ "{A : Type}" ^^
-    nest (parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false r.typ)) ^^ !^ ":" ^^
-    !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ !^ "A" ^^ !^ ":=" ^^
+    !^ "Definition" ^^ Name.to_coq ("read_" ^ r.name) ^^ !^ "(_ : unit)" ^^ !^ ":" ^^
+      !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ Type.to_coq false r.typ ^^ !^ ":=" ^^
     newline ^^ indent (
-      !^ "fun s => (inr (inl x), s).")
+      !^ "fun s => (inl (fst s), s).") ^^
+    newline ^^ newline ^^
+    !^ "Definition" ^^ Name.to_coq ("write_" ^ r.name) ^^ parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false r.typ) ^^ !^ ":" ^^
+      !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ !^ "unit" ^^ !^ ":=" ^^
+    newline ^^ indent (
+      !^ "fun s => (inl tt, (x, tt)).")
 end
 
 (*
@@ -260,6 +264,15 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
     : unit FullEnvi.t * (unit, Loc.t) t =
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
+    | Tstr_value (_, [{vb_pat = {pat_desc = Tpat_var (x, _)};
+      vb_expr = {
+        exp_desc = Texp_apply ({exp_desc = Texp_ident (path, _, _)}, [_]);
+        exp_type = {Types.desc = Types.Tconstr (_, [typ], _)}}}])
+      when PathName.of_path path = PathName.of_name ["Pervasives"] "ref" ->
+      let r = {
+        Reference.name = Name.of_ident x;
+        typ = Type.of_type_expr env.FullEnvi.typs typ } in
+      (Reference.update_env r env, Reference (loc, r))
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
       let (env, is_rec, pattern, typ_vars, args, typ, e) =
         Exp.import_let_fun env is_rec pattern e in
