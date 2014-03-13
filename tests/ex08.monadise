@@ -1,48 +1,43 @@
-Inductive 't1':
-  ([ ],
-    [
-      ('C1', [ Type ('Z') ]);
-      ('C2', [ Type ('bool'); Type ('Z') ]);
-      ('C3', [ ])
-    ])
+Inductive t1:
+  ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
 
 ((),
-  Value (non_rec, 'n', [ ], [ ], Some Type ('t1')) =
-    Constructor (8, 'C2', Constructor (8, 'false'), Constant (8, Int(3))))
+  Value (non_rec, n, [ ], [ ], Some Type (t1/0)) =
+    Constructor (8, C2/0, Constructor (8, false/1), Constant (8, Int(3))))
 
 ((),
-  Value (non_rec, 'm', [ ], [ ], Some Type ('bool')) =
+  Value (non_rec, m, [ ], [ ], Some Type (bool/1)) =
     Match
-      (10, Variable (10, 'n'),
+      (10, Variable (10, n/0),
         [
-          (Constructor ('C2', 'b', Any), Variable (11, 'b'));
-          (Any, Constructor (12, 'true'))
+          (Constructor (C2/0, b, Any), Variable (11, b/0));
+          (Any, Constructor (12, true/1))
         ]))
 
-Inductive 't2':
-  ([ 'a' ], [ ('D1', [ ]); ('D2', [ 'a'; Type ('t2', 'a') ]) ])
+Inductive t2:
+  ([ a ], [ (D1, [ ]); (D2, [ a; Type (t2/0, a) ]) ])
 
 ((),
   Value
-    (rec, 'of_list_rec', [ 'A' ],
-      [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
-      Some Monad ([ 'NonTermination' ], Type ('t2', 'A'))) =
+    (rec, of_list_rec, [ A ],
+      [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+      Some Monad ([ NonTermination/1 ], Type (t2/0, A))) =
     Match
-      (?, Variable (?, 'counter'),
+      (?, Variable (?, counter/0),
         [
-          (Nat(0),
-            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
-          (Constructor ('S', 'counter'),
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
             Match
-              (19, Variable (19, 'l'),
+              (19, Variable (19, l/0),
                 [
-                  (Constructor ('[]'),
+                  (Constructor ([]/1),
                     Return
                       (?,
                         Constructor
                           (20,
-                            'D1')));
-                  (Constructor ('cons', 'x', 'xs'),
+                            D1/0)));
+                  (Constructor (cons/1, x, xs),
                     Bind
                       (?,
                         Apply
@@ -51,67 +46,66 @@ Inductive 't2':
                               (?,
                                 Variable
                                   (?,
-                                    'of_list_rec'),
+                                    of_list_rec/0),
                                 Variable
                                   (?,
-                                    'counter')),
+                                    counter/0)),
                             Variable
                               (21,
-                                'xs')),
+                                xs/0)),
                         Some
-                          'x_1',
+                          x_1,
                         Return
                           (?,
                             Constructor
                               (21,
-                                'D2',
+                                D2/0,
                                 Variable
                                   (21,
-                                    'x'),
+                                    x/0),
                                 Variable
                                   (?,
-                                    'x_1')))))
+                                    x_1/0)))))
                 ]))
         ]))
 
 ((),
   Value
-    (non_rec, 'of_list', [ 'A' ], [ ('l', Type ('list', 'A')) ],
-      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('t2', 'A'))) =
+    (non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ],
+      Some Monad ([ Counter/1; NonTermination/1 ], Type (t2/0, A))) =
     Bind
       (?,
         Lift
-          (?, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt'))),
-        Some 'counter',
+          (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
         Lift
-          (?, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
             Apply
               (?,
-                Apply (?, Variable (?, 'of_list_rec'), Variable (?, 'counter')),
-                Variable (?, 'l')))))
+                Apply (?, Variable (?, of_list_rec/0), Variable (?, counter/0)),
+                Variable (?, l/0)))))
 
 ((),
   Value
-    (rec, 'sum_rec', [ ],
-      [ ('counter', Type ('nat')); ('l', Type ('t2', Type ('Z'))) ],
-      Some Monad ([ 'NonTermination' ], Type ('Z'))) =
+    (rec, sum_rec, [ ],
+      [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ],
+      Some Monad ([ NonTermination/1 ], Type (Z/1))) =
     Match
-      (?, Variable (?, 'counter'),
+      (?, Variable (?, counter/0),
         [
-          (Nat(0),
-            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
-          (Constructor ('S', 'counter'),
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
             Match
-              (24, Variable (24, 'l'),
+              (24, Variable (24, l/0),
                 [
-                  (Constructor ('D1'),
+                  (Constructor (D1/0),
                     Return
                       (?,
                         Constant
                           (25,
                             Int(0))));
-                  (Constructor ('D2', 'x', 'xs'),
+                  (Constructor (D2/0, x, xs),
                     Bind
                       (?,
                         Apply
@@ -120,15 +114,15 @@ Inductive 't2':
                               (?,
                                 Variable
                                   (?,
-                                    'sum_rec'),
+                                    sum_rec/0),
                                 Variable
                                   (?,
-                                    'counter')),
+                                    counter/0)),
                             Variable
                               (26,
-                                'xs')),
+                                xs/0)),
                         Some
-                          'x_1',
+                          x_1,
                         Return
                           (?,
                             Apply
@@ -137,44 +131,43 @@ Inductive 't2':
                                   (26,
                                     Variable
                                       (26,
-                                        'Z.add'),
+                                        Z.add/1),
                                     Variable
                                       (26,
-                                        'x')),
+                                        x/0)),
                                 Variable
                                   (?,
-                                    'x_1')))))
+                                    x_1/0)))))
                 ]))
         ]))
 
 ((),
   Value
-    (non_rec, 'sum', [ ], [ ('l', Type ('t2', Type ('Z'))) ],
-      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+    (non_rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ],
+      Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
     Bind
       (?,
         Lift
-          (?, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt'))),
-        Some 'counter',
+          (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
         Lift
-          (?, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
             Apply
-              (?, Apply (?, Variable (?, 'sum_rec'), Variable (?, 'counter')),
-                Variable (?, 'l')))))
+              (?, Apply (?, Variable (?, sum_rec/0), Variable (?, counter/0)),
+                Variable (?, l/0)))))
 
 ((),
   Value
-    (non_rec, 's', [ ], [ ],
-      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('Z'))) =
+    (non_rec, s, [ ], [ ],
+      Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
     Bind
       (?,
         Apply
-          (28, Variable (28, 'of_list'),
+          (28, Variable (28, of_list/0),
             Constructor
-              (28, 'cons', Constant (28, Int(5)),
+              (28, cons/1, Constant (28, Int(5)),
                 Constructor
-                  (28, 'cons', Constant (28, Int(7)),
+                  (28, cons/1, Constant (28, Int(7)),
                     Constructor
-                      (28, 'cons', Constant (28, Int(3)), Constructor (28, '[]'))))),
-        Some 'x', Apply (28, Variable (28, 'sum'), Variable (?, 'x'))))
+                      (28, cons/1, Constant (28, Int(3)), Constructor (28, []/1))))),
+        Some x, Apply (28, Variable (28, sum/0), Variable (?, x/0))))

@@ -7,7 +7,7 @@ Set Implicit Arguments.
 Fixpoint map_rec {A B : Type} (counter : nat) (f : B -> A) (l : list B) :
   M [ NonTermination ] (list A) :=
   match counter with
-  | 0 % nat => not_terminated tt
+  | O => not_terminated tt
   | S counter =>
     match l with
     | [] => ret []
@@ -26,7 +26,7 @@ Fixpoint fold_rec {A B : Type}
   (counter : nat) (f : A -> B -> A) (a : A) (l : list B) :
   M [ NonTermination ] A :=
   match counter with
-  | 0 % nat => not_terminated tt
+  | O => not_terminated tt
   | S counter =>
     match l with
     | [] => ret a

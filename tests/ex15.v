@@ -15,7 +15,7 @@ Definition empty : set := Empty.
 Fixpoint member_rec (counter : nat) (x : Z) (s : set) :
   M [ NonTermination ] bool :=
   match counter with
-  | 0 % nat => not_terminated tt
+  | O => not_terminated tt
   | S counter =>
     match s with
     | Empty => ret false
@@ -37,7 +37,7 @@ Definition member (x : Z) (s : set) : M [ Counter; NonTermination ] bool :=
 Fixpoint insert_rec (counter : nat) (x : Z) (s : set) : M [ NonTermination ] set
   :=
   match counter with
-  | 0 % nat => not_terminated tt
+  | O => not_terminated tt
   | S counter =>
     match s with
     | Empty => ret (Node Empty x Empty)

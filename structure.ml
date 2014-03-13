@@ -336,8 +336,7 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
     | Value ((), {
       Value.header = (is_rec, x, _, args, _) as header;
       body = e }) ->
-      let (e, x_typ) =
-        Exp.effects_of_let env is_rec x args e in
+      let (e, x_typ) = Exp.effects_of_let env is_rec x args e in
       let value = { Value.header = header; body = e } in
       (Value.update_env value x_typ env, Value (x_typ, value))
     | Module (name, defs) ->
@@ -357,12 +356,12 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
       (env, []) defs in
   (env, List.rev defs)
 
-(*let rec monadise (env : Common.env_units)
+let rec monadise (env : unit Envi.t)
   (defs : (Effect.Type.t, Loc.t * Effect.t) t list)
-  : Common.env_units * (unit, Loc.t) t list =
-  let rec monadise_one (env : Common.env_units)
+  : unit Envi.t * (unit, Loc.t) t list =
+  let rec monadise_one (env : unit Envi.t)
     (def : (Effect.Type.t, Loc.t * Effect.t) t)
-    : Common.env_units * (unit, Loc.t) t =
+    : unit Envi.t * (unit, Loc.t) t =
     match def with
     | Value (effect, {
       Value.header = (is_rec, x, typ_vars, args, typ);
@@ -372,29 +371,28 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
         | Some typ -> Some (Type.monadise typ (snd (Exp.annotation body))) in
       let env_in_body =
         if Recursivity.to_bool is_rec then
-          PathName.Env.add_name x () env
+          Envi.add_name x () env
         else
           env in
       let body = Exp.monadise env_in_body body in
-      let env = PathName.Env.add_name x () env in
+      let env = Envi.add_name x () env in
       (env, Value ((), {
         Value.header = (is_rec, x, typ_vars, args, typ);
         body = body }))
     | Module (name, defs) ->
-      let (env, defs) = monadise (PathName.Env.open_module env) defs in
-      (PathName.Env.close_module env (fun _ _ -> ()) name, Module (name, defs))
+      let (env, defs) = monadise (Envi.open_module env) defs in
+      (Envi.close_module env (fun _ _ -> ()) name, Module (name, defs))
     | Exception exn ->
-      (PathName.Env.add_name exn.Exception.name () env, Exception exn)
+      (Envi.add_name exn.Exception.name () env, Exception exn)
     | Inductive ind -> (env, Inductive ind)
     | Record record -> (env, Record record)
-    | Synonym synonym -> (env, Synonym synonym)
-    | Open name -> (env, Open name) in
+    | Synonym synonym -> (env, Synonym synonym) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env_units, def) = monadise_one env def in
       (env, def :: defs))
       (env, []) defs in
-  (env, List.rev defs)*)
+  (env, List.rev defs)
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : ('a, 'b) t list) : SmartPrint.t =

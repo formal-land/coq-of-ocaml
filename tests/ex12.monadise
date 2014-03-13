@@ -1,32 +1,27 @@
-Inductive 'tree':
-  ([ ],
-    [ ('Leaf', [ ]); ('Node', [ Type ('tree'); Type ('Z'); Type ('tree') ]) ])
+Inductive tree:
+  ([ ], [ (Leaf, [ ]); (Node, [ Type (tree/0); Type (Z/1); Type (tree/0) ]) ])
 
 ((),
   Value
-    (rec, 'find_rec', [ ],
-      [ ('counter', Type ('nat')); ('x', Type ('Z')); ('t', Type ('tree')) ],
-      Some Monad ([ 'NonTermination' ], Type ('bool'))) =
+    (rec, find_rec, [ ],
+      [ (counter, Type (nat/1)); (x, Type (Z/1)); (t, Type (tree/0)) ],
+      Some Monad ([ NonTermination/1 ], Type (bool/1))) =
     Match
-      (?, Variable (?, 'counter'),
+      (?, Variable (?, counter/0),
         [
-          (Nat(0),
-            Apply (?, Variable (?, 'not_terminated'), Variable (?, 'tt')));
-          (Constructor ('S', 'counter'),
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
             Match
-              (8, Variable (8, 't'),
+              (8, Variable (8, t/0),
                 [
-                  (Constructor ('Leaf'),
+                  (Constructor (Leaf/0),
                     Return
                       (?,
                         Constructor
                           (9,
-                            'false')));
-                  (Constructor
-                    ('Node',
-                      't1',
-                      'x'',
-                      't2'),
+                            false/1)));
+                  (Constructor (Node/0, t1, x', t2),
                     IfThenElse
                       (11,
                         Apply
@@ -35,13 +30,13 @@ Inductive 'tree':
                               (11,
                                 Variable
                                   (11,
-                                    'Z.ltb'),
+                                    Z.ltb/1),
                                 Variable
                                   (11,
-                                    'x')),
+                                    x/0)),
                             Variable
                               (11,
-                                'x'')),
+                                x'/0)),
                         Apply
                           (?,
                             Apply
@@ -50,16 +45,16 @@ Inductive 'tree':
                                   (?,
                                     Variable
                                       (?,
-                                        'find_rec'),
+                                        find_rec/0),
                                     Variable
                                       (?,
-                                        'counter')),
+                                        counter/0)),
                                 Variable
                                   (12,
-                                    'x')),
+                                    x/0)),
                             Variable
                               (12,
-                                't1')),
+                                t1/0)),
                         IfThenElse
                           (13,
                             Apply
@@ -68,13 +63,13 @@ Inductive 'tree':
                                   (13,
                                     Variable
                                       (13,
-                                        'Z.ltb'),
+                                        Z.ltb/1),
                                     Variable
                                       (13,
-                                        'x'')),
+                                        x'/0)),
                                 Variable
                                   (13,
-                                    'x')),
+                                    x/0)),
                             Apply
                               (?,
                                 Apply
@@ -83,39 +78,38 @@ Inductive 'tree':
                                       (?,
                                         Variable
                                           (?,
-                                            'find_rec'),
+                                            find_rec/0),
                                         Variable
                                           (?,
-                                            'counter')),
+                                            counter/0)),
                                     Variable
                                       (14,
-                                        'x')),
+                                        x/0)),
                                 Variable
                                   (14,
-                                    't2')),
+                                    t2/0)),
                             Return
                               (?,
                                 Constructor
                                   (16,
-                                    'true')))))
+                                    true/1)))))
                 ]))
         ]))
 
 ((),
   Value
-    (non_rec, 'find', [ ], [ ('x', Type ('Z')); ('t', Type ('tree')) ],
-      Some Monad ([ 'Counter'; 'NonTermination' ], Type ('bool'))) =
+    (non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
+      Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))) =
     Bind
       (?,
         Lift
-          (?, [ 'Counter' ], [ 'Counter'; 'NonTermination' ],
-            Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt'))),
-        Some 'counter',
+          (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
         Lift
-          (?, [ 'NonTermination' ], [ 'Counter'; 'NonTermination' ],
+          (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
             Apply
               (?,
                 Apply
                   (?,
-                    Apply (?, Variable (?, 'find_rec'), Variable (?, 'counter')),
-                    Variable (?, 'x')), Variable (?, 't')))))
+                    Apply (?, Variable (?, find_rec/0), Variable (?, counter/0)),
+                    Variable (?, x/0)), Variable (?, t/0)))))

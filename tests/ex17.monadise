@@ -1,129 +1,159 @@
-Exception ('TailLess', ())
-
-Exception ('Wtf', (Type ('Z') * Type ('string')))
+Exception (Outside, ())
 
 ((),
-  Value
-    (non_rec, 'f', [ 'A'; 'B' ], [ ('x', 'B') ],
-      Some Monad ([ 'TailLess' ], 'A')) =
-    Apply (7, Variable (7, 'raise_TailLess'), Tuple (?)))
+  Value (non_rec, f, [ A; B ], [ (x, B) ], Some Monad ([ Outside/0 ], A)) =
+    Apply (5, Variable (5, raise_Outside/0), Tuple (?)))
 
-Module 'G':
+Module G:
+  Exception (Inside, (Type (Z/2) * Type (string/2)))
+  
   ((),
     Value
-      (non_rec, 'g', [ 'A' ], [ ('x', Type ('Z')) ], Some Monad ([ 'Wtf' ], 'A'))
-      =
-      Apply
-        (10, Variable (10, 'raise_Wtf'),
-          Tuple (?, Variable (10, 'x'), Constant (10, String("no")))))
+      (non_rec, g, [ A ], [ (b, Type (bool/2)) ],
+        Some Monad ([ Inside/0; Outside/0 ], A)) =
+      IfThenElse
+        (11, Variable (11, b/0),
+          Lift
+            (?, [ Inside/0 ], [ Inside/0; Outside/0 ],
+              Apply
+                (12, Variable (12, raise_Inside/0),
+                  Tuple (?, Constant (12, Int(12)), Constant (12, String("no"))))),
+          Lift
+            (?, [ Outside/0 ], [ Inside/0; Outside/0 ],
+              Apply (14, Variable (14, raise_Outside/1), Tuple (?)))))
 
 ((),
   Value
-    (rec, 'h_rec', [ 'A' ],
-      [ ('counter', Type ('nat')); ('l', Type ('list', 'A')) ],
-      Some Monad ([ 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
+    (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
+      Some Monad ([ IO/1; Inside/0; NonTermination/1; Outside/0 ], A)) =
     Match
-      (?, Variable (?, 'counter'),
+      (?, Variable (?, counter/0),
         [
-          (Nat(0),
+          (Constructor (O/1),
             Lift
-              (?, [ 'NonTermination' ],
-                [ 'IO'; 'NonTermination'; 'TailLess' ],
+              (?, [ NonTermination/1 ],
+                [ IO/1; Inside/0; NonTermination/1; Outside/0 ],
                 Apply
-                  (?, Variable (?, 'not_terminated'),
-                    Variable (?, 'tt'))));
-          (Constructor ('S', 'counter'),
+                  (?, Variable (?, not_terminated/1),
+                    Tuple (?))));
+          (Constructor (S/1, counter),
             Match
-              (14, Variable (14, 'l'),
+              (18, Variable (18, l/0),
                 [
-                  (Constructor ('[]'),
+                  (Constructor ([]/1),
                     Lift
                       (?,
                         [
-                          'IO';
-                          'TailLess'
+                          IO/1;
+                          Inside/0;
+                          Outside/0
                         ],
                         [
-                          'IO';
-                          'NonTermination';
-                          'TailLess'
+                          IO/1;
+                          Inside/0;
+                          NonTermination/1;
+                          Outside/0
                         ],
                         Bind
                           (?,
                             Lift
                               (?,
                                 [
-                                  'IO'
+                                  IO/1
                                 ],
                                 [
-                                  'IO';
-                                  'TailLess'
+                                  IO/1;
+                                  Inside/0;
+                                  Outside/0
                                 ],
                                 Apply
-                                  (15,
+                                  (19,
                                     Variable
-                                      (15,
-                                        'print_string'),
+                                      (19,
+                                        print_string/1),
                                     Constant
-                                      (15,
+                                      (19,
                                         String("no tail")))),
                             None,
                             Lift
                               (?,
                                 [
-                                  'TailLess'
+                                  Inside/0;
+                                  Outside/0
                                 ],
                                 [
-                                  'IO';
-                                  'TailLess'
+                                  IO/1;
+                                  Inside/0;
+                                  Outside/0
                                 ],
                                 Apply
-                                  (15,
+                                  (19,
                                     Variable
-                                      (15,
-                                        'raise_TailLess'),
-                                    Tuple
-                                      (?))))));
+                                      (19,
+                                        G.g/0),
+                                    Constructor
+                                      (19,
+                                        false/1))))));
                   (Constructor
-                    ('cons',
-                      'x',
+                    (cons/1,
+                      x,
                       Constructor
-                        ('[]')),
-                    Return
+                        ([]/1)),
+                    Lift
                       (?,
-                        Variable
-                          (16,
-                            'x')));
-                  (Constructor ('cons', Any, 'xs'),
+                        [
+                          Inside/0
+                        ],
+                        [
+                          IO/1;
+                          Inside/0;
+                          NonTermination/1;
+                          Outside/0
+                        ],
+                        Apply
+                          (20,
+                            Variable
+                              (20,
+                                G.raise_Inside/0),
+                            Tuple
+                              (?,
+                                Constant
+                                  (20,
+                                    Int(0)),
+                                Constant
+                                  (20,
+                                    String("gg"))))));
+                  (Constructor (cons/1, Any, xs),
                     Apply
-                      (17,
+                      (21,
                         Apply
                           (?,
                             Variable
                               (?,
-                                'h_rec'),
+                                h_rec/0),
                             Variable
                               (?,
-                                'counter')),
+                                counter/0)),
                         Variable
-                          (17,
-                            'xs')))
+                          (21,
+                            xs/0)))
                 ]))
         ]))
 
 ((),
   Value
-    (non_rec, 'h', [ 'A' ], [ ('l', Type ('list', 'A')) ],
-      Some Monad ([ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ], 'A')) =
+    (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ],
+      Some Monad ([ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ], A))
+    =
     Bind
       (?,
         Lift
-          (?, [ 'Counter' ], [ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ],
-            Apply (?, Variable (?, 'read_counter'), Variable (?, 'tt'))),
-        Some 'counter',
+          (?, [ Counter/1 ],
+            [ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ],
+            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
         Lift
-          (?, [ 'IO'; 'NonTermination'; 'TailLess' ],
-            [ 'Counter'; 'IO'; 'NonTermination'; 'TailLess' ],
+          (?, [ IO/1; Inside/0; NonTermination/1; Outside/0 ],
+            [ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ],
             Apply
-              (?, Apply (?, Variable (?, 'h_rec'), Variable (?, 'counter')),
-                Variable (?, 'l')))))
+              (?, Apply (?, Variable (?, h_rec/0), Variable (?, counter/0)),
+                Variable (?, l/0)))))

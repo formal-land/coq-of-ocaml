@@ -29,7 +29,7 @@ Arguments D2 {a} _ _.
 Fixpoint of_list_rec {A : Type} (counter : nat) (l : list A) :
   M [ NonTermination ] (t2 A) :=
   match counter with
-  | 0 % nat => not_terminated tt
+  | O => not_terminated tt
   | S counter =>
     match l with
     | [] => ret D1
@@ -46,7 +46,7 @@ Definition of_list {A : Type} (l : list A) :
 
 Fixpoint sum_rec (counter : nat) (l : t2 Z) : M [ NonTermination ] Z :=
   match counter with
-  | 0 % nat => not_terminated tt
+  | O => not_terminated tt
   | S counter =>
     match l with
     | D1 => ret 0

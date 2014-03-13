@@ -1,21 +1,24 @@
-Exception (TailLess, ())
-
-Exception (Wtf, (Type (Z/1) * Type (string/1)))
+Exception (Outside, ())
 
 ((),
   Value (non_rec, f, [ A; B ], [ (x, B) ], Some A) =
-    Apply (7, Variable (7, raise_TailLess/0), Tuple (?)))
+    Apply (5, Variable (5, raise_Outside/0), Tuple (?)))
 
 Module G:
+  Exception (Inside, (Type (Z/2) * Type (string/2)))
+  
   ((),
-    Value (non_rec, g, [ A ], [ (x, Type (Z/2)) ], Some A) =
-      Apply
-        (10, Variable (10, raise_Wtf/1),
-          Tuple (?, Variable (10, x/0), Constant (10, String("no")))))
+    Value (non_rec, g, [ A ], [ (b, Type (bool/2)) ], Some A) =
+      IfThenElse
+        (11, Variable (11, b/0),
+          Apply
+            (12, Variable (12, raise_Inside/0),
+              Tuple (?, Constant (12, Int(12)), Constant (12, String("no")))),
+          Apply (14, Variable (14, raise_Outside/1), Tuple (?))))
 
 ((),
   Value
-    (rec, h_rec, [ A ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+    (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
       Some A) =
     Match
       (?, Variable (?, counter/0),
@@ -24,37 +27,48 @@ Module G:
             Apply (?, Variable (?, not_terminated/1), Tuple (?)));
           (Constructor (S/1, counter),
             Match
-              (14, Variable (14, l/0),
+              (18, Variable (18, l/0),
                 [
                   (Constructor ([]/1),
                     Sequence
-                      (15,
+                      (19,
                         Apply
-                          (15,
+                          (19,
                             Variable
-                              (15,
+                              (19,
                                 print_string/1),
                             Constant
-                              (15,
+                              (19,
                                 String("no tail"))),
                         Apply
-                          (15,
+                          (19,
                             Variable
-                              (15,
-                                raise_TailLess/0),
-                            Tuple
-                              (?))));
+                              (19,
+                                G.g/0),
+                            Constructor
+                              (19,
+                                false/1))));
                   (Constructor
                     (cons/1,
                       x,
                       Constructor
                         ([]/1)),
-                    Variable
-                      (16,
-                        x/0));
+                    Apply
+                      (20,
+                        Variable
+                          (20,
+                            G.raise_Inside/0),
+                        Tuple
+                          (?,
+                            Constant
+                              (20,
+                                Int(0)),
+                            Constant
+                              (20,
+                                String("gg")))));
                   (Constructor (cons/1, Any, xs),
                     Apply
-                      (17,
+                      (21,
                         Apply
                           (?,
                             Variable
@@ -64,13 +78,13 @@ Module G:
                               (?,
                                 counter/0)),
                         Variable
-                          (17,
+                          (21,
                             xs/0)))
                 ]))
         ]))
 
 ((),
-  Value (non_rec, h, [ A ], [ (l, Type (list/1, A)) ], Some A) =
+  Value (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ], Some A) =
     Let ? (non_rec, counter, [ ], [ ], None) =
       Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply

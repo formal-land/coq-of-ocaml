@@ -537,8 +537,7 @@ and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
     let x_typ = Effect.function_typ args_names effect in
     (e, x_typ)
 
-(*let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t)
-  : Loc.t t =
+let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
   let descriptor e = (snd (annotation e)).Effect.descriptor in
   let lift d1 d2 e =
     if Effect.Descriptor.eq d1 d2 then
@@ -639,7 +638,7 @@ and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
     let e1 = monadise env e1 in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 None e2
-  | _ -> failwith "Unexpected arguments for 'monadise'."*)
+  | _ -> failwith "Unexpected arguments for 'monadise'."
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =

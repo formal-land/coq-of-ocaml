@@ -10,12 +10,12 @@ Definition tail {A : Type} (l : list A) : M [ Failure ] (list A) :=
   | [] => failwith "Cannot take the tail of an empty list." % string
   end.
 
-Fixpoint print_list_rec (counter : nat) (match_var_0 : list string) :
+Fixpoint print_list_rec (counter : nat) (x : list string) :
   M [ IO; NonTermination ] unit :=
   match counter with
-  | 0 % nat => lift [_;_] "01" (not_terminated tt)
+  | O => lift [_;_] "01" (not_terminated tt)
   | S counter =>
-    match match_var_0 with
+    match x with
     | [] => ret tt
     | cons x xs =>
       let! _ := lift [_;_] "10" (print_string x) in
@@ -23,10 +23,10 @@ Fixpoint print_list_rec (counter : nat) (match_var_0 : list string) :
     end
   end.
 
-Definition print_list (match_var_0 : list string) :
-  M [ Counter; IO; NonTermination ] unit :=
+Definition print_list (x : list string) : M [ Counter; IO; NonTermination ] unit
+  :=
   let! counter := lift [_;_;_] "100" (read_counter tt) in
-  lift [_;_;_] "011" ((print_list_rec counter) match_var_0).
+  lift [_;_;_] "011" ((print_list_rec counter) x).
 
 Definition f : (list string) -> M [ Counter; IO; NonTermination ] unit :=
   print_list.

@@ -4,38 +4,42 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Definition TailLess := Effect.new unit unit.
+Definition Outside := Effect.new unit unit.
 
-Definition raise_TailLess {A : Type} (x : unit) : M [ TailLess ] A :=
+Definition raise_Outside {A : Type} (x : unit) : M [ Outside ] A :=
   fun s => (inr (inl x), s).
 
-Definition Wtf := Effect.new unit (Z * string).
-
-Definition raise_Wtf {A : Type} (x : Z * string) : M [ Wtf ] A :=
-  fun s => (inr (inl x), s).
-
-Definition f {A B : Type} (x : B) : M [ TailLess ] A := raise_TailLess tt.
+Definition f {A B : Type} (x : B) : M [ Outside ] A := raise_Outside tt.
 
 Module G.
-  Definition g {A : Type} (x : Z) : M [ Wtf ] A := raise_Wtf (x, "no" % string).
+  Definition Inside := Effect.new unit (Z * string).
+  
+  Definition raise_Inside {A : Type} (x : Z * string) : M [ Inside ] A :=
+    fun s => (inr (inl x), s).
+  
+  Definition g {A : Type} (b : bool) : M [ Inside; Outside ] A :=
+    if b then
+      lift [_;_] "10" (raise_Inside (12, "no" % string))
+    else
+      lift [_;_] "01" (raise_Outside tt).
 End G.
 
-Fixpoint h_rec {A : Type} (counter : nat) (l : list A) :
-  M [ IO; NonTermination; TailLess ] A :=
+Fixpoint h_rec {A B : Type} (counter : nat) (l : list B) :
+  M [ IO; G.Inside; NonTermination; Outside ] A :=
   match counter with
-  | 0 % nat => lift [_;_;_] "010" (not_terminated tt)
+  | O => lift [_;_;_;_] "0010" (not_terminated tt)
   | S counter =>
     match l with
     | [] =>
-      lift [_;_;_] "101"
-        (let! _ := lift [_;_] "10" (print_string "no tail" % string) in
-        lift [_;_] "01" (raise_TailLess tt))
-    | cons x [] => ret x
+      lift [_;_;_;_] "1101"
+        (let! _ := lift [_;_;_] "100" (print_string "no tail" % string) in
+        lift [_;_;_] "011" (G.g false))
+    | cons x [] => lift [_;_;_;_] "0100" (G.raise_Inside (0, "gg" % string))
     | cons _ xs => (h_rec counter) xs
     end
   end.
 
-Definition h {A : Type} (l : list A) :
-  M [ Counter; IO; NonTermination; TailLess ] A :=
-  let! counter := lift [_;_;_;_] "1000" (read_counter tt) in
-  lift [_;_;_;_] "0111" ((h_rec counter) l).
+Definition h {A B : Type} (l : list B) :
+  M [ Counter; IO; G.Inside; NonTermination; Outside ] A :=
+  let! counter := lift [_;_;_;_;_] "10000" (read_counter tt) in
+  lift [_;_;_;_;_] "01111" ((h_rec counter) l).

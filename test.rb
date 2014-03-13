@@ -91,7 +91,6 @@ puts
 tests.check('exp')
 puts
 tests.check('effects')
-exit(0)
 puts
 tests.check('monadise')
 puts

@@ -1,62 +1,60 @@
-Module 'SizedString':
-  Record 't':
-    ([ ('name', Type ('string')); ('size', Type ('Z')) ])
+Module SizedString:
+  Record t:
+    ([ (name, Type (string/2)); (size, Type (Z/2)) ])
 
 ((),
-  Value (non_rec, 'r', [ ], [ ], Some Type ('SizedString.t')) =
+  Value (non_rec, r, [ ], [ ], Some Type (SizedString.t/0)) =
     Record
-      (9, ('SizedString.name', Constant (9, String("gre"))),
-        ('SizedString.size', Constant (9, Int(3)))))
+      (9, (SizedString.name/0, Constant (9, String("gre"))),
+        (SizedString.size/0, Constant (9, Int(3)))))
 
 ((),
-  Value (non_rec, 'r'', [ ], [ ], Some Type ('SizedString.t')) =
+  Value (non_rec, r', [ ], [ ], Some Type (SizedString.t/0)) =
     Record
-      (10, ('SizedString.name', Constant (10, String("haha"))),
-        ('SizedString.size', Constant (10, Int(4)))))
+      (10, (SizedString.name/0, Constant (10, String("haha"))),
+        (SizedString.size/0, Constant (10, Int(4)))))
 
 ((),
-  Value (non_rec, 's', [ ], [ ], Some Type ('Z')) =
+  Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
     Apply
       (?,
         Apply
-          (12, Variable (12, 'Z.add'),
-            Field (12, Variable (12, 'r'), 'SizedString.size')),
-        Field (12, Variable (12, 'r''), 'SizedString.size')))
+          (12, Variable (12, Z.add/1),
+            Field (12, Variable (12, r/0), SizedString.size/0)),
+        Field (12, Variable (12, r'/0), SizedString.size/0)))
 
 ((),
-  Value
-    (non_rec, 'f', [ ], [ ('match_var_0', Type ('SizedString.t')) ],
-      Some Type ('bool')) =
+  Value (non_rec, f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)) =
     Match
-      (?, Variable (?, 'match_var_0'),
+      (?, Variable (?, x/0),
         [
-          (Record (('SizedString.size', Int(3))), Constructor (15, 'true'));
-          (Any, Constructor (16, 'false'))
+          (Record ((SizedString.size/0, Int(3))), Constructor (15, true/1));
+          (Any, Constructor (16, false/1))
         ]))
 
 ((),
-  Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
-    Apply (18, Variable (18, 'f'), Variable (18, 'r')))
+  Value (non_rec, b, [ ], [ ], Some Type (bool/1)) =
+    Apply (18, Variable (18, f/0), Variable (18, r/0)))
 
 ((),
-  Value (non_rec, 'b'', [ ], [ ], Some Type ('bool')) =
-    Apply (19, Variable (19, 'f'), Variable (19, 'r'')))
+  Value (non_rec, b', [ ], [ ], Some Type (bool/1)) =
+    Apply (19, Variable (19, f/0), Variable (19, r'/0)))
 
-Module 'Point':
-  Record 't':
-    ([ ('x', Type ('Z')); ('y', Type ('Z')); ('z', Type ('Z')) ])
+Module Point:
+  Record t:
+    ([ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ])
   
   ((),
-    Value (non_rec, 'p', [ ], [ ], Some Type ('t')) =
+    Value (non_rec, p, [ ], [ ], Some Type (t/0)) =
       Record
-        (27, ('x', Constant (27, Int(5))), ('y', Constant (27, Int(-3))),
-          ('z', Constant (27, Int(1)))))
+        (27, (x/0, Constant (27, Int(5))), (y/0, Constant (27, Int(-3))),
+          (z/0, Constant (27, Int(1)))))
   
   ((),
-    Value (non_rec, 'b', [ ], [ ], Some Type ('bool')) =
+    Value (non_rec, b, [ ], [ ], Some Type (bool/2)) =
       Match
-        (29, Variable (29, 'p'),
+        (29, Variable (29, p/0),
           [
-            (Record (('x', Int(5)), ('z', Int(1))), Constructor (30, 'true'));
-            (Any, Constructor (31, 'false'))
+            (Record ((x/0, Int(5)), (z/0, Int(1))), Constructor (30, true/2));
+            (Any, Constructor (31, false/2))
           ]))

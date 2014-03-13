@@ -13,7 +13,7 @@ Arguments Node _ _ _.
 Fixpoint find_rec (counter : nat) (x : Z) (t : tree) : M [ NonTermination ] bool
   :=
   match counter with
-  | 0 % nat => not_terminated tt
+  | O => not_terminated tt
   | S counter =>
     match t with
     | Leaf => ret false
