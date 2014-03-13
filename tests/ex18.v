@@ -11,3 +11,27 @@ Definition read_r (_ : unit) : M [ r ] Z :=
 
 Definition write_r (x : Z) : M [ r ] unit :=
   fun s => (inl tt, (x, tt)).
+
+Definition plus_one {A : Type} (x : A) : M [ r ] Z :=
+  match x with
+  | _ =>
+    let! x :=
+      let! x := read_r tt in
+      ret (Z.add x) in
+    ret (x 1)
+  end.
+
+Definition s := Effect.new string unit.
+
+Definition read_s (_ : unit) : M [ s ] string :=
+  fun s => (inl (fst s), s).
+
+Definition write_s (x : string) : M [ s ] unit :=
+  fun s => (inl tt, (x, tt)).
+
+Definition fail {A B : Type} (x : B) : M [ s; Failure ] A :=
+  match x with
+  | _ =>
+    let! x := lift [_;_] "10" (read_s tt) in
+    lift [_;_] "01" (failwith x)
+  end.

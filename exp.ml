@@ -173,6 +173,18 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           Apply (l, Variable (l_exn, x), Tuple (Loc.Unknown, es))
         | _ -> failwith "Constructor of an exception expected after a 'raise'.")
       | _ -> failwith "Expected one argument for 'raise'.")
+    | Texp_ident (path, _, _)
+      when PathName.of_path path = PathName.of_name ["Pervasives"] "!" ->
+      (match e_xs with
+      | [(_, Some e_x, _)] ->
+        (match e_x.exp_desc with
+        | Texp_ident (path, _, _) ->
+          let read = PathName.of_path path in
+          let read = { read with base = "read_" ^ read.PathName.base } in
+          let read = Envi.bound_name read env.FullEnvi.vars in
+          Apply (l, Variable (Loc.Unknown, read), Tuple (Loc.Unknown, []))
+        | _ -> failwith "Name of a reference expected after '!'.")
+      | _ -> failwith "Expected one argument for '!'.")
     | _ ->
       let e_f = of_expression env e_f in
       let e_xs = List.map (fun (_, e_x, _) ->
