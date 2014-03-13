@@ -167,7 +167,7 @@ module Exception = struct
       !^ "fun s => (inr (inl x), s).")
 end
 
-(*module Reference = struct
+module Reference = struct
   type t = {
     name : Name.t;
     typ : Type.t }
@@ -175,27 +175,40 @@ end
   let pp (r : t) : SmartPrint.t =
     nest (!^ "Reference" ^^ OCaml.tuple [Name.pp r.name; Type.pp r.typ])
 
-  let effect_name (r : t) : string =
-    "Ref_" ^ r.name
+  let update_env (r : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
+    { env with
+      FullEnvi.vars =
+        Envi.add_name ("read_" ^ r.name) () (
+        Envi.add_name ("write_" ^ r.name) ()
+          (env.FullEnvi.vars));
+      descriptors = Envi.add_name r.name () env.FullEnvi.descriptors }
 
-  let atom (r : t) : Effect.Atom.t = {
-    Effect.Atom.name = r.name;
-    kind = Effect.Atom.Kind.State;
-    coq_type = Type.to_coq false r.typ }
-
-  let read_write_effect_typ (r : t) : Effect.Type.t =
-    Effect.Type.Arrow (Effect.Descriptor.of_atom (atom r), Effect.Type.Pure)
+  let update_env_with_effects (r : t) (env : Effect.Type.t FullEnvi.t) (loc : Loc.t)
+    : Effect.Type.t FullEnvi.t =
+    let env = { env with
+      FullEnvi.descriptors = Envi.add_name r.name () env.FullEnvi.descriptors } in
+    let effect_typ =
+      Effect.Type.Arrow (
+        Effect.Descriptor.singleton
+          loc
+          (Envi.bound_name (PathName.of_name [] r.name) env.FullEnvi.descriptors),
+        Effect.Type.Pure) in
+    { env with
+      FullEnvi.vars =
+        Envi.add_name ("read_" ^ r.name) effect_typ (
+        Envi.add_name ("write_" ^ r.name) effect_typ
+          (env.FullEnvi.vars)) }
 
   let to_coq (r : t) : SmartPrint.t =
-    !^ "Definition" ^^ Name.to_coq (effect_name r) ^^ !^ ":=" ^^
-    !^ "Effect.new" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
+    !^ "Definition" ^^ Name.to_coq r.name ^^ !^ ":=" ^^
+      !^ "Effect.new" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
     newline ^^ newline ^^
-    !^ "Definition" ^^ Name.to_coq (r.name) ^^ !^ "{A : Type}" ^^
+    !^ "Definition" ^^ Name.to_coq ("read_" ^ r.name) ^^ !^ "{A : Type}" ^^
     nest (parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false r.typ)) ^^ !^ ":" ^^
-    !^ "M" ^^ !^ "[" ^^ !^ (effect_name r) ^^ !^ "]" ^^ !^ "A" ^^ !^ ":=" ^^
+    !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ !^ "A" ^^ !^ ":=" ^^
     newline ^^ indent (
       !^ "fun s => (inr (inl x), s).")
-end*)
+end
 
 (*
 (** The "open" construct to open a module. *)
@@ -218,6 +231,7 @@ type ('a, 'b) t =
   | Record of Loc.t * Record.t
   | Synonym of Loc.t * Synonym.t
   | Exception of Loc.t * Exception.t
+  | Reference of Loc.t * Reference.t
   (* | Open of Loc.t * Open.t *)
   | Module of Loc.t * Name.t * ('a, 'b) t list
 
@@ -231,6 +245,7 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
     | Record (loc, record) -> Loc.pp loc ^^ Record.pp record
     | Synonym (loc, synonym) -> Loc.pp loc ^^ Synonym.pp synonym
     | Exception (loc, exn) -> Loc.pp loc ^^ Exception.pp exn
+    | Reference (loc, r) -> Loc.pp loc ^^ Reference.pp r
     (* | Open (loc, o) -> Loc.pp loc ^^ Open.pp o *)
     | Module (loc, name, defs) ->
       nest (
@@ -325,7 +340,8 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : (unit, Loc.t) t list)
     | Inductive (loc, ind) -> (Inductive.update_env ind env, [def])
     | Record (loc, record) -> (Record.update_env record env, [def])
     | Synonym (loc, synonym) -> (Synonym.update_env synonym env, [def])
-    | Exception (loc, exn) -> (Exception.update_env exn env, [def]) in
+    | Exception (loc, exn) -> (Exception.update_env exn env, [def])
+    | Reference (loc, r) -> (Reference.update_env r env, [def]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))
@@ -350,6 +366,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
       (env, Module (loc, name, defs))
     | Exception (loc, exn) ->
       (Exception.update_env_with_effects exn env loc, Exception (loc, exn))
+    | Reference (loc, r) ->
+      (Reference.update_env_with_effects r env loc, Reference (loc, r))
     | Inductive (loc, ind) -> (Inductive.update_env ind env, Inductive (loc, ind))
     | Record (loc, record) -> (Record.update_env record env, Record (loc, record))
     | Synonym (loc, synonym) -> (Synonym.update_env synonym env, Synonym (loc, synonym)) in
@@ -389,6 +407,8 @@ let rec monadise (env : unit Envi.t)
       (Envi.close_module env (fun _ _ -> ()) name, Module (loc, name, defs))
     | Exception (loc, exn) ->
       (Envi.add_name exn.Exception.name () env, Exception (loc, exn))
+    | Reference (loc, r) ->
+      (Envi.add_name r.Reference.name () env, Reference (loc, r))
     | Inductive (loc, ind) -> (env, Inductive (loc, ind))
     | Record (loc, record) -> (env, Record (loc, record))
     | Synonym (loc, synonym) -> (env, Synonym (loc, synonym)) in
@@ -408,6 +428,7 @@ let rec to_coq (defs : ('a, 'b) t list) : SmartPrint.t =
     | Record (_, record) -> Record.to_coq record
     | Synonym (_, s) -> Synonym.to_coq s
     | Exception (_, exn) -> Exception.to_coq exn
+    | Reference (_, r) -> Reference.to_coq r
     (* | Open o -> Open.to_coq o *)
     | Module (_, name, defs) ->
       nest (
