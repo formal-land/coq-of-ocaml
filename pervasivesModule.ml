@@ -47,7 +47,9 @@ let env_fields : unit Envi.t =
 
 let env_effects : Effect.Type.t Envi.t =
   let descriptor x =
-    Effect.Descriptor.singleton (Envi.bound_name (PathName.of_name [] x) env_descriptors) in
+    Effect.Descriptor.singleton {
+      BoundName.path_name = PathName.of_name [] x;
+      depth = 0 } in
   Envi.open_module @@
   List.fold_left (fun env_effects (path, base, typ) ->
     Envi.add (PathName.of_name path base) typ env_effects)
@@ -101,7 +103,7 @@ let env_effects : Effect.Type.t Envi.t =
 
 let env_with_effects : Effect.Type.t FullEnvi.t = {
   FullEnvi.vars = env_effects;
-  lift_vars = (fun effect_typ _ -> effect_typ); (* TODO *)
+  close_lift_vars = Effect.Type.close_lift;
   typs = env_typs;
   descriptors = env_descriptors;
   constructors = env_constructors;
@@ -111,4 +113,4 @@ let env_with_effects : Effect.Type.t FullEnvi.t = {
 let env : unit FullEnvi.t =
   { env_with_effects with
     FullEnvi.vars = Envi.map env_effects (fun _ -> ());
-    lift_vars = (fun _ _ -> ()) }
+    close_lift_vars = (fun _ _ -> ()) }

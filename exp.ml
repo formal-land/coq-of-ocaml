@@ -410,7 +410,7 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
     (try
       let effect =
         { Effect.descriptor = Effect.Descriptor.pure;
-          typ = Envi.find x env.FullEnvi.vars } in
+          typ = Envi.find x env.FullEnvi.vars Effect.Type.open_lift } in
       Variable ((a, effect), x)
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (BoundName.pp x ^^ !^ "not found.")))

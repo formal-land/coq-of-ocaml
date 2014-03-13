@@ -10,10 +10,10 @@ Exception (Outside, ())
 Module G:
   Exception (Inside, (Type (Z/2) * Type (string/2)))
   
-  (. -[ Inside/0; Outside/0 ]-> .,
+  (. -[ Inside/0; Outside/1 ]-> .,
     Value (non_rec, g, [ A ], [ (b, Type (bool/2)) ], Some A) =
       IfThenElse
-        ((11, Effect ([ Inside/0; Outside/0 ], .)),
+        ((11, Effect ([ Inside/0; Outside/1 ], .)),
           Variable ((11, Effect ([ ], .)), b/0),
           Apply
             ((12, Effect ([ Inside/0 ], .)),
@@ -23,17 +23,17 @@ Module G:
                   Constant ((12, Effect ([ ], .)), Int(12)),
                   Constant ((12, Effect ([ ], .)), String("no")))),
           Apply
-            ((14, Effect ([ Outside/0 ], .)),
+            ((14, Effect ([ Outside/1 ], .)),
               Variable
-                ((14, Effect ([ ], . -[ Outside/0 ]-> .)), raise_Outside/1),
+                ((14, Effect ([ ], . -[ Outside/1 ]-> .)), raise_Outside/1),
               Tuple ((?, Effect ([ ], .))))))
 
-(. -> . -[ IO/1; Inside/0; NonTermination/1; Outside/0 ]-> .,
+(. -> . -[ IO/1; NonTermination/1; Outside/0; G.Inside/0 ]-> .,
   Value
     (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
       Some A) =
     Match
-      ((?, Effect ([ IO/1; Inside/0; NonTermination/1; Outside/0 ], .)),
+      ((?, Effect ([ IO/1; NonTermination/1; Outside/0; G.Inside/0 ], .)),
         Variable ((?, Effect ([ ], .)), counter/0),
         [
           (Constructor (O/1),
@@ -55,9 +55,9 @@ Module G:
                 Effect
                   ([
                     IO/1;
-                    Inside/0;
                     NonTermination/1;
-                    Outside/0
+                    Outside/0;
+                    G.Inside/0
                   ], .)),
                 Variable ((18, Effect ([ ], .)), l/0),
                 [
@@ -67,8 +67,8 @@ Module G:
                         Effect
                           ([
                             IO/1;
-                            Inside/0;
-                            Outside/0
+                            Outside/0;
+                            G.Inside/0
                           ],
                             .)),
                         Apply
@@ -100,8 +100,8 @@ Module G:
                           ((19,
                             Effect
                               ([
-                                Inside/0;
-                                Outside/0
+                                Outside/0;
+                                G.Inside/0
                               ],
                                 .)),
                             Variable
@@ -111,8 +111,8 @@ Module G:
                                   ],
                                     .
                                       -[
-                                        Inside/0;
-                                        Outside/0
+                                        Outside/0;
+                                        G.Inside/0
                                       ]->
                                       .)),
                                 G.g/0),
@@ -132,7 +132,7 @@ Module G:
                       ((20,
                         Effect
                           ([
-                            Inside/0
+                            G.Inside/0
                           ],
                             .)),
                         Variable
@@ -142,7 +142,7 @@ Module G:
                               ],
                                 .
                                   -[
-                                    Inside/0
+                                    G.Inside/0
                                   ]->
                                   .)),
                             G.raise_Inside/0),
@@ -172,9 +172,9 @@ Module G:
                         Effect
                           ([
                             IO/1;
-                            Inside/0;
                             NonTermination/1;
-                            Outside/0
+                            Outside/0;
+                            G.Inside/0
                           ],
                             .)),
                         Apply
@@ -185,9 +185,9 @@ Module G:
                                 .
                                   -[
                                     IO/1;
-                                    Inside/0;
                                     NonTermination/1;
-                                    Outside/0
+                                    Outside/0;
+                                    G.Inside/0
                                   ]->
                                   .)),
                             Variable
@@ -200,9 +200,9 @@ Module G:
                                       .
                                         -[
                                           IO/1;
-                                          Inside/0;
                                           NonTermination/1;
-                                          Outside/0
+                                          Outside/0;
+                                          G.Inside/0
                                         ]->
                                         .)),
                                 h_rec/0),
@@ -223,24 +223,27 @@ Module G:
                 ]))
         ]))
 
-(. -[ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ]-> .,
+(. -[ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ]-> .,
   Value (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ], Some A) =
     Let
-      (?, Effect ([ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ], .))
+      (?,
+        Effect ([ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ], .))
       (non_rec, counter, [ ], [ ], None) =
       Apply
         ((?, Effect ([ Counter/1 ], .)),
           Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
           Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ IO/1; Inside/0; NonTermination/1; Outside/0 ], .)),
+      ((?, Effect ([ IO/1; NonTermination/1; Outside/0; G.Inside/0 ], .)),
         Apply
           ((?,
-            Effect ([ ], . -[ IO/1; Inside/0; NonTermination/1; Outside/0 ]-> .)),
+            Effect
+              ([ ], . -[ IO/1; NonTermination/1; Outside/0; G.Inside/0 ]-> .)),
             Variable
               ((?,
                 Effect
                   ([ ],
-                    . -> . -[ IO/1; Inside/0; NonTermination/1; Outside/0 ]-> .)),
+                    . ->
+                      . -[ IO/1; NonTermination/1; Outside/0; G.Inside/0 ]-> .)),
                 h_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
         Variable ((?, Effect ([ ], .)), l/0)))

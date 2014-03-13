@@ -10,29 +10,34 @@ Module G:
   ((),
     Value
       (non_rec, g, [ A ], [ (b, Type (bool/2)) ],
-        Some Monad ([ Inside/0; Outside/0 ], A)) =
+        Some Monad ([ Inside/0; Outside/1 ], A)) =
       IfThenElse
         (11, Variable (11, b/0),
           Lift
-            (?, [ Inside/0 ], [ Inside/0; Outside/0 ],
+            (?, [ Inside/0 ], [ Inside/0; Outside/1 ],
               Apply
                 (12, Variable (12, raise_Inside/0),
                   Tuple (?, Constant (12, Int(12)), Constant (12, String("no"))))),
           Lift
-            (?, [ Outside/0 ], [ Inside/0; Outside/0 ],
+            (?, [ Outside/1 ], [ Inside/0; Outside/1 ],
               Apply (14, Variable (14, raise_Outside/1), Tuple (?)))))
 
 ((),
   Value
     (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
-      Some Monad ([ IO/1; Inside/0; NonTermination/1; Outside/0 ], A)) =
+      Some Monad ([ IO/1; NonTermination/1; Outside/0; G.Inside/0 ], A)) =
     Match
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
             Lift
               (?, [ NonTermination/1 ],
-                [ IO/1; Inside/0; NonTermination/1; Outside/0 ],
+                [
+                  IO/1;
+                  NonTermination/1;
+                  Outside/0;
+                  G.Inside/0
+                ],
                 Apply
                   (?, Variable (?, not_terminated/1),
                     Tuple (?))));
@@ -45,14 +50,14 @@ Module G:
                       (?,
                         [
                           IO/1;
-                          Inside/0;
-                          Outside/0
+                          Outside/0;
+                          G.Inside/0
                         ],
                         [
                           IO/1;
-                          Inside/0;
                           NonTermination/1;
-                          Outside/0
+                          Outside/0;
+                          G.Inside/0
                         ],
                         Bind
                           (?,
@@ -63,8 +68,8 @@ Module G:
                                 ],
                                 [
                                   IO/1;
-                                  Inside/0;
-                                  Outside/0
+                                  Outside/0;
+                                  G.Inside/0
                                 ],
                                 Apply
                                   (19,
@@ -78,13 +83,13 @@ Module G:
                             Lift
                               (?,
                                 [
-                                  Inside/0;
-                                  Outside/0
+                                  Outside/0;
+                                  G.Inside/0
                                 ],
                                 [
                                   IO/1;
-                                  Inside/0;
-                                  Outside/0
+                                  Outside/0;
+                                  G.Inside/0
                                 ],
                                 Apply
                                   (19,
@@ -102,13 +107,13 @@ Module G:
                     Lift
                       (?,
                         [
-                          Inside/0
+                          G.Inside/0
                         ],
                         [
                           IO/1;
-                          Inside/0;
                           NonTermination/1;
-                          Outside/0
+                          Outside/0;
+                          G.Inside/0
                         ],
                         Apply
                           (20,
@@ -143,17 +148,18 @@ Module G:
 ((),
   Value
     (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ],
-      Some Monad ([ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ], A))
+      Some
+        Monad ([ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ], A))
     =
     Bind
       (?,
         Lift
           (?, [ Counter/1 ],
-            [ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ],
+            [ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
             Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
         Lift
-          (?, [ IO/1; Inside/0; NonTermination/1; Outside/0 ],
-            [ Counter/1; IO/1; Inside/0; NonTermination/1; Outside/0 ],
+          (?, [ IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
+            [ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
             Apply
               (?, Apply (?, Variable (?, h_rec/0), Variable (?, counter/0)),
                 Variable (?, l/0)))))

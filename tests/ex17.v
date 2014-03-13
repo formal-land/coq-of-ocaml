@@ -25,21 +25,21 @@ Module G.
 End G.
 
 Fixpoint h_rec {A B : Type} (counter : nat) (l : list B) :
-  M [ IO; G.Inside; NonTermination; Outside ] A :=
+  M [ IO; NonTermination; Outside; G.Inside ] A :=
   match counter with
-  | O => lift [_;_;_;_] "0010" (not_terminated tt)
+  | O => lift [_;_;_;_] "0100" (not_terminated tt)
   | S counter =>
     match l with
     | [] =>
-      lift [_;_;_;_] "1101"
+      lift [_;_;_;_] "1011"
         (let! _ := lift [_;_;_] "100" (print_string "no tail" % string) in
         lift [_;_;_] "011" (G.g false))
-    | cons x [] => lift [_;_;_;_] "0100" (G.raise_Inside (0, "gg" % string))
+    | cons x [] => lift [_;_;_;_] "0001" (G.raise_Inside (0, "gg" % string))
     | cons _ xs => (h_rec counter) xs
     end
   end.
 
 Definition h {A B : Type} (l : list B) :
-  M [ Counter; IO; G.Inside; NonTermination; Outside ] A :=
+  M [ Counter; IO; NonTermination; Outside; G.Inside ] A :=
   let! counter := lift [_;_;_;_;_] "10000" (read_counter tt) in
   lift [_;_;_;_;_] "01111" ((h_rec counter) l).

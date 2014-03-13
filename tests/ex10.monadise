@@ -6,7 +6,7 @@ Module List2:
     Value
       (rec, sum_rec, [ ],
         [ (counter, Type (nat/2)); (l, Type (t/0, Type (Z/2))) ],
-        Some Monad ([ NonTermination/1 ], Type (Z/2))) =
+        Some Monad ([ NonTermination/2 ], Type (Z/2))) =
       Match
         (?, Variable (?, counter/0),
           [
@@ -61,14 +61,14 @@ Module List2:
   ((),
     Value
       (non_rec, sum, [ ], [ (l, Type (t/0, Type (Z/2))) ],
-        Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/2))) =
+        Some Monad ([ Counter/2; NonTermination/2 ], Type (Z/2))) =
       Bind
         (?,
           Lift
-            (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+            (?, [ Counter/2 ], [ Counter/2; NonTermination/2 ],
               Apply (?, Variable (?, read_counter/2), Tuple (?))), Some counter,
           Lift
-            (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+            (?, [ NonTermination/2 ], [ Counter/2; NonTermination/2 ],
               Apply
                 (?, Apply (?, Variable (?, sum_rec/0), Variable (?, counter/0)),
                   Variable (?, l/0)))))
@@ -77,7 +77,7 @@ Module List2:
     Value
       (rec, of_list_rec, [ A ],
         [ (counter, Type (nat/2)); (x, Type (list/2, A)) ],
-        Some Monad ([ NonTermination/1 ], Type (t/0, A))) =
+        Some Monad ([ NonTermination/2 ], Type (t/0, A))) =
       Match
         (?, Variable (?, counter/0),
           [
@@ -128,14 +128,14 @@ Module List2:
   ((),
     Value
       (non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ],
-        Some Monad ([ Counter/1; NonTermination/1 ], Type (t/0, A))) =
+        Some Monad ([ Counter/2; NonTermination/2 ], Type (t/0, A))) =
       Bind
         (?,
           Lift
-            (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+            (?, [ Counter/2 ], [ Counter/2; NonTermination/2 ],
               Apply (?, Variable (?, read_counter/2), Tuple (?))), Some counter,
           Lift
-            (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+            (?, [ NonTermination/2 ], [ Counter/2; NonTermination/2 ],
               Apply
                 (?,
                   Apply

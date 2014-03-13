@@ -24,11 +24,17 @@ let rec depth (x : PathName.t) (env : 'a t) : int =
 let bound_name (x : PathName.t) (env : 'a t) : BoundName.t =
   { BoundName.path_name = x; depth = depth x env }
 
-let rec find (x : BoundName.t) (env : 'a t) : 'a =
+let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
   let map =
     try List.nth env x.BoundName.depth with
     | Failure "nth" -> raise Not_found in
-  PathName.Map.find x.BoundName.path_name map
+  let rec iterate_open_lift v n =
+    if n = 0 then
+      v
+    else
+      iterate_open_lift (open_lift v) (n - 1) in
+  iterate_open_lift (PathName.Map.find x.BoundName.path_name map) x.BoundName.depth
+
 
 let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
   let mem (x : PathName.t) : bool =
