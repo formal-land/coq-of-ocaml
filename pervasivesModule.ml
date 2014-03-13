@@ -58,7 +58,10 @@ let env_effects : Effect.Type.t Envi.t =
     Envi.empty
     [ [], "equiv_decb", Pure;
       [], "nequiv_decb", Pure;
+      ["Z"], "leb", Pure;
+      ["Z"], "geb", Pure;
       ["Z"], "ltb", Pure;
+      ["Z"], "gtb", Pure;
       [], "negb", Pure;
       [], "andb", Pure;
       [], "orb", Pure;

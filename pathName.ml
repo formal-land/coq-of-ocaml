@@ -21,7 +21,10 @@ let convert (x : t) : t =
     (match base with
     | "=" -> { path = []; base = "equiv_decb" }
     | "<>" -> { path = []; base = "nequiv_decb" }
+    | "<=" -> { path = ["Z"]; base = "leb" }
+    | ">=" -> { path = ["Z"]; base = "geb" }
     | "<" -> { path = ["Z"]; base = "ltb" }
+    | ">" -> { path = ["Z"]; base = "gtb" }
     | "not" -> { path = []; base = "negb" }
     | "&&" -> { path = []; base = "andb" }
     | "&" -> failwith "\"&\" is deprecated. Use \"&&\" instead."
