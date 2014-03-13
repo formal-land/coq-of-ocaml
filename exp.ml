@@ -185,6 +185,19 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           Apply (l, Variable (Loc.Unknown, read), Tuple (Loc.Unknown, []))
         | _ -> failwith "Name of a reference expected after '!'.")
       | _ -> failwith "Expected one argument for '!'.")
+    | Texp_ident (path, _, _)
+      when PathName.of_path path = PathName.of_name ["Pervasives"] ":=" ->
+      (match e_xs with
+      | [(_, Some e_r, _); (_, Some e_v, _)] ->
+        (match e_r.exp_desc with
+        | Texp_ident (path, _, _) ->
+          let write = PathName.of_path path in
+          let write = { write with base = "write_" ^ write.PathName.base } in
+          let write = Envi.bound_name write env.FullEnvi.vars in
+          let e_v = of_expression env e_v in
+          Apply (l, Variable (Loc.Unknown, write), e_v)
+        | _ -> failwith "Name of a reference expected after ':='.")
+      | _ -> failwith "Expected two arguments for ':='.")
     | _ ->
       let e_f = of_expression env e_f in
       let e_xs = List.map (fun (_, e_x, _) ->

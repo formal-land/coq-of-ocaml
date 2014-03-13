@@ -35,3 +35,19 @@ Definition fail {A B : Type} (x : B) : M [ s; Failure ] A :=
     let! x := lift [_;_] "10" (read_s tt) in
     lift [_;_] "01" (failwith x)
   end.
+
+Definition reset {A : Type} (x : A) : M [ r ] unit :=
+  match x with
+  | _ => write_r 0
+  end.
+
+Definition incr {A : Type} (x : A) : M [ r ] unit :=
+  match x with
+  | _ =>
+    let! x :=
+      let! x :=
+        let! x := read_r tt in
+        ret (Z.add x) in
+      ret (x 1) in
+    write_r x
+  end.

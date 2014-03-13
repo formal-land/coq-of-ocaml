@@ -71,3 +71,60 @@
                           (?,
                             x/0)))))
         ]))
+
+10
+((),
+  Value (non_rec, reset, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1)))
+    =
+    Match
+      (?, Variable (?, x/0),
+        [ (Any, Apply (11, Variable (?, write_r/0), Constant (11, Int(0)))) ]))
+
+13
+((),
+  Value (non_rec, incr, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1)))
+    =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Bind
+              (?,
+                Bind
+                  (?,
+                    Bind
+                      (?,
+                        Apply
+                          (14,
+                            Variable
+                              (?,
+                                read_r/0),
+                            Tuple
+                              (?)),
+                        Some x,
+                        Return
+                          (?,
+                            Apply
+                              (14,
+                                Variable
+                                  (14,
+                                    Z.add/1),
+                                Variable
+                                  (?,
+                                    x/0)))),
+                    Some x,
+                    Return
+                      (?,
+                        Apply
+                          (?,
+                            Variable
+                              (?,
+                                x/0),
+                            Constant
+                              (14,
+                                Int(1))))),
+                Some x,
+                Apply
+                  (14, Variable (?, write_r/0),
+                    Variable (?, x/0))))
+        ]))

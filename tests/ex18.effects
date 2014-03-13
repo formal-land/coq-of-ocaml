@@ -75,3 +75,74 @@
                         read_s/0),
                     Tuple ((?, Effect ([ ], .))))))
         ]))
+
+10
+(. -[ r/0 ]-> .,
+  Value (non_rec, reset, [ A ], [ (x, A) ], Some Type (unit/1)) =
+    Match
+      ((?, Effect ([ r/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Any,
+            Apply
+              ((11, Effect ([ r/0 ], .)),
+                Variable
+                  ((?, Effect ([ ], . -[ r/0 ]-> .)),
+                    write_r/0),
+                Constant ((11, Effect ([ ], .)), Int(0))))
+        ]))
+
+13
+(. -[ r/0 ]-> .,
+  Value (non_rec, incr, [ A ], [ (x, A) ], Some Type (unit/1)) =
+    Match
+      ((?, Effect ([ r/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Any,
+            Apply
+              ((14, Effect ([ r/0 ], .)),
+                Variable
+                  ((?, Effect ([ ], . -[ r/0 ]-> .)),
+                    write_r/0),
+                Apply
+                  ((?, Effect ([ r/0 ], .)),
+                    Apply
+                      ((14,
+                        Effect
+                          ([
+                            r/0
+                          ], .)),
+                        Variable
+                          ((14,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Z.add/1),
+                        Apply
+                          ((14,
+                            Effect
+                              ([
+                                r/0
+                              ],
+                                .)),
+                            Variable
+                              ((?,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      -[
+                                        r/0
+                                      ]->
+                                      .)),
+                                read_r/0),
+                            Tuple
+                              ((?,
+                                Effect
+                                  ([
+                                  ],
+                                    .))))),
+                    Constant
+                      ((14, Effect ([ ], .)),
+                        Int(1)))))
+        ]))
