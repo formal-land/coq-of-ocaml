@@ -221,20 +221,20 @@ type ('a, 'b) t =
   (* | Open of Loc.t * Open.t *)
   | Module of Loc.t * Name.t * ('a, 'b) t list
 
-(* TODO: print the location *)
 let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
   (defs : ('a, 'b) t list) : SmartPrint.t =
   let pp_one (def : ('a, 'b) t) : SmartPrint.t =
     match def with
-    | Value (_, a, value) -> OCaml.tuple [pp_a a; Value.pp pp_b value]
-    | Inductive (_, ind) -> Inductive.pp ind
-    | Record (_, record) -> Record.pp record
-    | Synonym (_, synonym) -> Synonym.pp synonym
-    | Exception (_, exn) -> Exception.pp exn
-    (* | Open (_, o) -> Open.pp o *)
-    | Module (_, name, defs) ->
+    | Value (loc, a, value) ->
+      Loc.pp loc ^^ OCaml.tuple [pp_a a; Value.pp pp_b value]
+    | Inductive (loc, ind) -> Loc.pp loc ^^ Inductive.pp ind
+    | Record (loc, record) -> Loc.pp loc ^^ Record.pp record
+    | Synonym (loc, synonym) -> Loc.pp loc ^^ Synonym.pp synonym
+    | Exception (loc, exn) -> Loc.pp loc ^^ Exception.pp exn
+    (* | Open (loc, o) -> Loc.pp loc ^^ Open.pp o *)
+    | Module (loc, name, defs) ->
       nest (
-        !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+        Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
         indent (pp pp_a pp_b defs)) in
   separate (newline ^^ newline) (List.map pp_one defs)
 

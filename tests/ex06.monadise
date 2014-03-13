@@ -1,3 +1,4 @@
+3
 ((),
   Value
     (rec, map_rec, [ A; B ],
@@ -60,6 +61,7 @@
                 ]))
         ]))
 
+3
 ((),
   Value
     (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
@@ -78,6 +80,7 @@
                     Apply (?, Variable (?, map_rec/0), Variable (?, counter/0)),
                     Variable (?, f/0)), Variable (?, l/0)))))
 
+8
 ((),
   Value
     (rec, fold_rec, [ A; B ],
@@ -139,6 +142,7 @@
                 ]))
         ]))
 
+8
 ((),
   Value
     (non_rec, fold, [ A; B ],
@@ -162,6 +166,7 @@
                         Variable (?, f/0)), Variable (?, a/0)),
                 Variable (?, l/0)))))
 
+13
 ((),
   Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Constructor
@@ -173,6 +178,7 @@
                 Constructor
                   (13, cons/1, Constant (13, Int(2)), Constructor (13, []/1))))))
 
+15
 ((),
   Value
     (non_rec, n, [ A ],

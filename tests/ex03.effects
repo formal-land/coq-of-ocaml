@@ -1,3 +1,4 @@
+3
 (.,
   Value (non_rec, n1, [ ], [ ], Some Type (Z/1)) =
     Let (4, Effect ([ ], .)) (non_rec, m, [ ], [ ], None) =
@@ -6,6 +7,7 @@
       Variable ((5, Effect ([ ], .)), m/0) in
     Variable ((6, Effect ([ ], .)), n1/0))
 
+8
 (.,
   Value (non_rec, n2, [ ], [ ], Some Type (Z/1)) =
     Let (9, Effect ([ ], .))

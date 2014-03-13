@@ -1,6 +1,8 @@
+3
 Inductive tree:
   ([ ], [ (Leaf, [ ]); (Node, [ Type (tree/0); Type (Z/1); Type (tree/0) ]) ])
 
+7
 ((),
   Value
     (rec, find_rec, [ ],
@@ -92,6 +94,7 @@ Inductive tree:
                 ]))
         ]))
 
+7
 ((),
   Value
     (non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],

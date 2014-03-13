@@ -1,3 +1,4 @@
+3
 (. -[ Failure/1 ]-> .,
   Value (non_rec, tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
     =
@@ -22,6 +23,7 @@
                     String("Cannot take the tail of an empty list."))))
         ]))
 
+8
 (. -> . -[ IO/1; NonTermination/1 ]-> .,
   Value
     (rec, print_list_rec, [ ],
@@ -141,6 +143,7 @@
                 ]))
         ]))
 
+8
 (. -[ Counter/1; IO/1; NonTermination/1 ]-> .,
   Value
     (non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
@@ -160,6 +163,7 @@
                 print_list_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
         Variable ((?, Effect ([ ], .)), x/0)))
 
+14
 (. -[ Counter/1; IO/1; NonTermination/1 ]-> .,
   Value
     (non_rec, f, [ ], [ ],
@@ -168,6 +172,7 @@
       ((14, Effect ([ ], . -[ Counter/1; IO/1; NonTermination/1 ]-> .)),
         print_list/0))
 
+16
 (. -[ Counter/1; Failure/1; IO/1; NonTermination/1 ]-> .,
   Value (non_rec, x, [ A ], [ (z, A) ], Some Type (unit/1)) =
     Apply

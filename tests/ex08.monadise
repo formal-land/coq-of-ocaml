@@ -1,10 +1,13 @@
+3
 Inductive t1:
   ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
 
+8
 ((),
   Value (non_rec, n, [ ], [ ], Some Type (t1/0)) =
     Constructor (8, C2/0, Constructor (8, false/1), Constant (8, Int(3))))
 
+10
 ((),
   Value (non_rec, m, [ ], [ ], Some Type (bool/1)) =
     Match
@@ -14,9 +17,11 @@ Inductive t1:
           (Any, Constructor (12, true/1))
         ]))
 
+14
 Inductive t2:
   ([ a ], [ (D1, [ ]); (D2, [ a; Type (t2/0, a) ]) ])
 
+18
 ((),
   Value
     (rec, of_list_rec, [ A ],
@@ -69,6 +74,7 @@ Inductive t2:
                 ]))
         ]))
 
+18
 ((),
   Value
     (non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ],
@@ -85,6 +91,7 @@ Inductive t2:
                 Apply (?, Variable (?, of_list_rec/0), Variable (?, counter/0)),
                 Variable (?, l/0)))))
 
+23
 ((),
   Value
     (rec, sum_rec, [ ],
@@ -141,6 +148,7 @@ Inductive t2:
                 ]))
         ]))
 
+23
 ((),
   Value
     (non_rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ],
@@ -156,6 +164,7 @@ Inductive t2:
               (?, Apply (?, Variable (?, sum_rec/0), Variable (?, counter/0)),
                 Variable (?, l/0)))))
 
+28
 ((),
   Value
     (non_rec, s, [ ], [ ],

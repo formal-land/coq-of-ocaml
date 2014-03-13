@@ -1,10 +1,13 @@
+3
 Inductive set:
   ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/1); Type (set/0) ]) ])
 
+7
 ((),
   Value (non_rec, empty, [ ], [ ], Some Type (set/0)) =
     Constructor (7, Empty/0))
 
+9
 ((),
   Value
     (rec, member_rec, [ ],
@@ -100,6 +103,7 @@ Inductive set:
                 ]))
         ]))
 
+9
 ((),
   Value
     (non_rec, member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
@@ -119,6 +123,7 @@ Inductive set:
                       (?, Variable (?, member_rec/0), Variable (?, counter/0)),
                     Variable (?, x/0)), Variable (?, s/0)))))
 
+20
 ((),
   Value
     (rec, insert_rec, [ ],
@@ -259,6 +264,7 @@ Inductive set:
                 ]))
         ]))
 
+20
 ((),
   Value
     (non_rec, insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],

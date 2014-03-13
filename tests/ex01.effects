@@ -1,7 +1,9 @@
+3
 (. -> . -> .,
   Value (non_rec, f, [ A; B ], [ (x, A); (y, B) ], Some A) =
     Variable ((3, Effect ([ ], .)), x/0))
 
+5
 (.,
   Value (non_rec, n, [ ], [ ], Some Type (Z/1)) =
     Apply

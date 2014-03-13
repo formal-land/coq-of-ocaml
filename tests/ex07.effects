@@ -1,3 +1,4 @@
+3
 (.,
   Value (non_rec, b, [ ], [ ], Some Type (bool/1)) =
     Apply
@@ -26,6 +27,7 @@
               ((3, Effect ([ ], .)), Variable ((3, Effect ([ ], .)), negb/1),
                 Constructor ((3, Effect ([ ], .)), true/1)))))
 
+5
 (.,
   Value (non_rec, n1, [ ], [ ], Some Type (Z/1)) =
     Apply
@@ -40,6 +42,7 @@
                 Constant ((5, Effect ([ ], .)), Int(2))),
             Constant ((5, Effect ([ ], .)), Int(3)))))
 
+7
 (.,
   Value (non_rec, n2, [ ], [ ], Some Type (Z/1)) =
     Apply
@@ -75,6 +78,7 @@
                     Constant ((7, Effect ([ ], .)), Int(4)))),
             Constant ((7, Effect ([ ], .)), Int(3)))))
 
+9
 (.,
   Value (non_rec, n3, [ ], [ ], Some Type (Z/1)) =
     Apply
@@ -83,6 +87,7 @@
           ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), Z.succ/1),
             Constant ((9, Effect ([ ], .)), Int(12)))))
 
+11
 (.,
   Value (non_rec, n4, [ ], [ ], Some Type (Z/1)) =
     Apply
@@ -104,6 +109,7 @@
                 Constant ((11, Effect ([ ], .)), Int(3)))),
         Constant ((11, Effect ([ ], .)), Int(9))))
 
+13
 (.,
   Value (non_rec, n5, [ ], [ ], Some Type (Z/1)) =
     Apply
@@ -125,6 +131,7 @@
                 Constant ((13, Effect ([ ], .)), Int(12))),
             Constant ((13, Effect ([ ], .)), Int(1)))))
 
+15
 (.,
   Value (non_rec, s, [ ], [ ], Some Type (string/1)) =
     Apply
@@ -134,6 +141,7 @@
             Constant ((15, Effect ([ ], .)), String("ghj"))),
         Constant ((15, Effect ([ ], .)), String("klm"))))
 
+17
 (.,
   Value (non_rec, c, [ ], [ ], Some Type (ascii/1)) =
     Apply
@@ -148,12 +156,14 @@
                     Constant ((17, Effect ([ ], .)), Char("c")))),
             Constant ((17, Effect ([ ], .)), Int(1)))))
 
+19
 (.,
   Value (non_rec, x, [ ], [ ], Some Type (unit/1)) =
     Apply
       ((19, Effect ([ ], .)), Variable ((19, Effect ([ ], .)), ignore/1),
         Constant ((19, Effect ([ ], .)), Int(23))))
 
+21
 (.,
   Value (non_rec, p, [ ], [ ], Some Type (Z/1)) =
     Apply
@@ -172,6 +182,7 @@
               ((21, Effect ([ ], .)), Constant ((21, Effect ([ ], .)), Int(3)),
                 Constant ((21, Effect ([ ], .)), Int(4))))))
 
+23
 (.,
   Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
@@ -190,6 +201,7 @@
             Constant ((23, Effect ([ ], .)), Int(3)),
             Constructor ((23, Effect ([ ], .)), []/1))))
 
+25
 (.,
   Value (non_rec, y, [ ], [ ], Some Type (Z/1)) =
     Apply

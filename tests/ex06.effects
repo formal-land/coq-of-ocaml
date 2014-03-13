@@ -1,3 +1,4 @@
+3
 (. -> . -> . -[ NonTermination/1 ]-> .,
   Value
     (rec, map_rec, [ A; B ],
@@ -130,6 +131,7 @@
                 ]))
         ]))
 
+3
 (. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
     (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
@@ -152,6 +154,7 @@
             Variable ((?, Effect ([ ], .)), f/0)),
         Variable ((?, Effect ([ ], .)), l/0)))
 
+8
 (. -> . -> . -> . -[ NonTermination/1 ]-> .,
   Value
     (rec, fold_rec, [ A; B ],
@@ -309,6 +312,7 @@
                 ]))
         ]))
 
+8
 (. -> . -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
     (non_rec, fold, [ A; B ],
@@ -335,6 +339,7 @@
             Variable ((?, Effect ([ ], .)), a/0)),
         Variable ((?, Effect ([ ], .)), l/0)))
 
+13
 (.,
   Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Constructor
@@ -350,6 +355,7 @@
                     Constant ((13, Effect ([ ], .)), Int(2)),
                     Constructor ((13, Effect ([ ], .)), []/1))))))
 
+15
 (. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
     (non_rec, n, [ A ],

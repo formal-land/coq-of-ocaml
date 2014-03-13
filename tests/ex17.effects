@@ -1,5 +1,6 @@
-Exception (Outside, ())
+3 Exception (Outside, ())
 
+5
 (. -[ Outside/0 ]-> .,
   Value (non_rec, f, [ A; B ], [ (x, B) ], Some A) =
     Apply
@@ -7,10 +8,10 @@ Exception (Outside, ())
         Variable ((5, Effect ([ ], . -[ Outside/0 ]-> .)), raise_Outside/0),
         Tuple ((?, Effect ([ ], .)))))
 
-Module G:
-  Exception (Inside, (Type (Z/2) * Type (string/2)))
+7 Module G:
+  8 Exception (Inside, (Type (Z/2) * Type (string/2)))
   
-  (. -[ Outside/1; Inside/0 ]-> .,
+  10 (. -[ Outside/1; Inside/0 ]-> .,
     Value (non_rec, g, [ A ], [ (b, Type (bool/2)) ], Some A) =
       IfThenElse
         ((11, Effect ([ Outside/1; Inside/0 ], .)),
@@ -28,6 +29,7 @@ Module G:
                 ((14, Effect ([ ], . -[ Outside/1 ]-> .)), raise_Outside/1),
               Tuple ((?, Effect ([ ], .))))))
 
+17
 (. -> . -[ Outside/0; G.Inside/0; IO/1; NonTermination/1 ]-> .,
   Value
     (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
@@ -223,6 +225,7 @@ Module G:
                 ]))
         ]))
 
+17
 (. -[ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ]-> .,
   Value (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ], Some A) =
     Let

@@ -1,3 +1,4 @@
+3
 (.,
   Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Let (4, Effect ([ Counter/1; NonTermination/1 ], .))

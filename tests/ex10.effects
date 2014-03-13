@@ -1,8 +1,8 @@
-Module List2:
-  Inductive t:
+3 Module List2:
+  4 Inductive t:
     ([ a ], [ (Nil, [ ]); (Cons, [ a; Type (t/0, a) ]) ])
   
-  (. -> . -[ NonTermination/2 ]-> .,
+  8 (. -> . -[ NonTermination/2 ]-> .,
     Value
       (rec, sum_rec, [ ],
         [ (counter, Type (nat/2)); (l, Type (t/0, Type (Z/2))) ],
@@ -113,7 +113,7 @@ Module List2:
                   ]))
           ]))
   
-  (. -[ Counter/2; NonTermination/2 ]-> .,
+  8 (. -[ Counter/2; NonTermination/2 ]-> .,
     Value (non_rec, sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2))
       =
       Let (?, Effect ([ Counter/2; NonTermination/2 ], .))
@@ -131,7 +131,7 @@ Module List2:
               Variable ((?, Effect ([ ], .)), counter/0)),
           Variable ((?, Effect ([ ], .)), l/0)))
   
-  (. -> . -[ NonTermination/2 ]-> .,
+  13 (. -> . -[ NonTermination/2 ]-> .,
     Value
       (rec, of_list_rec, [ A ],
         [ (counter, Type (nat/2)); (x, Type (list/2, A)) ], Some Type (t/0, A))
@@ -230,7 +230,7 @@ Module List2:
                   ]))
           ]))
   
-  (. -[ Counter/2; NonTermination/2 ]-> .,
+  13 (. -[ Counter/2; NonTermination/2 ]-> .,
     Value
       (non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)) =
       Let (?, Effect ([ Counter/2; NonTermination/2 ], .))
@@ -248,11 +248,12 @@ Module List2:
                   of_list_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
           Variable ((?, Effect ([ ], .)), x/0)))
   
-  Module Inside:
-    (.,
+  17 Module Inside:
+    18 (.,
       Value (non_rec, x, [ ], [ ], Some Type (Z/3)) =
         Constant ((18, Effect ([ ], .)), Int(12)))
 
+22
 (.,
   Value (non_rec, n, [ ], [ ], Some Type (Z/1)) =
     Apply
