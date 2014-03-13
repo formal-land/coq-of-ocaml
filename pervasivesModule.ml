@@ -47,9 +47,11 @@ let env_fields : unit Envi.t =
 
 let env_effects : Effect.Type.t Envi.t =
   let descriptor x =
-    Effect.Descriptor.singleton {
+    let loc = Loc.Ether x in
+    let x = {
       BoundName.path_name = PathName.of_name [] x;
       depth = 0 } in
+    Effect.Descriptor.singleton loc x in
   Envi.open_module @@
   List.fold_left (fun env_effects (path, base, typ) ->
     Envi.add (PathName.of_name path base) typ env_effects)

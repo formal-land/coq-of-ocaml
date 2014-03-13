@@ -2,27 +2,28 @@
 open SmartPrint
 
 module Descriptor = struct
-  type t = BoundName.Set.t
+  module Map = Map.Make (struct type t = Loc.t let compare = compare end)
+  type t = BoundName.t Map.t
 
   let pp (d : t) : SmartPrint.t =
-    OCaml.list BoundName.pp (BoundName.Set.elements d)
+    OCaml.list (fun (_, x) -> BoundName.pp x) (Map.bindings d)
 
-  let pure : t = BoundName.Set.empty
+  let pure : t = Map.empty
 
   let is_pure (d : t) : bool =
-    BoundName.Set.is_empty d
+    Map.is_empty d
 
   let eq (d1 : t) (d2 : t) : bool =
-    BoundName.Set.equal d1 d2
+    Map.equal (fun _ _ -> true) d1 d2
 
-  let singleton (x : BoundName.t) : t =
-    BoundName.Set.singleton x
+  let singleton (loc : Loc.t) (x : BoundName.t) : t =
+    Map.singleton loc x
 
   let union (ds : t list) : t =
-    List.fold_left (BoundName.Set.union) pure ds
+    List.fold_left (fun d1 d2 -> Map.fold Map.add d1 d2) pure ds
 
   let to_coq (d : t) : SmartPrint.t =
-    OCaml.list BoundName.to_coq (BoundName.Set.elements d)
+    OCaml.list (fun (_, x) -> BoundName.to_coq x) (Map.bindings d)
 
   let subset_to_coq (d1 : t) (d2 : t) : SmartPrint.t =
     let rec aux xs1 xs2 : bool list =
@@ -35,20 +36,16 @@ module Descriptor = struct
           false :: aux xs1 xs2'
       | (_ :: _, []) ->
         failwith "Must be a subset to display the subset." in
-    let bs = aux (BoundName.Set.elements d1) (BoundName.Set.elements d2) in
+    let bs = aux (Map.bindings d1) (Map.bindings d2) in
     brakets (separate (!^ ";") (List.map (fun _ -> !^ "_") bs)) ^^
     double_quotes (separate empty
       (List.map (fun b -> if b then !^ "1" else !^ "0") bs))
 
   let open_lift (d : t) : t =
-    BoundName.Set.fold (fun x d ->
-      BoundName.Set.add (BoundName.open_lift x) d)
-      d BoundName.Set.empty
+    Map.map BoundName.open_lift d
 
   let close_lift (d : t) (name : Name.t) : t =
-    BoundName.Set.fold (fun x d ->
-      BoundName.Set.add (BoundName.close_lift x name) d)
-      d BoundName.Set.empty
+    Map.map (fun x -> BoundName.close_lift x name) d
 end
 
 module Type = struct

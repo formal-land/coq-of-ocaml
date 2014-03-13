@@ -143,13 +143,15 @@ module Exception = struct
       FullEnvi.vars = Envi.add_name ("raise_" ^ exn.name) () env.FullEnvi.vars;
       descriptors = Envi.add_name exn.name () env.FullEnvi.descriptors }
 
-  let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t)
+  let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t) (loc : Loc.t)
     : Effect.Type.t FullEnvi.t =
     let env = { env with
       FullEnvi.descriptors = Envi.add_name exn.name () env.FullEnvi.descriptors } in
     let effect_typ =
       Effect.Type.Arrow (
-        Effect.Descriptor.singleton (Envi.bound_name (PathName.of_name [] exn.name) env.FullEnvi.descriptors),
+        Effect.Descriptor.singleton
+          loc
+          (Envi.bound_name (PathName.of_name [] exn.name) env.FullEnvi.descriptors),
         Effect.Type.Pure) in
     { env with
       FullEnvi.vars = Envi.add_name ("raise_" ^ exn.name) effect_typ env.FullEnvi.vars }
@@ -211,25 +213,26 @@ end
 
 (** A structure. *)
 type ('a, 'b) t =
-  | Value of 'a * 'b Value.t
-  | Inductive of Inductive.t
-  | Record of Record.t
-  | Synonym of Synonym.t
-  | Exception of Exception.t
-  (* | Open of Open.t *)
-  | Module of Name.t * ('a, 'b) t list
+  | Value of Loc.t * 'a * 'b Value.t
+  | Inductive of Loc.t * Inductive.t
+  | Record of Loc.t * Record.t
+  | Synonym of Loc.t * Synonym.t
+  | Exception of Loc.t * Exception.t
+  (* | Open of Loc.t * Open.t *)
+  | Module of Loc.t * Name.t * ('a, 'b) t list
 
+(* TODO: print the location *)
 let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
   (defs : ('a, 'b) t list) : SmartPrint.t =
   let pp_one (def : ('a, 'b) t) : SmartPrint.t =
     match def with
-    | Value (a, value) -> OCaml.tuple [pp_a a; Value.pp pp_b value]
-    | Inductive ind -> Inductive.pp ind
-    | Record record -> Record.pp record
-    | Synonym synonym -> Synonym.pp synonym
-    | Exception exn -> Exception.pp exn
-    (* | Open o -> Open.pp o *)
-    | Module (name, defs) ->
+    | Value (_, a, value) -> OCaml.tuple [pp_a a; Value.pp pp_b value]
+    | Inductive (_, ind) -> Inductive.pp ind
+    | Record (_, record) -> Record.pp record
+    | Synonym (_, synonym) -> Synonym.pp synonym
+    | Exception (_, exn) -> Exception.pp exn
+    (* | Open (_, o) -> Open.pp o *)
+    | Module (_, name, defs) ->
       nest (
         !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
         indent (pp pp_a pp_b defs)) in
@@ -240,13 +243,14 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
   : unit FullEnvi.t * (unit, Loc.t) t list =
   let of_structure_item (env : unit FullEnvi.t) (item : structure_item)
     : unit FullEnvi.t * (unit, Loc.t) t =
+    let loc = Loc.of_location item.str_loc in
     match item.str_desc with
     | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
       let (env, is_rec, pattern, typ_vars, args, typ, e) =
         Exp.import_let_fun env is_rec pattern e in
       (match pattern with
       | Pattern.Variable x ->
-        (env, Value ((), {
+        (env, Value (loc, (), {
           Value.header = (is_rec, x, typ_vars, args, Some typ);
           body = e }))
       | _ -> failwith "Cannot match a function definition on a pattern.")
@@ -264,14 +268,14 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
           Inductive.name = name;
           typ_vars = typ_vars;
           constructors = constructors } in
-        (Inductive.update_env ind env, Inductive ind)
+        (Inductive.update_env ind env, Inductive (loc, ind))
       | Type_record (fields, _) ->
         let fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
           (Name.of_ident x, Type.of_type_expr env.FullEnvi.typs typ)) in
         let r = {
           Record.name = name;
           fields = fields } in
-        (Record.update_env r env, Record r)
+        (Record.update_env r env, Record (loc, r))
       | Type_abstract ->
         (match typ.type_manifest with
         | Some typ ->
@@ -279,7 +283,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
             Synonym.name = name;
             typ_vars = typ_vars;
             value = Type.of_type_expr env.FullEnvi.typs typ } in
-          (Synonym.update_env syn env, Synonym syn)
+          (Synonym.update_env syn env, Synonym (loc, syn))
         | None -> failwith "Type definition not handled."))
     | Tstr_exception { cd_id = name; cd_args = args } ->
       let name = Name.of_ident name in
@@ -287,7 +291,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
           Type.of_type_expr env.FullEnvi.typs typ)) in
       let exn = { Exception.name = name; typ = typ} in
-      (Exception.update_env exn env, Exception exn)
+      (Exception.update_env exn env, Exception (loc, exn))
     (* | Tstr_open (_, path, _, _) -> (failwith "TODO", Open (PathName.of_path 0 path)) *)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
@@ -295,7 +299,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let env = FullEnvi.open_module env in
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.close_module env name in
-      (env, Module (name, structures))
+      (env, Module (loc, name, structures))
     | _ -> failwith "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
@@ -309,19 +313,19 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : (unit, Loc.t) t list)
   let rec monadise_let_rec_one (env : unit FullEnvi.t) (def : (unit, Loc.t) t)
     : unit FullEnvi.t * (unit, Loc.t) t list =
     match def with
-    | Value ((), { Value.header = header; body = body }) ->
+    | Value (loc, (), { Value.header = header; body = body }) ->
       let (env, defs) = Exp.monadise_let_rec_definition env header body in
       (env, defs |> List.rev |> List.map (fun (header, body) ->
-        Value ((), { Value.header = header; body = body })))
-    | Module (name, defs) ->
+        Value (loc, (), { Value.header = header; body = body })))
+    | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in
       let (env, defs) = monadise_let_rec env defs in
       let env = FullEnvi.close_module env name in
-      (env, [Module (name, defs)])
-    | Inductive ind -> (Inductive.update_env ind env, [def])
-    | Record record -> (Record.update_env record env, [def])
-    | Synonym synonym -> (Synonym.update_env synonym env, [def])
-    | Exception exn -> (Exception.update_env exn env, [def]) in
+      (env, [Module (loc, name, defs)])
+    | Inductive (loc, ind) -> (Inductive.update_env ind env, [def])
+    | Record (loc, record) -> (Record.update_env record env, [def])
+    | Synonym (loc, synonym) -> (Synonym.update_env synonym env, [def])
+    | Exception (loc, exn) -> (Exception.update_env exn env, [def]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))
@@ -333,21 +337,22 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
   let rec effects_one (env : Effect.Type.t FullEnvi.t) (def : (unit, 'a) t)
     : Effect.Type.t FullEnvi.t * (Effect.Type.t, 'a * Effect.t) t =
     match def with
-    | Value ((), {
+    | Value (loc, (), {
       Value.header = (is_rec, x, _, args, _) as header;
       body = e }) ->
       let (e, x_typ) = Exp.effects_of_let env is_rec x args e in
       let value = { Value.header = header; body = e } in
-      (Value.update_env value x_typ env, Value (x_typ, value))
-    | Module (name, defs) ->
+      (Value.update_env value x_typ env, Value (loc, x_typ, value))
+    | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in
       let (env, defs) = effects env defs in
       let env = FullEnvi.close_module env name in
-      (env, Module (name, defs))
-    | Exception exn -> (Exception.update_env_with_effects exn env, Exception exn)
-    | Inductive ind -> (Inductive.update_env ind env, Inductive ind)
-    | Record record -> (Record.update_env record env, Record record)
-    | Synonym synonym -> (Synonym.update_env synonym env, Synonym synonym) in
+      (env, Module (loc, name, defs))
+    | Exception (loc, exn) ->
+      (Exception.update_env_with_effects exn env loc, Exception (loc, exn))
+    | Inductive (loc, ind) -> (Inductive.update_env ind env, Inductive (loc, ind))
+    | Record (loc, record) -> (Record.update_env record env, Record (loc, record))
+    | Synonym (loc, synonym) -> (Synonym.update_env synonym env, Synonym (loc, synonym)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env, def) =
@@ -363,7 +368,7 @@ let rec monadise (env : unit Envi.t)
     (def : (Effect.Type.t, Loc.t * Effect.t) t)
     : unit Envi.t * (unit, Loc.t) t =
     match def with
-    | Value (effect, {
+    | Value (loc, effect, {
       Value.header = (is_rec, x, typ_vars, args, typ);
       body = body }) ->
       let typ = match typ with
@@ -376,17 +381,17 @@ let rec monadise (env : unit Envi.t)
           env in
       let body = Exp.monadise env_in_body body in
       let env = Envi.add_name x () env in
-      (env, Value ((), {
+      (env, Value (loc, (), {
         Value.header = (is_rec, x, typ_vars, args, typ);
         body = body }))
-    | Module (name, defs) ->
+    | Module (loc, name, defs) ->
       let (env, defs) = monadise (Envi.open_module env) defs in
-      (Envi.close_module env (fun _ _ -> ()) name, Module (name, defs))
-    | Exception exn ->
-      (Envi.add_name exn.Exception.name () env, Exception exn)
-    | Inductive ind -> (env, Inductive ind)
-    | Record record -> (env, Record record)
-    | Synonym synonym -> (env, Synonym synonym) in
+      (Envi.close_module env (fun _ _ -> ()) name, Module (loc, name, defs))
+    | Exception (loc, exn) ->
+      (Envi.add_name exn.Exception.name () env, Exception (loc, exn))
+    | Inductive (loc, ind) -> (env, Inductive (loc, ind))
+    | Record (loc, record) -> (env, Record (loc, record))
+    | Synonym (loc, synonym) -> (env, Synonym (loc, synonym)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env_units, def) = monadise_one env def in
@@ -398,13 +403,13 @@ let rec monadise (env : unit Envi.t)
 let rec to_coq (defs : ('a, 'b) t list) : SmartPrint.t =
   let to_coq_one (def : ('a, 'b) t) : SmartPrint.t =
     match def with
-    | Value (_, value) -> Value.to_coq value
-    | Inductive ind -> Inductive.to_coq ind
-    | Record record -> Record.to_coq record
-    | Synonym s -> Synonym.to_coq s
-    | Exception exn -> Exception.to_coq exn
+    | Value (_, _, value) -> Value.to_coq value
+    | Inductive (_, ind) -> Inductive.to_coq ind
+    | Record (_, record) -> Record.to_coq record
+    | Synonym (_, s) -> Synonym.to_coq s
+    | Exception (_, exn) -> Exception.to_coq exn
     (* | Open o -> Open.to_coq o *)
-    | Module (name, defs) ->
+    | Module (_, name, defs) ->
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^

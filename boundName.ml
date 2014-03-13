@@ -4,9 +4,6 @@ type t = {
   path_name : PathName.t;
   depth : int }
 
-type t' = t
-module Set = Set.Make (struct type t = t' let compare = compare end)
-
 let pp (x : t) : SmartPrint.t =
   PathName.pp x.path_name ^-^ !^ "/" ^-^ OCaml.int x.depth
 

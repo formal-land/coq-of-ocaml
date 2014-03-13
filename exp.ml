@@ -170,7 +170,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           let x = { x with PathName.base = "raise_" ^ x.PathName.base } in
           let x = Envi.bound_name x env.FullEnvi.vars in
           let es = List.map (of_expression env) es in
-          Apply (l, Variable (l_exn, x), Tuple (Loc.unknown, es))
+          Apply (l, Variable (l_exn, x), Tuple (Loc.Unknown, es))
         | _ -> failwith "Constructor of an exception expected after a 'raise'.")
       | _ -> failwith "Expected one argument for 'raise'.")
     | _ ->
@@ -179,7 +179,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
         match e_x with
         | Some e_x -> of_expression env e_x
         | None -> failwith "expected an argument") e_xs in
-      List.fold_left (fun e e_x -> Apply (Loc.unknown, e, e_x))
+      List.fold_left (fun e e_x -> Apply (Loc.Unknown, e, e_x))
         (Apply (l, e_f, List.hd e_xs)) (List.tl e_xs))
   | Texp_match (e, cases, _) ->
     let e = of_expression env e in
@@ -201,7 +201,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     Field (l, of_expression env e, x)
   | Texp_ifthenelse (e1, e2, e3) ->
     let e3 = match e3 with
-      | None -> Tuple (Loc.unknown, [])
+      | None -> Tuple (Loc.Unknown, [])
       | Some e3 -> of_expression env e3 in
     IfThenElse (l, of_expression env e1,
       of_expression env e2, e3)
@@ -222,7 +222,7 @@ and open_cases (env : unit FullEnvi.t) (cases : case list)
     let env = Pattern.add_to_env p env in
     (p, of_expression env e)) in
   let bound_x = Envi.bound_name (PathName.of_name [] x) env_vars in
-  (x, Match (Loc.unknown, Variable (Loc.unknown, bound_x), cases))
+  (x, Match (Loc.Unknown, Variable (Loc.Unknown, bound_x), cases))
 and import_let_fun (env : unit FullEnvi.t) (rec_flag : Asttypes.rec_flag)
   (pattern : pattern) (e : expression)
   : unit FullEnvi.t * Recursivity.t * Pattern.t * Name.t list *
@@ -354,7 +354,7 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
   let (is_rec, x, typ_vars, args, typ) = header in
   if Recursivity.to_bool is_rec then
     let var (x : Name.t) env : Loc.t t =
-      Variable (Loc.unknown,
+      Variable (Loc.Unknown,
         Envi.bound_name (PathName.of_name [] x) env.FullEnvi.vars) in
     let (x_rec, _) = Envi.fresh (x ^ "_rec") () env.FullEnvi.vars in
     let args_x_rec =
@@ -364,22 +364,22 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     let header_x_rec = (is_rec, x_rec, typ_vars, args_x_rec, typ) in
     let env_in_x_rec = Header.env_in_header header_x_rec env in
     let e_x_rec = monadise_let_rec env_in_x_rec e in
-    let e_x_rec = Match (Loc.unknown, var "counter" env_in_x_rec, [
+    let e_x_rec = Match (Loc.Unknown, var "counter" env_in_x_rec, [
       (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O") env_in_x_rec.FullEnvi.constructors, []),
-        Apply (Loc.unknown, var "not_terminated" env_in_x_rec, Tuple (Loc.unknown, [])));
+        Apply (Loc.Unknown, var "not_terminated" env_in_x_rec, Tuple (Loc.Unknown, [])));
       (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env_in_x_rec.FullEnvi.constructors,
         [Pattern.Variable "counter"]),
         substitute x
-          (Apply (Loc.unknown, var x_rec env_in_x_rec, var "counter" env_in_x_rec)) e_x_rec)]) in
+          (Apply (Loc.Unknown, var x_rec env_in_x_rec, var "counter" env_in_x_rec)) e_x_rec)]) in
     let env = { env with FullEnvi.vars = Envi.add_name x_rec () env.FullEnvi.vars } in
     let header_x = (Recursivity.New false, x, typ_vars, args, typ) in
     let env_in_x = Header.env_in_header header_x env in
     let e_x =
-      Let (Loc.unknown, Header.variable "counter",
-        Apply (Loc.unknown, var "read_counter" env_in_x, Tuple (Loc.unknown, [])),
+      Let (Loc.Unknown, Header.variable "counter",
+        Apply (Loc.Unknown, var "read_counter" env_in_x, Tuple (Loc.Unknown, [])),
       let env_in_x = { env with FullEnvi.vars = Envi.add_name "counter" () env_in_x.FullEnvi.vars } in
-      List.fold_left (fun e (x, _) -> Apply (Loc.unknown, e, var x env_in_x))
-        (Apply (Loc.unknown, var x_rec env_in_x, var "counter" env_in_x)) args) in
+      List.fold_left (fun e (x, _) -> Apply (Loc.Unknown, e, var x env_in_x))
+        (Apply (Loc.Unknown, var x_rec env_in_x, var "counter" env_in_x)) args) in
     let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     (env, [ (header_x_rec, e_x_rec); (header_x, e_x) ])
   else
@@ -543,17 +543,17 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     if Effect.Descriptor.eq d1 d2 then
       e
     else if Effect.Descriptor.is_pure d1 then
-      Return (Loc.unknown, e)
+      Return (Loc.Unknown, e)
     else
-      Lift (Loc.unknown, d1, d2, e) in
+      Lift (Loc.Unknown, d1, d2, e) in
   (** [d1] is the descriptor of [e1], [d2] of [e2]. *)
   let bind d1 d2 d e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
       match x with
-      | Some x -> Let (Loc.unknown, Header.variable x, e1, e2)
+      | Some x -> Let (Loc.Unknown, Header.variable x, e1, e2)
       | None -> e2
     else
-      Bind (Loc.unknown, lift d1 d e1, x, lift d2 d e2) in
+      Bind (Loc.Unknown, lift d1 d e1, x, lift d2 d e2) in
   (** [k es'] is supposed to raise the effect [d]. *)
   let rec monadise_list env es d es' k =
     match es with
@@ -566,7 +566,7 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
         let e' = monadise env e in
         let (x, env) = Envi.fresh "x" () env in
         bind d_e d d e' (Some x) (monadise_list env es d
-          (Variable (Loc.unknown, Envi.bound_name (PathName.of_name [] x) env) :: es') k) in
+          (Variable (Loc.Unknown, Envi.bound_name (PathName.of_name [] x) env) :: es') k) in
   let d = descriptor e in
   match e with
   | Constant ((l, _), c) -> Constant (l, c)
