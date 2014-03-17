@@ -26,11 +26,11 @@ Definition app {A : Type} (l1 l2 : list A) : list A :=
   app l1 l2.
 
 Module Effect.
-  Record t := new {
+  Record t := make {
     S : Type;
     E : Type }.
   
-  Definition unit : t := {|
+  Definition nil : t := {|
     S := unit;
     E := Empty_set |}.
   
@@ -40,7 +40,7 @@ Module Effect.
   
   Fixpoint of_list (es : list t) : t :=
     match es with
-    | [] => unit
+    | [] => nil
     | e :: es => add e (of_list es)
     end.
   
@@ -102,6 +102,24 @@ Module Effect.
       + exact (fst s1, expand_state ebs (snd s1) (snd s2)).
       + exact (fst s2, expand_state ebs s1 (snd s2)).
   Defined.
+  
+  Module Filter.
+    Definition S (e : t) : t :=
+      make (Effect.S e) Empty_set.
+    
+    Definition E (e : t) : t :=
+      make unit (Effect.E e).
+    
+    Fixpoint states (ebs : list (t * bool)) : list t :=
+      match ebs with
+      | [] => []
+      | (e, false) :: ebs => e :: states ebs
+      | (e, true) :: ebs => S e :: states ebs
+      end.
+    
+(*    Definition errors (es : list t) : list t :=
+      List.map E es.*)
+  End Filter.
 End Effect.
 
 Definition M (es : list Effect.t) (A : Type) : Type :=
@@ -118,6 +136,48 @@ Definition bind {es : list Effect.t} {A B : Type}
     | inl x => f x s
     | inr e => (inr e, s)
     end.
+
+Definition run_nil {A : Type} (x : M [] A) : A :=
+  match x tt with
+  | (inl x, _) => x
+  | (inr err, _) => match err with end
+  end.
+
+Definition sum_assoc_left (A B C : Type) (x : A + (B + C)) : (A + B) + C :=
+  match x with
+  | inl x => inl (inl x)
+  | inr (inl x) => inl (inr x)
+  | inr (inr x) => inr x
+  end.
+
+Definition run_head_error {A : Type} (e : Effect.t) (es : list Effect.t)
+  (x : M (e :: es) A)
+  : M (Effect.Filter.S e :: es) (A + Effect.E e) :=
+  fun s =>
+    let (x, s) := x s in
+    (match x with
+    | (inl x) => inl (inl x)
+    | (inr (inl err)) => inl (inr err)
+    | (inr (inr err)) => inr (inr err)
+    end, s).
+
+(*Definition run_head_state {A : Type} (e : Effect.t) (es : list Effect.t)
+  (x : M (e :: es) A)
+  : Effect.S e -> M (Effect.Filter.E e :: es) A * Effect.S e.*)
+
+Fixpoint run_errors {A : Type} (ebs : list (Effect.t * bool))
+  (x : M (Effect.domain ebs) A) {struct ebs}
+  : M (Effect.Filter.states ebs) (A + Effect.error (Effect.sub ebs)).
+  destruct ebs as [|[e b] ebs].
+  - exact (ret (inl (run_nil x))).
+  
+  - destruct b; simpl in *.
+    + refine (fun s => let (s, ss) := s in _).
+      Check fun ss => run_head_error x (s, ss).
+      Check fun ss =>
+        match x (s, ss) with
+        | (x, (s, ss)) => (x, ss)
+        end.
 
 Definition run_head {A : Type} (e : Effect.t) (es : list Effect.t)
   (x : M (e :: es) A)
@@ -178,15 +238,15 @@ Definition lift {A : Type} (es : list Effect.t) (bs : string)
     end in
   aux (List.combine es (bool_list bs)) x.
 
-Definition Invalid_argument := Effect.new unit string.
+Definition Invalid_argument := Effect.make unit string.
 
-Definition Failure := Effect.new unit string.
+Definition Failure := Effect.make unit string.
 
-Definition IO := Effect.new (list string * list string) Empty_set.
+Definition IO := Effect.make (list string * list string) Empty_set.
 
-Definition Counter := Effect.new nat Empty_set.
+Definition Counter := Effect.make nat Empty_set.
 
-Definition NonTermination := Effect.new unit unit.
+Definition NonTermination := Effect.make unit unit.
 
 Definition invalid_arg {A : Type} (message : string)
   : M [Invalid_argument] A :=
