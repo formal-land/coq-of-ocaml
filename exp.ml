@@ -231,10 +231,9 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     IfThenElse (l, of_expression env e1,
       of_expression env e2, e3)
   | Texp_sequence (e1, e2) ->
-    Sequence (l, of_expression env e1,
-      of_expression env e2)
-  | Texp_try _ | Texp_setfield _ | Texp_array _
-    | Texp_while _ | Texp_for _ | Texp_assert _ ->
+    Sequence (l, of_expression env e1, of_expression env e2)
+  | Texp_try _ -> failwith "TODO"
+  | Texp_setfield _ | Texp_array _ | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
 (** Generate a variable and a "match" on this variable from a list of patterns. *)

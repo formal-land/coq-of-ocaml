@@ -44,6 +44,12 @@ Module Effect.
     | e :: es => add e (of_list es)
     end.
   
+  Definition state (es : list t) : Type :=
+    S (of_list es).
+  
+  Definition error (es : list t) : Type :=
+    E (of_list es).
+  
   Fixpoint domain (ebs : list (t * bool)) : list t :=
     match ebs with
     | [] => []
@@ -57,19 +63,26 @@ Module Effect.
     | (e, true) :: ebs => e :: sub ebs
     end.
   
-  Fixpoint filter (ebs : list (t * bool))
-    (s : S (of_list (domain ebs))) {struct ebs}
-    : S (of_list (sub ebs)).
+  Fixpoint negsub (ebs : list (t * bool)) : list t :=
+    match ebs with
+    | [] => []
+    | (_, true) :: ebs => negsub ebs
+    | (e, false) :: ebs => e :: negsub ebs
+    end.
+  
+  Fixpoint filter_state (ebs : list (t * bool))
+    (s : state (domain ebs)) {struct ebs}
+    : state (sub ebs).
     destruct ebs as [|[e b] ebs].
     - exact s.
     - destruct b; simpl in *.
-      + exact (fst s, filter ebs (snd s)).
-      + exact (filter ebs (snd s)).
+      + exact (fst s, filter_state ebs (snd s)).
+      + exact (filter_state ebs (snd s)).
   Defined.
   
   Fixpoint expand_exception (ebs : list (t * bool))
-    (err : E (of_list (sub ebs))) {struct ebs}
-    : E (of_list (domain ebs)).
+    (err : error (sub ebs)) {struct ebs}
+    : error (domain ebs).
     destruct ebs as [|[e b] ebs].
     - exact err.
     - destruct b; simpl in *.
@@ -81,8 +94,8 @@ Module Effect.
   Defined.
   
   Fixpoint expand_state (ebs : list (t * bool))
-    (s1 : S (of_list (sub ebs))) (s2 : S (of_list (domain ebs)))
-    {struct ebs} : S (of_list (domain ebs)).
+    (s1 : state (sub ebs)) (s2 : state (domain ebs))
+    {struct ebs} : state (domain ebs).
     destruct ebs as [|[e b] ebs].
     - exact s1.
     - destruct b; simpl in *.
@@ -92,8 +105,7 @@ Module Effect.
 End Effect.
 
 Definition M (es : list Effect.t) (A : Type) : Type :=
-  let e := Effect.of_list es in
-  Effect.S e -> (A + Effect.E e) * Effect.S e.
+  Effect.state es -> (A + Effect.error es) * Effect.state es.
 
 Definition ret {es : list Effect.t} {A : Type} (x : A) : M es A :=
   fun s => (inl x, s).
@@ -107,6 +119,43 @@ Definition bind {es : list Effect.t} {A B : Type}
     | inr e => (inr e, s)
     end.
 
+Definition run_head {A : Type} (e : Effect.t) (es : list Effect.t)
+  (x : M (e :: es) A)
+  : Effect.S e -> M es ((A + Effect.E e) * Effect.S e).
+  refine (fun s ss =>
+    match x (s, ss) with
+    | (x, (s, ss)) => (_, ss)
+    end).
+  refine (match x with
+    | inl x => inl (inl x, s)
+    | inr err => _
+    end).
+  refine (match err with
+    | inl err => inl (inr err, s)
+    | inr err => inr err
+    end).
+Defined.
+
+(*Fixpoint run {A : Type} (ebs : list (Effect.t * bool))
+  (x : M (Effect.domain ebs) A) {struct ebs}
+  : Effect.state (Effect.sub ebs) ->
+      M (Effect.negsub ebs) ((A + Effect.error (Effect.sub ebs)) *
+      Effect.state (Effect.sub ebs)).
+  intro s.
+  destruct ebs as [|[e b] ebs].
+  - refine (let (x, _) := x s in _).
+    refine (match x with
+      | inl x => _
+      | inr err => match err with end
+      end).
+    exact (fun s => (inl (inl x, s), s)).
+  - destruct b; simpl in *.
+    + refine (let (s, ss) := s in _).
+      refine (bind (run _ _ (run_head x s) ss) (fun x => ret _)).
+      refine (let (x, ss) := x in _).
+      destruct (
+      unfold Effect.error, Effect.state; simpl.*)
+
 Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
   (at level 200, X ident, A at level 100, B at level 200).
 
@@ -115,7 +164,7 @@ Definition lift {A : Type} (es : list Effect.t) (bs : string)
   let aux (ebs : list (Effect.t * bool)) (x : M (Effect.sub ebs) A)
     : M (Effect.domain ebs) A :=
     fun s =>
-      let (r, s') := x (Effect.filter ebs s) in
+      let (r, s') := x (Effect.filter_state ebs s) in
       let s := Effect.expand_state ebs s' s in
       match r with
       | inl x => (inl x, s)
