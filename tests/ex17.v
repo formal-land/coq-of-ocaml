@@ -4,7 +4,7 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Definition Outside := Effect.new unit unit.
+Definition Outside := Effect.make unit unit.
 
 Definition raise_Outside {A : Type} (x : unit) : M [ Outside ] A :=
   fun s => (inr (inl x), s).
@@ -12,7 +12,7 @@ Definition raise_Outside {A : Type} (x : unit) : M [ Outside ] A :=
 Definition f {A B : Type} (x : B) : M [ Outside ] A := raise_Outside tt.
 
 Module G.
-  Definition Inside := Effect.new unit (Z * string).
+  Definition Inside := Effect.make unit (Z * string).
   
   Definition raise_Inside {A : Type} (x : Z * string) : M [ Inside ] A :=
     fun s => (inr (inl x), s).

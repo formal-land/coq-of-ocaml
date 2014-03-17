@@ -4,7 +4,7 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Definition r := Effect.new Z unit.
+Definition r := Effect.make Z unit.
 
 Definition read_r (_ : unit) : M [ r ] Z :=
   fun s => (inl (fst s), s).
@@ -21,7 +21,7 @@ Definition plus_one {A : Type} (x : A) : M [ r ] Z :=
     ret (x 1)
   end.
 
-Definition s := Effect.new string unit.
+Definition s := Effect.make string unit.
 
 Definition read_s (_ : unit) : M [ s ] string :=
   fun s => (inl (fst s), s).

@@ -137,11 +137,11 @@ Definition bind {es : list Effect.t} {A B : Type}
     | inr e => (inr e, s)
     end.
 
-Definition run_nil {A : Type} (x : M [] A) : A :=
+(*Definition run_nil {A : Type} (x : M [] A) : A :=
   match x tt with
   | (inl x, _) => x
   | (inr err, _) => match err with end
-  end.
+  end.*)
 
 Definition sum_assoc_left (A B C : Type) (x : A + (B + C)) : (A + B) + C :=
   match x with
@@ -150,34 +150,46 @@ Definition sum_assoc_left (A B C : Type) (x : A + (B + C)) : (A + B) + C :=
   | inr (inr x) => inr x
   end.
 
-Definition run_head_error {A : Type} (e : Effect.t) (es : list Effect.t)
-  (x : M (e :: es) A)
-  : M (Effect.Filter.S e :: es) (A + Effect.E e) :=
-  fun s =>
-    let (x, s) := x s in
-    (match x with
-    | (inl x) => inl (inl x)
-    | (inr (inl err)) => inl (inr err)
-    | (inr (inr err)) => inr (inr err)
-    end, s).
-
-(*Definition run_head_state {A : Type} (e : Effect.t) (es : list Effect.t)
-  (x : M (e :: es) A)
-  : Effect.S e -> M (Effect.Filter.E e :: es) A * Effect.S e.*)
-
-Fixpoint run_errors {A : Type} (ebs : list (Effect.t * bool))
-  (x : M (Effect.domain ebs) A) {struct ebs}
-  : M (Effect.Filter.states ebs) (A + Effect.error (Effect.sub ebs)).
+Fixpoint run_errors_input (ebs : list (Effect.t * bool))
+  (s : Effect.state (Effect.Filter.states ebs)) {struct ebs}
+  : Effect.state (Effect.domain ebs).
   destruct ebs as [|[e b] ebs].
-  - exact (ret (inl (run_nil x))).
-  
-  - destruct b; simpl in *.
-    + refine (fun s => let (s, ss) := s in _).
-      Check fun ss => run_head_error x (s, ss).
-      Check fun ss =>
-        match x (s, ss) with
-        | (x, (s, ss)) => (x, ss)
-        end.
+  - exact s.
+  - destruct b; exact (
+      let (s, ss) := s in
+      (s, run_errors_input _ ss)).
+Defined.
+
+Fixpoint run_errors_output (ebs : list (Effect.t * bool))
+  (s : Effect.state (Effect.domain ebs)) {struct ebs}
+  : Effect.state (Effect.Filter.states ebs).
+  destruct ebs as [|[e b] ebs].
+  - exact s.
+  - destruct b; exact (
+      let (s, ss) := s in
+      (s, run_errors_output _ ss)).
+Defined.
+
+Fixpoint run_errors_error (ebs : list (Effect.t * bool))
+  (err : Effect.error (Effect.domain ebs)) {struct ebs}
+  : Effect.error (Effect.sub ebs) + Effect.error (Effect.Filter.states ebs).
+  destruct ebs as [|(e, b) ebs].
+  - destruct err.
+  - destruct err as [err | err].
+    + destruct b; [exact (inl (inl err)) | exact (inr (inl err))].
+    + destruct (run_errors_error _ err) as [err' | err'];
+        [apply inl | apply inr]; destruct b; try apply inr; exact err'.
+Defined.
+
+Definition run_errors {A : Type} (ebs : list (Effect.t * bool))
+  (x : M (Effect.domain ebs) A)
+  : M (Effect.Filter.states ebs) (A + Effect.error (Effect.sub ebs)) :=
+  fun s =>
+    let (r, s) := x (run_errors_input _ s) in
+    (match r with
+    | inl x => inl (inl x)
+    | inr err => sum_assoc_left (inr (run_errors_error _ err))
+    end, run_errors_output _ s).
 
 Definition run_head {A : Type} (e : Effect.t) (es : list Effect.t)
   (x : M (e :: es) A)

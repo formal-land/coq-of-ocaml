@@ -158,7 +158,7 @@ module Exception = struct
 
   let to_coq (exn : t) : SmartPrint.t =
     !^ "Definition" ^^ Name.to_coq exn.name ^^ !^ ":=" ^^
-      !^ "Effect.new" ^^ !^ "unit" ^^ Type.to_coq true exn.typ ^-^ !^ "." ^^
+      !^ "Effect.make" ^^ !^ "unit" ^^ Type.to_coq true exn.typ ^-^ !^ "." ^^
     newline ^^ newline ^^
     !^ "Definition" ^^ Name.to_coq ("raise_" ^ exn.name) ^^ !^ "{A : Type}" ^^
       nest (parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false exn.typ)) ^^ !^ ":" ^^
@@ -201,7 +201,7 @@ module Reference = struct
 
   let to_coq (r : t) : SmartPrint.t =
     !^ "Definition" ^^ Name.to_coq r.name ^^ !^ ":=" ^^
-      !^ "Effect.new" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
+      !^ "Effect.make" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
     newline ^^ newline ^^
     !^ "Definition" ^^ Name.to_coq ("read_" ^ r.name) ^^ !^ "(_ : unit)" ^^ !^ ":" ^^
       !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ Type.to_coq false r.typ ^^ !^ ":=" ^^
