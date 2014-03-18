@@ -105,10 +105,7 @@ Module Effect.
   
   Module Filter.
     Definition S (e : t) : t :=
-      make (Effect.S e) Empty_set.
-    
-    Definition E (e : t) : t :=
-      make unit (Effect.E e).
+      make (Effect.S e) Empty_s
     
     Fixpoint states (ebs : list (t * bool)) : list t :=
       match ebs with
@@ -116,9 +113,6 @@ Module Effect.
       | (e, false) :: ebs => e :: states ebs
       | (e, true) :: ebs => S e :: states ebs
       end.
-    
-(*    Definition errors (es : list t) : list t :=
-      List.map E es.*)
   End Filter.
 End Effect.
 
@@ -136,12 +130,6 @@ Definition bind {es : list Effect.t} {A B : Type}
     | inl x => f x s
     | inr e => (inr e, s)
     end.
-
-(*Definition run_nil {A : Type} (x : M [] A) : A :=
-  match x tt with
-  | (inl x, _) => x
-  | (inr err, _) => match err with end
-  end.*)
 
 Definition sum_assoc_left (A B C : Type) (x : A + (B + C)) : (A + B) + C :=
   match x with
@@ -190,43 +178,6 @@ Definition run_errors {A : Type} (ebs : list (Effect.t * bool))
     | inl x => inl (inl x)
     | inr err => sum_assoc_left (inr (run_errors_error _ err))
     end, run_errors_output _ s).
-
-Definition run_head {A : Type} (e : Effect.t) (es : list Effect.t)
-  (x : M (e :: es) A)
-  : Effect.S e -> M es ((A + Effect.E e) * Effect.S e).
-  refine (fun s ss =>
-    match x (s, ss) with
-    | (x, (s, ss)) => (_, ss)
-    end).
-  refine (match x with
-    | inl x => inl (inl x, s)
-    | inr err => _
-    end).
-  refine (match err with
-    | inl err => inl (inr err, s)
-    | inr err => inr err
-    end).
-Defined.
-
-(*Fixpoint run {A : Type} (ebs : list (Effect.t * bool))
-  (x : M (Effect.domain ebs) A) {struct ebs}
-  : Effect.state (Effect.sub ebs) ->
-      M (Effect.negsub ebs) ((A + Effect.error (Effect.sub ebs)) *
-      Effect.state (Effect.sub ebs)).
-  intro s.
-  destruct ebs as [|[e b] ebs].
-  - refine (let (x, _) := x s in _).
-    refine (match x with
-      | inl x => _
-      | inr err => match err with end
-      end).
-    exact (fun s => (inl (inl x, s), s)).
-  - destruct b; simpl in *.
-    + refine (let (s, ss) := s in _).
-      refine (bind (run _ _ (run_head x s) ss) (fun x => ret _)).
-      refine (let (x, ss) := x in _).
-      destruct (
-      unfold Effect.error, Effect.state; simpl.*)
 
 Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
   (at level 200, X ident, A at level 100, B at level 200).
