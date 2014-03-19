@@ -53,14 +53,15 @@ type 'a t =
   | Return of 'a * 'a t (** Monadic return. *)
   | Bind of 'a * 'a t * Name.t option * 'a t (** Monadic bind. *)
   | Lift of 'a * Effect.Descriptor.t * Effect.Descriptor.t * 'a t (** Monadic lift. *)
+  | TryWith of 'a * 'a t * BoundName.t * Pattern.t list * 'a t
 
 let annotation (e : 'a t) : 'a =
   match e with
   | Constant (a, _) | Variable (a, _) | Tuple (a, _) | Constructor (a, _, _)
     | Apply (a, _, _) | Function (a, _, _) | Let (a, _, _, _) | Match (a, _, _)
     | Record (a, _) | Field (a, _, _) | IfThenElse (a, _, _, _)
-    | Sequence (a, _, _) | Return (a, _) | Bind (a, _, _, _)
-    | Lift (a, _, _, _) -> a
+    | Sequence (a, _, _) | Return (a, _) | Bind (a, _, _, _) | Lift (a, _, _, _)
+    | TryWith (a, _, _, _, _) -> a
 
 let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   match e with
@@ -82,6 +83,7 @@ let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   | Return (a, e) -> Return (f a, map f e)
   | Bind (a, e1, x, e2) -> Bind (f a, map f e1, x, map f e2)
   | Lift (a, d1, d2, e) -> Lift (f a, d1, d2, map f e)
+  | TryWith (a, e1, x, ps, e2) -> TryWith (f a, map f e1, x, ps, map f e2)
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
@@ -119,6 +121,9 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   | Lift (a, d1, d2, e) ->
     nest (!^ "Lift" ^^
       OCaml.tuple [pp_a a; Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
+  | TryWith (a, e1, x, ps, e2) ->
+    nest (!^ "TryWith" ^^
+      OCaml.tuple [pp_a a; pp e1; BoundName.pp x; OCaml.list Pattern.pp ps; pp e2])
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -180,7 +185,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
         (match e_x.exp_desc with
         | Texp_ident (path, _, _) ->
           let read = PathName.of_path path in
-          let read = { read with base = "read_" ^ read.PathName.base } in
+          let read = { read with PathName.base = "read_" ^ read.PathName.base } in
           let read = Envi.bound_name read env.FullEnvi.vars in
           Apply (l, Variable (Loc.Unknown, read), Tuple (Loc.Unknown, []))
         | _ -> failwith "Name of a reference expected after '!'.")
@@ -192,7 +197,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
         (match e_r.exp_desc with
         | Texp_ident (path, _, _) ->
           let write = PathName.of_path path in
-          let write = { write with base = "write_" ^ write.PathName.base } in
+          let write = { write with PathName.base = "write_" ^ write.PathName.base } in
           let write = Envi.bound_name write env.FullEnvi.vars in
           let e_v = of_expression env e_v in
           Apply (l, Variable (Loc.Unknown, write), e_v)
@@ -232,7 +237,13 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
       of_expression env e2, e3)
   | Texp_sequence (e1, e2) ->
     Sequence (l, of_expression env e1, of_expression env e2)
-  | Texp_try _ -> failwith "TODO"
+  | Texp_try (e1, [{c_lhs = {pat_desc = Tpat_construct (x, _, ps)}; c_rhs = e2}]) ->
+    let e1 = of_expression env e1 in
+    let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.descriptors in
+    let ps = List.map (Pattern.of_pattern env) ps in
+    let env = List.fold_left (fun env p -> Pattern.add_to_env p env) env ps in
+    let e2 = of_expression env e2 in
+    TryWith (l, e1, x, ps, e2)
   | Texp_setfield _ | Texp_array _ | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
@@ -328,6 +339,17 @@ let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
           substitute x e' e2 in
     Bind (a, e1, y, e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, substitute x e' e)
+  | TryWith (a, e1, y, ps, e2) ->
+    let e1 = substitute x e' e1 in
+    let ys =
+      List.fold_left (fun ys p -> Name.Set.union ys (Pattern.free_variables p))
+        Name.Set.empty ps in
+    let e2 =
+      if Name.Set.exists (fun y -> y = x) ys then
+        e2
+      else
+        substitute x e' e2 in
+    TryWith (a, e1, y, ps, e2)
 
 let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
   match e with
@@ -351,8 +373,7 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
         let env = Pattern.add_to_env p env in
         (p, monadise_let_rec env e)))
   | Record (a, fields) ->
-    Record (a, fields |> List.map (fun (x, e) ->
-      (x, monadise_let_rec env e)))
+    Record (a, fields |> List.map (fun (x, e) -> (x, monadise_let_rec env e)))
   | Field (a, e, x) -> Field (a, monadise_let_rec env e, x)
   | IfThenElse (a, e1, e2, e3) ->
     IfThenElse (a, monadise_let_rec env e1,
@@ -369,8 +390,12 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
       | Some x ->
         { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     Bind (a, e1, x, monadise_let_rec env e2)
-  | Lift (a, d1, d2, e) ->
-    Lift (a, d1, d2, monadise_let_rec env e)
+  | Lift (a, d1, d2, e) -> Lift (a, d1, d2, monadise_let_rec env e)
+  | TryWith (a, e1, x, ps, e2) ->
+    let e1 = monadise_let_rec env e1 in
+    let env = List.fold_left (fun env p -> Pattern.add_to_env p env) env ps in
+    let e2 = monadise_let_rec env e2 in
+    TryWith (a, e1, x, ps, e2)
 
 and monadise_let_rec_definition (env : unit FullEnvi.t)
   (header : Header.t) (e : Loc.t t)
@@ -535,6 +560,10 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
     Sequence ((a, effect), e1, e2)
   | Return _ | Bind _ | Lift _ ->
     failwith "Cannot compute effects on an explicit return, bind or lift."
+  | TryWith (a, e1, x, ps, e2) ->
+    let e1 = effects env e1 in
+    let env = List.fold_left (fun env p -> Pattern.add_to_env p env) env ps in
+    ...
 
 and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
   (x : Name.t) (args : (Name.t * Type.t) list) (e : 'a t)
