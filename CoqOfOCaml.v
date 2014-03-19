@@ -9,6 +9,13 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
+Definition sum_assoc_left (A B C : Type) (x : A + (B + C)) : (A + B) + C :=
+  match x with
+  | inl x => inl (inl x)
+  | inr (inl x) => inl (inr x)
+  | inr (inr x) => inr x
+  end.
+
 Definition reverse_apply {A B : Type} (x : A) (f : A -> B) : B :=
   f x.
 
@@ -166,13 +173,6 @@ Definition lift {A : Type} (es : list Effect.t) (bs : string)
   aux (List.combine es (bool_list bs)) x.
 
 Module Run.
-  Definition sum_assoc_left (A B C : Type) (x : A + (B + C)) : (A + B) + C :=
-    match x with
-    | inl x => inl (inl x)
-    | inr (inl x) => inl (inr x)
-    | inr (inr x) => inr x
-    end.
-
   Fixpoint errors_input (ebs : list (Effect.t * bool))
     (s : Effect.state (Effect.Filter.states ebs)) {struct ebs}
     : Effect.state (Effect.Ebs.domain ebs).
@@ -213,12 +213,71 @@ Module Run.
       | inl x => inl (inl x)
       | inr err => sum_assoc_left (inr (errors_error _ err))
       end, errors_output _ s).
-  
-  (*Definition try_with {A : Type} (es : list Effect.t) (n : nat)
-    (H : option_map Effect.S (List.nth_error es n) = Some (Empty_set : Type))
-    (x : M es A)
-    : bool.*)
 End Run.
+
+Module Exception.
+  Fixpoint remove_nth (es : list Effect.t) (n : nat) : list Effect.t :=
+    match es with
+    | [] => []
+    | e :: es =>
+      match n with
+      | O => es
+      | S n => e :: remove_nth es n
+      end
+    end.
+  
+  Definition nth_is_stateless (es : list Effect.t) (n : nat) : Type :=
+    match List.nth_error es n with
+    | Some e => Effect.S e
+    | None => unit
+    end.
+  
+  Fixpoint input (es : list Effect.t) (n : nat) (tt' : nth_is_stateless es n)
+    (s : Effect.state (remove_nth es n)) {struct es} : Effect.state es.
+    destruct es as [|e es].
+    - exact s.
+    - destruct n as [|n].
+      + exact (tt', s).
+      + refine (fst s, input es n tt' (snd s)).
+  Defined.
+  
+  Fixpoint output (es : list Effect.t) (n : nat) (s : Effect.state es)
+    {struct es} : Effect.state (remove_nth es n).
+    destruct es as [|e es].
+    - exact s.
+    - destruct n as [|n].
+      + exact (snd s).
+      + exact (fst s, output _ _ (snd s)).
+  Defined.
+  
+  Fixpoint error (es : list Effect.t) (n : nat) (err : Effect.error es)
+    {struct es}
+    : Effect.E (nth n es Effect.nil) + Effect.error (remove_nth es n).
+    destruct es as [|e es].
+    - destruct err.
+    - destruct n as [|n].
+      + exact err.
+      + refine (
+          match err with
+          | inl err => inr (inl err)
+          | inr err =>
+            match error _ _ err with
+            | inl err => inl err
+            | inr err => inr (inr err)
+            end
+          end).
+  Defined.
+  
+  Definition run {A : Type} (es : list Effect.t) (n : nat)
+    (tt' : nth_is_stateless es n) (x : M es A)
+    : M (remove_nth es n) (A + Effect.E (List.nth n es Effect.nil)) :=
+    fun s =>
+      let (r, s) := x (input _ _ tt' s) in
+      (match r with
+      | inl x => inl (inl x)
+      | inr err => sum_assoc_left (inr (error _ _ err))
+      end, output _ _ s).
+End Exception.
 
 Definition Invalid_argument := Effect.make unit string.
 
