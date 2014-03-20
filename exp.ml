@@ -215,7 +215,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     let e = of_expression env e in
     let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
       let p = Pattern.of_pattern env p in
-      let env = Pattern.add_to_env p env in
+      let env = Pattern.add_to_env p () env in
       (p, of_expression env e)) in
     Match (l, e, cases)
   | Texp_tuple es -> Tuple (l, List.map (of_expression env) es)
@@ -241,7 +241,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     let e1 = of_expression env e1 in
     let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.descriptors in
     let ps = List.map (Pattern.of_pattern env) ps in
-    let env = List.fold_left (fun env p -> Pattern.add_to_env p env) env ps in
+    let env = List.fold_left (fun env p -> Pattern.add_to_env p () env) env ps in
     let e2 = of_expression env e2 in
     TryWith (l, e1, x, ps, e2)
   | Texp_setfield _ | Texp_array _ | Texp_while _ | Texp_for _ | Texp_assert _ ->
@@ -254,7 +254,7 @@ and open_cases (env : unit FullEnvi.t) (cases : case list)
   let env = { env with FullEnvi.vars = env_vars } in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
     let p = Pattern.of_pattern env p in
-    let env = Pattern.add_to_env p env in
+    let env = Pattern.add_to_env p () env in
     (p, of_expression env e)) in
   let bound_x = Envi.bound_name (PathName.of_name [] x) env_vars in
   (x, Match (Loc.Unknown, Variable (Loc.Unknown, bound_x), cases))
@@ -265,7 +265,7 @@ and import_let_fun (env : unit FullEnvi.t) (rec_flag : Asttypes.rec_flag)
   let pattern = Pattern.of_pattern env pattern in
   let is_rec = Recursivity.of_rec_flag rec_flag in
   let env_with_let =
-    Pattern.add_to_env pattern env in
+    Pattern.add_to_env pattern () env in
   let env =
     if Recursivity.to_bool is_rec then
       env_with_let
@@ -370,7 +370,7 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
   | Match (a, e, cases) ->
     Match (a, monadise_let_rec env e,
       cases |> List.map (fun (p, e) ->
-        let env = Pattern.add_to_env p env in
+        let env = Pattern.add_to_env p () env in
         (p, monadise_let_rec env e)))
   | Record (a, fields) ->
     Record (a, fields |> List.map (fun (x, e) -> (x, monadise_let_rec env e)))
@@ -393,7 +393,7 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, monadise_let_rec env e)
   | TryWith (a, e1, x, ps, e2) ->
     let e1 = monadise_let_rec env e1 in
-    let env = List.fold_left (fun env p -> Pattern.add_to_env p env) env ps in
+    let env = List.fold_left (fun env p -> Pattern.add_to_env p () env) env ps in
     let e2 = monadise_let_rec env e2 in
     TryWith (a, e1, x, ps, e2)
 
@@ -562,8 +562,22 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
     failwith "Cannot compute effects on an explicit return, bind or lift."
   | TryWith (a, e1, x, ps, e2) ->
     let e1 = effects env e1 in
-    let env = List.fold_left (fun env p -> Pattern.add_to_env p env) env ps in
-    ...
+    let effect_e1 = snd (annotation e1) in
+    let env =
+      List.fold_left (fun env p -> Pattern.add_to_env p Effect.Type.Pure env)
+        env ps in
+    let e2 = effects env e2 in
+    let effect_e2 = snd (annotation e2) in
+    if Effect.Descriptor.mem x effect_e2.Effect.descriptor then
+      let effect = {
+        Effect.descriptor =
+          Effect.Descriptor.union [
+            Effect.Descriptor.remove x effect_e1.Effect.descriptor;
+            effect_e2.Effect.descriptor];
+        typ = Effect.Type.union [effect_e1.Effect.typ; effect_e2.Effect.typ] } in
+      TryWith ((a, effect), e1, x, ps, e2)
+    else
+      failwith "Error effect excepted in 'try with'."
 
 and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
   (x : Name.t) (args : (Name.t * Type.t) list) (e : 'a t)
@@ -647,8 +661,10 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     let env = Envi.add_name x () env in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 (Some x) e2
-  | Let ((l, _), (is_rec, x, typ_args, args, Some typ), e1, e2) ->
-    let typ = Type.monadise typ (snd (annotation e1)) in
+  | Let ((l, _), (is_rec, x, typ_args, args, typ), e1, e2) ->
+    let typ = match typ with
+      | Some typ -> Some (Type.monadise typ (snd (annotation e1)))
+      | None -> None in
     let env_in_e1 =
       if Recursivity.to_bool is_rec then
         Envi.add_name x () env
@@ -657,7 +673,7 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     let e1 = monadise env_in_e1 e1 in
     let env_in_e2 = Envi.add_name x () env in
     let e2 = monadise env_in_e2 e2 in
-    Let (l, (is_rec, x, typ_args, args, Some typ), e1, e2)
+    Let (l, (is_rec, x, typ_args, args, typ), e1, e2)
   | Match ((l, _), e, cases) ->
     monadise_list env [e] d [] (fun es' ->
       match es' with
@@ -691,7 +707,17 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     let e1 = monadise env e1 in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 None e2
-  | _ -> failwith "Unexpected arguments for 'monadise'."
+  | TryWith ((l, _), e1, x, ps, e2) ->
+    let (d1, d2) = (descriptor e1, descriptor e2) in
+    let e1 = monadise env e1 in
+    let env =
+      List.fold_left (fun env p ->
+        Name.Set.fold (fun x env -> Envi.add_name x () env)
+          (Pattern.free_variables p) env)
+        env ps in
+    let e2 = monadise env e2 in
+    TryWith (l, lift d1 d e1, x, ps, lift d2 d e2)
+  | Return _ | Bind _ | Lift _ -> failwith "Unexpected arguments for 'monadise'."
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
@@ -762,3 +788,5 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
   | Lift (_, d1, d2, e) ->
     Pp.parens paren @@ nest (
       !^ "lift" ^^ Effect.Descriptor.subset_to_coq d1 d2 ^^ to_coq true e)
+  | TryWith (_, e1, x, ps, e2) ->
+    failwith "TODO"

@@ -22,6 +22,12 @@ module Descriptor = struct
   let union (ds : t list) : t =
     List.fold_left (fun d1 d2 -> Map.fold Map.add d1 d2) pure ds
 
+  let mem (x : BoundName.t) (d : t) : bool =
+    Map.exists (fun _ y -> x = y) d
+
+  let remove (x : BoundName.t) (d : t) : t =
+    Map.filter (fun _ y -> x = y) d
+
   let to_coq (d : t) : SmartPrint.t =
     OCaml.list (fun (_, x) -> BoundName.to_coq x) (Map.bindings d)
 
