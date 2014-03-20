@@ -28,6 +28,13 @@ module Descriptor = struct
   let remove (x : BoundName.t) (d : t) : t =
     Map.filter (fun _ y -> x <> y) d
 
+  let index (x : BoundName.t) (d : t) : int =
+    let rec find_index l f =
+      match l with
+      | [] -> 0
+      | x :: xs -> if f x then 0 else 1 + find_index xs f in
+    find_index (Map.bindings d) (fun (_, y) -> y = x)
+
   let to_coq (d : t) : SmartPrint.t =
     OCaml.list (fun (_, x) -> BoundName.to_coq x) (Map.bindings d)
 

@@ -141,6 +141,12 @@ Definition M (es : list Effect.t) (A : Type) : Type :=
 Definition ret {es : list Effect.t} {A : Type} (x : A) : M es A :=
   fun s => (inl x, s).
 
+Definition unret {A : Type} (x: M [] A) : A :=
+  match x tt with
+  | (inl x, _) => x
+  | (inr err, _) => match err with end
+  end.
+
 Definition bind {es : list Effect.t} {A B : Type}
   (x : M es A) (f : A -> M es B) : M es B :=
   fun s =>
@@ -268,7 +274,7 @@ Module Exception.
           end).
   Defined.
   
-  Definition run {A : Type} (es : list Effect.t) (n : nat)
+  Definition run {A : Type} {es : list Effect.t} (n : nat)
     (tt' : nth_is_stateless es n) (x : M es A)
     : M (remove_nth es n) (A + Effect.E (List.nth n es Effect.nil)) :=
     fun s =>

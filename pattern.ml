@@ -66,7 +66,11 @@ let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
   | Any -> !^ "_"
   | Constant c -> Constant.to_coq c
   | Variable x -> Name.to_coq x
-  | Tuple ps -> parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq false) ps)
+  | Tuple ps ->
+    if ps = [] then
+      !^ "tt"
+    else
+      parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq false) ps)
   | Constructor (x, ps) ->
     if ps = [] then
       BoundName.to_coq x
