@@ -54,9 +54,9 @@ let rec free_variables (p : t) : Name.Set.t =
   | Alias (p, x) -> Name.Set.union (Name.Set.singleton x) (free_variables p)
   | Record fields -> aux (List.map snd fields)
 
-let add_to_env (p : t) (v : 'a) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+let add_to_env (p : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
   let env_vars =
-    Name.Set.fold (fun x env_vars -> Envi.add_name x v env_vars)
+    Name.Set.fold (fun x env_vars -> Envi.add_name x () env_vars)
       (free_variables p) env.FullEnvi.vars in
   { env with FullEnvi.vars = env_vars }
 

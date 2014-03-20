@@ -53,7 +53,7 @@ type 'a t =
   | Return of 'a * 'a t (** Monadic return. *)
   | Bind of 'a * 'a t * Name.t option * 'a t (** Monadic bind. *)
   | Lift of 'a * Effect.Descriptor.t * Effect.Descriptor.t * 'a t (** Monadic lift. *)
-  | TryWith of 'a * 'a t * int * BoundName.t * Pattern.t list * 'a t
+  | Run of 'a * BoundName.t * Effect.Descriptor.t * 'a t
 
 let annotation (e : 'a t) : 'a =
   match e with
@@ -61,7 +61,7 @@ let annotation (e : 'a t) : 'a =
     | Apply (a, _, _) | Function (a, _, _) | Let (a, _, _, _) | Match (a, _, _)
     | Record (a, _) | Field (a, _, _) | IfThenElse (a, _, _, _)
     | Sequence (a, _, _) | Return (a, _) | Bind (a, _, _, _) | Lift (a, _, _, _)
-    | TryWith (a, _, _, _, _, _) -> a
+    | Run (a, _, _, _) -> a
 
 let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   match e with
@@ -83,7 +83,7 @@ let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   | Return (a, e) -> Return (f a, map f e)
   | Bind (a, e1, x, e2) -> Bind (f a, map f e1, x, map f e2)
   | Lift (a, d1, d2, e) -> Lift (f a, d1, d2, map f e)
-  | TryWith (a, e1, n, x, ps, e2) -> TryWith (f a, map f e1, n, x, ps, map f e2)
+  | Run (a, x, d, e) -> Run (f a, x, d, map f e)
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
@@ -121,9 +121,8 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   | Lift (a, d1, d2, e) ->
     nest (!^ "Lift" ^^
       OCaml.tuple [pp_a a; Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
-  | TryWith (a, e1, n, x, ps, e2) ->
-    nest (!^ "TryWith" ^^
-      OCaml.tuple [pp_a a; pp e1; OCaml.int n; BoundName.pp x; OCaml.list Pattern.pp ps; pp e2])
+  | Run (a, x, d, e) ->
+    nest (!^ "Run" ^^ OCaml.tuple [pp_a a; BoundName.pp x; Effect.Descriptor.pp d; pp e])
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -215,7 +214,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     let e = of_expression env e in
     let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
       let p = Pattern.of_pattern env p in
-      let env = Pattern.add_to_env p () env in
+      let env = Pattern.add_to_env p env in
       (p, of_expression env e)) in
     Match (l, e, cases)
   | Texp_tuple es -> Tuple (l, List.map (of_expression env) es)
@@ -240,10 +239,20 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
   | Texp_try (e1, [{c_lhs = {pat_desc = Tpat_construct (x, _, ps)}; c_rhs = e2}]) ->
     let e1 = of_expression env e1 in
     let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.descriptors in
-    let ps = List.map (Pattern.of_pattern env) ps in
-    let env = List.fold_left (fun env p -> Pattern.add_to_env p () env) env ps in
-    let e2 = of_expression env e2 in
-    TryWith (l, e1, 0, x, ps, e2)
+    let p = Pattern.Tuple (List.map (Pattern.of_pattern env) ps) in
+    Match (l, Run (Loc.Unknown, x, Effect.Descriptor.pure, e1), [
+      (let p = Pattern.Constructor (
+        Envi.bound_name (PathName.of_name [] "inl") env.FullEnvi.constructors,
+        [Pattern.Variable "x"]) in
+      let env = Pattern.add_to_env p env in
+      let x = Envi.bound_name (PathName.of_name [] "x") env.FullEnvi.vars in
+      (p, Variable (Loc.Unknown, x)));
+      (let p = Pattern.Constructor (
+        Envi.bound_name (PathName.of_name [] "inr") env.FullEnvi.constructors,
+        [p]) in
+      let env = Pattern.add_to_env p env in
+      let e2 = of_expression env e2 in
+      (p, e2))])
   | Texp_setfield _ | Texp_array _ | Texp_while _ | Texp_for _ | Texp_assert _ ->
     failwith "Imperative expression not handled."
   | _ -> failwith "Expression not handled."
@@ -254,7 +263,7 @@ and open_cases (env : unit FullEnvi.t) (cases : case list)
   let env = { env with FullEnvi.vars = env_vars } in
   let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
     let p = Pattern.of_pattern env p in
-    let env = Pattern.add_to_env p () env in
+    let env = Pattern.add_to_env p env in
     (p, of_expression env e)) in
   let bound_x = Envi.bound_name (PathName.of_name [] x) env_vars in
   (x, Match (Loc.Unknown, Variable (Loc.Unknown, bound_x), cases))
@@ -265,7 +274,7 @@ and import_let_fun (env : unit FullEnvi.t) (rec_flag : Asttypes.rec_flag)
   let pattern = Pattern.of_pattern env pattern in
   let is_rec = Recursivity.of_rec_flag rec_flag in
   let env_with_let =
-    Pattern.add_to_env pattern () env in
+    Pattern.add_to_env pattern env in
   let env =
     if Recursivity.to_bool is_rec then
       env_with_let
@@ -326,6 +335,7 @@ let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
     IfThenElse (a, substitute x e' e1, substitute x e' e2, substitute x e' e3)
   | Sequence (a, e1, e2) ->
     Sequence (a, substitute x e' e1, substitute x e' e2)
+  | Run (a, y, n, e) -> Run (a, y, n, substitute x e' e)
   | Return (a, e) -> Return (a, substitute x e' e)
   | Bind (a, e1, y, e2) ->
     let e1 = substitute x e' e1 in
@@ -339,17 +349,6 @@ let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
           substitute x e' e2 in
     Bind (a, e1, y, e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, substitute x e' e)
-  | TryWith (a, e1, n, y, ps, e2) ->
-    let e1 = substitute x e' e1 in
-    let ys =
-      List.fold_left (fun ys p -> Name.Set.union ys (Pattern.free_variables p))
-        Name.Set.empty ps in
-    let e2 =
-      if Name.Set.exists (fun y -> y = x) ys then
-        e2
-      else
-        substitute x e' e2 in
-    TryWith (a, e1, n, y, ps, e2)
 
 let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
   match e with
@@ -370,7 +369,7 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
   | Match (a, e, cases) ->
     Match (a, monadise_let_rec env e,
       cases |> List.map (fun (p, e) ->
-        let env = Pattern.add_to_env p () env in
+        let env = Pattern.add_to_env p env in
         (p, monadise_let_rec env e)))
   | Record (a, fields) ->
     Record (a, fields |> List.map (fun (x, e) -> (x, monadise_let_rec env e)))
@@ -382,6 +381,7 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
   | Sequence (a, e1, e2) ->
     Sequence (a, monadise_let_rec env e1,
       monadise_let_rec env e2)
+  | Run (a, x, d, e) -> Run (a, x, d, monadise_let_rec env e)
   | Return (a, e) -> monadise_let_rec env e
   | Bind (a, e1, x, e2) ->
     let e1 = monadise_let_rec env e1 in
@@ -391,11 +391,6 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
         { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     Bind (a, e1, x, monadise_let_rec env e2)
   | Lift (a, d1, d2, e) -> Lift (a, d1, d2, monadise_let_rec env e)
-  | TryWith (a, e1, n, x, ps, e2) ->
-    let e1 = monadise_let_rec env e1 in
-    let env = List.fold_left (fun env p -> Pattern.add_to_env p () env) env ps in
-    let e2 = monadise_let_rec env e2 in
-    TryWith (a, e1, n, x, ps, e2)
 
 and monadise_let_rec_definition (env : unit FullEnvi.t)
   (header : Header.t) (e : Loc.t t)
@@ -558,26 +553,14 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
         [effect_e1.Effect.descriptor; effect_e2.Effect.descriptor];
       typ = effect_e2.Effect.typ } in
     Sequence ((a, effect), e1, e2)
+  | Run (a, x, d, e) ->
+    let e = effects env e in
+    let effect_e = snd (annotation e) in
+    let effect = { effect_e with
+      Effect.descriptor = Effect.Descriptor.remove x effect_e.Effect.descriptor } in
+    Run ((a, effect), x, d, e)
   | Return _ | Bind _ | Lift _ ->
     failwith "Cannot compute effects on an explicit return, bind or lift."
-  | TryWith (a, e1, n, x, ps, e2) ->
-    let e1 = effects env e1 in
-    let effect_e1 = snd (annotation e1) in
-    let env =
-      List.fold_left (fun env p -> Pattern.add_to_env p Effect.Type.Pure env)
-        env ps in
-    let e2 = effects env e2 in
-    let effect_e2 = snd (annotation e2) in
-    if Effect.Descriptor.mem x effect_e1.Effect.descriptor then
-      let effect = {
-        Effect.descriptor =
-          Effect.Descriptor.union [
-            Effect.Descriptor.remove x effect_e1.Effect.descriptor;
-            effect_e2.Effect.descriptor];
-        typ = Effect.Type.union [effect_e1.Effect.typ; effect_e2.Effect.typ] } in
-      TryWith ((a, effect), e1, n, x, ps, e2)
-    else
-      failwith ("Error effect expected in 'try with'.")
 
 and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
   (x : Name.t) (args : (Name.t * Type.t) list) (e : 'a t)
@@ -707,18 +690,8 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     let e1 = monadise env e1 in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 None e2
-  | TryWith ((l, _), e1, _, x, ps, e2) ->
-    let (d1, d2) = (descriptor e1, descriptor e2) in
-    let e1 = monadise env e1 in
-    let env =
-      List.fold_left (fun env p ->
-        Name.Set.fold (fun x env -> Envi.add_name x () env)
-          (Pattern.free_variables p) env)
-        env ps in
-    let e2 = monadise env e2 in
-    let d_with_error = Effect.Descriptor.union [d; d1] in
-    let n = Effect.Descriptor.index x d1 in
-    TryWith (l, lift d1 d_with_error e1, n, x, ps, lift d2 d e2)
+  | Run ((l, _), x, _, e) ->
+    Run (l, x, descriptor e, monadise env e)
   | Return _ | Bind _ | Lift _ -> failwith "Unexpected arguments for 'monadise'."
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)
@@ -772,13 +745,21 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
       nest (BoundName.to_coq x ^^ !^ ":=" ^^ to_coq false e))) ^^ !^ "|}")
   | Field (_, e, x) -> Pp.parens paren @@ nest (BoundName.to_coq x ^^ to_coq true e)
   | IfThenElse (_, e1, e2, e3) ->
-    nest (
+    Pp.parens paren @@ nest (
       !^ "if" ^^ to_coq false e1 ^^ !^ "then" ^^ newline ^^
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
   | Sequence (_, e1, e2) ->
     nest (to_coq true e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
+  | Run (_, x, d, e) ->
+    let n = Effect.Descriptor.index x d in
+    let output = nest (!^ "Exception.run" ^^ OCaml.int n ^^ to_coq true e ^^ !^ "tt") in
+    Pp.parens paren (
+      if Effect.Descriptor.is_pure (Effect.Descriptor.remove x d) then
+        nest (!^ "unret" ^^ parens output)
+      else
+        output)
   | Return (_, e) -> Pp.parens paren @@ nest (!^ "ret" ^^ to_coq true e)
   | Bind (_, e1, x, e2) ->
     Pp.parens paren @@ nest (
@@ -790,9 +771,3 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
   | Lift (_, d1, d2, e) ->
     Pp.parens paren @@ nest (
       !^ "lift" ^^ Effect.Descriptor.subset_to_coq d1 d2 ^^ to_coq true e)
-  | TryWith (_, e1, n, x, ps, e2) ->
-    nest (
-      !^ "match" ^^ !^ "run" ^^ OCaml.int n ^^ !^ "tt" ^^ to_coq true e1 ^^ !^ "with" ^^ newline ^^
-      !^ "|" ^^ !^ "inl x" ^^ !^ "=>" ^^ !^ "ret x" ^^ newline ^^
-      !^ "|" ^^ !^ "inr" ^^ Pattern.to_coq false (Pattern.Tuple ps) ^^ !^ "=>" ^^ to_coq false e2 ^^ newline ^^
-      !^ "end")

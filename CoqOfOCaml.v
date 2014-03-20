@@ -275,7 +275,7 @@ Module Exception.
   Defined.
   
   Definition run {A : Type} {es : list Effect.t} (n : nat)
-    (tt' : nth_is_stateless es n) (x : M es A)
+    (x : M es A) (tt' : nth_is_stateless es n)
     : M (remove_nth es n) (A + Effect.E (List.nth n es Effect.nil)) :=
     fun s =>
       let (r, s) := x (input _ _ tt' s) in

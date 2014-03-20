@@ -14,6 +14,7 @@ let env_typs : unit Envi.t =
       [], "ascii";
       [], "string";
       [], "option";
+      [], "sum";
       [], "list" ]
 
 let env_descriptors : unit Envi.t =
@@ -39,6 +40,8 @@ let env_constructors : unit Envi.t =
       [], "S";
       [], "None";
       [], "Some";
+      [], "inl";
+      [], "inr";
       [], "[]";
       [], "cons" ]
 

@@ -2,7 +2,62 @@
 
 3
 ((),
-  Value (non_rec, x, [ ], [ ], Some Type (Z/1)) =
-    TryWith
-      (4, Apply (4, Variable (4, raise_Error/0), Tuple (?)), Error/0, [ ],
-        Constant (5, Int(12))))
+  Value (non_rec, x1, [ ], [ ], Some Type (Z/1)) =
+    Match
+      (4,
+        Run (?, Error/0, [ ], Apply (4, Variable (4, raise_Error/0), Tuple (?))),
+        [
+          (Constructor (inl/1, x), Variable (?, x/0));
+          (Constructor (inr/1, Tuple ()), Constant (5, Int(12)))
+        ]))
+
+7
+((),
+  Value (non_rec, x2, [ A; B ], [ (x, B) ], Some A) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Match
+              (8,
+                Run
+                  (?, Error/0, [ ],
+                    Apply
+                      (8,
+                        Variable
+                          (8,
+                            raise_Error/0),
+                        Tuple (?))),
+                [
+                  (Constructor (inl/1, x),
+                    Variable
+                      (?,
+                        x/0));
+                  (Constructor (inr/1, Tuple ()),
+                    Apply
+                      (9,
+                        Variable
+                          (9,
+                            failwith/1),
+                        Constant
+                          (9,
+                            String("arg"))))
+                ]))
+        ]))
+
+11
+((),
+  Value (non_rec, x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
+    Match
+      (12,
+        Run
+          (?, Error/0, [ ],
+            IfThenElse
+              (12, Variable (12, b/0),
+                Apply
+                  (12, Variable (12, failwith/1), Constant (12, String("arg"))),
+                Apply (12, Variable (12, raise_Error/0), Tuple (?)))),
+        [
+          (Constructor (inl/1, x), Variable (?, x/0));
+          (Constructor (inr/1, Tuple ()), Constant (13, Int(12)))
+        ]))
