@@ -50,6 +50,10 @@ Module List2.
   End Inside.
 End List2.
 
-Definition n : M [ Counter; NonTermination ] Z :=
-  let! x := List2.of_list (cons 5 (cons 7 (cons 6 (cons List2.Inside.x [])))) in
-  List2.sum x.
+Definition n {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
+  match x with
+  | _ =>
+    let! x := List2.of_list (cons 5 (cons 7 (cons 6 (cons List2.Inside.x []))))
+      in
+    List2.sum x
+  end.

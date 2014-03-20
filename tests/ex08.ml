@@ -25,4 +25,4 @@ let rec sum l =
   | D1 -> 0
   | D2 (x, xs) -> x + sum xs
 
-let s = sum (of_list [5; 7; 3])
+let s _ = sum (of_list [5; 7; 3])

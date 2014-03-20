@@ -1,6 +1,6 @@
 (** Local let-rec *)
 
-let l =
+let l _ =
   let rec map f = function
     | [] -> []
     | x :: xs -> f x :: map f xs in

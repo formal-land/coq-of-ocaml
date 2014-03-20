@@ -26,7 +26,7 @@ module Descriptor = struct
     Map.exists (fun _ y -> x = y) d
 
   let remove (x : BoundName.t) (d : t) : t =
-    Map.filter (fun _ y -> x = y) d
+    Map.filter (fun _ y -> x <> y) d
 
   let to_coq (d : t) : SmartPrint.t =
     OCaml.list (fun (_, x) -> BoundName.to_coq x) (Map.bindings d)
@@ -131,4 +131,4 @@ let function_typ (args_names : Name.t list) (body_effect : t) : Type.t =
 let union (effects : t list) : t =
   { descriptor =
       Descriptor.union @@ List.map (fun effect -> effect.descriptor) effects;
-    typ = Type.union (List.map (fun effect -> effect.typ) effects) }
+    typ = Type.union (List.map (fun effect -> effect.typ) effects) }  

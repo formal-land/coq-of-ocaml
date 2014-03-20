@@ -19,4 +19,4 @@ module List2 = struct
   end
 end
 
-let n = List2.sum (List2.of_list [5; 7; 6; List2.Inside.x])
+let n _ = List2.sum (List2.of_list [5; 7; 6; List2.Inside.x])

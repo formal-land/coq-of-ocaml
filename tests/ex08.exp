@@ -129,14 +129,33 @@ Inductive t2:
 
 28
 ((),
-  Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
-    Apply
-      (28, Variable (28, sum/0),
-        Apply
-          (28, Variable (28, of_list/0),
-            Constructor
-              (28, cons/1, Constant (28, Int(5)),
-                Constructor
-                  (28, cons/1, Constant (28, Int(7)),
+  Value (non_rec, s, [ A ], [ (x, A) ], Some Type (Z/1)) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Apply
+              (28, Variable (28, sum/0),
+                Apply
+                  (28, Variable (28, of_list/0),
                     Constructor
-                      (28, cons/1, Constant (28, Int(3)), Constructor (28, []/1)))))))
+                      (28, cons/1,
+                        Constant
+                          (28,
+                            Int(5)),
+                        Constructor
+                          (28,
+                            cons/1,
+                            Constant
+                              (28,
+                                Int(7)),
+                            Constructor
+                              (28,
+                                cons/1,
+                                Constant
+                                  (28,
+                                    Int(3)),
+                                Constructor
+                                  (28,
+                                    []/1)))))))
+        ]))

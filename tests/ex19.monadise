@@ -1,0 +1,11 @@
+1 Exception (Error, ())
+
+3
+((),
+  Value (non_rec, x, [ ], [ ], Some Type (Z/1)) =
+    TryWith
+      (4,
+        Lift
+          (?, [ Error/0 ], [ ],
+            Apply (4, Variable (4, raise_Error/0), Tuple (?))), Error/0, [ ],
+        Constant (5, Int(12))))

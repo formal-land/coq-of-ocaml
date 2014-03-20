@@ -167,16 +167,38 @@ Inductive t2:
 28
 ((),
   Value
-    (non_rec, s, [ ], [ ],
+    (non_rec, s, [ A ], [ (x, A) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
-    Bind
-      (?,
-        Apply
-          (28, Variable (28, of_list/0),
-            Constructor
-              (28, cons/1, Constant (28, Int(5)),
-                Constructor
-                  (28, cons/1, Constant (28, Int(7)),
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Bind
+              (?,
+                Apply
+                  (28, Variable (28, of_list/0),
                     Constructor
-                      (28, cons/1, Constant (28, Int(3)), Constructor (28, []/1))))),
-        Some x, Apply (28, Variable (28, sum/0), Variable (?, x/0))))
+                      (28, cons/1,
+                        Constant
+                          (28,
+                            Int(5)),
+                        Constructor
+                          (28,
+                            cons/1,
+                            Constant
+                              (28,
+                                Int(7)),
+                            Constructor
+                              (28,
+                                cons/1,
+                                Constant
+                                  (28,
+                                    Int(3)),
+                                Constructor
+                                  (28,
+                                    []/1))))),
+                Some x,
+                Apply
+                  (28, Variable (28, sum/0),
+                    Variable (?, x/0))))
+        ]))

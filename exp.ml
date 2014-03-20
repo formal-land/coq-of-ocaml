@@ -568,7 +568,7 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
         env ps in
     let e2 = effects env e2 in
     let effect_e2 = snd (annotation e2) in
-    if Effect.Descriptor.mem x effect_e2.Effect.descriptor then
+    if Effect.Descriptor.mem x effect_e1.Effect.descriptor then
       let effect = {
         Effect.descriptor =
           Effect.Descriptor.union [
@@ -577,7 +577,7 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
         typ = Effect.Type.union [effect_e1.Effect.typ; effect_e2.Effect.typ] } in
       TryWith ((a, effect), e1, x, ps, e2)
     else
-      failwith "Error effect excepted in 'try with'."
+      failwith ("Error effect expected in 'try with'.")
 
 and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
   (x : Name.t) (args : (Name.t * Type.t) list) (e : 'a t)

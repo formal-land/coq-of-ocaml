@@ -270,24 +270,86 @@ Inductive t2:
         Variable ((?, Effect ([ ], .)), l/0)))
 
 28
-(.,
-  Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
-    Apply
-      ((28, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Variable
-          ((28, Effect ([ ], . -[ Counter/1; NonTermination/1 ]-> .)), sum/0),
-        Apply
-          ((28, Effect ([ Counter/1; NonTermination/1 ], .)),
-            Variable
-              ((28, Effect ([ ], . -[ Counter/1; NonTermination/1 ]-> .)),
-                of_list/0),
-            Constructor
-              ((28, Effect ([ ], .)), cons/1,
-                Constant ((28, Effect ([ ], .)), Int(5)),
-                Constructor
-                  ((28, Effect ([ ], .)), cons/1,
-                    Constant ((28, Effect ([ ], .)), Int(7)),
+(. -[ Counter/1; NonTermination/1 ]-> .,
+  Value (non_rec, s, [ A ], [ (x, A) ], Some Type (Z/1)) =
+    Match
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Any,
+            Apply
+              ((28, Effect ([ Counter/1; NonTermination/1 ], .)),
+                Variable
+                  ((28,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            Counter/1;
+                            NonTermination/1
+                          ]-> .)),
+                    sum/0),
+                Apply
+                  ((28,
+                    Effect
+                      ([
+                        Counter/1;
+                        NonTermination/1
+                      ], .)),
+                    Variable
+                      ((28,
+                        Effect
+                          ([ ],
+                            .
+                              -[
+                                Counter/1;
+                                NonTermination/1
+                              ]->
+                              .)),
+                        of_list/0),
                     Constructor
-                      ((28, Effect ([ ], .)), cons/1,
-                        Constant ((28, Effect ([ ], .)), Int(3)),
-                        Constructor ((28, Effect ([ ], .)), []/1)))))))
+                      ((28, Effect ([ ], .)),
+                        cons/1,
+                        Constant
+                          ((28,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Int(5)),
+                        Constructor
+                          ((28,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            cons/1,
+                            Constant
+                              ((28,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Int(7)),
+                            Constructor
+                              ((28,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                cons/1,
+                                Constant
+                                  ((28,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    Int(3)),
+                                Constructor
+                                  ((28,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    []/1)))))))
+        ]))

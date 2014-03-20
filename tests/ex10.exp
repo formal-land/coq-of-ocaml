@@ -113,17 +113,39 @@
 
 22
 ((),
-  Value (non_rec, n, [ ], [ ], Some Type (Z/1)) =
-    Apply
-      (22, Variable (22, List2.sum/0),
-        Apply
-          (22, Variable (22, List2.of_list/0),
-            Constructor
-              (22, cons/1, Constant (22, Int(5)),
-                Constructor
-                  (22, cons/1, Constant (22, Int(7)),
+  Value (non_rec, n, [ A ], [ (x, A) ], Some Type (Z/1)) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Apply
+              (22, Variable (22, List2.sum/0),
+                Apply
+                  (22, Variable (22, List2.of_list/0),
                     Constructor
-                      (22, cons/1, Constant (22, Int(6)),
+                      (22, cons/1,
+                        Constant
+                          (22,
+                            Int(5)),
                         Constructor
-                          (22, cons/1, Variable (22, List2.Inside.x/0),
-                            Constructor (22, []/1))))))))
+                          (22,
+                            cons/1,
+                            Constant
+                              (22,
+                                Int(7)),
+                            Constructor
+                              (22,
+                                cons/1,
+                                Constant
+                                  (22,
+                                    Int(6)),
+                                Constructor
+                                  (22,
+                                    cons/1,
+                                    Variable
+                                      (22,
+                                        List2.Inside.x/0),
+                                    Constructor
+                                      (22,
+                                        []/1))))))))
+        ]))

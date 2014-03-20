@@ -60,6 +60,9 @@ Definition sum (l : t2 Z) : M [ Counter; NonTermination ] Z :=
   let! counter := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" ((sum_rec counter) l).
 
-Definition s : M [ Counter; NonTermination ] Z :=
-  let! x := of_list (cons 5 (cons 7 (cons 3 []))) in
-  sum x.
+Definition s {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
+  match x with
+  | _ =>
+    let! x := of_list (cons 5 (cons 7 (cons 3 []))) in
+    sum x
+  end.

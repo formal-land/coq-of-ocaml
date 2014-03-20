@@ -370,8 +370,12 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
       Value.header = (is_rec, x, _, args, _) as header;
       body = e }) ->
       let (e, x_typ) = Exp.effects_of_let env is_rec x args e in
-      let value = { Value.header = header; body = e } in
-      (Value.update_env value x_typ env, Value (loc, x_typ, value))
+      let descriptor = (snd (Exp.annotation e)).Effect.descriptor in
+      if Effect.Descriptor.is_pure descriptor || args <> [] then
+        let value = { Value.header = header; body = e } in
+        (Value.update_env value x_typ env, Value (loc, x_typ, value))
+      else
+        failwith "Effects unexpected for toplevel values."
     | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in
       let (env, defs) = effects env defs in
