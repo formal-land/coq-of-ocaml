@@ -317,3 +317,17 @@ Definition read_counter (_ : unit) : M [Counter] nat :=
 
 Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
   fun s => (inr (inl tt), s).
+
+Module String.
+  Fixpoint _make (n : nat) (c : ascii) : string :=
+    match n with
+    | O => EmptyString
+    | S n => String c (_make n c)
+    end.
+  
+  (* TODO: raise an exception if n < 0. *)
+  Definition make (n : Z) (c : ascii) : string :=
+    _make (Z.to_nat n) c.
+End String.
+
+

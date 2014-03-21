@@ -168,14 +168,14 @@ module Atom = struct
   let render (width : int) (tab : int) (_as : t list) : t =
     let (a, _, _) = eval width tab 0 (GroupOne (false, _as)) 0 (Some Break.Newline) in
     a
-  (*
+  
   (* A buffer eating trailing spaces. *)
   module NonTrailingBuffer = struct
     type t = {
       add_char : char -> unit;
       add_string : string -> unit;
       add_sub_string : string -> int -> int -> unit;
-      mutable nb_spaces : int }
+      nb_spaces : int }
 
     (* A new buffer. *)
     let make (add_char : char -> unit) (add_string : string -> unit)
@@ -187,63 +187,71 @@ module Atom = struct
         nb_spaces = 0 (* A number of spaces we may print if they are not trailing. *) }
 
     (* Forget previous spaces which appear to be trailing. *)
-    let forget_spaces (b : t) : unit =
-      b.nb_spaces <- 0
+    let forget_spaces (b : t) : t =
+      { b with nb_spaces = 0 }
 
     (* Spaces are not trailing: print all of them. *)
-    let flush_spaces (b : t) : unit =
+    let flush_spaces (b : t) : t =
       b.add_string (String.make b.nb_spaces ' ');
       forget_spaces b
 
     (* Indent by [i] spaces. By convention, indentation spaces are always
         printed, even one an empty line, to mark the indentation level. *)
-    let indent (b : t) (i : int) : unit =
-      forget_spaces b;
-      b.add_string (String.make i ' ')
+    let indent (b : t) (i : int) : t =
+      b.add_string (String.make i ' ');
+      forget_spaces b
 
     (* Print a sub-string. *)
-    let sub_string (b : t) (s : string) (o : int) (l : int) : unit =
-      flush_spaces b;
-      b.add_sub_string s o l
+    let sub_string (b : t) (s : string) (o : int) (l : int) : t =
+      b.add_sub_string s o l;
+      flush_spaces b
 
     (* Add one space in the buffer. *)
-    let space (b : t) : unit =
-      b.nb_spaces <- b.nb_spaces + 1
+    let space (b : t) : t =
+      { b with nb_spaces = b.nb_spaces + 1 }
 
     (* Print a newline, with no trailing space before it. *)
-    let newline (b : t) : unit =
-      forget_spaces b;
-      b.add_char '\n'
+    let newline (b : t) : t =
+      b.add_char '\n';
+      forget_spaces b
   end
 
   (* Write to something, given the [add_char] and [add_string] functions. *)
   let to_something (tab : int) (add_char : char -> unit) (add_string : string -> unit)
     (add_sub_string : string -> int -> int -> unit) (a : t) : unit =
-    let open NonTrailingBuffer in
-    let b = make add_char add_string add_sub_string in
-    let rec aux a i (last_break : Break.t option) : Break.t option =
+    failwith "TODO"
+    (* TODO: rewrite from the initial file *)
+    (*let open NonTrailingBuffer in
+    let rec aux b a i (last_break : Break.t option) : t * Break.t option =
       match a with
       | String (s, o, l) ->
         (*Printf.printf "<%d, %b>" i (last_break = Some Break.Newline);*)
-        if last_break = Some Break.Newline then
-          indent b i;
-        sub_string b s o l; None
+        let b =
+          if last_break = Some Break.Newline then
+            indent b i
+          else
+            b in
+        (sub_string b s o l, None)
       | Break Break.Space ->
         if last_break = None then
-          (space b; Some Break.Space)
+          (space b, Some Break.Space)
         else
-          last_break
+          (b, last_break)
       | Break Break.Newline ->
-        if last_break = Some Break.Newline then
-          indent b i;
-        newline b; Some Break.Newline
+        let b =
+          if last_break = Some Break.Newline then
+            indent b i
+          else
+            b in
+        (newline b, Some Break.Newline)
       | GroupOne (_, _as) | GroupAll (_, _as) ->
-        let last_break = ref last_break in
+        (*let last_break = ref last_break in
         _as |> List.iter (fun a ->
           last_break := aux a i !last_break);
-        !last_break
+        !last_break*)
       | Indent (n, a) -> aux a (i + n * tab) last_break in
-    ignore (aux a 0 (Some Break.Newline)) *)
+    let b = make add_char add_string add_sub_string in
+    ignore (aux b a 0 (Some Break.Newline))*)
 end
 
 (*

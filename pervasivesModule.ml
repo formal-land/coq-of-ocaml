@@ -107,7 +107,8 @@ let env_effects : Effect.Type.t Envi.t =
       [], "read_line", Arrow (descriptor "IO", Pure);
       [], "read_int", Arrow (descriptor "IO", Pure);
       [], "read_counter", Arrow (descriptor "Counter", Pure);
-      [], "not_terminated", Arrow (descriptor "NonTermination", Pure) ]
+      [], "not_terminated", Arrow (descriptor "NonTermination", Pure);
+      ["String"], "make", Pure ]
 
 let env_with_effects : Effect.Type.t FullEnvi.t = {
   FullEnvi.vars = env_effects;
