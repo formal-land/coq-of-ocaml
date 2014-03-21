@@ -44,15 +44,15 @@ module Atom = struct
       match _as with
       | [] -> (_as, p, last_break)
       | Break Break.Space :: _as ->
-        if last_break = None then (
+        (match last_break with
+        | None ->
           let (_as, p, last_break) =
             eval_list_all width tab (if can_nest then i + tab else i) _as 0 (Some Break.Newline) false in
           if can_nest then
             ([Break Break.Newline; Indent (1, GroupAll (false, _as))], p, last_break)
           else
             (Break Break.Newline :: _as, p, last_break)
-        ) else
-          eval_list_all width tab i _as p last_break can_nest
+        | _ -> eval_list_all width tab i _as p last_break can_nest)
       | a :: _as ->
         let (a, p, last_break) = eval width tab i a p last_break in
         let (_as, p, last_break) = eval_list_all width tab i _as p last_break can_nest in
@@ -72,12 +72,14 @@ module Atom = struct
             (p, last_break) in
         match a with
         | String (_, _, l) ->
-          try_return ((if last_break = Some Break.Newline then p + i + l else p + l), None)
+          let p = match last_break with
+            | Some Break.Newline -> p + i + l
+            | _ -> p + l in
+          try_return (p, None)
         | Break Break.Space ->
-          if last_break = None then
-            try_return (p + 1, Some Break.Space)
-          else
-            try_return (p, last_break)
+          (match last_break with
+          | None -> try_return (p + 1, Some Break.Space)
+          | _ -> try_return (p, last_break))
         | Break Break.Newline -> raise Overflow
         | GroupOne (can_nest, _as) ->
           let (p, last_break) = try_eval_list_flat width tab (i + tab) _as p last_break in
@@ -102,7 +104,8 @@ module Atom = struct
       match _as with
       | [] -> (_as, p, last_break)
       | Break Break.Space :: _as ->
-        if last_break = None then
+        (match last_break with
+        | None ->
           (* If it is not possible in flat mode, switch back to "at best". *)
           (try let (_as, p, last_break) = try_eval_list_one width tab i _as (p + 1) (Some Break.Space) true can_nest in_nest in
             (Break Break.Space :: _as, p, last_break) with
@@ -114,8 +117,7 @@ module Atom = struct
               ([Break Break.Newline; Indent (1, GroupOne (false, _as))], p, last_break)
             else
               (Break Break.Newline :: _as, p, last_break))
-        else
-          try_eval_list_one width tab i _as p last_break can_fail can_nest in_nest
+        | _ -> try_eval_list_one width tab i _as p last_break can_fail can_nest in_nest)
       | Break Break.Newline :: _as ->
         let (_as, p, last_break) =
           (* If there is an explicit newline we always undo the nesting. *)
@@ -140,12 +142,14 @@ module Atom = struct
 
     match a with
     | String (_, _, l) ->
-      (a, (if last_break = Some Break.Newline then p + i + l else p + l), None)
+      let p = match last_break with
+        | Some Break.Newline -> p + i + l
+        | _ -> p + l in
+      (a, p, None)
     | Break Break.Space ->
-      if last_break = None then
-        (a, p + 1, Some Break.Space)
-      else
-        (a, p, last_break)
+      (match last_break with
+      | None -> (a, p + 1, Some Break.Space)
+      | _ -> (a, p, last_break))
     | Break Break.Newline -> (a, 0, Some Break.Newline)
     | GroupOne (can_nest, _as) ->
       let (_as, p, last_break) = try_eval_list_one width tab i _as p last_break false can_nest false in
@@ -160,12 +164,11 @@ module Atom = struct
       let (a, p, last_break) = eval width tab (i + n * tab) a p last_break in
       (Indent (n, a), p, last_break)
 
-(*
   (* Evaluate the breaks with a maximal [width] per line and a tabulation width [tab]. *)
   let render (width : int) (tab : int) (_as : t list) : t =
     let (a, _, _) = eval width tab 0 (GroupOne (false, _as)) 0 (Some Break.Newline) in
     a
-
+  (*
   (* A buffer eating trailing spaces. *)
   module NonTrailingBuffer = struct
     type t = {
@@ -240,7 +243,7 @@ module Atom = struct
           last_break := aux a i !last_break);
         !last_break
       | Indent (n, a) -> aux a (i + n * tab) last_break in
-    ignore (aux a 0 (Some Break.Newline))*)
+    ignore (aux a 0 (Some Break.Newline)) *)
 end
 
 (*

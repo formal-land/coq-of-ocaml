@@ -1,0 +1,197 @@
+3
+((),
+  Value
+    (rec, sums_rec, [ ],
+      [ (counter, Type (nat/1)); (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
+      Some Type (list/1, Type (Z/1))) =
+    Match
+      (?, Variable (?, counter/0),
+        [
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+          (Constructor (S/1, counter),
+            Let 4
+              (rec, sum_rec, [ ],
+                [
+                  (counter_1, Type (nat/1));
+                  (xs, Type (list/1, Type (Z/1)))
+                ], Some Type (Z/1)) =
+              Match
+                (?, Variable (?, counter_1/0),
+                  [
+                    (Constructor (O/1),
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              not_terminated/1),
+                          Tuple
+                            (?)));
+                    (Constructor (S/1, counter_1),
+                      Match
+                        (5,
+                          Variable
+                            (5,
+                              xs/0),
+                          [
+                            (Constructor
+                              ([]/1),
+                              Constant
+                                (6,
+                                  Int(0)));
+                            (Constructor
+                              (cons/1,
+                                x,
+                                xs),
+                              IfThenElse
+                                (8,
+                                  Apply
+                                    (?,
+                                      Apply
+                                        (8,
+                                          Variable
+                                            (8,
+                                              equiv_decb/1),
+                                          Variable
+                                            (8,
+                                              x/0)),
+                                      Constant
+                                        (8,
+                                          Int(12))),
+                                  Match
+                                    (9,
+                                      Apply
+                                        (9,
+                                          Apply
+                                            (?,
+                                              Variable
+                                                (?,
+                                                  sums_rec/0),
+                                              Variable
+                                                (?,
+                                                  counter/0)),
+                                          Constructor
+                                            (9,
+                                              cons/1,
+                                              Constructor
+                                                (9,
+                                                  cons/1,
+                                                  Constant
+                                                    (9,
+                                                      Int(13)),
+                                                  Constructor
+                                                    (9,
+                                                      []/1)),
+                                              Constructor
+                                                (9,
+                                                  []/1))),
+                                      [
+                                        (Constructor
+                                          (cons/1,
+                                            x,
+                                            Any),
+                                          Apply
+                                            (?,
+                                              Apply
+                                                (10,
+                                                  Variable
+                                                    (10,
+                                                      Z.sub/1),
+                                                  Variable
+                                                    (10,
+                                                      x/0)),
+                                              Constant
+                                                (10,
+                                                  Int(1))));
+                                        (Any,
+                                          Constant
+                                            (11,
+                                              Int(0)))
+                                      ]),
+                                  Apply
+                                    (?,
+                                      Apply
+                                        (13,
+                                          Variable
+                                            (13,
+                                              Z.add/1),
+                                          Variable
+                                            (13,
+                                              x/0)),
+                                      Apply
+                                        (13,
+                                          Apply
+                                            (?,
+                                              Variable
+                                                (?,
+                                                  sum_rec/0),
+                                              Variable
+                                                (?,
+                                                  counter_1/0)),
+                                          Variable
+                                            (13,
+                                              xs/0)))))
+                          ]))
+                  ]) in
+            Let 4
+              (non_rec, sum, [ ],
+                [ (xs, Type (list/1, Type (Z/1))) ],
+                Some Type (Z/1)) =
+              Apply
+                (?,
+                  Apply
+                    (?, Variable (?, sum_rec/0),
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              read_counter/1),
+                          Tuple
+                            (?))),
+                  Variable (?, xs/0)) in
+            Match
+              (14, Variable (14, ls/0),
+                [
+                  (Constructor ([]/1),
+                    Constructor
+                      (15,
+                        []/1));
+                  (Constructor (cons/1, xs, ls),
+                    Constructor
+                      (16,
+                        cons/1,
+                        Apply
+                          (16,
+                            Variable
+                              (16,
+                                sum/0),
+                            Variable
+                              (16,
+                                xs/0)),
+                        Apply
+                          (16,
+                            Apply
+                              (?,
+                                Variable
+                                  (?,
+                                    sums_rec/0),
+                                Variable
+                                  (?,
+                                    counter/0)),
+                            Variable
+                              (16,
+                                ls/0))))
+                ]))
+        ]))
+
+3
+((),
+  Value
+    (non_rec, sums, [ ], [ (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
+      Some Type (list/1, Type (Z/1))) =
+    Apply
+      (?,
+        Apply
+          (?, Variable (?, sums_rec/0),
+            Apply (?, Variable (?, read_counter/1), Tuple (?))),
+        Variable (?, ls/0)))

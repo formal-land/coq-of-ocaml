@@ -159,10 +159,11 @@
         Lift
           (?, [ Counter/1 ],
             [ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x,
+                Return (?, Apply (?, Variable (?, h_rec/0), Variable (?, x/0))))),
+        Some x,
         Lift
           (?, [ Outside/0; G.Inside/0; IO/1; NonTermination/1 ],
             [ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ],
-            Apply
-              (?, Apply (?, Variable (?, h_rec/0), Variable (?, counter/0)),
-                Variable (?, l/0)))))
+            Apply (?, Variable (?, x/0), Variable (?, l/0)))))

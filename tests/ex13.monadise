@@ -86,14 +86,16 @@
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; IO/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x_1,
+                Return
+                  (?,
+                    Apply
+                      (?, Variable (?, print_list_rec/0), Variable (?, x_1/0))))),
+        Some x_1,
         Lift
           (?, [ IO/1; NonTermination/1 ], [ Counter/1; IO/1; NonTermination/1 ],
-            Apply
-              (?,
-                Apply
-                  (?, Variable (?, print_list_rec/0), Variable (?, counter/0)),
-                Variable (?, x/0)))))
+            Apply (?, Variable (?, x_1/0), Variable (?, x/0)))))
 
 14
 ((),

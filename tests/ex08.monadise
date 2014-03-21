@@ -83,13 +83,14 @@ Inductive t2:
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x,
+                Return
+                  (?, Apply (?, Variable (?, of_list_rec/0), Variable (?, x/0))))),
+        Some x,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply
-              (?,
-                Apply (?, Variable (?, of_list_rec/0), Variable (?, counter/0)),
-                Variable (?, l/0)))))
+            Apply (?, Variable (?, x/0), Variable (?, l/0)))))
 
 23
 ((),
@@ -157,12 +158,14 @@ Inductive t2:
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x,
+                Return
+                  (?, Apply (?, Variable (?, sum_rec/0), Variable (?, x/0))))),
+        Some x,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply
-              (?, Apply (?, Variable (?, sum_rec/0), Variable (?, counter/0)),
-                Variable (?, l/0)))))
+            Apply (?, Variable (?, x/0), Variable (?, l/0)))))
 
 28
 ((),
@@ -197,8 +200,8 @@ Inductive t2:
                                 Constructor
                                   (28,
                                     []/1))))),
-                Some x,
+                Some x_1,
                 Apply
                   (28, Variable (28, sum/0),
-                    Variable (?, x/0))))
+                    Variable (?, x_1/0))))
         ]))

@@ -70,15 +70,19 @@
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?,
+                Bind
+                  (?, Apply (?, Variable (?, read_counter/1), Tuple (?)),
+                    Some x,
+                    Return
+                      (?, Apply (?, Variable (?, map_rec/0), Variable (?, x/0)))),
+                Some x,
+                Return (?, Apply (?, Variable (?, x/0), Variable (?, f/0))))),
+        Some x,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply
-              (?,
-                Apply
-                  (?,
-                    Apply (?, Variable (?, map_rec/0), Variable (?, counter/0)),
-                    Variable (?, f/0)), Variable (?, l/0)))))
+            Apply (?, Variable (?, x/0), Variable (?, l/0)))))
 
 8
 ((),
@@ -152,19 +156,25 @@
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?,
+                Bind
+                  (?,
+                    Bind
+                      (?, Apply (?, Variable (?, read_counter/1), Tuple (?)),
+                        Some x,
+                        Return
+                          (?,
+                            Apply
+                              (?, Variable (?, fold_rec/0), Variable (?, x/0)))),
+                    Some x,
+                    Return (?, Apply (?, Variable (?, x/0), Variable (?, f/0)))),
+                Some x,
+                Return (?, Apply (?, Variable (?, x/0), Variable (?, a/0))))),
+        Some x,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply
-              (?,
-                Apply
-                  (?,
-                    Apply
-                      (?,
-                        Apply
-                          (?, Variable (?, fold_rec/0), Variable (?, counter/0)),
-                        Variable (?, f/0)), Variable (?, a/0)),
-                Variable (?, l/0)))))
+            Apply (?, Variable (?, x/0), Variable (?, l/0)))))
 
 13
 ((),

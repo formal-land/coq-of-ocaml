@@ -414,6 +414,9 @@ let rec monadise (env : unit Envi.t)
           Envi.add_name x () env
         else
           env in
+      let env_in_body =
+        List.fold_left (fun env_in_body (x, _) -> Envi.add_name x () env_in_body)
+          env_in_body args in
       let body = Exp.monadise env_in_body body in
       let env = Envi.add_name x () env in
       (env, Value (loc, (), {

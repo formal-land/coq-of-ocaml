@@ -55,12 +55,13 @@
   Value
     (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Type (list/1, A)) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
       (?,
         Apply
-          (?, Apply (?, Variable (?, map_rec/0), Variable (?, counter/0)),
+          (?,
+            Apply
+              (?, Variable (?, map_rec/0),
+                Apply (?, Variable (?, read_counter/1), Tuple (?))),
             Variable (?, f/0)), Variable (?, l/0)))
 
 8
@@ -128,14 +129,15 @@
   Value
     (non_rec, fold, [ A; B ],
       [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
       (?,
         Apply
           (?,
             Apply
-              (?, Apply (?, Variable (?, fold_rec/0), Variable (?, counter/0)),
+              (?,
+                Apply
+                  (?, Variable (?, fold_rec/0),
+                    Apply (?, Variable (?, read_counter/1), Tuple (?))),
                 Variable (?, f/0)), Variable (?, a/0)), Variable (?, l/0)))
 
 13

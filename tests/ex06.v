@@ -19,8 +19,13 @@ Fixpoint map_rec {A B : Type} (counter : nat) (f : B -> A) (l : list B) :
 
 Definition map {A B : Type} (f : B -> A) (l : list B) :
   M [ Counter; NonTermination ] (list A) :=
-  let! counter := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (((map_rec counter) f) l).
+  let! x :=
+    lift [_;_] "10"
+      (let! x :=
+        let! x := read_counter tt in
+        ret (map_rec x) in
+      ret (x f)) in
+  lift [_;_] "01" (x l).
 
 Fixpoint fold_rec {A B : Type}
   (counter : nat) (f : A -> B -> A) (a : A) (l : list B) :
@@ -36,8 +41,15 @@ Fixpoint fold_rec {A B : Type}
 
 Definition fold {A B : Type} (f : A -> B -> A) (a : A) (l : list B) :
   M [ Counter; NonTermination ] A :=
-  let! counter := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" ((((fold_rec counter) f) a) l).
+  let! x :=
+    lift [_;_] "10"
+      (let! x :=
+        let! x :=
+          let! x := read_counter tt in
+          ret (fold_rec x) in
+        ret (x f) in
+      ret (x a)) in
+  lift [_;_] "01" (x l).
 
 Definition l : list Z := cons 5 (cons 6 (cons 7 (cons 2 []))).
 

@@ -269,21 +269,20 @@ Inductive set:
   Value
     (non_rec, member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Type (bool/1)) =
-    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ Counter/1 ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
                   ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
-                    member_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                    member_rec/0),
+                Apply
+                  ((?, Effect ([ Counter/1 ], .)),
+                    Variable
+                      ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+                    Tuple ((?, Effect ([ ], .))))),
             Variable ((?, Effect ([ ], .)), x/0)),
         Variable ((?, Effect ([ ], .)), s/0)))
 
@@ -614,20 +613,19 @@ Inductive set:
   Value
     (non_rec, insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Type (set/0)) =
-    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ Counter/1 ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
                   ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
-                    insert_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                    insert_rec/0),
+                Apply
+                  ((?, Effect ([ Counter/1 ], .)),
+                    Variable
+                      ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+                    Tuple ((?, Effect ([ ], .))))),
             Variable ((?, Effect ([ ], .)), x/0)),
         Variable ((?, Effect ([ ], .)), s/0)))

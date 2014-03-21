@@ -1,23 +1,23 @@
-1 Exception (Error, ())
+3 Exception (Error, ())
 
-3
+5
 (.,
   Value (non_rec, x1, [ ], [ ], Some Type (Z/1)) =
     Match
-      ((4, Effect ([ ], .)),
+      ((6, Effect ([ ], .)),
         Run
           ((?, Effect ([ ], .)), Error/0, [ ],
             Apply
-              ((4, Effect ([ Error/0 ], .)),
-                Variable ((4, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
+              ((6, Effect ([ Error/0 ], .)),
+                Variable ((6, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
                 Tuple ((?, Effect ([ ], .))))),
         [
           (Constructor (inl/1, x), Variable ((?, Effect ([ ], .)), x/0));
           (Constructor (inr/1, Tuple ()),
-            Constant ((5, Effect ([ ], .)), Int(12)))
+            Constant ((7, Effect ([ ], .)), Int(12)))
         ]))
 
-7
+9
 (. -[ Failure/1 ]-> .,
   Value (non_rec, x2, [ A; B ], [ (x, B) ], Some A) =
     Match
@@ -25,17 +25,17 @@
         [
           (Any,
             Match
-              ((8, Effect ([ Failure/1 ], .)),
+              ((10, Effect ([ Failure/1 ], .)),
                 Run
                   ((?, Effect ([ ], .)), Error/0, [ ],
                     Apply
-                      ((8,
+                      ((10,
                         Effect
                           ([
                             Error/0
                           ], .)),
                         Variable
-                          ((8,
+                          ((10,
                             Effect
                               ([
                               ],
@@ -62,14 +62,14 @@
                         x/0));
                   (Constructor (inr/1, Tuple ()),
                     Apply
-                      ((9,
+                      ((11,
                         Effect
                           ([
                             Failure/1
                           ],
                             .)),
                         Variable
-                          ((9,
+                          ((11,
                             Effect
                               ([
                               ],
@@ -80,7 +80,7 @@
                                   .)),
                             failwith/1),
                         Constant
-                          ((9,
+                          ((11,
                             Effect
                               ([
                               ],
@@ -89,28 +89,28 @@
                 ]))
         ]))
 
-11
+13
 (. -[ Failure/1 ]-> .,
   Value (non_rec, x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
     Match
-      ((12, Effect ([ Failure/1 ], .)),
+      ((14, Effect ([ Failure/1 ], .)),
         Run
           ((?, Effect ([ Failure/1 ], .)), Error/0, [ ],
             IfThenElse
-              ((12, Effect ([ Error/0; Failure/1 ], .)),
-                Variable ((12, Effect ([ ], .)), b/0),
+              ((14, Effect ([ Error/0; Failure/1 ], .)),
+                Variable ((14, Effect ([ ], .)), b/0),
                 Apply
-                  ((12, Effect ([ Failure/1 ], .)),
+                  ((14, Effect ([ Failure/1 ], .)),
                     Variable
-                      ((12, Effect ([ ], . -[ Failure/1 ]-> .)), failwith/1),
-                    Constant ((12, Effect ([ ], .)), String("arg"))),
+                      ((14, Effect ([ ], . -[ Failure/1 ]-> .)), failwith/1),
+                    Constant ((14, Effect ([ ], .)), String("arg"))),
                 Apply
-                  ((12, Effect ([ Error/0 ], .)),
+                  ((14, Effect ([ Error/0 ], .)),
                     Variable
-                      ((12, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
+                      ((14, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
                     Tuple ((?, Effect ([ ], .)))))),
         [
           (Constructor (inl/1, x), Variable ((?, Effect ([ ], .)), x/0));
           (Constructor (inr/1, Tuple ()),
-            Constant ((13, Effect ([ ], .)), Int(12)))
+            Constant ((15, Effect ([ ], .)), Int(12)))
         ]))

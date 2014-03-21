@@ -116,19 +116,17 @@
   8 (. -[ Counter/2; NonTermination/2 ]-> .,
     Value (non_rec, sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2))
       =
-      Let (?, Effect ([ Counter/2; NonTermination/2 ], .))
-        (non_rec, counter, [ ], [ ], None) =
-        Apply
-          ((?, Effect ([ Counter/2 ], .)),
-            Variable ((?, Effect ([ ], . -[ Counter/2 ]-> .)), read_counter/2),
-            Tuple ((?, Effect ([ ], .)))) in
       Apply
-        ((?, Effect ([ NonTermination/2 ], .)),
+        ((?, Effect ([ Counter/2; NonTermination/2 ], .)),
           Apply
-            ((?, Effect ([ ], . -[ NonTermination/2 ]-> .)),
+            ((?, Effect ([ Counter/2 ], . -[ NonTermination/2 ]-> .)),
               Variable
                 ((?, Effect ([ ], . -> . -[ NonTermination/2 ]-> .)), sum_rec/0),
-              Variable ((?, Effect ([ ], .)), counter/0)),
+              Apply
+                ((?, Effect ([ Counter/2 ], .)),
+                  Variable
+                    ((?, Effect ([ ], . -[ Counter/2 ]-> .)), read_counter/2),
+                  Tuple ((?, Effect ([ ], .))))),
           Variable ((?, Effect ([ ], .)), l/0)))
   
   13 (. -> . -[ NonTermination/2 ]-> .,
@@ -233,19 +231,18 @@
   13 (. -[ Counter/2; NonTermination/2 ]-> .,
     Value
       (non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)) =
-      Let (?, Effect ([ Counter/2; NonTermination/2 ], .))
-        (non_rec, counter, [ ], [ ], None) =
-        Apply
-          ((?, Effect ([ Counter/2 ], .)),
-            Variable ((?, Effect ([ ], . -[ Counter/2 ]-> .)), read_counter/2),
-            Tuple ((?, Effect ([ ], .)))) in
       Apply
-        ((?, Effect ([ NonTermination/2 ], .)),
+        ((?, Effect ([ Counter/2; NonTermination/2 ], .)),
           Apply
-            ((?, Effect ([ ], . -[ NonTermination/2 ]-> .)),
+            ((?, Effect ([ Counter/2 ], . -[ NonTermination/2 ]-> .)),
               Variable
                 ((?, Effect ([ ], . -> . -[ NonTermination/2 ]-> .)),
-                  of_list_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                  of_list_rec/0),
+              Apply
+                ((?, Effect ([ Counter/2 ], .)),
+                  Variable
+                    ((?, Effect ([ ], . -[ Counter/2 ]-> .)), read_counter/2),
+                  Tuple ((?, Effect ([ ], .))))),
           Variable ((?, Effect ([ ], .)), x/0)))
   
   17 Module Inside:

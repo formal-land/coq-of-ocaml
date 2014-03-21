@@ -107,12 +107,17 @@ Inductive tree:
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?,
+                Bind
+                  (?, Apply (?, Variable (?, read_counter/1), Tuple (?)),
+                    Some x_1,
+                    Return
+                      (?,
+                        Apply (?, Variable (?, find_rec/0), Variable (?, x_1/0)))),
+                Some x_1,
+                Return (?, Apply (?, Variable (?, x_1/0), Variable (?, x/0))))),
+        Some x_1,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply
-              (?,
-                Apply
-                  (?,
-                    Apply (?, Variable (?, find_rec/0), Variable (?, counter/0)),
-                    Variable (?, x/0)), Variable (?, t/0)))))
+            Apply (?, Variable (?, x_1/0), Variable (?, t/0)))))

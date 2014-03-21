@@ -50,10 +50,11 @@
   8 ((),
     Value (non_rec, sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2))
       =
-      Let ? (non_rec, counter, [ ], [ ], None) =
-        Apply (?, Variable (?, read_counter/2), Tuple (?)) in
       Apply
-        (?, Apply (?, Variable (?, sum_rec/0), Variable (?, counter/0)),
+        (?,
+          Apply
+            (?, Variable (?, sum_rec/0),
+              Apply (?, Variable (?, read_counter/2), Tuple (?))),
           Variable (?, l/0)))
   
   13 ((),
@@ -100,10 +101,11 @@
   13 ((),
     Value
       (non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)) =
-      Let ? (non_rec, counter, [ ], [ ], None) =
-        Apply (?, Variable (?, read_counter/2), Tuple (?)) in
       Apply
-        (?, Apply (?, Variable (?, of_list_rec/0), Variable (?, counter/0)),
+        (?,
+          Apply
+            (?, Variable (?, of_list_rec/0),
+              Apply (?, Variable (?, read_counter/2), Tuple (?))),
           Variable (?, x/0)))
   
   17 Module Inside:

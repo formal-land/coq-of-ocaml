@@ -172,28 +172,17 @@
               (non_rec, map, [ A; B ],
                 [ (f, (B -> A)); (x_1, Type (list/1, B)) ],
                 Some Type (list/1, A)) =
-              Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-                (non_rec, counter, [ ], [ ], None) =
-                Apply
-                  ((?, Effect ([ Counter/1 ], .)),
-                    Variable
-                      ((?,
-                        Effect
-                          ([ ],
-                            .
-                              -[
-                                Counter/1
-                              ]->
-                              .)),
-                        read_counter/1),
-                    Tuple ((?, Effect ([ ], .))))
-                in
               Apply
-                ((?, Effect ([ NonTermination/1 ], .)),
+                ((?,
+                  Effect
+                    ([
+                      Counter/1;
+                      NonTermination/1
+                    ], .)),
                   Apply
                     ((?,
                       Effect
-                        ([ ],
+                        ([ Counter/1 ],
                           .
                             -[
                               NonTermination/1
@@ -203,6 +192,7 @@
                         ((?,
                           Effect
                             ([
+                              Counter/1
                             ],
                               .
                                 ->
@@ -226,13 +216,30 @@
                                         ]->
                                         .)),
                               map_rec/0),
-                          Variable
+                          Apply
                             ((?,
                               Effect
                                 ([
+                                  Counter/1
                                 ],
                                   .)),
-                              counter/0)),
+                              Variable
+                                ((?,
+                                  Effect
+                                    ([
+                                    ],
+                                      .
+                                        -[
+                                          Counter/1
+                                        ]->
+                                        .)),
+                                  read_counter/1),
+                              Tuple
+                                ((?,
+                                  Effect
+                                    ([
+                                    ],
+                                      .))))),
                       Variable
                         ((?,
                           Effect
@@ -287,28 +294,17 @@
                   ]) in
             Let (7, Effect ([ Counter/1; NonTermination/1 ], .))
               (non_rec, loop, [ A ], [ (x, A) ], Some A) =
-              Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-                (non_rec, counter, [ ], [ ], None) =
-                Apply
-                  ((?, Effect ([ Counter/1 ], .)),
-                    Variable
-                      ((?,
-                        Effect
-                          ([ ],
-                            .
-                              -[
-                                Counter/1
-                              ]->
-                              .)),
-                        read_counter/1),
-                    Tuple ((?, Effect ([ ], .))))
-                in
               Apply
-                ((?, Effect ([ NonTermination/1 ], .)),
+                ((?,
+                  Effect
+                    ([
+                      Counter/1;
+                      NonTermination/1
+                    ], .)),
                   Apply
                     ((?,
                       Effect
-                        ([ ],
+                        ([ Counter/1 ],
                           .
                             -[
                               NonTermination/1
@@ -327,13 +323,30 @@
                                   ]->
                                   .)),
                           loop_rec/0),
-                      Variable
+                      Apply
                         ((?,
                           Effect
                             ([
+                              Counter/1
                             ],
                               .)),
-                          counter/0)),
+                          Variable
+                            ((?,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    -[
+                                      Counter/1
+                                    ]->
+                                    .)),
+                              read_counter/1),
+                          Tuple
+                            ((?,
+                              Effect
+                                ([
+                                ],
+                                  .))))),
                   Variable ((?, Effect ([ ], .)), x/0))
               in
             Apply

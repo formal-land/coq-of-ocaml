@@ -32,6 +32,8 @@ Definition ignore {A : Type} (_ : A) : unit :=
 Definition app {A : Type} (l1 l2 : list A) : list A :=
   app l1 l2.
 
+Instance Z_eqdec : EqDec (A := Z) _ := Z.eq_dec.
+
 Module Effect.
   Record t := make {
     S : Type;

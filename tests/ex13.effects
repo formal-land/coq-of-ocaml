@@ -148,19 +148,18 @@
   Value
     (non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
       Some Type (unit/1)) =
-    Let (?, Effect ([ Counter/1; IO/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ IO/1; NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; IO/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ IO/1; NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ IO/1; NonTermination/1 ]-> .)),
             Variable
               ((?, Effect ([ ], . -> . -[ IO/1; NonTermination/1 ]-> .)),
-                print_list_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                print_list_rec/0),
+            Apply
+              ((?, Effect ([ Counter/1 ], .)),
+                Variable
+                  ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+                Tuple ((?, Effect ([ ], .))))),
         Variable ((?, Effect ([ ], .)), x/0)))
 
 14

@@ -264,20 +264,19 @@ Inductive tree:
   Value
     (non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
       Some Type (bool/1)) =
-    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ Counter/1 ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
                   ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
-                    find_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                    find_rec/0),
+                Apply
+                  ((?, Effect ([ Counter/1 ], .)),
+                    Variable
+                      ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+                    Tuple ((?, Effect ([ ], .))))),
             Variable ((?, Effect ([ ], .)), x/0)),
         Variable ((?, Effect ([ ], .)), t/0)))

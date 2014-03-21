@@ -99,10 +99,11 @@ Inductive tree:
   Value
     (non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
       Some Type (bool/1)) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
       (?,
         Apply
-          (?, Apply (?, Variable (?, find_rec/0), Variable (?, counter/0)),
+          (?,
+            Apply
+              (?, Variable (?, find_rec/0),
+                Apply (?, Variable (?, read_counter/1), Tuple (?))),
             Variable (?, x/0)), Variable (?, t/0)))

@@ -401,29 +401,30 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
       Variable (Loc.Unknown,
         Envi.bound_name (PathName.of_name [] x) env.FullEnvi.vars) in
     let (x_rec, _) = Envi.fresh (x ^ "_rec") () env.FullEnvi.vars in
+    let (counter, _) = Envi.fresh "counter" () env.FullEnvi.vars in
     let args_x_rec =
-      ("counter",
+      (counter,
         Type.Apply (Envi.bound_name (PathName.of_name [] "nat") env.FullEnvi.typs, []))
           :: args in
     let header_x_rec = (is_rec, x_rec, typ_vars, args_x_rec, typ) in
     let env_in_x_rec = Header.env_in_header header_x_rec env in
     let e_x_rec = monadise_let_rec env_in_x_rec e in
-    let e_x_rec = Match (Loc.Unknown, var "counter" env_in_x_rec, [
+    let e_x_rec = Match (Loc.Unknown, var counter env_in_x_rec, [
       (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O") env_in_x_rec.FullEnvi.constructors, []),
         Apply (Loc.Unknown, var "not_terminated" env_in_x_rec, Tuple (Loc.Unknown, [])));
       (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env_in_x_rec.FullEnvi.constructors,
-        [Pattern.Variable "counter"]),
+        [Pattern.Variable counter]),
         substitute x
-          (Apply (Loc.Unknown, var x_rec env_in_x_rec, var "counter" env_in_x_rec)) e_x_rec)]) in
+          (Apply (Loc.Unknown, var x_rec env_in_x_rec, var counter env_in_x_rec)) e_x_rec)]) in
     let env = { env with FullEnvi.vars = Envi.add_name x_rec () env.FullEnvi.vars } in
     let header_x = (Recursivity.New false, x, typ_vars, args, typ) in
     let env_in_x = Header.env_in_header header_x env in
     let e_x =
-      Let (Loc.Unknown, Header.variable "counter",
-        Apply (Loc.Unknown, var "read_counter" env_in_x, Tuple (Loc.Unknown, [])),
-      let env_in_x = { env with FullEnvi.vars = Envi.add_name "counter" () env_in_x.FullEnvi.vars } in
       List.fold_left (fun e (x, _) -> Apply (Loc.Unknown, e, var x env_in_x))
-        (Apply (Loc.Unknown, var x_rec env_in_x, var "counter" env_in_x)) args) in
+        (Apply (Loc.Unknown,
+          var x_rec env_in_x,
+          Apply (Loc.Unknown, var "read_counter" env_in_x, Tuple (Loc.Unknown, []))))
+        args in
     let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     (env, [ (header_x_rec, e_x_rec); (header_x, e_x) ])
   else
@@ -653,6 +654,9 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
         Envi.add_name x () env
       else
         env in
+    let env_in_e1 =
+      List.fold_left (fun env_in_e1 (x, _) -> Envi.add_name x () env_in_e1)
+        env_in_e1 args in
     let e1 = monadise env_in_e1 e1 in
     let env_in_e2 = Envi.add_name x () env in
     let e2 = monadise env_in_e2 e2 in

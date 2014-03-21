@@ -65,10 +65,11 @@
   Value
     (non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
       Some Type (unit/1)) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
-      (?, Apply (?, Variable (?, print_list_rec/0), Variable (?, counter/0)),
+      (?,
+        Apply
+          (?, Variable (?, print_list_rec/0),
+            Apply (?, Variable (?, read_counter/1), Tuple (?))),
         Variable (?, x/0)))
 
 14

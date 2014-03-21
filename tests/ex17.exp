@@ -88,8 +88,9 @@
 17
 ((),
   Value (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ], Some A) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
-      (?, Apply (?, Variable (?, h_rec/0), Variable (?, counter/0)),
+      (?,
+        Apply
+          (?, Variable (?, h_rec/0),
+            Apply (?, Variable (?, read_counter/1), Tuple (?))),
         Variable (?, l/0)))

@@ -41,8 +41,11 @@ Fixpoint of_list_rec {A : Type} (counter : nat) (l : list A) :
 
 Definition of_list {A : Type} (l : list A) :
   M [ Counter; NonTermination ] (t2 A) :=
-  let! counter := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" ((of_list_rec counter) l).
+  let! x :=
+    lift [_;_] "10"
+      (let! x := read_counter tt in
+      ret (of_list_rec x)) in
+  lift [_;_] "01" (x l).
 
 Fixpoint sum_rec (counter : nat) (l : t2 Z) : M [ NonTermination ] Z :=
   match counter with
@@ -57,12 +60,15 @@ Fixpoint sum_rec (counter : nat) (l : t2 Z) : M [ NonTermination ] Z :=
   end.
 
 Definition sum (l : t2 Z) : M [ Counter; NonTermination ] Z :=
-  let! counter := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" ((sum_rec counter) l).
+  let! x :=
+    lift [_;_] "10"
+      (let! x := read_counter tt in
+      ret (sum_rec x)) in
+  lift [_;_] "01" (x l).
 
 Definition s {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
   match x with
   | _ =>
-    let! x := of_list (cons 5 (cons 7 (cons 3 []))) in
-    sum x
+    let! x_1 := of_list (cons 5 (cons 7 (cons 3 []))) in
+    sum x_1
   end.

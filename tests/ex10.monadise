@@ -66,12 +66,14 @@
         (?,
           Lift
             (?, [ Counter/2 ], [ Counter/2; NonTermination/2 ],
-              Apply (?, Variable (?, read_counter/2), Tuple (?))), Some counter,
+              Bind
+                (?, Apply (?, Variable (?, read_counter/2), Tuple (?)), Some x,
+                  Return
+                    (?, Apply (?, Variable (?, sum_rec/0), Variable (?, x/0))))),
+          Some x,
           Lift
             (?, [ NonTermination/2 ], [ Counter/2; NonTermination/2 ],
-              Apply
-                (?, Apply (?, Variable (?, sum_rec/0), Variable (?, counter/0)),
-                  Variable (?, l/0)))))
+              Apply (?, Variable (?, x/0), Variable (?, l/0)))))
   
   13 ((),
     Value
@@ -133,14 +135,17 @@
         (?,
           Lift
             (?, [ Counter/2 ], [ Counter/2; NonTermination/2 ],
-              Apply (?, Variable (?, read_counter/2), Tuple (?))), Some counter,
+              Bind
+                (?, Apply (?, Variable (?, read_counter/2), Tuple (?)),
+                  Some x_1,
+                  Return
+                    (?,
+                      Apply
+                        (?, Variable (?, of_list_rec/0), Variable (?, x_1/0))))),
+          Some x_1,
           Lift
             (?, [ NonTermination/2 ], [ Counter/2; NonTermination/2 ],
-              Apply
-                (?,
-                  Apply
-                    (?, Variable (?, of_list_rec/0), Variable (?, counter/0)),
-                  Variable (?, x/0)))))
+              Apply (?, Variable (?, x_1/0), Variable (?, x/0)))))
   
   17 Module Inside:
     18 ((),
@@ -186,8 +191,8 @@
                                     Constructor
                                       (22,
                                         []/1)))))),
-                Some x,
+                Some x_1,
                 Apply
                   (22, Variable (22, List2.sum/0),
-                    Variable (?, x/0))))
+                    Variable (?, x_1/0))))
         ]))

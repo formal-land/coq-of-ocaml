@@ -18,7 +18,7 @@
                           (?,
                             read_r/0),
                         Tuple (?)),
-                    Some x,
+                    Some x_1,
                     Return
                       (?,
                         Apply
@@ -28,12 +28,15 @@
                                 Z.add/1),
                             Variable
                               (?,
-                                x/0)))),
-                Some x,
+                                x_1/0)))),
+                Some x_1,
                 Return
                   (?,
                     Apply
-                      (?, Variable (?, x/0),
+                      (?,
+                        Variable
+                          (?,
+                            x_1/0),
                         Constant
                           (4,
                             Int(1))))))
@@ -59,7 +62,7 @@
                           (?,
                             read_s/0),
                         Tuple (?))),
-                Some x,
+                Some x_1,
                 Lift
                   (?, [ Failure/1 ], [ s/0; Failure/1 ],
                     Apply
@@ -69,7 +72,7 @@
                             failwith/1),
                         Variable
                           (?,
-                            x/0)))))
+                            x_1/0)))))
         ]))
 
 10
@@ -101,7 +104,7 @@
                                 read_r/0),
                             Tuple
                               (?)),
-                        Some x,
+                        Some x_1,
                         Return
                           (?,
                             Apply
@@ -111,20 +114,20 @@
                                     Z.add/1),
                                 Variable
                                   (?,
-                                    x/0)))),
-                    Some x,
+                                    x_1/0)))),
+                    Some x_1,
                     Return
                       (?,
                         Apply
                           (?,
                             Variable
                               (?,
-                                x/0),
+                                x_1/0),
                             Constant
                               (14,
                                 Int(1))))),
-                Some x,
+                Some x_1,
                 Apply
                   (14, Variable (?, write_r/0),
-                    Variable (?, x/0))))
+                    Variable (?, x_1/0))))
         ]))

@@ -104,12 +104,13 @@ Inductive set:
   Value
     (non_rec, member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Type (bool/1)) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
       (?,
         Apply
-          (?, Apply (?, Variable (?, member_rec/0), Variable (?, counter/0)),
+          (?,
+            Apply
+              (?, Variable (?, member_rec/0),
+                Apply (?, Variable (?, read_counter/1), Tuple (?))),
             Variable (?, x/0)), Variable (?, s/0)))
 
 20
@@ -236,10 +237,11 @@ Inductive set:
   Value
     (non_rec, insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Type (set/0)) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
       (?,
         Apply
-          (?, Apply (?, Variable (?, insert_rec/0), Variable (?, counter/0)),
+          (?,
+            Apply
+              (?, Variable (?, insert_rec/0),
+                Apply (?, Variable (?, read_counter/1), Tuple (?))),
             Variable (?, x/0)), Variable (?, s/0)))

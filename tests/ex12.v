@@ -29,5 +29,10 @@ Fixpoint find_rec (counter : nat) (x : Z) (t : tree) : M [ NonTermination ] bool
   end.
 
 Definition find (x : Z) (t : tree) : M [ Counter; NonTermination ] bool :=
-  let! counter := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (((find_rec counter) x) t).
+  let! x_1 :=
+    lift [_;_] "10"
+      (let! x_1 :=
+        let! x_1 := read_counter tt in
+        ret (find_rec x_1) in
+      ret (x_1 x)) in
+  lift [_;_] "01" (x_1 t).

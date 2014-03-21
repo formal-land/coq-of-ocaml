@@ -66,10 +66,11 @@ Inductive t2:
 ((),
   Value
     (non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
-      (?, Apply (?, Variable (?, of_list_rec/0), Variable (?, counter/0)),
+      (?,
+        Apply
+          (?, Variable (?, of_list_rec/0),
+            Apply (?, Variable (?, read_counter/1), Tuple (?))),
         Variable (?, l/0)))
 
 23
@@ -121,10 +122,11 @@ Inductive t2:
 23
 ((),
   Value (non_rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)) =
-    Let ? (non_rec, counter, [ ], [ ], None) =
-      Apply (?, Variable (?, read_counter/1), Tuple (?)) in
     Apply
-      (?, Apply (?, Variable (?, sum_rec/0), Variable (?, counter/0)),
+      (?,
+        Apply
+          (?, Variable (?, sum_rec/0),
+            Apply (?, Variable (?, read_counter/1), Tuple (?))),
         Variable (?, l/0)))
 
 28

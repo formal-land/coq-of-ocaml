@@ -68,7 +68,7 @@
                                         (6,
                                           xs/0)),
                                   Some
-                                    x_1,
+                                    x_2,
                                   Return
                                     (?,
                                       Constructor
@@ -84,7 +84,7 @@
                                                   x/0)),
                                           Variable
                                             (?,
-                                              x_1/0)))))
+                                              x_2/0)))))
                           ]))
                   ]) in
             Let 4
@@ -104,14 +104,42 @@
                         Counter/1;
                         NonTermination/1
                       ],
-                      Apply
+                      Bind
                         (?,
-                          Variable
+                          Bind
                             (?,
-                              read_counter/1),
-                          Tuple
-                            (?))),
-                  Some counter,
+                              Apply
+                                (?,
+                                  Variable
+                                    (?,
+                                      read_counter/1),
+                                  Tuple
+                                    (?)),
+                              Some
+                                x_2,
+                              Return
+                                (?,
+                                  Apply
+                                    (?,
+                                      Variable
+                                        (?,
+                                          map_rec/0),
+                                      Variable
+                                        (?,
+                                          x_2/0)))),
+                          Some
+                            x_2,
+                          Return
+                            (?,
+                              Apply
+                                (?,
+                                  Variable
+                                    (?,
+                                      x_2/0),
+                                  Variable
+                                    (?,
+                                      f/0))))),
+                  Some x_2,
                   Lift
                     (?, [ NonTermination/1 ],
                       [
@@ -120,19 +148,9 @@
                       ],
                       Apply
                         (?,
-                          Apply
+                          Variable
                             (?,
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      map_rec/0),
-                                  Variable
-                                    (?,
-                                      counter/0)),
-                              Variable
-                                (?,
-                                  f/0)),
+                              x_2/0),
                           Variable
                             (?,
                               x_1/0))))
@@ -175,14 +193,28 @@
                         Counter/1;
                         NonTermination/1
                       ],
-                      Apply
+                      Bind
                         (?,
-                          Variable
+                          Apply
                             (?,
-                              read_counter/1),
-                          Tuple
-                            (?))),
-                  Some counter,
+                              Variable
+                                (?,
+                                  read_counter/1),
+                              Tuple
+                                (?)),
+                          Some
+                            x_1,
+                          Return
+                            (?,
+                              Apply
+                                (?,
+                                  Variable
+                                    (?,
+                                      loop_rec/0),
+                                  Variable
+                                    (?,
+                                      x_1/0))))),
+                  Some x_1,
                   Lift
                     (?, [ NonTermination/1 ],
                       [
@@ -191,14 +223,9 @@
                       ],
                       Apply
                         (?,
-                          Apply
+                          Variable
                             (?,
-                              Variable
-                                (?,
-                                  loop_rec/0),
-                              Variable
-                                (?,
-                                  counter/0)),
+                              x_1/0),
                           Variable
                             (?,
                               x/0))))

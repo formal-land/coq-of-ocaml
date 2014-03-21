@@ -1,4 +1,10 @@
+open SmartPrint
+
 type 'a t = 'a PathName.Map.t list
+
+let pp (d : 'a t) : SmartPrint.t =
+  d |> OCaml.list (fun map ->
+    OCaml.list (fun (x, _) -> PathName.pp x) (PathName.Map.bindings map))
 
 exception NotFound of PathName.t
 

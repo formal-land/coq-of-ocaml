@@ -136,21 +136,20 @@
   Value
     (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Type (list/1, A)) =
-    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ Counter/1 ], . -> . -[ NonTermination/1 ]-> .)),
                 Variable
                   ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
-                    map_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                    map_rec/0),
+                Apply
+                  ((?, Effect ([ Counter/1 ], .)),
+                    Variable
+                      ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+                    Tuple ((?, Effect ([ ], .))))),
             Variable ((?, Effect ([ ], .)), f/0)),
         Variable ((?, Effect ([ ], .)), l/0)))
 
@@ -317,24 +316,25 @@
   Value
     (non_rec, fold, [ A; B ],
       [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
-    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
             Apply
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ Counter/1 ], . -> . -[ NonTermination/1 ]-> .)),
                 Apply
-                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
+                  ((?,
+                    Effect
+                      ([ Counter/1 ], . -> . -> . -[ NonTermination/1 ]-> .)),
                     Variable
                       ((?,
                         Effect ([ ], . -> . -> . -> . -[ NonTermination/1 ]-> .)),
-                        fold_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                        fold_rec/0),
+                    Apply
+                      ((?, Effect ([ Counter/1 ], .)),
+                        Variable
+                          ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
+                            read_counter/1), Tuple ((?, Effect ([ ], .))))),
                 Variable ((?, Effect ([ ], .)), f/0)),
             Variable ((?, Effect ([ ], .)), a/0)),
         Variable ((?, Effect ([ ], .)), l/0)))

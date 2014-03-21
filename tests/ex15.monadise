@@ -112,16 +112,21 @@ Inductive set:
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?,
+                Bind
+                  (?, Apply (?, Variable (?, read_counter/1), Tuple (?)),
+                    Some x_1,
+                    Return
+                      (?,
+                        Apply
+                          (?, Variable (?, member_rec/0), Variable (?, x_1/0)))),
+                Some x_1,
+                Return (?, Apply (?, Variable (?, x_1/0), Variable (?, x/0))))),
+        Some x_1,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply
-              (?,
-                Apply
-                  (?,
-                    Apply
-                      (?, Variable (?, member_rec/0), Variable (?, counter/0)),
-                    Variable (?, x/0)), Variable (?, s/0)))))
+            Apply (?, Variable (?, x_1/0), Variable (?, s/0)))))
 
 20
 ((),
@@ -190,7 +195,7 @@ Inductive set:
                                   (25,
                                     s1/0)),
                             Some
-                              x,
+                              x_1,
                             Return
                               (?,
                                 Constructor
@@ -198,7 +203,7 @@ Inductive set:
                                     Node/0,
                                     Variable
                                       (?,
-                                        x/0),
+                                        x_1/0),
                                     Variable
                                       (25,
                                         y/0),
@@ -241,7 +246,7 @@ Inductive set:
                                       (27,
                                         s2/0)),
                                 Some
-                                  x,
+                                  x_1,
                                 Return
                                   (?,
                                     Constructor
@@ -255,7 +260,7 @@ Inductive set:
                                             y/0),
                                         Variable
                                           (?,
-                                            x/0)))),
+                                            x_1/0)))),
                             Return
                               (?,
                                 Variable
@@ -273,13 +278,18 @@ Inductive set:
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, read_counter/1), Tuple (?))), Some counter,
+            Bind
+              (?,
+                Bind
+                  (?, Apply (?, Variable (?, read_counter/1), Tuple (?)),
+                    Some x_1,
+                    Return
+                      (?,
+                        Apply
+                          (?, Variable (?, insert_rec/0), Variable (?, x_1/0)))),
+                Some x_1,
+                Return (?, Apply (?, Variable (?, x_1/0), Variable (?, x/0))))),
+        Some x_1,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply
-              (?,
-                Apply
-                  (?,
-                    Apply
-                      (?, Variable (?, insert_rec/0), Variable (?, counter/0)),
-                    Variable (?, x/0)), Variable (?, s/0)))))
+            Apply (?, Variable (?, x_1/0), Variable (?, s/0)))))

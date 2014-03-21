@@ -125,19 +125,18 @@ Inductive t2:
 (. -[ Counter/1; NonTermination/1 ]-> .,
   Value
     (non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)) =
-    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
             Variable
               ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
-                of_list_rec/0), Variable ((?, Effect ([ ], .)), counter/0)),
+                of_list_rec/0),
+            Apply
+              ((?, Effect ([ Counter/1 ], .)),
+                Variable
+                  ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+                Tuple ((?, Effect ([ ], .))))),
         Variable ((?, Effect ([ ], .)), l/0)))
 
 23
@@ -254,19 +253,17 @@ Inductive t2:
 23
 (. -[ Counter/1; NonTermination/1 ]-> .,
   Value (non_rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)) =
-    Let (?, Effect ([ Counter/1; NonTermination/1 ], .))
-      (non_rec, counter, [ ], [ ], None) =
-      Apply
-        ((?, Effect ([ Counter/1 ], .)),
-          Variable ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-          Tuple ((?, Effect ([ ], .)))) in
     Apply
-      ((?, Effect ([ NonTermination/1 ], .)),
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Apply
-          ((?, Effect ([ ], . -[ NonTermination/1 ]-> .)),
+          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
             Variable
               ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)), sum_rec/0),
-            Variable ((?, Effect ([ ], .)), counter/0)),
+            Apply
+              ((?, Effect ([ Counter/1 ], .)),
+                Variable
+                  ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
+                Tuple ((?, Effect ([ ], .))))),
         Variable ((?, Effect ([ ], .)), l/0)))
 
 28

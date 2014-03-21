@@ -41,5 +41,8 @@ Fixpoint h_rec {A B : Type} (counter : nat) (l : list B) :
 
 Definition h {A B : Type} (l : list B) :
   M [ Outside; G.Inside; Counter; IO; NonTermination ] A :=
-  let! counter := lift [_;_;_;_;_] "00100" (read_counter tt) in
-  lift [_;_;_;_;_] "11011" ((h_rec counter) l).
+  let! x :=
+    lift [_;_;_;_;_] "00100"
+      (let! x := read_counter tt in
+      ret (h_rec x)) in
+  lift [_;_;_;_;_] "11011" (x l).
