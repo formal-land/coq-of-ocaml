@@ -3,7 +3,7 @@
 5
 ((),
   Value (non_rec, f, [ A; B ], [ (x, B) ], Some A) =
-    Apply (5, Variable (5, raise_Outside/0), Tuple (?)))
+    Apply (5, Variable (5, raise_Outside/0), [ Tuple (?) ]))
 
 7 Module G:
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
@@ -14,8 +14,8 @@
         (11, Variable (11, b/0),
           Apply
             (12, Variable (12, raise_Inside/0),
-              Tuple (?, Constant (12, Int(12)), Constant (12, String("no")))),
-          Apply (14, Variable (14, raise_Outside/1), Tuple (?))))
+              [ Tuple (?, Constant (12, Int(12)), Constant (12, String("no"))) ]),
+          Apply (14, Variable (14, raise_Outside/1), [ Tuple (?) ])))
 
 17
 ((),
@@ -26,7 +26,7 @@
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
           (Constructor (S/1, counter),
             Match
               (18, Variable (18, l/0),
@@ -39,17 +39,21 @@
                             Variable
                               (19,
                                 print_string/1),
-                            Constant
-                              (19,
-                                String("no tail"))),
+                            [
+                              Constant
+                                (19,
+                                  String("no tail"))
+                            ]),
                         Apply
                           (19,
                             Variable
                               (19,
                                 G.g/0),
-                            Constructor
-                              (19,
-                                false/1))));
+                            [
+                              Constructor
+                                (19,
+                                  false/1)
+                            ])));
                   (Constructor
                     (cons/1,
                       x,
@@ -60,14 +64,16 @@
                         Variable
                           (20,
                             G.raise_Inside/0),
-                        Tuple
-                          (?,
-                            Constant
-                              (20,
-                                Int(0)),
-                            Constant
-                              (20,
-                                String("gg")))));
+                        [
+                          Tuple
+                            (?,
+                              Constant
+                                (20,
+                                  Int(0)),
+                              Constant
+                                (20,
+                                  String("gg")))
+                        ]));
                   (Constructor (cons/1, Any, xs),
                     Apply
                       (21,
@@ -76,12 +82,16 @@
                             Variable
                               (?,
                                 h_rec/0),
-                            Variable
-                              (?,
-                                counter/0)),
-                        Variable
-                          (21,
-                            xs/0)))
+                            [
+                              Variable
+                                (?,
+                                  counter/0)
+                            ]),
+                        [
+                          Variable
+                            (21,
+                              xs/0)
+                        ]))
                 ]))
         ]))
 
@@ -89,8 +99,8 @@
 ((),
   Value (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ], Some A) =
     Apply
-      (?,
-        Apply
-          (?, Variable (?, h_rec/0),
-            Apply (?, Variable (?, read_counter/1), Tuple (?))),
-        Variable (?, l/0)))
+      (?, Variable (?, h_rec/0),
+        [
+          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+          Variable (?, l/0)
+        ]))

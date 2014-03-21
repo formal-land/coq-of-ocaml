@@ -6,7 +6,7 @@
     Apply
       ((5, Effect ([ Outside/0 ], .)),
         Variable ((5, Effect ([ ], . -[ Outside/0 ]-> .)), raise_Outside/0),
-        Tuple ((?, Effect ([ ], .)))))
+        [ Tuple ((?, Effect ([ ], .))) ]))
 
 7 Module G:
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
@@ -19,15 +19,21 @@
           Apply
             ((12, Effect ([ Inside/0 ], .)),
               Variable ((12, Effect ([ ], . -[ Inside/0 ]-> .)), raise_Inside/0),
-              Tuple
-                ((?, Effect ([ ], .)),
-                  Constant ((12, Effect ([ ], .)), Int(12)),
-                  Constant ((12, Effect ([ ], .)), String("no")))),
+              [
+                Tuple
+                  ((?, Effect ([ ], .)),
+                    Constant
+                      ((12, Effect ([ ], .)),
+                        Int(12)),
+                    Constant
+                      ((12, Effect ([ ], .)),
+                        String("no")))
+              ]),
           Apply
             ((14, Effect ([ Outside/1 ], .)),
               Variable
                 ((14, Effect ([ ], . -[ Outside/1 ]-> .)), raise_Outside/1),
-              Tuple ((?, Effect ([ ], .))))))
+              [ Tuple ((?, Effect ([ ], .))) ])))
 
 17
 (. -> . -[ Outside/0; G.Inside/0; IO/1; NonTermination/1 ]-> .,
@@ -50,7 +56,7 @@
                             NonTermination/1
                           ]-> .)),
                     not_terminated/1),
-                Tuple ((?, Effect ([ ], .)))));
+                [ Tuple ((?, Effect ([ ], .))) ]));
           (Constructor (S/1, counter),
             Match
               ((18,
@@ -91,13 +97,15 @@
                                       ]->
                                       .)),
                                 print_string/1),
-                            Constant
-                              ((19,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                String("no tail"))),
+                            [
+                              Constant
+                                ((19,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  String("no tail"))
+                            ]),
                         Apply
                           ((19,
                             Effect
@@ -118,13 +126,15 @@
                                       ]->
                                       .)),
                                 G.g/0),
-                            Constructor
-                              ((19,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                false/1))));
+                            [
+                              Constructor
+                                ((19,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  false/1)
+                            ])));
                   (Constructor
                     (cons/1,
                       x,
@@ -148,26 +158,28 @@
                                   ]->
                                   .)),
                             G.raise_Inside/0),
-                        Tuple
-                          ((?,
-                            Effect
-                              ([
-                              ],
-                                .)),
-                            Constant
-                              ((20,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                Int(0)),
-                            Constant
-                              ((20,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                String("gg")))));
+                        [
+                          Tuple
+                            ((?,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Constant
+                                ((20,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Int(0)),
+                              Constant
+                                ((20,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  String("gg")))
+                        ]));
                   (Constructor (cons/1, Any, xs),
                     Apply
                       ((21,
@@ -208,20 +220,24 @@
                                         ]->
                                         .)),
                                 h_rec/0),
-                            Variable
-                              ((?,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                counter/0)),
-                        Variable
-                          ((21,
-                            Effect
-                              ([
-                              ],
-                                .)),
-                            xs/0)))
+                            [
+                              Variable
+                                ((?,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  counter/0)
+                            ]),
+                        [
+                          Variable
+                            ((21,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              xs/0)
+                        ]))
                 ]))
         ]))
 
@@ -231,21 +247,18 @@
     Apply
       ((?,
         Effect ([ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ], .)),
-        Apply
+        Variable
           ((?,
             Effect
-              ([ Counter/1 ],
-                . -[ Outside/0; G.Inside/0; IO/1; NonTermination/1 ]-> .)),
-            Variable
-              ((?,
-                Effect
-                  ([ ],
-                    . ->
-                      . -[ Outside/0; G.Inside/0; IO/1; NonTermination/1 ]-> .)),
-                h_rec/0),
-            Apply
-              ((?, Effect ([ Counter/1 ], .)),
-                Variable
-                  ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-                Tuple ((?, Effect ([ ], .))))),
-        Variable ((?, Effect ([ ], .)), l/0)))
+              ([ ],
+                . -> . -[ Outside/0; G.Inside/0; IO/1; NonTermination/1 ]-> .)),
+            h_rec/0),
+        [
+          Apply
+            ((?, Effect ([ Counter/1 ], .)),
+              Variable
+                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
+                  read_counter/1),
+              [ Tuple ((?, Effect ([ ], .))) ]);
+          Variable ((?, Effect ([ ], .)), l/0)
+        ]))

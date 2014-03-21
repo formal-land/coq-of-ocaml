@@ -27,8 +27,10 @@
                           Variable
                             (?,
                               not_terminated/1),
-                          Tuple
-                            (?)));
+                          [
+                            Tuple
+                              (?)
+                          ]));
                     (Constructor (S/1, counter),
                       Match
                         (?,
@@ -50,23 +52,25 @@
                               Bind
                                 (?,
                                   Apply
-                                    (?,
+                                    (6,
                                       Apply
-                                        (6,
-                                          Apply
-                                            (?,
-                                              Variable
-                                                (?,
-                                                  map_rec/0),
-                                              Variable
-                                                (?,
-                                                  counter/0)),
+                                        (?,
                                           Variable
-                                            (6,
-                                              f/0)),
-                                      Variable
-                                        (6,
-                                          xs/0)),
+                                            (?,
+                                              map_rec/0),
+                                          [
+                                            Variable
+                                              (?,
+                                                counter/0)
+                                          ]),
+                                      [
+                                        Variable
+                                          (6,
+                                            f/0);
+                                        Variable
+                                          (6,
+                                            xs/0)
+                                      ]),
                                   Some
                                     x_2,
                                   Return
@@ -79,9 +83,11 @@
                                               Variable
                                                 (6,
                                                   f/0),
-                                              Variable
-                                                (6,
-                                                  x/0)),
+                                              [
+                                                Variable
+                                                  (6,
+                                                    x/0)
+                                              ]),
                                           Variable
                                             (?,
                                               x_2/0)))))
@@ -104,41 +110,15 @@
                         Counter/1;
                         NonTermination/1
                       ],
-                      Bind
+                      Apply
                         (?,
-                          Bind
+                          Variable
                             (?,
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      read_counter/1),
-                                  Tuple
-                                    (?)),
-                              Some
-                                x_2,
-                              Return
-                                (?,
-                                  Apply
-                                    (?,
-                                      Variable
-                                        (?,
-                                          map_rec/0),
-                                      Variable
-                                        (?,
-                                          x_2/0)))),
-                          Some
-                            x_2,
-                          Return
-                            (?,
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      x_2/0),
-                                  Variable
-                                    (?,
-                                      f/0))))),
+                              read_counter/1),
+                          [
+                            Tuple
+                              (?)
+                          ])),
                   Some x_2,
                   Lift
                     (?, [ NonTermination/1 ],
@@ -150,10 +130,18 @@
                         (?,
                           Variable
                             (?,
-                              x_2/0),
-                          Variable
-                            (?,
-                              x_1/0))))
+                              map_rec/0),
+                          [
+                            Variable
+                              (?,
+                                x_2/0);
+                            Variable
+                              (?,
+                                f/0);
+                            Variable
+                              (?,
+                                x_1/0)
+                          ])))
               in
             Let 7
               (rec, loop_rec, [ A ],
@@ -168,8 +156,10 @@
                           Variable
                             (?,
                               not_terminated/1),
-                          Tuple
-                            (?)));
+                          [
+                            Tuple
+                              (?)
+                          ]));
                     (Constructor (S/1, counter),
                       Return
                         (?,
@@ -193,27 +183,15 @@
                         Counter/1;
                         NonTermination/1
                       ],
-                      Bind
+                      Apply
                         (?,
-                          Apply
+                          Variable
                             (?,
-                              Variable
-                                (?,
-                                  read_counter/1),
-                              Tuple
-                                (?)),
-                          Some
-                            x_1,
-                          Return
-                            (?,
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      loop_rec/0),
-                                  Variable
-                                    (?,
-                                      x_1/0))))),
+                              read_counter/1),
+                          [
+                            Tuple
+                              (?)
+                          ])),
                   Some x_1,
                   Lift
                     (?, [ NonTermination/1 ],
@@ -225,44 +203,55 @@
                         (?,
                           Variable
                             (?,
-                              x_1/0),
-                          Variable
-                            (?,
-                              x/0))))
+                              loop_rec/0),
+                          [
+                            Variable
+                              (?,
+                                x_1/0);
+                            Variable
+                              (?,
+                                x/0)
+                          ])))
               in
             Apply
-              (?,
-                Apply
-                  (8, Variable (8, map/0),
-                    Function
-                      (8, n,
-                        Apply
-                          (?,
-                            Apply
+              (8, Variable (8, map/0),
+                [
+                  Function
+                    (8,
+                      n,
+                      Apply
+                        (8,
+                          Variable
+                            (8,
+                              Z.add/1),
+                          [
+                            Variable
                               (8,
-                                Variable
-                                  (8,
-                                    Z.add/1),
-                                Variable
-                                  (8,
-                                    n/0)),
+                                n/0);
                             Constant
                               (8,
-                                Int(1))))),
-                Constructor
-                  (8, cons/1, Constant (8, Int(5)),
-                    Constructor
-                      (8, cons/1,
-                        Constant
-                          (8,
-                            Int(7)),
-                        Constructor
-                          (8,
-                            cons/1,
-                            Constant
-                              (8,
-                                Int(8)),
-                            Constructor
-                              (8,
-                                []/1))))))
+                                Int(1))
+                          ]));
+                  Constructor
+                    (8,
+                      cons/1,
+                      Constant
+                        (8,
+                          Int(5)),
+                      Constructor
+                        (8,
+                          cons/1,
+                          Constant
+                            (8,
+                              Int(7)),
+                          Constructor
+                            (8,
+                              cons/1,
+                              Constant
+                                (8,
+                                  Int(8)),
+                              Constructor
+                                (8,
+                                  []/1))))
+                ]))
         ]))

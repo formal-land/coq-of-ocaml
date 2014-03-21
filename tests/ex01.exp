@@ -7,5 +7,4 @@
 ((),
   Value (non_rec, n, [ ], [ ], Some Type (Z/1)) =
     Apply
-      (?, Apply (5, Variable (5, f/0), Constant (5, Int(12))),
-        Constant (5, Int(3))))
+      (5, Variable (5, f/0), [ Constant (5, Int(12)); Constant (5, Int(3)) ]))

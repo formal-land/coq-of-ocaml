@@ -9,9 +9,11 @@
           (Constructor ([]/1),
             Apply
               (6, Variable (6, failwith/1),
-                Constant
-                  (6,
-                    String("Cannot take the tail of an empty list."))))
+                [
+                  Constant
+                    (6,
+                      String("Cannot take the tail of an empty list."))
+                ]))
         ]))
 
 8
@@ -24,7 +26,7 @@
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
           (Constructor (S/1, counter),
             Match
               (?, Variable (?, x/0),
@@ -41,9 +43,11 @@
                             Variable
                               (11,
                                 print_string/1),
-                            Variable
-                              (11,
-                                x/0)),
+                            [
+                              Variable
+                                (11,
+                                  x/0)
+                            ]),
                         Apply
                           (12,
                             Apply
@@ -51,12 +55,16 @@
                                 Variable
                                   (?,
                                     print_list_rec/0),
-                                Variable
-                                  (?,
-                                    counter/0)),
-                            Variable
-                              (12,
-                                xs/0))))
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                (12,
+                                  xs/0)
+                            ])))
                 ]))
         ]))
 
@@ -66,11 +74,11 @@
     (non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
       Some Type (unit/1)) =
     Apply
-      (?,
-        Apply
-          (?, Variable (?, print_list_rec/0),
-            Apply (?, Variable (?, read_counter/1), Tuple (?))),
-        Variable (?, x/0)))
+      (?, Variable (?, print_list_rec/0),
+        [
+          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+          Variable (?, x/0)
+        ]))
 
 14
 ((),
@@ -84,14 +92,35 @@
   Value (non_rec, x, [ A ], [ (z, A) ], Some Type (unit/1)) =
     Apply
       (16, Variable (16, f/0),
-        Apply
-          (16, Variable (16, tail/0),
-            Constructor
-              (16, cons/1, Constant (16, String("Stop")),
+        [
+          Apply
+            (16, Variable (16, tail/0),
+              [
                 Constructor
-                  (16, cons/1, Constant (16, String("Hello")),
+                  (16, cons/1,
+                    Constant
+                      (16,
+                        String("Stop")),
                     Constructor
-                      (16, cons/1, Constant (16, String(" ")),
+                      (16,
+                        cons/1,
+                        Constant
+                          (16,
+                            String("Hello")),
                         Constructor
-                          (16, cons/1, Constant (16, String("world")),
-                            Constructor (16, []/1))))))))
+                          (16,
+                            cons/1,
+                            Constant
+                              (16,
+                                String(" ")),
+                            Constructor
+                              (16,
+                                cons/1,
+                                Constant
+                                  (16,
+                                    String("world")),
+                                Constructor
+                                  (16,
+                                    []/1)))))
+              ])
+        ]))

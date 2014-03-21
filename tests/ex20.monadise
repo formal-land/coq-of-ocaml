@@ -13,7 +13,7 @@
                 [ Counter/1; NonTermination/1 ],
                 Apply
                   (?, Variable (?, not_terminated/1),
-                    Tuple (?))));
+                    [ Tuple (?) ])));
           (Constructor (S/1, counter),
             Let 4
               (rec, sum_rec, [ ],
@@ -45,8 +45,10 @@
                               Variable
                                 (?,
                                   not_terminated/1),
-                              Tuple
-                                (?))));
+                              [
+                                Tuple
+                                  (?)
+                              ])));
                     (Constructor (S/1, counter_1),
                       Match
                         (5,
@@ -68,18 +70,18 @@
                               IfThenElse
                                 (8,
                                   Apply
-                                    (?,
-                                      Apply
+                                    (8,
+                                      Variable
                                         (8,
-                                          Variable
-                                            (8,
-                                              equiv_decb/1),
-                                          Variable
-                                            (8,
-                                              x/0)),
-                                      Constant
-                                        (8,
-                                          Int(12))),
+                                          equiv_decb/1),
+                                      [
+                                        Variable
+                                          (8,
+                                            x/0);
+                                        Constant
+                                          (8,
+                                            Int(12))
+                                      ]),
                                   Bind
                                     (?,
                                       Apply
@@ -89,24 +91,28 @@
                                               Variable
                                                 (?,
                                                   sums_rec/0),
-                                              Variable
-                                                (?,
-                                                  counter/0)),
-                                          Constructor
-                                            (9,
-                                              cons/1,
-                                              Constructor
-                                                (9,
-                                                  cons/1,
-                                                  Constant
-                                                    (9,
-                                                      Int(13)),
-                                                  Constructor
-                                                    (9,
-                                                      []/1)),
-                                              Constructor
-                                                (9,
-                                                  []/1))),
+                                              [
+                                                Variable
+                                                  (?,
+                                                    counter/0)
+                                              ]),
+                                          [
+                                            Constructor
+                                              (9,
+                                                cons/1,
+                                                Constructor
+                                                  (9,
+                                                    cons/1,
+                                                    Constant
+                                                      (9,
+                                                        Int(13)),
+                                                    Constructor
+                                                      (9,
+                                                        []/1)),
+                                                Constructor
+                                                  (9,
+                                                    []/1))
+                                          ]),
                                       Some
                                         x_1,
                                       Match
@@ -122,18 +128,18 @@
                                               Return
                                                 (?,
                                                   Apply
-                                                    (?,
-                                                      Apply
+                                                    (10,
+                                                      Variable
                                                         (10,
-                                                          Variable
-                                                            (10,
-                                                              Z.sub/1),
-                                                          Variable
-                                                            (10,
-                                                              x/0)),
-                                                      Constant
-                                                        (10,
-                                                          Int(1)))));
+                                                          Z.sub/1),
+                                                      [
+                                                        Variable
+                                                          (10,
+                                                            x/0);
+                                                        Constant
+                                                          (10,
+                                                            Int(1))
+                                                      ])));
                                             (Any,
                                               Return
                                                 (?,
@@ -150,29 +156,33 @@
                                               Variable
                                                 (?,
                                                   sum_rec/0),
-                                              Variable
-                                                (?,
-                                                  counter_1/0)),
-                                          Variable
-                                            (13,
-                                              xs/0)),
+                                              [
+                                                Variable
+                                                  (?,
+                                                    counter_1/0)
+                                              ]),
+                                          [
+                                            Variable
+                                              (13,
+                                                xs/0)
+                                          ]),
                                       Some
                                         x_1,
                                       Return
                                         (?,
                                           Apply
-                                            (?,
-                                              Apply
-                                                (13,
-                                                  Variable
-                                                    (13,
-                                                      Z.add/1),
-                                                  Variable
-                                                    (13,
-                                                      x/0)),
+                                            (13,
                                               Variable
-                                                (?,
-                                                  x_1/0))))))
+                                                (13,
+                                                  Z.add/1),
+                                              [
+                                                Variable
+                                                  (13,
+                                                    x/0);
+                                                Variable
+                                                  (?,
+                                                    x_1/0)
+                                              ])))))
                           ]))
                   ]) in
             Let 4
@@ -192,31 +202,26 @@
                         Counter/1;
                         NonTermination/1
                       ],
-                      Bind
+                      Apply
                         (?,
-                          Apply
+                          Variable
                             (?,
-                              Variable
-                                (?,
-                                  read_counter/1),
-                              Tuple
-                                (?)),
-                          Some x,
-                          Return
-                            (?,
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      sum_rec/0),
-                                  Variable
-                                    (?,
-                                      x/0))))),
+                              read_counter/1),
+                          [
+                            Tuple
+                              (?)
+                          ])),
                   Some x,
                   Apply
-                    (?, Variable (?, x/0),
-                      Variable (?, xs/0)))
-              in
+                    (?, Variable (?, sum_rec/0),
+                      [
+                        Variable
+                          (?,
+                            x/0);
+                        Variable
+                          (?,
+                            xs/0)
+                      ])) in
             Match
               (14, Variable (14, ls/0),
                 [
@@ -234,9 +239,11 @@
                             Variable
                               (16,
                                 sum/0),
-                            Variable
-                              (16,
-                                xs/0)),
+                            [
+                              Variable
+                                (16,
+                                  xs/0)
+                            ]),
                         Some
                           x,
                         Bind
@@ -248,12 +255,16 @@
                                     Variable
                                       (?,
                                         sums_rec/0),
-                                    Variable
-                                      (?,
-                                        counter/0)),
-                                Variable
-                                  (16,
-                                    ls/0)),
+                                    [
+                                      Variable
+                                        (?,
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    (16,
+                                      ls/0)
+                                ]),
                             Some
                               x_1,
                             Return
@@ -279,8 +290,7 @@
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Bind
-              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x,
-                Return
-                  (?, Apply (?, Variable (?, sums_rec/0), Variable (?, x/0))))),
-        Some x, Apply (?, Variable (?, x/0), Variable (?, ls/0))))
+            Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x,
+        Apply
+          (?, Variable (?, sums_rec/0),
+            [ Variable (?, x/0); Variable (?, ls/0) ])))

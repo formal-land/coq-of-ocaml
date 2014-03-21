@@ -15,10 +15,8 @@ Definition write_r (x : Z) : M [ r ] unit :=
 Definition plus_one {A : Type} (x : A) : M [ r ] Z :=
   match x with
   | _ =>
-    let! x_1 :=
-      let! x_1 := read_r tt in
-      ret (Z.add x_1) in
-    ret (x_1 1)
+    let! x_1 := read_r tt in
+    ret (Z.add x_1 1)
   end.
 
 Definition s := Effect.make string unit.
@@ -45,9 +43,7 @@ Definition incr {A : Type} (x : A) : M [ r ] unit :=
   match x with
   | _ =>
     let! x_1 :=
-      let! x_1 :=
-        let! x_1 := read_r tt in
-        ret (Z.add x_1) in
-      ret (x_1 1) in
+      let! x_1 := read_r tt in
+      ret (Z.add x_1 1) in
     write_r x_1
   end.

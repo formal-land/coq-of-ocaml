@@ -1,0 +1,59 @@
+3
+(. -[ IO/1 ]-> . -[ Failure/1 ]-> .,
+  Value (non_rec, f, [ A; B; C ], [ (x, A) ], Some (C -> B)) =
+    Sequence
+      ((4, Effect ([ IO/1 ], . -[ Failure/1 ]-> .)),
+        Apply
+          ((4, Effect ([ IO/1 ], .)),
+            Variable ((4, Effect ([ ], . -[ IO/1 ]-> .)), print_string/1),
+            [ Constant ((4, Effect ([ ], .)), String("Hi")) ]),
+        Function
+          ((5, Effect ([ ], . -[ Failure/1 ]-> .)), y,
+            Apply
+              ((5, Effect ([ Failure/1 ], .)),
+                Variable ((5, Effect ([ ], . -[ Failure/1 ]-> .)), failwith/1),
+                [ Constant ((5, Effect ([ ], .)), String("Bye")) ]))))
+
+7
+(. -[ Failure/1; IO/1 ]-> .,
+  Value (non_rec, r, [ A; B ], [ (x, B) ], Some A) =
+    Match
+      ((?, Effect ([ Failure/1; IO/1 ], .)),
+        Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Any,
+            Apply
+              ((7, Effect ([ Failure/1; IO/1 ], .)),
+                Apply
+                  ((7,
+                    Effect
+                      ([ IO/1 ],
+                        .
+                          -[
+                            Failure/1
+                          ]-> .)),
+                    Variable
+                      ((7,
+                        Effect
+                          ([ ],
+                            .
+                              -[
+                                IO/1
+                              ]->
+                              .
+                                -[
+                                  Failure/1
+                                ]->
+                                .)),
+                        f/0),
+                    [
+                      Constant
+                        ((7,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Int(1))
+                    ]),
+                [ Constant ((7, Effect ([ ], .)), Int(2)) ]))
+        ]))

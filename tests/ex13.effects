@@ -18,9 +18,15 @@
                             Failure/1
                           ]-> .)),
                     failwith/1),
-                Constant
-                  ((6, Effect ([ ], .)),
-                    String("Cannot take the tail of an empty list."))))
+                [
+                  Constant
+                    ((6,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("Cannot take the tail of an empty list."))
+                ]))
         ]))
 
 8
@@ -45,7 +51,7 @@
                             NonTermination/1
                           ]-> .)),
                     not_terminated/1),
-                Tuple ((?, Effect ([ ], .)))));
+                [ Tuple ((?, Effect ([ ], .))) ]));
           (Constructor (S/1, counter),
             Match
               ((?, Effect ([ IO/1; NonTermination/1 ], .)),
@@ -86,13 +92,15 @@
                                       ]->
                                       .)),
                                 print_string/1),
-                            Variable
-                              ((11,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                x/0)),
+                            [
+                              Variable
+                                ((11,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  x/0)
+                            ]),
                         Apply
                           ((12,
                             Effect
@@ -126,20 +134,24 @@
                                             ]->
                                             .)),
                                     print_list_rec/0),
-                                Variable
-                                  ((?,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    counter/0)),
-                            Variable
-                              ((12,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                xs/0))))
+                                [
+                                  Variable
+                                    ((?,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                ((12,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  xs/0)
+                            ])))
                 ]))
         ]))
 
@@ -150,17 +162,18 @@
       Some Type (unit/1)) =
     Apply
       ((?, Effect ([ Counter/1; IO/1; NonTermination/1 ], .)),
-        Apply
-          ((?, Effect ([ Counter/1 ], . -[ IO/1; NonTermination/1 ]-> .)),
-            Variable
-              ((?, Effect ([ ], . -> . -[ IO/1; NonTermination/1 ]-> .)),
-                print_list_rec/0),
-            Apply
-              ((?, Effect ([ Counter/1 ], .)),
-                Variable
-                  ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-                Tuple ((?, Effect ([ ], .))))),
-        Variable ((?, Effect ([ ], .)), x/0)))
+        Variable
+          ((?, Effect ([ ], . -> . -[ IO/1; NonTermination/1 ]-> .)),
+            print_list_rec/0),
+        [
+          Apply
+            ((?, Effect ([ Counter/1 ], .)),
+              Variable
+                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
+                  read_counter/1),
+              [ Tuple ((?, Effect ([ ], .))) ]);
+          Variable ((?, Effect ([ ], .)), x/0)
+        ]))
 
 14
 (. -[ Counter/1; IO/1; NonTermination/1 ]-> .,
@@ -178,19 +191,75 @@
       ((16, Effect ([ Counter/1; Failure/1; IO/1; NonTermination/1 ], .)),
         Variable
           ((16, Effect ([ ], . -[ Counter/1; IO/1; NonTermination/1 ]-> .)), f/0),
-        Apply
-          ((16, Effect ([ Failure/1 ], .)),
-            Variable ((16, Effect ([ ], . -[ Failure/1 ]-> .)), tail/0),
-            Constructor
-              ((16, Effect ([ ], .)), cons/1,
-                Constant ((16, Effect ([ ], .)), String("Stop")),
+        [
+          Apply
+            ((16, Effect ([ Failure/1 ], .)),
+              Variable
+                ((16, Effect ([ ], . -[ Failure/1 ]-> .)),
+                  tail/0),
+              [
                 Constructor
-                  ((16, Effect ([ ], .)), cons/1,
-                    Constant ((16, Effect ([ ], .)), String("Hello")),
+                  ((16,
+                    Effect
+                      ([
+                      ],
+                        .)),
+                    cons/1,
+                    Constant
+                      ((16,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        String("Stop")),
                     Constructor
-                      ((16, Effect ([ ], .)), cons/1,
-                        Constant ((16, Effect ([ ], .)), String(" ")),
+                      ((16,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        cons/1,
+                        Constant
+                          ((16,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            String("Hello")),
                         Constructor
-                          ((16, Effect ([ ], .)), cons/1,
-                            Constant ((16, Effect ([ ], .)), String("world")),
-                            Constructor ((16, Effect ([ ], .)), []/1))))))))
+                          ((16,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            cons/1,
+                            Constant
+                              ((16,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                String(" ")),
+                            Constructor
+                              ((16,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                cons/1,
+                                Constant
+                                  ((16,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    String("world")),
+                                Constructor
+                                  ((16,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    []/1)))))
+              ])
+        ]))

@@ -16,7 +16,7 @@ Definition r : SizedString.t :=
 Definition r' : SizedString.t :=
   {| SizedString.name := "haha" % string; SizedString.size := 4 |}.
 
-Definition s : Z := (Z.add (SizedString.size r)) (SizedString.size r').
+Definition s : Z := Z.add (SizedString.size r) (SizedString.size r').
 
 Definition f (x : SizedString.t) : bool :=
   match x with

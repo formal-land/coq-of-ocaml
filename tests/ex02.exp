@@ -27,4 +27,4 @@
 11
 ((),
   Value (non_rec, t3, [ ], [ ], Some (Type (Z/1) * Type (Z/1))) =
-    Apply (11, Variable (11, f/0), Constant (11, Int(12))))
+    Apply (11, Variable (11, f/0), [ Constant (11, Int(12)) ]))

@@ -31,7 +31,7 @@ Inductive t2:
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
           (Constructor (S/1, counter),
             Match
               (19, Variable (19, l/0),
@@ -52,12 +52,16 @@ Inductive t2:
                                 Variable
                                   (?,
                                     of_list_rec/0),
-                                Variable
-                                  (?,
-                                    counter/0)),
-                            Variable
-                              (21,
-                                xs/0)),
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                (21,
+                                  xs/0)
+                            ]),
                         Some
                           x_1,
                         Return
@@ -83,14 +87,12 @@ Inductive t2:
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Bind
-              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x,
-                Return
-                  (?, Apply (?, Variable (?, of_list_rec/0), Variable (?, x/0))))),
-        Some x,
+            Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, x/0), Variable (?, l/0)))))
+            Apply
+              (?, Variable (?, of_list_rec/0),
+                [ Variable (?, x/0); Variable (?, l/0) ]))))
 
 23
 ((),
@@ -102,7 +104,7 @@ Inductive t2:
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
           (Constructor (S/1, counter),
             Match
               (24, Variable (24, l/0),
@@ -123,29 +125,33 @@ Inductive t2:
                                 Variable
                                   (?,
                                     sum_rec/0),
-                                Variable
-                                  (?,
-                                    counter/0)),
-                            Variable
-                              (26,
-                                xs/0)),
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                (26,
+                                  xs/0)
+                            ]),
                         Some
                           x_1,
                         Return
                           (?,
                             Apply
-                              (?,
-                                Apply
-                                  (26,
-                                    Variable
-                                      (26,
-                                        Z.add/1),
-                                    Variable
-                                      (26,
-                                        x/0)),
+                              (26,
                                 Variable
-                                  (?,
-                                    x_1/0)))))
+                                  (26,
+                                    Z.add/1),
+                                [
+                                  Variable
+                                    (26,
+                                      x/0);
+                                  Variable
+                                    (?,
+                                      x_1/0)
+                                ]))))
                 ]))
         ]))
 
@@ -158,14 +164,12 @@ Inductive t2:
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-            Bind
-              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x,
-                Return
-                  (?, Apply (?, Variable (?, sum_rec/0), Variable (?, x/0))))),
-        Some x,
+            Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x,
         Lift
           (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
-            Apply (?, Variable (?, x/0), Variable (?, l/0)))))
+            Apply
+              (?, Variable (?, sum_rec/0),
+                [ Variable (?, x/0); Variable (?, l/0) ]))))
 
 28
 ((),
@@ -180,28 +184,30 @@ Inductive t2:
               (?,
                 Apply
                   (28, Variable (28, of_list/0),
-                    Constructor
-                      (28, cons/1,
-                        Constant
-                          (28,
-                            Int(5)),
-                        Constructor
-                          (28,
-                            cons/1,
-                            Constant
-                              (28,
-                                Int(7)),
-                            Constructor
-                              (28,
-                                cons/1,
-                                Constant
-                                  (28,
-                                    Int(3)),
-                                Constructor
-                                  (28,
-                                    []/1))))),
-                Some x_1,
+                    [
+                      Constructor
+                        (28,
+                          cons/1,
+                          Constant
+                            (28,
+                              Int(5)),
+                          Constructor
+                            (28,
+                              cons/1,
+                              Constant
+                                (28,
+                                  Int(7)),
+                              Constructor
+                                (28,
+                                  cons/1,
+                                  Constant
+                                    (28,
+                                      Int(3)),
+                                  Constructor
+                                    (28,
+                                      []/1))))
+                    ]), Some x_1,
                 Apply
                   (28, Variable (28, sum/0),
-                    Variable (?, x_1/0))))
+                    [ Variable (?, x_1/0) ])))
         ]))

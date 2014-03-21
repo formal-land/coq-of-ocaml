@@ -5,7 +5,9 @@
   Value (non_rec, x1, [ ], [ ], Some Type (Z/1)) =
     Match
       (6,
-        Run (?, Error/0, [ ], Apply (6, Variable (6, raise_Error/0), Tuple (?))),
+        Run
+          (?, Error/0, [ ],
+            Apply (6, Variable (6, raise_Error/0), [ Tuple (?) ])),
         [
           (Constructor (inl/1, x), Variable (?, x/0));
           (Constructor (inr/1, Tuple ()), Constant (7, Int(12)))
@@ -27,7 +29,7 @@
                         Variable
                           (10,
                             raise_Error/0),
-                        Tuple (?))),
+                        [ Tuple (?) ])),
                 [
                   (Constructor (inl/1, x),
                     Return
@@ -41,9 +43,11 @@
                         Variable
                           (11,
                             failwith/1),
-                        Constant
-                          (11,
-                            String("arg"))))
+                        [
+                          Constant
+                            (11,
+                              String("arg"))
+                        ]))
                 ]))
         ]))
 
@@ -62,10 +66,10 @@
                   (?, [ Failure/1 ], [ Error/0; Failure/1 ],
                     Apply
                       (14, Variable (14, failwith/1),
-                        Constant (14, String("arg")))),
+                        [ Constant (14, String("arg")) ])),
                 Lift
                   (?, [ Error/0 ], [ Error/0; Failure/1 ],
-                    Apply (14, Variable (14, raise_Error/0), Tuple (?))))),
+                    Apply (14, Variable (14, raise_Error/0), [ Tuple (?) ])))),
         Some x,
         Match
           (14, Variable (?, x/0),

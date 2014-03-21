@@ -14,19 +14,27 @@
       (non_rec, p1, [ A; B; C ], [ (c, ((B -> (C -> B)) -> A)) ], Some A) =
       Apply
         ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), c/0),
-          Function
-            ((9, Effect ([ ], . -> . -> .)), x,
-              Function
-                ((9, Effect ([ ], . -> .)), y,
-                  Variable ((9, Effect ([ ], .)), x/0)))) in
+          [
+            Function
+              ((9, Effect ([ ], . -> . -> .)), x,
+                Function
+                  ((9, Effect ([ ], . -> .)), y,
+                    Variable
+                      ((9,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        x/0)))
+          ]) in
     Let (10, Effect ([ ], .))
       (non_rec, c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ], Some A) =
       Apply
-        ((?, Effect ([ ], .)),
-          Apply
-            ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), f/0),
-              Constant ((10, Effect ([ ], .)), Int(12))),
-          Constant ((10, Effect ([ ], .)), Int(23))) in
+        ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), f/0),
+          [
+            Constant ((10, Effect ([ ], .)), Int(12));
+            Constant ((10, Effect ([ ], .)), Int(23))
+          ]) in
     Apply
       ((11, Effect ([ ], .)), Variable ((11, Effect ([ ], . -> .)), p1/0),
-        Variable ((11, Effect ([ ], . -> .)), c/0)))
+        [ Variable ((11, Effect ([ ], . -> .)), c/0) ]))

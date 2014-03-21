@@ -8,7 +8,7 @@
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
           (Constructor (S/1, counter),
             Match
               (4, Variable (4, l/0),
@@ -26,27 +26,31 @@
                             Variable
                               (6,
                                 f/0),
-                            Variable
-                              (6,
-                                x/0)),
+                            [
+                              Variable
+                                (6,
+                                  x/0)
+                            ]),
                         Apply
-                          (?,
+                          (6,
                             Apply
-                              (6,
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        map_rec/0),
-                                    Variable
-                                      (?,
-                                        counter/0)),
+                              (?,
                                 Variable
-                                  (6,
-                                    f/0)),
-                            Variable
-                              (6,
-                                xs/0))))
+                                  (?,
+                                    map_rec/0),
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                (6,
+                                  f/0);
+                              Variable
+                                (6,
+                                  xs/0)
+                            ])))
                 ]))
         ]))
 
@@ -56,13 +60,12 @@
     (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Type (list/1, A)) =
     Apply
-      (?,
-        Apply
-          (?,
-            Apply
-              (?, Variable (?, map_rec/0),
-                Apply (?, Variable (?, read_counter/1), Tuple (?))),
-            Variable (?, f/0)), Variable (?, l/0)))
+      (?, Variable (?, map_rec/0),
+        [
+          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+          Variable (?, f/0);
+          Variable (?, l/0)
+        ]))
 
 8
 ((),
@@ -78,7 +81,7 @@
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), Tuple (?)));
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
           (Constructor (S/1, counter),
             Match
               (9, Variable (9, l/0),
@@ -89,38 +92,38 @@
                         a/0));
                   (Constructor (cons/1, x, xs),
                     Apply
-                      (?,
+                      (11,
                         Apply
                           (?,
-                            Apply
-                              (11,
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        fold_rec/0),
-                                    Variable
-                                      (?,
-                                        counter/0)),
-                                Variable
-                                  (11,
-                                    f/0)),
-                            Apply
+                            Variable
                               (?,
-                                Apply
-                                  (11,
-                                    Variable
-                                      (11,
-                                        f/0),
-                                    Variable
-                                      (11,
-                                        a/0)),
+                                fold_rec/0),
+                            [
+                              Variable
+                                (?,
+                                  counter/0)
+                            ]),
+                        [
+                          Variable
+                            (11,
+                              f/0);
+                          Apply
+                            (11,
+                              Variable
+                                (11,
+                                  f/0),
+                              [
                                 Variable
                                   (11,
-                                    x/0))),
-                        Variable
-                          (11,
-                            xs/0)))
+                                    a/0);
+                                Variable
+                                  (11,
+                                    x/0)
+                              ]);
+                          Variable
+                            (11,
+                              xs/0)
+                        ]))
                 ]))
         ]))
 
@@ -130,15 +133,13 @@
     (non_rec, fold, [ A; B ],
       [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
     Apply
-      (?,
-        Apply
-          (?,
-            Apply
-              (?,
-                Apply
-                  (?, Variable (?, fold_rec/0),
-                    Apply (?, Variable (?, read_counter/1), Tuple (?))),
-                Variable (?, f/0)), Variable (?, a/0)), Variable (?, l/0)))
+      (?, Variable (?, fold_rec/0),
+        [
+          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+          Variable (?, f/0);
+          Variable (?, a/0);
+          Variable (?, l/0)
+        ]))
 
 13
 ((),
@@ -159,20 +160,24 @@
       [ (incr, (Type (Z/1) -> A)); (plus, (Type (Z/1) -> (A -> Type (Z/1)))) ],
       Some Type (Z/1)) =
     Apply
-      (?,
-        Apply
-          (?,
-            Apply
-              (16, Variable (16, fold/0),
-                Function
-                  (16, x,
-                    Function
-                      (16, y,
-                        Apply
-                          (?,
-                            Apply
-                              (16, Variable (16, plus/0), Variable (16, x/0)),
-                            Variable (16, y/0))))), Constant (16, Int(0))),
-        Apply
-          (?, Apply (16, Variable (16, map/0), Variable (16, incr/0)),
-            Variable (16, l/0))))
+      (16, Variable (16, fold/0),
+        [
+          Function
+            (16, x,
+              Function
+                (16, y,
+                  Apply
+                    (16, Variable (16, plus/0),
+                      [
+                        Variable
+                          (16,
+                            x/0);
+                        Variable
+                          (16,
+                            y/0)
+                      ])));
+          Constant (16, Int(0));
+          Apply
+            (16, Variable (16, map/0),
+              [ Variable (16, incr/0); Variable (16, l/0) ])
+        ]))

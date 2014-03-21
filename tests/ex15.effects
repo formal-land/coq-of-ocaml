@@ -29,7 +29,7 @@ Inductive set:
                             NonTermination/1
                           ]-> .)),
                     not_terminated/1),
-                Tuple ((?, Effect ([ ], .)))));
+                [ Tuple ((?, Effect ([ ], .))) ]));
           (Constructor (S/1, counter),
             Match
               ((10, Effect ([ NonTermination/1 ], .)),
@@ -52,55 +52,136 @@ Inductive set:
                           ],
                             .)),
                         Apply
-                          ((?,
+                          ((13,
                             Effect
                               ([
                               ],
                                 .)),
-                            Apply
-                              ((13,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                Variable
-                                  ((13,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    Z.ltb/1),
-                                Variable
-                                  ((13,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    x/0)),
                             Variable
                               ((13,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                y/0)),
+                                Z.ltb/1),
+                            [
+                              Variable
+                                ((13,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  x/0);
+                              Variable
+                                ((13,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  y/0)
+                            ]),
                         Apply
-                          ((?,
+                          ((14,
                             Effect
                               ([
                                 NonTermination/1
                               ],
                                 .)),
                             Apply
-                              ((14,
+                              ((?,
                                 Effect
                                   ([
                                   ],
                                     .
-                                      -[
-                                        NonTermination/1
-                                      ]->
+                                      ->
+                                      .
+                                        -[
+                                          NonTermination/1
+                                        ]->
+                                        .)),
+                                Variable
+                                  ((?,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          ->
+                                          .
+                                            ->
+                                            .
+                                              -[
+                                                NonTermination/1
+                                              ]->
+                                              .)),
+                                    member_rec/0),
+                                [
+                                  Variable
+                                    ((?,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                ((14,
+                                  Effect
+                                    ([
+                                    ],
                                       .)),
+                                  x/0);
+                              Variable
+                                ((14,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  s1/0)
+                            ]),
+                        IfThenElse
+                          ((15,
+                            Effect
+                              ([
+                                NonTermination/1
+                              ],
+                                .)),
+                            Apply
+                              ((15,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Variable
+                                  ((15,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    Z.ltb/1),
+                                [
+                                  Variable
+                                    ((15,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      y/0);
+                                  Variable
+                                    ((15,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      x/0)
+                                ]),
+                            Apply
+                              ((16,
+                                Effect
+                                  ([
+                                    NonTermination/1
+                                  ],
+                                    .)),
                                 Apply
                                   ((?,
                                     Effect
@@ -128,132 +209,31 @@ Inductive set:
                                                   ]->
                                                   .)),
                                         member_rec/0),
-                                    Variable
-                                      ((?,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        counter/0)),
-                                Variable
-                                  ((14,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    x/0)),
-                            Variable
-                              ((14,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                s1/0)),
-                        IfThenElse
-                          ((15,
-                            Effect
-                              ([
-                                NonTermination/1
-                              ],
-                                .)),
-                            Apply
-                              ((?,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                Apply
-                                  ((15,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    Variable
-                                      ((15,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        Z.ltb/1),
-                                    Variable
-                                      ((15,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        y/0)),
-                                Variable
-                                  ((15,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    x/0)),
-                            Apply
-                              ((?,
-                                Effect
-                                  ([
-                                    NonTermination/1
-                                  ],
-                                    .)),
-                                Apply
-                                  ((16,
-                                    Effect
-                                      ([
-                                      ],
-                                        .
-                                          -[
-                                            NonTermination/1
-                                          ]->
+                                    [
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
+                                              .)),
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    ((16,
+                                      Effect
+                                        ([
+                                        ],
                                           .)),
-                                    Apply
-                                      ((?,
-                                        Effect
-                                          ([
-                                          ],
-                                            .
-                                              ->
-                                              .
-                                                -[
-                                                  NonTermination/1
-                                                ]->
-                                                .)),
-                                        Variable
-                                          ((?,
-                                            Effect
-                                              ([
-                                              ],
-                                                .
-                                                  ->
-                                                  .
-                                                    ->
-                                                    .
-                                                      -[
-                                                        NonTermination/1
-                                                      ]->
-                                                      .)),
-                                            member_rec/0),
-                                        Variable
-                                          ((?,
-                                            Effect
-                                              ([
-                                              ],
-                                                .)),
-                                            counter/0)),
-                                    Variable
-                                      ((16,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        x/0)),
-                                Variable
-                                  ((16,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    s2/0)),
+                                      x/0);
+                                  Variable
+                                    ((16,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      s2/0)
+                                ]),
                             Constructor
                               ((18,
                                 Effect
@@ -271,20 +251,19 @@ Inductive set:
       Some Type (bool/1)) =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Apply
-          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
-            Apply
-              ((?, Effect ([ Counter/1 ], . -> . -[ NonTermination/1 ]-> .)),
-                Variable
-                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
-                    member_rec/0),
-                Apply
-                  ((?, Effect ([ Counter/1 ], .)),
-                    Variable
-                      ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-                    Tuple ((?, Effect ([ ], .))))),
-            Variable ((?, Effect ([ ], .)), x/0)),
-        Variable ((?, Effect ([ ], .)), s/0)))
+        Variable
+          ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
+            member_rec/0),
+        [
+          Apply
+            ((?, Effect ([ Counter/1 ], .)),
+              Variable
+                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
+                  read_counter/1),
+              [ Tuple ((?, Effect ([ ], .))) ]);
+          Variable ((?, Effect ([ ], .)), x/0);
+          Variable ((?, Effect ([ ], .)), s/0)
+        ]))
 
 20
 (. -> . -> . -[ NonTermination/1 ]-> .,
@@ -308,7 +287,7 @@ Inductive set:
                             NonTermination/1
                           ]-> .)),
                     not_terminated/1),
-                Tuple ((?, Effect ([ ], .)))));
+                [ Tuple ((?, Effect ([ ], .))) ]));
           (Constructor (S/1, counter),
             Match
               ((21, Effect ([ NonTermination/1 ], .)),
@@ -352,38 +331,34 @@ Inductive set:
                           ],
                             .)),
                         Apply
-                          ((?,
+                          ((24,
                             Effect
                               ([
                               ],
                                 .)),
-                            Apply
-                              ((24,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                Variable
-                                  ((24,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    Z.ltb/1),
-                                Variable
-                                  ((24,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    x/0)),
                             Variable
                               ((24,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                y/0)),
+                                Z.ltb/1),
+                            [
+                              Variable
+                                ((24,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  x/0);
+                              Variable
+                                ((24,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  y/0)
+                            ]),
                         Constructor
                           ((25,
                             Effect
@@ -393,22 +368,143 @@ Inductive set:
                                 .)),
                             Node/0,
                             Apply
-                              ((?,
+                              ((25,
                                 Effect
                                   ([
                                     NonTermination/1
                                   ],
                                     .)),
                                 Apply
-                                  ((25,
+                                  ((?,
                                     Effect
                                       ([
                                       ],
                                         .
-                                          -[
-                                            NonTermination/1
-                                          ]->
+                                          ->
+                                          .
+                                            -[
+                                              NonTermination/1
+                                            ]->
+                                            .)),
+                                    Variable
+                                      ((?,
+                                        Effect
+                                          ([
+                                          ],
+                                            .
+                                              ->
+                                              .
+                                                ->
+                                                .
+                                                  -[
+                                                    NonTermination/1
+                                                  ]->
+                                                  .)),
+                                        insert_rec/0),
+                                    [
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
+                                              .)),
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    ((25,
+                                      Effect
+                                        ([
+                                        ],
                                           .)),
+                                      x/0);
+                                  Variable
+                                    ((25,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      s1/0)
+                                ]),
+                            Variable
+                              ((25,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                y/0),
+                            Variable
+                              ((25,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                s2/0)),
+                        IfThenElse
+                          ((26,
+                            Effect
+                              ([
+                                NonTermination/1
+                              ],
+                                .)),
+                            Apply
+                              ((26,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Variable
+                                  ((26,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    Z.ltb/1),
+                                [
+                                  Variable
+                                    ((26,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      y/0);
+                                  Variable
+                                    ((26,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      x/0)
+                                ]),
+                            Constructor
+                              ((27,
+                                Effect
+                                  ([
+                                    NonTermination/1
+                                  ],
+                                    .)),
+                                Node/0,
+                                Variable
+                                  ((27,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    s1/0),
+                                Variable
+                                  ((27,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    y/0),
+                                Apply
+                                  ((27,
+                                    Effect
+                                      ([
+                                        NonTermination/1
+                                      ],
+                                        .)),
                                     Apply
                                       ((?,
                                         Effect
@@ -436,168 +532,31 @@ Inductive set:
                                                       ]->
                                                       .)),
                                             insert_rec/0),
-                                        Variable
-                                          ((?,
-                                            Effect
-                                              ([
-                                              ],
-                                                .)),
-                                            counter/0)),
-                                    Variable
-                                      ((25,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        x/0)),
-                                Variable
-                                  ((25,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    s1/0)),
-                            Variable
-                              ((25,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                y/0),
-                            Variable
-                              ((25,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                s2/0)),
-                        IfThenElse
-                          ((26,
-                            Effect
-                              ([
-                                NonTermination/1
-                              ],
-                                .)),
-                            Apply
-                              ((?,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                Apply
-                                  ((26,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    Variable
-                                      ((26,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        Z.ltb/1),
-                                    Variable
-                                      ((26,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        y/0)),
-                                Variable
-                                  ((26,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    x/0)),
-                            Constructor
-                              ((27,
-                                Effect
-                                  ([
-                                    NonTermination/1
-                                  ],
-                                    .)),
-                                Node/0,
-                                Variable
-                                  ((27,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    s1/0),
-                                Variable
-                                  ((27,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    y/0),
-                                Apply
-                                  ((?,
-                                    Effect
-                                      ([
-                                        NonTermination/1
-                                      ],
-                                        .)),
-                                    Apply
-                                      ((27,
-                                        Effect
-                                          ([
-                                          ],
-                                            .
-                                              -[
-                                                NonTermination/1
-                                              ]->
+                                        [
+                                          Variable
+                                            ((?,
+                                              Effect
+                                                ([
+                                                ],
+                                                  .)),
+                                              counter/0)
+                                        ]),
+                                    [
+                                      Variable
+                                        ((27,
+                                          Effect
+                                            ([
+                                            ],
                                               .)),
-                                        Apply
-                                          ((?,
-                                            Effect
-                                              ([
-                                              ],
-                                                .
-                                                  ->
-                                                  .
-                                                    -[
-                                                      NonTermination/1
-                                                    ]->
-                                                    .)),
-                                            Variable
-                                              ((?,
-                                                Effect
-                                                  ([
-                                                  ],
-                                                    .
-                                                      ->
-                                                      .
-                                                        ->
-                                                        .
-                                                          -[
-                                                            NonTermination/1
-                                                          ]->
-                                                          .)),
-                                                insert_rec/0),
-                                            Variable
-                                              ((?,
-                                                Effect
-                                                  ([
-                                                  ],
-                                                    .)),
-                                                counter/0)),
-                                        Variable
-                                          ((27,
-                                            Effect
-                                              ([
-                                              ],
-                                                .)),
-                                            x/0)),
-                                    Variable
-                                      ((27,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        s2/0))),
+                                          x/0);
+                                      Variable
+                                        ((27,
+                                          Effect
+                                            ([
+                                            ],
+                                              .)),
+                                          s2/0)
+                                    ])),
                             Variable
                               ((28,
                                 Effect
@@ -615,17 +574,16 @@ Inductive set:
       Some Type (set/0)) =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Apply
-          ((?, Effect ([ Counter/1 ], . -[ NonTermination/1 ]-> .)),
-            Apply
-              ((?, Effect ([ Counter/1 ], . -> . -[ NonTermination/1 ]-> .)),
-                Variable
-                  ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
-                    insert_rec/0),
-                Apply
-                  ((?, Effect ([ Counter/1 ], .)),
-                    Variable
-                      ((?, Effect ([ ], . -[ Counter/1 ]-> .)), read_counter/1),
-                    Tuple ((?, Effect ([ ], .))))),
-            Variable ((?, Effect ([ ], .)), x/0)),
-        Variable ((?, Effect ([ ], .)), s/0)))
+        Variable
+          ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
+            insert_rec/0),
+        [
+          Apply
+            ((?, Effect ([ Counter/1 ], .)),
+              Variable
+                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
+                  read_counter/1),
+              [ Tuple ((?, Effect ([ ], .))) ]);
+          Variable ((?, Effect ([ ], .)), x/0);
+          Variable ((?, Effect ([ ], .)), s/0)
+        ]))

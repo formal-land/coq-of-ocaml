@@ -13,5 +13,5 @@ Definition n2 : Z :=
   let p1 {A B C : Type} (c : (B -> C -> B) -> A) : A :=
     c (fun x => fun y => x) in
   let c {A : Type} (f : Z -> Z -> A) : A :=
-    (f 12) 23 in
+    f 12 23 in
   p1 c.

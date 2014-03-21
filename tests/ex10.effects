@@ -24,7 +24,7 @@
                             ]->
                             .)),
                       not_terminated/2),
-                  Tuple ((?, Effect ([ ], .)))));
+                  [ Tuple ((?, Effect ([ ], .))) ]));
             (Constructor (S/2, counter),
               Match
                 ((9, Effect ([ NonTermination/2 ], .)),
@@ -40,76 +40,76 @@
                           Int(0)));
                     (Constructor (Cons/0, x, xs),
                       Apply
-                        ((?,
+                        ((11,
                           Effect
                             ([
                               NonTermination/2
                             ],
                               .)),
-                          Apply
+                          Variable
                             ((11,
                               Effect
                                 ([
                                 ],
                                   .)),
-                              Variable
-                                ((11,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  Z.add/2),
-                              Variable
-                                ((11,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  x/0)),
-                          Apply
-                            ((11,
-                              Effect
-                                ([
-                                  NonTermination/2
-                                ],
-                                  .)),
-                              Apply
-                                ((?,
-                                  Effect
-                                    ([
-                                    ],
-                                      .
-                                        -[
-                                          NonTermination/2
-                                        ]->
-                                        .)),
-                                  Variable
-                                    ((?,
-                                      Effect
-                                        ([
-                                        ],
-                                          .
-                                            ->
+                              Z.add/2),
+                          [
+                            Variable
+                              ((11,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                x/0);
+                            Apply
+                              ((11,
+                                Effect
+                                  ([
+                                    NonTermination/2
+                                  ],
+                                    .)),
+                                Apply
+                                  ((?,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          -[
+                                            NonTermination/2
+                                          ]->
+                                          .)),
+                                    Variable
+                                      ((?,
+                                        Effect
+                                          ([
+                                          ],
                                             .
-                                              -[
-                                                NonTermination/2
-                                              ]->
+                                              ->
+                                              .
+                                                -[
+                                                  NonTermination/2
+                                                ]->
+                                                .)),
+                                        sum_rec/0),
+                                    [
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
                                               .)),
-                                      sum_rec/0),
+                                          counter/0)
+                                    ]),
+                                [
                                   Variable
-                                    ((?,
+                                    ((11,
                                       Effect
                                         ([
                                         ],
                                           .)),
-                                      counter/0)),
-                              Variable
-                                ((11,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  xs/0))))
+                                      xs/0)
+                                ])
+                          ]))
                   ]))
           ]))
   
@@ -118,16 +118,24 @@
       =
       Apply
         ((?, Effect ([ Counter/2; NonTermination/2 ], .)),
-          Apply
-            ((?, Effect ([ Counter/2 ], . -[ NonTermination/2 ]-> .)),
-              Variable
-                ((?, Effect ([ ], . -> . -[ NonTermination/2 ]-> .)), sum_rec/0),
-              Apply
-                ((?, Effect ([ Counter/2 ], .)),
-                  Variable
-                    ((?, Effect ([ ], . -[ Counter/2 ]-> .)), read_counter/2),
-                  Tuple ((?, Effect ([ ], .))))),
-          Variable ((?, Effect ([ ], .)), l/0)))
+          Variable
+            ((?, Effect ([ ], . -> . -[ NonTermination/2 ]-> .)), sum_rec/0),
+          [
+            Apply
+              ((?, Effect ([ Counter/2 ], .)),
+                Variable
+                  ((?,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            Counter/2
+                          ]->
+                          .)),
+                    read_counter/2),
+                [ Tuple ((?, Effect ([ ], .))) ]);
+            Variable ((?, Effect ([ ], .)), l/0)
+          ]))
   
   13 (. -> . -[ NonTermination/2 ]-> .,
     Value
@@ -151,7 +159,7 @@
                             ]->
                             .)),
                       not_terminated/2),
-                  Tuple ((?, Effect ([ ], .)))));
+                  [ Tuple ((?, Effect ([ ], .))) ]));
             (Constructor (S/2, counter),
               Match
                 ((?, Effect ([ NonTermination/2 ], .)),
@@ -211,20 +219,24 @@
                                               ]->
                                               .)),
                                       of_list_rec/0),
-                                  Variable
-                                    ((?,
-                                      Effect
-                                        ([
-                                        ],
-                                          .)),
-                                      counter/0)),
-                              Variable
-                                ((15,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  xs/0))))
+                                  [
+                                    Variable
+                                      ((?,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        counter/0)
+                                  ]),
+                              [
+                                Variable
+                                  ((15,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    xs/0)
+                              ])))
                   ]))
           ]))
   
@@ -233,17 +245,24 @@
       (non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)) =
       Apply
         ((?, Effect ([ Counter/2; NonTermination/2 ], .)),
-          Apply
-            ((?, Effect ([ Counter/2 ], . -[ NonTermination/2 ]-> .)),
-              Variable
-                ((?, Effect ([ ], . -> . -[ NonTermination/2 ]-> .)),
-                  of_list_rec/0),
-              Apply
-                ((?, Effect ([ Counter/2 ], .)),
-                  Variable
-                    ((?, Effect ([ ], . -[ Counter/2 ]-> .)), read_counter/2),
-                  Tuple ((?, Effect ([ ], .))))),
-          Variable ((?, Effect ([ ], .)), x/0)))
+          Variable
+            ((?, Effect ([ ], . -> . -[ NonTermination/2 ]-> .)), of_list_rec/0),
+          [
+            Apply
+              ((?, Effect ([ Counter/2 ], .)),
+                Variable
+                  ((?,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            Counter/2
+                          ]->
+                          .)),
+                    read_counter/2),
+                [ Tuple ((?, Effect ([ ], .))) ]);
+            Variable ((?, Effect ([ ], .)), x/0)
+          ]))
   
   17 Module Inside:
     18 (.,
@@ -270,34 +289,28 @@
                             NonTermination/1
                           ]-> .)),
                     List2.sum/0),
-                Apply
-                  ((22,
-                    Effect
-                      ([
-                        Counter/1;
-                        NonTermination/1
-                      ], .)),
-                    Variable
-                      ((22,
-                        Effect
-                          ([ ],
-                            .
-                              -[
-                                Counter/1;
-                                NonTermination/1
-                              ]->
-                              .)),
-                        List2.of_list/0),
-                    Constructor
-                      ((22, Effect ([ ], .)),
-                        cons/1,
-                        Constant
-                          ((22,
-                            Effect
-                              ([
-                              ],
+                [
+                  Apply
+                    ((22,
+                      Effect
+                        ([
+                          Counter/1;
+                          NonTermination/1
+                        ],
+                          .)),
+                      Variable
+                        ((22,
+                          Effect
+                            ([
+                            ],
+                              .
+                                -[
+                                  Counter/1;
+                                  NonTermination/1
+                                ]->
                                 .)),
-                            Int(5)),
+                          List2.of_list/0),
+                      [
                         Constructor
                           ((22,
                             Effect
@@ -311,7 +324,7 @@
                                   ([
                                   ],
                                     .)),
-                                Int(7)),
+                                Int(5)),
                             Constructor
                               ((22,
                                 Effect
@@ -325,7 +338,7 @@
                                       ([
                                       ],
                                         .)),
-                                    Int(6)),
+                                    Int(7)),
                                 Constructor
                                   ((22,
                                     Effect
@@ -333,18 +346,34 @@
                                       ],
                                         .)),
                                     cons/1,
-                                    Variable
+                                    Constant
                                       ((22,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        List2.Inside.x/0),
+                                        Int(6)),
                                     Constructor
                                       ((22,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        []/1))))))))
+                                        cons/1,
+                                        Variable
+                                          ((22,
+                                            Effect
+                                              ([
+                                              ],
+                                                .)),
+                                            List2.Inside.x/0),
+                                        Constructor
+                                          ((22,
+                                            Effect
+                                              ([
+                                              ],
+                                                .)),
+                                            []/1)))))
+                      ])
+                ]))
         ]))

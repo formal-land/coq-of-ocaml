@@ -3,7 +3,7 @@
 5
 ((),
   Value (non_rec, f, [ A; B ], [ (x, B) ], Some Monad ([ Outside/0 ], A)) =
-    Apply (5, Variable (5, raise_Outside/0), Tuple (?)))
+    Apply (5, Variable (5, raise_Outside/0), [ Tuple (?) ]))
 
 7 Module G:
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
@@ -18,10 +18,16 @@
             (?, [ Inside/0 ], [ Outside/1; Inside/0 ],
               Apply
                 (12, Variable (12, raise_Inside/0),
-                  Tuple (?, Constant (12, Int(12)), Constant (12, String("no"))))),
+                  [
+                    Tuple
+                      (?, Constant (12, Int(12)),
+                        Constant
+                          (12,
+                            String("no")))
+                  ])),
           Lift
             (?, [ Outside/1 ], [ Outside/1; Inside/0 ],
-              Apply (14, Variable (14, raise_Outside/1), Tuple (?)))))
+              Apply (14, Variable (14, raise_Outside/1), [ Tuple (?) ]))))
 
 17
 ((),
@@ -42,7 +48,7 @@
                 ],
                 Apply
                   (?, Variable (?, not_terminated/1),
-                    Tuple (?))));
+                    [ Tuple (?) ])));
           (Constructor (S/1, counter),
             Match
               (18, Variable (18, l/0),
@@ -78,9 +84,11 @@
                                     Variable
                                       (19,
                                         print_string/1),
-                                    Constant
-                                      (19,
-                                        String("no tail")))),
+                                    [
+                                      Constant
+                                        (19,
+                                          String("no tail"))
+                                    ])),
                             None,
                             Lift
                               (?,
@@ -98,9 +106,11 @@
                                     Variable
                                       (19,
                                         G.g/0),
-                                    Constructor
-                                      (19,
-                                        false/1))))));
+                                    [
+                                      Constructor
+                                        (19,
+                                          false/1)
+                                    ])))));
                   (Constructor
                     (cons/1,
                       x,
@@ -122,14 +132,16 @@
                             Variable
                               (20,
                                 G.raise_Inside/0),
-                            Tuple
-                              (?,
-                                Constant
-                                  (20,
-                                    Int(0)),
-                                Constant
-                                  (20,
-                                    String("gg"))))));
+                            [
+                              Tuple
+                                (?,
+                                  Constant
+                                    (20,
+                                      Int(0)),
+                                  Constant
+                                    (20,
+                                      String("gg")))
+                            ])));
                   (Constructor (cons/1, Any, xs),
                     Apply
                       (21,
@@ -138,12 +150,16 @@
                             Variable
                               (?,
                                 h_rec/0),
-                            Variable
-                              (?,
-                                counter/0)),
-                        Variable
-                          (21,
-                            xs/0)))
+                            [
+                              Variable
+                                (?,
+                                  counter/0)
+                            ]),
+                        [
+                          Variable
+                            (21,
+                              xs/0)
+                        ]))
                 ]))
         ]))
 
@@ -159,11 +175,10 @@
         Lift
           (?, [ Counter/1 ],
             [ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ],
-            Bind
-              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x,
-                Return (?, Apply (?, Variable (?, h_rec/0), Variable (?, x/0))))),
-        Some x,
+            Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x,
         Lift
           (?, [ Outside/0; G.Inside/0; IO/1; NonTermination/1 ],
             [ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ],
-            Apply (?, Variable (?, x/0), Variable (?, l/0)))))
+            Apply
+              (?, Variable (?, h_rec/0),
+                [ Variable (?, x/0); Variable (?, l/0) ]))))

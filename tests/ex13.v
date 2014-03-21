@@ -25,11 +25,8 @@ Fixpoint print_list_rec (counter : nat) (x : list string) :
 
 Definition print_list (x : list string) : M [ Counter; IO; NonTermination ] unit
   :=
-  let! x_1 :=
-    lift [_;_;_] "100"
-      (let! x_1 := read_counter tt in
-      ret (print_list_rec x_1)) in
-  lift [_;_;_] "011" (x_1 x).
+  let! x_1 := lift [_;_;_] "100" (read_counter tt) in
+  lift [_;_;_] "011" (print_list_rec x_1 x).
 
 Definition f : (list string) -> M [ Counter; IO; NonTermination ] unit :=
   print_list.

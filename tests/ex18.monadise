@@ -9,37 +9,23 @@
         [
           (Any,
             Bind
-              (?,
-                Bind
-                  (?,
-                    Apply
-                      (4,
-                        Variable
-                          (?,
-                            read_r/0),
-                        Tuple (?)),
-                    Some x_1,
-                    Return
-                      (?,
-                        Apply
-                          (4,
-                            Variable
-                              (4,
-                                Z.add/1),
-                            Variable
-                              (?,
-                                x_1/0)))),
+              (?, Apply (4, Variable (?, read_r/0), [ Tuple (?) ]),
                 Some x_1,
                 Return
                   (?,
                     Apply
-                      (?,
+                      (4,
                         Variable
-                          (?,
-                            x_1/0),
-                        Constant
                           (4,
-                            Int(1))))))
+                            Z.add/1),
+                        [
+                          Variable
+                            (?,
+                              x_1/0);
+                          Constant
+                            (4,
+                              Int(1))
+                        ]))))
         ]))
 
 6 Reference (s, Type (string/1))
@@ -61,7 +47,7 @@
                         Variable
                           (?,
                             read_s/0),
-                        Tuple (?))),
+                        [ Tuple (?) ])),
                 Some x_1,
                 Lift
                   (?, [ Failure/1 ], [ s/0; Failure/1 ],
@@ -70,9 +56,11 @@
                         Variable
                           (8,
                             failwith/1),
-                        Variable
-                          (?,
-                            x_1/0)))))
+                        [
+                          Variable
+                            (?,
+                              x_1/0)
+                        ]))))
         ]))
 
 10
@@ -81,7 +69,7 @@
     =
     Match
       (?, Variable (?, x/0),
-        [ (Any, Apply (11, Variable (?, write_r/0), Constant (11, Int(0)))) ]))
+        [ (Any, Apply (11, Variable (?, write_r/0), [ Constant (11, Int(0)) ])) ]))
 
 13
 ((),
@@ -95,39 +83,30 @@
               (?,
                 Bind
                   (?,
-                    Bind
-                      (?,
-                        Apply
-                          (14,
-                            Variable
-                              (?,
-                                read_r/0),
-                            Tuple
-                              (?)),
-                        Some x_1,
-                        Return
+                    Apply
+                      (14,
+                        Variable
                           (?,
-                            Apply
-                              (14,
-                                Variable
-                                  (14,
-                                    Z.add/1),
-                                Variable
-                                  (?,
-                                    x_1/0)))),
+                            read_r/0),
+                        [ Tuple (?) ]),
                     Some x_1,
                     Return
                       (?,
                         Apply
-                          (?,
+                          (14,
                             Variable
-                              (?,
-                                x_1/0),
-                            Constant
                               (14,
-                                Int(1))))),
+                                Z.add/1),
+                            [
+                              Variable
+                                (?,
+                                  x_1/0);
+                              Constant
+                                (14,
+                                  Int(1))
+                            ]))),
                 Some x_1,
                 Apply
                   (14, Variable (?, write_r/0),
-                    Variable (?, x_1/0))))
+                    [ Variable (?, x_1/0) ])))
         ]))

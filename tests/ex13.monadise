@@ -10,9 +10,11 @@
           (Constructor ([]/1),
             Apply
               (6, Variable (6, failwith/1),
-                Constant
-                  (6,
-                    String("Cannot take the tail of an empty list."))))
+                [
+                  Constant
+                    (6,
+                      String("Cannot take the tail of an empty list."))
+                ]))
         ]))
 
 8
@@ -29,7 +31,7 @@
               (?, [ NonTermination/1 ], [ IO/1; NonTermination/1 ],
                 Apply
                   (?, Variable (?, not_terminated/1),
-                    Tuple (?))));
+                    [ Tuple (?) ])));
           (Constructor (S/1, counter),
             Match
               (?, Variable (?, x/0),
@@ -57,9 +59,11 @@
                                 Variable
                                   (11,
                                     print_string/1),
-                                Variable
-                                  (11,
-                                    x/0))),
+                                [
+                                  Variable
+                                    (11,
+                                      x/0)
+                                ])),
                         None,
                         Apply
                           (12,
@@ -68,12 +72,16 @@
                                 Variable
                                   (?,
                                     print_list_rec/0),
-                                Variable
-                                  (?,
-                                    counter/0)),
-                            Variable
-                              (12,
-                                xs/0))))
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                (12,
+                                  xs/0)
+                            ])))
                 ]))
         ]))
 
@@ -86,16 +94,12 @@
       (?,
         Lift
           (?, [ Counter/1 ], [ Counter/1; IO/1; NonTermination/1 ],
-            Bind
-              (?, Apply (?, Variable (?, read_counter/1), Tuple (?)), Some x_1,
-                Return
-                  (?,
-                    Apply
-                      (?, Variable (?, print_list_rec/0), Variable (?, x_1/0))))),
-        Some x_1,
+            Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x_1,
         Lift
           (?, [ IO/1; NonTermination/1 ], [ Counter/1; IO/1; NonTermination/1 ],
-            Apply (?, Variable (?, x_1/0), Variable (?, x/0)))))
+            Apply
+              (?, Variable (?, print_list_rec/0),
+                [ Variable (?, x_1/0); Variable (?, x/0) ]))))
 
 14
 ((),
@@ -119,16 +123,31 @@
           (?, [ Failure/1 ], [ Counter/1; Failure/1; IO/1; NonTermination/1 ],
             Apply
               (16, Variable (16, tail/0),
-                Constructor
-                  (16, cons/1, Constant (16, String("Stop")),
-                    Constructor
-                      (16, cons/1, Constant (16, String("Hello")),
-                        Constructor
-                          (16, cons/1, Constant (16, String(" ")),
-                            Constructor
-                              (16, cons/1, Constant (16, String("world")),
-                                Constructor (16, []/1))))))), Some x,
+                [
+                  Constructor
+                    (16, cons/1, Constant (16, String("Stop")),
+                      Constructor
+                        (16, cons/1,
+                          Constant
+                            (16,
+                              String("Hello")),
+                          Constructor
+                            (16,
+                              cons/1,
+                              Constant
+                                (16,
+                                  String(" ")),
+                              Constructor
+                                (16,
+                                  cons/1,
+                                  Constant
+                                    (16,
+                                      String("world")),
+                                  Constructor
+                                    (16,
+                                      []/1)))))
+                ])), Some x,
         Lift
           (?, [ Counter/1; IO/1; NonTermination/1 ],
             [ Counter/1; Failure/1; IO/1; NonTermination/1 ],
-            Apply (16, Variable (16, f/0), Variable (?, x/0)))))
+            Apply (16, Variable (16, f/0), [ Variable (?, x/0) ]))))

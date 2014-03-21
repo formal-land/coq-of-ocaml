@@ -8,16 +8,19 @@
         [
           (Any,
             Apply
-              (?,
-                Apply
-                  (4, Variable (4, Z.add/1),
-                    Apply
-                      (4,
-                        Variable
-                          (?,
-                            read_r/0),
-                        Tuple (?))),
-                Constant (4, Int(1))))
+              (4, Variable (4, Z.add/1),
+                [
+                  Apply
+                    (4,
+                      Variable
+                        (?,
+                          read_r/0),
+                      [
+                        Tuple
+                          (?)
+                      ]);
+                  Constant (4, Int(1))
+                ]))
         ]))
 
 6 Reference (s, Type (string/1))
@@ -31,7 +34,17 @@
           (Any,
             Apply
               (8, Variable (8, failwith/1),
-                Apply (8, Variable (?, read_s/0), Tuple (?))))
+                [
+                  Apply
+                    (8,
+                      Variable
+                        (?,
+                          read_s/0),
+                      [
+                        Tuple
+                          (?)
+                      ])
+                ]))
         ]))
 
 10
@@ -39,7 +52,7 @@
   Value (non_rec, reset, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
-        [ (Any, Apply (11, Variable (?, write_r/0), Constant (11, Int(0)))) ]))
+        [ (Any, Apply (11, Variable (?, write_r/0), [ Constant (11, Int(0)) ])) ]))
 
 13
 ((),
@@ -50,19 +63,25 @@
           (Any,
             Apply
               (14, Variable (?, write_r/0),
-                Apply
-                  (?,
-                    Apply
-                      (14,
-                        Variable
-                          (14,
-                            Z.add/1),
+                [
+                  Apply
+                    (14,
+                      Variable
+                        (14,
+                          Z.add/1),
+                      [
                         Apply
                           (14,
                             Variable
                               (?,
                                 read_r/0),
-                            Tuple
-                              (?))),
-                    Constant (14, Int(1)))))
+                            [
+                              Tuple
+                                (?)
+                            ]);
+                        Constant
+                          (14,
+                            Int(1))
+                      ])
+                ]))
         ]))

@@ -6,14 +6,14 @@
     IfThenElse
       ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), b/0),
         Apply
-          ((?, Effect ([ ], .)),
-            Apply
-              ((5, Effect ([ ], .)), Variable ((5, Effect ([ ], .)), Z.add/1),
-                Variable ((5, Effect ([ ], .)), n/0)),
-            Constant ((5, Effect ([ ], .)), Int(1))),
+          ((5, Effect ([ ], .)), Variable ((5, Effect ([ ], .)), Z.add/1),
+            [
+              Variable ((5, Effect ([ ], .)), n/0);
+              Constant ((5, Effect ([ ], .)), Int(1))
+            ]),
         Apply
-          ((?, Effect ([ ], .)),
-            Apply
-              ((7, Effect ([ ], .)), Variable ((7, Effect ([ ], .)), Z.sub/1),
-                Variable ((7, Effect ([ ], .)), n/0)),
-            Constant ((7, Effect ([ ], .)), Int(1)))))
+          ((7, Effect ([ ], .)), Variable ((7, Effect ([ ], .)), Z.sub/1),
+            [
+              Variable ((7, Effect ([ ], .)), n/0);
+              Constant ((7, Effect ([ ], .)), Int(1))
+            ])))

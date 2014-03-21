@@ -10,7 +10,7 @@
             Apply
               ((6, Effect ([ Error/0 ], .)),
                 Variable ((6, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
-                Tuple ((?, Effect ([ ], .))))),
+                [ Tuple ((?, Effect ([ ], .))) ])),
         [
           (Constructor (inl/1, x), Variable ((?, Effect ([ ], .)), x/0));
           (Constructor (inr/1, Tuple ()),
@@ -45,12 +45,14 @@
                                   ]->
                                   .)),
                             raise_Error/0),
-                        Tuple
-                          ((?,
-                            Effect
-                              ([
-                              ],
-                                .))))),
+                        [
+                          Tuple
+                            ((?,
+                              Effect
+                                ([
+                                ],
+                                  .)))
+                        ])),
                 [
                   (Constructor (inl/1, x),
                     Variable
@@ -79,13 +81,15 @@
                                   ]->
                                   .)),
                             failwith/1),
-                        Constant
-                          ((11,
-                            Effect
-                              ([
-                              ],
-                                .)),
-                            String("arg"))))
+                        [
+                          Constant
+                            ((11,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              String("arg"))
+                        ]))
                 ]))
         ]))
 
@@ -103,12 +107,12 @@
                   ((14, Effect ([ Failure/1 ], .)),
                     Variable
                       ((14, Effect ([ ], . -[ Failure/1 ]-> .)), failwith/1),
-                    Constant ((14, Effect ([ ], .)), String("arg"))),
+                    [ Constant ((14, Effect ([ ], .)), String("arg")) ]),
                 Apply
                   ((14, Effect ([ Error/0 ], .)),
                     Variable
                       ((14, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
-                    Tuple ((?, Effect ([ ], .)))))),
+                    [ Tuple ((?, Effect ([ ], .))) ]))),
         [
           (Constructor (inl/1, x), Variable ((?, Effect ([ ], .)), x/0));
           (Constructor (inr/1, Tuple ()),

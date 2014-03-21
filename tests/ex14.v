@@ -6,6 +6,6 @@ Set Implicit Arguments.
 
 Definition f (n : Z) (b : bool) : Z :=
   if b then
-    (Z.add n) 1
+    Z.add n 1
   else
-    (Z.sub n) 1.
+    Z.sub n 1.

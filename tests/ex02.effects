@@ -36,4 +36,4 @@
   Value (non_rec, t3, [ ], [ ], Some (Type (Z/1) * Type (Z/1))) =
     Apply
       ((11, Effect ([ ], .)), Variable ((11, Effect ([ ], . -> .)), f/0),
-        Constant ((11, Effect ([ ], .)), Int(12))))
+        [ Constant ((11, Effect ([ ], .)), Int(12)) ]))

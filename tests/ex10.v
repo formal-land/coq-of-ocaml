@@ -19,16 +19,13 @@ Module List2.
       | Nil => ret 0
       | Cons x xs =>
         let! x_1 := (sum_rec counter) xs in
-        ret ((Z.add x) x_1)
+        ret (Z.add x x_1)
       end
     end.
   
   Definition sum (l : t Z) : M [ Counter; NonTermination ] Z :=
-    let! x :=
-      lift [_;_] "10"
-        (let! x := read_counter tt in
-        ret (sum_rec x)) in
-    lift [_;_] "01" (x l).
+    let! x := lift [_;_] "10" (read_counter tt) in
+    lift [_;_] "01" (sum_rec x l).
   
   Fixpoint of_list_rec {A : Type} (counter : nat) (x : list A) :
     M [ NonTermination ] (t A) :=
@@ -45,11 +42,8 @@ Module List2.
   
   Definition of_list {A : Type} (x : list A) :
     M [ Counter; NonTermination ] (t A) :=
-    let! x_1 :=
-      lift [_;_] "10"
-        (let! x_1 := read_counter tt in
-        ret (of_list_rec x_1)) in
-    lift [_;_] "01" (x_1 x).
+    let! x_1 := lift [_;_] "10" (read_counter tt) in
+    lift [_;_] "01" (of_list_rec x_1 x).
   
   Module Inside.
     Definition x : Z := 12.

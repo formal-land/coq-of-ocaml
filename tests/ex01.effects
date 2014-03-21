@@ -7,9 +7,8 @@
 (.,
   Value (non_rec, n, [ ], [ ], Some Type (Z/1)) =
     Apply
-      ((?, Effect ([ ], .)),
-        Apply
-          ((5, Effect ([ ], . -> .)),
-            Variable ((5, Effect ([ ], . -> . -> .)), f/0),
-            Constant ((5, Effect ([ ], .)), Int(12))),
-        Constant ((5, Effect ([ ], .)), Int(3))))
+      ((5, Effect ([ ], .)), Variable ((5, Effect ([ ], . -> . -> .)), f/0),
+        [
+          Constant ((5, Effect ([ ], .)), Int(12));
+          Constant ((5, Effect ([ ], .)), Int(3))
+        ]))

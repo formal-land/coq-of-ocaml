@@ -17,23 +17,20 @@ Fixpoint sums_rec (counter : nat) (ls : list (list Z)) :
         match xs with
         | [] => ret 0
         | cons x xs =>
-          if (equiv_decb x) 12 then
+          if equiv_decb x 12 then
             let! x_1 := (sums_rec counter) (cons (cons 13 []) []) in
             match x_1 with
-            | cons x _ => ret ((Z.sub x) 1)
+            | cons x _ => ret (Z.sub x 1)
             | _ => ret 0
             end
           else
             let! x_1 := (sum_rec counter_1) xs in
-            ret ((Z.add x) x_1)
+            ret (Z.add x x_1)
         end
       end in
     let sum (xs : list Z) : M [ Counter; NonTermination ] Z :=
-      let! x :=
-        lift [_;_] "10"
-          (let! x := read_counter tt in
-          ret (sum_rec x)) in
-      x xs in
+      let! x := lift [_;_] "10" (read_counter tt) in
+      sum_rec x xs in
     match ls with
     | [] => ret []
     | cons xs ls =>
@@ -44,8 +41,5 @@ Fixpoint sums_rec (counter : nat) (ls : list (list Z)) :
   end.
 
 Definition sums (ls : list (list Z)) : M [ Counter; NonTermination ] (list Z) :=
-  let! x :=
-    lift [_;_] "10"
-      (let! x := read_counter tt in
-      ret (sums_rec x)) in
-  x ls.
+  let! x := lift [_;_] "10" (read_counter tt) in
+  sums_rec x ls.

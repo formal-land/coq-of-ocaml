@@ -11,7 +11,7 @@
         (?, Variable (?, counter/0),
           [
             (Constructor (O/2),
-              Apply (?, Variable (?, not_terminated/2), Tuple (?)));
+              Apply (?, Variable (?, not_terminated/2), [ Tuple (?) ]));
             (Constructor (S/2, counter),
               Match
                 (9, Variable (9, l/0),
@@ -32,29 +32,33 @@
                                   Variable
                                     (?,
                                       sum_rec/0),
-                                  Variable
-                                    (?,
-                                      counter/0)),
-                              Variable
-                                (11,
-                                  xs/0)),
+                                  [
+                                    Variable
+                                      (?,
+                                        counter/0)
+                                  ]),
+                              [
+                                Variable
+                                  (11,
+                                    xs/0)
+                              ]),
                           Some
                             x_1,
                           Return
                             (?,
                               Apply
-                                (?,
-                                  Apply
-                                    (11,
-                                      Variable
-                                        (11,
-                                          Z.add/2),
-                                      Variable
-                                        (11,
-                                          x/0)),
+                                (11,
                                   Variable
-                                    (?,
-                                      x_1/0)))))
+                                    (11,
+                                      Z.add/2),
+                                  [
+                                    Variable
+                                      (11,
+                                        x/0);
+                                    Variable
+                                      (?,
+                                        x_1/0)
+                                  ]))))
                   ]))
           ]))
   
@@ -66,14 +70,12 @@
         (?,
           Lift
             (?, [ Counter/2 ], [ Counter/2; NonTermination/2 ],
-              Bind
-                (?, Apply (?, Variable (?, read_counter/2), Tuple (?)), Some x,
-                  Return
-                    (?, Apply (?, Variable (?, sum_rec/0), Variable (?, x/0))))),
-          Some x,
+              Apply (?, Variable (?, read_counter/2), [ Tuple (?) ])), Some x,
           Lift
             (?, [ NonTermination/2 ], [ Counter/2; NonTermination/2 ],
-              Apply (?, Variable (?, x/0), Variable (?, l/0)))))
+              Apply
+                (?, Variable (?, sum_rec/0),
+                  [ Variable (?, x/0); Variable (?, l/0) ]))))
   
   13 ((),
     Value
@@ -84,7 +86,7 @@
         (?, Variable (?, counter/0),
           [
             (Constructor (O/2),
-              Apply (?, Variable (?, not_terminated/2), Tuple (?)));
+              Apply (?, Variable (?, not_terminated/2), [ Tuple (?) ]));
             (Constructor (S/2, counter),
               Match
                 (?, Variable (?, x/0),
@@ -105,12 +107,16 @@
                                   Variable
                                     (?,
                                       of_list_rec/0),
-                                  Variable
-                                    (?,
-                                      counter/0)),
-                              Variable
-                                (15,
-                                  xs/0)),
+                                  [
+                                    Variable
+                                      (?,
+                                        counter/0)
+                                  ]),
+                              [
+                                Variable
+                                  (15,
+                                    xs/0)
+                              ]),
                           Some
                             x_1,
                           Return
@@ -135,17 +141,12 @@
         (?,
           Lift
             (?, [ Counter/2 ], [ Counter/2; NonTermination/2 ],
-              Bind
-                (?, Apply (?, Variable (?, read_counter/2), Tuple (?)),
-                  Some x_1,
-                  Return
-                    (?,
-                      Apply
-                        (?, Variable (?, of_list_rec/0), Variable (?, x_1/0))))),
-          Some x_1,
+              Apply (?, Variable (?, read_counter/2), [ Tuple (?) ])), Some x_1,
           Lift
             (?, [ NonTermination/2 ], [ Counter/2; NonTermination/2 ],
-              Apply (?, Variable (?, x_1/0), Variable (?, x/0)))))
+              Apply
+                (?, Variable (?, of_list_rec/0),
+                  [ Variable (?, x_1/0); Variable (?, x/0) ]))))
   
   17 Module Inside:
     18 ((),
@@ -165,34 +166,36 @@
               (?,
                 Apply
                   (22, Variable (22, List2.of_list/0),
-                    Constructor
-                      (22, cons/1,
-                        Constant
-                          (22,
-                            Int(5)),
-                        Constructor
-                          (22,
-                            cons/1,
-                            Constant
-                              (22,
-                                Int(7)),
-                            Constructor
-                              (22,
-                                cons/1,
-                                Constant
-                                  (22,
-                                    Int(6)),
-                                Constructor
-                                  (22,
-                                    cons/1,
-                                    Variable
-                                      (22,
-                                        List2.Inside.x/0),
-                                    Constructor
-                                      (22,
-                                        []/1)))))),
-                Some x_1,
+                    [
+                      Constructor
+                        (22,
+                          cons/1,
+                          Constant
+                            (22,
+                              Int(5)),
+                          Constructor
+                            (22,
+                              cons/1,
+                              Constant
+                                (22,
+                                  Int(7)),
+                              Constructor
+                                (22,
+                                  cons/1,
+                                  Constant
+                                    (22,
+                                      Int(6)),
+                                  Constructor
+                                    (22,
+                                      cons/1,
+                                      Variable
+                                        (22,
+                                          List2.Inside.x/0),
+                                      Constructor
+                                        (22,
+                                          []/1)))))
+                    ]), Some x_1,
                 Apply
                   (22, Variable (22, List2.sum/0),
-                    Variable (?, x_1/0))))
+                    [ Variable (?, x_1/0) ])))
         ]))

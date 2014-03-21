@@ -89,15 +89,22 @@ module Type = struct
     | (Arrow (d1, typ1), Arrow (d2, typ2)) ->
       (Descriptor.eq d1 d2) && eq typ1 typ2
 
-  let return_descriptor (typ : t) : Descriptor.t =
-    match typ with
-    | Pure -> Descriptor.pure
-    | Arrow (d, _) -> d
+  let rec return_descriptor (typ : t) (nb_args : int) : Descriptor.t =
+    if nb_args = 0 then
+      Descriptor.pure
+    else
+      match typ with
+      | Pure -> Descriptor.pure
+      | Arrow (d, typ) ->
+        Descriptor.union [d; return_descriptor typ (nb_args - 1)]
 
-  let return_type (typ : t) : t =
-    match typ with
-    | Pure -> Pure
-    | Arrow (_, typ) -> typ
+  let rec return_type (typ : t) (nb_args : int) : t =
+    if nb_args = 0 then
+      typ
+    else
+      match typ with
+      | Pure -> Pure
+      | Arrow (_, typ) -> return_type typ (nb_args - 1)
 
   let union (typs : t list) : t =
     let rec aux typ1 typ2 =

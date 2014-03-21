@@ -42,7 +42,7 @@ type 'a t =
   | Variable of 'a * BoundName.t
   | Tuple of 'a * 'a t list (** A tuple of expressions. *)
   | Constructor of 'a * BoundName.t * 'a t list (** A constructor name and a list of arguments. *)
-  | Apply of 'a * 'a t * 'a t (** An application. *)
+  | Apply of 'a * 'a t * 'a t list (** An application. *)
   | Function of 'a * Name.t * 'a t (** An argument name and a body. *)
   | Let of 'a * Header.t * 'a t * 'a t
   | Match of 'a * 'a t * (Pattern.t * 'a t) list (** Match an expression to a list of patterns. *)
@@ -69,7 +69,7 @@ let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   | Variable (a, x) -> Variable (f a, x)
   | Tuple (a, es) -> Tuple (f a, List.map (map f) es)
   | Constructor (a, x, es) -> Constructor (f a, x, List.map (map f) es)
-  | Apply (a, e_f, e_x) -> Apply (f a, map f e_f, map f e_x)
+  | Apply (a, e_f, e_xs) -> Apply (f a, map f e_f, List.map (map f) e_xs)
   | Function (a, x, e) -> Function (f a, x, map f e)
   | Let (a, header, e1, e2) -> Let (f a, header, map f e1, map f e2)
   | Match (a, e, cases) ->
@@ -94,8 +94,8 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
     nest (!^ "Tuple" ^^ OCaml.tuple (pp_a a :: List.map pp es))
   | Constructor (a, x, es) ->
     nest (!^ "Constructor" ^^ OCaml.tuple (pp_a a :: BoundName.pp x :: List.map pp es))
-  | Apply (a, e_f, e_x) ->
-    nest (!^ "Apply" ^^ OCaml.tuple [pp_a a; pp e_f; pp e_x])
+  | Apply (a, e_f, e_xs) ->
+    nest (!^ "Apply" ^^ OCaml.tuple [pp_a a; pp e_f; OCaml.list pp e_xs])
   | Function (a, x, e) ->
     nest (!^ "Function" ^^ OCaml.tuple [pp_a a; Name.pp x; pp e])
   | Let (a, header, e1, e2) ->
@@ -174,7 +174,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           let x = { x with PathName.base = "raise_" ^ x.PathName.base } in
           let x = Envi.bound_name x env.FullEnvi.vars in
           let es = List.map (of_expression env) es in
-          Apply (l, Variable (l_exn, x), Tuple (Loc.Unknown, es))
+          Apply (l, Variable (l_exn, x), [Tuple (Loc.Unknown, es)])
         | _ -> failwith "Constructor of an exception expected after a 'raise'.")
       | _ -> failwith "Expected one argument for 'raise'.")
     | Texp_ident (path, _, _)
@@ -186,7 +186,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           let read = PathName.of_path path in
           let read = { read with PathName.base = "read_" ^ read.PathName.base } in
           let read = Envi.bound_name read env.FullEnvi.vars in
-          Apply (l, Variable (Loc.Unknown, read), Tuple (Loc.Unknown, []))
+          Apply (l, Variable (Loc.Unknown, read), [Tuple (Loc.Unknown, [])])
         | _ -> failwith "Name of a reference expected after '!'.")
       | _ -> failwith "Expected one argument for '!'.")
     | Texp_ident (path, _, _)
@@ -199,7 +199,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           let write = { write with PathName.base = "write_" ^ write.PathName.base } in
           let write = Envi.bound_name write env.FullEnvi.vars in
           let e_v = of_expression env e_v in
-          Apply (l, Variable (Loc.Unknown, write), e_v)
+          Apply (l, Variable (Loc.Unknown, write), [e_v])
         | _ -> failwith "Name of a reference expected after ':='.")
       | _ -> failwith "Expected two arguments for ':='.")
     | _ ->
@@ -208,8 +208,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
         match e_x with
         | Some e_x -> of_expression env e_x
         | None -> failwith "expected an argument") e_xs in
-      List.fold_left (fun e e_x -> Apply (Loc.Unknown, e, e_x))
-        (Apply (l, e_f, List.hd e_xs)) (List.tl e_xs))
+      Apply (l, e_f, e_xs))
   | Texp_match (e, cases, _) ->
     let e = of_expression env e in
     let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
@@ -300,7 +299,8 @@ let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
       e
   | Tuple (a, es) -> Tuple (a, List.map (substitute x e') es)
   | Constructor (a, y, es) -> Constructor (a, y, List.map (substitute x e') es)
-  | Apply (a, e1, e2) -> Apply (a, substitute x e' e1, substitute x e' e2)
+  | Apply (a, e_f, e_xs) ->
+    Apply (a, substitute x e' e_f, List.map (substitute x e') e_xs)
   | Function (a, y, e) ->
     if y = x then
       Function (a, y, e)
@@ -357,8 +357,8 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
     Tuple (a, List.map (monadise_let_rec env) es)
   | Constructor (a, x, es) ->
     Constructor (a, x, List.map (monadise_let_rec env) es)
-  | Apply (a, e1, e2) ->
-    Apply (a, monadise_let_rec env e1, monadise_let_rec env e2)
+  | Apply (a, e_f, e_xs) ->
+    Apply (a, monadise_let_rec env e_f, List.map (monadise_let_rec env) e_xs)
   | Function (a, x, e) ->
     let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     Function (a, x, monadise_let_rec env e)
@@ -411,20 +411,18 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     let e_x_rec = monadise_let_rec env_in_x_rec e in
     let e_x_rec = Match (Loc.Unknown, var counter env_in_x_rec, [
       (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O") env_in_x_rec.FullEnvi.constructors, []),
-        Apply (Loc.Unknown, var "not_terminated" env_in_x_rec, Tuple (Loc.Unknown, [])));
+        Apply (Loc.Unknown, var "not_terminated" env_in_x_rec, [Tuple (Loc.Unknown, [])]));
       (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env_in_x_rec.FullEnvi.constructors,
         [Pattern.Variable counter]),
         substitute x
-          (Apply (Loc.Unknown, var x_rec env_in_x_rec, var counter env_in_x_rec)) e_x_rec)]) in
+          (Apply (Loc.Unknown, var x_rec env_in_x_rec, [var counter env_in_x_rec])) e_x_rec)]) in
     let env = { env with FullEnvi.vars = Envi.add_name x_rec () env.FullEnvi.vars } in
     let header_x = (Recursivity.New false, x, typ_vars, args, typ) in
     let env_in_x = Header.env_in_header header_x env in
-    let e_x =
-      List.fold_left (fun e (x, _) -> Apply (Loc.Unknown, e, var x env_in_x))
-        (Apply (Loc.Unknown,
-          var x_rec env_in_x,
-          Apply (Loc.Unknown, var "read_counter" env_in_x, Tuple (Loc.Unknown, []))))
-        args in
+    let e_x = Apply (Loc.Unknown,
+      var x_rec env_in_x,
+      Apply (Loc.Unknown, var "read_counter" env_in_x, [Tuple (Loc.Unknown, [])]) ::
+      List.map (fun (x, _) -> var x env_in_x) args) in
     let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     (env, [ (header_x_rec, e_x_rec); (header_x, e_x) ])
   else
@@ -465,18 +463,45 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
   | Constructor (a, x, es) ->
     let (es, effect) = compound es in
     Constructor ((a, effect), x, es)
-  | Apply (a, e_f, e_x) ->
+  | Apply (a, e_f, e_xs) ->
     let e_f = effects env e_f in
-    let effect_f = snd (annotation e_f) in
-    let e_x = effects env e_x in
-    let effect_x = snd (annotation e_x) in
-    if Effect.Type.is_pure effect_x.Effect.typ then
-      let descriptor = Effect.Descriptor.union [
-        effect_f.Effect.descriptor; effect_x.Effect.descriptor;
-        Effect.Type.return_descriptor effect_f.Effect.typ] in
-      let effect_typ = Effect.Type.return_type effect_f.Effect.typ in
+    let effect_e_f = snd (annotation e_f) in
+    let e_xs = List.map (effects env) e_xs in
+    let effects_e_xs = List.map (fun e_x -> snd (annotation e_x)) e_xs in
+    if List.for_all (fun effect_e_x -> Effect.Type.is_pure effect_e_x.Effect.typ) effects_e_xs then
+      let rec e_xss typ e_xs : ('b t list * Effect.Descriptor.t) list =
+        match e_xs with
+        | [] -> []
+        | e_x :: e_xs ->
+          let e_xss = e_xss (Effect.Type.return_type typ 1) e_xs in
+          let d = Effect.Type.return_descriptor typ 1 in
+          if Effect.Descriptor.is_pure d then
+            match e_xss with
+            | [] -> [([e_x], Effect.Descriptor.pure)]
+            | (e_xs', d') :: e_xss -> ((e_x :: e_xs'), d') :: e_xss
+          else
+            ([e_x], d) :: e_xss in
+      let e_xss = e_xss effect_e_f.Effect.typ e_xs in
+      (*SmartPrint.to_stdout 160 2 (OCaml.list (fun (e_xs, d) ->
+        OCaml.tuple [OCaml.list (pp (fun _ -> empty)) e_xs; Effect.Descriptor.pp d]) e_xss ^^ newline);*)
+      List.fold_left (fun e (e_xs, d) ->
+        let effect_e = snd (annotation e) in
+        let effects_e_xs = List.map (fun e_x -> snd (annotation e_x)) e_xs in
+        let descriptor = Effect.Descriptor.union (
+          effect_e.Effect.descriptor ::
+          Effect.Type.return_descriptor effect_e.Effect.typ (List.length e_xs) ::
+          List.map (fun effect_e_x -> effect_e_x.Effect.descriptor) effects_e_xs) in
+        let typ = Effect.Type.return_type effect_e.Effect.typ (List.length e_xs) in
+        let effect = { Effect.descriptor = descriptor; typ = typ } in
+        Apply ((a, effect), e, e_xs))
+        e_f e_xss
+      (*let descriptor = Effect.Descriptor.union (
+        effect_f.Effect.descriptor ::
+        Effect.Type.return_descriptor effect_f.Effect.typ (List.length e_xs) ::
+        List.map (fun effect_x -> effect_x.Effect.descriptor) effects_xs) in
+      let effect_typ = Effect.Type.return_type effect_f.Effect.typ (List.length e_xs) in
       let effect = { Effect.descriptor = descriptor; typ = effect_typ } in
-      Apply ((a, effect), e_f, e_x)
+      Apply ((a, effect), e_f, e_xs)*)
     else
       failwith "Function arguments cannot have functional effects."
   | Function (a, x, e) ->
@@ -618,6 +643,10 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
         let (x, env) = Envi.fresh "x" () env in
         bind d_e d d e' (Some x) (monadise_list env es d
           (Variable (Loc.Unknown, Envi.bound_name (PathName.of_name [] x) env) :: es') k) in
+  (*let rec split_application typ e_xs : t list list =
+    match e_xs with
+    | [] -> [[]]
+    | e_x :: e_xs ->  in*)
   let d = descriptor e in
   match e with
   | Constant ((l, _), c) -> Constant (l, c)
@@ -628,13 +657,13 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
   | Constructor ((l, _), x, es) ->
     monadise_list env es d [] (fun es' ->
       lift Effect.Descriptor.pure d (Constructor (l, x, es')))
-  | Apply ((l, _), e1, e2) ->
-    let effect_e1 = (snd (annotation e1)).Effect.typ in
-    monadise_list env [e1; e2] d [] (fun es' ->
+  | Apply ((l, _), e_f, e_xs) ->
+    let effect_f = (snd (annotation e_f)).Effect.typ in
+    monadise_list env (e_f :: e_xs) d [] (fun es' ->
       match es' with
-      | [e1; e2] ->
-        let return_descriptor = Effect.Type.return_descriptor effect_e1 in
-        lift return_descriptor d (Apply (l, e1, e2))
+      | e_f :: e_xs ->
+        let return_descriptor = Effect.Type.return_descriptor effect_f (List.length e_xs) in
+        lift return_descriptor d (Apply (l, e_f, e_xs))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
   | Function ((l, _), x, e) ->
     let env = Envi.add_name x () env in
@@ -713,8 +742,8 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
       BoundName.to_coq x
     else
       Pp.parens paren @@ nest @@ separate space (BoundName.to_coq x :: List.map (to_coq true) es)
-  | Apply (_, e_f, e_x) ->
-    Pp.parens paren @@ nest @@ (to_coq true e_f ^^ to_coq true e_x)
+  | Apply (_, e_f, e_xs) ->
+    Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
   | Function (_, x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | Let (_, (_, x, _, [], _), e1, e2) ->

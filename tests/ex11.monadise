@@ -20,11 +20,11 @@
 ((),
   Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
     Apply
-      (?,
-        Apply
-          (12, Variable (12, Z.add/1),
-            Field (12, Variable (12, r/0), SizedString.size/0)),
-        Field (12, Variable (12, r'/0), SizedString.size/0)))
+      (12, Variable (12, Z.add/1),
+        [
+          Field (12, Variable (12, r/0), SizedString.size/0);
+          Field (12, Variable (12, r'/0), SizedString.size/0)
+        ]))
 
 14
 ((),
@@ -39,12 +39,12 @@
 18
 ((),
   Value (non_rec, b, [ ], [ ], Some Type (bool/1)) =
-    Apply (18, Variable (18, f/0), Variable (18, r/0)))
+    Apply (18, Variable (18, f/0), [ Variable (18, r/0) ]))
 
 19
 ((),
   Value (non_rec, b', [ ], [ ], Some Type (bool/1)) =
-    Apply (19, Variable (19, f/0), Variable (19, r'/0)))
+    Apply (19, Variable (19, f/0), [ Variable (19, r'/0) ]))
 
 21 Module Point:
   22 Record t:
