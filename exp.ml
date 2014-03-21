@@ -252,9 +252,13 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
       let env = Pattern.add_to_env p env in
       let e2 = of_expression env e2 in
       (p, e2))])
-  | Texp_setfield _ | Texp_array _ | Texp_while _ | Texp_for _ | Texp_assert _ ->
-    failwith "Imperative expression not handled."
+  | Texp_setfield _ -> failwith "Set field not handled."
+  | Texp_array _ -> failwith "Arrays not handled."
+  | Texp_while _ -> failwith "While loops not handled."
+  | Texp_for _ -> failwith "For loops not handled."
+  | Texp_assert _ -> failwith "Assertions not handled."
   | _ -> failwith "Expression not handled."
+
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
 and open_cases (env : unit FullEnvi.t) (cases : case list)
   : Name.t * Loc.t t =
