@@ -244,7 +244,7 @@ module Atom = struct
     ignore (aux a 0 (Some Break.Newline))
 end
 
-(*
+
 (* A document is a binary tree of atoms so that concatenation happens in O(1). *)
 type t =
   | Empty
@@ -254,7 +254,7 @@ type t =
 let empty : t = Empty
 
 let string (s : string) : t =
-  if s = "" then
+  if String.length s = 0 then (* TODO: Compare with "" *)
     empty
   else
     Leaf (Atom.String (s, 0, String.length s))
@@ -348,13 +348,13 @@ let rec split (s : string) (f : char -> bool) (o : int) (l : int)
   else
     split s f o (l + 1)
 
-let words (s : string) : t =
+(*let words (s : string) : t =
   group @@ separate space @@ List.map (fun (o, l) -> sub_string s o l)
-    (split s (fun c -> c = ' ' || c = '\n' || c = '\t') 0 0)
+    (split s (fun c -> c = ' ' || c = '\n' || c = '\t') 0 0)*)
 
-let lines (s : string) : t =
+(*let lines (s : string) : t =
   separate newline @@ List.map (fun (o, l) -> sub_string s o l)
-    (split s (fun c -> c = '\n') 0 0)
+    (split s (fun c -> c = '\n') 0 0)*)
 
 module OCaml = struct
   let unit (_ : unit) : t =
@@ -366,8 +366,8 @@ module OCaml = struct
   let int (i : int) : t =
     !^ (string_of_int i)
 
-  let float (f : float) : t =
-    !^ (string_of_float f)
+  (*let float (f : float) : t =
+    !^ (string_of_float f)*)
 
   let string (s : string) : t =
     double_quotes (!^ (String.escaped s))
@@ -380,40 +380,39 @@ module OCaml = struct
   let list (d : 'a -> t) (l : 'a list) : t =
     brakets @@ nest_all (space ^^ separate (!^ ";" ^^ space) (List.map d l) ^^ space)
 
-  let tuple (ds : t list) : t =
-    parens @@ nest @@ separate (!^ "," ^^ space) ds
+  (*let tuple (ds : t list) : t =
+    parens @@ nest @@ separate (!^ "," ^^ space) ds*)
 end
 
-module Debug = struct
+(*module Debug = struct
   (* Pretty-print an atom. *)
   let rec pp_atom (a : Atom.t) : t =
+    (* Pretty-print a list of atoms. *)
+    let rec pp_atoms (_as : Atom.t list) : t =
+      group_all (separate (!^ "," ^^ space) (List.map pp_atom _as)) in
     match a with
     | Atom.String (s, o, l) -> OCaml.string (String.sub s o l)
     | Atom.Break Break.Space -> !^ "Space"
     | Atom.Break Break.Newline -> !^ "Newline"
     | Atom.GroupOne (can_nest, _as) -> nest (!^ "GroupOne" ^^ parens (OCaml.bool can_nest ^-^ !^ "," ^^ pp_atoms _as))
     | Atom.GroupAll (can_nest, _as) -> nest (!^ "GroupAll" ^^ parens (OCaml.bool can_nest ^-^ !^ "," ^^ pp_atoms _as))
-    | Atom.Indent (n, a) -> nest (!^ "Indent" ^^ parens (OCaml.int n ^-^ !^ "," ^^ pp_atom a))
-
-  (* Pretty-print a list of atoms. *)
-  and pp_atoms (_as : Atom.t list) : t =
-    group_all (separate (!^ "," ^^ space) (List.map pp_atom _as))
+    | Atom.Indent (n, a) -> nest (!^ "Indent" ^^ parens ((*OCaml.int n ^-^*) !^ "," ^^ pp_atom a))
 
   let pp_document (d : t) : t =
     OCaml.list pp_atom (to_atoms d)
 
   let pp_document_after_rendering (width : int) (tab : int) (d : t) : t =
     pp_atom @@ Atom.render width tab @@ to_atoms d
-end
+end*)
 
-let to_something (width : int) (tab : int)
+(*let to_something (width : int) (tab : int)
   (add_char : char -> unit) (add_string : string -> unit)
   (add_sub_string : string -> int -> int -> unit)
   (d : t) : unit =
   Atom.to_something tab add_char add_string add_sub_string @@
-    Atom.render width tab @@ to_atoms d
+    Atom.render width tab @@ to_atoms d*)
 
-let to_buffer (width : int) (tab : int) (b : Buffer.t) (d : t) : unit =
+(*let to_buffer (width : int) (tab : int) (b : Buffer.t) (d : t) : unit =
   to_something width tab
     (Buffer.add_char b) (Buffer.add_string b) (Buffer.add_substring b) d
 

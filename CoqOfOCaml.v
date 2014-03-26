@@ -318,7 +318,29 @@ Definition read_counter (_ : unit) : M [Counter] nat :=
 Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
   fun s => (inr (inl tt), s).
 
+Module Pervasives.
+  Definition string_of_bool (b : bool) : string :=
+    if b then
+      "true" % string
+    else
+      "false" % string.
+  
+  (* TODO *)
+  Definition string_of_int (n : Z) : string :=
+    "0".
+End Pervasives.
+
 Module String.
+  Definition length (s : string) : Z :=
+    Z.of_nat (String.length s).
+  
+  (* TODO: raise an exception if n < 0. *)
+  Definition get (s : string) (n : Z) : ascii :=
+    match String.get (Z.to_nat n) s with
+    | None => "?" % char
+    | Some c => c
+    end.
+  
   Fixpoint _make (n : nat) (c : ascii) : string :=
     match n with
     | O => EmptyString
@@ -328,6 +350,14 @@ Module String.
   (* TODO: raise an exception if n < 0. *)
   Definition make (n : Z) (c : ascii) : string :=
     _make (Z.to_nat n) c.
+  
+  (* TODO *)
+  Definition sub (s : string) (start : Z) (length : Z) : string :=
+    s.
+  
+  (* TODO *)
+  Definition escaped (s : string) : string :=
+    s.
 End String.
 
 

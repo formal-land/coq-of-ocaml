@@ -281,7 +281,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         (env, Value (loc, (), {
           Value.header = (is_rec, x, typ_vars, args, Some typ);
           body = e }))
-      | _ -> failwith "Cannot match a function definition on a pattern.")
+      | _ -> Error.raise loc "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       let name = Name.of_ident name in
       let typ_vars = List.map Type.of_type_expr_variable typ.type_params in
@@ -312,7 +312,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
             typ_vars = typ_vars;
             value = Type.of_type_expr env.FullEnvi.typs typ } in
           (Synonym.update_env syn env, Synonym (loc, syn))
-        | None -> failwith "Type definition not handled."))
+        | None -> Error.raise loc "Type definition not handled."))
     | Tstr_exception { cd_id = name; cd_args = args } ->
       let name = Name.of_ident name in
       let typ =
@@ -320,7 +320,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
           Type.of_type_expr env.FullEnvi.typs typ)) in
       let exn = { Exception.name = name; typ = typ} in
       (Exception.update_env exn env, Exception (loc, exn))
-    (* | Tstr_open (_, path, _, _) -> (failwith "TODO", Open (PathName.of_path 0 path)) *)
+    (* | Tstr_open (_, path, _, _) -> (Error.raise loc "TODO", Open (PathName.of_path 0 path)) *)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
       let name = Name.of_ident name in
@@ -328,7 +328,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.close_module env name in
       (env, Module (loc, name, structures))
-    | _ -> failwith "Structure item not handled." in
+    | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
       let (env, def) = of_structure_item env item in

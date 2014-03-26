@@ -108,7 +108,16 @@ let env_effects : Effect.Type.t Envi.t =
       [], "read_int", Arrow (descriptor "IO", Pure);
       [], "read_counter", Arrow (descriptor "Counter", Pure);
       [], "not_terminated", Arrow (descriptor "NonTermination", Pure);
-      ["String"], "make", Pure ]
+      ["List"], "fold_left", Pure;
+      ["List"], "fold_right", Pure;
+      ["List"], "map", Pure;
+      ["Pervasives"], "string_of_bool", Pure;
+      ["Pervasives"], "string_of_int", Pure;
+      ["String"], "get", Pure;
+      ["String"], "escaped", Pure;
+      ["String"], "length", Pure;
+      ["String"], "make", Pure;
+      ["String"], "sub", Pure ]
 
 let env_with_effects : Effect.Type.t FullEnvi.t = {
   FullEnvi.vars = env_effects;

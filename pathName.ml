@@ -53,9 +53,9 @@ let convert (x : t) : t =
     | "int_of_char" -> { path = []; base = "int_of_char" }
     | "char_of_int" -> { path = []; base = "char_of_int" }
     | "ignore" -> { path = []; base = "ignore" }
-    | "string_of_bool" -> failwith "string_of_bool not handled."
+    | "string_of_bool" -> { path = ["Pervasives"]; base = "string_of_bool" }
     | "bool_of_string" -> failwith "bool_of_string not handled."
-    | "string_of_int" -> failwith "string_of_int not handled."
+    | "string_of_int" -> { path = ["Pervasives"]; base = "string_of_int" }
     | "int_of_string" -> failwith "int_of_string not handled."
     | "fst" -> { path = []; base = "fst" }
     | "snd" -> { path = []; base = "snd" }

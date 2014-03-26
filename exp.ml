@@ -434,9 +434,9 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
     (env, [(header, e)])
 
-let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
-  : ('a * Effect.t) t =
-  let compound (es : 'a t list) : ('a * Effect.t) t list * Effect.t =
+let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
+  : (Loc.t * Effect.t) t =
+  let compound (es : Loc.t t list) : (Loc.t * Effect.t) t list * Effect.t =
     let es = List.map (effects env) es in
     let effects = List.map (fun e -> snd (annotation e)) es in
     let descriptor = Effect.Descriptor.union (
@@ -448,26 +448,26 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
     else
       (es, { Effect.descriptor = descriptor; typ = Effect.Type.Pure }) in
   match e with
-  | Constant (a, c) ->
+  | Constant (l, c) ->
     let effect =
       { Effect.descriptor = Effect.Descriptor.pure;
         typ = Effect.Type.Pure } in
-    Constant ((a, effect), c)
-  | Variable (a, x) ->
+    Constant ((l, effect), c)
+  | Variable (l, x) ->
     (try
       let effect =
         { Effect.descriptor = Effect.Descriptor.pure;
           typ = Envi.find x env.FullEnvi.vars Effect.Type.open_lift } in
-      Variable ((a, effect), x)
+      Variable ((l, effect), x)
     with Not_found -> failwith (SmartPrint.to_string 80 2
       (BoundName.pp x ^^ !^ "not found.")))
-  | Tuple (a, es) ->
+  | Tuple (l, es) ->
     let (es, effect) = compound es in
-    Tuple ((a, effect), es)
-  | Constructor (a, x, es) ->
+    Tuple ((l, effect), es)
+  | Constructor (l, x, es) ->
     let (es, effect) = compound es in
-    Constructor ((a, effect), x, es)
-  | Apply (a, e_f, e_xs) ->
+    Constructor ((l, effect), x, es)
+  | Apply (l, e_f, e_xs) ->
     let e_f = effects env e_f in
     let effect_e_f = snd (annotation e_f) in
     let e_xs = List.map (effects env) e_xs in
@@ -486,8 +486,6 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
           else
             ([e_x], d) :: e_xss in
       let e_xss = e_xss effect_e_f.Effect.typ e_xs in
-      (*SmartPrint.to_stdout 160 2 (OCaml.list (fun (e_xs, d) ->
-        OCaml.tuple [OCaml.list (pp (fun _ -> empty)) e_xs; Effect.Descriptor.pp d]) e_xss ^^ newline);*)
       List.fold_left (fun e (e_xs, d) ->
         let effect_e = snd (annotation e) in
         let effects_e_xs = List.map (fun e_x -> snd (annotation e_x)) e_xs in
@@ -497,18 +495,11 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
           List.map (fun effect_e_x -> effect_e_x.Effect.descriptor) effects_e_xs) in
         let typ = Effect.Type.return_type effect_e.Effect.typ (List.length e_xs) in
         let effect = { Effect.descriptor = descriptor; typ = typ } in
-        Apply ((a, effect), e, e_xs))
+        Apply ((l, effect), e, e_xs))
         e_f e_xss
-      (*let descriptor = Effect.Descriptor.union (
-        effect_f.Effect.descriptor ::
-        Effect.Type.return_descriptor effect_f.Effect.typ (List.length e_xs) ::
-        List.map (fun effect_x -> effect_x.Effect.descriptor) effects_xs) in
-      let effect_typ = Effect.Type.return_type effect_f.Effect.typ (List.length e_xs) in
-      let effect = { Effect.descriptor = descriptor; typ = effect_typ } in
-      Apply ((a, effect), e_f, e_xs)*)
     else
-      failwith "Function arguments cannot have functional effects."
-  | Function (a, x, e) ->
+      Error.raise l "Function arguments cannot have functional effects."
+  | Function (l, x, e) ->
     let env = { env with FullEnvi.vars = Envi.add_name x Effect.Type.Pure env.FullEnvi.vars } in
     let e = effects env e in
     let effect_e = snd (annotation e) in
@@ -516,8 +507,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
       Effect.descriptor = Effect.Descriptor.pure;
       typ = Effect.Type.Arrow (
         effect_e.Effect.descriptor, effect_e.Effect.typ) } in
-    Function ((a, effect), x, e)
-  | Let (a, ((is_rec, x, _, args, _) as header), e1, e2) ->
+    Function ((l, effect), x, e)
+  | Let (l, ((is_rec, x, _, args, _) as header), e1, e2) ->
     let (e1, x_typ) = effects_of_let env is_rec x args e1 in
     let effect1 = snd (annotation e1) in
     let env_in_e2 = { env with FullEnvi.vars = Envi.add_name x x_typ env.FullEnvi.vars } in
@@ -528,8 +519,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
     let effect = {
       Effect.descriptor = descriptor;
       typ = effect2.Effect.typ } in
-    Let ((a, effect), header, e1, e2)
-  | Match (a, e, cases) ->
+    Let ((l, effect), header, e1, e2)
+  | Match (l, e, cases) ->
     let e = effects env e in
     let effect_e = snd (annotation e) in
     if Effect.Type.is_pure effect_e.Effect.typ then
@@ -545,20 +536,20 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
         Effect.descriptor = Effect.Descriptor.union
           [effect_e.Effect.descriptor; effect.Effect.descriptor];
         typ = effect.Effect.typ } in
-      Match ((a, effect), e, cases)
+      Match ((l, effect), e, cases)
     else
-      failwith "Cannot match a value with functional effects."
-  | Record (a, fields) ->
+      Error.raise l "Cannot match a value with functional effects."
+  | Record (l, fields) ->
     let (es, effect) = compound (List.map snd fields) in
-    Record ((a, effect), List.map2 (fun (x, _) e -> (x, e)) fields es)
-  | Field (a, e, x) ->
+    Record ((l, effect), List.map2 (fun (x, _) e -> (x, e)) fields es)
+  | Field (l, e, x) ->
     let e = effects env e in
     let effect = snd (annotation e) in
     if Effect.Type.is_pure effect.Effect.typ then
-      Field ((a, effect), e, x)
+      Field ((l, effect), e, x)
     else
-      failwith "Cannot take a field of a value with functional effects."
-  | IfThenElse (a, e1, e2, e3) ->
+      Error.raise l "Cannot take a field of a value with functional effects."
+  | IfThenElse (l, e1, e2, e3) ->
     let e1 = effects env e1 in
     let effect_e1 = snd (annotation e1) in
     if Effect.Type.is_pure effect_e1.Effect.typ then
@@ -570,10 +561,10 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
         Effect.descriptor = Effect.Descriptor.union
           [effect_e1.Effect.descriptor; effect.Effect.descriptor];
         typ = effect.Effect.typ } in
-      IfThenElse ((a, effect), e1, e2, e3)
+      IfThenElse ((l, effect), e1, e2, e3)
     else
-      failwith "Cannot do an if on a value with functional effects."
-  | Sequence (a, e1, e2) ->
+      Error.raise l "Cannot do an if on a value with functional effects."
+  | Sequence (l, e1, e2) ->
     let e1 = effects env e1 in
     let effect_e1 = snd (annotation e1) in
     let e2 = effects env e2 in
@@ -582,15 +573,15 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : 'a t)
       Effect.descriptor = Effect.Descriptor.union
         [effect_e1.Effect.descriptor; effect_e2.Effect.descriptor];
       typ = effect_e2.Effect.typ } in
-    Sequence ((a, effect), e1, e2)
-  | Run (a, x, d, e) ->
+    Sequence ((l, effect), e1, e2)
+  | Run (l, x, d, e) ->
     let e = effects env e in
     let effect_e = snd (annotation e) in
     let effect = { effect_e with
       Effect.descriptor = Effect.Descriptor.remove x effect_e.Effect.descriptor } in
-    Run ((a, effect), x, d, e)
+    Run ((l, effect), x, d, e)
   | Return _ | Bind _ | Lift _ ->
-    failwith "Cannot compute effects on an explicit return, bind or lift."
+    Error.raise Loc.Unknown "Cannot compute effects on an explicit return, bind or lift."
 
 and effects_of_let (env : Effect.Type.t FullEnvi.t) (is_rec : Recursivity.t)
   (x : Name.t) (args : (Name.t * Type.t) list) (e : 'a t)
