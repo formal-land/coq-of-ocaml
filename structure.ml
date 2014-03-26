@@ -204,7 +204,7 @@ module Reference = struct
       !^ "Effect.make" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
     newline ^^ newline ^^
     !^ "Definition" ^^ Name.to_coq ("read_" ^ r.name) ^^ !^ "(_ : unit)" ^^ !^ ":" ^^
-      !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ Type.to_coq false r.typ ^^ !^ ":=" ^^
+      !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ Type.to_coq true r.typ ^^ !^ ":=" ^^
     newline ^^ indent (
       !^ "fun s => (inl (fst s), s).") ^^
     newline ^^ newline ^^

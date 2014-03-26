@@ -32,5 +32,14 @@ let rec to_coq (c : t) : SmartPrint.t =
     else
       parens @@ OCaml.int n
   | Nat n -> nest (to_coq (Int n) ^^ !^ "%" ^^ !^ "nat")
-  | Char c -> nest (double_quotes (!^ (Char.escaped c)) ^^ !^ "%" ^^ !^ "char")
-  | String s -> nest (OCaml.string s ^^ !^ "%" ^^ !^ "string")
+  | Char c ->
+    let s =
+      if Char.code c < 32 then
+        "0" ^ string_of_int (Char.code c)
+      else if c = '"' then
+        "\"\""
+      else
+        String.make 1 c in
+    nest (double_quotes (!^ s) ^^ !^ "%" ^^ !^ "char")
+  | String s ->
+    nest (OCaml.string s ^^ !^ "%" ^^ !^ "string")
