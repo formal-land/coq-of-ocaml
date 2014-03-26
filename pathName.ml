@@ -89,7 +89,7 @@ let of_name (path : Name.t list) (base : Name.t) : t =
 let of_longident (longident : Longident.t) : t =
   match List.rev (Longident.flatten longident) with
   | [] -> failwith "Expected a non empty list."
-  | x :: xs -> of_name xs x
+  | x :: xs -> of_name (List.rev xs) x
 
 (** Import an OCaml location. *)
 let of_loc (loc : Longident.t loc) : t = 
