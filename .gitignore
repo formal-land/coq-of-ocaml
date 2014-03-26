@@ -15,3 +15,5 @@ a.out
 *.glob
 _build/
 smartPrint/*.v
+smartPrint/*.monadise
+\#*\#

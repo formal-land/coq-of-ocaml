@@ -210,6 +210,8 @@ module Atom = struct
       c.Config.add_char '\n'
   end
 
+  let ref_last_break = ref None
+
   (* Write to something, given the [add_char] and [add_string] functions. *)
   let to_something (tab : int) (add_char : char -> unit) (add_string : string -> unit)
     (add_sub_string : string -> int -> int -> unit) (a : t) : unit =
@@ -220,23 +222,24 @@ module Atom = struct
     let rec aux a i (last_break : Break.t option) : Break.t option =
       match a with
       | String (s, o, l) ->
-        if last_break = Some Break.Newline then
-          NonTrailingBuffer.indent c i;
+        (match last_break with
+        | Some Break.Newline -> NonTrailingBuffer.indent c i
+        | _ -> ());
         NonTrailingBuffer.sub_string c s o l; None
       | Break Break.Space ->
-        if last_break = None then
-          (NonTrailingBuffer.space (); Some Break.Space)
-        else
-          last_break
+        (match last_break with
+        | None -> NonTrailingBuffer.space (); Some Break.Space
+        | _ -> last_break)
       | Break Break.Newline ->
-        if last_break = Some Break.Newline then
-          NonTrailingBuffer.indent c i;
+        (match last_break with
+        | Some Break.Newline -> NonTrailingBuffer.indent c i
+        | _ -> ());
         NonTrailingBuffer.newline c; Some Break.Newline
       | GroupOne (_, _as) | GroupAll (_, _as) ->
-        let last_break = ref last_break in
-        _as |> List.iter (fun a ->
-          last_break := aux a i !last_break);
-        !last_break
+        ref_last_break := last_break;
+        (*_as |> List.iter (fun a ->
+          ref_last_break := aux a i !ref_last_break);*) (* TODO: handle iter *)
+        !ref_last_break
       | Indent (n, a) -> aux a (i + n * tab) last_break in
     ignore (aux a 0 (Some Break.Newline))
 end
