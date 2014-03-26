@@ -36,9 +36,11 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
       | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
     to_stdout 80 2 document;
     print_newline ();
-    flush stdout
-  with Envi.NotFound x ->
+    flush stdout with
+  | Envi.NotFound x ->
     failwith (to_string 80 2 @@ (PathName.pp x ^^ !^ "not found."))
+  | Error.Make x ->
+    failwith (to_string 80 2 @@ Error.pp x)
 
 (** Parse a .cmt file to a typed AST. *)
 let parse_cmt (file_name : string) : Typedtree.structure =

@@ -151,7 +151,7 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     | (_, []) -> Match (l, body, [pattern, e2])
     | (Pattern.Variable name, _) ->
       Let (l, (rec_flag, name, free_typ_vars, args, Some body_typ), body, e2)
-    | _ -> failwith "Cannot match a function definition on a pattern.")
+    | _ -> Error.raise l "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
     ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->
@@ -175,8 +175,8 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           let x = Envi.bound_name x env.FullEnvi.vars in
           let es = List.map (of_expression env) es in
           Apply (l, Variable (l_exn, x), [Tuple (Loc.Unknown, es)])
-        | _ -> failwith "Constructor of an exception expected after a 'raise'.")
-      | _ -> failwith "Expected one argument for 'raise'.")
+        | _ -> Error.raise l "Constructor of an exception expected after a 'raise'.")
+      | _ -> Error.raise l "Expected one argument for 'raise'.")
     | Texp_ident (path, _, _)
       when PathName.of_path path = PathName.of_name ["Pervasives"] "!" ->
       (match e_xs with
@@ -187,8 +187,8 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           let read = { read with PathName.base = "read_" ^ read.PathName.base } in
           let read = Envi.bound_name read env.FullEnvi.vars in
           Apply (l, Variable (Loc.Unknown, read), [Tuple (Loc.Unknown, [])])
-        | _ -> failwith "Name of a reference expected after '!'.")
-      | _ -> failwith "Expected one argument for '!'.")
+        | _ -> Error.raise l "Name of a reference expected after '!'.")
+      | _ -> Error.raise l "Expected one argument for '!'.")
     | Texp_ident (path, _, _)
       when PathName.of_path path = PathName.of_name ["Pervasives"] ":=" ->
       (match e_xs with
@@ -200,14 +200,14 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
           let write = Envi.bound_name write env.FullEnvi.vars in
           let e_v = of_expression env e_v in
           Apply (l, Variable (Loc.Unknown, write), [e_v])
-        | _ -> failwith "Name of a reference expected after ':='.")
-      | _ -> failwith "Expected two arguments for ':='.")
+        | _ -> Error.raise l "Name of a reference expected after ':='.")
+      | _ -> Error.raise l "Expected two arguments for ':='.")
     | _ ->
       let e_f = of_expression env e_f in
       let e_xs = List.map (fun (_, e_x, _) ->
         match e_x with
         | Some e_x -> of_expression env e_x
-        | None -> failwith "expected an argument") e_xs in
+        | None -> Error.raise l "expected an argument") e_xs in
       Apply (l, e_f, e_xs))
   | Texp_match (e, cases, _) ->
     let e = of_expression env e in
@@ -252,12 +252,12 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
       let env = Pattern.add_to_env p env in
       let e2 = of_expression env e2 in
       (p, e2))])
-  | Texp_setfield _ -> failwith "Set field not handled."
-  | Texp_array _ -> failwith "Arrays not handled."
-  | Texp_while _ -> failwith "While loops not handled."
-  | Texp_for _ -> failwith "For loops not handled."
-  | Texp_assert _ -> failwith "Assertions not handled."
-  | _ -> failwith "Expression not handled."
+  | Texp_setfield _ -> Error.raise l "Set field not handled."
+  | Texp_array _ -> Error.raise l "Arrays not handled."
+  | Texp_while _ -> Error.raise l "While loops not handled."
+  | Texp_for _ -> Error.raise l "For loops not handled."
+  | Texp_assert _ -> Error.raise l "Assertions not handled."
+  | _ -> Error.raise l "Expression not handled."
 
 (** Generate a variable and a "match" on this variable from a list of patterns. *)
 and open_cases (env : unit FullEnvi.t) (cases : case list)
