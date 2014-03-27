@@ -42,4 +42,10 @@ let rec to_coq (c : t) : SmartPrint.t =
         String.make 1 c in
     nest (double_quotes (!^ s) ^^ !^ "%" ^^ !^ "char")
   | String s ->
-    nest (OCaml.string s ^^ !^ "%" ^^ !^ "string")
+    let b = Buffer.create 0 in
+    s |> String.iter (fun c ->
+      if c = '"' then
+        Buffer.add_string b "\"\""
+      else
+        Buffer.add_char b c);
+    nest (double_quotes (!^ (Buffer.contents b)) ^^ !^ "%" ^^ !^ "string")
