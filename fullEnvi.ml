@@ -7,6 +7,30 @@ type 'a t = {
   fields : unit Envi.t
 }
 
+let empty (close_lift_vars : 'a -> Name.t -> 'a) : 'a t = {
+  vars = Envi.empty;
+  close_lift_vars = close_lift_vars;
+  typs = Envi.empty;
+  descriptors = Envi.empty;
+  constructors = Envi.empty;
+  fields = Envi.empty;
+}
+
+let add_var (path : Name.t list) (base : Name.t) (v : 'a) (env : 'a t) : 'a t =
+  { env with vars = Envi.add (PathName.of_name path base) v env.vars }
+
+let add_typ (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
+  { env with typs = Envi.add (PathName.of_name path base) () env.typs }
+
+let add_descriptor (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
+  { env with descriptors = Envi.add (PathName.of_name path base) () env.descriptors }
+
+let add_constructor (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
+  { env with constructors = Envi.add (PathName.of_name path base) () env.constructors }
+
+let add_field (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
+  { env with fields = Envi.add (PathName.of_name path base) () env.fields }
+
 let open_module (env : 'a t) : 'a t = {
   vars = Envi.open_module env.vars;
   close_lift_vars = env.close_lift_vars;

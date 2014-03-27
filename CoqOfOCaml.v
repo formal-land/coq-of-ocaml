@@ -420,9 +420,15 @@ Module OCaml.
       print_endline message.
     
     (** * Input functions on standard input *)
-    (* TODO *)
     Definition read_line (_ : unit) : M [IO] string :=
-      ret "" % string.
+      fun s =>
+        match s with
+        | ((stream_i, stream_o), _) =>
+          match stream_i with
+          | [] => (inl "" % string, s) (* We could raise an [End_of_file] exception. *)
+          | message :: stream_i => (inl message, ((stream_i, stream_o), tt))
+          end
+        end.
     
     Definition read_int (_ : unit) : M [IO] Z :=
       let! s := read_line tt in

@@ -1,6 +1,23 @@
 (** The initially opened module. *)
+open FullEnvi
 open Effect.Type
 open SmartPrint
+
+let env' : Effect.Type.t FullEnvi.t =
+  FullEnvi.empty Effect.Type.close_lift
+  |> add_typ [] "nat"
+  |> add_typ [] "sum"
+  (* The core library *)
+  (* Built-in types *)
+  |> add_typ [] "Z"
+  |> add_typ [] "ascii"
+  |> add_typ [] "string"
+  |> add_typ [] "bool"
+  |> add_typ [] "unit"
+  |> add_typ [] "list"
+  |> add_typ [] "option"
+  (* Predefined exceptions *)
+  |> open_module
 
 let env_typs : unit Envi.t =
   Envi.open_module @@
