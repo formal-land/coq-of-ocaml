@@ -60,7 +60,7 @@ let convert (x : t) : t =
     | "int_of_string" -> failwith "int_of_string not handled."
     | "fst" -> { path = []; base = "fst" }
     | "snd" -> { path = []; base = "snd" }
-    | "@" -> { path = ["List"]; base = "app" }
+    | "@" -> { path = ["OCaml"; "List"]; base = "app" }
     | "invalid_arg" -> { path = []; base = "invalid_arg" }
     | "failwith" -> { path = []; base = "failwith" }
     | "print_char" -> { path = []; base = "print_char" }

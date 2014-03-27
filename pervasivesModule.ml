@@ -22,11 +22,16 @@ let env_descriptors : unit Envi.t =
   List.fold_left (fun env_descriptors (path, base) ->
     Envi.add (PathName.of_name path base) () env_descriptors)
     Envi.empty
-    [ [], "Invalid_argument";
-      [], "Failure";
-      [], "IO";
+    [ [], "IO";
       [], "Counter";
-      [], "NonTermination" ]
+      [], "NonTermination";
+      ["OCaml"], "Match_failure";
+      ["OCaml"], "Assert_failure";
+      ["OCaml"], "Invalid_argument";
+      ["OCaml"], "Failure";
+      ["OCaml"], "Not_found";
+      ["OCaml"], "End_of_file";
+      ["OCaml"], "Division_by_zero" ]
 
 let env_constructors : unit Envi.t =
   Envi.open_module @@
@@ -91,7 +96,7 @@ let env_effects : Effect.Type.t Envi.t =
       [], "ignore", Pure;
       [], "fst", Pure;
       [], "snd", Pure;
-      ["List"], "app", Pure;
+      ["OCaml"; "List"], "app", Pure;
       [], "invalid_arg", Arrow (descriptor "Invalid_argument", Pure);
       [], "failwith", Arrow (descriptor "Failure", Pure);
       [], "print_char", Arrow (descriptor "IO", Pure);

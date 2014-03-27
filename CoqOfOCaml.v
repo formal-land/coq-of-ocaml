@@ -336,6 +336,8 @@ Module OCaml.
     
     (** * Integer arithmetic *)
     
+    (** * Bitwise operations *)
+    
     (** * Floating-point arithmetic *)
     (* TODO *)
     
@@ -378,6 +380,8 @@ Module OCaml.
     
     (** * Input/output *)
     (* TODO: add channels. *)
+    
+    (** * Output functions on standard output *)
     Definition print_string (message : string) : M [IO] unit :=
       fun s =>
         match s with
@@ -397,6 +401,50 @@ Module OCaml.
     Definition print_endline (message : string) : M [IO] unit :=
       let! _ := print_string message in
       print_newline tt.
+    
+    (** * Output functions on standard error *)
+    (* TODO: do it on the error channel. *)
+    Definition prerr_string (message : string) : M [IO] unit :=
+      print_string message.
+    
+    Definition prerr_char (c : ascii) : M [IO] unit :=
+      print_char c.
+    
+    Definition prerr_int (n : Z) : M [IO] unit :=
+      print_int n.
+    
+    Definition prerr_newline (_ : unit) : M [IO] unit :=
+      print_newline tt.
+    
+    Definition prerr_endline (message : string) : M [IO] unit :=
+      print_endline message.
+    
+    (** * Input functions on standard input *)
+    (* TODO *)
+    Definition read_line (_ : unit) : M [IO] string :=
+      ret "" % string.
+    
+    Definition read_int (_ : unit) : M [IO] Z :=
+      let! s := read_line tt in
+      ret (int_of_string s).
+    
+    (** * General output functions *)
+    (* TODO *)
+    
+    (** * General input functions *)
+    (* TODO *)
+    
+    (** * Operations on large files *)
+    (* TODO *)
+    
+    (** * References *)
+    (* No first-class reference for now. *)
+    
+    (** * Operations on format strings *)
+    (* TODO *)
+    
+    (** * Program termination *)
+    (* TODO *)
   End Pervasives.
 
   Module List.
