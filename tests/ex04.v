@@ -18,4 +18,6 @@ Definition o2 : option Z := Some 12.
 
 Definition c : ascii := "g" % char.
 
-Definition s : string := "bla" % string.
+Definition s1 : string := "bla" % string.
+
+Definition s2 : string := """" % string.

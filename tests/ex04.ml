@@ -14,4 +14,6 @@ let o2 = Some 12
 
 let c = 'g'
 
-let s = "bla"
+let s1 = "bla"
+
+let s2 = "\""

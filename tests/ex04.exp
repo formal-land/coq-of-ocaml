@@ -44,5 +44,10 @@
 
 17
 ((),
-  Value (non_rec, s, [ ], [ ], Some Type (string/1)) =
+  Value (non_rec, s1, [ ], [ ], Some Type (string/1)) =
     Constant (17, String("bla")))
+
+19
+((),
+  Value (non_rec, s2, [ ], [ ], Some Type (string/1)) =
+    Constant (19, String("\"")))
