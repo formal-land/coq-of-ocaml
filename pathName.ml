@@ -31,7 +31,7 @@ let convert (x : t) : t =
     | "&" -> failwith "\"&\" is deprecated. Use \"&&\" instead."
     | "||" -> { path = []; base = "orb" }
     | "or" -> failwith "\"or\" is deprecated. Use \"||\" instead."
-    | "|>" -> { path = []; base = "reverse_apply" }
+    | "|>" -> { path = ["OCaml"]; base = "reverse_apply" }
     | "@@" -> { path = []; base = "apply" }
     | "~-" -> { path = ["Z"]; base = "opp" }
     | "~+" -> { path = []; base = "" }
@@ -50,9 +50,9 @@ let convert (x : t) : t =
     | "asr" -> failwith "\"asr\" not handled."
     | "lsl" -> { path = ["Z"]; base = "shiftl" }
     | "lsr" -> { path = ["Z"]; base = "shiftr" }
-    | "^" -> { path = []; base = "append" }
-    | "int_of_char" -> { path = []; base = "int_of_char" }
-    | "char_of_int" -> { path = []; base = "char_of_int" }
+    | "^" -> { path = ["String"]; base = "append" }
+    | "int_of_char" -> { path = ["OCaml"]; base = "int_of_char" }
+    | "char_of_int" -> { path = ["OCaml"]; base = "char_of_int" }
     | "ignore" -> { path = []; base = "ignore" }
     | "string_of_bool" -> { path = ["Pervasives"]; base = "string_of_bool" }
     | "bool_of_string" -> failwith "bool_of_string not handled."
@@ -60,7 +60,7 @@ let convert (x : t) : t =
     | "int_of_string" -> failwith "int_of_string not handled."
     | "fst" -> { path = []; base = "fst" }
     | "snd" -> { path = []; base = "snd" }
-    | "@" -> { path = []; base = "app" }
+    | "@" -> { path = ["List"]; base = "app" }
     | "invalid_arg" -> { path = []; base = "invalid_arg" }
     | "failwith" -> { path = []; base = "failwith" }
     | "print_char" -> { path = []; base = "print_char" }

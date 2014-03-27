@@ -85,13 +85,13 @@ let env_effects : Effect.Type.t Envi.t =
       ["Z"], "lxor", Pure;
       ["Z"], "shiftl", Pure;
       ["Z"], "shiftr", Pure;
-      [], "append", Pure;
+      ["String"], "append", Pure;
       [], "int_of_char", Pure;
       [], "char_of_int", Pure;
       [], "ignore", Pure;
       [], "fst", Pure;
       [], "snd", Pure;
-      [], "app", Pure;
+      ["List"], "app", Pure;
       [], "invalid_arg", Arrow (descriptor "Invalid_argument", Pure);
       [], "failwith", Arrow (descriptor "Failure", Pure);
       [], "print_char", Arrow (descriptor "IO", Pure);

@@ -16,24 +16,6 @@ Definition sum_assoc_left (A B C : Type) (x : A + (B + C)) : (A + B) + C :=
   | inr (inr x) => inr x
   end.
 
-Definition reverse_apply {A B : Type} (x : A) (f : A -> B) : B :=
-  f x.
-
-Definition int_of_char (c : ascii) : Z :=
-  Z.of_nat (nat_of_ascii c).
-
-Definition char_of_int (n : Z) : ascii :=
-  ascii_of_nat (Z.to_nat n).
-
-Definition ignore {A : Type} (_ : A) : unit :=
-  tt.
-
-(** The concatenation of lists with an implicit parameter. *)
-Definition app {A : Type} (l1 l2 : list A) : list A :=
-  app l1 l2.
-
-Instance Z_eqdec : EqDec (A := Z) _ := Z.eq_dec.
-
 Module Effect.
   Record t := make {
     S : Type;
@@ -112,16 +94,6 @@ Module Effect.
         + exact (fst s1, expand_state ebs (snd s1) (snd s2)).
         + exact (fst s2, expand_state ebs s1 (snd s2)).
     Defined.
-    
-    (*Fixpoint of_nat (n : nat) (es : list t) : list (t * bool) :=
-      match es with
-      | [] => []
-      | e :: es =>
-        match n with
-        | O => (e, true) :: List.map (fun e => (e, false)) es
-        | Datatypes.S n => (e, false) :: of_nat n es
-        end
-      end.*)
   End Ebs.
   
   Module Filter.
@@ -287,30 +259,11 @@ Module Exception.
       end, output _ _ s).
 End Exception.
 
-Definition Invalid_argument := Effect.make unit string.
-
-Definition Failure := Effect.make unit string.
-
 Definition IO := Effect.make (list string * list string) Empty_set.
 
 Definition Counter := Effect.make nat Empty_set.
 
 Definition NonTermination := Effect.make unit unit.
-
-Definition invalid_arg {A : Type} (message : string)
-  : M [Invalid_argument] A :=
-  fun s => (inr (inl message), s).
-
-Definition failwith {A : Type} (message : string)
-  : M [Failure] A :=
-  fun s => (inr (inl message), s).
-
-Definition print_string (message : string) : M [IO] unit :=
-  fun s =>
-    match s with
-    | ((stream_i, stream_o), _) =>
-      (inl tt, ((stream_i, message :: stream_o), tt))
-    end.
 
 Definition read_counter (_ : unit) : M [Counter] nat :=
   fun s => (inl (fst s), s).
@@ -318,46 +271,168 @@ Definition read_counter (_ : unit) : M [Counter] nat :=
 Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
   fun s => (inr (inl tt), s).
 
-Module Pervasives.
-  Definition string_of_bool (b : bool) : string :=
-    if b then
-      "true" % string
-    else
-      "false" % string.
+(* TODO: add floats, add the different integer types (int32, int64, ...). *)
+Module OCaml.
+  Instance Z_eqdec : EqDec (A := Z) _ := Z.eq_dec.
   
-  (* TODO *)
-  Definition string_of_int (n : Z) : string :=
-    "0".
-End Pervasives.
+  Definition Match_failure := Effect.make unit (string * Z * Z).
+   Definition raise_Match_failure {A : Type} (x : string * Z * Z)
+    : M [ Match_failure ] A :=
+    fun s => (inr (inl x), s).
+  
+  Definition Assert_failure := Effect.make unit (string * Z * Z).
+  Definition raise_Assert_failure {A : Type} (x : string * Z * Z)
+    : M [ Assert_failure ] A :=
+    fun s => (inr (inl x), s).
+  
+  Definition Invalid_argument := Effect.make unit string.
+  Definition raise_Invalid_argument {A : Type} (x : string)
+    : M [ Invalid_argument ] A :=
+    fun s => (inr (inl x), s).
 
-Module String.
-  Definition length (s : string) : Z :=
-    Z.of_nat (String.length s).
+  Definition Failure := Effect.make unit string.
+  Definition raise_Failure {A : Type} (x : string)
+    : M [ Failure ] A :=
+    fun s => (inr (inl x), s).
   
-  (* TODO: raise an exception if n < 0. *)
-  Definition get (s : string) (n : Z) : ascii :=
-    match String.get (Z.to_nat n) s with
-    | None => "?" % char
-    | Some c => c
-    end.
+  Definition Not_found := Effect.make unit unit.
+  Definition raise_Not_found {A : Type} (x : unit)
+    : M [ Not_found ] A :=
+    fun s => (inr (inl x), s).
   
-  Fixpoint _make (n : nat) (c : ascii) : string :=
-    match n with
-    | O => EmptyString
-    | S n => String c (_make n c)
-    end.
+  Definition End_of_file := Effect.make unit unit.
+  Definition raise_End_of_file {A : Type} (x : unit)
+    : M [ End_of_file ] A :=
+    fun s => (inr (inl x), s).
   
-  (* TODO: raise an exception if n < 0. *)
-  Definition make (n : Z) (c : ascii) : string :=
-    _make (Z.to_nat n) c.
+  Definition Division_by_zero := Effect.make unit unit.
+  Definition raise_Division_by_zero {A : Type} (x : unit)
+    : M [ Division_by_zero ] A :=
+    fun s => (inr (inl x), s).
   
-  (* TODO *)
-  Definition sub (s : string) (start : Z) (length : Z) : string :=
-    s.
-  
-  (* TODO *)
-  Definition escaped (s : string) : string :=
-    s.
-End String.
+  (** OCaml functions are converted to their Coq's counter parts when it is
+      possible. *)
+  Module Pervasives.
+    (** * Exceptions *)
+    Definition invalid_arg {A : Type} (message : string)
+      : M [Invalid_argument] A :=
+      raise_Invalid_argument message.
 
+    Definition failwith {A : Type} (message : string)
+      : M [Failure] A :=
+      raise_Failure message.
+    
+    Definition Exit := Effect.make unit unit.
+    Definition raise_Exit {A : Type} (x : unit) : M [ Exit ] A :=
+      fun s => (inr (inl x), s).
+    
+    (** * Comparisons *)
+    
+    (** * Boolean operations *)
+    
+    (** * Composition operators *)
+    Definition reverse_apply {A B : Type} (x : A) (f : A -> B) : B :=
+      f x.
+    
+    (** * Integer arithmetic *)
+    
+    (** * Floating-point arithmetic *)
+    (* TODO *)
+    
+    (** * String operations *)
+    
+    (** * Character operations *)
+    Definition int_of_char (c : ascii) : Z :=
+      Z.of_nat (nat_of_ascii c).
+
+    (* TODO: raise Invalid_argument "char_of_int" if the argument is outside the range 0-255. *)
+    Definition char_of_int (n : Z) : ascii :=
+      ascii_of_nat (Z.to_nat n).
+    
+    (** * Unit operations *)
+    Definition ignore {A : Type} (_ : A) : unit :=
+      tt.
+    
+    (** * String conversion functions *)
+    Definition string_of_bool (b : bool) : string :=
+      if b then
+        "true" % string
+      else
+        "false" % string.
+    
+    (* TODO *)
+    Definition bool_of_string (s : string) : bool :=
+      false.
+    
+    (* TODO *)
+    Definition string_of_int (n : Z) : string :=
+      "0".
+    
+    (* TODO *)
+    Definition int_of_string (s : string) : Z :=
+      0.
+    
+    (** * Pair operations *)
+    
+    (** * List operations *)
+    
+    (** * Input/output *)
+    (* TODO: add channels. *)
+    Definition print_string (message : string) : M [IO] unit :=
+      fun s =>
+        match s with
+        | ((stream_i, stream_o), _) =>
+          (inl tt, ((stream_i, message :: stream_o), tt))
+        end.
+    
+    Definition print_char (c : ascii) : M [IO] unit :=
+      print_string (String.String c String.EmptyString).
+    
+    Definition print_int (n : Z) : M [IO] unit :=
+      print_string (string_of_int n).
+    
+    Definition print_newline (_ : unit) : M [IO] unit :=
+      print_char "010" % char.
+    
+    Definition print_endline (message : string) : M [IO] unit :=
+      let! _ := print_string message in
+      print_newline tt.
+  End Pervasives.
+
+  Module List.
+    (** The concatenation of lists with an implicit parameter. *)
+    Definition app {A : Type} (l1 l2 : list A) : list A :=
+      app l1 l2.
+  End List.
+
+  Module String.
+    Definition length (s : string) : Z :=
+      Z.of_nat (String.length s).
+    
+    (* TODO: raise an exception if n < 0. *)
+    Definition get (s : string) (n : Z) : ascii :=
+      match String.get (Z.to_nat n) s with
+      | None => "?" % char
+      | Some c => c
+      end.
+    
+    Fixpoint _make (n : nat) (c : ascii) : string :=
+      match n with
+      | O => EmptyString
+      | S n => String c (_make n c)
+      end.
+    
+    (* TODO: raise an exception if n < 0. *)
+    Definition make (n : Z) (c : ascii) : string :=
+      _make (Z.to_nat n) c.
+    
+    (* TODO *)
+    Definition sub (s : string) (start : Z) (length : Z) : string :=
+      s.
+    
+    (* TODO *)
+    Definition escaped (s : string) : string :=
+      s.
+  End String.
+End OCaml.
 
