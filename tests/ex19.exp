@@ -40,7 +40,7 @@
                       (11,
                         Variable
                           (11,
-                            failwith/1),
+                            OCaml.Pervasives.failwith/1),
                         [
                           Constant
                             (11,
@@ -59,7 +59,7 @@
             IfThenElse
               (14, Variable (14, b/0),
                 Apply
-                  (14, Variable (14, failwith/1),
+                  (14, Variable (14, OCaml.Pervasives.failwith/1),
                     [ Constant (14, String("arg")) ]),
                 Apply (14, Variable (14, raise_Error/0), [ Tuple (?) ]))),
         [

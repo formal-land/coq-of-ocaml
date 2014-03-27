@@ -2,14 +2,14 @@
 ((),
   Value
     (non_rec, tail, [ A ], [ (l, Type (list/1, A)) ],
-      Some Monad ([ Failure/1 ], Type (list/1, A))) =
+      Some Monad ([ OCaml.Failure/1 ], Type (list/1, A))) =
     Match
       (4, Variable (4, l/0),
         [
           (Constructor (cons/1, Any, xs), Return (?, Variable (5, xs/0)));
           (Constructor ([]/1),
             Apply
-              (6, Variable (6, failwith/1),
+              (6, Variable (6, OCaml.Pervasives.failwith/1),
                 [
                   Constant
                     (6,
@@ -58,7 +58,7 @@
                               (11,
                                 Variable
                                   (11,
-                                    print_string/1),
+                                    OCaml.Pervasives.print_string/1),
                                 [
                                   Variable
                                     (11,
@@ -115,12 +115,14 @@
   Value
     (non_rec, x, [ A ], [ (z, A) ],
       Some
-        Monad ([ Counter/1; Failure/1; IO/1; NonTermination/1 ], Type (unit/1)))
+        Monad
+          ([ Counter/1; IO/1; NonTermination/1; OCaml.Failure/1 ], Type (unit/1)))
     =
     Bind
       (?,
         Lift
-          (?, [ Failure/1 ], [ Counter/1; Failure/1; IO/1; NonTermination/1 ],
+          (?, [ OCaml.Failure/1 ],
+            [ Counter/1; IO/1; NonTermination/1; OCaml.Failure/1 ],
             Apply
               (16, Variable (16, tail/0),
                 [
@@ -149,5 +151,5 @@
                 ])), Some x,
         Lift
           (?, [ Counter/1; IO/1; NonTermination/1 ],
-            [ Counter/1; Failure/1; IO/1; NonTermination/1 ],
+            [ Counter/1; IO/1; NonTermination/1; OCaml.Failure/1 ],
             Apply (16, Variable (16, f/0), [ Variable (?, x/0) ]))))

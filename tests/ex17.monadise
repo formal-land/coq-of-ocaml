@@ -33,7 +33,7 @@
 ((),
   Value
     (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
-      Some Monad ([ Outside/0; G.Inside/0; IO/1; NonTermination/1 ], A)) =
+      Some Monad ([ IO/1; NonTermination/1; Outside/0; G.Inside/0 ], A)) =
     Match
       (?, Variable (?, counter/0),
         [
@@ -41,10 +41,10 @@
             Lift
               (?, [ NonTermination/1 ],
                 [
-                  Outside/0;
-                  G.Inside/0;
                   IO/1;
-                  NonTermination/1
+                  NonTermination/1;
+                  Outside/0;
+                  G.Inside/0
                 ],
                 Apply
                   (?, Variable (?, not_terminated/1),
@@ -57,15 +57,15 @@
                     Lift
                       (?,
                         [
+                          IO/1;
                           Outside/0;
-                          G.Inside/0;
-                          IO/1
+                          G.Inside/0
                         ],
                         [
-                          Outside/0;
-                          G.Inside/0;
                           IO/1;
-                          NonTermination/1
+                          NonTermination/1;
+                          Outside/0;
+                          G.Inside/0
                         ],
                         Bind
                           (?,
@@ -75,15 +75,15 @@
                                   IO/1
                                 ],
                                 [
+                                  IO/1;
                                   Outside/0;
-                                  G.Inside/0;
-                                  IO/1
+                                  G.Inside/0
                                 ],
                                 Apply
                                   (19,
                                     Variable
                                       (19,
-                                        print_string/1),
+                                        OCaml.Pervasives.print_string/1),
                                     [
                                       Constant
                                         (19,
@@ -97,9 +97,9 @@
                                   G.Inside/0
                                 ],
                                 [
+                                  IO/1;
                                   Outside/0;
-                                  G.Inside/0;
-                                  IO/1
+                                  G.Inside/0
                                 ],
                                 Apply
                                   (19,
@@ -122,10 +122,10 @@
                           G.Inside/0
                         ],
                         [
-                          Outside/0;
-                          G.Inside/0;
                           IO/1;
-                          NonTermination/1
+                          NonTermination/1;
+                          Outside/0;
+                          G.Inside/0
                         ],
                         Apply
                           (20,
@@ -168,17 +168,17 @@
   Value
     (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ],
       Some
-        Monad ([ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ], A))
+        Monad ([ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ], A))
     =
     Bind
       (?,
         Lift
           (?, [ Counter/1 ],
-            [ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ],
+            [ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
             Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x,
         Lift
-          (?, [ Outside/0; G.Inside/0; IO/1; NonTermination/1 ],
-            [ Outside/0; G.Inside/0; Counter/1; IO/1; NonTermination/1 ],
+          (?, [ IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
+            [ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
             Apply
               (?, Variable (?, h_rec/0),
                 [ Variable (?, x/0); Variable (?, l/0) ]))))

@@ -4,9 +4,23 @@ open Effect.Type
 open SmartPrint
 
 let env' : Effect.Type.t FullEnvi.t =
+  let descriptor (path, base) =
+    let x = PathName.of_name path base in
+    Effect.Descriptor.singleton (Loc.Ether x)
+      { BoundName.path_name = x; depth = 0 } in
+  let d xs : Effect.Descriptor.t =
+    Effect.Descriptor.union (List.map descriptor xs) in
+  let add_exn path base =
+    add_exception_with_effects path base
+      (Loc.Ether (PathName.of_name path base)) in
   FullEnvi.empty Effect.Type.close_lift
+  (* Values specific to the translation to Coq *)
   |> add_typ [] "nat"
   |> add_typ [] "sum"
+  |> add_descriptor [] "IO"
+  |> add_descriptor [] "Counter"
+  |> add_descriptor [] "NonTermination"
+
   (* The core library *)
   (* Built-in types *)
   |> add_typ [] "Z"
@@ -17,6 +31,19 @@ let env' : Effect.Type.t FullEnvi.t =
   |> add_typ [] "list"
   |> add_typ [] "option"
   (* Predefined exceptions *)
+  |> add_exn ["OCaml"] "Match_failure"
+  |> add_exn ["OCaml"] "Assert_failure"
+  |> add_exn ["OCaml"] "Invalid_argument"
+  |> add_exn ["OCaml"] "Failure"
+  |> add_exn ["OCaml"] "Not_found"
+  |> add_exn ["OCaml"] "End_of_file"
+  |> add_exn ["OCaml"] "Division_by_zero"
+
+  (* Pervasives *)
+  (* Exceptions *)
+  |> add_var ["OCaml"] "invalid_arg" (Arrow (d [["OCaml"], "Invalid_argument"], Pure))
+  |> add_var ["OCaml"] "failwith" (Arrow (d [["OCaml"], "Failure"], Pure))
+  |> add_exn ["OCaml"; "Pervasives"] "Exit"
   |> open_module
 
 let env_typs : unit Envi.t =
@@ -71,12 +98,10 @@ let env_fields : unit Envi.t =
   Envi.open_module Envi.empty
 
 let env_effects : Effect.Type.t Envi.t =
-  let descriptor x =
-    let loc = Loc.Ether x in
-    let x = {
-      BoundName.path_name = PathName.of_name [] x;
-      depth = 0 } in
-    Effect.Descriptor.singleton loc x in
+  let d path base =
+    let x = PathName.of_name path base in
+    Effect.Descriptor.singleton (Loc.Ether x)
+      { BoundName.path_name = x; depth = 0 } in
   Envi.open_module @@
   List.fold_left (fun env_effects (path, base, typ) ->
     Envi.add (PathName.of_name path base) typ env_effects)
@@ -108,28 +133,28 @@ let env_effects : Effect.Type.t Envi.t =
       ["Z"], "shiftl", Pure;
       ["Z"], "shiftr", Pure;
       ["String"], "append", Pure;
-      [], "int_of_char", Pure;
-      [], "char_of_int", Pure;
-      [], "ignore", Pure;
+      ["OCaml"; "Pervasives"], "int_of_char", Pure;
+      ["OCaml"; "Pervasives"], "char_of_int", Pure;
+      ["OCaml"; "Pervasives"], "ignore", Pure;
       [], "fst", Pure;
       [], "snd", Pure;
       ["OCaml"; "List"], "app", Pure;
-      [], "invalid_arg", Arrow (descriptor "Invalid_argument", Pure);
-      [], "failwith", Arrow (descriptor "Failure", Pure);
-      [], "print_char", Arrow (descriptor "IO", Pure);
-      [], "print_string", Arrow (descriptor "IO", Pure);
-      [], "print_int", Arrow (descriptor "IO", Pure);
-      [], "print_endline", Arrow (descriptor "IO", Pure);
-      [], "print_newline", Arrow (descriptor "IO", Pure);
-      [], "prerr_char", Arrow (descriptor "IO", Pure);
-      [], "prerr_string", Arrow (descriptor "IO", Pure);
-      [], "prerr_int", Arrow (descriptor "IO", Pure);
-      [], "prerr_endline", Arrow (descriptor "IO", Pure);
-      [], "prerr_newline", Arrow (descriptor "IO", Pure);
-      [], "read_line", Arrow (descriptor "IO", Pure);
-      [], "read_int", Arrow (descriptor "IO", Pure);
-      [], "read_counter", Arrow (descriptor "Counter", Pure);
-      [], "not_terminated", Arrow (descriptor "NonTermination", Pure);
+      ["OCaml"; "Pervasives"], "invalid_arg", Arrow (d ["OCaml"] "Invalid_argument", Pure);
+      ["OCaml"; "Pervasives"], "failwith", Arrow (d ["OCaml"] "Failure", Pure);
+      ["OCaml"; "Pervasives"], "print_char", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "print_string", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "print_int", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "print_endline", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "print_newline", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "prerr_char", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "prerr_string", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "prerr_int", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "prerr_endline", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "prerr_newline", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "read_line", Arrow (d [] "IO", Pure);
+      ["OCaml"; "Pervasives"], "read_int", Arrow (d [] "IO", Pure);
+      [], "read_counter", Arrow (d [] "Counter", Pure);
+      [], "not_terminated", Arrow (d [] "NonTermination", Pure);
       ["List"], "fold_left", Pure;
       ["List"], "fold_right", Pure;
       ["List"], "map", Pure;

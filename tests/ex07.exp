@@ -151,14 +151,14 @@
 ((),
   Value (non_rec, s, [ ], [ ], Some Type (string/1)) =
     Apply
-      (15, Variable (15, append/1),
+      (15, Variable (15, String.append/1),
         [ Constant (15, String("ghj")); Constant (15, String("klm")) ]))
 
 17
 ((),
   Value (non_rec, c, [ ], [ ], Some Type (ascii/1)) =
     Apply
-      (17, Variable (17, char_of_int/1),
+      (17, Variable (17, OCaml.Pervasives.char_of_int/1),
         [
           Apply
             (17, Variable (17, Z.add/1),
@@ -167,7 +167,7 @@
                   (17,
                     Variable
                       (17,
-                        int_of_char/1),
+                        OCaml.Pervasives.int_of_char/1),
                     [
                       Constant
                         (17,
@@ -180,7 +180,8 @@
 19
 ((),
   Value (non_rec, x, [ ], [ ], Some Type (unit/1)) =
-    Apply (19, Variable (19, ignore/1), [ Constant (19, Int(23)) ]))
+    Apply
+      (19, Variable (19, OCaml.Pervasives.ignore/1), [ Constant (19, Int(23)) ]))
 
 21
 ((),
@@ -218,7 +219,7 @@
 ((),
   Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
-      (23, Variable (23, app/1),
+      (23, Variable (23, OCaml.List.app/1),
         [
           Constructor
             (23, cons/1, Constant (23, Int(1)),

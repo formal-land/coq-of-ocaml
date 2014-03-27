@@ -8,7 +8,7 @@
           (Constructor (cons/1, Any, xs), Variable (5, xs/0));
           (Constructor ([]/1),
             Apply
-              (6, Variable (6, failwith/1),
+              (6, Variable (6, OCaml.Pervasives.failwith/1),
                 [
                   Constant
                     (6,
@@ -42,7 +42,7 @@
                           (11,
                             Variable
                               (11,
-                                print_string/1),
+                                OCaml.Pervasives.print_string/1),
                             [
                               Variable
                                 (11,

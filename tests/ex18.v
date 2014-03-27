@@ -27,11 +27,11 @@ Definition read_s (_ : unit) : M [ s ] string :=
 Definition write_s (x : string) : M [ s ] unit :=
   fun s => (inl tt, (x, tt)).
 
-Definition fail {A B : Type} (x : B) : M [ s; Failure ] A :=
+Definition fail {A B : Type} (x : B) : M [ OCaml.Failure; s ] A :=
   match x with
   | _ =>
-    let! x_1 := lift [_;_] "10" (read_s tt) in
-    lift [_;_] "01" (failwith x_1)
+    let! x_1 := lift [_;_] "01" (read_s tt) in
+    lift [_;_] "10" (OCaml.Pervasives.failwith x_1)
   end.
 
 Definition reset {A : Type} (x : A) : M [ r ] unit :=

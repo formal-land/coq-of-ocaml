@@ -244,7 +244,7 @@
 (.,
   Value (non_rec, s, [ ], [ ], Some Type (string/1)) =
     Apply
-      ((15, Effect ([ ], .)), Variable ((15, Effect ([ ], .)), append/1),
+      ((15, Effect ([ ], .)), Variable ((15, Effect ([ ], .)), String.append/1),
         [
           Constant ((15, Effect ([ ], .)), String("ghj"));
           Constant ((15, Effect ([ ], .)), String("klm"))
@@ -254,7 +254,8 @@
 (.,
   Value (non_rec, c, [ ], [ ], Some Type (ascii/1)) =
     Apply
-      ((17, Effect ([ ], .)), Variable ((17, Effect ([ ], .)), char_of_int/1),
+      ((17, Effect ([ ], .)),
+        Variable ((17, Effect ([ ], .)), OCaml.Pervasives.char_of_int/1),
         [
           Apply
             ((17, Effect ([ ], .)),
@@ -272,7 +273,7 @@
                           ([
                           ],
                             .)),
-                        int_of_char/1),
+                        OCaml.Pervasives.int_of_char/1),
                     [
                       Constant
                         ((17,
@@ -290,7 +291,8 @@
 (.,
   Value (non_rec, x, [ ], [ ], Some Type (unit/1)) =
     Apply
-      ((19, Effect ([ ], .)), Variable ((19, Effect ([ ], .)), ignore/1),
+      ((19, Effect ([ ], .)),
+        Variable ((19, Effect ([ ], .)), OCaml.Pervasives.ignore/1),
         [ Constant ((19, Effect ([ ], .)), Int(23)) ]))
 
 21
@@ -355,7 +357,8 @@
 (.,
   Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
-      ((23, Effect ([ ], .)), Variable ((23, Effect ([ ], .)), app/1),
+      ((23, Effect ([ ], .)),
+        Variable ((23, Effect ([ ], .)), OCaml.List.app/1),
         [
           Constructor
             ((23, Effect ([ ], .)), cons/1,

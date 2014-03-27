@@ -51,9 +51,9 @@ let convert (x : t) : t =
     | "lsl" -> { path = ["Z"]; base = "shiftl" }
     | "lsr" -> { path = ["Z"]; base = "shiftr" }
     | "^" -> { path = ["String"]; base = "append" }
-    | "int_of_char" -> { path = ["OCaml"]; base = "int_of_char" }
-    | "char_of_int" -> { path = ["OCaml"]; base = "char_of_int" }
-    | "ignore" -> { path = []; base = "ignore" }
+    | "int_of_char" -> { path = ["OCaml"; "Pervasives"]; base = "int_of_char" }
+    | "char_of_int" -> { path = ["OCaml"; "Pervasives"]; base = "char_of_int" }
+    | "ignore" -> { path = ["OCaml"; "Pervasives"]; base = "ignore" }
     | "string_of_bool" -> { path = ["Pervasives"]; base = "string_of_bool" }
     | "bool_of_string" -> failwith "bool_of_string not handled."
     | "string_of_int" -> { path = ["Pervasives"]; base = "string_of_int" }
@@ -61,20 +61,20 @@ let convert (x : t) : t =
     | "fst" -> { path = []; base = "fst" }
     | "snd" -> { path = []; base = "snd" }
     | "@" -> { path = ["OCaml"; "List"]; base = "app" }
-    | "invalid_arg" -> { path = []; base = "invalid_arg" }
-    | "failwith" -> { path = []; base = "failwith" }
-    | "print_char" -> { path = []; base = "print_char" }
-    | "print_string" -> { path = []; base = "print_string" }
-    | "print_int" -> { path = []; base = "print_int" }
-    | "print_endline" -> { path = []; base = "print_endline" }
-    | "print_newline" -> { path = []; base = "print_newline" }
-    | "prerr_char" -> { path = []; base = "prerr_char" }
-    | "prerr_string" -> { path = []; base = "prerr_string" }
-    | "prerr_int" -> { path = []; base = "prerr_int" }
-    | "prerr_endline" -> { path = []; base = "prerr_endline" }
-    | "prerr_newline" -> { path = []; base = "prerr_newline" }
-    | "read_line" -> { path = []; base = "read_line" }
-    | "read_int" -> { path = []; base = "read_int" }
+    | "invalid_arg" -> { path = ["OCaml"; "Pervasives"]; base = "invalid_arg" }
+    | "failwith" -> { path = ["OCaml"; "Pervasives"]; base = "failwith" }
+    | "print_char" -> { path = ["OCaml"; "Pervasives"]; base = "print_char" }
+    | "print_string" -> { path = ["OCaml"; "Pervasives"]; base = "print_string" }
+    | "print_int" -> { path = ["OCaml"; "Pervasives"]; base = "print_int" }
+    | "print_endline" -> { path = ["OCaml"; "Pervasives"]; base = "print_endline" }
+    | "print_newline" -> { path = ["OCaml"; "Pervasives"]; base = "print_newline" }
+    | "prerr_char" -> { path = ["OCaml"; "Pervasives"]; base = "prerr_char" }
+    | "prerr_string" -> { path = ["OCaml"; "Pervasives"]; base = "prerr_string" }
+    | "prerr_int" -> { path = ["OCaml"; "Pervasives"]; base = "prerr_int" }
+    | "prerr_endline" -> { path = ["OCaml"; "Pervasives"]; base = "prerr_endline" }
+    | "prerr_newline" -> { path = ["OCaml"; "Pervasives"]; base = "prerr_newline" }
+    | "read_line" -> { path = ["OCaml"; "Pervasives"]; base = "read_line" }
+    | "read_int" -> { path = ["OCaml"; "Pervasives"]; base = "read_int" }
     | _ -> x)
   | { path = path; base = base } -> { path = path; base = Name.convert base }
 

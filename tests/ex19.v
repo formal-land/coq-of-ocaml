@@ -15,22 +15,22 @@ Definition x1 : Z :=
   | inr tt => 12
   end.
 
-Definition x2 {A B : Type} (x : B) : M [ Failure ] A :=
+Definition x2 {A B : Type} (x : B) : M [ OCaml.Failure ] A :=
   match x with
   | _ =>
     match unret (Exception.run 0 (raise_Error tt) tt) with
     | inl x => ret x
-    | inr tt => failwith "arg" % string
+    | inr tt => OCaml.Pervasives.failwith "arg" % string
     end
   end.
 
-Definition x3 (b : bool) : M [ Failure ] Z :=
+Definition x3 (b : bool) : M [ OCaml.Failure ] Z :=
   let! x :=
-    Exception.run 0
+    Exception.run 1
       (if b then
-        lift [_;_] "01" (failwith "arg" % string)
+        lift [_;_] "10" (OCaml.Pervasives.failwith "arg" % string)
       else
-        lift [_;_] "10" (raise_Error tt)) tt in
+        lift [_;_] "01" (raise_Error tt)) tt in
   match x with
   | inl x => ret x
   | inr tt => ret 12

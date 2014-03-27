@@ -3,10 +3,14 @@
   Value (non_rec, f, [ A; B; C ], [ (x, A) ], Some (C -> B)) =
     Sequence
       (4,
-        Apply (4, Variable (4, print_string/1), [ Constant (4, String("Hi")) ]),
+        Apply
+          (4, Variable (4, OCaml.Pervasives.print_string/1),
+            [ Constant (4, String("Hi")) ]),
         Function
           (5, y,
-            Apply (5, Variable (5, failwith/1), [ Constant (5, String("Bye")) ]))))
+            Apply
+              (5, Variable (5, OCaml.Pervasives.failwith/1),
+                [ Constant (5, String("Bye")) ]))))
 
 7
 ((),

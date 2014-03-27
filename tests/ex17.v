@@ -25,21 +25,23 @@ Module G.
 End G.
 
 Fixpoint h_rec {A B : Type} (counter : nat) (l : list B) :
-  M [ Outside; G.Inside; IO; NonTermination ] A :=
+  M [ IO; NonTermination; Outside; G.Inside ] A :=
   match counter with
-  | O => lift [_;_;_;_] "0001" (not_terminated tt)
+  | O => lift [_;_;_;_] "0100" (not_terminated tt)
   | S counter =>
     match l with
     | [] =>
-      lift [_;_;_;_] "1110"
-        (let! _ := lift [_;_;_] "001" (print_string "no tail" % string) in
-        lift [_;_;_] "110" (G.g false))
-    | cons x [] => lift [_;_;_;_] "0100" (G.raise_Inside (0, "gg" % string))
+      lift [_;_;_;_] "1011"
+        (let! _ :=
+          lift [_;_;_] "100" (OCaml.Pervasives.print_string "no tail" % string)
+          in
+        lift [_;_;_] "011" (G.g false))
+    | cons x [] => lift [_;_;_;_] "0001" (G.raise_Inside (0, "gg" % string))
     | cons _ xs => (h_rec counter) xs
     end
   end.
 
 Definition h {A B : Type} (l : list B) :
-  M [ Outside; G.Inside; Counter; IO; NonTermination ] A :=
-  let! x := lift [_;_;_;_;_] "00100" (read_counter tt) in
-  lift [_;_;_;_;_] "11011" (h_rec x l).
+  M [ Counter; IO; NonTermination; Outside; G.Inside ] A :=
+  let! x := lift [_;_;_;_;_] "10000" (read_counter tt) in
+  lift [_;_;_;_;_] "01111" (h_rec x l).

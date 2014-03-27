@@ -18,14 +18,16 @@ Definition n4 : Z := Z.lxor (Z.lor (Z.land 5 7) 3) 9.
 
 Definition n5 : Z := Z.add (Z.shiftl 156 4) (Z.shiftr 12 1).
 
-Definition s : string := append "ghj" % string "klm" % string.
+Definition s : string := String.append "ghj" % string "klm" % string.
 
-Definition c : ascii := char_of_int (Z.add (int_of_char "c" % char) 1).
+Definition c : ascii :=
+  OCaml.Pervasives.char_of_int
+    (Z.add (OCaml.Pervasives.int_of_char "c" % char) 1).
 
-Definition x : unit := ignore 23.
+Definition x : unit := OCaml.Pervasives.ignore 23.
 
 Definition p : Z := Z.add (fst (1, 2)) (snd (3, 4)).
 
-Definition l : list Z := app (cons 1 (cons 2 [])) (cons 3 []).
+Definition l : list Z := OCaml.List.app (cons 1 (cons 2 [])) (cons 3 []).
 
 Definition y : Z := apply (fun n => Z.add n 1) 12.

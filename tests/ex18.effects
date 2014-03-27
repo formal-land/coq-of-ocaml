@@ -50,24 +50,24 @@
 6 Reference (s, Type (string/1))
 
 8
-(. -[ s/0; Failure/1 ]-> .,
+(. -[ OCaml.Failure/1; s/0 ]-> .,
   Value (non_rec, fail, [ A; B ], [ (x, B) ], Some A) =
     Match
-      ((?, Effect ([ s/0; Failure/1 ], .)),
+      ((?, Effect ([ OCaml.Failure/1; s/0 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
         [
           (Any,
             Apply
-              ((8, Effect ([ s/0; Failure/1 ], .)),
+              ((8, Effect ([ OCaml.Failure/1; s/0 ], .)),
                 Variable
                   ((8,
                     Effect
                       ([ ],
                         .
                           -[
-                            Failure/1
+                            OCaml.Failure/1
                           ]-> .)),
-                    failwith/1),
+                    OCaml.Pervasives.failwith/1),
                 [
                   Apply
                     ((8,

@@ -25,6 +25,22 @@ let add_typ (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
 let add_descriptor (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
   { env with descriptors = Envi.add (PathName.of_name path base) () env.descriptors }
 
+let add_exception (path : Name.t list) (base : Name.t) (env : unit t) : unit t =
+  env
+  |> add_descriptor path base
+  |> add_var path ("raise_" ^ base) ()
+
+let add_exception_with_effects (path : Name.t list) (base : Name.t)
+  (loc : Loc.t) (env : Effect.Type.t t) : Effect.Type.t t =
+  let env = add_descriptor path base env in
+  let effect_typ =
+    Effect.Type.Arrow (
+      Effect.Descriptor.singleton
+        loc
+        (Envi.bound_name (PathName.of_name path base) env.descriptors),
+      Effect.Type.Pure) in
+  add_var path ("raise_" ^ base) effect_typ env
+
 let add_constructor (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
   { env with constructors = Envi.add (PathName.of_name path base) () env.constructors }
 

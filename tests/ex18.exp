@@ -33,7 +33,7 @@
         [
           (Any,
             Apply
-              (8, Variable (8, failwith/1),
+              (8, Variable (8, OCaml.Pervasives.failwith/1),
                 [
                   Apply
                     (8,

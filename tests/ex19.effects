@@ -18,14 +18,15 @@
         ]))
 
 9
-(. -[ Failure/1 ]-> .,
+(. -[ OCaml.Failure/1 ]-> .,
   Value (non_rec, x2, [ A; B ], [ (x, B) ], Some A) =
     Match
-      ((?, Effect ([ Failure/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+      ((?, Effect ([ OCaml.Failure/1 ], .)),
+        Variable ((?, Effect ([ ], .)), x/0),
         [
           (Any,
             Match
-              ((10, Effect ([ Failure/1 ], .)),
+              ((10, Effect ([ OCaml.Failure/1 ], .)),
                 Run
                   ((?, Effect ([ ], .)), Error/0, [ ],
                     Apply
@@ -67,7 +68,7 @@
                       ((11,
                         Effect
                           ([
-                            Failure/1
+                            OCaml.Failure/1
                           ],
                             .)),
                         Variable
@@ -77,10 +78,10 @@
                               ],
                                 .
                                   -[
-                                    Failure/1
+                                    OCaml.Failure/1
                                   ]->
                                   .)),
-                            failwith/1),
+                            OCaml.Pervasives.failwith/1),
                         [
                           Constant
                             ((11,
@@ -94,19 +95,20 @@
         ]))
 
 13
-(. -[ Failure/1 ]-> .,
+(. -[ OCaml.Failure/1 ]-> .,
   Value (non_rec, x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
     Match
-      ((14, Effect ([ Failure/1 ], .)),
+      ((14, Effect ([ OCaml.Failure/1 ], .)),
         Run
-          ((?, Effect ([ Failure/1 ], .)), Error/0, [ ],
+          ((?, Effect ([ OCaml.Failure/1 ], .)), Error/0, [ ],
             IfThenElse
-              ((14, Effect ([ Error/0; Failure/1 ], .)),
+              ((14, Effect ([ OCaml.Failure/1; Error/0 ], .)),
                 Variable ((14, Effect ([ ], .)), b/0),
                 Apply
-                  ((14, Effect ([ Failure/1 ], .)),
+                  ((14, Effect ([ OCaml.Failure/1 ], .)),
                     Variable
-                      ((14, Effect ([ ], . -[ Failure/1 ]-> .)), failwith/1),
+                      ((14, Effect ([ ], . -[ OCaml.Failure/1 ]-> .)),
+                        OCaml.Pervasives.failwith/1),
                     [ Constant ((14, Effect ([ ], .)), String("arg")) ]),
                 Apply
                   ((14, Effect ([ Error/0 ], .)),
