@@ -12,9 +12,54 @@ module Map = Map.Make (struct type t = t' let compare = compare end)
 let pp (x : t) : SmartPrint.t =
   !^ x
 
+let is_operator (s : string) : bool =
+  if s = "" then
+    failwith "Unexpected empty argument."
+  else
+    let c = Char.code s.[0] in
+    not (c = Char.code '_' ||
+      (Char.code 'a' <= c && c <= Char.code 'z') ||
+      (Char.code 'A' <= c && c <= Char.code 'Z') ||
+      (Char.code '0' <= c && c <= Char.code '9'))
+
+let escape_operator_character (c : char) : string =
+  match c with
+  | '=' -> "eq"
+  | '<' -> "lt"
+  | '>' -> "gt"
+  | '@' -> "at"
+  | '^' -> "caret"
+  | '|' -> "pipe"
+  | '&' -> "and"
+  | '+' -> "plus"
+  | '-' -> "minus"
+  | '*' -> "star"
+  | '/' -> "div"
+  | '$' -> "dollar"
+  | '%' -> "percent"
+  | '?' -> "question"
+  | '!' -> "exclamation"
+  | '~' -> "tilde"
+  | '.' -> "point"
+  | ':' -> "colon"
+  | _ -> failwith "Unexpected character for an operator."
+
+let escape_operator (s : string) : string =
+  let b = Buffer.create 0 in
+  s |> String.iter (fun c ->
+    Buffer.add_char b '_';
+    Buffer.add_string b (escape_operator_character c));
+  Buffer.contents b
+
+let convert (x : t) : t =
+  if is_operator x then
+    "op" ^ escape_operator x
+  else
+    x
+
 (** Import an OCaml identifier. *)
 let of_ident (i : Ident.t) : t =
-  i.Ident.name
+  convert i.Ident.name
 
 (** Lift a [string] to an identifier. *)
 let of_string (s : string) : t =

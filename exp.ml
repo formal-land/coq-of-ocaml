@@ -270,6 +270,7 @@ and open_cases (env : unit FullEnvi.t) (cases : case list)
     (p, of_expression env e)) in
   let bound_x = Envi.bound_name (PathName.of_name [] x) env_vars in
   (x, Match (Loc.Unknown, Variable (Loc.Unknown, bound_x), cases))
+
 and import_let_fun (env : unit FullEnvi.t) (rec_flag : Asttypes.rec_flag)
   (pattern : pattern) (e : expression)
   : unit FullEnvi.t * Recursivity.t * Pattern.t * Name.t list *

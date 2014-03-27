@@ -16,6 +16,7 @@ let convert (x : t) : t =
   | { path = []; base = "()" } -> { path = []; base = "tt" }
   | { path = []; base = "int" } -> { path = []; base = "Z" }
   | { path = []; base = "char" } -> { path = []; base = "ascii" }
+  | { path = []; base = "[]" } -> x (* explicit case so it is not considered as an operator *)
   | { path = []; base = "::" } -> { path = []; base = "cons" }
   | { path = ["Pervasives"]; base = base } ->
     (match base with
@@ -75,7 +76,7 @@ let convert (x : t) : t =
     | "read_line" -> { path = []; base = "read_line" }
     | "read_int" -> { path = []; base = "read_int" }
     | _ -> x)
-  | _ -> x
+  | { path = path; base = base } -> { path = path; base = Name.convert base }
 
 (** Pretty-print a global name. *)
 let pp (x : t) : SmartPrint.t =
@@ -83,13 +84,13 @@ let pp (x : t) : SmartPrint.t =
 
 (** Lift a local name to a global name. *)
 let of_name (path : Name.t list) (base : Name.t) : t =
-  convert { path = path; base = base }
+  { path = path; base = base }
 
 (** Import an OCaml [Longident.t]. *)
 let of_longident (longident : Longident.t) : t =
   match List.rev (Longident.flatten longident) with
   | [] -> failwith "Expected a non empty list."
-  | x :: xs -> of_name (List.rev xs) x
+  | x :: xs -> convert (of_name (List.rev xs) x)
 
 (** Import an OCaml location. *)
 let of_loc (loc : Longident.t loc) : t = 
@@ -105,4 +106,4 @@ let of_path (p : Path.t) : t =
       (base :: path, s)
     | Path.Papply _ -> failwith "application of paths not handled" in
   let (path, base) = aux p in
-  of_name (List.rev path) base
+  convert (of_name (List.rev path) base)
