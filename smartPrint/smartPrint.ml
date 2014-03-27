@@ -253,13 +253,13 @@ type t =
 
 let empty : t = Empty
 
-let string (s : string) : t =
+let pp_string (s : string) : t =
   if String.length s = 0 then (* TODO: Compare with "" *)
     empty
   else
     Leaf (Atom.String (s, 0, String.length s))
 
-let (!^) = string
+let (!^) = pp_string
 
 let sub_string (s : string) (o : int) (l : int) : t =
   if l = 0 then
