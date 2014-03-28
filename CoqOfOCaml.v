@@ -299,6 +299,21 @@ Module OCaml.
   Definition raise_Not_found {A : Type} (x : unit)
     : M [ Not_found ] A :=
     fun s => (inr (inl x), s).
+
+  Definition Out_of_memory := Effect.make unit unit.
+  Definition raise_Out_of_memory {A : Type} (x : unit)
+    : M [ Out_of_memory ] A :=
+    fun s => (inr (inl x), s).
+
+  Definition Stack_overflow := Effect.make unit unit.
+  Definition raise_Stack_overflow {A : Type} (x : unit)
+    : M [ Stack_overflow ] A :=
+    fun s => (inr (inl x), s).
+
+  Definition Sys_error := Effect.make unit string.
+  Definition raise_Sys_error {A : Type} (x : string)
+    : M [ Sys_error ] A :=
+    fun s => (inr (inl x), s).
   
   Definition End_of_file := Effect.make unit unit.
   Definition raise_End_of_file {A : Type} (x : unit)
@@ -308,6 +323,16 @@ Module OCaml.
   Definition Division_by_zero := Effect.make unit unit.
   Definition raise_Division_by_zero {A : Type} (x : unit)
     : M [ Division_by_zero ] A :=
+    fun s => (inr (inl x), s).
+
+  Definition Sys_blocked_io := Effect.make unit unit.
+  Definition raise_Sys_blocked_io {A : Type} (x : unit)
+    : M [ Sys_blocked_io ] A :=
+    fun s => (inr (inl x), s).
+
+  Definition Undefined_recursive_module := Effect.make unit (string * Z * Z).
+  Definition raise_Undefined_recursive_module {A : Type} (x : string * Z * Z)
+    : M [ Undefined_recursive_module ] A :=
     fun s => (inr (inl x), s).
   
   (** OCaml functions are converted to their Coq's counter parts when it is

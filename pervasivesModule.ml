@@ -44,8 +44,13 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_exn ["OCaml"] "Invalid_argument"
   |> add_exn ["OCaml"] "Failure"
   |> add_exn ["OCaml"] "Not_found"
+  |> add_exn ["OCaml"] "Out_of_memory"
+  |> add_exn ["OCaml"] "Stack_overflow"
+  |> add_exn ["OCaml"] "Sys_error"
   |> add_exn ["OCaml"] "End_of_file"
   |> add_exn ["OCaml"] "Division_by_zero"
+  |> add_exn ["OCaml"] "Sys_blocked_io"
+  |> add_exn ["OCaml"] "Undefined_recursive_module"
 
   (* Pervasives *)
   (* Exceptions *)

@@ -58,6 +58,21 @@ Definition e_not_found {A B : Type} (x : B) : M [ OCaml.Not_found ] A :=
   | _ => OCaml.raise_Not_found tt
   end.
 
+Definition e_out_of_mem {A B : Type} (x : B) : M [ OCaml.Out_of_memory ] A :=
+  match x with
+  | _ => OCaml.raise_Out_of_memory tt
+  end.
+
+Definition e_overflow {A B : Type} (x : B) : M [ OCaml.Stack_overflow ] A :=
+  match x with
+  | _ => OCaml.raise_Stack_overflow tt
+  end.
+
+Definition e_sys_err {A B : Type} (x : B) : M [ OCaml.Sys_error ] A :=
+  match x with
+  | _ => OCaml.raise_Sys_error ("error" % string)
+  end.
+
 Definition e_EOF {A B : Type} (x : B) : M [ OCaml.End_of_file ] A :=
   match x with
   | _ => OCaml.raise_End_of_file tt
@@ -66,4 +81,15 @@ Definition e_EOF {A B : Type} (x : B) : M [ OCaml.End_of_file ] A :=
 Definition e_div {A B : Type} (x : B) : M [ OCaml.Division_by_zero ] A :=
   match x with
   | _ => OCaml.raise_Division_by_zero tt
+  end.
+
+Definition e_sys_blocked {A B : Type} (x : B) : M [ OCaml.Sys_blocked_io ] A :=
+  match x with
+  | _ => OCaml.raise_Sys_blocked_io tt
+  end.
+
+Definition e_rec_module {A B : Type} (x : B) :
+  M [ OCaml.Undefined_recursive_module ] A :=
+  match x with
+  | _ => OCaml.raise_Undefined_recursive_module (("error" % string, 1, 2))
   end.

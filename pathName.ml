@@ -35,8 +35,13 @@ let convert (x : t) : t =
   | { path = []; base = "Invalid_argument" } -> { path = ["OCaml"]; base = "Invalid_argument" }
   | { path = []; base = "Failure" } -> { path = ["OCaml"]; base = "Failure" }
   | { path = []; base = "Not_found" } -> { path = ["OCaml"]; base = "Not_found" }
+  | { path = []; base = "Out_of_memory" } -> { path = ["OCaml"]; base = "Out_of_memory" }
+  | { path = []; base = "Stack_overflow" } -> { path = ["OCaml"]; base = "Stack_overflow" }
+  | { path = []; base = "Sys_error" } -> { path = ["OCaml"]; base = "Sys_error" }
   | { path = []; base = "End_of_file" } -> { path = ["OCaml"]; base = "End_of_file" }
   | { path = []; base = "Division_by_zero" } -> { path = ["OCaml"]; base = "Division_by_zero" }
+  | { path = []; base = "Sys_blocked_io" } -> { path = ["OCaml"]; base = "Sys_blocked_io" }
+  | { path = []; base = "Undefined_recursive_module" } -> { path = ["OCaml"]; base = "Undefined_recursive_module" }
 
   (* Pervasives *)
   (* Exceptions *)
