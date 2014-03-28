@@ -59,10 +59,32 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_exn ["OCaml"; "Pervasives"] "Exit"
   |> open_module
   (* Comparisons *)
+  |> add_var [] "equiv_decb" Pure
+  |> add_var [] "nequiv_decb" Pure
   (* Boolean operations *)
+  |> add_var [] "negb" Pure
+  |> add_var [] "andb" Pure
+  |> add_var [] "orb" Pure
   (* Composition operators *)
+  |> add_var ["OCaml"; "Pervasives"] "reverse_apply" Pure
+  |> add_var [] "apply" Pure
   (* Integer arithmetic *)
+  |> add_var ["Z"] "opp" Pure
+  |> add_var [] "" Pure
+  |> add_var ["Z"] "succ" Pure
+  |> add_var ["Z"] "pred" Pure
+  |> add_var ["Z"] "add" Pure
+  |> add_var ["Z"] "sub" Pure
+  |> add_var ["Z"] "mul" Pure
+  |> add_var ["Z"] "div" Pure
+  |> add_var ["Z"] "modulo" Pure
+  |> add_var ["Z"] "abs" Pure
   (* Bitwise operations *)
+  |> add_var ["Z"] "land" Pure
+  |> add_var ["Z"] "lor" Pure
+  |> add_var ["Z"] "lxor" Pure
+  |> add_var ["Z"] "shiftl" Pure
+  |> add_var ["Z"] "shiftr" Pure
   (* Floating-point arithmetic *)
   (* String operations *)
   (* Character operations *)

@@ -50,10 +50,34 @@ let convert (x : t) : t =
   | { path = []; base = "Exit" } | { path = ["Pervasives"]; base = "Exit" } ->
     { path = ["OCaml"; "Pervasives"]; base = "Exit" }
   (* Comparisons *)
+  | { path = ["Pervasives"]; base = "=" } -> { path = []; base = "equiv_decb" }
+  | { path = ["Pervasives"]; base = "<>" } -> { path = []; base = "nequiv_decb" }
   (* Boolean operations *)
+  | { path = ["Pervasives"]; base = "not" } -> { path = []; base = "negb" }
+  | { path = ["Pervasives"]; base = "&&" } -> { path = []; base = "andb" }
+  | { path = ["Pervasives"]; base = "&" } -> { path = []; base = "andb" }
+  | { path = ["Pervasives"]; base = "||" } -> { path = []; base = "orb" }
+  | { path = ["Pervasives"]; base = "or" } -> { path = []; base = "orb" }
   (* Composition operators *)
+  | { path = ["Pervasives"]; base = "|>" } -> { path = ["OCaml"; "Pervasives"]; base = "reverse_apply" }
+  | { path = ["Pervasives"]; base = "@@" } -> { path = []; base = "apply" }
   (* Integer arithmetic *)
+  | { path = ["Pervasives"]; base = "~-" } -> { path = ["Z"]; base = "opp" }
+  | { path = ["Pervasives"]; base = "~+" } -> { path = []; base = "" }
+  | { path = ["Pervasives"]; base = "succ" } -> { path = ["Z"]; base = "succ" }
+  | { path = ["Pervasives"]; base = "pred" } -> { path = ["Z"]; base = "pred" }
+  | { path = ["Pervasives"]; base = "+" } -> { path = ["Z"]; base = "add" }
+  | { path = ["Pervasives"]; base = "-" } -> { path = ["Z"]; base = "sub" }
+  | { path = ["Pervasives"]; base = "*" } -> { path = ["Z"]; base = "mul" }
+  | { path = ["Pervasives"]; base = "/" } -> { path = ["Z"]; base = "div" }
+  | { path = ["Pervasives"]; base = "mod" } -> { path = ["Z"]; base = "modulo" }
+  | { path = ["Pervasives"]; base = "abs" } -> { path = ["Z"]; base = "abs" }
   (* Bitwise operations *)
+  | { path = ["Pervasives"]; base = "land" } -> { path = ["Z"]; base = "land" }
+  | { path = ["Pervasives"]; base = "lor" } -> { path = ["Z"]; base = "lor" }
+  | { path = ["Pervasives"]; base = "lxor" } -> { path = ["Z"]; base = "lxor" }
+  | { path = ["Pervasives"]; base = "lsl" } -> { path = ["Z"]; base = "shiftl" }
+  | { path = ["Pervasives"]; base = "lsr" } -> { path = ["Z"]; base = "shiftr" }
   (* Floating-point arithmetic *)
   (* String operations *)
   (* Character operations *)

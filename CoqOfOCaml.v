@@ -205,7 +205,7 @@ Module Exception.
       | S n => e :: remove_nth es n
       end
     end.
-  
+
   Definition nth_is_stateless (es : list Effect.t) (n : nat) : Type :=
     match List.nth_error es n with
     | Some e => Effect.S e
