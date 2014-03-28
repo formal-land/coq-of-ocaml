@@ -49,10 +49,32 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
 
   (* Pervasives *)
   (* Exceptions *)
-  |> add_var ["OCaml"] "invalid_arg" (Arrow (d [["OCaml"], "Invalid_argument"], Pure))
-  |> add_var ["OCaml"] "failwith" (Arrow (d [["OCaml"], "Failure"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "invalid_arg" (Arrow (d [["OCaml"], "Invalid_argument"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "failwith" (Arrow (d [["OCaml"], "Failure"], Pure))
   |> add_exn ["OCaml"; "Pervasives"] "Exit"
   |> open_module
+  (* Comparisons *)
+  (* Boolean operations *)
+  (* Composition operators *)
+  (* Integer arithmetic *)
+  (* Bitwise operations *)
+  (* Floating-point arithmetic *)
+  (* String operations *)
+  (* Character operations *)
+  (* Unit operations *)
+  (* String conversion functions *)
+  (* Pair operations *)
+  (* List operations *)
+  (* Input/output *)
+  (* Output functions on standard output *)
+  (* Output functions on standard error *)
+  (* Input functions on standard input *)
+  (* General output functions *)
+  (* General input functions *)
+  (* Operations on large files *)
+  (* References *)
+  (* Operations on format strings *)
+  (* Program termination *)
 
 (*let env_typs : unit Envi.t =
   Envi.open_module @@

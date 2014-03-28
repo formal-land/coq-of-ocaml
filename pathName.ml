@@ -37,6 +37,35 @@ let convert (x : t) : t =
   | { path = []; base = "Not_found" } -> { path = ["OCaml"]; base = "Not_found" }
   | { path = []; base = "End_of_file" } -> { path = ["OCaml"]; base = "End_of_file" }
   | { path = []; base = "Division_by_zero" } -> { path = ["OCaml"]; base = "Division_by_zero" }
+
+  (* Pervasives *)
+  (* Exceptions *)
+  | { path = ["Pervasives"]; base = "invalid_arg" } -> { path = ["OCaml"; "Pervasives"]; base = "invalid_arg" }
+  | { path = ["Pervasives"]; base = "failwith" } -> { path = ["OCaml"; "Pervasives"]; base = "failwith" }
+  | { path = []; base = "Exit" } | { path = ["Pervasives"]; base = "Exit" } ->
+    { path = ["OCaml"; "Pervasives"]; base = "Exit" }
+  (* Comparisons *)
+  (* Boolean operations *)
+  (* Composition operators *)
+  (* Integer arithmetic *)
+  (* Bitwise operations *)
+  (* Floating-point arithmetic *)
+  (* String operations *)
+  (* Character operations *)
+  (* Unit operations *)
+  (* String conversion functions *)
+  (* Pair operations *)
+  (* List operations *)
+  (* Input/output *)
+  (* Output functions on standard output *)
+  (* Output functions on standard error *)
+  (* Input functions on standard input *)
+  (* General output functions *)
+  (* General input functions *)
+  (* Operations on large files *)
+  (* References *)
+  (* Operations on format strings *)
+  (* Program termination *)
   (*| { path = ["Pervasives"]; base = base } ->
     (match base with
     | "=" -> { path = []; base = "equiv_decb" }
