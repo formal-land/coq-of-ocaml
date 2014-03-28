@@ -34,7 +34,9 @@ let rec to_coq (c : t) : SmartPrint.t =
   | Nat n -> nest (to_coq (Int n) ^^ !^ "%" ^^ !^ "nat")
   | Char c ->
     let s =
-      if Char.code c < 32 then
+      if Char.code c < 10 then
+        "00" ^ string_of_int (Char.code c)
+      else if Char.code c < 32 then
         "0" ^ string_of_int (Char.code c)
       else if c = '"' then
         "\"\""

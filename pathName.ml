@@ -13,12 +13,31 @@ module Map = Map.Make (struct type t = t' let compare = compare end)
 (* Convert an identifier from OCaml to its Coq's equivalent. *)
 let convert (x : t) : t =
   match x with
-  | { path = []; base = "()" } -> { path = []; base = "tt" }
+  (* The core library *)
+  (* Built-in types *)
   | { path = []; base = "int" } -> { path = []; base = "Z" }
   | { path = []; base = "char" } -> { path = []; base = "ascii" }
-  | { path = []; base = "[]" } -> x (* explicit case so it is not considered as an operator *)
+  | { path = []; base = "string" } -> { path = []; base = "string" }
+  | { path = []; base = "bool" } -> { path = []; base = "bool" }
+  | { path = []; base = "false" } -> { path = []; base = "false" }
+  | { path = []; base = "true" } -> { path = []; base = "true" }
+  | { path = []; base = "unit" } -> { path = []; base = "unit" }
+  | { path = []; base = "()" } -> { path = []; base = "tt" }
+  | { path = []; base = "list" } -> { path = []; base = "list" }
+  | { path = []; base = "[]" } -> { path = []; base = "[]" }
   | { path = []; base = "::" } -> { path = []; base = "cons" }
-  | { path = ["Pervasives"]; base = base } ->
+  | { path = []; base = "option" } -> { path = []; base = "option" }
+  | { path = []; base = "None" } -> { path = []; base = "None" }
+  | { path = []; base = "Some" } -> { path = []; base = "Some" }
+  (* Predefined exceptions *)
+  | { path = []; base = "Match_failure" } -> { path = ["OCaml"]; base = "Match_failure" }
+  | { path = []; base = "Assert_failure" } -> { path = ["OCaml"]; base = "Assert_failure" }
+  | { path = []; base = "Invalid_argument" } -> { path = ["OCaml"]; base = "Invalid_argument" }
+  | { path = []; base = "Failure" } -> { path = ["OCaml"]; base = "Failure" }
+  | { path = []; base = "Not_found" } -> { path = ["OCaml"]; base = "Not_found" }
+  | { path = []; base = "End_of_file" } -> { path = ["OCaml"]; base = "End_of_file" }
+  | { path = []; base = "Division_by_zero" } -> { path = ["OCaml"]; base = "Division_by_zero" }
+  (*| { path = ["Pervasives"]; base = base } ->
     (match base with
     | "=" -> { path = []; base = "equiv_decb" }
     | "<>" -> { path = []; base = "nequiv_decb" }
@@ -75,7 +94,7 @@ let convert (x : t) : t =
     | "prerr_newline" -> { path = ["OCaml"; "Pervasives"]; base = "prerr_newline" }
     | "read_line" -> { path = ["OCaml"; "Pervasives"]; base = "read_line" }
     | "read_int" -> { path = ["OCaml"; "Pervasives"]; base = "read_int" }
-    | _ -> x)
+    | _ -> x)*)
   | { path = path; base = base } -> { path = path; base = Name.convert base }
 
 (** Pretty-print a global name. *)

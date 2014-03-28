@@ -1,4 +1,4 @@
-(** Pervasives *)
+(** Basic functions from Pervasives *)
 
 let b = (false = true) || (() <> ()) && not true
 

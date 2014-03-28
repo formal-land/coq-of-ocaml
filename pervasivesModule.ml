@@ -3,7 +3,7 @@ open FullEnvi
 open Effect.Type
 open SmartPrint
 
-let env' : Effect.Type.t FullEnvi.t =
+let env_with_effects : Effect.Type.t FullEnvi.t =
   let descriptor (path, base) =
     let x = PathName.of_name path base in
     Effect.Descriptor.singleton (Loc.Ether x)
@@ -16,6 +16,7 @@ let env' : Effect.Type.t FullEnvi.t =
   FullEnvi.empty Effect.Type.close_lift
   (* Values specific to the translation to Coq *)
   |> add_typ [] "nat"
+  |> add_constructor [] "S"
   |> add_typ [] "sum"
   |> add_descriptor [] "IO"
   |> add_descriptor [] "Counter"
@@ -27,9 +28,16 @@ let env' : Effect.Type.t FullEnvi.t =
   |> add_typ [] "ascii"
   |> add_typ [] "string"
   |> add_typ [] "bool"
+  |> add_constructor [] "false"
+  |> add_constructor [] "true"
   |> add_typ [] "unit"
+  |> add_constructor [] "tt"
   |> add_typ [] "list"
+  |> add_constructor [] "[]"
+  |> add_constructor [] "cons"
   |> add_typ [] "option"
+  |> add_constructor [] "None"
+  |> add_constructor [] "Some"
   (* Predefined exceptions *)
   |> add_exn ["OCaml"] "Match_failure"
   |> add_exn ["OCaml"] "Assert_failure"
@@ -46,7 +54,7 @@ let env' : Effect.Type.t FullEnvi.t =
   |> add_exn ["OCaml"; "Pervasives"] "Exit"
   |> open_module
 
-let env_typs : unit Envi.t =
+(*let env_typs : unit Envi.t =
   Envi.open_module @@
   List.fold_left (fun env_typs (path, base) ->
     Envi.add (PathName.of_name path base) () env_typs)
@@ -173,9 +181,9 @@ let env_with_effects : Effect.Type.t FullEnvi.t = {
   descriptors = env_descriptors;
   constructors = env_constructors;
   fields = env_fields
-}
+}*)
 
 let env : unit FullEnvi.t =
   { env_with_effects with
-    FullEnvi.vars = Envi.map env_effects (fun _ -> ());
+    vars = Envi.map env_with_effects.vars (fun _ -> ());
     close_lift_vars = (fun _ _ -> ()) }
