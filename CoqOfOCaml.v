@@ -402,6 +402,9 @@ Module OCaml.
     (** * Pair operations *)
     
     (** * List operations *)
+    (** The concatenation of lists with an implicit parameter. *)
+    Definition app {A : Type} (l1 l2 : list A) : list A :=
+      app l1 l2.
     
     (** * Input/output *)
     (* TODO: add channels. *)
@@ -477,12 +480,6 @@ Module OCaml.
     (** * Program termination *)
     (* TODO *)
   End Pervasives.
-
-  Module List.
-    (** The concatenation of lists with an implicit parameter. *)
-    Definition app {A : Type} (l1 l2 : list A) : list A :=
-      app l1 l2.
-  End List.
 
   Module String.
     Definition length (s : string) : Z :=

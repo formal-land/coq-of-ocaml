@@ -87,15 +87,38 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_var ["Z"] "shiftr" Pure
   (* Floating-point arithmetic *)
   (* String operations *)
+  |> add_var ["String"] "append" Pure
   (* Character operations *)
+  |> add_var ["OCaml"; "Pervasives"] "int_of_char" Pure
+  |> add_var ["OCaml"; "Pervasives"] "char_of_int" Pure
   (* Unit operations *)
+  |> add_var ["OCaml"; "Pervasives"] "ignore" Pure
   (* String conversion functions *)
+  |> add_var ["OCaml"; "Pervasives"] "string_of_bool" Pure
+  |> add_var ["OCaml"; "Pervasives"] "bool_of_string" Pure
+  |> add_var ["OCaml"; "Pervasives"] "string_of_int" Pure
+  |> add_var ["OCaml"; "Pervasives"] "int_of_string" Pure
   (* Pair operations *)
+  |> add_var [] "fst" Pure
+  |> add_var [] "snd" Pure
   (* List operations *)
+  |> add_var ["OCaml"; "Pervasives"] "app" Pure
   (* Input/output *)
   (* Output functions on standard output *)
+  |> add_var ["OCaml"; "Pervasives"] "print_char" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "print_string" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "print_int" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "print_endline" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "print_newline" (Arrow (d [[], "IO"], Pure))
   (* Output functions on standard error *)
+  |> add_var ["OCaml"; "Pervasives"] "prerr_char" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "prerr_string" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "prerr_int" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "prerr_endline" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "prerr_newline" (Arrow (d [[], "IO"], Pure))
   (* Input functions on standard input *)
+  |> add_var ["OCaml"; "Pervasives"] "read_line" (Arrow (d [[], "IO"], Pure))
+  |> add_var ["OCaml"; "Pervasives"] "read_int" (Arrow (d [[], "IO"], Pure))
   (* General output functions *)
   (* General input functions *)
   (* Operations on large files *)

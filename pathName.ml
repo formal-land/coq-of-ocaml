@@ -80,15 +80,38 @@ let convert (x : t) : t =
   | { path = ["Pervasives"]; base = "lsr" } -> { path = ["Z"]; base = "shiftr" }
   (* Floating-point arithmetic *)
   (* String operations *)
+  | { path = ["Pervasives"]; base = "^" } -> { path = ["String"]; base = "append" }
   (* Character operations *)
+  | { path = ["Pervasives"]; base = "int_of_char" } -> { path = ["OCaml"; "Pervasives"]; base = "int_of_char" }
+  | { path = ["Pervasives"]; base = "char_of_int" } -> { path = ["OCaml"; "Pervasives"]; base = "char_of_int" }
   (* Unit operations *)
+  | { path = ["Pervasives"]; base = "ignore" } -> { path = ["OCaml"; "Pervasives"]; base = "ignore" }
   (* String conversion functions *)
+  | { path = ["Pervasives"]; base = "string_of_bool" } -> { path = ["OCaml"; "Pervasives"]; base = "string_of_bool" }
+  | { path = ["Pervasives"]; base = "bool_of_string" } -> { path = ["OCaml"; "Pervasives"]; base = "bool_of_string" }
+  | { path = ["Pervasives"]; base = "string_of_int" } -> { path = ["OCaml"; "Pervasives"]; base = "string_of_int" }
+  | { path = ["Pervasives"]; base = "int_of_string" } -> { path = ["OCaml"; "Pervasives"]; base = "int_of_string" }
   (* Pair operations *)
+  | { path = ["Pervasives"]; base = "fst" } -> { path = []; base = "fst" }
+  | { path = ["Pervasives"]; base = "snd" } -> { path = []; base = "snd" }
   (* List operations *)
+  | { path = ["Pervasives"]; base = "@" } -> { path = ["OCaml"; "Pervasives"]; base = "app" }
   (* Input/output *)
   (* Output functions on standard output *)
+  | { path = ["Pervasives"]; base = "print_char" } -> { path = ["OCaml"; "Pervasives"]; base = "print_char" }
+  | { path = ["Pervasives"]; base = "print_string" } -> { path = ["OCaml"; "Pervasives"]; base = "print_string" }
+  | { path = ["Pervasives"]; base = "print_int" } -> { path = ["OCaml"; "Pervasives"]; base = "print_int" }
+  | { path = ["Pervasives"]; base = "print_endline" } -> { path = ["OCaml"; "Pervasives"]; base = "print_endline" }
+  | { path = ["Pervasives"]; base = "print_newline" } -> { path = ["OCaml"; "Pervasives"]; base = "print_newline" }
   (* Output functions on standard error *)
+  | { path = ["Pervasives"]; base = "prerr_char" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_char" }
+  | { path = ["Pervasives"]; base = "prerr_string" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_string" }
+  | { path = ["Pervasives"]; base = "prerr_int" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_int" }
+  | { path = ["Pervasives"]; base = "prerr_endline" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_endline" }
+  | { path = ["Pervasives"]; base = "prerr_newline" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_newline" }
   (* Input functions on standard input *)
+  | { path = ["Pervasives"]; base = "read_line" } -> { path = ["OCaml"; "Pervasives"]; base = "read_line" }
+  | { path = ["Pervasives"]; base = "read_int" } -> { path = ["OCaml"; "Pervasives"]; base = "read_int" }
   (* General output functions *)
   (* General input functions *)
   (* Operations on large files *)
