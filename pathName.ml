@@ -13,6 +13,8 @@ module Map = Map.Make (struct type t = t' let compare = compare end)
 (* Convert an identifier from OCaml to its Coq's equivalent. *)
 let convert (x : t) : t =
   match x with
+  | { path = ["Pervasives"]; base = "!" } -> { path = ["Pervasives"]; base = "!" }
+  | { path = ["Pervasives"]; base = ":=" } -> { path = ["Pervasives"]; base = ":=" }
   (* The core library *)
   (* Built-in types *)
   | { path = []; base = "int" } -> { path = []; base = "Z" }

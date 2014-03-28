@@ -273,7 +273,16 @@ Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
 
 (* TODO: add floats, add the different integer types (int32, int64, ...). *)
 Module OCaml.
-  Instance Z_eqdec : EqDec (A := Z) _ := Z.eq_dec.
+  Class OrderDec {A eqA R} `(PartialOrder A eqA R) := {
+    compare : A -> A -> comparison;
+    compare_is_sound : forall (x y : A),
+      match compare x y with
+      | Eq => eqA x y
+      | Lt => R x y
+      | Gt => R y x
+      end}.
+  
+  Instance Z_eqdec : EqDec (eq_setoid Z) := Z.eq_dec.
   
   Definition Match_failure := Effect.make unit (string * Z * Z).
    Definition raise_Match_failure {A : Type} (x : string * Z * Z)

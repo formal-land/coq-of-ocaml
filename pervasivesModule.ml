@@ -16,11 +16,16 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   FullEnvi.empty Effect.Type.close_lift
   (* Values specific to the translation to Coq *)
   |> add_typ [] "nat"
+  |> add_constructor [] "O"
   |> add_constructor [] "S"
   |> add_typ [] "sum"
+  |> add_constructor [] "inl"
+  |> add_constructor [] "inr"
   |> add_descriptor [] "IO"
   |> add_descriptor [] "Counter"
+  |> add_var [] "read_counter" (Arrow (d [[], "Counter"], Pure))
   |> add_descriptor [] "NonTermination"
+  |> add_var [] "not_terminated" (Arrow (d [[], "NonTermination"], Pure))
 
   (* The core library *)
   (* Built-in types *)
