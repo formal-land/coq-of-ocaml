@@ -20,10 +20,10 @@ Fixpoint member_rec (counter : nat) (x : Z) (s : set) :
     match s with
     | Empty => ret false
     | Node s1 y s2 =>
-      if Z.ltb x y then
+      if OCaml.Pervasives.lt x y then
         (member_rec counter) x s1
       else
-        if Z.ltb y x then
+        if OCaml.Pervasives.lt y x then
           (member_rec counter) x s2
         else
           ret true
@@ -42,11 +42,11 @@ Fixpoint insert_rec (counter : nat) (x : Z) (s : set) : M [ NonTermination ] set
     match s with
     | Empty => ret (Node Empty x Empty)
     | Node s1 y s2 =>
-      if Z.ltb x y then
+      if OCaml.Pervasives.lt x y then
         let! x_1 := (insert_rec counter) x s1 in
         ret (Node x_1 y s2)
       else
-        if Z.ltb y x then
+        if OCaml.Pervasives.lt y x then
           let! x_1 := (insert_rec counter) x s2 in
           ret (Node s1 y x_1)
         else

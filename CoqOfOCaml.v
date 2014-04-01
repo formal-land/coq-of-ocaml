@@ -273,16 +273,16 @@ Definition not_terminated {A : Type} (_ : unit) : M [NonTermination] A :=
 
 (* TODO: add floats, add the different integer types (int32, int64, ...). *)
 Module OCaml.
-  Class OrderDec {A eqA R} `(PartialOrder A eqA R) := {
+  Class OrderDec {A R} `(StrictOrder A R) := {
     compare : A -> A -> comparison;
-    compare_is_sound : forall (x y : A),
-      match compare x y with
-      | Eq => eqA x y
-      | Lt => R x y
-      | Gt => R y x
-      end}.
+    compare_is_sound : forall x y,
+      CompareSpec (x = y) (R x y) (R y x) (compare x y) }.
   
-  Instance Z_eqdec : EqDec (eq_setoid Z) := Z.eq_dec.
+  Instance Z_eq_dec : EqDec (eq_setoid Z) := Z.eq_dec.
+  
+  Instance Z_order_dec : OrderDec Z.lt_strorder := {|
+    compare := Z.compare;
+    compare_is_sound := Z.compare_spec |}.
   
   Definition Match_failure := Effect.make unit (string * Z * Z).
    Definition raise_Match_failure {A : Type} (x : string * Z * Z)
@@ -361,6 +361,54 @@ Module OCaml.
       fun s => (inr (inl x), s).
     
     (** * Comparisons *)
+    Definition lt {A : Type} {R} `{OrderDec A R} (x y : A) : bool :=
+      match compare x y with
+      | Eq => false
+      | Lt => true
+      | Gt => false
+      end.
+    
+    Definition gt {A : Type} {R} `{OrderDec A R} (x y : A) : bool :=
+      match compare x y with
+      | Eq => false
+      | Lt => false
+      | Gt => true
+      end.
+    
+    Definition le {A : Type} {R} `{OrderDec A R} (x y : A) : bool :=
+      match compare x y with
+      | Eq => true
+      | Lt => true
+      | Gt => false
+      end.
+    
+    Definition ge {A : Type} {R} `{OrderDec A R} (x y : A) : bool :=
+      match compare x y with
+      | Eq => true
+      | Lt => false
+      | Gt => true
+      end.
+    
+    Definition min {A : Type} {R} `{OrderDec A R} (x y : A) : A :=
+      match compare x y with
+      | Eq => x
+      | Lt => x
+      | Gt => y
+      end.
+    
+    Definition max {A : Type} {R} `{OrderDec A R} (x y : A) : A :=
+      match compare x y with
+      | Eq => x
+      | Lt => y
+      | Gt => x
+      end.
+    
+    Definition compare {A : Type} {R} `{OrderDec A R} (x y : A) : Z :=
+      match compare x y with
+      | Eq => 0
+      | Lt => -1
+      | Gt => 1
+      end.
     
     (** * Boolean operations *)
     

@@ -54,6 +54,13 @@ let convert (x : t) : t =
   (* Comparisons *)
   | { path = ["Pervasives"]; base = "=" } -> { path = []; base = "equiv_decb" }
   | { path = ["Pervasives"]; base = "<>" } -> { path = []; base = "nequiv_decb" }
+  | { path = ["Pervasives"]; base = "<" } -> { path = ["OCaml"; "Pervasives"]; base = "lt" }
+  | { path = ["Pervasives"]; base = ">" } -> { path = ["OCaml"; "Pervasives"]; base = "gt" }
+  | { path = ["Pervasives"]; base = "<=" } -> { path = ["OCaml"; "Pervasives"]; base = "le" }
+  | { path = ["Pervasives"]; base = ">=" } -> { path = ["OCaml"; "Pervasives"]; base = "ge" }
+  | { path = ["Pervasives"]; base = "compare" } -> { path = ["OCaml"; "Pervasives"]; base = "compare" }
+  | { path = ["Pervasives"]; base = "min" } -> { path = ["OCaml"; "Pervasives"]; base = "min" }
+  | { path = ["Pervasives"]; base = "max" } -> { path = ["OCaml"; "Pervasives"]; base = "max" }
   (* Boolean operations *)
   | { path = ["Pervasives"]; base = "not" } -> { path = []; base = "negb" }
   | { path = ["Pervasives"]; base = "&&" } -> { path = []; base = "andb" }

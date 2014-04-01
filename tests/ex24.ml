@@ -10,13 +10,13 @@ let e_exit2 _ = raise Exit
 (* Comparisons *)
 let b_eq = 1 = 2
 let b_neq = 1 <> 2
-(* let b_lt = 1 < 2 *)
-(* let b_gt = 1 > 2 *)
-(* let b_le = 1 <= 2 *)
-(* let b_ge = 1 >= 2 *)
-(* let comp = compare 1 2 *)
-(* let n_min = min 1 2 *)
-(* let n_max = max 1 2 *)
+let b_lt = 1 < 2
+let b_gt = 1 > 2
+let b_le = 1 <= 2
+let b_ge = 1 >= 2
+let comp = compare 1 2
+let n_min = min 1 2
+let n_max = max 1 2
 (* let n_phys_eq = 1 == 2 *)
 (* let n_phys_neq = 1 != 2 *)
 

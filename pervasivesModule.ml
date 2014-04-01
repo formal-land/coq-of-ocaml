@@ -66,6 +66,13 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   (* Comparisons *)
   |> add_var [] "equiv_decb" Pure
   |> add_var [] "nequiv_decb" Pure
+  |> add_var ["OCaml"; "Pervasives"] "lt" Pure
+  |> add_var ["OCaml"; "Pervasives"] "gt" Pure
+  |> add_var ["OCaml"; "Pervasives"] "le" Pure
+  |> add_var ["OCaml"; "Pervasives"] "ge" Pure
+  |> add_var ["OCaml"; "Pervasives"] "compare" Pure
+  |> add_var ["OCaml"; "Pervasives"] "min" Pure
+  |> add_var ["OCaml"; "Pervasives"] "max" Pure
   (* Boolean operations *)
   |> add_var [] "negb" Pure
   |> add_var [] "andb" Pure

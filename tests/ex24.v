@@ -28,6 +28,20 @@ Definition b_eq : bool := equiv_decb 1 2.
 
 Definition b_neq : bool := nequiv_decb 1 2.
 
+Definition b_lt : bool := OCaml.Pervasives.lt 1 2.
+
+Definition b_gt : bool := OCaml.Pervasives.gt 1 2.
+
+Definition b_le : bool := OCaml.Pervasives.le 1 2.
+
+Definition b_ge : bool := OCaml.Pervasives.ge 1 2.
+
+Definition comp : Z := OCaml.Pervasives.compare 1 2.
+
+Definition n_min : Z := OCaml.Pervasives.min 1 2.
+
+Definition n_max : Z := OCaml.Pervasives.max 1 2.
+
 Definition b_not : bool := negb false.
 
 Definition b_and : bool := andb true false.
