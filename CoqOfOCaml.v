@@ -259,7 +259,14 @@ Module Exception.
       end, output _ _ s).
 End Exception.
 
-Definition IO := Effect.make (list string * list string) Empty_set.
+(** A stream which may be finite. *)
+Module FiniteStream.
+  CoInductive t (A : Type) : Type :=
+  | nil : t A
+  | cons : A -> t A -> t A.
+End FiniteStream.
+
+Definition IO := Effect.make (FiniteStream.t string * list string) Empty_set.
 
 Definition Counter := Effect.make nat Empty_set.
 
@@ -564,8 +571,8 @@ Module OCaml.
         match s with
         | ((stream_i, stream_o), _) =>
           match stream_i with
-          | [] => (inl "" % string, s) (* We could raise an [End_of_file] exception. *)
-          | message :: stream_i => (inl message, ((stream_i, stream_o), tt))
+          | FiniteStream.nil _ => (inl "" % string, s) (* We could raise an [End_of_file] exception. *)
+          | FiniteStream.cons message stream_i => (inl message, ((stream_i, stream_o), tt))
           end
         end.
     
