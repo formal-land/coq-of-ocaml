@@ -26,15 +26,17 @@ Definition e_exit2 {A B : Type} (x : B) : M [ OCaml.Pervasives.Exit ] A :=
 
 Definition b_eq : bool := equiv_decb 1 2.
 
-Definition b_neq : bool := nequiv_decb 1 2.
+Definition b_neq1 : bool := nequiv_decb true false.
+
+Definition b_neq2 : bool := nequiv_decb tt tt.
 
 Definition b_lt : bool := OCaml.Pervasives.lt 1 2.
 
 Definition b_gt : bool := OCaml.Pervasives.gt 1 2.
 
-Definition b_le : bool := OCaml.Pervasives.le 1 2.
+Definition b_le : bool := OCaml.Pervasives.le true false.
 
-Definition b_ge : bool := OCaml.Pervasives.ge 1 2.
+Definition b_ge : bool := OCaml.Pervasives.ge tt tt.
 
 Definition comp : Z := OCaml.Pervasives.compare 1 2.
 

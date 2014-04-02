@@ -278,11 +278,65 @@ Module OCaml.
     compare_is_sound : forall x y,
       CompareSpec (x = y) (R x y) (R y x) (compare x y) }.
   
-  Instance Z_eq_dec : EqDec (eq_setoid Z) := Z.eq_dec.
+  Module Unit.
+    Definition lt (x y : unit) : Prop := False.
+    
+    Instance strict_order : StrictOrder lt.
+      refine {|
+        StrictOrder_Irreflexive := _;
+        StrictOrder_Transitive := _ |}.
+      - intro x.
+        unfold complement, lt.
+        trivial.
+      - intros x y z Rxy Ryz.
+        exact Rxy.
+    Qed.
+    
+    Instance order_dec : OrderDec strict_order.
+      refine {|
+        compare := fun x y => Eq;
+        compare_is_sound := fun x y => CompEq _ _ _ |}.
+      abstract (now destruct x; destruct y).
+    Defined.
+  End Unit.
   
-  Instance Z_order_dec : OrderDec Z.lt_strorder := {|
-    compare := Z.compare;
-    compare_is_sound := Z.compare_spec |}.
+  Module Bool.
+    Inductive lt : bool -> bool -> Prop :=
+    | lt_intro : lt false true.
+    
+    Instance strict_order : StrictOrder lt.
+      refine {|
+        StrictOrder_Irreflexive := _;
+        StrictOrder_Transitive := _ |}.
+      - intros x Hxx.
+        inversion Hxx.
+      - intros x y z Hxy Hyz.
+        destruct Hxy; destruct Hyz.
+        constructor.
+    Qed.
+    
+    Instance order_dec : OrderDec strict_order.
+      refine {|
+        compare := fun x y =>
+          match (x, y) with
+          | (false, true) => Lt
+          | (false, false) | (true, true) => Eq
+          | (true, false) => Gt
+          end;
+        compare_is_sound := fun x y => _ |}.
+      abstract (destruct x; destruct y;
+        try apply CompLt; try apply CompEq; try apply CompGt;
+        constructor).
+    Defined.
+  End Bool.
+  
+  Module Z.
+    Instance eq_dec : EqDec (eq_setoid Z) := Z.eq_dec.
+    
+    Instance order_dec : OrderDec Z.lt_strorder := {|
+      compare := Z.compare;
+      compare_is_sound := Z.compare_spec |}.
+  End Z.
   
   Definition Match_failure := Effect.make unit (string * Z * Z).
    Definition raise_Match_failure {A : Type} (x : string * Z * Z)
