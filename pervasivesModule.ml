@@ -138,6 +138,16 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   (* Operations on format strings *)
   (* Program termination *)
 
+  (* List *)
+  |> add_var ["OCaml"; "List"] "length" Pure
+  |> add_var ["OCaml"; "List"] "hd" (Arrow (d [["OCaml"], "Failure"], Pure))
+  |> add_var ["OCaml"; "List"] "tl" (Arrow (d [["OCaml"], "Failure"], Pure))
+  |> add_var ["OCaml"; "List"] "nth" (Arrow (d [], Arrow (d [["OCaml"], "Failure"; ["OCaml"], "Invalid_argument"], Pure)))
+  |> add_var ["List"] "rev" Pure
+  |> add_var ["OCaml"; "Pervasives"] "app" Pure
+  |> add_var ["List"] "rev_append" Pure
+  |> add_var ["OCaml"; "List"] "flatten" Pure
+
 (*let env_typs : unit Envi.t =
   Envi.open_module @@
   List.fold_left (fun env_typs (path, base) ->

@@ -1,0 +1,124 @@
+3
+((),
+  Value (non_rec, l1, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+    Constructor (3, []/1))
+
+4
+((),
+  Value (non_rec, l2, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+    Constructor
+      (4, cons/1, Constant (4, Int(1)),
+        Constructor
+          (4, cons/1, Constant (4, Int(2)),
+            Constructor (4, cons/1, Constant (4, Int(3)), Constructor (4, []/1)))))
+
+6
+((),
+  Value (non_rec, s1, [ ], [ ], Some Type (Z/1)) =
+    Apply (6, Variable (6, OCaml.List.length/0), [ Variable (6, l1/0) ]))
+
+7
+((),
+  Value (non_rec, s2, [ ], [ ], Some Type (Z/1)) =
+    Apply (7, Variable (7, OCaml.List.length/0), [ Variable (7, l2/0) ]))
+
+8
+((),
+  Value (non_rec, h, [ A ], [ (x, A) ], Some Type (Z/1)) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Apply
+              (8, Variable (8, OCaml.List.hd/0),
+                [ Variable (8, l2/0) ]))
+        ]))
+
+9
+((),
+  Value (non_rec, t, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Apply
+              (9, Variable (9, OCaml.List.tl/0),
+                [ Variable (9, l2/0) ]))
+        ]))
+
+10
+((),
+  Value (non_rec, x, [ A ], [ (x, A) ], Some Type (Z/1)) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Apply
+              (10, Variable (10, OCaml.List.nth/0),
+                [ Variable (10, l2/0); Constant (10, Int(1)) ]))
+        ]))
+
+11
+((),
+  Value (non_rec, rl, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+    Apply (11, Variable (11, List.rev/0), [ Variable (11, l2/0) ]))
+
+12
+((),
+  Value (non_rec, ll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+    Apply
+      (12, Variable (12, OCaml.Pervasives.app/0),
+        [ Variable (12, l2/0); Variable (12, l2/0) ]))
+
+13
+((),
+  Value (non_rec, rll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+    Apply
+      (13, Variable (13, List.rev_append/0),
+        [ Variable (13, l2/0); Variable (13, l2/0) ]))
+
+14
+((),
+  Value (non_rec, lc, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+    Apply
+      (14, Variable (14, OCaml.List.flatten/0),
+        [
+          Constructor
+            (14, cons/1, Variable (14, l1/0),
+              Constructor
+                (14, cons/1, Variable (14, l2/0),
+                  Constructor
+                    (14, cons/1,
+                      Variable (14, l1/0),
+                      Constructor
+                        (14, cons/1,
+                          Variable
+                            (14,
+                              l2/0),
+                          Constructor
+                            (14,
+                              []/1)))))
+        ]))
+
+15
+((),
+  Value (non_rec, lf, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+    Apply
+      (15, Variable (15, OCaml.List.flatten/0),
+        [
+          Constructor
+            (15, cons/1, Variable (15, l1/0),
+              Constructor
+                (15, cons/1, Variable (15, l2/0),
+                  Constructor
+                    (15, cons/1,
+                      Variable (15, l1/0),
+                      Constructor
+                        (15, cons/1,
+                          Variable
+                            (15,
+                              l2/0),
+                          Constructor
+                            (15,
+                              []/1)))))
+        ]))

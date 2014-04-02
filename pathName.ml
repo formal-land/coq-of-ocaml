@@ -127,6 +127,18 @@ let convert (x : t) : t =
   (* References *)
   (* Operations on format strings *)
   (* Program termination *)
+
+  (* List *)
+  | { path = ["List"]; base = "length" } -> { path = ["OCaml"; "List"]; base = "length" }
+  | { path = ["List"]; base = "hd" } -> { path = ["OCaml"; "List"]; base = "hd" }
+  | { path = ["List"]; base = "tl" } -> { path = ["OCaml"; "List"]; base = "tl" }
+  | { path = ["List"]; base = "nth" } -> { path = ["OCaml"; "List"]; base = "nth" }
+  | { path = ["List"]; base = "rev" } -> { path = ["List"]; base = "rev" }
+  | { path = ["List"]; base = "append" } -> { path = ["OCaml"; "Pervasives"]; base = "app" }
+  | { path = ["List"]; base = "rev_append" } -> { path = ["List"]; base = "rev_append" }
+  | { path = ["List"]; base = "concat" } -> { path = ["OCaml"; "List"]; base = "flatten" }
+  | { path = ["List"]; base = "flatten" } -> { path = ["OCaml"; "List"]; base = "flatten" }
+
   (*| { path = ["Pervasives"]; base = base } ->
     (match base with
     | "=" -> { path = []; base = "equiv_decb" }

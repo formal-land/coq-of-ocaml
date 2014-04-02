@@ -598,7 +598,41 @@ Module OCaml.
     (** * Program termination *)
     (* TODO *)
   End Pervasives.
-
+  
+  Module List.
+    Definition length {A : Type} (l : list A) : Z :=
+      Z_of_nat (length l).
+    
+    Definition hd {A : Type} (l : list A) : M [Failure] A :=
+      match l with
+      | [] => raise_Failure "hd" % string
+      | x :: _ => ret x
+      end.
+    
+    Definition tl {A : Type} (l : list A) : M [Failure] (list A) :=
+      match l with
+      | [] => raise_Failure "tl" % string
+      | _ :: l => ret l
+      end.
+    
+    Definition nth {A : Type} (l : list A) (n : Z) : M [Failure; Invalid_argument] A :=
+      if n <? 0 then
+        lift [_;_] "01" (raise_Invalid_argument "List.nth" % string)
+      else
+        lift [_;_] "10" (
+          let n := Z.to_nat n in
+          match List.nth_error l n with
+          | None => raise_Failure "nth" % string
+          | Some x => ret x
+          end).
+    
+    Fixpoint flatten {A : Type} (ll : list (list A)) : list A :=
+      match ll with
+      | [] => []
+      | l :: ll => l ++ flatten ll
+      end.
+  End List.
+  
   Module String.
     Definition length (s : string) : Z :=
       Z.of_nat (String.length s).
