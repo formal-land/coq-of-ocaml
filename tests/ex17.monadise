@@ -33,7 +33,7 @@
 ((),
   Value
     (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
-      Some Monad ([ IO/1; NonTermination/1; Outside/0; G.Inside/0 ], A)) =
+      Some Monad ([ IO/0; NonTermination/1; Outside/0; G.Inside/0 ], A)) =
     Match
       (?, Variable (?, counter/0),
         [
@@ -41,7 +41,7 @@
             Lift
               (?, [ NonTermination/1 ],
                 [
-                  IO/1;
+                  IO/0;
                   NonTermination/1;
                   Outside/0;
                   G.Inside/0
@@ -57,12 +57,12 @@
                     Lift
                       (?,
                         [
-                          IO/1;
+                          IO/0;
                           Outside/0;
                           G.Inside/0
                         ],
                         [
-                          IO/1;
+                          IO/0;
                           NonTermination/1;
                           Outside/0;
                           G.Inside/0
@@ -72,10 +72,10 @@
                             Lift
                               (?,
                                 [
-                                  IO/1
+                                  IO/0
                                 ],
                                 [
-                                  IO/1;
+                                  IO/0;
                                   Outside/0;
                                   G.Inside/0
                                 ],
@@ -83,7 +83,7 @@
                                   (19,
                                     Variable
                                       (19,
-                                        OCaml.Pervasives.print_string/1),
+                                        OCaml.Pervasives.print_string/0),
                                     [
                                       Constant
                                         (19,
@@ -97,7 +97,7 @@
                                   G.Inside/0
                                 ],
                                 [
-                                  IO/1;
+                                  IO/0;
                                   Outside/0;
                                   G.Inside/0
                                 ],
@@ -122,7 +122,7 @@
                           G.Inside/0
                         ],
                         [
-                          IO/1;
+                          IO/0;
                           NonTermination/1;
                           Outside/0;
                           G.Inside/0
@@ -168,17 +168,17 @@
   Value
     (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ],
       Some
-        Monad ([ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ], A))
+        Monad ([ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ], A))
     =
     Bind
       (?,
         Lift
           (?, [ Counter/1 ],
-            [ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
+            [ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ],
             Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x,
         Lift
-          (?, [ IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
-            [ Counter/1; IO/1; NonTermination/1; Outside/0; G.Inside/0 ],
+          (?, [ IO/0; NonTermination/1; Outside/0; G.Inside/0 ],
+            [ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ],
             Apply
               (?, Variable (?, h_rec/0),
                 [ Variable (?, x/0); Variable (?, l/0) ]))))

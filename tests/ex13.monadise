@@ -22,13 +22,13 @@
   Value
     (rec, print_list_rec, [ ],
       [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
-      Some Monad ([ IO/1; NonTermination/1 ], Type (unit/1))) =
+      Some Monad ([ IO/0; NonTermination/1 ], Type (unit/1))) =
     Match
       (?, Variable (?, counter/0),
         [
           (Constructor (O/1),
             Lift
-              (?, [ NonTermination/1 ], [ IO/1; NonTermination/1 ],
+              (?, [ NonTermination/1 ], [ IO/0; NonTermination/1 ],
                 Apply
                   (?, Variable (?, not_terminated/1),
                     [ Tuple (?) ])));
@@ -48,17 +48,17 @@
                         Lift
                           (?,
                             [
-                              IO/1
+                              IO/0
                             ],
                             [
-                              IO/1;
+                              IO/0;
                               NonTermination/1
                             ],
                             Apply
                               (11,
                                 Variable
                                   (11,
-                                    OCaml.Pervasives.print_string/1),
+                                    OCaml.Pervasives.print_string/0),
                                 [
                                   Variable
                                     (11,
@@ -89,14 +89,14 @@
 ((),
   Value
     (non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
-      Some Monad ([ Counter/1; IO/1; NonTermination/1 ], Type (unit/1))) =
+      Some Monad ([ Counter/1; IO/0; NonTermination/1 ], Type (unit/1))) =
     Bind
       (?,
         Lift
-          (?, [ Counter/1 ], [ Counter/1; IO/1; NonTermination/1 ],
+          (?, [ Counter/1 ], [ Counter/1; IO/0; NonTermination/1 ],
             Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x_1,
         Lift
-          (?, [ IO/1; NonTermination/1 ], [ Counter/1; IO/1; NonTermination/1 ],
+          (?, [ IO/0; NonTermination/1 ], [ Counter/1; IO/0; NonTermination/1 ],
             Apply
               (?, Variable (?, print_list_rec/0),
                 [ Variable (?, x_1/0); Variable (?, x/0) ]))))
@@ -107,7 +107,7 @@
     (non_rec, f, [ ], [ ],
       Some
         (Type (list/1, Type (string/1)) ->
-          Monad ([ Counter/1; IO/1; NonTermination/1 ], Type (unit/1)))) =
+          Monad ([ Counter/1; IO/0; NonTermination/1 ], Type (unit/1)))) =
     Variable (14, print_list/0))
 
 16
@@ -116,13 +116,13 @@
     (non_rec, x, [ A ], [ (z, A) ],
       Some
         Monad
-          ([ Counter/1; IO/1; NonTermination/1; OCaml.Failure/1 ], Type (unit/1)))
+          ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ], Type (unit/1)))
     =
     Bind
       (?,
         Lift
           (?, [ OCaml.Failure/1 ],
-            [ Counter/1; IO/1; NonTermination/1; OCaml.Failure/1 ],
+            [ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ],
             Apply
               (16, Variable (16, tail/0),
                 [
@@ -150,6 +150,6 @@
                                       []/1)))))
                 ])), Some x,
         Lift
-          (?, [ Counter/1; IO/1; NonTermination/1 ],
-            [ Counter/1; IO/1; NonTermination/1; OCaml.Failure/1 ],
+          (?, [ Counter/1; IO/0; NonTermination/1 ],
+            [ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ],
             Apply (16, Variable (16, f/0), [ Variable (?, x/0) ]))))

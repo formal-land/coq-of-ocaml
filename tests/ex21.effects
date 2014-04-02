@@ -1,13 +1,13 @@
 3
-(. -[ IO/1 ]-> . -[ OCaml.Failure/1 ]-> .,
+(. -[ IO/0 ]-> . -[ OCaml.Failure/1 ]-> .,
   Value (non_rec, f, [ A; B; C ], [ (x, A) ], Some (C -> B)) =
     Sequence
-      ((4, Effect ([ IO/1 ], . -[ OCaml.Failure/1 ]-> .)),
+      ((4, Effect ([ IO/0 ], . -[ OCaml.Failure/1 ]-> .)),
         Apply
-          ((4, Effect ([ IO/1 ], .)),
+          ((4, Effect ([ IO/0 ], .)),
             Variable
-              ((4, Effect ([ ], . -[ IO/1 ]-> .)),
-                OCaml.Pervasives.print_string/1),
+              ((4, Effect ([ ], . -[ IO/0 ]-> .)),
+                OCaml.Pervasives.print_string/0),
             [ Constant ((4, Effect ([ ], .)), String("Hi")) ]),
         Function
           ((5, Effect ([ ], . -[ OCaml.Failure/1 ]-> .)), y,
@@ -19,19 +19,19 @@
                 [ Constant ((5, Effect ([ ], .)), String("Bye")) ]))))
 
 7
-(. -[ IO/1; OCaml.Failure/1 ]-> .,
+(. -[ IO/0; OCaml.Failure/1 ]-> .,
   Value (non_rec, r, [ A; B ], [ (x, B) ], Some A) =
     Match
-      ((?, Effect ([ IO/1; OCaml.Failure/1 ], .)),
+      ((?, Effect ([ IO/0; OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
         [
           (Any,
             Apply
-              ((7, Effect ([ IO/1; OCaml.Failure/1 ], .)),
+              ((7, Effect ([ IO/0; OCaml.Failure/1 ], .)),
                 Apply
                   ((7,
                     Effect
-                      ([ IO/1 ],
+                      ([ IO/0 ],
                         .
                           -[
                             OCaml.Failure/1
@@ -42,7 +42,7 @@
                           ([ ],
                             .
                               -[
-                                IO/1
+                                IO/0
                               ]->
                               .
                                 -[

@@ -223,7 +223,7 @@
                         (8,
                           Variable
                             (8,
-                              Z.add/1),
+                              Z.add/0),
                           [
                             Variable
                               (8,

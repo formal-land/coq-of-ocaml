@@ -50,7 +50,7 @@
                                 (11,
                                   Variable
                                     (11,
-                                      Z.add/2),
+                                      Z.add/1),
                                   [
                                     Variable
                                       (11,

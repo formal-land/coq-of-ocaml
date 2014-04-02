@@ -20,7 +20,7 @@
 ((),
   Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
     Apply
-      (12, Variable (12, Z.add/1),
+      (12, Variable (12, Z.add/0),
         [
           Field (12, Variable (12, r/0), SizedString.size/0);
           Field (12, Variable (12, r'/0), SizedString.size/0)

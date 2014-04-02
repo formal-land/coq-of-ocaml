@@ -42,7 +42,7 @@
                           (11,
                             Variable
                               (11,
-                                OCaml.Pervasives.print_string/1),
+                                OCaml.Pervasives.print_string/0),
                             [
                               Variable
                                 (11,

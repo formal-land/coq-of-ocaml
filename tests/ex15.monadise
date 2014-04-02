@@ -35,7 +35,7 @@ Inductive set:
                           (13,
                             Variable
                               (13,
-                                Z.ltb/1),
+                                OCaml.Pervasives.lt/0),
                             [
                               Variable
                                 (13,
@@ -70,7 +70,7 @@ Inductive set:
                               (15,
                                 Variable
                                   (15,
-                                    Z.ltb/1),
+                                    OCaml.Pervasives.lt/0),
                                 [
                                   Variable
                                     (15,
@@ -160,7 +160,7 @@ Inductive set:
                           (24,
                             Variable
                               (24,
-                                Z.ltb/1),
+                                OCaml.Pervasives.lt/0),
                             [
                               Variable
                                 (24,
@@ -213,7 +213,7 @@ Inductive set:
                               (26,
                                 Variable
                                   (26,
-                                    Z.ltb/1),
+                                    OCaml.Pervasives.lt/0),
                                 [
                                   Variable
                                     (26,

@@ -17,7 +17,7 @@
                       (4,
                         Variable
                           (4,
-                            Z.add/1),
+                            Z.add/0),
                         [
                           Variable
                             (?,
@@ -98,7 +98,7 @@
                           (14,
                             Variable
                               (14,
-                                Z.add/1),
+                                Z.add/0),
                             [
                               Variable
                                 (?,

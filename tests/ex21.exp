@@ -4,7 +4,7 @@
     Sequence
       (4,
         Apply
-          (4, Variable (4, OCaml.Pervasives.print_string/1),
+          (4, Variable (4, OCaml.Pervasives.print_string/0),
             [ Constant (4, String("Hi")) ]),
         Function
           (5, y,

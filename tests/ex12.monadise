@@ -30,7 +30,7 @@ Inductive tree:
                           (11,
                             Variable
                               (11,
-                                Z.ltb/1),
+                                OCaml.Pervasives.lt/0),
                             [
                               Variable
                                 (11,
@@ -65,7 +65,7 @@ Inductive tree:
                               (13,
                                 Variable
                                   (13,
-                                    Z.ltb/1),
+                                    OCaml.Pervasives.lt/0),
                                 [
                                   Variable
                                     (13,

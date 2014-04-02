@@ -22,7 +22,7 @@
 (.,
   Value (non_rec, s, [ ], [ ], Some Type (Z/1)) =
     Apply
-      ((12, Effect ([ ], .)), Variable ((12, Effect ([ ], .)), Z.add/1),
+      ((12, Effect ([ ], .)), Variable ((12, Effect ([ ], .)), Z.add/0),
         [
           Field
             ((12, Effect ([ ], .)), Variable ((12, Effect ([ ], .)), r/0),

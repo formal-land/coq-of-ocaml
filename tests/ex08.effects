@@ -193,7 +193,7 @@ Inductive t2:
                               ([
                               ],
                                 .)),
-                            Z.add/1),
+                            Z.add/0),
                         [
                           Variable
                             ((26,

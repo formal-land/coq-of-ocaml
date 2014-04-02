@@ -73,7 +73,7 @@
                                     (8,
                                       Variable
                                         (8,
-                                          equiv_decb/1),
+                                          equiv_decb/0),
                                       [
                                         Variable
                                           (8,
@@ -131,7 +131,7 @@
                                                     (10,
                                                       Variable
                                                         (10,
-                                                          Z.sub/1),
+                                                          Z.sub/0),
                                                       [
                                                         Variable
                                                           (10,
@@ -174,7 +174,7 @@
                                             (13,
                                               Variable
                                                 (13,
-                                                  Z.add/1),
+                                                  Z.add/0),
                                               [
                                                 Variable
                                                   (13,

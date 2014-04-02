@@ -2,11 +2,11 @@
 ((),
   Value
     (non_rec, f, [ A; B; C ], [ (x, A) ],
-      Some Monad ([ IO/1 ], (C -> Monad ([ OCaml.Failure/1 ], B)))) =
+      Some Monad ([ IO/0 ], (C -> Monad ([ OCaml.Failure/1 ], B)))) =
     Bind
       (?,
         Apply
-          (4, Variable (4, OCaml.Pervasives.print_string/1),
+          (4, Variable (4, OCaml.Pervasives.print_string/0),
             [ Constant (4, String("Hi")) ]), None,
         Return
           (?,
@@ -19,7 +19,7 @@
 7
 ((),
   Value
-    (non_rec, r, [ A; B ], [ (x, B) ], Some Monad ([ IO/1; OCaml.Failure/1 ], A))
+    (non_rec, r, [ A; B ], [ (x, B) ], Some Monad ([ IO/0; OCaml.Failure/1 ], A))
     =
     Match
       (?, Variable (?, x/0),
@@ -28,8 +28,8 @@
             Bind
               (?,
                 Lift
-                  (?, [ IO/1 ],
-                    [ IO/1; OCaml.Failure/1 ],
+                  (?, [ IO/0 ],
+                    [ IO/0; OCaml.Failure/1 ],
                     Apply
                       (7, Variable (7, f/0),
                         [
@@ -39,7 +39,7 @@
                         ])), Some x_1,
                 Lift
                   (?, [ OCaml.Failure/1 ],
-                    [ IO/1; OCaml.Failure/1 ],
+                    [ IO/0; OCaml.Failure/1 ],
                     Apply
                       (7,
                         Variable

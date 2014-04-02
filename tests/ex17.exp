@@ -38,7 +38,7 @@
                           (19,
                             Variable
                               (19,
-                                OCaml.Pervasives.print_string/1),
+                                OCaml.Pervasives.print_string/0),
                             [
                               Constant
                                 (19,

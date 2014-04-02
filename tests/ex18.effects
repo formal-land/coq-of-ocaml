@@ -9,7 +9,7 @@
           (Any,
             Apply
               ((4, Effect ([ r/0 ], .)),
-                Variable ((4, Effect ([ ], .)), Z.add/1),
+                Variable ((4, Effect ([ ], .)), Z.add/0),
                 [
                   Apply
                     ((4,
@@ -139,7 +139,7 @@
                             ([
                             ],
                               .)),
-                          Z.add/1),
+                          Z.add/0),
                       [
                         Apply
                           ((14,
