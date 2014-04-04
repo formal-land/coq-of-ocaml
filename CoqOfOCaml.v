@@ -631,6 +631,66 @@ Module OCaml.
       | [] => []
       | l :: ll => l ++ flatten ll
       end.
+    
+    (** * Iterators *)
+    Fixpoint mapi_aux {A B : Type} (f : Z -> A -> B) (l : list A) (n : nat) : list B :=
+      match l with
+      | [] => []
+      | x :: l => f (Z.of_nat n) x :: mapi_aux f l (S n)
+      end.
+    
+    Definition mapi {A B : Type} (f : Z -> A -> B) (l : list A) : list B :=
+      mapi_aux f l O.
+    
+    Fixpoint rev_map_aux {A B : Type} (f : A -> B) (l : list A) (r : list B) : list B :=
+      match l with
+      | [] => r
+      | x :: l => rev_map_aux f l (f x :: r)
+      end.
+    
+    Definition rev_map {A B : Type} (f : A -> B) (l : list A) : list B :=
+      rev_map_aux f l [].
+    
+    Definition fold_left {A B : Type} (f : A -> B -> A) (a : A) (l : list B) : A :=
+      List.fold_left f l a.
+    
+    Definition fold_right {A B : Type} (f : A -> B -> B) (l : list A) (a : B) : B :=
+      List.fold_right f a l.
+    
+    (** * Iterators on two lists *)
+    Fixpoint map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
+      : M [Invalid_argument] (list C) :=
+      match (l1, l2) with
+      | ([], []) => ret []
+      | (x1 :: l1, x2 :: l2) =>
+        let! l := map2 f l1 l2 in
+        ret (f x1 x2 :: l)
+      | _ => raise_Invalid_argument "map2" % string
+      end.
+    
+    Fixpoint rev_map2_aux {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
+      (r : list C) : M [Invalid_argument] (list C) :=
+      match (l1, l2) with
+      | ([], []) => ret r
+      | (x1 :: l1, x2 :: l2) => rev_map2_aux f l1 l2 (f x1 x2 :: r)
+      | _ => raise_Invalid_argument "rev_map2" % string
+      end.
+    
+    Definition rev_map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
+      : M [Invalid_argument] (list C) :=
+      rev_map2_aux f l1 l2 [].
+    
+    Fixpoint fold_left2 {A B C : Type} (f : A -> B -> C -> A) (a : A)
+      (l1 : list B) (l2 : list C) : M [Invalid_argument] A :=
+      match (l1 , l2) with
+      | ([], []) => 
+      end.
+    
+    (** * List scanning *)
+    (** * List searching *)
+    (** * Association lists *)
+    (** * Lists of pairs *)
+    (** * Sorting *)
   End List.
   
   Module String.
@@ -663,4 +723,3 @@ Module OCaml.
       s.
   End String.
 End OCaml.
-

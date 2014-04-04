@@ -6,7 +6,10 @@ Set Implicit Arguments.
 
 Definition l1 : list Z := [].
 
-Definition l2 : list Z := cons 1 (cons 2 (cons 3 [])).
+Definition l2 : list Z := cons 1 (cons 2 (cons 3 (cons 4 []))).
+
+Definition l3 : list (Z * string) :=
+  cons (1, "one" % string) (cons (2, "two" % string) []).
 
 Definition s1 : Z := OCaml.List.length l1.
 
@@ -39,3 +42,69 @@ Definition lc : list Z :=
 
 Definition lf : list Z :=
   OCaml.List.flatten (cons l1 (cons l2 (cons l1 (cons l2 [])))).
+
+Definition m : list Z := List.map (fun x => Z.add x 1) l2.
+
+Definition mi : list Z := OCaml.List.mapi (fun i => fun x => Z.add x i) l2.
+
+Definition rm : list Z := OCaml.List.rev_map (fun x => Z.add x 1) l2.
+
+Definition fl : Z := OCaml.List.fold_left (fun s => fun x => Z.add s x) 0 l2.
+
+Definition fr : Z := OCaml.List.fold_right (fun x => fun s => Z.add s x) l2 0.
+
+Definition m2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] (list Z) :=
+  match x_1 with
+  | _ => OCaml.List.map2 (fun x => fun y => Z.add x y) l2 l2
+  end.
+
+Definition rm2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] (list Z) :=
+  match x_1 with
+  | _ => OCaml.List.rev_map2 (fun x => fun y => Z.add x y) l2 l2
+  end.
+
+Definition fl2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
+  match x_1 with
+  | _ =>
+    OCaml.List.fold_left2 (fun s => fun x => fun y => Z.add (Z.add s x) y) 0 l2
+      l2
+  end.
+
+Definition fr2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
+  match x_1 with
+  | _ =>
+    OCaml.List.fold_right2 (fun s => fun x => fun y => Z.add (Z.add s x) y) l2
+      l2 0
+  end.
+
+Definition all : bool := List.forallb (fun x => equiv_decb x 2) l2.
+
+Definition ex : bool := List.existsb (fun x => equiv_decb x 2) l2.
+
+Definition all2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
+  match x_1 with
+  | _ =>
+    let! x := OCaml.List.for_all2 (fun x => fun y => equiv_decb x y) in
+    ret (x l2 l2)
+  end.
+
+Definition ex2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
+  match x_1 with
+  | _ =>
+    let! x := OCaml.List.exists2 (fun x => fun y => equiv_decb x y) in
+    ret (x l2 l2)
+  end.
+
+Definition me : bool := OCaml.List.mem 2 l2.
+
+Definition fin {A : Type} (x_1 : A) : Z :=
+  match x_1 with
+  | _ => OCaml.List.find (fun x => equiv_decb x 1) l2
+  end.
+
+Definition fil : list Z := List.filter (fun x => OCaml.Pervasives.ge x 2) l2.
+
+Definition fina : list Z := List.filter (fun x => OCaml.Pervasives.ge x 2) l2.
+
+Definition par : (list Z) * (list Z) :=
+  List.partition (fun x => OCaml.Pervasives.gt x 2) l2.

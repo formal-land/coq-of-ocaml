@@ -138,6 +138,31 @@ let convert (x : t) : t =
   | { path = ["List"]; base = "rev_append" } -> { path = ["List"]; base = "rev_append" }
   | { path = ["List"]; base = "concat" } -> { path = ["OCaml"; "List"]; base = "flatten" }
   | { path = ["List"]; base = "flatten" } -> { path = ["OCaml"; "List"]; base = "flatten" }
+  (* Iterators *)
+  | { path = ["List"]; base = "map" } -> { path = ["List"]; base = "map" }
+  | { path = ["List"]; base = "mapi" } -> { path = ["OCaml"; "List"]; base = "mapi" }
+  | { path = ["List"]; base = "rev_map" } -> { path = ["OCaml"; "List"]; base = "rev_map" }
+  | { path = ["List"]; base = "fold_left" } -> { path = ["OCaml"; "List"]; base = "fold_left" }
+  | { path = ["List"]; base = "fold_right" } -> { path = ["OCaml"; "List"]; base = "fold_right" }
+  (* Iterators on two lists *)
+  | { path = ["List"]; base = "map2" } -> { path = ["OCaml"; "List"]; base = "map2" }
+  | { path = ["List"]; base = "rev_map2" } -> { path = ["OCaml"; "List"]; base = "rev_map2" }
+  | { path = ["List"]; base = "fold_left2" } -> { path = ["OCaml"; "List"]; base = "fold_left2" }
+  | { path = ["List"]; base = "fold_right2" } -> { path = ["OCaml"; "List"]; base = "fold_right2" }
+  (* List scanning *)
+  | { path = ["List"]; base = "for_all" } -> { path = ["List"]; base = "forallb" }
+  | { path = ["List"]; base = "exists" } -> { path = ["List"]; base = "existsb" }
+  | { path = ["List"]; base = "for_all2" } -> { path = ["OCaml"; "List"]; base = "for_all2" }
+  | { path = ["List"]; base = "exists2" } -> { path = ["OCaml"; "List"]; base = "exists2" }
+  | { path = ["List"]; base = "mem" } -> { path = ["OCaml"; "List"]; base = "mem" }
+  (* List searching *)
+  | { path = ["List"]; base = "find" } -> { path = ["OCaml"; "List"]; base = "find" }
+  | { path = ["List"]; base = "filter" } -> { path = ["List"]; base = "filter" }
+  | { path = ["List"]; base = "find_all" } -> { path = ["List"]; base = "filter" }
+  | { path = ["List"]; base = "partition" } -> { path = ["List"]; base = "partition" }
+  (* Association lists *)
+  (* Lists of pairs *)
+  (* Sorting *)
 
   (*| { path = ["Pervasives"]; base = base } ->
     (match base with

@@ -147,6 +147,30 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_var ["OCaml"; "Pervasives"] "app" Pure
   |> add_var ["List"] "rev_append" Pure
   |> add_var ["OCaml"; "List"] "flatten" Pure
+  (* Iterators *)
+  |> add_var ["List"] "map" Pure
+  |> add_var ["OCaml"; "List"] "mapi" Pure
+  |> add_var ["OCaml"; "List"] "rev_map" Pure
+  |> add_var ["OCaml"; "List"] "fold_left" Pure
+  |> add_var ["OCaml"; "List"] "fold_right" Pure
+  (* Iterators on two lists *)
+  |> add_var ["OCaml"; "List"] "map2" (Arrow (d [], (Arrow (d [], Arrow (d [["OCaml"], "Invalid_argument"], Pure)))))
+  |> add_var ["OCaml"; "List"] "rev_map2" (Arrow (d [], (Arrow (d [], Arrow (d [["OCaml"], "Invalid_argument"], Pure)))))
+  |> add_var ["OCaml"; "List"] "fold_left2" (Arrow (d [], (Arrow (d [], (Arrow (d [], Arrow (d [["OCaml"], "Invalid_argument"], Pure)))))))
+  |> add_var ["OCaml"; "List"] "fold_right2" (Arrow (d [], (Arrow (d [], (Arrow (d [], Arrow (d [["OCaml"], "Invalid_argument"], Pure)))))))
+  (* List scanning *)
+  |> add_var ["List"] "forallb" Pure
+  |> add_var ["List"] "existsb" Pure
+  |> add_var ["OCaml"; "List"] "for_all2" (Arrow (d [["OCaml"], "Invalid_argument"], Pure))
+  |> add_var ["OCaml"; "List"] "exists2" (Arrow (d [["OCaml"], "Invalid_argument"], Pure))
+  |> add_var ["OCaml"; "List"] "mem" Pure
+  (* List searching *)
+  |> add_var ["OCaml"; "List"] "find" Pure
+  |> add_var ["List"] "filter" Pure
+  |> add_var ["List"] "partition" Pure
+  (* Association lists *)
+  (* Lists of pairs *)
+  (* Sorting *)
 
 (*let env_typs : unit Envi.t =
   Envi.open_module @@
