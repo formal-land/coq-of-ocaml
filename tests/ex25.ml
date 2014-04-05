@@ -32,7 +32,7 @@ let fl2 _ = List.fold_left2 (fun s x y -> s + x + y) 0 l2 l2
 let fr2 _ = List.fold_right2 (fun s x y -> s + x + y) l2 l2 0
 
 (* List scanning *)
-let all = List.for_all (fun x -> x = 2) l2
+(*let all = List.for_all (fun x -> x = 2) l2
 let ex = List.exists (fun x -> x = 2) l2
 let all2 _ = List.for_all2 (fun x y -> x = y) l2 l2
 let ex2 _ = List.exists2 (fun x y -> x = y) l2 l2
@@ -43,7 +43,7 @@ let me = List.mem 2 l2
 let fin _ = List.find (fun x -> x = 1) l2
 let fil = List.filter (fun x -> x >= 2) l2
 let fina = List.find_all (fun x -> x >= 2) l2
-let par = List.partition (fun x -> x > 2) l2
+let par = List.partition (fun x -> x > 2) l2*)
 (*
 (* Association lists *)
 let asso _ = List.assoc 2 l3

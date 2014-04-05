@@ -665,7 +665,7 @@ Module OCaml.
       | (x1 :: l1, x2 :: l2) =>
         let! l := map2 f l1 l2 in
         ret (f x1 x2 :: l)
-      | _ => raise_Invalid_argument "map2" % string
+      | _ => raise_Invalid_argument "map2"
       end.
     
     Fixpoint rev_map2_aux {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
@@ -673,7 +673,7 @@ Module OCaml.
       match (l1, l2) with
       | ([], []) => ret r
       | (x1 :: l1, x2 :: l2) => rev_map2_aux f l1 l2 (f x1 x2 :: r)
-      | _ => raise_Invalid_argument "rev_map2" % string
+      | _ => raise_Invalid_argument "rev_map2"
       end.
     
     Definition rev_map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
@@ -683,7 +683,19 @@ Module OCaml.
     Fixpoint fold_left2 {A B C : Type} (f : A -> B -> C -> A) (a : A)
       (l1 : list B) (l2 : list C) : M [Invalid_argument] A :=
       match (l1 , l2) with
-      | ([], []) => 
+      | ([], []) => ret a
+      | (x1 :: l1, x2 :: l2) => fold_left2 f (f a x1 x2) l1 l2
+      | _ => raise_Invalid_argument "fold_left2"
+      end.
+    
+    Fixpoint fold_right2 {A B C : Type} (f : A -> B -> C -> C)
+      (l1 : list A) (l2 : list B) (a : C) :  M [Invalid_argument] C :=
+      match (l1, l2) with
+      | ([], []) => ret a
+      | (x1 :: l1, x2 :: l2) =>
+        let! a := fold_right2 f l1 l2 a in
+        ret (f x1 x2 a)
+      | _ => raise_Invalid_argument "fold_right2"
       end.
     
     (** * List scanning *)

@@ -76,35 +76,3 @@ Definition fr2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
     OCaml.List.fold_right2 (fun s => fun x => fun y => Z.add (Z.add s x) y) l2
       l2 0
   end.
-
-Definition all : bool := List.forallb (fun x => equiv_decb x 2) l2.
-
-Definition ex : bool := List.existsb (fun x => equiv_decb x 2) l2.
-
-Definition all2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
-  match x_1 with
-  | _ =>
-    let! x := OCaml.List.for_all2 (fun x => fun y => equiv_decb x y) in
-    ret (x l2 l2)
-  end.
-
-Definition ex2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
-  match x_1 with
-  | _ =>
-    let! x := OCaml.List.exists2 (fun x => fun y => equiv_decb x y) in
-    ret (x l2 l2)
-  end.
-
-Definition me : bool := OCaml.List.mem 2 l2.
-
-Definition fin {A : Type} (x_1 : A) : Z :=
-  match x_1 with
-  | _ => OCaml.List.find (fun x => equiv_decb x 1) l2
-  end.
-
-Definition fil : list Z := List.filter (fun x => OCaml.Pervasives.ge x 2) l2.
-
-Definition fina : list Z := List.filter (fun x => OCaml.Pervasives.ge x 2) l2.
-
-Definition par : (list Z) * (list Z) :=
-  List.partition (fun x => OCaml.Pervasives.gt x 2) l2.
