@@ -1,150 +1,50 @@
 3
-(. -> . -> . -[ NonTermination/1 ]-> .,
+(.,
   Value
-    (@coq_rec, rec, f_map_rec, [ A; B ],
-      [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
+    (@coq_rec, rec, f_map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Type (list/1, A)) =
     Match
-      ((?, Effect ([ NonTermination/1 ], .)),
-        Variable ((?, Effect ([ ], .)), counter/0),
+      ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), l/0),
         [
-          (Constructor (O/1),
-            Apply
-              ((?, Effect ([ NonTermination/1 ], .)),
-                Variable
-                  ((?,
-                    Effect
-                      ([ ],
-                        .
-                          -[
-                            NonTermination/1
-                          ]-> .)),
-                    not_terminated/1),
-                [ Tuple ((?, Effect ([ ], .))) ]));
-          (Constructor (S/1, counter),
-            Match
-              ((4, Effect ([ NonTermination/1 ], .)),
-                Variable ((4, Effect ([ ], .)), l/0),
-                [
-                  (Constructor ([]/1),
-                    Constructor
-                      ((5,
-                        Effect
-                          ([
-                          ],
-                            .)),
-                        []/1));
-                  (Constructor (cons/1, x, l),
-                    Constructor
-                      ((6,
-                        Effect
-                          ([
-                            NonTermination/1
-                          ],
-                            .)),
-                        cons/1,
-                        Apply
-                          ((6,
-                            Effect
-                              ([
-                              ],
-                                .)),
-                            Variable
-                              ((6,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                f/0),
-                            [
-                              Variable
-                                ((6,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  x/0)
-                            ]),
-                        Apply
-                          ((6,
-                            Effect
-                              ([
-                                NonTermination/1
-                              ],
-                                .)),
-                            Apply
-                              ((?,
-                                Effect
-                                  ([
-                                  ],
-                                    .
-                                      ->
-                                      .
-                                        -[
-                                          NonTermination/1
-                                        ]->
-                                        .)),
-                                Variable
-                                  ((?,
-                                    Effect
-                                      ([
-                                      ],
-                                        .
-                                          ->
-                                          .
-                                            ->
-                                            .
-                                              -[
-                                                NonTermination/1
-                                              ]->
-                                              .)),
-                                    f_map_rec/0),
-                                [
-                                  Variable
-                                    ((?,
-                                      Effect
-                                        ([
-                                        ],
-                                          .)),
-                                      counter/0)
-                                ]),
-                            [
-                              Variable
-                                ((6,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  f/0);
-                              Variable
-                                ((6,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  l/0)
-                            ])))
-                ]))
-        ]))
-
-3
-(. -> . -[ Counter/1; NonTermination/1 ]-> .,
-  Value
-    (@., non_rec, f_map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
-      Some Type (list/1, A)) =
-    Apply
-      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Variable
-          ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)), f_map_rec/0),
-        [
-          Apply
-            ((?, Effect ([ Counter/1 ], .)),
-              Variable
-                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
-                  read_counter/1),
-              [ Tuple ((?, Effect ([ ], .))) ]);
-          Variable ((?, Effect ([ ], .)), f/0);
-          Variable ((?, Effect ([ ], .)), l/0)
+          (Constructor ([]/1), Constructor ((5, Effect ([ ], .)), []/1));
+          (Constructor (cons/1, x, l),
+            Constructor
+              ((6, Effect ([ ], .)), cons/1,
+                Apply
+                  ((6, Effect ([ ], .)),
+                    Variable
+                      ((6, Effect ([ ], .)),
+                        f/0),
+                    [
+                      Variable
+                        ((6,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          x/0)
+                    ]),
+                Apply
+                  ((6, Effect ([ ], .)),
+                    Variable
+                      ((6, Effect ([ ], .)),
+                        f_map/0),
+                    [
+                      Variable
+                        ((6,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0);
+                      Variable
+                        ((6,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l/0)
+                    ])))
         ]))
 
 9
@@ -298,230 +198,65 @@
         ]))
 
 15
-(. -[ Counter/1; NonTermination/1 ]-> .,
-  Value (@., non_rec, n, [ A ], [ (x, A) ], Some Type (Z/1)) =
-    Match
-      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Variable ((?, Effect ([ ], .)), x/0),
-        [
-          (Any,
-            Let (16, Effect ([ Counter/1; NonTermination/1 ], .))
-              (@coq_rec, rec, sum_rec, [ ],
-                [
-                  (counter, Type (nat/1));
-                  (l, Type (list/1, Type (Z/1)))
-                ], Some Type (Z/1)) =
-              Match
-                ((?, Effect ([ NonTermination/1 ], .)),
-                  Variable
-                    ((?, Effect ([ ], .)),
-                      counter/0),
-                  [
-                    (Constructor (O/1),
-                      Apply
-                        ((?,
-                          Effect
-                            ([
-                              NonTermination/1
-                            ],
-                              .)),
-                          Variable
-                            ((?,
-                              Effect
-                                ([
-                                ],
-                                  .
-                                    -[
-                                      NonTermination/1
-                                    ]->
-                                    .)),
-                              not_terminated/1),
-                          [
-                            Tuple
-                              ((?,
-                                Effect
-                                  ([
-                                  ],
-                                    .)))
-                          ]));
-                    (Constructor (S/1, counter),
-                      Match
-                        ((17,
-                          Effect
-                            ([
-                              NonTermination/1
-                            ],
-                              .)),
-                          Variable
-                            ((17,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              l/0),
-                          [
-                            (Constructor
-                              ([]/1),
-                              Constant
-                                ((18,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  Int(0)));
-                            (Constructor
-                              (cons/1,
-                                x,
-                                l),
-                              Apply
-                                ((19,
-                                  Effect
-                                    ([
-                                      NonTermination/1
-                                    ],
-                                      .)),
-                                  Variable
-                                    ((19,
-                                      Effect
-                                        ([
-                                        ],
-                                          .)),
-                                      Z.add/0),
-                                  [
-                                    Variable
-                                      ((19,
-                                        Effect
-                                          ([
-                                          ],
-                                            .)),
-                                        x/0);
-                                    Apply
-                                      ((19,
-                                        Effect
-                                          ([
-                                            NonTermination/1
-                                          ],
-                                            .)),
-                                        Apply
-                                          ((?,
-                                            Effect
-                                              ([
-                                              ],
-                                                .
-                                                  -[
-                                                    NonTermination/1
-                                                  ]->
-                                                  .)),
-                                            Variable
-                                              ((?,
-                                                Effect
-                                                  ([
-                                                  ],
-                                                    .
-                                                      ->
-                                                      .
-                                                        -[
-                                                          NonTermination/1
-                                                        ]->
-                                                        .)),
-                                                sum_rec/0),
-                                            [
-                                              Variable
-                                                ((?,
-                                                  Effect
-                                                    ([
-                                                    ],
-                                                      .)),
-                                                  counter/0)
-                                            ]),
-                                        [
-                                          Variable
-                                            ((19,
-                                              Effect
-                                                ([
-                                                ],
-                                                  .)),
-                                              l/0)
-                                        ])
-                                  ]))
-                          ]))
-                  ]) in
-            Let (16, Effect ([ Counter/1; NonTermination/1 ], .))
-              (@., non_rec, sum, [ ],
-                [ (l, Type (list/1, Type (Z/1))) ],
-                Some Type (Z/1)) =
+(.,
+  Value (@., non_rec, n, [ ], [ ], Some Type (Z/1)) =
+    Let (16, Effect ([ ], .))
+      (@coq_rec, rec, sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
+        Some Type (Z/1)) =
+      Match
+        ((17, Effect ([ ], .)), Variable ((17, Effect ([ ], .)), l/0),
+          [
+            (Constructor ([]/1), Constant ((18, Effect ([ ], .)), Int(0)));
+            (Constructor (cons/1, x, l),
               Apply
-                ((?,
-                  Effect
-                    ([
-                      Counter/1;
-                      NonTermination/1
-                    ], .)),
+                ((19, Effect ([ ], .)),
                   Variable
-                    ((?,
-                      Effect
-                        ([ ],
-                          . ->
-                            .
-                              -[
-                                NonTermination/1
-                              ]->
-                              .)),
-                      sum_rec/0),
+                    ((19, Effect ([ ], .)),
+                      Z.add/0),
                   [
-                    Apply
-                      ((?,
+                    Variable
+                      ((19,
                         Effect
                           ([
-                            Counter/1
+                          ],
+                            .)),
+                        x/0);
+                    Apply
+                      ((19,
+                        Effect
+                          ([
                           ],
                             .)),
                         Variable
-                          ((?,
+                          ((19,
                             Effect
                               ([
                               ],
-                                .
-                                  -[
-                                    Counter/1
-                                  ]->
-                                  .)),
-                            read_counter/1),
+                                .)),
+                            sum/0),
                         [
-                          Tuple
-                            ((?,
+                          Variable
+                            ((19,
                               Effect
                                 ([
                                 ],
-                                  .)))
-                        ]);
-                    Variable
-                      ((?,
-                        Effect
-                          ([
-                          ],
-                            .)),
-                        l/0)
-                  ]) in
-            Apply
-              ((21, Effect ([ Counter/1; NonTermination/1 ], .)),
-                Variable
-                  ((21,
-                    Effect
-                      ([ ],
-                        .
-                          -[
-                            Counter/1;
-                            NonTermination/1
-                          ]-> .)),
-                    sum/0),
-                [
+                                  .)),
+                              l/0)
+                        ])
+                  ]))
+          ]) in
+    Apply
+      ((21, Effect ([ ], .)), Variable ((21, Effect ([ ], .)), sum/0),
+        [
+          Constructor
+            ((21, Effect ([ ], .)), cons/1,
+              Constant ((21, Effect ([ ], .)), Int(1)),
+              Constructor
+                ((21, Effect ([ ], .)), cons/1,
+                  Constant
+                    ((21, Effect ([ ], .)), Int(2)),
                   Constructor
-                    ((21,
-                      Effect
-                        ([
-                        ],
-                          .)),
+                    ((21, Effect ([ ], .)),
                       cons/1,
                       Constant
                         ((21,
@@ -529,43 +264,14 @@
                             ([
                             ],
                               .)),
-                          Int(1)),
+                          Int(3)),
                       Constructor
                         ((21,
                           Effect
                             ([
                             ],
                               .)),
-                          cons/1,
-                          Constant
-                            ((21,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              Int(2)),
-                          Constructor
-                            ((21,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              cons/1,
-                              Constant
-                                ((21,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  Int(3)),
-                              Constructor
-                                ((21,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  []/1))))
-                ]))
+                          []/1))))
         ]))
 
 23

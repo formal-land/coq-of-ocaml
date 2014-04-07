@@ -403,7 +403,7 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
   (header : Header.t) (e : Loc.t t)
   : unit FullEnvi.t * (Header.t * Loc.t t) list =
   let (is_rec, attr, x, typ_vars, args, typ) = header in
-  if Recursivity.to_bool is_rec then
+  if Recursivity.to_bool is_rec && attr <> Attribute.CoqRec then
     let var (x : Name.t) env : Loc.t t =
       Variable (Loc.Unknown,
         Envi.bound_name (PathName.of_name [] x) env.FullEnvi.vars) in

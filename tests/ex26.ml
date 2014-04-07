@@ -12,7 +12,7 @@ let rec f_map2 f l =
   | x :: l -> f x :: f_map2 f l
 [@@free_rec]
 
-let n _ =
+let n =
   let rec sum l =
     match l with
     | [] -> 0
