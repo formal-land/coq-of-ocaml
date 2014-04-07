@@ -64,15 +64,6 @@ let of_type_expr_variable (typ : Types.type_expr) : Name.t =
   | Tvar (Some x) -> x
   | _ -> failwith "The type parameter was expected to be a variable."
 
-(** The set of free variables in a type (the polymorphic arguments). *)
-(*let rec free_vars (typ : t) : Name.Set.t =
-  match typ with
-  | Variable x -> Name.Set.singleton x
-  | Arrow (typ_x, typ_y) -> Name.Set.union (free_vars typ_x) (free_vars typ_y)
-  | Tuple typs | Apply (_, typs) ->
-    List.fold_left (fun s typ -> Name.Set.union s (free_vars typ)) Name.Set.empty typs
-  | Monad (_, typ) -> free_vars typ*)
-
 (** In a function's type extract the body's type (up to [n] arguments). *)
 let rec open_type (typ : t) (n : int) : t list * t =
   if n = 0 then
@@ -83,15 +74,6 @@ let rec open_type (typ : t) (n : int) : t list * t =
       let (typs, typ) = open_type typ2 (n - 1) in
       (typ1 :: typs, typ)
     | _ -> failwith "Expected an arrow type."
-
-(** Replace a variable name by another. *)
-(*let rec substitute_variable (typ : t) (x : Name.t) (x' : Name.t) : t =
-  match typ with
-  | Variable y -> if x = y then Variable x' else typ
-  | Arrow (typ1, typ2) -> Arrow (substitute_variable typ1 x x', substitute_variable typ2 x x')
-  | Tuple typs -> Tuple (List.map (fun typ -> substitute_variable typ x x') typs)
-  | Apply (path, typs) -> Apply (path, List.map (fun typ -> substitute_variable typ x x') typs)
-  | Monad (d, typ) -> Monad (d, substitute_variable typ x x')*)
 
 let monadise (typ : t) (effect : Effect.t) : t =
   let rec aux (typ : t) (effect_typ : Effect.Type.t) : t =
