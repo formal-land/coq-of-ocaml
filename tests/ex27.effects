@@ -1846,3 +1846,429 @@
                       String("List.combine"))
                 ]))
         ]))
+
+228
+(. -> . -> . -> . -[ NonTermination/1 ]-> .,
+  Value
+    (@., rec, merge_rec, [ A ],
+      [
+        (counter, Type (nat/1));
+        (cmp, (A -> (A -> Type (Z/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, A))
+      ], Some Type (list/1, A)) =
+    Match
+      ((?, Effect ([ NonTermination/1 ], .)),
+        Variable ((?, Effect ([ ], .)), counter/0),
+        [
+          (Constructor (O/1),
+            Apply
+              ((?, Effect ([ NonTermination/1 ], .)),
+                Variable
+                  ((?,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            NonTermination/1
+                          ]-> .)),
+                    not_terminated/1),
+                [ Tuple ((?, Effect ([ ], .))) ]));
+          (Constructor (S/1, counter),
+            Match
+              ((229, Effect ([ NonTermination/1 ], .)),
+                Tuple
+                  ((229, Effect ([ ], .)),
+                    Variable
+                      ((229, Effect ([ ], .)),
+                        l1/0),
+                    Variable
+                      ((229, Effect ([ ], .)),
+                        l2/0)),
+                [
+                  (Tuple (Constructor ([]/1), l2),
+                    Variable
+                      ((230,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        l2/0));
+                  (Tuple (l1, Constructor ([]/1)),
+                    Variable
+                      ((231,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        l1/0));
+                  (Tuple
+                    (Constructor
+                      (cons/1,
+                        h1,
+                        t1),
+                      Constructor
+                        (cons/1,
+                          h2,
+                          t2)),
+                    IfThenElse
+                      ((233,
+                        Effect
+                          ([
+                            NonTermination/1
+                          ],
+                            .)),
+                        Apply
+                          ((233,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Variable
+                              ((233,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                OCaml.Pervasives.le/0),
+                            [
+                              Apply
+                                ((233,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Variable
+                                    ((233,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      cmp/0),
+                                  [
+                                    Variable
+                                      ((233,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        h1/0);
+                                    Variable
+                                      ((233,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        h2/0)
+                                  ]);
+                              Constant
+                                ((233,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Int(0))
+                            ]),
+                        Constructor
+                          ((234,
+                            Effect
+                              ([
+                                NonTermination/1
+                              ],
+                                .)),
+                            cons/1,
+                            Variable
+                              ((234,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                h1/0),
+                            Apply
+                              ((234,
+                                Effect
+                                  ([
+                                    NonTermination/1
+                                  ],
+                                    .)),
+                                Apply
+                                  ((?,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          ->
+                                          .
+                                            ->
+                                            .
+                                              -[
+                                                NonTermination/1
+                                              ]->
+                                              .)),
+                                    Variable
+                                      ((?,
+                                        Effect
+                                          ([
+                                          ],
+                                            .
+                                              ->
+                                              .
+                                                ->
+                                                .
+                                                  ->
+                                                  .
+                                                    -[
+                                                      NonTermination/1
+                                                    ]->
+                                                    .)),
+                                        merge_rec/0),
+                                    [
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
+                                              .)),
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    ((234,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      cmp/0);
+                                  Variable
+                                    ((234,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      t1/0);
+                                  Variable
+                                    ((234,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      l2/0)
+                                ])),
+                        Constructor
+                          ((235,
+                            Effect
+                              ([
+                                NonTermination/1
+                              ],
+                                .)),
+                            cons/1,
+                            Variable
+                              ((235,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                h2/0),
+                            Apply
+                              ((235,
+                                Effect
+                                  ([
+                                    NonTermination/1
+                                  ],
+                                    .)),
+                                Apply
+                                  ((?,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          ->
+                                          .
+                                            ->
+                                            .
+                                              -[
+                                                NonTermination/1
+                                              ]->
+                                              .)),
+                                    Variable
+                                      ((?,
+                                        Effect
+                                          ([
+                                          ],
+                                            .
+                                              ->
+                                              .
+                                                ->
+                                                .
+                                                  ->
+                                                  .
+                                                    -[
+                                                      NonTermination/1
+                                                    ]->
+                                                    .)),
+                                        merge_rec/0),
+                                    [
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
+                                              .)),
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    ((235,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      cmp/0);
+                                  Variable
+                                    ((235,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      l1/0);
+                                  Variable
+                                    ((235,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      t2/0)
+                                ]))))
+                ]))
+        ]))
+
+228
+(. -> . -> . -[ Counter/1; NonTermination/1 ]-> .,
+  Value
+    (@., non_rec, merge, [ A ],
+      [
+        (cmp, (A -> (A -> Type (Z/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, A))
+      ], Some Type (list/1, A)) =
+    Apply
+      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+        Variable
+          ((?, Effect ([ ], . -> . -> . -> . -[ NonTermination/1 ]-> .)),
+            merge_rec/0),
+        [
+          Apply
+            ((?, Effect ([ Counter/1 ], .)),
+              Variable
+                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
+                  read_counter/1),
+              [ Tuple ((?, Effect ([ ], .))) ]);
+          Variable ((?, Effect ([ ], .)), cmp/0);
+          Variable ((?, Effect ([ ], .)), l1/0);
+          Variable ((?, Effect ([ ], .)), l2/0)
+        ]))
+
+237
+(. -> . -[ OCaml.Assert_failure/1 ]-> .,
+  Value
+    (@coq_rec, rec, chop, [ A ], [ (k, Type (Z/1)); (l, Type (list/1, A)) ],
+      Some Type (list/1, A)) =
+    IfThenElse
+      ((238, Effect ([ OCaml.Assert_failure/1 ], .)),
+        Apply
+          ((238, Effect ([ ], .)),
+            Variable ((238, Effect ([ ], .)), equiv_decb/0),
+            [
+              Variable ((238, Effect ([ ], .)), k/0);
+              Constant ((238, Effect ([ ], .)), Int(0))
+            ]), Variable ((238, Effect ([ ], .)), l/0),
+        Match
+          ((238, Effect ([ OCaml.Assert_failure/1 ], .)),
+            Variable ((239, Effect ([ ], .)), l/0),
+            [
+              (Constructor (cons/1, x, t),
+                Apply
+                  ((240,
+                    Effect
+                      ([
+                        OCaml.Assert_failure/1
+                      ], .)),
+                    Variable
+                      ((240,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                -[
+                                  OCaml.Assert_failure/1
+                                ]->
+                                .)),
+                        chop/0),
+                    [
+                      Apply
+                        ((240,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((240,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Z.sub/0),
+                          [
+                            Variable
+                              ((240,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                k/0);
+                            Constant
+                              ((240,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Int(1))
+                          ]);
+                      Variable
+                        ((240,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          t/0)
+                    ]));
+              (Any,
+                Apply
+                  ((241,
+                    Effect
+                      ([
+                        OCaml.Assert_failure/1
+                      ], .)),
+                    Variable
+                      ((241,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                OCaml.Assert_failure/1
+                              ]->
+                              .)),
+                        OCaml.assert/1),
+                    [
+                      Constructor
+                        ((241,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          false/1)
+                    ]))
+            ])))

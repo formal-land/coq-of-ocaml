@@ -258,7 +258,10 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
   | Texp_array _ -> Error.raise l "Arrays not handled."
   | Texp_while _ -> Error.raise l "While loops not handled."
   | Texp_for _ -> Error.raise l "For loops not handled."
-  | Texp_assert _ -> Error.raise l "Assertions not handled."
+  | Texp_assert e ->
+    let assert_function =
+      Envi.bound_name (PathName.of_name ["OCaml"] "assert") env.FullEnvi.vars in
+    Apply (l, Variable (l, assert_function), [of_expression env e])
   | _ -> Error.raise l "Expression not handled."
 
 (** Generate a variable and a "match" on this variable from a list of patterns. *)

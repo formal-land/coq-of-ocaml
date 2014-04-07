@@ -225,7 +225,7 @@ let rec combine l1 l2 =
 
 (** sorting *)
 
-(*let rec merge cmp l1 l2 =
+let rec merge cmp l1 l2 =
   match l1, l2 with
   | [], l2 -> l2
   | l1, [] -> l1
@@ -233,7 +233,6 @@ let rec combine l1 l2 =
       if cmp h1 h2 <= 0
       then h1 :: merge cmp t1 l2
       else h2 :: merge cmp l1 t2
-;;
 
 let rec chop k l =
   if k = 0 then l else begin
@@ -241,9 +240,9 @@ let rec chop k l =
     | x::t -> chop (k-1) t
     | _ -> assert false
   end
-;;
+[@@coq_rec]
 
-let stable_sort cmp l =
+(*let stable_sort cmp l =
   let rec rev_merge l1 l2 accu =
     match l1, l2 with
     | [], l2 -> rev_append l2 accu

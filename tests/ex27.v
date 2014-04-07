@@ -209,3 +209,37 @@ Fixpoint combine {A B : Type} (l1 : list A) (l2 : list B) :
     ret (cons (a1, a2) x)
   | (_, _) => OCaml.Pervasives.invalid_arg "List.combine" % string
   end.
+
+Fixpoint merge_rec {A : Type}
+  (counter : nat) (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) :
+  M [ NonTermination ] (list A) :=
+  match counter with
+  | O => not_terminated tt
+  | S counter =>
+    match (l1, l2) with
+    | ([], l2) => ret l2
+    | (l1, []) => ret l1
+    | (cons h1 t1, cons h2 t2) =>
+      if OCaml.Pervasives.le (cmp h1 h2) 0 then
+        let! x := (merge_rec counter) cmp t1 l2 in
+        ret (cons h1 x)
+      else
+        let! x := (merge_rec counter) cmp l1 t2 in
+        ret (cons h2 x)
+    end
+  end.
+
+Definition merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) :
+  M [ Counter; NonTermination ] (list A) :=
+  let! x := lift [_;_] "10" (read_counter tt) in
+  lift [_;_] "01" (merge_rec x cmp l1 l2).
+
+Fixpoint chop {A : Type} (k : Z) (l : list A) :
+  M [ OCaml.Assert_failure ] (list A) :=
+  if equiv_decb k 0 then
+    ret l
+  else
+    match l with
+    | cons x t => chop (Z.sub k 1) t
+    | _ => OCaml.assert false
+    end.

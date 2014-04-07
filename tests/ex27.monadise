@@ -887,3 +887,216 @@
               (223, Variable (223, OCaml.Pervasives.invalid_arg/1),
                 [ Constant (223, String("List.combine")) ]))
         ]))
+
+228
+((),
+  Value
+    (@., rec, merge_rec, [ A ],
+      [
+        (counter, Type (nat/1));
+        (cmp, (A -> (A -> Type (Z/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, A))
+      ], Some Monad ([ NonTermination/1 ], Type (list/1, A))) =
+    Match
+      (?, Variable (?, counter/0),
+        [
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
+          (Constructor (S/1, counter),
+            Match
+              (229,
+                Tuple
+                  (229, Variable (229, l1/0),
+                    Variable (229, l2/0)),
+                [
+                  (Tuple (Constructor ([]/1), l2),
+                    Return
+                      (?,
+                        Variable
+                          (230,
+                            l2/0)));
+                  (Tuple (l1, Constructor ([]/1)),
+                    Return
+                      (?,
+                        Variable
+                          (231,
+                            l1/0)));
+                  (Tuple
+                    (Constructor
+                      (cons/1,
+                        h1,
+                        t1),
+                      Constructor
+                        (cons/1,
+                          h2,
+                          t2)),
+                    IfThenElse
+                      (233,
+                        Apply
+                          (233,
+                            Variable
+                              (233,
+                                OCaml.Pervasives.le/0),
+                            [
+                              Apply
+                                (233,
+                                  Variable
+                                    (233,
+                                      cmp/0),
+                                  [
+                                    Variable
+                                      (233,
+                                        h1/0);
+                                    Variable
+                                      (233,
+                                        h2/0)
+                                  ]);
+                              Constant
+                                (233,
+                                  Int(0))
+                            ]),
+                        Bind
+                          (?,
+                            Apply
+                              (234,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        merge_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    (234,
+                                      cmp/0);
+                                  Variable
+                                    (234,
+                                      t1/0);
+                                  Variable
+                                    (234,
+                                      l2/0)
+                                ]),
+                            Some
+                              x,
+                            Return
+                              (?,
+                                Constructor
+                                  (234,
+                                    cons/1,
+                                    Variable
+                                      (234,
+                                        h1/0),
+                                    Variable
+                                      (?,
+                                        x/0)))),
+                        Bind
+                          (?,
+                            Apply
+                              (235,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        merge_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    (235,
+                                      cmp/0);
+                                  Variable
+                                    (235,
+                                      l1/0);
+                                  Variable
+                                    (235,
+                                      t2/0)
+                                ]),
+                            Some
+                              x,
+                            Return
+                              (?,
+                                Constructor
+                                  (235,
+                                    cons/1,
+                                    Variable
+                                      (235,
+                                        h2/0),
+                                    Variable
+                                      (?,
+                                        x/0))))))
+                ]))
+        ]))
+
+228
+((),
+  Value
+    (@., non_rec, merge, [ A ],
+      [
+        (cmp, (A -> (A -> Type (Z/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, A))
+      ], Some Monad ([ Counter/1; NonTermination/1 ], Type (list/1, A))) =
+    Bind
+      (?,
+        Lift
+          (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+            Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])), Some x,
+        Lift
+          (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+            Apply
+              (?, Variable (?, merge_rec/0),
+                [
+                  Variable (?, x/0);
+                  Variable (?, cmp/0);
+                  Variable (?, l1/0);
+                  Variable (?, l2/0)
+                ]))))
+
+237
+((),
+  Value
+    (@coq_rec, rec, chop, [ A ], [ (k, Type (Z/1)); (l, Type (list/1, A)) ],
+      Some Monad ([ OCaml.Assert_failure/1 ], Type (list/1, A))) =
+    IfThenElse
+      (238,
+        Apply
+          (238, Variable (238, equiv_decb/0),
+            [ Variable (238, k/0); Constant (238, Int(0)) ]),
+        Return (?, Variable (238, l/0)),
+        Match
+          (238, Variable (239, l/0),
+            [
+              (Constructor (cons/1, x, t),
+                Apply
+                  (240, Variable (240, chop/0),
+                    [
+                      Apply
+                        (240,
+                          Variable
+                            (240,
+                              Z.sub/0),
+                          [
+                            Variable
+                              (240,
+                                k/0);
+                            Constant
+                              (240,
+                                Int(1))
+                          ]);
+                      Variable
+                        (240,
+                          t/0)
+                    ]));
+              (Any,
+                Apply
+                  (241, Variable (241, OCaml.assert/1),
+                    [ Constructor (241, false/1) ]))
+            ])))

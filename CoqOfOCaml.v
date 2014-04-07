@@ -405,6 +405,9 @@ Module OCaml.
     : M [ Undefined_recursive_module ] A :=
     fun s => (inr (inl x), s).
   
+  Definition assert {A : Type} (b : bool) : M [Assert_failure] A :=
+    raise_Assert_failure ("coq" % string, 0, 0).
+  
   (** OCaml functions are converted to their Coq's counter parts when it is
       possible. *)
   Module Pervasives.

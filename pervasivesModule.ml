@@ -26,6 +26,7 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_var [] "read_counter" (Arrow (d [[], "Counter"], Pure))
   |> add_descriptor [] "NonTermination"
   |> add_var [] "not_terminated" (Arrow (d [[], "NonTermination"], Pure))
+  |> add_var ["OCaml"] "assert" (Arrow (d [["OCaml"], "Assert_failure"], Pure))
 
   (* The core library *)
   (* Built-in types *)
