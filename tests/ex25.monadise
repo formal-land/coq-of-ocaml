@@ -40,7 +40,7 @@
 9
 ((),
   Value
-    (@., non_rec, h, [ A1093 ], [ (x, A1093/0) ],
+    (@., non_rec, h, [ A ], [ (x, A) ],
       Some Monad ([ OCaml.Failure/0 ], Type (Z/1))) =
     Match
       (?, Variable (?, x/0),
@@ -54,7 +54,7 @@
 10
 ((),
   Value
-    (@., non_rec, t, [ A1109 ], [ (x, A1109/0) ],
+    (@., non_rec, t, [ A ], [ (x, A) ],
       Some Monad ([ OCaml.Failure/0 ], Type (list/1, Type (Z/1)))) =
     Match
       (?, Variable (?, x/0),
@@ -68,7 +68,7 @@
 11
 ((),
   Value
-    (@., non_rec, x, [ A1126 ], [ (x, A1126/0) ],
+    (@., non_rec, x, [ A ], [ (x, A) ],
       Some Monad ([ OCaml.Failure/0; OCaml.Invalid_argument/0 ], Type (Z/1))) =
     Match
       (?, Variable (?, x/0),
@@ -252,7 +252,7 @@
 29
 ((),
   Value
-    (@., non_rec, m2, [ A1405 ], [ (x_1, A1405/0) ],
+    (@., non_rec, m2, [ A ], [ (x_1, A) ],
       Some Monad ([ OCaml.Invalid_argument/0 ], Type (list/1, Type (Z/1)))) =
     Match
       (?, Variable (?, x_1/0),
@@ -288,7 +288,7 @@
 30
 ((),
   Value
-    (@., non_rec, rm2, [ A1450 ], [ (x_1, A1450/0) ],
+    (@., non_rec, rm2, [ A ], [ (x_1, A) ],
       Some Monad ([ OCaml.Invalid_argument/0 ], Type (list/1, Type (Z/1)))) =
     Match
       (?, Variable (?, x_1/0),
@@ -324,7 +324,7 @@
 31
 ((),
   Value
-    (@., non_rec, fl2, [ A1495 ], [ (x_1, A1495/0) ],
+    (@., non_rec, fl2, [ A ], [ (x_1, A) ],
       Some Monad ([ OCaml.Invalid_argument/0 ], Type (Z/1))) =
     Match
       (?, Variable (?, x_1/0),
@@ -374,7 +374,7 @@
 32
 ((),
   Value
-    (@., non_rec, fr2, [ A1556 ], [ (x_1, A1556/0) ],
+    (@., non_rec, fr2, [ A ], [ (x_1, A) ],
       Some Monad ([ OCaml.Invalid_argument/0 ], Type (Z/1))) =
     Match
       (?, Variable (?, x_1/0),

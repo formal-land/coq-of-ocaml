@@ -54,7 +54,7 @@
 
 9
 (. -[ OCaml.Failure/0 ]-> .,
-  Value (@., non_rec, h, [ A1093 ], [ (x, A1093/0) ], Some Type (Z/1)) =
+  Value (@., non_rec, h, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ OCaml.Failure/0 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -76,9 +76,7 @@
 
 10
 (. -[ OCaml.Failure/0 ]-> .,
-  Value
-    (@., non_rec, t, [ A1109 ], [ (x, A1109/0) ], Some Type (list/1, Type (Z/1)))
-    =
+  Value (@., non_rec, t, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
     Match
       ((?, Effect ([ OCaml.Failure/0 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -100,7 +98,7 @@
 
 11
 (. -[ OCaml.Failure/0; OCaml.Invalid_argument/0 ]-> .,
-  Value (@., non_rec, x, [ A1126 ], [ (x, A1126/0) ], Some Type (Z/1)) =
+  Value (@., non_rec, x, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ OCaml.Failure/0; OCaml.Invalid_argument/0 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -444,9 +442,7 @@
 
 29
 (. -[ OCaml.Invalid_argument/0 ]-> .,
-  Value
-    (@., non_rec, m2, [ A1405 ], [ (x_1, A1405/0) ],
-      Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, m2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))) =
     Match
       ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
         Variable ((?, Effect ([ ], .)), x_1/0),
@@ -523,9 +519,8 @@
 
 30
 (. -[ OCaml.Invalid_argument/0 ]-> .,
-  Value
-    (@., non_rec, rm2, [ A1450 ], [ (x_1, A1450/0) ],
-      Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, rm2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1)))
+    =
     Match
       ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
         Variable ((?, Effect ([ ], .)), x_1/0),
@@ -602,7 +597,7 @@
 
 31
 (. -[ OCaml.Invalid_argument/0 ]-> .,
-  Value (@., non_rec, fl2, [ A1495 ], [ (x_1, A1495/0) ], Some Type (Z/1)) =
+  Value (@., non_rec, fl2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
         Variable ((?, Effect ([ ], .)), x_1/0),
@@ -723,7 +718,7 @@
 
 32
 (. -[ OCaml.Invalid_argument/0 ]-> .,
-  Value (@., non_rec, fr2, [ A1556 ], [ (x_1, A1556/0) ], Some Type (Z/1)) =
+  Value (@., non_rec, fr2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
         Variable ((?, Effect ([ ], .)), x_1/0),

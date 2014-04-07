@@ -8,6 +8,11 @@ let pp (d : 'a t) : SmartPrint.t =
 
 exception NotFound of PathName.t
 
+let rec size (env : 'a t) : int =
+  match env with
+  | [] -> 0
+  | map :: env -> PathName.Map.cardinal map + size env
+
 let empty : 'a t = [PathName.Map.empty]
 
 let add (x : PathName.t) (v : 'a) (env : 'a t) : 'a t =

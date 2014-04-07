@@ -1,8 +1,8 @@
 3
 ((),
   Value
-    (@., non_rec, tail, [ A696 ], [ (l, Type (list/1, A696/0)) ],
-      Some Monad ([ OCaml.Failure/1 ], Type (list/1, A696/0))) =
+    (@., non_rec, tail, [ A ], [ (l, Type (list/1, A)) ],
+      Some Monad ([ OCaml.Failure/1 ], Type (list/1, A))) =
     Match
       (4, Variable (4, l/0),
         [
@@ -113,7 +113,7 @@
 16
 ((),
   Value
-    (@., non_rec, x, [ A748 ], [ (z, A748/0) ],
+    (@., non_rec, x, [ A ], [ (z, A) ],
       Some
         Monad
           ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ], Type (unit/1)))

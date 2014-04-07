@@ -4,25 +4,22 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Definition e_invalid {A684 A687 : Type} (x : A687) :
-  M [ OCaml.Invalid_argument ] A684 :=
+Definition e_invalid {A B : Type} (x : A) : M [ OCaml.Invalid_argument ] B :=
   match x with
   | _ => OCaml.Pervasives.invalid_arg "error" % string
   end.
 
-Definition e_failure {A699 A702 : Type} (x : A702) : M [ OCaml.Failure ] A699 :=
+Definition e_failure {A B : Type} (x : A) : M [ OCaml.Failure ] B :=
   match x with
   | _ => OCaml.Pervasives.failwith "error" % string
   end.
 
-Definition e_exit1 {A714 A717 : Type} (x : A717) :
-  M [ OCaml.Pervasives.Exit ] A714 :=
+Definition e_exit1 {A B : Type} (x : A) : M [ OCaml.Pervasives.Exit ] B :=
   match x with
   | _ => OCaml.Pervasives.raise_Exit tt
   end.
 
-Definition e_exit2 {A1357 A1360 : Type} (x : A1360) :
-  M [ OCaml.Pervasives.Exit ] A1357 :=
+Definition e_exit2 {A B : Type} (x : A) : M [ OCaml.Pervasives.Exit ] B :=
   match x with
   | _ => OCaml.Pervasives.raise_Exit tt
   end.
@@ -118,62 +115,62 @@ Definition n2 : Z := snd (12, 13).
 Definition ll : list Z :=
   OCaml.Pervasives.app (cons 1 (cons 2 [])) (cons 3 (cons 4 [])).
 
-Definition p_c {A1860 : Type} (x : A1860) : M [ IO ] unit :=
+Definition p_c {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.print_char "c" % char
   end.
 
-Definition p_s {A1875 : Type} (x : A1875) : M [ IO ] unit :=
+Definition p_s {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.print_string "str" % string
   end.
 
-Definition p_n {A1890 : Type} (x : A1890) : M [ IO ] unit :=
+Definition p_n {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.print_int 12
   end.
 
-Definition p_endline {A1905 : Type} (x : A1905) : M [ IO ] unit :=
+Definition p_endline {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.print_endline "str" % string
   end.
 
-Definition p_newline {A1920 : Type} (x : A1920) : M [ IO ] unit :=
+Definition p_newline {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.print_newline tt
   end.
 
-Definition perr_c {A1935 : Type} (x : A1935) : M [ IO ] unit :=
+Definition perr_c {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.prerr_char "c" % char
   end.
 
-Definition perr_s {A1950 : Type} (x : A1950) : M [ IO ] unit :=
+Definition perr_s {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.prerr_string "str" % string
   end.
 
-Definition perr_n {A1965 : Type} (x : A1965) : M [ IO ] unit :=
+Definition perr_n {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.prerr_int 12
   end.
 
-Definition perr_endline {A1980 : Type} (x : A1980) : M [ IO ] unit :=
+Definition perr_endline {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.prerr_endline "str" % string
   end.
 
-Definition perr_newline {A1995 : Type} (x : A1995) : M [ IO ] unit :=
+Definition perr_newline {A : Type} (x : A) : M [ IO ] unit :=
   match x with
   | _ => OCaml.Pervasives.prerr_newline tt
   end.
 
-Definition r_s {A2010 : Type} (x : A2010) : M [ IO ] string :=
+Definition r_s {A : Type} (x : A) : M [ IO ] string :=
   match x with
   | _ => OCaml.Pervasives.read_line tt
   end.
 
-Definition r_n {A2025 : Type} (x : A2025) : M [ IO ] Z :=
+Definition r_n {A : Type} (x : A) : M [ IO ] Z :=
   match x with
   | _ => OCaml.Pervasives.read_int tt
   end.

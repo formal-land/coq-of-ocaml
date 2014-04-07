@@ -16,8 +16,8 @@
 9
 ((),
   Value
-    (@., non_rec, x2, [ A698; A701 ], [ (x, A701/0) ],
-      Some Monad ([ OCaml.Failure/1 ], A698/0)) =
+    (@., non_rec, x2, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/1 ], B))
+    =
     Match
       (?, Variable (?, x/0),
         [

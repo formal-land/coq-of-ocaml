@@ -3,7 +3,7 @@ open Types
 open SmartPrint
 
 type t =
-  | Variable of BoundName.t
+  | Variable of Name.t
   | Arrow of t * t
   | Tuple of t list
   | Apply of BoundName.t * t list
@@ -11,7 +11,7 @@ type t =
 
 let rec pp (typ : t) : SmartPrint.t =
   match typ with
-  | Variable x -> BoundName.pp x
+  | Variable x -> Name.pp x
   | Arrow (typ1, typ2) -> nest @@ parens (pp typ1 ^^ !^ "->" ^^ pp typ2)
   | Tuple typs -> nest @@ parens (separate (space ^^ !^ "*" ^^ space) (List.map pp typs))
   | Apply (x, typs) ->
@@ -21,43 +21,59 @@ let rec pp (typ : t) : SmartPrint.t =
     Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
-let rec of_type_expr (env : 'a FullEnvi.t) (typ : Types.type_expr)
+let rec of_type_expr_new_free_vars (env : 'a FullEnvi.t) (typ : Types.type_expr)
   : t * ('a FullEnvi.t * Name.Set.t) =
   let var (x : string) =
     let x_path_name = PathName.of_name [] x in
-    let (env, free_typ_vars) =
-      if Envi.mem x_path_name env.FullEnvi.free_typ_vars then
-        (env, Name.Set.empty)
-      else
-        (FullEnvi.add_free_typ_var [] x env, Name.Set.singleton x) in
-    let typ = Variable (Envi.bound_name x_path_name env.FullEnvi.free_typ_vars) in
+    let (env, free_typ_vars, name) =
+      if Envi.mem x_path_name env.FullEnvi.free_typ_vars then (
+        let x_bound_name = Envi.bound_name x_path_name env.FullEnvi.free_typ_vars in
+        let name = Envi.find x_bound_name env.FullEnvi.free_typ_vars (fun x -> x) in
+        (env, Name.Set.empty, name)
+      ) else (
+        let (env, name) = FullEnvi.add_free_typ_var x env in
+        (env, Name.Set.singleton name, name)) in
+    let typ = Variable name in
     (typ, (env, free_typ_vars)) in
   match typ.desc with
   | Tvar None -> var (Printf.sprintf "A%d" typ.id)
-  | Tvar (Some x) -> var x
   | Tarrow (_, typ_x, typ_y, _) ->
-    let (typ_x, (env, free_typ_vars_x)) = of_type_expr env typ_x in
-    let (typ_y, (env, free_typ_vars_y)) = of_type_expr env typ_y in
+    let (typ_x, (env, free_typ_vars_x)) = of_type_expr_new_free_vars env typ_x in
+    let (typ_y, (env, free_typ_vars_y)) = of_type_expr_new_free_vars env typ_y in
     (Arrow (typ_x, typ_y), (env, Name.Set.union free_typ_vars_x free_typ_vars_y))
   | Ttuple typs ->
-    let (typs, (env, free_typ_vars)) = of_typs_exprs env typs in
+    let (typs, (env, free_typ_vars)) = of_typs_exprs_new_free_vars env typs in
     (Tuple typs, (env, free_typ_vars))
   | Tconstr (path, typs, _) ->
-    let (typs, (env, free_typ_vars)) = of_typs_exprs env typs in
+    let (typs, (env, free_typ_vars)) = of_typs_exprs_new_free_vars env typs in
     let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.typs in
     (Apply (x, typs), (env, free_typ_vars))
-  | Tlink typ -> of_type_expr env typ
-  | Tpoly (typ, []) -> of_type_expr env typ
+  | Tlink typ -> of_type_expr_new_free_vars env typ
+  | Tpoly (typ, []) -> of_type_expr_new_free_vars env typ
   | _ -> failwith "type not handled"
 
-and of_typs_exprs (env : 'a FullEnvi.t) (typs : Types.type_expr list)
+and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t) (typs : Types.type_expr list)
   : t list * ('a FullEnvi.t * Name.Set.t) =
   let (typs, env, free_typ_vars) =
     List.fold_left (fun (typs, env, free_typ_vars) typ ->
-      let (typ, (env, free_typ_vars')) = of_type_expr env typ in
+      let (typ, (env, free_typ_vars')) = of_type_expr_new_free_vars env typ in
       (typ :: typs, env, Name.Set.union free_typ_vars free_typ_vars'))
       ([], env, Name.Set.empty) typs in
   (List.rev typs, (env, free_typ_vars))
+
+let rec of_type_expr (env : 'a FullEnvi.t) (typ : Types.type_expr) : t =
+  match typ.desc with
+  | Tvar (Some x) -> Variable x
+  | Tarrow (_, typ_x, typ_y, _) ->
+    Arrow (of_type_expr env typ_x, of_type_expr env typ_y)
+  | Ttuple typs ->
+    Tuple (List.map (of_type_expr env) typs)
+  | Tconstr (path, typs, _) ->
+    let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.typs in
+    Apply (x, List.map (of_type_expr env) typs)
+  | Tlink typ -> of_type_expr env typ
+  | Tpoly (typ, []) -> of_type_expr env typ
+  | _ -> failwith "type not handled"
 
 let of_type_expr_variable (typ : Types.type_expr) : Name.t =
   match typ.desc with
@@ -98,7 +114,7 @@ let monadise (typ : t) (effect : Effect.t) : t =
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
   match typ with
-  | Variable x -> BoundName.to_coq x
+  | Variable x -> Name.to_coq x
   | Arrow (typ_x, typ_y) ->
     Pp.parens paren @@ nest (to_coq true typ_x ^^ !^ "->" ^^ to_coq false typ_y)
   | Tuple typs ->

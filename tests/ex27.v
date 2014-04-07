@@ -4,34 +4,34 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Fixpoint length_aux {A698 : Type} (len : Z) (x : list A698) : Z :=
+Fixpoint length_aux {A : Type} (len : Z) (x : list A) : Z :=
   match x with
   | [] => len
   | cons a l => length_aux (Z.add len 1) l
   end.
 
-Definition length {A730 : Type} (l : list A730) : Z := length_aux 0 l.
+Definition length {A : Type} (l : list A) : Z := length_aux 0 l.
 
-Definition hd {A739 : Type} (x : list A739) : M [ OCaml.Failure ] A739 :=
+Definition hd {A : Type} (x : list A) : M [ OCaml.Failure ] A :=
   match x with
   | [] => OCaml.Pervasives.failwith "hd" % string
   | cons a l => ret a
   end.
 
-Definition tl {A772 : Type} (x : list A772) : M [ OCaml.Failure ] (list A772) :=
+Definition tl {A : Type} (x : list A) : M [ OCaml.Failure ] (list A) :=
   match x with
   | [] => OCaml.Pervasives.failwith "tl" % string
   | cons a l => ret l
   end.
 
-Definition nth {A791 : Type} (l : list A791) (n : Z) :
-  M [ OCaml.Failure; OCaml.Invalid_argument ] A791 :=
+Definition nth {A : Type} (l : list A) (n : Z) :
+  M [ OCaml.Failure; OCaml.Invalid_argument ] A :=
   if OCaml.Pervasives.lt n 0 then
     lift [_;_] "01" (OCaml.Pervasives.invalid_arg "List.nth" % string)
   else
     lift [_;_] "10"
-      (let fix nth_aux {A813 : Type} (l : list A813) (n : Z) :
-        M [ OCaml.Failure ] A813 :=
+      (let fix nth_aux {B : Type} (l : list B) (n : Z) : M [ OCaml.Failure ] B
+        :=
         match l with
         | [] => OCaml.Pervasives.failwith "nth" % string
         | cons a l =>
@@ -42,28 +42,26 @@ Definition nth {A791 : Type} (l : list A791) (n : Z) :
         end in
       nth_aux l n).
 
-Definition append {A886 : Type} : (list A886) -> (list A886) -> list A886 :=
+Definition append {A : Type} : (list A) -> (list A) -> list A :=
   OCaml.Pervasives.app.
 
-Fixpoint rev_append {A915 : Type} (l1 : list A915) (l2 : list A915) : list A915
-  :=
+Fixpoint rev_append {A : Type} (l1 : list A) (l2 : list A) : list A :=
   match l1 with
   | [] => l2
   | cons a l => rev_append l (cons a l2)
   end.
 
-Definition rev {A932 : Type} (l : list A932) : list A932 := rev_append l [].
+Definition rev {A : Type} (l : list A) : list A := rev_append l [].
 
-Fixpoint flatten {A961 : Type} (x : list (list A961)) : list A961 :=
+Fixpoint flatten {A : Type} (x : list (list A)) : list A :=
   match x with
   | [] => []
   | cons l r => OCaml.Pervasives.app l (flatten r)
   end.
 
-Definition concat {A976 : Type} : (list (list A976)) -> list A976 := flatten.
+Definition concat {A : Type} : (list (list A)) -> list A := flatten.
 
-Fixpoint map {A1001 A998 : Type} (f : A1001 -> A998) (x : list A1001) :
-  list A998 :=
+Fixpoint map {A B : Type} (f : A -> B) (x : list A) : list B :=
   match x with
   | [] => []
   | cons a l =>
@@ -71,8 +69,8 @@ Fixpoint map {A1001 A998 : Type} (f : A1001 -> A998) (x : list A1001) :
     cons r (map f l)
   end.
 
-Fixpoint mapi_aux {A1041 A1047 : Type}
-  (i : Z) (f : Z -> A1047 -> A1041) (x : list A1047) : list A1041 :=
+Fixpoint mapi_aux {A B : Type} (i : Z) (f : Z -> A -> B) (x : list A) : list B
+  :=
   match x with
   | [] => []
   | cons a l =>
@@ -80,52 +78,47 @@ Fixpoint mapi_aux {A1041 A1047 : Type}
     cons r (mapi_aux (Z.add i 1) f l)
   end.
 
-Definition mapi {A1093 A1095 : Type} (f : Z -> A1095 -> A1093) (l : list A1095)
-  : list A1093 := mapi_aux 0 f l.
+Definition mapi {A B : Type} (f : Z -> A -> B) (l : list A) : list B :=
+  mapi_aux 0 f l.
 
-Definition rev_map {A1142 A1145 : Type} (f : A1145 -> A1142) (l : list A1145) :
-  list A1142 :=
-  let fix rmap_f (accu : list A1142) (x : list A1145) : list A1142 :=
+Definition rev_map {A B : Type} (f : A -> B) (l : list A) : list B :=
+  let fix rmap_f (accu : list B) (x : list A) : list B :=
     match x with
     | [] => accu
     | cons a l => rmap_f (cons (f a) accu) l
     end in
   rmap_f [] l.
 
-Fixpoint iter {A1188 A1190 : Type} (f : A1190 -> A1188) (x : list A1190) : unit
-  :=
+Fixpoint iter {A B : Type} (f : A -> B) (x : list A) : unit :=
   match x with
   | [] => tt
   | cons a l => iter f l
   end.
 
-Fixpoint iteri_aux {A1228 A1233 : Type}
-  (i : Z) (f : Z -> A1233 -> A1228) (x : list A1233) : unit :=
+Fixpoint iteri_aux {A B : Type} (i : Z) (f : Z -> A -> B) (x : list A) : unit :=
   match x with
   | [] => tt
   | cons a l => iteri_aux (Z.add i 1) f l
   end.
 
-Definition iteri {A1278 A1281 : Type} (f : Z -> A1278 -> A1281) (l : list A1278)
-  : unit := iteri_aux 0 f l.
+Definition iteri {A B : Type} (f : Z -> A -> B) (l : list A) : unit :=
+  iteri_aux 0 f l.
 
-Fixpoint fold_left {A1323 A1326 : Type}
-  (f : A1323 -> A1326 -> A1323) (accu : A1323) (l : list A1326) : A1323 :=
+Fixpoint fold_left {A B : Type} (f : A -> B -> A) (accu : A) (l : list B) : A :=
   match l with
   | [] => accu
   | cons a l => fold_left f (f accu a) l
   end.
 
-Fixpoint fold_right {A1364 A1367 : Type}
-  (f : A1364 -> A1367 -> A1367) (l : list A1364) (accu : A1367) : A1367 :=
+Fixpoint fold_right {A B : Type} (f : A -> B -> B) (l : list A) (accu : B) : B
+  :=
   match l with
   | [] => accu
   | cons a l => f a (fold_right f l accu)
   end.
 
-Fixpoint map2 {A1443 A1446 A1449 : Type}
-  (f : A1446 -> A1449 -> A1443) (l1 : list A1446) (l2 : list A1449) :
-  M [ OCaml.Invalid_argument ] (list A1443) :=
+Fixpoint map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B) :
+  M [ OCaml.Invalid_argument ] (list C) :=
   match (l1, l2) with
   | ([], []) => ret []
   | (cons a1 l1, cons a2 l2) =>
@@ -135,11 +128,10 @@ Fixpoint map2 {A1443 A1446 A1449 : Type}
   | (_, _) => OCaml.Pervasives.invalid_arg "List.map2" % string
   end.
 
-Definition rev_map2 {A1556 A1559 A1562 : Type}
-  (f : A1559 -> A1562 -> A1556) (l1 : list A1559) (l2 : list A1562) :
-  M [ OCaml.Invalid_argument ] (list A1556) :=
-  let fix rmap2_f (accu : list A1556) (l1 : list A1559) (l2 : list A1562) :
-    M [ OCaml.Invalid_argument ] (list A1556) :=
+Definition rev_map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
+  : M [ OCaml.Invalid_argument ] (list C) :=
+  let fix rmap2_f (accu : list C) (l1 : list A) (l2 : list B) :
+    M [ OCaml.Invalid_argument ] (list C) :=
     match (l1, l2) with
     | ([], []) => ret accu
     | (cons a1 l1, cons a2 l2) => rmap2_f (cons (f a1 a2) accu) l1 l2
@@ -147,8 +139,7 @@ Definition rev_map2 {A1556 A1559 A1562 : Type}
     end in
   rmap2_f [] l1 l2.
 
-Fixpoint iter2 {A1660 A1662 A1665 : Type}
-  (f : A1662 -> A1665 -> A1660) (l1 : list A1662) (l2 : list A1665) :
+Fixpoint iter2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B) :
   M [ OCaml.Invalid_argument ] unit :=
   match (l1, l2) with
   | ([], []) => ret tt
@@ -156,18 +147,18 @@ Fixpoint iter2 {A1660 A1662 A1665 : Type}
   | (_, _) => OCaml.Pervasives.invalid_arg "List.iter2" % string
   end.
 
-Fixpoint fold_left2 {A1759 A1762 A1765 : Type}
-  (f : A1759 -> A1762 -> A1765 -> A1759) (accu : A1759) (l1 : list A1762)
-  (l2 : list A1765) : M [ OCaml.Invalid_argument ] A1759 :=
+Fixpoint fold_left2 {A B C : Type}
+  (f : A -> B -> C -> A) (accu : A) (l1 : list B) (l2 : list C) :
+  M [ OCaml.Invalid_argument ] A :=
   match (l1, l2) with
   | ([], []) => ret accu
   | (cons a1 l1, cons a2 l2) => fold_left2 f (f accu a1 a2) l1 l2
   | (_, _) => OCaml.Pervasives.invalid_arg "List.fold_left2" % string
   end.
 
-Fixpoint fold_right2 {A1850 A1853 A1856 : Type}
-  (f : A1850 -> A1853 -> A1856 -> A1856) (l1 : list A1850) (l2 : list A1853)
-  (accu : A1856) : M [ OCaml.Invalid_argument ] A1856 :=
+Fixpoint fold_right2 {A B C : Type}
+  (f : A -> B -> C -> C) (l1 : list A) (l2 : list B) (accu : C) :
+  M [ OCaml.Invalid_argument ] C :=
   match (l1, l2) with
   | ([], []) => ret accu
   | (cons a1 l1, cons a2 l2) =>
@@ -176,21 +167,20 @@ Fixpoint fold_right2 {A1850 A1853 A1856 : Type}
   | (_, _) => OCaml.Pervasives.invalid_arg "List.fold_right2" % string
   end.
 
-Fixpoint for_all {A1912 : Type} (p : A1912 -> bool) (x : list A1912) : bool :=
+Fixpoint for_all {A : Type} (p : A -> bool) (x : list A) : bool :=
   match x with
   | [] => true
   | cons a l => andb (p a) (for_all p l)
   end.
 
-Fixpoint _exists {A1955 : Type} (p : A1955 -> bool) (x : list A1955) : bool :=
+Fixpoint _exists {A : Type} (p : A -> bool) (x : list A) : bool :=
   match x with
   | [] => false
   | cons a l => orb (p a) (_exists p l)
   end.
 
-Fixpoint for_all2 {A2038 A2041 : Type}
-  (p : A2038 -> A2041 -> bool) (l1 : list A2038) (l2 : list A2041) :
-  M [ OCaml.Invalid_argument ] bool :=
+Fixpoint for_all2 {A B : Type} (p : A -> B -> bool) (l1 : list A) (l2 : list B)
+  : M [ OCaml.Invalid_argument ] bool :=
   match (l1, l2) with
   | ([], []) => ret true
   | (cons a1 l1, cons a2 l2) =>
@@ -199,9 +189,8 @@ Fixpoint for_all2 {A2038 A2041 : Type}
   | (_, _) => OCaml.Pervasives.invalid_arg "List.for_all2" % string
   end.
 
-Fixpoint _exists2 {A2135 A2138 : Type}
-  (p : A2135 -> A2138 -> bool) (l1 : list A2135) (l2 : list A2138) :
-  M [ OCaml.Invalid_argument ] bool :=
+Fixpoint _exists2 {A B : Type} (p : A -> B -> bool) (l1 : list A) (l2 : list B)
+  : M [ OCaml.Invalid_argument ] bool :=
   match (l1, l2) with
   | ([], []) => ret false
   | (cons a1 l1, cons a2 l2) =>
@@ -210,8 +199,8 @@ Fixpoint _exists2 {A2135 A2138 : Type}
   | (_, _) => OCaml.Pervasives.invalid_arg "List.exists2" % string
   end.
 
-Fixpoint find {A2165 : Type} (p : A2165 -> bool) (x : list A2165) :
-  M [ OCaml.Not_found ] A2165 :=
+Fixpoint find {A : Type} (p : A -> bool) (x : list A) : M [ OCaml.Not_found ] A
+  :=
   match x with
   | [] => OCaml.raise_Not_found tt
   | cons x l =>
@@ -221,9 +210,8 @@ Fixpoint find {A2165 : Type} (p : A2165 -> bool) (x : list A2165) :
       find p l
   end.
 
-Definition find_all {A2232 : Type} (p : A2232 -> bool) :
-  (list A2232) -> list A2232 :=
-  let fix find (accu : list A2232) (x : list A2232) : list A2232 :=
+Definition find_all {A : Type} (p : A -> bool) : (list A) -> list A :=
+  let fix find (accu : list A) (x : list A) : list A :=
     match x with
     | [] => rev accu
     | cons x l =>
@@ -234,13 +222,12 @@ Definition find_all {A2232 : Type} (p : A2232 -> bool) :
     end in
   find [].
 
-Definition filter {A2276 : Type} : (A2276 -> bool) -> (list A2276) -> list A2276
-  := find_all.
+Definition filter {A : Type} : (A -> bool) -> (list A) -> list A := find_all.
 
-Definition partition {A2328 : Type} (p : A2328 -> bool) (l : list A2328) :
-  (list A2328) * (list A2328) :=
-  let fix part (yes : list A2328) (no : list A2328) (x : list A2328) :
-    (list A2328) * (list A2328) :=
+Definition partition {A : Type} (p : A -> bool) (l : list A) :
+  (list A) * (list A) :=
+  let fix part (yes : list A) (no : list A) (x : list A) : (list A) * (list A)
+    :=
     match x with
     | [] => ((rev yes), (rev no))
     | cons x l =>
@@ -251,8 +238,7 @@ Definition partition {A2328 : Type} (p : A2328 -> bool) (l : list A2328) :
     end in
   part [] [] l.
 
-Fixpoint split {A2410 A2412 : Type} (x : list (A2410 * A2412)) :
-  (list A2410) * (list A2412) :=
+Fixpoint split {A B : Type} (x : list (A * B)) : (list A) * (list B) :=
   match x with
   | [] => ([], [])
   | cons (x, y) l =>
@@ -261,8 +247,8 @@ Fixpoint split {A2410 A2412 : Type} (x : list (A2410 * A2412)) :
     end
   end.
 
-Fixpoint combine {A2493 A2494 : Type} (l1 : list A2493) (l2 : list A2494) :
-  M [ OCaml.Invalid_argument ] (list (A2493 * A2494)) :=
+Fixpoint combine {A B : Type} (l1 : list A) (l2 : list B) :
+  M [ OCaml.Invalid_argument ] (list (A * B)) :=
   match (l1, l2) with
   | ([], []) => ret []
   | (cons a1 l1, cons a2 l2) =>
@@ -271,9 +257,9 @@ Fixpoint combine {A2493 A2494 : Type} (l1 : list A2493) (l2 : list A2494) :
   | (_, _) => OCaml.Pervasives.invalid_arg "List.combine" % string
   end.
 
-Fixpoint merge_rec {A2583 : Type}
-  (counter : nat) (cmp : A2583 -> A2583 -> Z) (l1 : list A2583)
-  (l2 : list A2583) : M [ NonTermination ] (list A2583) :=
+Fixpoint merge_rec {A : Type}
+  (counter : nat) (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) :
+  M [ NonTermination ] (list A) :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -290,14 +276,13 @@ Fixpoint merge_rec {A2583 : Type}
     end
   end.
 
-Definition merge {A2583 : Type}
-  (cmp : A2583 -> A2583 -> Z) (l1 : list A2583) (l2 : list A2583) :
-  M [ Counter; NonTermination ] (list A2583) :=
+Definition merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) :
+  M [ Counter; NonTermination ] (list A) :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (merge_rec x cmp l1 l2).
 
-Fixpoint chop {A2642 : Type} (k : Z) (l : list A2642) :
-  M [ OCaml.Assert_failure ] (list A2642) :=
+Fixpoint chop {A : Type} (k : Z) (l : list A) :
+  M [ OCaml.Assert_failure ] (list A) :=
   if equiv_decb k 0 then
     ret l
   else

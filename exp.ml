@@ -289,7 +289,7 @@ and import_let_fun (env : unit FullEnvi.t) (rec_flag : Asttypes.rec_flag)
       env_with_let
     else
       env in
-  let (e_typ, (env, free_typ_vars)) = Type.of_type_expr env e.exp_type in
+  let (e_typ, (env, free_typ_vars)) = Type.of_type_expr_new_free_vars env e.exp_type in
   let free_typ_vars = Name.Set.elements free_typ_vars in
   let e = of_expression env e in
   let (args_names, e_body) = open_function e in

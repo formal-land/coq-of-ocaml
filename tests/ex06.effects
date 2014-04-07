@@ -1,12 +1,9 @@
 3
 (. -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (@., rec, map_rec, [ A704; A709 ],
-      [
-        (counter, Type (nat/1));
-        (f, (A709/0 -> A704/0));
-        (l, Type (list/1, A709/0))
-      ], Some Type (list/1, A704/0)) =
+    (@., rec, map_rec, [ A; B ],
+      [ (counter, Type (nat/1)); (f, (A -> B)); (l, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Match
       ((?, Effect ([ NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), counter/0),
@@ -133,9 +130,8 @@
 3
 (. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, map, [ A704; A709 ],
-      [ (f, (A709/0 -> A704/0)); (l, Type (list/1, A709/0)) ],
-      Some Type (list/1, A704/0)) =
+    (@., non_rec, map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable
@@ -154,13 +150,13 @@
 8
 (. -> . -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (@., rec, fold_rec, [ A753; A756 ],
+    (@., rec, fold_rec, [ A; B ],
       [
         (counter, Type (nat/1));
-        (f, (A753/0 -> (A756/0 -> A753/0)));
-        (a, A753/0);
-        (l, Type (list/1, A756/0))
-      ], Some A753/0) =
+        (f, (A -> (B -> A)));
+        (a, A);
+        (l, Type (list/1, B))
+      ], Some A) =
     Match
       ((?, Effect ([ NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), counter/0),
@@ -290,12 +286,8 @@
 8
 (. -> . -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, fold, [ A753; A756 ],
-      [
-        (f, (A753/0 -> (A756/0 -> A753/0)));
-        (a, A753/0);
-        (l, Type (list/1, A756/0))
-      ], Some A753/0) =
+    (@., non_rec, fold, [ A; B ],
+      [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable
@@ -332,11 +324,9 @@
 15
 (. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, n, [ A818 ],
-      [
-        (incr, (Type (Z/1) -> A818/0));
-        (plus, (Type (Z/1) -> (A818/0 -> Type (Z/1))))
-      ], Some Type (Z/1)) =
+    (@., non_rec, n, [ A ],
+      [ (incr, (Type (Z/1) -> A)); (plus, (Type (Z/1) -> (A -> Type (Z/1)))) ],
+      Some Type (Z/1)) =
     Apply
       ((16, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable

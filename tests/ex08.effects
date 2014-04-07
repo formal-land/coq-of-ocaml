@@ -21,14 +21,13 @@ Inductive t1:
 
 14
 Inductive t2:
-  ([ a ], [ (D1, [ ]); (D2, [ a/0; Type (t2/0, a/0) ]) ])
+  ([ a ], [ (D1, [ ]); (D2, [ a; Type (t2/0, a) ]) ])
 
 18
 (. -> . -[ NonTermination/1 ]-> .,
   Value
-    (@., rec, of_list_rec, [ A764 ],
-      [ (counter, Type (nat/1)); (l, Type (list/1, A764/0)) ],
-      Some Type (t2/0, A764/0)) =
+    (@., rec, of_list_rec, [ A ],
+      [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some Type (t2/0, A)) =
     Match
       ((?, Effect ([ NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), counter/0),
@@ -129,8 +128,8 @@ Inductive t2:
 18
 (. -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, of_list, [ A764 ], [ (l, Type (list/1, A764/0)) ],
-      Some Type (t2/0, A764/0)) =
+    (@., non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A))
+    =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable
@@ -276,7 +275,7 @@ Inductive t2:
 
 28
 (. -[ Counter/1; NonTermination/1 ]-> .,
-  Value (@., non_rec, s, [ A812 ], [ (x, A812/0) ], Some Type (Z/1)) =
+  Value (@., non_rec, s, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),

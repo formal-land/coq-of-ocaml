@@ -15,7 +15,7 @@
 
 9
 ((),
-  Value (@., non_rec, x2, [ A698; A701 ], [ (x, A701/0) ], Some A698/0) =
+  Value (@., non_rec, x2, [ A; B ], [ (x, A) ], Some B) =
     Match
       (?, Variable (?, x/0),
         [

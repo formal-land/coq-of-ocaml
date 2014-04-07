@@ -45,7 +45,7 @@
 
 16
 (.,
-  Value (@., non_rec, l1, [ A702 ], [ ], Some Type (list/1, A702/0)) =
+  Value (@., non_rec, l1, [ A ], [ ], Some Type (list/1, A)) =
     Constructor ((16, Effect ([ ], .)), []/1))
 
 17
@@ -75,7 +75,7 @@
 
 26
 (. -[ OCaml.Match_failure/1 ]-> .,
-  Value (@., non_rec, e_match, [ A732; A735 ], [ (x, A735/0) ], Some A732/0) =
+  Value (@., non_rec, e_match, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Match_failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -131,7 +131,7 @@
 
 27
 (. -[ OCaml.Assert_failure/1 ]-> .,
-  Value (@., non_rec, e_assert, [ A758; A761 ], [ (x, A761/0) ], Some A758/0) =
+  Value (@., non_rec, e_assert, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Assert_failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -187,7 +187,7 @@
 
 28
 (. -[ OCaml.Invalid_argument/1 ]-> .,
-  Value (@., non_rec, e_invalid, [ A784; A787 ], [ (x, A787/0) ], Some A784/0) =
+  Value (@., non_rec, e_invalid, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -223,7 +223,7 @@
 
 29
 (. -[ OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, e_failure, [ A801; A804 ], [ (x, A804/0) ], Some A801/0) =
+  Value (@., non_rec, e_failure, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -259,8 +259,7 @@
 
 30
 (. -[ OCaml.Not_found/1 ]-> .,
-  Value (@., non_rec, e_not_found, [ A818; A821 ], [ (x, A821/0) ], Some A818/0)
-    =
+  Value (@., non_rec, e_not_found, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Not_found/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -282,8 +281,7 @@
 
 31
 (. -[ OCaml.Out_of_memory/1 ]-> .,
-  Value
-    (@., non_rec, e_out_of_mem, [ A833; A836 ], [ (x, A836/0) ], Some A833/0) =
+  Value (@., non_rec, e_out_of_mem, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Out_of_memory/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -305,8 +303,7 @@
 
 32
 (. -[ OCaml.Stack_overflow/1 ]-> .,
-  Value (@., non_rec, e_overflow, [ A848; A851 ], [ (x, A851/0) ], Some A848/0)
-    =
+  Value (@., non_rec, e_overflow, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Stack_overflow/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -328,7 +325,7 @@
 
 33
 (. -[ OCaml.Sys_error/1 ]-> .,
-  Value (@., non_rec, e_sys_err, [ A863; A866 ], [ (x, A866/0) ], Some A863/0) =
+  Value (@., non_rec, e_sys_err, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Sys_error/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -364,7 +361,7 @@
 
 34
 (. -[ OCaml.End_of_file/1 ]-> .,
-  Value (@., non_rec, e_EOF, [ A880; A883 ], [ (x, A883/0) ], Some A880/0) =
+  Value (@., non_rec, e_EOF, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.End_of_file/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -386,7 +383,7 @@
 
 35
 (. -[ OCaml.Division_by_zero/1 ]-> .,
-  Value (@., non_rec, e_div, [ A895; A898 ], [ (x, A898/0) ], Some A895/0) =
+  Value (@., non_rec, e_div, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Division_by_zero/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -408,8 +405,7 @@
 
 36
 (. -[ OCaml.Sys_blocked_io/1 ]-> .,
-  Value
-    (@., non_rec, e_sys_blocked, [ A910; A913 ], [ (x, A913/0) ], Some A910/0) =
+  Value (@., non_rec, e_sys_blocked, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Sys_blocked_io/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -431,8 +427,7 @@
 
 37
 (. -[ OCaml.Undefined_recursive_module/1 ]-> .,
-  Value
-    (@., non_rec, e_rec_module, [ A925; A928 ], [ (x, A928/0) ], Some A925/0) =
+  Value (@., non_rec, e_rec_module, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Undefined_recursive_module/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),

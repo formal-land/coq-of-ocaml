@@ -1,12 +1,11 @@
 3
 (. -> . -> .,
   Value
-    (@., non_rec, map, [ A711; A716 ],
-      [ (f, (A716/0 -> A711/0)); (l, Type (list/1, A716/0)) ],
-      Some Type (list/1, A711/0)) =
+    (@., non_rec, map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Let (4, Effect ([ ], .))
-      (@coq_rec, rec, map, [ ], [ (l, Type (list/1, A716/0)) ],
-        Some Type (list/1, A711/0)) =
+      (@coq_rec, rec, map, [ ], [ (l, Type (list/1, A)) ], Some Type (list/1, B))
+      =
       Match
         ((5, Effect ([ ], .)), Variable ((5, Effect ([ ], .)), l/0),
           [
@@ -58,13 +57,11 @@
 11
 (. -> . -> .,
   Value
-    (@., non_rec, map2, [ A792; A794 ],
-      [ (f, (A794/0 -> A792/0)); (l, Type (list/1, A794/0)) ],
-      Some Type (list/1, A792/0)) =
+    (@., non_rec, map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Let (12, Effect ([ ], .))
-      (@coq_rec, rec, map2, [ A769; A774 ],
-        [ (f, (A774/0 -> A769/0)); (l, Type (list/1, A774/0)) ],
-        Some Type (list/1, A769/0)) =
+      (@coq_rec, rec, map2, [ C; D ], [ (f, (C -> D)); (l, Type (list/1, C)) ],
+        Some Type (list/1, D)) =
       Match
         ((13, Effect ([ ], .)), Variable ((13, Effect ([ ], .)), l/0),
           [

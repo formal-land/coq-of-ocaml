@@ -2,7 +2,7 @@ type 'a t = {
   vars : 'a Envi.t;
   close_lift_vars : 'a -> Name.t -> 'a;
   typs : unit Envi.t;
-  free_typ_vars : unit Envi.t;
+  free_typ_vars : Name.t Envi.t;
   descriptors: unit Envi.t;
   constructors : unit Envi.t;
   fields : unit Envi.t
@@ -24,8 +24,11 @@ let add_var (path : Name.t list) (base : Name.t) (v : 'a) (env : 'a t) : 'a t =
 let add_typ (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
   { env with typs = Envi.add (PathName.of_name path base) () env.typs }
 
-let add_free_typ_var (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
-  { env with free_typ_vars = Envi.add (PathName.of_name path base) () env.free_typ_vars }
+let add_free_typ_var (base : Name.t) (env : 'a t) : 'a t * Name.t =
+  let n = Envi.size env.free_typ_vars in
+  let name = String.make 1 (Char.chr (Char.code 'A' + n)) in
+  ({ env with free_typ_vars = Envi.add (PathName.of_name [] base) name env.free_typ_vars },
+    name)
 
 let add_descriptor (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
   { env with descriptors = Envi.add (PathName.of_name path base) () env.descriptors }
@@ -56,7 +59,7 @@ let open_module (env : 'a t) : 'a t = {
   vars = Envi.open_module env.vars;
   close_lift_vars = env.close_lift_vars;
   typs = Envi.open_module env.typs;
-  free_typ_vars = Envi.open_module env.free_typ_vars;
+  free_typ_vars = env.free_typ_vars;
   descriptors = Envi.open_module env.descriptors;
   constructors = Envi.open_module env.constructors;
   fields = Envi.open_module env.fields
@@ -68,7 +71,7 @@ let close_module (env : 'a t) (name : Name.t) : 'a t =
     vars = Envi.close_module env.vars env.close_lift_vars name;
     close_lift_vars = env.close_lift_vars;
     typs = Envi.close_module env.typs close_lift_unit name;
-    free_typ_vars = Envi.close_module env.free_typ_vars close_lift_unit name;
+    free_typ_vars = env.free_typ_vars;
     descriptors = Envi.close_module env.descriptors close_lift_unit name;
     constructors = Envi.close_module env.constructors close_lift_unit name;
     fields = Envi.close_module env.fields close_lift_unit name

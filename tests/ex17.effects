@@ -2,7 +2,7 @@
 
 5
 (. -[ Outside/0 ]-> .,
-  Value (@., non_rec, f, [ A684; A687 ], [ (x, A687/0) ], Some A684/0) =
+  Value (@., non_rec, f, [ A; B ], [ (x, A) ], Some B) =
     Apply
       ((5, Effect ([ Outside/0 ], .)),
         Variable ((5, Effect ([ ], . -[ Outside/0 ]-> .)), raise_Outside/0),
@@ -12,7 +12,7 @@
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
   
   10 (. -[ Outside/1; Inside/0 ]-> .,
-    Value (@., non_rec, g, [ A705 ], [ (b, Type (bool/2)) ], Some A705/0) =
+    Value (@., non_rec, g, [ A ], [ (b, Type (bool/2)) ], Some A) =
       IfThenElse
         ((11, Effect ([ Outside/1; Inside/0 ], .)),
           Variable ((11, Effect ([ ], .)), b/0),
@@ -38,8 +38,8 @@
 17
 (. -> . -[ IO/0; NonTermination/1; Outside/0; G.Inside/0 ]-> .,
   Value
-    (@., rec, h_rec, [ A731; A753 ],
-      [ (counter, Type (nat/1)); (l, Type (list/1, A753/0)) ], Some A731/0) =
+    (@., rec, h_rec, [ A; B ],
+      [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some B) =
     Match
       ((?, Effect ([ IO/0; NonTermination/1; Outside/0; G.Inside/0 ], .)),
         Variable ((?, Effect ([ ], .)), counter/0),
@@ -243,9 +243,7 @@
 
 17
 (. -[ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ]-> .,
-  Value
-    (@., non_rec, h, [ A731; A753 ], [ (l, Type (list/1, A753/0)) ], Some A731/0)
-    =
+  Value (@., non_rec, h, [ A; B ], [ (l, Type (list/1, A)) ], Some B) =
     Apply
       ((?,
         Effect ([ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ], .)),

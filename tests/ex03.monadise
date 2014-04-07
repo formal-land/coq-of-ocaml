@@ -11,14 +11,13 @@
 ((),
   Value (@., non_rec, n2, [ ], [ ], Some Type (Z/1)) =
     Let 9
-      (@., non_rec, p1, [ A691; A705; A708 ],
-        [ (c, ((A705/0 -> (A708/0 -> A705/0)) -> A691/0)) ], Some A691/0) =
+      (@., non_rec, p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C) =
       Apply
         (9, Variable (9, c/0),
           [ Function (9, x, Function (9, y, Variable (9, x/0))) ]) in
     Let 10
-      (@., non_rec, c, [ A718 ],
-        [ (f, (Type (Z/1) -> (Type (Z/1) -> A718/0))) ], Some A718/0) =
+      (@., non_rec, c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ], Some A)
+      =
       Apply
         (10, Variable (10, f/0),
           [ Constant (10, Int(12)); Constant (10, Int(23)) ]) in

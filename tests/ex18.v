@@ -12,7 +12,7 @@ Definition read_r (_ : unit) : M [ r ] Z :=
 Definition write_r (x : Z) : M [ r ] unit :=
   fun s => (inl tt, (x, tt)).
 
-Definition plus_one {A1323 : Type} (x : A1323) : M [ r ] Z :=
+Definition plus_one {A : Type} (x : A) : M [ r ] Z :=
   match x with
   | _ =>
     let! x_1 := read_r tt in
@@ -27,20 +27,19 @@ Definition read_s (_ : unit) : M [ s ] string :=
 Definition write_s (x : string) : M [ s ] unit :=
   fun s => (inl tt, (x, tt)).
 
-Definition fail {A1353 A1356 : Type} (x : A1356) : M [ OCaml.Failure; s ] A1353
-  :=
+Definition fail {A B : Type} (x : A) : M [ OCaml.Failure; s ] B :=
   match x with
   | _ =>
     let! x_1 := lift [_;_] "01" (read_s tt) in
     lift [_;_] "10" (OCaml.Pervasives.failwith x_1)
   end.
 
-Definition reset {A1377 : Type} (x : A1377) : M [ r ] unit :=
+Definition reset {A : Type} (x : A) : M [ r ] unit :=
   match x with
   | _ => write_r 0
   end.
 
-Definition incr {A1396 : Type} (x : A1396) : M [ r ] unit :=
+Definition incr {A : Type} (x : A) : M [ r ] unit :=
   match x with
   | _ =>
     let! x_1 :=

@@ -1,8 +1,6 @@
 3
 (. -[ IO/0 ]-> . -[ OCaml.Failure/1 ]-> .,
-  Value
-    (@., non_rec, f, [ A687; A698; A701 ], [ (x, A687/0) ],
-      Some (A701/0 -> A698/0)) =
+  Value (@., non_rec, f, [ A; B; C ], [ (x, A) ], Some (B -> C)) =
     Sequence
       ((4, Effect ([ IO/0 ], . -[ OCaml.Failure/1 ]-> .)),
         Apply
@@ -22,7 +20,7 @@
 
 7
 (. -[ IO/0; OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, r, [ A715; A718 ], [ (x, A718/0) ], Some A715/0) =
+  Value (@., non_rec, r, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ IO/0; OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),

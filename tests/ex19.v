@@ -15,7 +15,7 @@ Definition x1 : Z :=
   | inr tt => 12
   end.
 
-Definition x2 {A698 A701 : Type} (x : A701) : M [ OCaml.Failure ] A698 :=
+Definition x2 {A B : Type} (x : A) : M [ OCaml.Failure ] B :=
   match x with
   | _ =>
     match unret (Exception.run 0 (raise_Error tt) tt) with

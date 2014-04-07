@@ -1,8 +1,8 @@
 16
 ((),
   Value
-    (@coq_rec, rec, length_aux, [ A698 ],
-      [ (len, Type (Z/1)); (x, Type (list/1, A698/0)) ], Some Type (Z/1)) =
+    (@coq_rec, rec, length_aux, [ A ],
+      [ (len, Type (Z/1)); (x, Type (list/1, A)) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -30,9 +30,8 @@
 
 21
 ((),
-  Value
-    (@., non_rec, length, [ A730 ], [ (l, Type (list/1, A730/0)) ],
-      Some Type (Z/1)) =
+  Value (@., non_rec, length, [ A ], [ (l, Type (list/1, A)) ], Some Type (Z/1))
+    =
     Apply
       (21, Variable (21, length_aux/0),
         [ Constant (21, Int(0)); Variable (21, l/0) ]))
@@ -40,8 +39,8 @@
 23
 ((),
   Value
-    (@., non_rec, hd, [ A739 ], [ (x, Type (list/1, A739/0)) ],
-      Some Monad ([ OCaml.Failure/1 ], A739/0)) =
+    (@., non_rec, hd, [ A ], [ (x, Type (list/1, A)) ],
+      Some Monad ([ OCaml.Failure/1 ], A)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -55,8 +54,8 @@
 27
 ((),
   Value
-    (@., non_rec, tl, [ A772 ], [ (x, Type (list/1, A772/0)) ],
-      Some Monad ([ OCaml.Failure/1 ], Type (list/1, A772/0))) =
+    (@., non_rec, tl, [ A ], [ (x, Type (list/1, A)) ],
+      Some Monad ([ OCaml.Failure/1 ], Type (list/1, A))) =
     Match
       (?, Variable (?, x/0),
         [
@@ -70,9 +69,8 @@
 31
 ((),
   Value
-    (@., non_rec, nth, [ A791 ],
-      [ (l, Type (list/1, A791/0)); (n, Type (Z/1)) ],
-      Some Monad ([ OCaml.Failure/1; OCaml.Invalid_argument/1 ], A791/0)) =
+    (@., non_rec, nth, [ A ], [ (l, Type (list/1, A)); (n, Type (Z/1)) ],
+      Some Monad ([ OCaml.Failure/1; OCaml.Invalid_argument/1 ], A)) =
     IfThenElse
       (32,
         Apply
@@ -88,9 +86,9 @@
           (?, [ OCaml.Failure/1 ],
             [ OCaml.Failure/1; OCaml.Invalid_argument/1 ],
             Let 33
-              (@coq_rec, rec, nth_aux, [ A813 ],
-                [ (l, Type (list/1, A813/0)); (n, Type (Z/1)) ],
-                Some Monad ([ OCaml.Failure/1 ], A813/0)) =
+              (@coq_rec, rec, nth_aux, [ B ],
+                [ (l, Type (list/1, B)); (n, Type (Z/1)) ],
+                Some Monad ([ OCaml.Failure/1 ], B)) =
               Match
                 (34, Variable (34, l/0),
                   [
@@ -157,18 +155,16 @@
 40
 ((),
   Value
-    (@., non_rec, append, [ A886 ], [ ],
-      Some
-        (Type (list/1, A886/0) ->
-          (Type (list/1, A886/0) -> Type (list/1, A886/0)))) =
+    (@., non_rec, append, [ A ], [ ],
+      Some (Type (list/1, A) -> (Type (list/1, A) -> Type (list/1, A)))) =
     Variable (40, OCaml.Pervasives.app/0))
 
 42
 ((),
   Value
-    (@coq_rec, rec, rev_append, [ A915 ],
-      [ (l1, Type (list/1, A915/0)); (l2, Type (list/1, A915/0)) ],
-      Some Type (list/1, A915/0)) =
+    (@coq_rec, rec, rev_append, [ A ],
+      [ (l1, Type (list/1, A)); (l2, Type (list/1, A)) ], Some Type (list/1, A))
+    =
     Match
       (43, Variable (43, l1/0),
         [
@@ -193,8 +189,8 @@
 48
 ((),
   Value
-    (@., non_rec, rev, [ A932 ], [ (l, Type (list/1, A932/0)) ],
-      Some Type (list/1, A932/0)) =
+    (@., non_rec, rev, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
+    =
     Apply
       (48, Variable (48, rev_append/0),
         [ Variable (48, l/0); Constructor (48, []/1) ]))
@@ -202,9 +198,8 @@
 50
 ((),
   Value
-    (@coq_rec, rec, flatten, [ A961 ],
-      [ (x, Type (list/1, Type (list/1, A961/0))) ], Some Type (list/1, A961/0))
-    =
+    (@coq_rec, rec, flatten, [ A ], [ (x, Type (list/1, Type (list/1, A))) ],
+      Some Type (list/1, A)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -230,16 +225,15 @@
 55
 ((),
   Value
-    (@., non_rec, concat, [ A976 ], [ ],
-      Some (Type (list/1, Type (list/1, A976/0)) -> Type (list/1, A976/0))) =
+    (@., non_rec, concat, [ A ], [ ],
+      Some (Type (list/1, Type (list/1, A)) -> Type (list/1, A))) =
     Variable (55, flatten/0))
 
 57
 ((),
   Value
-    (@coq_rec, rec, map, [ A1001; A998 ],
-      [ (f, (A1001/0 -> A998/0)); (x, Type (list/1, A1001/0)) ],
-      Some Type (list/1, A998/0)) =
+    (@coq_rec, rec, map, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -261,12 +255,9 @@
 62
 ((),
   Value
-    (@coq_rec, rec, mapi_aux, [ A1041; A1047 ],
-      [
-        (i, Type (Z/1));
-        (f, (Type (Z/1) -> (A1047/0 -> A1041/0)));
-        (x, Type (list/1, A1047/0))
-      ], Some Type (list/1, A1041/0)) =
+    (@coq_rec, rec, mapi_aux, [ A; B ],
+      [ (i, Type (Z/1)); (f, (Type (Z/1) -> (A -> B))); (x, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -305,9 +296,9 @@
 67
 ((),
   Value
-    (@., non_rec, mapi, [ A1093; A1095 ],
-      [ (f, (Type (Z/1) -> (A1095/0 -> A1093/0))); (l, Type (list/1, A1095/0)) ],
-      Some Type (list/1, A1093/0)) =
+    (@., non_rec, mapi, [ A; B ],
+      [ (f, (Type (Z/1) -> (A -> B))); (l, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Apply
       (67, Variable (67, mapi_aux/0),
         [ Constant (67, Int(0)); Variable (67, f/0); Variable (67, l/0) ]))
@@ -315,13 +306,12 @@
 69
 ((),
   Value
-    (@., non_rec, rev_map, [ A1142; A1145 ],
-      [ (f, (A1145/0 -> A1142/0)); (l, Type (list/1, A1145/0)) ],
-      Some Type (list/1, A1142/0)) =
+    (@., non_rec, rev_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
     Let 70
       (@coq_rec, rec, rmap_f, [ ],
-        [ (accu, Type (list/1, A1142/0)); (x, Type (list/1, A1145/0)) ],
-        Some Type (list/1, A1142/0)) =
+        [ (accu, Type (list/1, B)); (x, Type (list/1, A)) ],
+        Some Type (list/1, B)) =
       Match
         (?, Variable (?, x/0),
           [
@@ -356,8 +346,7 @@
 76
 ((),
   Value
-    (@coq_rec, rec, iter, [ A1188; A1190 ],
-      [ (f, (A1190/0 -> A1188/0)); (x, Type (list/1, A1190/0)) ],
+    (@coq_rec, rec, iter, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
       Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
@@ -372,12 +361,9 @@
 81
 ((),
   Value
-    (@coq_rec, rec, iteri_aux, [ A1228; A1233 ],
-      [
-        (i, Type (Z/1));
-        (f, (Type (Z/1) -> (A1233/0 -> A1228/0)));
-        (x, Type (list/1, A1233/0))
-      ], Some Type (unit/1)) =
+    (@coq_rec, rec, iteri_aux, [ A; B ],
+      [ (i, Type (Z/1)); (f, (Type (Z/1) -> (A -> B))); (x, Type (list/1, A)) ],
+      Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -407,8 +393,8 @@
 86
 ((),
   Value
-    (@., non_rec, iteri, [ A1278; A1281 ],
-      [ (f, (Type (Z/1) -> (A1278/0 -> A1281/0))); (l, Type (list/1, A1278/0)) ],
+    (@., non_rec, iteri, [ A; B ],
+      [ (f, (Type (Z/1) -> (A -> B))); (l, Type (list/1, A)) ],
       Some Type (unit/1)) =
     Apply
       (86, Variable (86, iteri_aux/0),
@@ -417,12 +403,8 @@
 88
 ((),
   Value
-    (@coq_rec, rec, fold_left, [ A1323; A1326 ],
-      [
-        (f, (A1323/0 -> (A1326/0 -> A1323/0)));
-        (accu, A1323/0);
-        (l, Type (list/1, A1326/0))
-      ], Some A1323/0) =
+    (@coq_rec, rec, fold_left, [ A; B ],
+      [ (f, (A -> (B -> A))); (accu, A); (l, Type (list/1, B)) ], Some A) =
     Match
       (89, Variable (89, l/0),
         [
@@ -452,12 +434,8 @@
 94
 ((),
   Value
-    (@coq_rec, rec, fold_right, [ A1364; A1367 ],
-      [
-        (f, (A1364/0 -> (A1367/0 -> A1367/0)));
-        (l, Type (list/1, A1364/0));
-        (accu, A1367/0)
-      ], Some A1367/0) =
+    (@coq_rec, rec, fold_right, [ A; B ],
+      [ (f, (A -> (B -> B))); (l, Type (list/1, A)); (accu, B) ], Some B) =
     Match
       (95, Variable (95, l/0),
         [
@@ -489,12 +467,9 @@
 100
 ((),
   Value
-    (@coq_rec, rec, map2, [ A1443; A1446; A1449 ],
-      [
-        (f, (A1446/0 -> (A1449/0 -> A1443/0)));
-        (l1, Type (list/1, A1446/0));
-        (l2, Type (list/1, A1449/0))
-      ], Some Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, A1443/0))) =
+    (@coq_rec, rec, map2, [ A; B; C ],
+      [ (f, (A -> (B -> C))); (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
+      Some Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, C))) =
     Match
       (101, Tuple (101, Variable (101, l1/0), Variable (101, l2/0)),
         [
@@ -536,19 +511,16 @@
 107
 ((),
   Value
-    (@., non_rec, rev_map2, [ A1556; A1559; A1562 ],
-      [
-        (f, (A1559/0 -> (A1562/0 -> A1556/0)));
-        (l1, Type (list/1, A1559/0));
-        (l2, Type (list/1, A1562/0))
-      ], Some Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, A1556/0))) =
+    (@., non_rec, rev_map2, [ A; B; C ],
+      [ (f, (A -> (B -> C))); (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
+      Some Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, C))) =
     Let 108
       (@coq_rec, rec, rmap2_f, [ ],
         [
-          (accu, Type (list/1, A1556/0));
-          (l1, Type (list/1, A1559/0));
-          (l2, Type (list/1, A1562/0))
-        ], Some Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, A1556/0))) =
+          (accu, Type (list/1, C));
+          (l1, Type (list/1, A));
+          (l2, Type (list/1, B))
+        ], Some Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, C))) =
       Match
         (109, Tuple (109, Variable (109, l1/0), Variable (109, l2/0)),
           [
@@ -599,12 +571,9 @@
 116
 ((),
   Value
-    (@coq_rec, rec, iter2, [ A1660; A1662; A1665 ],
-      [
-        (f, (A1662/0 -> (A1665/0 -> A1660/0)));
-        (l1, Type (list/1, A1662/0));
-        (l2, Type (list/1, A1665/0))
-      ], Some Monad ([ OCaml.Invalid_argument/1 ], Type (unit/1))) =
+    (@coq_rec, rec, iter2, [ A; B; C ],
+      [ (f, (A -> (B -> C))); (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
+      Some Monad ([ OCaml.Invalid_argument/1 ], Type (unit/1))) =
     Match
       (117, Tuple (117, Variable (117, l1/0), Variable (117, l2/0)),
         [
@@ -627,13 +596,13 @@
 123
 ((),
   Value
-    (@coq_rec, rec, fold_left2, [ A1759; A1762; A1765 ],
+    (@coq_rec, rec, fold_left2, [ A; B; C ],
       [
-        (f, (A1759/0 -> (A1762/0 -> (A1765/0 -> A1759/0))));
-        (accu, A1759/0);
-        (l1, Type (list/1, A1762/0));
-        (l2, Type (list/1, A1765/0))
-      ], Some Monad ([ OCaml.Invalid_argument/1 ], A1759/0)) =
+        (f, (A -> (B -> (C -> A))));
+        (accu, A);
+        (l1, Type (list/1, B));
+        (l2, Type (list/1, C))
+      ], Some Monad ([ OCaml.Invalid_argument/1 ], A)) =
     Match
       (124, Tuple (124, Variable (124, l1/0), Variable (124, l2/0)),
         [
@@ -672,13 +641,13 @@
 130
 ((),
   Value
-    (@coq_rec, rec, fold_right2, [ A1850; A1853; A1856 ],
+    (@coq_rec, rec, fold_right2, [ A; B; C ],
       [
-        (f, (A1850/0 -> (A1853/0 -> (A1856/0 -> A1856/0))));
-        (l1, Type (list/1, A1850/0));
-        (l2, Type (list/1, A1853/0));
-        (accu, A1856/0)
-      ], Some Monad ([ OCaml.Invalid_argument/1 ], A1856/0)) =
+        (f, (A -> (B -> (C -> C))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, B));
+        (accu, C)
+      ], Some Monad ([ OCaml.Invalid_argument/1 ], C)) =
     Match
       (131, Tuple (131, Variable (131, l1/0), Variable (131, l2/0)),
         [
@@ -722,9 +691,9 @@
 137
 ((),
   Value
-    (@coq_rec, rec, for_all, [ A1912 ],
-      [ (p, (A1912/0 -> Type (bool/1))); (x, Type (list/1, A1912/0)) ],
-      Some Type (bool/1)) =
+    (@coq_rec, rec, for_all, [ A ],
+      [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some Type (bool/1))
+    =
     Match
       (?, Variable (?, x/0),
         [
@@ -762,9 +731,9 @@
 142
 ((),
   Value
-    (@coq_rec, rec, _exists, [ A1955 ],
-      [ (p, (A1955/0 -> Type (bool/1))); (x, Type (list/1, A1955/0)) ],
-      Some Type (bool/1)) =
+    (@coq_rec, rec, _exists, [ A ],
+      [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some Type (bool/1))
+    =
     Match
       (?, Variable (?, x/0),
         [
@@ -802,11 +771,11 @@
 147
 ((),
   Value
-    (@coq_rec, rec, for_all2, [ A2038; A2041 ],
+    (@coq_rec, rec, for_all2, [ A; B ],
       [
-        (p, (A2038/0 -> (A2041/0 -> Type (bool/1))));
-        (l1, Type (list/1, A2038/0));
-        (l2, Type (list/1, A2041/0))
+        (p, (A -> (B -> Type (bool/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, B))
       ], Some Monad ([ OCaml.Invalid_argument/1 ], Type (bool/1))) =
     Match
       (148, Tuple (148, Variable (148, l1/0), Variable (148, l2/0)),
@@ -857,11 +826,11 @@
 154
 ((),
   Value
-    (@coq_rec, rec, _exists2, [ A2135; A2138 ],
+    (@coq_rec, rec, _exists2, [ A; B ],
       [
-        (p, (A2135/0 -> (A2138/0 -> Type (bool/1))));
-        (l1, Type (list/1, A2135/0));
-        (l2, Type (list/1, A2138/0))
+        (p, (A -> (B -> Type (bool/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, B))
       ], Some Monad ([ OCaml.Invalid_argument/1 ], Type (bool/1))) =
     Match
       (155, Tuple (155, Variable (155, l1/0), Variable (155, l2/0)),
@@ -912,9 +881,9 @@
 194
 ((),
   Value
-    (@coq_rec, rec, find, [ A2165 ],
-      [ (p, (A2165/0 -> Type (bool/1))); (x, Type (list/1, A2165/0)) ],
-      Some Monad ([ OCaml.Not_found/1 ], A2165/0)) =
+    (@coq_rec, rec, find, [ A ],
+      [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ],
+      Some Monad ([ OCaml.Not_found/1 ], A)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -940,12 +909,12 @@
 199
 ((),
   Value
-    (@., non_rec, find_all, [ A2232 ], [ (p, (A2232/0 -> Type (bool/1))) ],
-      Some (Type (list/1, A2232/0) -> Type (list/1, A2232/0))) =
+    (@., non_rec, find_all, [ A ], [ (p, (A -> Type (bool/1))) ],
+      Some (Type (list/1, A) -> Type (list/1, A))) =
     Let 200
       (@coq_rec, rec, find, [ ],
-        [ (accu, Type (list/1, A2232/0)); (x, Type (list/1, A2232/0)) ],
-        Some Type (list/1, A2232/0)) =
+        [ (accu, Type (list/1, A)); (x, Type (list/1, A)) ],
+        Some Type (list/1, A)) =
       Match
         (?, Variable (?, x/0),
           [
@@ -1001,25 +970,23 @@
 206
 ((),
   Value
-    (@., non_rec, filter, [ A2276 ], [ ],
-      Some
-        ((A2276/0 -> Type (bool/1)) ->
-          (Type (list/1, A2276/0) -> Type (list/1, A2276/0)))) =
+    (@., non_rec, filter, [ A ], [ ],
+      Some ((A -> Type (bool/1)) -> (Type (list/1, A) -> Type (list/1, A)))) =
     Variable (206, find_all/0))
 
 208
 ((),
   Value
-    (@., non_rec, partition, [ A2328 ],
-      [ (p, (A2328/0 -> Type (bool/1))); (l, Type (list/1, A2328/0)) ],
-      Some (Type (list/1, A2328/0) * Type (list/1, A2328/0))) =
+    (@., non_rec, partition, [ A ],
+      [ (p, (A -> Type (bool/1))); (l, Type (list/1, A)) ],
+      Some (Type (list/1, A) * Type (list/1, A))) =
     Let 209
       (@coq_rec, rec, part, [ ],
         [
-          (yes, Type (list/1, A2328/0));
-          (no, Type (list/1, A2328/0));
-          (x, Type (list/1, A2328/0))
-        ], Some (Type (list/1, A2328/0) * Type (list/1, A2328/0))) =
+          (yes, Type (list/1, A));
+          (no, Type (list/1, A));
+          (x, Type (list/1, A))
+        ], Some (Type (list/1, A) * Type (list/1, A))) =
       Match
         (?, Variable (?, x/0),
           [
@@ -1102,9 +1069,8 @@
 215
 ((),
   Value
-    (@coq_rec, rec, split, [ A2410; A2412 ],
-      [ (x, Type (list/1, (A2410/0 * A2412/0))) ],
-      Some (Type (list/1, A2410/0) * Type (list/1, A2412/0))) =
+    (@coq_rec, rec, split, [ A; B ], [ (x, Type (list/1, (A * B))) ],
+      Some (Type (list/1, A) * Type (list/1, B))) =
     Match
       (?, Variable (?, x/0),
         [
@@ -1144,11 +1110,9 @@
 221
 ((),
   Value
-    (@coq_rec, rec, combine, [ A2493; A2494 ],
-      [ (l1, Type (list/1, A2493/0)); (l2, Type (list/1, A2494/0)) ],
-      Some
-        Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, (A2493/0 * A2494/0))))
-    =
+    (@coq_rec, rec, combine, [ A; B ],
+      [ (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
+      Some Monad ([ OCaml.Invalid_argument/1 ], Type (list/1, (A * B)))) =
     Match
       (222, Tuple (222, Variable (222, l1/0), Variable (222, l2/0)),
         [
@@ -1187,13 +1151,13 @@
 230
 ((),
   Value
-    (@., rec, merge_rec, [ A2583 ],
+    (@., rec, merge_rec, [ A ],
       [
         (counter, Type (nat/1));
-        (cmp, (A2583/0 -> (A2583/0 -> Type (Z/1))));
-        (l1, Type (list/1, A2583/0));
-        (l2, Type (list/1, A2583/0))
-      ], Some Monad ([ NonTermination/1 ], Type (list/1, A2583/0))) =
+        (cmp, (A -> (A -> Type (Z/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, A))
+      ], Some Monad ([ NonTermination/1 ], Type (list/1, A))) =
     Match
       (?, Variable (?, counter/0),
         [
@@ -1334,12 +1298,12 @@
 230
 ((),
   Value
-    (@., non_rec, merge, [ A2583 ],
+    (@., non_rec, merge, [ A ],
       [
-        (cmp, (A2583/0 -> (A2583/0 -> Type (Z/1))));
-        (l1, Type (list/1, A2583/0));
-        (l2, Type (list/1, A2583/0))
-      ], Some Monad ([ Counter/1; NonTermination/1 ], Type (list/1, A2583/0))) =
+        (cmp, (A -> (A -> Type (Z/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, A))
+      ], Some Monad ([ Counter/1; NonTermination/1 ], Type (list/1, A))) =
     Bind
       (?,
         Lift
@@ -1359,9 +1323,8 @@
 239
 ((),
   Value
-    (@coq_rec, rec, chop, [ A2642 ],
-      [ (k, Type (Z/1)); (l, Type (list/1, A2642/0)) ],
-      Some Monad ([ OCaml.Assert_failure/1 ], Type (list/1, A2642/0))) =
+    (@coq_rec, rec, chop, [ A ], [ (k, Type (Z/1)); (l, Type (list/1, A)) ],
+      Some Monad ([ OCaml.Assert_failure/1 ], Type (list/1, A))) =
     IfThenElse
       (240,
         Apply

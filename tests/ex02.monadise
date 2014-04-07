@@ -21,7 +21,7 @@
 
 9
 ((),
-  Value (@., non_rec, f, [ A711 ], [ (x, A711/0) ], Some (A711/0 * A711/0)) =
+  Value (@., non_rec, f, [ A ], [ (x, A) ], Some (A * A)) =
     Tuple (9, Variable (9, x/0), Variable (9, x/0)))
 
 11

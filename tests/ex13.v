@@ -4,8 +4,7 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Definition tail {A696 : Type} (l : list A696) : M [ OCaml.Failure ] (list A696)
-  :=
+Definition tail {A : Type} (l : list A) : M [ OCaml.Failure ] (list A) :=
   match l with
   | cons _ xs => ret xs
   | [] =>
@@ -33,7 +32,7 @@ Definition print_list (x : list string) : M [ Counter; IO; NonTermination ] unit
 Definition f : (list string) -> M [ Counter; IO; NonTermination ] unit :=
   print_list.
 
-Definition x {A748 : Type} (z : A748) :
+Definition x {A : Type} (z : A) :
   M [ Counter; IO; NonTermination; OCaml.Failure ] unit :=
   let! x :=
     lift [_;_;_;_] "0001"

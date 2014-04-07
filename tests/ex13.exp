@@ -1,8 +1,8 @@
 3
 ((),
   Value
-    (@., non_rec, tail, [ A696 ], [ (l, Type (list/1, A696/0)) ],
-      Some Type (list/1, A696/0)) =
+    (@., non_rec, tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
+    =
     Match
       (4, Variable (4, l/0),
         [
@@ -90,7 +90,7 @@
 
 16
 ((),
-  Value (@., non_rec, x, [ A748 ], [ (z, A748/0) ], Some Type (unit/1)) =
+  Value (@., non_rec, x, [ A ], [ (z, A) ], Some Type (unit/1)) =
     Apply
       (16, Variable (16, f/0),
         [
