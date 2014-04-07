@@ -1,0 +1,1848 @@
+16
+(.,
+  Value
+    (@coq_rec, rec, length_aux, [ A ],
+      [ (len, Type (Z/1)); (x, Type (list/1, A)) ], Some Type (Z/1)) =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Variable ((17, Effect ([ ], .)), len/0));
+          (Constructor (cons/1, a, l),
+            Apply
+              ((18, Effect ([ ], .)),
+                Variable ((18, Effect ([ ], .)), length_aux/0),
+                [
+                  Apply
+                    ((18,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((18,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Z.add/0),
+                      [
+                        Variable
+                          ((18,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            len/0);
+                        Constant
+                          ((18,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Int(1))
+                      ]);
+                  Variable ((18, Effect ([ ], .)), l/0)
+                ]))
+        ]))
+
+21
+(. -> .,
+  Value (@., non_rec, length, [ A ], [ (l, Type (list/1, A)) ], Some Type (Z/1))
+    =
+    Apply
+      ((21, Effect ([ ], .)), Variable ((21, Effect ([ ], .)), length_aux/0),
+        [
+          Constant ((21, Effect ([ ], .)), Int(0));
+          Variable ((21, Effect ([ ], .)), l/0)
+        ]))
+
+23
+(. -[ OCaml.Failure/1 ]-> .,
+  Value (@., non_rec, hd, [ A ], [ (x, Type (list/1, A)) ], Some A) =
+    Match
+      ((?, Effect ([ OCaml.Failure/1 ], .)),
+        Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1),
+            Apply
+              ((24, Effect ([ OCaml.Failure/1 ], .)),
+                Variable
+                  ((24,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Failure/1
+                          ]-> .)),
+                    OCaml.Pervasives.failwith/1),
+                [
+                  Constant
+                    ((24,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("hd"))
+                ]));
+          (Constructor (cons/1, a, l), Variable ((25, Effect ([ ], .)), a/0))
+        ]))
+
+27
+(. -[ OCaml.Failure/1 ]-> .,
+  Value
+    (@., non_rec, tl, [ A ], [ (x, Type (list/1, A)) ], Some Type (list/1, A)) =
+    Match
+      ((?, Effect ([ OCaml.Failure/1 ], .)),
+        Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1),
+            Apply
+              ((28, Effect ([ OCaml.Failure/1 ], .)),
+                Variable
+                  ((28,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Failure/1
+                          ]-> .)),
+                    OCaml.Pervasives.failwith/1),
+                [
+                  Constant
+                    ((28,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("tl"))
+                ]));
+          (Constructor (cons/1, a, l), Variable ((29, Effect ([ ], .)), l/0))
+        ]))
+
+31
+(. -> . -[ OCaml.Failure/1; OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@., non_rec, nth, [ A ], [ (l, Type (list/1, A)); (n, Type (Z/1)) ], Some A)
+    =
+    IfThenElse
+      ((32, Effect ([ OCaml.Failure/1; OCaml.Invalid_argument/1 ], .)),
+        Apply
+          ((32, Effect ([ ], .)),
+            Variable ((32, Effect ([ ], .)), OCaml.Pervasives.lt/0),
+            [
+              Variable ((32, Effect ([ ], .)), n/0);
+              Constant ((32, Effect ([ ], .)), Int(0))
+            ]),
+        Apply
+          ((32, Effect ([ OCaml.Invalid_argument/1 ], .)),
+            Variable
+              ((32, Effect ([ ], . -[ OCaml.Invalid_argument/1 ]-> .)),
+                OCaml.Pervasives.invalid_arg/1),
+            [ Constant ((32, Effect ([ ], .)), String("List.nth")) ]),
+        Let (33, Effect ([ OCaml.Failure/1 ], .))
+          (@coq_rec, rec, nth_aux, [ A ],
+            [ (l, Type (list/1, A)); (n, Type (Z/1)) ], Some A) =
+          Match
+            ((34, Effect ([ OCaml.Failure/1 ], .)),
+              Variable ((34, Effect ([ ], .)), l/0),
+              [
+                (Constructor ([]/1),
+                  Apply
+                    ((35,
+                      Effect
+                        ([
+                          OCaml.Failure/1
+                        ], .)),
+                      Variable
+                        ((35,
+                          Effect
+                            ([
+                            ],
+                              .
+                                -[
+                                  OCaml.Failure/1
+                                ]->
+                                .)),
+                          OCaml.Pervasives.failwith/1),
+                      [
+                        Constant
+                          ((35,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            String("nth"))
+                      ]));
+                (Constructor (cons/1, a, l),
+                  IfThenElse
+                    ((36,
+                      Effect
+                        ([
+                          OCaml.Failure/1
+                        ], .)),
+                      Apply
+                        ((36,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((36,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              equiv_decb/0),
+                          [
+                            Variable
+                              ((36,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                n/0);
+                            Constant
+                              ((36,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Int(0))
+                          ]),
+                      Variable
+                        ((36,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          a/0),
+                      Apply
+                        ((36,
+                          Effect
+                            ([
+                              OCaml.Failure/1
+                            ],
+                              .)),
+                          Variable
+                            ((36,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    ->
+                                    .
+                                      -[
+                                        OCaml.Failure/1
+                                      ]->
+                                      .)),
+                              nth_aux/0),
+                          [
+                            Variable
+                              ((36,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                l/0);
+                            Apply
+                              ((36,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Variable
+                                  ((36,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    Z.sub/0),
+                                [
+                                  Variable
+                                    ((36,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      n/0);
+                                  Constant
+                                    ((36,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      Int(1))
+                                ])
+                          ])))
+              ]) in
+        Apply
+          ((38, Effect ([ OCaml.Failure/1 ], .)),
+            Variable
+              ((38, Effect ([ ], . -> . -[ OCaml.Failure/1 ]-> .)), nth_aux/0),
+            [
+              Variable ((38, Effect ([ ], .)), l/0);
+              Variable ((38, Effect ([ ], .)), n/0)
+            ])))
+
+40
+(.,
+  Value
+    (@., non_rec, append, [ A ], [ ],
+      Some (Type (list/1, A) -> (Type (list/1, A) -> Type (list/1, A)))) =
+    Variable ((40, Effect ([ ], .)), OCaml.Pervasives.app/0))
+
+42
+(.,
+  Value
+    (@coq_rec, rec, rev_append, [ A ],
+      [ (l1, Type (list/1, A)); (l2, Type (list/1, A)) ], Some Type (list/1, A))
+    =
+    Match
+      ((43, Effect ([ ], .)), Variable ((43, Effect ([ ], .)), l1/0),
+        [
+          (Constructor ([]/1), Variable ((44, Effect ([ ], .)), l2/0));
+          (Constructor (cons/1, a, l),
+            Apply
+              ((45, Effect ([ ], .)),
+                Variable ((45, Effect ([ ], .)), rev_append/0),
+                [
+                  Variable ((45, Effect ([ ], .)), l/0);
+                  Constructor
+                    ((45,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      cons/1,
+                      Variable
+                        ((45,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          a/0),
+                      Variable
+                        ((45,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0))
+                ]))
+        ]))
+
+48
+(. -> .,
+  Value
+    (@., non_rec, rev, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
+    =
+    Apply
+      ((48, Effect ([ ], .)), Variable ((48, Effect ([ ], .)), rev_append/0),
+        [
+          Variable ((48, Effect ([ ], .)), l/0);
+          Constructor ((48, Effect ([ ], .)), []/1)
+        ]))
+
+50
+(.,
+  Value
+    (@coq_rec, rec, flatten, [ A ], [ (x, Type (list/1, Type (list/1, A))) ],
+      Some Type (list/1, A)) =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Constructor ((51, Effect ([ ], .)), []/1));
+          (Constructor (cons/1, l, r),
+            Apply
+              ((52, Effect ([ ], .)),
+                Variable
+                  ((52, Effect ([ ], .)),
+                    OCaml.Pervasives.app/0),
+                [
+                  Variable ((52, Effect ([ ], .)), l/0);
+                  Apply
+                    ((52,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((52,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          flatten/0),
+                      [
+                        Variable
+                          ((52,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            r/0)
+                      ])
+                ]))
+        ]))
+
+55
+(.,
+  Value
+    (@., non_rec, concat, [ A ], [ ],
+      Some (Type (list/1, Type (list/1, A)) -> Type (list/1, A))) =
+    Variable ((55, Effect ([ ], .)), flatten/0))
+
+57
+(.,
+  Value
+    (@coq_rec, rec, map, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
+      Some Type (list/1, B)) =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Constructor ((58, Effect ([ ], .)), []/1));
+          (Constructor (cons/1, a, l),
+            Let (59, Effect ([ ], .)) (@., non_rec, r, [ ], [ ], None) =
+              Apply
+                ((59, Effect ([ ], .)),
+                  Variable ((59, Effect ([ ], .)), f/0),
+                  [
+                    Variable
+                      ((59,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        a/0)
+                  ]) in
+            Constructor
+              ((59, Effect ([ ], .)), cons/1,
+                Variable ((59, Effect ([ ], .)), r/0),
+                Apply
+                  ((59, Effect ([ ], .)),
+                    Variable
+                      ((59, Effect ([ ], .)),
+                        map/0),
+                    [
+                      Variable
+                        ((59,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0);
+                      Variable
+                        ((59,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l/0)
+                    ])))
+        ]))
+
+62
+(.,
+  Value
+    (@coq_rec, rec, mapi_aux, [ A; B ],
+      [ (i, Type (Z/1)); (f, (Type (Z/1) -> (B -> A))); (x, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Constructor ((63, Effect ([ ], .)), []/1));
+          (Constructor (cons/1, a, l),
+            Let (64, Effect ([ ], .)) (@., non_rec, r, [ ], [ ], None) =
+              Apply
+                ((64, Effect ([ ], .)),
+                  Variable ((64, Effect ([ ], .)), f/0),
+                  [
+                    Variable
+                      ((64,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        i/0);
+                    Variable
+                      ((64,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        a/0)
+                  ]) in
+            Constructor
+              ((64, Effect ([ ], .)), cons/1,
+                Variable ((64, Effect ([ ], .)), r/0),
+                Apply
+                  ((64, Effect ([ ], .)),
+                    Variable
+                      ((64, Effect ([ ], .)),
+                        mapi_aux/0),
+                    [
+                      Apply
+                        ((64,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((64,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Z.add/0),
+                          [
+                            Variable
+                              ((64,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                i/0);
+                            Constant
+                              ((64,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Int(1))
+                          ]);
+                      Variable
+                        ((64,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0);
+                      Variable
+                        ((64,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l/0)
+                    ])))
+        ]))
+
+67
+(. -> . -> .,
+  Value
+    (@., non_rec, mapi, [ A; B ],
+      [ (f, (Type (Z/1) -> (B -> A))); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Apply
+      ((67, Effect ([ ], .)), Variable ((67, Effect ([ ], .)), mapi_aux/0),
+        [
+          Constant ((67, Effect ([ ], .)), Int(0));
+          Variable ((67, Effect ([ ], .)), f/0);
+          Variable ((67, Effect ([ ], .)), l/0)
+        ]))
+
+76
+(.,
+  Value
+    (@coq_rec, rec, iter, [ A; B ], [ (f, (B -> A)); (x, Type (list/1, B)) ],
+      Some Type (unit/1)) =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Constructor ((77, Effect ([ ], .)), tt/1));
+          (Constructor (cons/1, a, l),
+            Sequence
+              ((78, Effect ([ ], .)),
+                Apply
+                  ((78, Effect ([ ], .)),
+                    Variable
+                      ((78, Effect ([ ], .)),
+                        f/0),
+                    [
+                      Variable
+                        ((78,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          a/0)
+                    ]),
+                Apply
+                  ((78, Effect ([ ], .)),
+                    Variable
+                      ((78, Effect ([ ], .)),
+                        iter/0),
+                    [
+                      Variable
+                        ((78,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0);
+                      Variable
+                        ((78,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l/0)
+                    ])))
+        ]))
+
+81
+(.,
+  Value
+    (@coq_rec, rec, iteri_aux, [ A; B ],
+      [ (i, Type (Z/1)); (f, (Type (Z/1) -> (B -> A))); (x, Type (list/1, B)) ],
+      Some Type (unit/1)) =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Constructor ((82, Effect ([ ], .)), tt/1));
+          (Constructor (cons/1, a, l),
+            Sequence
+              ((83, Effect ([ ], .)),
+                Apply
+                  ((83, Effect ([ ], .)),
+                    Variable
+                      ((83, Effect ([ ], .)),
+                        f/0),
+                    [
+                      Variable
+                        ((83,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          i/0);
+                      Variable
+                        ((83,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          a/0)
+                    ]),
+                Apply
+                  ((83, Effect ([ ], .)),
+                    Variable
+                      ((83, Effect ([ ], .)),
+                        iteri_aux/0),
+                    [
+                      Apply
+                        ((83,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((83,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Z.add/0),
+                          [
+                            Variable
+                              ((83,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                i/0);
+                            Constant
+                              ((83,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Int(1))
+                          ]);
+                      Variable
+                        ((83,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0);
+                      Variable
+                        ((83,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l/0)
+                    ])))
+        ]))
+
+86
+(. -> . -> .,
+  Value
+    (@., non_rec, iteri, [ A; B ],
+      [ (f, (Type (Z/1) -> (A -> B))); (l, Type (list/1, A)) ],
+      Some Type (unit/1)) =
+    Apply
+      ((86, Effect ([ ], .)), Variable ((86, Effect ([ ], .)), iteri_aux/0),
+        [
+          Constant ((86, Effect ([ ], .)), Int(0));
+          Variable ((86, Effect ([ ], .)), f/0);
+          Variable ((86, Effect ([ ], .)), l/0)
+        ]))
+
+88
+(.,
+  Value
+    (@coq_rec, rec, fold_left, [ A; B ],
+      [ (f, (A -> (B -> A))); (accu, A); (l, Type (list/1, B)) ], Some A) =
+    Match
+      ((89, Effect ([ ], .)), Variable ((89, Effect ([ ], .)), l/0),
+        [
+          (Constructor ([]/1), Variable ((90, Effect ([ ], .)), accu/0));
+          (Constructor (cons/1, a, l),
+            Apply
+              ((91, Effect ([ ], .)),
+                Variable ((91, Effect ([ ], .)), fold_left/0),
+                [
+                  Variable ((91, Effect ([ ], .)), f/0);
+                  Apply
+                    ((91,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((91,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0),
+                      [
+                        Variable
+                          ((91,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            accu/0);
+                        Variable
+                          ((91,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a/0)
+                      ]);
+                  Variable ((91, Effect ([ ], .)), l/0)
+                ]))
+        ]))
+
+94
+(.,
+  Value
+    (@coq_rec, rec, fold_right, [ A; B ],
+      [ (f, (A -> (B -> B))); (l, Type (list/1, A)); (accu, B) ], Some B) =
+    Match
+      ((95, Effect ([ ], .)), Variable ((95, Effect ([ ], .)), l/0),
+        [
+          (Constructor ([]/1), Variable ((96, Effect ([ ], .)), accu/0));
+          (Constructor (cons/1, a, l),
+            Apply
+              ((97, Effect ([ ], .)),
+                Variable ((97, Effect ([ ], .)), f/0),
+                [
+                  Variable ((97, Effect ([ ], .)), a/0);
+                  Apply
+                    ((97,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((97,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          fold_right/0),
+                      [
+                        Variable
+                          ((97,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            f/0);
+                        Variable
+                          ((97,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l/0);
+                        Variable
+                          ((97,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            accu/0)
+                      ])
+                ]))
+        ]))
+
+100
+(. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@coq_rec, rec, map2, [ A; B; C ],
+      [ (f, (B -> (C -> A))); (l1, Type (list/1, B)); (l2, Type (list/1, C)) ],
+      Some Type (list/1, A)) =
+    Match
+      ((101, Effect ([ OCaml.Invalid_argument/1 ], .)),
+        Tuple
+          ((101, Effect ([ ], .)), Variable ((101, Effect ([ ], .)), l1/0),
+            Variable ((101, Effect ([ ], .)), l2/0)),
+        [
+          (Tuple (Constructor ([]/1), Constructor ([]/1)),
+            Constructor ((102, Effect ([ ], .)), []/1));
+          (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
+            Let (103, Effect ([ OCaml.Invalid_argument/1 ], .))
+              (@., non_rec, r, [ ], [ ], None) =
+              Apply
+                ((103, Effect ([ ], .)),
+                  Variable ((103, Effect ([ ], .)), f/0),
+                  [
+                    Variable
+                      ((103,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        a1/0);
+                    Variable
+                      ((103,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        a2/0)
+                  ]) in
+            Constructor
+              ((103, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                cons/1,
+                Variable ((103, Effect ([ ], .)), r/0),
+                Apply
+                  ((103,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ], .)),
+                    Variable
+                      ((103,
+                        Effect
+                          ([ ],
+                            .
+                              ->
+                              .
+                                ->
+                                .
+                                  -[
+                                    OCaml.Invalid_argument/1
+                                  ]->
+                                  .)),
+                        map2/0),
+                    [
+                      Variable
+                        ((103,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0);
+                      Variable
+                        ((103,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l1/0);
+                      Variable
+                        ((103,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0)
+                    ])));
+          (Tuple (Any, Any),
+            Apply
+              ((104, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((104,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Invalid_argument/1
+                          ]-> .)),
+                    OCaml.Pervasives.invalid_arg/1),
+                [
+                  Constant
+                    ((104,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("List.map2"))
+                ]))
+        ]))
+
+116
+(. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@coq_rec, rec, iter2, [ A; B; C ],
+      [ (f, (B -> (C -> A))); (l1, Type (list/1, B)); (l2, Type (list/1, C)) ],
+      Some Type (unit/1)) =
+    Match
+      ((117, Effect ([ OCaml.Invalid_argument/1 ], .)),
+        Tuple
+          ((117, Effect ([ ], .)), Variable ((117, Effect ([ ], .)), l1/0),
+            Variable ((117, Effect ([ ], .)), l2/0)),
+        [
+          (Tuple (Constructor ([]/1), Constructor ([]/1)),
+            Constructor ((118, Effect ([ ], .)), tt/1));
+          (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
+            Sequence
+              ((119, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Apply
+                  ((119, Effect ([ ], .)),
+                    Variable
+                      ((119, Effect ([ ], .)),
+                        f/0),
+                    [
+                      Variable
+                        ((119,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          a1/0);
+                      Variable
+                        ((119,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          a2/0)
+                    ]),
+                Apply
+                  ((119,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ], .)),
+                    Variable
+                      ((119,
+                        Effect
+                          ([ ],
+                            .
+                              ->
+                              .
+                                ->
+                                .
+                                  -[
+                                    OCaml.Invalid_argument/1
+                                  ]->
+                                  .)),
+                        iter2/0),
+                    [
+                      Variable
+                        ((119,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0);
+                      Variable
+                        ((119,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l1/0);
+                      Variable
+                        ((119,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0)
+                    ])));
+          (Tuple (Any, Any),
+            Apply
+              ((120, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((120,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Invalid_argument/1
+                          ]-> .)),
+                    OCaml.Pervasives.invalid_arg/1),
+                [
+                  Constant
+                    ((120,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("List.iter2"))
+                ]))
+        ]))
+
+123
+(. -> . -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@coq_rec, rec, fold_left2, [ A; B; C ],
+      [
+        (f, (A -> (B -> (C -> A))));
+        (accu, A);
+        (l1, Type (list/1, B));
+        (l2, Type (list/1, C))
+      ], Some A) =
+    Match
+      ((124, Effect ([ OCaml.Invalid_argument/1 ], .)),
+        Tuple
+          ((124, Effect ([ ], .)), Variable ((124, Effect ([ ], .)), l1/0),
+            Variable ((124, Effect ([ ], .)), l2/0)),
+        [
+          (Tuple (Constructor ([]/1), Constructor ([]/1)),
+            Variable ((125, Effect ([ ], .)), accu/0));
+          (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
+            Apply
+              ((126, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((126,
+                    Effect
+                      ([ ],
+                        . ->
+                          . ->
+                            .
+                              ->
+                              .
+                                -[
+                                  OCaml.Invalid_argument/1
+                                ]->
+                                .)),
+                    fold_left2/0),
+                [
+                  Variable ((126, Effect ([ ], .)), f/0);
+                  Apply
+                    ((126,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((126,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          f/0),
+                      [
+                        Variable
+                          ((126,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            accu/0);
+                        Variable
+                          ((126,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a1/0);
+                        Variable
+                          ((126,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a2/0)
+                      ]);
+                  Variable
+                    ((126,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      l1/0);
+                  Variable
+                    ((126,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      l2/0)
+                ]));
+          (Tuple (Any, Any),
+            Apply
+              ((127, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((127,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Invalid_argument/1
+                          ]-> .)),
+                    OCaml.Pervasives.invalid_arg/1),
+                [
+                  Constant
+                    ((127,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("List.fold_left2"))
+                ]))
+        ]))
+
+130
+(. -> . -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@coq_rec, rec, fold_right2, [ A; B; C ],
+      [
+        (f, (A -> (B -> (C -> C))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, B));
+        (accu, C)
+      ], Some C) =
+    Match
+      ((131, Effect ([ OCaml.Invalid_argument/1 ], .)),
+        Tuple
+          ((131, Effect ([ ], .)), Variable ((131, Effect ([ ], .)), l1/0),
+            Variable ((131, Effect ([ ], .)), l2/0)),
+        [
+          (Tuple (Constructor ([]/1), Constructor ([]/1)),
+            Variable ((132, Effect ([ ], .)), accu/0));
+          (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
+            Apply
+              ((133, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable ((133, Effect ([ ], .)), f/0),
+                [
+                  Variable
+                    ((133,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      a1/0);
+                  Variable
+                    ((133,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      a2/0);
+                  Apply
+                    ((133,
+                      Effect
+                        ([
+                          OCaml.Invalid_argument/1
+                        ],
+                          .)),
+                      Variable
+                        ((133,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .
+                                    ->
+                                    .
+                                      -[
+                                        OCaml.Invalid_argument/1
+                                      ]->
+                                      .)),
+                          fold_right2/0),
+                      [
+                        Variable
+                          ((133,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            f/0);
+                        Variable
+                          ((133,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l1/0);
+                        Variable
+                          ((133,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l2/0);
+                        Variable
+                          ((133,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            accu/0)
+                      ])
+                ]));
+          (Tuple (Any, Any),
+            Apply
+              ((134, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((134,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Invalid_argument/1
+                          ]-> .)),
+                    OCaml.Pervasives.invalid_arg/1),
+                [
+                  Constant
+                    ((134,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("List.fold_right2"))
+                ]))
+        ]))
+
+137
+(.,
+  Value
+    (@coq_rec, rec, for_all, [ A ],
+      [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some Type (bool/1))
+    =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Constructor ((138, Effect ([ ], .)), true/1));
+          (Constructor (cons/1, a, l),
+            Apply
+              ((139, Effect ([ ], .)),
+                Variable ((139, Effect ([ ], .)), andb/0),
+                [
+                  Apply
+                    ((139,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((139,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          p/0),
+                      [
+                        Variable
+                          ((139,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a/0)
+                      ]);
+                  Apply
+                    ((139,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((139,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          for_all/0),
+                      [
+                        Variable
+                          ((139,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            p/0);
+                        Variable
+                          ((139,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l/0)
+                      ])
+                ]))
+        ]))
+
+142
+(.,
+  Value
+    (@coq_rec, rec, _exists, [ A ],
+      [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some Type (bool/1))
+    =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1), Constructor ((143, Effect ([ ], .)), false/1));
+          (Constructor (cons/1, a, l),
+            Apply
+              ((144, Effect ([ ], .)),
+                Variable ((144, Effect ([ ], .)), orb/0),
+                [
+                  Apply
+                    ((144,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((144,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          p/0),
+                      [
+                        Variable
+                          ((144,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a/0)
+                      ]);
+                  Apply
+                    ((144,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((144,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          _exists/0),
+                      [
+                        Variable
+                          ((144,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            p/0);
+                        Variable
+                          ((144,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l/0)
+                      ])
+                ]))
+        ]))
+
+147
+(. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@coq_rec, rec, for_all2, [ A; B ],
+      [
+        (p, (A -> (B -> Type (bool/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, B))
+      ], Some Type (bool/1)) =
+    Match
+      ((148, Effect ([ OCaml.Invalid_argument/1 ], .)),
+        Tuple
+          ((148, Effect ([ ], .)), Variable ((148, Effect ([ ], .)), l1/0),
+            Variable ((148, Effect ([ ], .)), l2/0)),
+        [
+          (Tuple (Constructor ([]/1), Constructor ([]/1)),
+            Constructor ((149, Effect ([ ], .)), true/1));
+          (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
+            Apply
+              ((150, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable ((150, Effect ([ ], .)), andb/0),
+                [
+                  Apply
+                    ((150,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((150,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          p/0),
+                      [
+                        Variable
+                          ((150,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a1/0);
+                        Variable
+                          ((150,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a2/0)
+                      ]);
+                  Apply
+                    ((150,
+                      Effect
+                        ([
+                          OCaml.Invalid_argument/1
+                        ],
+                          .)),
+                      Variable
+                        ((150,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .
+                                    -[
+                                      OCaml.Invalid_argument/1
+                                    ]->
+                                    .)),
+                          for_all2/0),
+                      [
+                        Variable
+                          ((150,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            p/0);
+                        Variable
+                          ((150,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l1/0);
+                        Variable
+                          ((150,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l2/0)
+                      ])
+                ]));
+          (Tuple (Any, Any),
+            Apply
+              ((151, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((151,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Invalid_argument/1
+                          ]-> .)),
+                    OCaml.Pervasives.invalid_arg/1),
+                [
+                  Constant
+                    ((151,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("List.for_all2"))
+                ]))
+        ]))
+
+154
+(. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@coq_rec, rec, _exists2, [ A; B ],
+      [
+        (p, (A -> (B -> Type (bool/1))));
+        (l1, Type (list/1, A));
+        (l2, Type (list/1, B))
+      ], Some Type (bool/1)) =
+    Match
+      ((155, Effect ([ OCaml.Invalid_argument/1 ], .)),
+        Tuple
+          ((155, Effect ([ ], .)), Variable ((155, Effect ([ ], .)), l1/0),
+            Variable ((155, Effect ([ ], .)), l2/0)),
+        [
+          (Tuple (Constructor ([]/1), Constructor ([]/1)),
+            Constructor ((156, Effect ([ ], .)), false/1));
+          (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
+            Apply
+              ((157, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable ((157, Effect ([ ], .)), orb/0),
+                [
+                  Apply
+                    ((157,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((157,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          p/0),
+                      [
+                        Variable
+                          ((157,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a1/0);
+                        Variable
+                          ((157,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            a2/0)
+                      ]);
+                  Apply
+                    ((157,
+                      Effect
+                        ([
+                          OCaml.Invalid_argument/1
+                        ],
+                          .)),
+                      Variable
+                        ((157,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .
+                                    -[
+                                      OCaml.Invalid_argument/1
+                                    ]->
+                                    .)),
+                          _exists2/0),
+                      [
+                        Variable
+                          ((157,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            p/0);
+                        Variable
+                          ((157,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l1/0);
+                        Variable
+                          ((157,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            l2/0)
+                      ])
+                ]));
+          (Tuple (Any, Any),
+            Apply
+              ((158, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((158,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Invalid_argument/1
+                          ]-> .)),
+                    OCaml.Pervasives.invalid_arg/1),
+                [
+                  Constant
+                    ((158,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("List.exists2"))
+                ]))
+        ]))
+
+194
+(. -> . -[ OCaml.Not_found/1 ]-> .,
+  Value
+    (@coq_rec, rec, find, [ A ],
+      [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some A) =
+    Match
+      ((?, Effect ([ OCaml.Not_found/1 ], .)),
+        Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1),
+            Apply
+              ((195, Effect ([ OCaml.Not_found/1 ], .)),
+                Variable
+                  ((195,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Not_found/1
+                          ]-> .)),
+                    OCaml.raise_Not_found/1),
+                [ Tuple ((?, Effect ([ ], .))) ]));
+          (Constructor (cons/1, x, l),
+            IfThenElse
+              ((196, Effect ([ OCaml.Not_found/1 ], .)),
+                Apply
+                  ((196, Effect ([ ], .)),
+                    Variable
+                      ((196, Effect ([ ], .)),
+                        p/0),
+                    [
+                      Variable
+                        ((196,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          x/0)
+                    ]),
+                Variable ((196, Effect ([ ], .)), x/0),
+                Apply
+                  ((196,
+                    Effect
+                      ([ OCaml.Not_found/1 ],
+                        .)),
+                    Variable
+                      ((196,
+                        Effect
+                          ([ ],
+                            .
+                              ->
+                              .
+                                -[
+                                  OCaml.Not_found/1
+                                ]->
+                                .)),
+                        find/0),
+                    [
+                      Variable
+                        ((196,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          p/0);
+                      Variable
+                        ((196,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l/0)
+                    ])))
+        ]))
+
+213
+(.,
+  Value
+    (@coq_rec, rec, split, [ A; B ], [ (x, Type (list/1, (A * B))) ],
+      Some (Type (list/1, A) * Type (list/1, B))) =
+    Match
+      ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
+        [
+          (Constructor ([]/1),
+            Tuple
+              ((214, Effect ([ ], .)),
+                Constructor ((214, Effect ([ ], .)), []/1),
+                Constructor ((214, Effect ([ ], .)), []/1)));
+          (Constructor (cons/1, Tuple (x, y), l),
+            Match
+              ((216, Effect ([ ], .)),
+                Apply
+                  ((216, Effect ([ ], .)),
+                    Variable
+                      ((216, Effect ([ ], .)),
+                        split/0),
+                    [
+                      Variable
+                        ((216,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l/0)
+                    ]),
+                [
+                  (Tuple (rx, ry),
+                    Tuple
+                      ((216,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        Constructor
+                          ((216,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            cons/1,
+                            Variable
+                              ((216,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                x/0),
+                            Variable
+                              ((216,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                rx/0)),
+                        Constructor
+                          ((216,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            cons/1,
+                            Variable
+                              ((216,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                y/0),
+                            Variable
+                              ((216,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                ry/0))))
+                ]))
+        ]))
+
+219
+(. -> . -[ OCaml.Invalid_argument/1 ]-> .,
+  Value
+    (@coq_rec, rec, combine, [ A; B ],
+      [ (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
+      Some Type (list/1, (A * B))) =
+    Match
+      ((220, Effect ([ OCaml.Invalid_argument/1 ], .)),
+        Tuple
+          ((220, Effect ([ ], .)), Variable ((220, Effect ([ ], .)), l1/0),
+            Variable ((220, Effect ([ ], .)), l2/0)),
+        [
+          (Tuple (Constructor ([]/1), Constructor ([]/1)),
+            Constructor ((221, Effect ([ ], .)), []/1));
+          (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
+            Constructor
+              ((222, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                cons/1,
+                Tuple
+                  ((222, Effect ([ ], .)),
+                    Variable
+                      ((222, Effect ([ ], .)),
+                        a1/0),
+                    Variable
+                      ((222, Effect ([ ], .)),
+                        a2/0)),
+                Apply
+                  ((222,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ], .)),
+                    Variable
+                      ((222,
+                        Effect
+                          ([ ],
+                            .
+                              ->
+                              .
+                                -[
+                                  OCaml.Invalid_argument/1
+                                ]->
+                                .)),
+                        combine/0),
+                    [
+                      Variable
+                        ((222,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l1/0);
+                      Variable
+                        ((222,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0)
+                    ])));
+          (Tuple (Any, Any),
+            Apply
+              ((223, Effect ([ OCaml.Invalid_argument/1 ], .)),
+                Variable
+                  ((223,
+                    Effect
+                      ([ ],
+                        .
+                          -[
+                            OCaml.Invalid_argument/1
+                          ]-> .)),
+                    OCaml.Pervasives.invalid_arg/1),
+                [
+                  Constant
+                    ((223,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      String("List.combine"))
+                ]))
+        ]))
