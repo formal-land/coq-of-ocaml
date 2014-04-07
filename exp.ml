@@ -142,16 +142,17 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.vars in
     Variable (l, x)
   | Texp_constant constant -> Constant (l, Constant.of_constant constant)
-  | Texp_let (rec_flag, [{ vb_pat = pattern; vb_expr = e1 }], e2) ->
+  | Texp_let (rec_flag, [{ vb_pat = pattern; vb_expr = e1; vb_attributes = attrs }], e2) ->
     let (env, rec_flag, pattern, free_typ_vars, args, body_typ, body) =
       import_let_fun env rec_flag pattern e1 in
+    let attr = Attribute.of_attributes attrs in
     let e2 = of_expression env e2 in
     (match (pattern, args) with
     | (Pattern.Variable name, []) ->
-      Let (l, (Recursivity.New false, Attribute.None, name, [], [], None), body, e2)
+      Let (l, (Recursivity.New false, attr, name, [], [], None), body, e2)
     | (_, []) -> Match (l, body, [pattern, e2])
     | (Pattern.Variable name, _) ->
-      Let (l, (rec_flag, Attribute.None, name, free_typ_vars, args, Some body_typ), body, e2)
+      Let (l, (rec_flag, attr, name, free_typ_vars, args, Some body_typ), body, e2)
     | _ -> Error.raise l "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias

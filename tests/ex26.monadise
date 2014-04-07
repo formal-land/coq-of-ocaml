@@ -84,7 +84,7 @@
 9
 ((),
   Value
-    (@., rec, f_map2_rec, [ A; B ],
+    (@free_rec, rec, f_map2_rec, [ A; B ],
       [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Monad ([ NonTermination/1 ], Type (list/1, A))) =
     Match
@@ -163,3 +163,323 @@
             Apply
               (?, Variable (?, f_map2_rec/0),
                 [ Variable (?, x/0); Variable (?, f/0); Variable (?, l/0) ]))))
+
+15
+((),
+  Value
+    (@., non_rec, n, [ A ], [ (x, A) ],
+      Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Let 16
+              (@coq_rec, rec, sum_rec, [ ],
+                [
+                  (counter, Type (nat/1));
+                  (l, Type (list/1, Type (Z/1)))
+                ],
+                Some Monad ([ NonTermination/1 ], Type (Z/1)))
+              =
+              Match
+                (?, Variable (?, counter/0),
+                  [
+                    (Constructor (O/1),
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              not_terminated/1),
+                          [
+                            Tuple
+                              (?)
+                          ]));
+                    (Constructor (S/1, counter),
+                      Match
+                        (17,
+                          Variable
+                            (17,
+                              l/0),
+                          [
+                            (Constructor
+                              ([]/1),
+                              Return
+                                (?,
+                                  Constant
+                                    (18,
+                                      Int(0))));
+                            (Constructor
+                              (cons/1,
+                                x,
+                                l),
+                              Bind
+                                (?,
+                                  Apply
+                                    (19,
+                                      Apply
+                                        (?,
+                                          Variable
+                                            (?,
+                                              sum_rec/0),
+                                          [
+                                            Variable
+                                              (?,
+                                                counter/0)
+                                          ]),
+                                      [
+                                        Variable
+                                          (19,
+                                            l/0)
+                                      ]),
+                                  Some
+                                    x_1,
+                                  Return
+                                    (?,
+                                      Apply
+                                        (19,
+                                          Variable
+                                            (19,
+                                              Z.add/0),
+                                          [
+                                            Variable
+                                              (19,
+                                                x/0);
+                                            Variable
+                                              (?,
+                                                x_1/0)
+                                          ]))))
+                          ]))
+                  ]) in
+            Let 16
+              (@., non_rec, sum, [ ],
+                [ (l, Type (list/1, Type (Z/1))) ],
+                Some
+                  Monad
+                    ([
+                      Counter/1;
+                      NonTermination/1
+                    ], Type (Z/1))) =
+              Bind
+                (?,
+                  Lift
+                    (?, [ Counter/1 ],
+                      [
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              read_counter/1),
+                          [
+                            Tuple
+                              (?)
+                          ])),
+                  Some x_1,
+                  Lift
+                    (?, [ NonTermination/1 ],
+                      [
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              sum_rec/0),
+                          [
+                            Variable
+                              (?,
+                                x_1/0);
+                            Variable
+                              (?,
+                                l/0)
+                          ])))
+              in
+            Apply
+              (21, Variable (21, sum/0),
+                [
+                  Constructor
+                    (21,
+                      cons/1,
+                      Constant
+                        (21,
+                          Int(1)),
+                      Constructor
+                        (21,
+                          cons/1,
+                          Constant
+                            (21,
+                              Int(2)),
+                          Constructor
+                            (21,
+                              cons/1,
+                              Constant
+                                (21,
+                                  Int(3)),
+                              Constructor
+                                (21,
+                                  []/1))))
+                ]))
+        ]))
+
+23
+((),
+  Value
+    (@., non_rec, n2, [ A ], [ (x, A) ],
+      Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
+    Match
+      (?, Variable (?, x/0),
+        [
+          (Any,
+            Let 24
+              (@free_rec, rec, sum_rec, [ ],
+                [
+                  (counter, Type (nat/1));
+                  (l, Type (list/1, Type (Z/1)))
+                ],
+                Some Monad ([ NonTermination/1 ], Type (Z/1)))
+              =
+              Match
+                (?, Variable (?, counter/0),
+                  [
+                    (Constructor (O/1),
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              not_terminated/1),
+                          [
+                            Tuple
+                              (?)
+                          ]));
+                    (Constructor (S/1, counter),
+                      Match
+                        (25,
+                          Variable
+                            (25,
+                              l/0),
+                          [
+                            (Constructor
+                              ([]/1),
+                              Return
+                                (?,
+                                  Constant
+                                    (26,
+                                      Int(0))));
+                            (Constructor
+                              (cons/1,
+                                x,
+                                l),
+                              Bind
+                                (?,
+                                  Apply
+                                    (27,
+                                      Apply
+                                        (?,
+                                          Variable
+                                            (?,
+                                              sum_rec/0),
+                                          [
+                                            Variable
+                                              (?,
+                                                counter/0)
+                                          ]),
+                                      [
+                                        Variable
+                                          (27,
+                                            l/0)
+                                      ]),
+                                  Some
+                                    x_1,
+                                  Return
+                                    (?,
+                                      Apply
+                                        (27,
+                                          Variable
+                                            (27,
+                                              Z.add/0),
+                                          [
+                                            Variable
+                                              (27,
+                                                x/0);
+                                            Variable
+                                              (?,
+                                                x_1/0)
+                                          ]))))
+                          ]))
+                  ]) in
+            Let 24
+              (@., non_rec, sum, [ ],
+                [ (l, Type (list/1, Type (Z/1))) ],
+                Some
+                  Monad
+                    ([
+                      Counter/1;
+                      NonTermination/1
+                    ], Type (Z/1))) =
+              Bind
+                (?,
+                  Lift
+                    (?, [ Counter/1 ],
+                      [
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              read_counter/1),
+                          [
+                            Tuple
+                              (?)
+                          ])),
+                  Some x_1,
+                  Lift
+                    (?, [ NonTermination/1 ],
+                      [
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              sum_rec/0),
+                          [
+                            Variable
+                              (?,
+                                x_1/0);
+                            Variable
+                              (?,
+                                l/0)
+                          ])))
+              in
+            Apply
+              (29, Variable (29, sum/0),
+                [
+                  Constructor
+                    (29,
+                      cons/1,
+                      Constant
+                        (29,
+                          Int(1)),
+                      Constructor
+                        (29,
+                          cons/1,
+                          Constant
+                            (29,
+                              Int(2)),
+                          Constructor
+                            (29,
+                              cons/1,
+                              Constant
+                                (29,
+                                  Int(3)),
+                              Constructor
+                                (29,
+                                  []/1))))
+                ]))
+        ]))
