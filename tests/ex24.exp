@@ -1,6 +1,6 @@
 5
 ((),
-  Value (non_rec, e_invalid, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_invalid, [ A; B ], [ (x, B) ], Some A) =
     Match
       (?, Variable (?, x/0),
         [
@@ -12,7 +12,7 @@
 
 6
 ((),
-  Value (non_rec, e_failure, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_failure, [ A; B ], [ (x, B) ], Some A) =
     Match
       (?, Variable (?, x/0),
         [
@@ -24,7 +24,7 @@
 
 7
 ((),
-  Value (non_rec, e_exit1, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_exit1, [ A; B ], [ (x, B) ], Some A) =
     Match
       (?, Variable (?, x/0),
         [
@@ -36,7 +36,7 @@
 
 8
 ((),
-  Value (non_rec, e_exit2, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_exit2, [ A; B ], [ (x, B) ], Some A) =
     Match
       (?, Variable (?, x/0),
         [
@@ -48,298 +48,298 @@
 
 11
 ((),
-  Value (non_rec, b_eq, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_eq, [ ], [ ], Some Type (bool/1)) =
     Apply
       (11, Variable (11, equiv_decb/0),
         [ Constant (11, Int(1)); Constant (11, Int(2)) ]))
 
 12
 ((),
-  Value (non_rec, b_neq1, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_neq1, [ ], [ ], Some Type (bool/1)) =
     Apply
       (12, Variable (12, nequiv_decb/0),
         [ Constructor (12, true/1); Constructor (12, false/1) ]))
 
 13
 ((),
-  Value (non_rec, b_neq2, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_neq2, [ ], [ ], Some Type (bool/1)) =
     Apply
       (13, Variable (13, nequiv_decb/0),
         [ Constructor (13, tt/1); Constructor (13, tt/1) ]))
 
 14
 ((),
-  Value (non_rec, b_lt, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_lt, [ ], [ ], Some Type (bool/1)) =
     Apply
       (14, Variable (14, OCaml.Pervasives.lt/0),
         [ Constant (14, Int(1)); Constant (14, Int(2)) ]))
 
 15
 ((),
-  Value (non_rec, b_gt, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_gt, [ ], [ ], Some Type (bool/1)) =
     Apply
       (15, Variable (15, OCaml.Pervasives.gt/0),
         [ Constant (15, Int(1)); Constant (15, Int(2)) ]))
 
 16
 ((),
-  Value (non_rec, b_le, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_le, [ ], [ ], Some Type (bool/1)) =
     Apply
       (16, Variable (16, OCaml.Pervasives.le/0),
         [ Constructor (16, true/1); Constructor (16, false/1) ]))
 
 17
 ((),
-  Value (non_rec, b_ge, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_ge, [ ], [ ], Some Type (bool/1)) =
     Apply
       (17, Variable (17, OCaml.Pervasives.ge/0),
         [ Constructor (17, tt/1); Constructor (17, tt/1) ]))
 
 18
 ((),
-  Value (non_rec, comp, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, comp, [ ], [ ], Some Type (Z/1)) =
     Apply
       (18, Variable (18, OCaml.Pervasives.compare/0),
         [ Constant (18, Int(1)); Constant (18, Int(2)) ]))
 
 19
 ((),
-  Value (non_rec, n_min, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_min, [ ], [ ], Some Type (Z/1)) =
     Apply
       (19, Variable (19, OCaml.Pervasives.min/0),
         [ Constant (19, Int(1)); Constant (19, Int(2)) ]))
 
 20
 ((),
-  Value (non_rec, n_max, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_max, [ ], [ ], Some Type (Z/1)) =
     Apply
       (20, Variable (20, OCaml.Pervasives.max/0),
         [ Constant (20, Int(1)); Constant (20, Int(2)) ]))
 
 25
 ((),
-  Value (non_rec, b_not, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_not, [ ], [ ], Some Type (bool/1)) =
     Apply (25, Variable (25, negb/0), [ Constructor (25, false/1) ]))
 
 26
 ((),
-  Value (non_rec, b_and, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_and, [ ], [ ], Some Type (bool/1)) =
     Apply
       (26, Variable (26, andb/0),
         [ Constructor (26, true/1); Constructor (26, false/1) ]))
 
 27
 ((),
-  Value (non_rec, b_and_old, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_and_old, [ ], [ ], Some Type (bool/1)) =
     Apply
       (27, Variable (27, andb/0),
         [ Constructor (27, true/1); Constructor (27, false/1) ]))
 
 28
 ((),
-  Value (non_rec, b_or, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_or, [ ], [ ], Some Type (bool/1)) =
     Apply
       (28, Variable (28, orb/0),
         [ Constructor (28, true/1); Constructor (28, false/1) ]))
 
 29
 ((),
-  Value (non_rec, b_or_old, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, b_or_old, [ ], [ ], Some Type (bool/1)) =
     Apply
       (29, Variable (29, orb/0),
         [ Constructor (29, true/1); Constructor (29, false/1) ]))
 
 32
 ((),
-  Value (non_rec, app1, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, app1, [ ], [ ], Some Type (Z/1)) =
     Apply
       (32, Variable (32, OCaml.Pervasives.reverse_apply/0),
         [ Constant (32, Int(12)); Function (32, x, Variable (32, x/0)) ]))
 
 33
 ((),
-  Value (non_rec, app2, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, app2, [ ], [ ], Some Type (Z/1)) =
     Apply
       (33, Variable (33, apply/0),
         [ Function (33, x, Variable (33, x/0)); Constant (33, Int(12)) ]))
 
 36
 ((),
-  Value (non_rec, n_neg1, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_neg1, [ ], [ ], Some Type (Z/1)) =
     Apply (36, Variable (36, Z.opp/0), [ Constant (36, Int(12)) ]))
 
 37
 ((),
-  Value (non_rec, n_neg2, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_neg2, [ ], [ ], Some Type (Z/1)) =
     Constant (37, Int(-12)))
 
 38
 ((),
-  Value (non_rec, n_pos1, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_pos1, [ ], [ ], Some Type (Z/1)) =
     Apply (38, Variable (38, /0), [ Constant (38, Int(12)) ]))
 
 39
 ((),
-  Value (non_rec, n_pos2, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_pos2, [ ], [ ], Some Type (Z/1)) =
     Constant (39, Int(12)))
 
 40
 ((),
-  Value (non_rec, n_succ, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_succ, [ ], [ ], Some Type (Z/1)) =
     Apply (40, Variable (40, Z.succ/0), [ Constant (40, Int(1)) ]))
 
 41
 ((),
-  Value (non_rec, n_pred, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_pred, [ ], [ ], Some Type (Z/1)) =
     Apply (41, Variable (41, Z.pred/0), [ Constant (41, Int(1)) ]))
 
 42
 ((),
-  Value (non_rec, n_plus, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_plus, [ ], [ ], Some Type (Z/1)) =
     Apply
       (42, Variable (42, Z.add/0),
         [ Constant (42, Int(1)); Constant (42, Int(2)) ]))
 
 43
 ((),
-  Value (non_rec, n_minus, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_minus, [ ], [ ], Some Type (Z/1)) =
     Apply
       (43, Variable (43, Z.sub/0),
         [ Constant (43, Int(1)); Constant (43, Int(2)) ]))
 
 44
 ((),
-  Value (non_rec, n_times, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_times, [ ], [ ], Some Type (Z/1)) =
     Apply
       (44, Variable (44, Z.mul/0),
         [ Constant (44, Int(1)); Constant (44, Int(2)) ]))
 
 45
 ((),
-  Value (non_rec, n_div, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_div, [ ], [ ], Some Type (Z/1)) =
     Apply
       (45, Variable (45, Z.div/0),
         [ Constant (45, Int(1)); Constant (45, Int(2)) ]))
 
 46
 ((),
-  Value (non_rec, n_mod, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_mod, [ ], [ ], Some Type (Z/1)) =
     Apply
       (46, Variable (46, Z.modulo/0),
         [ Constant (46, Int(1)); Constant (46, Int(2)) ]))
 
 47
 ((),
-  Value (non_rec, n_abs, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_abs, [ ], [ ], Some Type (Z/1)) =
     Apply (47, Variable (47, Z.abs/0), [ Constant (47, Int(1)) ]))
 
 52
 ((),
-  Value (non_rec, n_land, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_land, [ ], [ ], Some Type (Z/1)) =
     Apply
       (52, Variable (52, Z.land/0),
         [ Constant (52, Int(12)); Constant (52, Int(13)) ]))
 
 53
 ((),
-  Value (non_rec, n_lor, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_lor, [ ], [ ], Some Type (Z/1)) =
     Apply
       (53, Variable (53, Z.lor/0),
         [ Constant (53, Int(12)); Constant (53, Int(13)) ]))
 
 54
 ((),
-  Value (non_rec, n_lxor, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_lxor, [ ], [ ], Some Type (Z/1)) =
     Apply
       (54, Variable (54, Z.lxor/0),
         [ Constant (54, Int(12)); Constant (54, Int(13)) ]))
 
 56
 ((),
-  Value (non_rec, n_lsl, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_lsl, [ ], [ ], Some Type (Z/1)) =
     Apply
       (56, Variable (56, Z.shiftl/0),
         [ Constant (56, Int(12)); Constant (56, Int(13)) ]))
 
 57
 ((),
-  Value (non_rec, n_lsr, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_lsr, [ ], [ ], Some Type (Z/1)) =
     Apply
       (57, Variable (57, Z.shiftr/0),
         [ Constant (57, Int(12)); Constant (57, Int(13)) ]))
 
 64
 ((),
-  Value (non_rec, ss, [ ], [ ], Some Type (string/1)) =
+  Value (@., non_rec, ss, [ ], [ ], Some Type (string/1)) =
     Apply
       (64, Variable (64, String.append/0),
         [ Constant (64, String("begin")); Constant (64, String("end")) ]))
 
 67
 ((),
-  Value (non_rec, n_char, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_char, [ ], [ ], Some Type (Z/1)) =
     Apply
       (67, Variable (67, OCaml.Pervasives.int_of_char/0),
         [ Constant (67, Char("c")) ]))
 
 68
 ((),
-  Value (non_rec, char_n, [ ], [ ], Some Type (ascii/1)) =
+  Value (@., non_rec, char_n, [ ], [ ], Some Type (ascii/1)) =
     Apply
       (68, Variable (68, OCaml.Pervasives.char_of_int/0),
         [ Constant (68, Int(23)) ]))
 
 71
 ((),
-  Value (non_rec, i, [ ], [ ], Some Type (unit/1)) =
+  Value (@., non_rec, i, [ ], [ ], Some Type (unit/1)) =
     Apply
       (71, Variable (71, OCaml.Pervasives.ignore/0), [ Constant (71, Int(12)) ]))
 
 74
 ((),
-  Value (non_rec, s_bool, [ ], [ ], Some Type (string/1)) =
+  Value (@., non_rec, s_bool, [ ], [ ], Some Type (string/1)) =
     Apply
       (74, Variable (74, OCaml.Pervasives.string_of_bool/0),
         [ Constructor (74, false/1) ]))
 
 75
 ((),
-  Value (non_rec, bool_s, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, bool_s, [ ], [ ], Some Type (bool/1)) =
     Apply
       (75, Variable (75, OCaml.Pervasives.bool_of_string/0),
         [ Constant (75, String("false")) ]))
 
 76
 ((),
-  Value (non_rec, s_n, [ ], [ ], Some Type (string/1)) =
+  Value (@., non_rec, s_n, [ ], [ ], Some Type (string/1)) =
     Apply
       (76, Variable (76, OCaml.Pervasives.string_of_int/0),
         [ Constant (76, Int(12)) ]))
 
 77
 ((),
-  Value (non_rec, n_s, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n_s, [ ], [ ], Some Type (Z/1)) =
     Apply
       (77, Variable (77, OCaml.Pervasives.int_of_string/0),
         [ Constant (77, String("12")) ]))
 
 82
 ((),
-  Value (non_rec, n1, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n1, [ ], [ ], Some Type (Z/1)) =
     Apply
       (82, Variable (82, fst/0),
         [ Tuple (82, Constant (82, Int(12)), Constant (82, Int(13))) ]))
 
 83
 ((),
-  Value (non_rec, n2, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, n2, [ ], [ ], Some Type (Z/1)) =
     Apply
       (83, Variable (83, snd/0),
         [ Tuple (83, Constant (83, Int(12)), Constant (83, Int(13))) ]))
 
 86
 ((),
-  Value (non_rec, ll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, ll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (86, Variable (86, OCaml.Pervasives.app/0),
         [
@@ -357,7 +357,7 @@
 
 94
 ((),
-  Value (non_rec, p_c, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_c, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -369,7 +369,7 @@
 
 95
 ((),
-  Value (non_rec, p_s, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_s, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -381,7 +381,7 @@
 
 96
 ((),
-  Value (non_rec, p_n, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_n, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -393,7 +393,7 @@
 
 98
 ((),
-  Value (non_rec, p_endline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_endline, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -405,7 +405,7 @@
 
 99
 ((),
-  Value (non_rec, p_newline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_newline, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -417,7 +417,7 @@
 
 102
 ((),
-  Value (non_rec, perr_c, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_c, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -429,7 +429,7 @@
 
 103
 ((),
-  Value (non_rec, perr_s, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_s, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -441,7 +441,7 @@
 
 104
 ((),
-  Value (non_rec, perr_n, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_n, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -453,7 +453,7 @@
 
 106
 ((),
-  Value (non_rec, perr_endline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_endline, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -467,7 +467,7 @@
 
 107
 ((),
-  Value (non_rec, perr_newline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_newline, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -481,7 +481,7 @@
 
 110
 ((),
-  Value (non_rec, r_s, [ A ], [ (x, A) ], Some Type (string/1)) =
+  Value (@., non_rec, r_s, [ A ], [ (x, A) ], Some Type (string/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -493,7 +493,7 @@
 
 111
 ((),
-  Value (non_rec, r_n, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, r_n, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x/0),
         [

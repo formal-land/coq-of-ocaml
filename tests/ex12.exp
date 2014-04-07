@@ -5,7 +5,7 @@ Inductive tree:
 7
 ((),
   Value
-    (rec, find_rec, [ ],
+    (@., rec, find_rec, [ ],
       [ (counter, Type (nat/1)); (x, Type (Z/1)); (t, Type (tree/0)) ],
       Some Type (bool/1)) =
     Match
@@ -101,7 +101,7 @@ Inductive tree:
 7
 ((),
   Value
-    (non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
+    (@., non_rec, find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
       Some Type (bool/1)) =
     Apply
       (?, Variable (?, find_rec/0),

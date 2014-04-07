@@ -2,7 +2,8 @@
 
 3
 ((),
-  Value (non_rec, plus_one, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (Z/1)))
+  Value
+    (@., non_rec, plus_one, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (Z/1)))
     =
     Match
       (?, Variable (?, x/0),
@@ -33,7 +34,7 @@
 8
 ((),
   Value
-    (non_rec, fail, [ A; B ], [ (x, B) ],
+    (@., non_rec, fail, [ A; B ], [ (x, B) ],
       Some Monad ([ OCaml.Failure/1; s/0 ], A)) =
     Match
       (?, Variable (?, x/0),
@@ -67,7 +68,8 @@
 
 10
 ((),
-  Value (non_rec, reset, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1)))
+  Value
+    (@., non_rec, reset, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1)))
     =
     Match
       (?, Variable (?, x/0),
@@ -75,7 +77,8 @@
 
 13
 ((),
-  Value (non_rec, incr, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1)))
+  Value
+    (@., non_rec, incr, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1)))
     =
     Match
       (?, Variable (?, x/0),

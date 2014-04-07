@@ -1,11 +1,11 @@
 3
 ((),
-  Value (non_rec, l1, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, l1, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Constructor (3, []/1))
 
 4
 ((),
-  Value (non_rec, l2, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, l2, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Constructor
       (4, cons/1, Constant (4, Int(1)),
         Constructor
@@ -18,8 +18,8 @@
 5
 ((),
   Value
-    (non_rec, l3, [ ], [ ], Some Type (list/1, (Type (Z/1) * Type (string/1))))
-    =
+    (@., non_rec, l3, [ ], [ ],
+      Some Type (list/1, (Type (Z/1) * Type (string/1)))) =
     Constructor
       (5, cons/1, Tuple (5, Constant (5, Int(1)), Constant (5, String("one"))),
         Constructor
@@ -29,17 +29,17 @@
 
 7
 ((),
-  Value (non_rec, s1, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, s1, [ ], [ ], Some Type (Z/1)) =
     Apply (7, Variable (7, OCaml.List.length/0), [ Variable (7, l1/0) ]))
 
 8
 ((),
-  Value (non_rec, s2, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, s2, [ ], [ ], Some Type (Z/1)) =
     Apply (8, Variable (8, OCaml.List.length/0), [ Variable (8, l2/0) ]))
 
 9
 ((),
-  Value (non_rec, h, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, h, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -51,7 +51,7 @@
 
 10
 ((),
-  Value (non_rec, t, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, t, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
     Match
       (?, Variable (?, x/0),
         [
@@ -63,7 +63,7 @@
 
 11
 ((),
-  Value (non_rec, x, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, x, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -75,26 +75,26 @@
 
 12
 ((),
-  Value (non_rec, rl, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, rl, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply (12, Variable (12, List.rev/0), [ Variable (12, l2/0) ]))
 
 13
 ((),
-  Value (non_rec, ll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, ll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (13, Variable (13, OCaml.Pervasives.app/0),
         [ Variable (13, l2/0); Variable (13, l2/0) ]))
 
 14
 ((),
-  Value (non_rec, rll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, rll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (14, Variable (14, List.rev_append/0),
         [ Variable (14, l2/0); Variable (14, l2/0) ]))
 
 15
 ((),
-  Value (non_rec, lc, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, lc, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (15, Variable (15, OCaml.List.flatten/0),
         [
@@ -117,7 +117,7 @@
 
 16
 ((),
-  Value (non_rec, lf, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, lf, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (16, Variable (16, OCaml.List.flatten/0),
         [
@@ -140,7 +140,7 @@
 
 21
 ((),
-  Value (non_rec, m, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, m, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (21, Variable (21, List.map/0),
         [
@@ -157,7 +157,7 @@
 
 22
 ((),
-  Value (non_rec, mi, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, mi, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (22, Variable (22, OCaml.List.mapi/0),
         [
@@ -180,7 +180,7 @@
 
 23
 ((),
-  Value (non_rec, rm, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, rm, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Apply
       (23, Variable (23, OCaml.List.rev_map/0),
         [
@@ -197,7 +197,7 @@
 
 24
 ((),
-  Value (non_rec, fl, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, fl, [ ], [ ], Some Type (Z/1)) =
     Apply
       (24, Variable (24, OCaml.List.fold_left/0),
         [
@@ -221,7 +221,7 @@
 
 25
 ((),
-  Value (non_rec, fr, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, fr, [ ], [ ], Some Type (Z/1)) =
     Apply
       (25, Variable (25, OCaml.List.fold_right/0),
         [
@@ -245,7 +245,7 @@
 
 29
 ((),
-  Value (non_rec, m2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, m2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))) =
     Match
       (?, Variable (?, x_1/0),
         [
@@ -279,7 +279,8 @@
 
 30
 ((),
-  Value (non_rec, rm2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, rm2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1)))
+    =
     Match
       (?, Variable (?, x_1/0),
         [
@@ -313,7 +314,7 @@
 
 31
 ((),
-  Value (non_rec, fl2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, fl2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x_1/0),
         [
@@ -361,7 +362,7 @@
 
 32
 ((),
-  Value (non_rec, fr2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, fr2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x_1/0),
         [

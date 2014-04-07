@@ -1,0 +1,137 @@
+3
+((),
+  Value
+    (@coq_rec, rec, f_map_rec, [ A; B ],
+      [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Match
+      (?, Variable (?, counter/0),
+        [
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
+          (Constructor (S/1, counter),
+            Match
+              (4, Variable (4, l/0),
+                [
+                  (Constructor ([]/1),
+                    Constructor
+                      (5,
+                        []/1));
+                  (Constructor (cons/1, x, l),
+                    Constructor
+                      (6,
+                        cons/1,
+                        Apply
+                          (6,
+                            Variable
+                              (6,
+                                f/0),
+                            [
+                              Variable
+                                (6,
+                                  x/0)
+                            ]),
+                        Apply
+                          (6,
+                            Apply
+                              (?,
+                                Variable
+                                  (?,
+                                    f_map_rec/0),
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                (6,
+                                  f/0);
+                              Variable
+                                (6,
+                                  l/0)
+                            ])))
+                ]))
+        ]))
+
+3
+((),
+  Value
+    (@., non_rec, f_map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Apply
+      (?, Variable (?, f_map_rec/0),
+        [
+          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+          Variable (?, f/0);
+          Variable (?, l/0)
+        ]))
+
+9
+((),
+  Value
+    (@., rec, f_map2_rec, [ A; B ],
+      [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Match
+      (?, Variable (?, counter/0),
+        [
+          (Constructor (O/1),
+            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
+          (Constructor (S/1, counter),
+            Match
+              (10, Variable (10, l/0),
+                [
+                  (Constructor ([]/1),
+                    Constructor
+                      (11,
+                        []/1));
+                  (Constructor (cons/1, x, l),
+                    Constructor
+                      (12,
+                        cons/1,
+                        Apply
+                          (12,
+                            Variable
+                              (12,
+                                f/0),
+                            [
+                              Variable
+                                (12,
+                                  x/0)
+                            ]),
+                        Apply
+                          (12,
+                            Apply
+                              (?,
+                                Variable
+                                  (?,
+                                    f_map2_rec/0),
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                (12,
+                                  f/0);
+                              Variable
+                                (12,
+                                  l/0)
+                            ])))
+                ]))
+        ]))
+
+9
+((),
+  Value
+    (@., non_rec, f_map2, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
+      Some Type (list/1, A)) =
+    Apply
+      (?, Variable (?, f_map2_rec/0),
+        [
+          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+          Variable (?, f/0);
+          Variable (?, l/0)
+        ]))

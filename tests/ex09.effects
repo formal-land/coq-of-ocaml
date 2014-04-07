@@ -1,13 +1,13 @@
 3
 (. -[ Counter/1; NonTermination/1 ]-> .,
-  Value (non_rec, l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
     Match
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
         [
           (Any,
             Let (4, Effect ([ Counter/1; NonTermination/1 ], .))
-              (rec, map_rec, [ A; B ],
+              (@., rec, map_rec, [ A; B ],
                 [
                   (counter, Type (nat/1));
                   (f, (B -> A));
@@ -167,7 +167,7 @@
                           ]))
                   ]) in
             Let (4, Effect ([ Counter/1; NonTermination/1 ], .))
-              (non_rec, map, [ A; B ],
+              (@., non_rec, map, [ A; B ],
                 [ (f, (B -> A)); (x_1, Type (list/1, B)) ],
                 Some Type (list/1, A)) =
               Apply
@@ -233,7 +233,7 @@
                         x_1/0)
                   ]) in
             Let (7, Effect ([ Counter/1; NonTermination/1 ], .))
-              (rec, loop_rec, [ A ],
+              (@., rec, loop_rec, [ A ],
                 [ (counter, Type (nat/1)); (x, A) ], Some A) =
               Match
                 ((?, Effect ([ NonTermination/1 ], .)),
@@ -278,7 +278,7 @@
                           x/0))
                   ]) in
             Let (7, Effect ([ Counter/1; NonTermination/1 ], .))
-              (non_rec, loop, [ A ], [ (x, A) ], Some A) =
+              (@., non_rec, loop, [ A ], [ (x, A) ], Some A) =
               Apply
                 ((?,
                   Effect

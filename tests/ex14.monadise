@@ -1,8 +1,8 @@
 3
 ((),
   Value
-    (non_rec, f, [ ], [ (n, Type (Z/1)); (b, Type (bool/1)) ], Some Type (Z/1))
-    =
+    (@., non_rec, f, [ ], [ (n, Type (Z/1)); (b, Type (bool/1)) ],
+      Some Type (Z/1)) =
     IfThenElse
       (4, Variable (4, b/0),
         Apply

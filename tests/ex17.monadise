@@ -2,7 +2,7 @@
 
 5
 ((),
-  Value (non_rec, f, [ A; B ], [ (x, B) ], Some Monad ([ Outside/0 ], A)) =
+  Value (@., non_rec, f, [ A; B ], [ (x, B) ], Some Monad ([ Outside/0 ], A)) =
     Apply (5, Variable (5, raise_Outside/0), [ Tuple (?) ]))
 
 7 Module G:
@@ -10,7 +10,7 @@
   
   10 ((),
     Value
-      (non_rec, g, [ A ], [ (b, Type (bool/2)) ],
+      (@., non_rec, g, [ A ], [ (b, Type (bool/2)) ],
         Some Monad ([ Outside/1; Inside/0 ], A)) =
       IfThenElse
         (11, Variable (11, b/0),
@@ -32,7 +32,8 @@
 17
 ((),
   Value
-    (rec, h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
+    (@., rec, h_rec, [ A; B ],
+      [ (counter, Type (nat/1)); (l, Type (list/1, B)) ],
       Some Monad ([ IO/0; NonTermination/1; Outside/0; G.Inside/0 ], A)) =
     Match
       (?, Variable (?, counter/0),
@@ -166,7 +167,7 @@
 17
 ((),
   Value
-    (non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ],
+    (@., non_rec, h, [ A; B ], [ (l, Type (list/1, B)) ],
       Some
         Monad ([ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ], A))
     =

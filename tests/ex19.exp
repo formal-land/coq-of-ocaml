@@ -2,7 +2,7 @@
 
 5
 ((),
-  Value (non_rec, x1, [ ], [ ], Some Type (Z/1)) =
+  Value (@., non_rec, x1, [ ], [ ], Some Type (Z/1)) =
     Match
       (6,
         Run
@@ -15,7 +15,7 @@
 
 9
 ((),
-  Value (non_rec, x2, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, x2, [ A; B ], [ (x, B) ], Some A) =
     Match
       (?, Variable (?, x/0),
         [
@@ -51,7 +51,7 @@
 
 13
 ((),
-  Value (non_rec, x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
+  Value (@., non_rec, x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
     Match
       (14,
         Run

@@ -1,7 +1,7 @@
 3
 ((),
   Value
-    (rec, map_rec, [ A; B ],
+    (@., rec, map_rec, [ A; B ],
       [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Type (list/1, A)) =
     Match
@@ -57,7 +57,7 @@
 3
 ((),
   Value
-    (non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
+    (@., non_rec, map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
       Some Type (list/1, A)) =
     Apply
       (?, Variable (?, map_rec/0),
@@ -70,7 +70,7 @@
 8
 ((),
   Value
-    (rec, fold_rec, [ A; B ],
+    (@., rec, fold_rec, [ A; B ],
       [
         (counter, Type (nat/1));
         (f, (A -> (B -> A)));
@@ -130,7 +130,7 @@
 8
 ((),
   Value
-    (non_rec, fold, [ A; B ],
+    (@., non_rec, fold, [ A; B ],
       [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
     Apply
       (?, Variable (?, fold_rec/0),
@@ -143,7 +143,7 @@
 
 13
 ((),
-  Value (non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (@., non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Constructor
       (13, cons/1, Constant (13, Int(5)),
         Constructor
@@ -156,7 +156,7 @@
 15
 ((),
   Value
-    (non_rec, n, [ A ],
+    (@., non_rec, n, [ A ],
       [ (incr, (Type (Z/1) -> A)); (plus, (Type (Z/1) -> (A -> Type (Z/1)))) ],
       Some Type (Z/1)) =
     Apply

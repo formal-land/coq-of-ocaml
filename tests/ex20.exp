@@ -1,7 +1,7 @@
 3
 ((),
   Value
-    (rec, sums_rec, [ ],
+    (@., rec, sums_rec, [ ],
       [ (counter, Type (nat/1)); (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
       Some Type (list/1, Type (Z/1))) =
     Match
@@ -11,7 +11,7 @@
             Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
           (Constructor (S/1, counter),
             Let 4
-              (rec, sum_rec, [ ],
+              (@., rec, sum_rec, [ ],
                 [
                   (counter_1, Type (nat/1));
                   (xs, Type (list/1, Type (Z/1)))
@@ -144,7 +144,7 @@
                           ]))
                   ]) in
             Let 4
-              (non_rec, sum, [ ],
+              (@., non_rec, sum, [ ],
                 [ (xs, Type (list/1, Type (Z/1))) ],
                 Some Type (Z/1)) =
               Apply
@@ -205,7 +205,7 @@
 3
 ((),
   Value
-    (non_rec, sums, [ ], [ (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
+    (@., non_rec, sums, [ ], [ (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
       Some Type (list/1, Type (Z/1))) =
     Apply
       (?, Variable (?, sums_rec/0),

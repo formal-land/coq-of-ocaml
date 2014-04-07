@@ -4,7 +4,7 @@
   
   8 (. -> . -[ NonTermination/2 ]-> .,
     Value
-      (rec, sum_rec, [ ],
+      (@., rec, sum_rec, [ ],
         [ (counter, Type (nat/2)); (l, Type (t/0, Type (Z/2))) ],
         Some Type (Z/2)) =
       Match
@@ -114,7 +114,8 @@
           ]))
   
   8 (. -[ Counter/2; NonTermination/2 ]-> .,
-    Value (non_rec, sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2))
+    Value
+      (@., non_rec, sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2))
       =
       Apply
         ((?, Effect ([ Counter/2; NonTermination/2 ], .)),
@@ -139,7 +140,7 @@
   
   13 (. -> . -[ NonTermination/2 ]-> .,
     Value
-      (rec, of_list_rec, [ A ],
+      (@., rec, of_list_rec, [ A ],
         [ (counter, Type (nat/2)); (x, Type (list/2, A)) ], Some Type (t/0, A))
       =
       Match
@@ -242,7 +243,8 @@
   
   13 (. -[ Counter/2; NonTermination/2 ]-> .,
     Value
-      (non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)) =
+      (@., non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ],
+        Some Type (t/0, A)) =
       Apply
         ((?, Effect ([ Counter/2; NonTermination/2 ], .)),
           Variable
@@ -266,12 +268,12 @@
   
   17 Module Inside:
     18 (.,
-      Value (non_rec, x, [ ], [ ], Some Type (Z/3)) =
+      Value (@., non_rec, x, [ ], [ ], Some Type (Z/3)) =
         Constant ((18, Effect ([ ], .)), Int(12)))
 
 22
 (. -[ Counter/1; NonTermination/1 ]-> .,
-  Value (non_rec, n, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, n, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),

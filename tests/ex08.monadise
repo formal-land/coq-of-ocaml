@@ -4,12 +4,12 @@ Inductive t1:
 
 8
 ((),
-  Value (non_rec, n, [ ], [ ], Some Type (t1/0)) =
+  Value (@., non_rec, n, [ ], [ ], Some Type (t1/0)) =
     Constructor (8, C2/0, Constructor (8, false/1), Constant (8, Int(3))))
 
 10
 ((),
-  Value (non_rec, m, [ ], [ ], Some Type (bool/1)) =
+  Value (@., non_rec, m, [ ], [ ], Some Type (bool/1)) =
     Match
       (10, Variable (10, n/0),
         [
@@ -24,7 +24,7 @@ Inductive t2:
 18
 ((),
   Value
-    (rec, of_list_rec, [ A ],
+    (@., rec, of_list_rec, [ A ],
       [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
       Some Monad ([ NonTermination/1 ], Type (t2/0, A))) =
     Match
@@ -81,7 +81,7 @@ Inductive t2:
 18
 ((),
   Value
-    (non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ],
+    (@., non_rec, of_list, [ A ], [ (l, Type (list/1, A)) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (t2/0, A))) =
     Bind
       (?,
@@ -97,7 +97,7 @@ Inductive t2:
 23
 ((),
   Value
-    (rec, sum_rec, [ ],
+    (@., rec, sum_rec, [ ],
       [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ],
       Some Monad ([ NonTermination/1 ], Type (Z/1))) =
     Match
@@ -158,7 +158,7 @@ Inductive t2:
 23
 ((),
   Value
-    (non_rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ],
+    (@., non_rec, sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
     Bind
       (?,
@@ -174,7 +174,7 @@ Inductive t2:
 28
 ((),
   Value
-    (non_rec, s, [ A ], [ (x, A) ],
+    (@., non_rec, s, [ A ], [ (x, A) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
     Match
       (?, Variable (?, x/0),

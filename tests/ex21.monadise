@@ -1,7 +1,7 @@
 3
 ((),
   Value
-    (non_rec, f, [ A; B; C ], [ (x, A) ],
+    (@., non_rec, f, [ A; B; C ], [ (x, A) ],
       Some Monad ([ IO/0 ], (C -> Monad ([ OCaml.Failure/1 ], B)))) =
     Bind
       (?,
@@ -19,8 +19,8 @@
 7
 ((),
   Value
-    (non_rec, r, [ A; B ], [ (x, B) ], Some Monad ([ IO/0; OCaml.Failure/1 ], A))
-    =
+    (@., non_rec, r, [ A; B ], [ (x, B) ],
+      Some Monad ([ IO/0; OCaml.Failure/1 ], A)) =
     Match
       (?, Variable (?, x/0),
         [

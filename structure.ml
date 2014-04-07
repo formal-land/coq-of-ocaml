@@ -14,12 +14,12 @@ module Value = struct
       indent (Exp.pp pp_a value.body))
   
   let update_env (value : 'a t) (v : 'b) (env : 'b FullEnvi.t) : 'b FullEnvi.t =
-    let (_, x, _, _, _) = value.header in
+    let (_, _, x, _, _, _) = value.header in
     { env with FullEnvi.vars = Envi.add_name x v env.FullEnvi.vars }
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : 'a t) : SmartPrint.t =
-    let (is_rec, x, typ_vars, args, typ) = value.header in
+    let (is_rec, _, x, typ_vars, args, typ) = value.header in
     nest (
       (if Recursivity.to_bool is_rec then
         !^ "Fixpoint"
@@ -273,13 +273,15 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         Reference.name = Name.of_ident x;
         typ = Type.of_type_expr env.FullEnvi.typs typ } in
       (Reference.update_env r env, Reference (loc, r))
-    | Tstr_value (is_rec, [{vb_pat = pattern; vb_expr = e}]) ->
+    | Tstr_value (is_rec, [{
+      vb_pat = pattern; vb_expr = e;
+      vb_attributes = attrs}]) ->
       let (env, is_rec, pattern, typ_vars, args, typ, e) =
         Exp.import_let_fun env is_rec pattern e in
       (match pattern with
       | Pattern.Variable x ->
         (env, Value (loc, (), {
-          Value.header = (is_rec, x, typ_vars, args, Some typ);
+          Value.header = (is_rec, Attribute.of_attributes attrs, x, typ_vars, args, Some typ);
           body = e }))
       | _ -> Error.raise loc "Cannot match a function definition on a pattern.")
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
@@ -367,7 +369,7 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
     : Effect.Type.t FullEnvi.t * (Effect.Type.t, 'a * Effect.t) t =
     match def with
     | Value (loc, (), {
-      Value.header = (is_rec, x, _, args, _) as header;
+      Value.header = (is_rec, _, x, _, args, _) as header;
       body = e }) ->
       let (e, x_typ) = Exp.effects_of_let env is_rec x args e in
       let descriptor = (snd (Exp.annotation e)).Effect.descriptor in
@@ -404,7 +406,7 @@ let rec monadise (env : unit Envi.t)
     : unit Envi.t * (unit, Loc.t) t =
     match def with
     | Value (loc, effect, {
-      Value.header = (is_rec, x, typ_vars, args, typ);
+      Value.header = (is_rec, attr, x, typ_vars, args, typ);
       body = body }) ->
       let typ = match typ with
         | None -> None
@@ -420,7 +422,7 @@ let rec monadise (env : unit Envi.t)
       let body = Exp.monadise env_in_body body in
       let env = Envi.add_name x () env in
       (env, Value (loc, (), {
-        Value.header = (is_rec, x, typ_vars, args, typ);
+        Value.header = (is_rec, attr, x, typ_vars, args, typ);
         body = body }))
     | Module (loc, name, defs) ->
       let (env, defs) = monadise (Envi.open_module env) defs in
