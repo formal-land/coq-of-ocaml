@@ -19,7 +19,7 @@
 
 9
 (. -[ OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, x2, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, x2, [ A698; A701 ], [ (x, A701/0) ], Some A698/0) =
     Match
       ((?, Effect ([ OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),

@@ -1,8 +1,9 @@
 3
 (.,
   Value
-    (@coq_rec, rec, f_map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
-      Some Type (list/1, A)) =
+    (@coq_rec, rec, f_map, [ A704; A709 ],
+      [ (f, (A709/0 -> A704/0)); (l, Type (list/1, A709/0)) ],
+      Some Type (list/1, A704/0)) =
     Match
       ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), l/0),
         [
@@ -50,9 +51,12 @@
 9
 (. -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (@free_rec, rec, f_map2_rec, [ A; B ],
-      [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
-      Some Type (list/1, A)) =
+    (@free_rec, rec, f_map2_rec, [ A745; A750 ],
+      [
+        (counter, Type (nat/1));
+        (f, (A750/0 -> A745/0));
+        (l, Type (list/1, A750/0))
+      ], Some Type (list/1, A745/0)) =
     Match
       ((?, Effect ([ NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), counter/0),
@@ -179,8 +183,9 @@
 9
 (. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, f_map2, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
-      Some Type (list/1, A)) =
+    (@., non_rec, f_map2, [ A745; A750 ],
+      [ (f, (A750/0 -> A745/0)); (l, Type (list/1, A750/0)) ],
+      Some Type (list/1, A745/0)) =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable
@@ -276,7 +281,7 @@
 
 23
 (. -[ Counter/1; NonTermination/1 ]-> .,
-  Value (@., non_rec, n2, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, n2, [ A824 ], [ (x, A824/0) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),

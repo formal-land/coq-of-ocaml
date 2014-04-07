@@ -41,17 +41,17 @@ let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
       iterate_open_lift (open_lift v) (n - 1) in
   iterate_open_lift (PathName.Map.find x.BoundName.path_name map) x.BoundName.depth
 
+let mem (x : PathName.t) (env : 'a t) : bool =
+  try let _ = depth x env in true with NotFound _ -> false
 
 let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
-  let mem (x : PathName.t) : bool =
-    try let _ = depth x env in true with NotFound _ -> false in
   let prefix_n s n =
     if n = 0 then
       Name.of_string s
     else
       Name.of_string @@ Printf.sprintf "%s_%d" s n in
   let rec first_n (n : int) : int =
-    if mem (PathName.of_name [] @@ prefix_n prefix n) then
+    if mem (PathName.of_name [] @@ prefix_n prefix n) env then
       first_n (n + 1)
     else
       n in

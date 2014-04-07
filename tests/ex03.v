@@ -10,8 +10,8 @@ Definition n1 : Z :=
   n1.
 
 Definition n2 : Z :=
-  let p1 {A B C : Type} (c : (B -> C -> B) -> A) : A :=
+  let p1 {A691 A705 A708 : Type} (c : (A705 -> A708 -> A705) -> A691) : A691 :=
     c (fun x => fun y => x) in
-  let c {A : Type} (f : Z -> Z -> A) : A :=
+  let c {A718 : Type} (f : Z -> Z -> A718) : A718 :=
     f 12 23 in
   p1 c.

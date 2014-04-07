@@ -26,8 +26,8 @@ Inductive t2 (a : Type) : Type :=
 Arguments D1 {a} .
 Arguments D2 {a} _ _.
 
-Fixpoint of_list_rec {A : Type} (counter : nat) (l : list A) :
-  M [ NonTermination ] (t2 A) :=
+Fixpoint of_list_rec {A764 : Type} (counter : nat) (l : list A764) :
+  M [ NonTermination ] (t2 A764) :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -39,8 +39,8 @@ Fixpoint of_list_rec {A : Type} (counter : nat) (l : list A) :
     end
   end.
 
-Definition of_list {A : Type} (l : list A) :
-  M [ Counter; NonTermination ] (t2 A) :=
+Definition of_list {A764 : Type} (l : list A764) :
+  M [ Counter; NonTermination ] (t2 A764) :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (of_list_rec x l).
 
@@ -60,7 +60,7 @@ Definition sum (l : t2 Z) : M [ Counter; NonTermination ] Z :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (sum_rec x l).
 
-Definition s {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
+Definition s {A812 : Type} (x : A812) : M [ Counter; NonTermination ] Z :=
   match x with
   | _ =>
     let! x_1 := of_list (cons 5 (cons 7 (cons 3 []))) in

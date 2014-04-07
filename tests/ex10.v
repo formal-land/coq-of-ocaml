@@ -27,8 +27,8 @@ Module List2.
     let! x := lift [_;_] "10" (read_counter tt) in
     lift [_;_] "01" (sum_rec x l).
   
-  Fixpoint of_list_rec {A : Type} (counter : nat) (x : list A) :
-    M [ NonTermination ] (t A) :=
+  Fixpoint of_list_rec {A786 : Type} (counter : nat) (x : list A786) :
+    M [ NonTermination ] (t A786) :=
     match counter with
     | O => not_terminated tt
     | S counter =>
@@ -40,8 +40,8 @@ Module List2.
       end
     end.
   
-  Definition of_list {A : Type} (x : list A) :
-    M [ Counter; NonTermination ] (t A) :=
+  Definition of_list {A786 : Type} (x : list A786) :
+    M [ Counter; NonTermination ] (t A786) :=
     let! x_1 := lift [_;_] "10" (read_counter tt) in
     lift [_;_] "01" (of_list_rec x_1 x).
   
@@ -50,7 +50,7 @@ Module List2.
   End Inside.
 End List2.
 
-Definition n {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
+Definition n {A803 : Type} (x : A803) : M [ Counter; NonTermination ] Z :=
   match x with
   | _ =>
     let! x_1 :=

@@ -1,6 +1,8 @@
 3
 ((),
-  Value (@., non_rec, f, [ A; B; C ], [ (x, A) ], Some (C -> B)) =
+  Value
+    (@., non_rec, f, [ A687; A698; A701 ], [ (x, A687/0) ],
+      Some (A701/0 -> A698/0)) =
     Sequence
       (4,
         Apply
@@ -14,7 +16,7 @@
 
 7
 ((),
-  Value (@., non_rec, r, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, r, [ A715; A718 ], [ (x, A718/0) ], Some A715/0) =
     Match
       (?, Variable (?, x/0),
         [

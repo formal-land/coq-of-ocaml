@@ -9,7 +9,8 @@ Definition Outside := Effect.make unit unit.
 Definition raise_Outside {A : Type} (x : unit) : M [ Outside ] A :=
   fun s => (inr (inl x), s).
 
-Definition f {A B : Type} (x : B) : M [ Outside ] A := raise_Outside tt.
+Definition f {A684 A687 : Type} (x : A687) : M [ Outside ] A684 :=
+  raise_Outside tt.
 
 Module G.
   Definition Inside := Effect.make unit (Z * string).
@@ -17,15 +18,15 @@ Module G.
   Definition raise_Inside {A : Type} (x : Z * string) : M [ Inside ] A :=
     fun s => (inr (inl x), s).
   
-  Definition g {A : Type} (b : bool) : M [ Outside; Inside ] A :=
+  Definition g {A705 : Type} (b : bool) : M [ Outside; Inside ] A705 :=
     if b then
       lift [_;_] "01" (raise_Inside (12, "no" % string))
     else
       lift [_;_] "10" (raise_Outside tt).
 End G.
 
-Fixpoint h_rec {A B : Type} (counter : nat) (l : list B) :
-  M [ IO; NonTermination; Outside; G.Inside ] A :=
+Fixpoint h_rec {A731 A753 : Type} (counter : nat) (l : list A753) :
+  M [ IO; NonTermination; Outside; G.Inside ] A731 :=
   match counter with
   | O => lift [_;_;_;_] "0100" (not_terminated tt)
   | S counter =>
@@ -41,7 +42,7 @@ Fixpoint h_rec {A B : Type} (counter : nat) (l : list B) :
     end
   end.
 
-Definition h {A B : Type} (l : list B) :
-  M [ Counter; IO; NonTermination; Outside; G.Inside ] A :=
+Definition h {A731 A753 : Type} (l : list A753) :
+  M [ Counter; IO; NonTermination; Outside; G.Inside ] A731 :=
   let! x := lift [_;_;_;_;_] "10000" (read_counter tt) in
   lift [_;_;_;_;_] "01111" (h_rec x l).

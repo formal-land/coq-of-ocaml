@@ -1,0 +1,70 @@
+3
+((),
+  Value
+    (@., non_rec, map, [ A711; A716 ],
+      [ (f, (A716/0 -> A711/0)); (l, Type (list/1, A716/0)) ],
+      Some Type (list/1, A711/0)) =
+    Let 4
+      (@coq_rec, rec, map, [ ], [ (l, Type (list/1, A716/0)) ],
+        Some Type (list/1, A711/0)) =
+      Match
+        (5, Variable (5, l/0),
+          [
+            (Constructor ([]/1), Constructor (6, []/1));
+            (Constructor (cons/1, x, l),
+              Constructor
+                (7, cons/1,
+                  Apply
+                    (7, Variable (7, f/0),
+                      [
+                        Variable
+                          (7,
+                            x/0)
+                      ]),
+                  Apply
+                    (7, Variable (7, map/0),
+                      [
+                        Variable
+                          (7,
+                            l/0)
+                      ])))
+          ]) in
+    Apply (9, Variable (9, map/0), [ Variable (9, l/0) ]))
+
+11
+((),
+  Value
+    (@., non_rec, map2, [ A792; A794 ],
+      [ (f, (A794/0 -> A792/0)); (l, Type (list/1, A794/0)) ],
+      Some Type (list/1, A792/0)) =
+    Let 12
+      (@coq_rec, rec, map2, [ A769; A774 ],
+        [ (f, (A774/0 -> A769/0)); (l, Type (list/1, A774/0)) ],
+        Some Type (list/1, A769/0)) =
+      Match
+        (13, Variable (13, l/0),
+          [
+            (Constructor ([]/1), Constructor (14, []/1));
+            (Constructor (cons/1, x, l),
+              Constructor
+                (15, cons/1,
+                  Apply
+                    (15, Variable (15, f/0),
+                      [
+                        Variable
+                          (15,
+                            x/0)
+                      ]),
+                  Apply
+                    (15, Variable (15, map2/0),
+                      [
+                        Variable
+                          (15,
+                            f/0);
+                        Variable
+                          (15,
+                            l/0)
+                      ])))
+          ]) in
+    Apply
+      (17, Variable (17, map2/0), [ Variable (17, f/0); Variable (17, l/0) ]))

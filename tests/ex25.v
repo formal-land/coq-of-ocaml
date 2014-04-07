@@ -15,18 +15,18 @@ Definition s1 : Z := OCaml.List.length l1.
 
 Definition s2 : Z := OCaml.List.length l2.
 
-Definition h {A : Type} (x : A) : M [ OCaml.Failure ] Z :=
+Definition h {A1093 : Type} (x : A1093) : M [ OCaml.Failure ] Z :=
   match x with
   | _ => OCaml.List.hd l2
   end.
 
-Definition t {A : Type} (x : A) : M [ OCaml.Failure ] (list Z) :=
+Definition t {A1109 : Type} (x : A1109) : M [ OCaml.Failure ] (list Z) :=
   match x with
   | _ => OCaml.List.tl l2
   end.
 
-Definition x {A : Type} (x : A) : M [ OCaml.Failure; OCaml.Invalid_argument ] Z
-  :=
+Definition x {A1126 : Type} (x : A1126) :
+  M [ OCaml.Failure; OCaml.Invalid_argument ] Z :=
   match x with
   | _ => OCaml.List.nth l2 1
   end.
@@ -53,24 +53,26 @@ Definition fl : Z := OCaml.List.fold_left (fun s => fun x => Z.add s x) 0 l2.
 
 Definition fr : Z := OCaml.List.fold_right (fun x => fun s => Z.add s x) l2 0.
 
-Definition m2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] (list Z) :=
+Definition m2 {A1405 : Type} (x_1 : A1405) :
+  M [ OCaml.Invalid_argument ] (list Z) :=
   match x_1 with
   | _ => OCaml.List.map2 (fun x => fun y => Z.add x y) l2 l2
   end.
 
-Definition rm2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] (list Z) :=
+Definition rm2 {A1450 : Type} (x_1 : A1450) :
+  M [ OCaml.Invalid_argument ] (list Z) :=
   match x_1 with
   | _ => OCaml.List.rev_map2 (fun x => fun y => Z.add x y) l2 l2
   end.
 
-Definition fl2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
+Definition fl2 {A1495 : Type} (x_1 : A1495) : M [ OCaml.Invalid_argument ] Z :=
   match x_1 with
   | _ =>
     OCaml.List.fold_left2 (fun s => fun x => fun y => Z.add (Z.add s x) y) 0 l2
       l2
   end.
 
-Definition fr2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
+Definition fr2 {A1556 : Type} (x_1 : A1556) : M [ OCaml.Invalid_argument ] Z :=
   match x_1 with
   | _ =>
     OCaml.List.fold_right2 (fun s => fun x => fun y => Z.add (Z.add s x) y) l2

@@ -1,18 +1,20 @@
 3
 (. -[ Counter/1; NonTermination/1 ]-> .,
-  Value (@., non_rec, l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
+  Value
+    (@., non_rec, l, [ A687 ], [ (x, A687/0) ], Some Type (list/1, Type (Z/1)))
+    =
     Match
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
         [
           (Any,
             Let (4, Effect ([ Counter/1; NonTermination/1 ], .))
-              (@., rec, map_rec, [ A; B ],
+              (@., rec, map_rec, [ A707; A712 ],
                 [
                   (counter, Type (nat/1));
-                  (f, (B -> A));
-                  (x_1, Type (list/1, B))
-                ], Some Type (list/1, A)) =
+                  (f, (A712/0 -> A707/0));
+                  (x_1, Type (list/1, A712/0))
+                ], Some Type (list/1, A707/0)) =
               Match
                 ((?, Effect ([ NonTermination/1 ], .)),
                   Variable
@@ -167,9 +169,11 @@
                           ]))
                   ]) in
             Let (4, Effect ([ Counter/1; NonTermination/1 ], .))
-              (@., non_rec, map, [ A; B ],
-                [ (f, (B -> A)); (x_1, Type (list/1, B)) ],
-                Some Type (list/1, A)) =
+              (@., non_rec, map, [ A707; A712 ],
+                [
+                  (f, (A712/0 -> A707/0));
+                  (x_1, Type (list/1, A712/0))
+                ], Some Type (list/1, A707/0)) =
               Apply
                 ((?,
                   Effect
@@ -233,8 +237,9 @@
                         x_1/0)
                   ]) in
             Let (7, Effect ([ Counter/1; NonTermination/1 ], .))
-              (@., rec, loop_rec, [ A ],
-                [ (counter, Type (nat/1)); (x, A) ], Some A) =
+              (@., rec, loop_rec, [ A727 ],
+                [ (counter, Type (nat/1)); (x, A727/0) ],
+                Some A727/0) =
               Match
                 ((?, Effect ([ NonTermination/1 ], .)),
                   Variable
@@ -278,7 +283,8 @@
                           x/0))
                   ]) in
             Let (7, Effect ([ Counter/1; NonTermination/1 ], .))
-              (@., non_rec, loop, [ A ], [ (x, A) ], Some A) =
+              (@., non_rec, loop, [ A727 ], [ (x, A727/0) ],
+                Some A727/0) =
               Apply
                 ((?,
                   Effect

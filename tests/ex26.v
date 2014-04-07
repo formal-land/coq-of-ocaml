@@ -4,14 +4,16 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Fixpoint f_map {A B : Type} (f : B -> A) (l : list B) : list A :=
+Fixpoint f_map {A704 A709 : Type} (f : A709 -> A704) (l : list A709) : list A704
+  :=
   match l with
   | [] => []
   | cons x l => cons (f x) (f_map f l)
   end.
 
-Fixpoint f_map2_rec {A B : Type} (counter : nat) (f : B -> A) (l : list B) :
-  M [ NonTermination ] (list A) :=
+Fixpoint f_map2_rec {A745 A750 : Type}
+  (counter : nat) (f : A750 -> A745) (l : list A750) :
+  M [ NonTermination ] (list A745) :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -23,8 +25,8 @@ Fixpoint f_map2_rec {A B : Type} (counter : nat) (f : B -> A) (l : list B) :
     end
   end.
 
-Definition f_map2 {A B : Type} (f : B -> A) (l : list B) :
-  M [ Counter; NonTermination ] (list A) :=
+Definition f_map2 {A745 A750 : Type} (f : A750 -> A745) (l : list A750) :
+  M [ Counter; NonTermination ] (list A745) :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (f_map2_rec x f l).
 
@@ -36,7 +38,7 @@ Definition n : Z :=
     end in
   sum (cons 1 (cons 2 (cons 3 []))).
 
-Definition n2 {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
+Definition n2 {A824 : Type} (x : A824) : M [ Counter; NonTermination ] Z :=
   match x with
   | _ =>
     let fix sum_rec (counter : nat) (l : list Z) : M [ NonTermination ] Z :=

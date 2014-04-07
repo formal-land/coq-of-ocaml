@@ -4,8 +4,9 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Fixpoint map_rec {A B : Type} (counter : nat) (f : B -> A) (l : list B) :
-  M [ NonTermination ] (list A) :=
+Fixpoint map_rec {A704 A709 : Type}
+  (counter : nat) (f : A709 -> A704) (l : list A709) :
+  M [ NonTermination ] (list A704) :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -17,14 +18,14 @@ Fixpoint map_rec {A B : Type} (counter : nat) (f : B -> A) (l : list B) :
     end
   end.
 
-Definition map {A B : Type} (f : B -> A) (l : list B) :
-  M [ Counter; NonTermination ] (list A) :=
+Definition map {A704 A709 : Type} (f : A709 -> A704) (l : list A709) :
+  M [ Counter; NonTermination ] (list A704) :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (map_rec x f l).
 
-Fixpoint fold_rec {A B : Type}
-  (counter : nat) (f : A -> B -> A) (a : A) (l : list B) :
-  M [ NonTermination ] A :=
+Fixpoint fold_rec {A753 A756 : Type}
+  (counter : nat) (f : A753 -> A756 -> A753) (a : A753) (l : list A756) :
+  M [ NonTermination ] A753 :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -34,14 +35,15 @@ Fixpoint fold_rec {A B : Type}
     end
   end.
 
-Definition fold {A B : Type} (f : A -> B -> A) (a : A) (l : list B) :
-  M [ Counter; NonTermination ] A :=
+Definition fold {A753 A756 : Type}
+  (f : A753 -> A756 -> A753) (a : A753) (l : list A756) :
+  M [ Counter; NonTermination ] A753 :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (fold_rec x f a l).
 
 Definition l : list Z := cons 5 (cons 6 (cons 7 (cons 2 []))).
 
-Definition n {A : Type} (incr : Z -> A) (plus : Z -> A -> Z) :
+Definition n {A818 : Type} (incr : Z -> A818) (plus : Z -> A818 -> Z) :
   M [ Counter; NonTermination ] Z :=
   let! x := map incr l in
   fold (fun x => fun y => plus x y) 0 x.

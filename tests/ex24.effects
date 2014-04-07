@@ -1,6 +1,6 @@
 5
 (. -[ OCaml.Invalid_argument/1 ]-> .,
-  Value (@., non_rec, e_invalid, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_invalid, [ A684; A687 ], [ (x, A687/0) ], Some A684/0) =
     Match
       ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -30,7 +30,7 @@
 
 6
 (. -[ OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, e_failure, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_failure, [ A699; A702 ], [ (x, A702/0) ], Some A699/0) =
     Match
       ((?, Effect ([ OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -60,7 +60,7 @@
 
 7
 (. -[ OCaml.Pervasives.Exit/1 ]-> .,
-  Value (@., non_rec, e_exit1, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_exit1, [ A714; A717 ], [ (x, A717/0) ], Some A714/0) =
     Match
       ((?, Effect ([ OCaml.Pervasives.Exit/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -82,7 +82,8 @@
 
 8
 (. -[ OCaml.Pervasives.Exit/1 ]-> .,
-  Value (@., non_rec, e_exit2, [ A; B ], [ (x, B) ], Some A) =
+  Value (@., non_rec, e_exit2, [ A1357; A1360 ], [ (x, A1360/0) ], Some A1357/0)
+    =
     Match
       ((?, Effect ([ OCaml.Pervasives.Exit/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -545,7 +546,7 @@
 
 94
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, p_c, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_c, [ A1860 ], [ (x, A1860/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -560,7 +561,7 @@
 
 95
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, p_s, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_s, [ A1875 ], [ (x, A1875/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -583,7 +584,7 @@
 
 96
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, p_n, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, p_n, [ A1890 ], [ (x, A1890/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -598,7 +599,8 @@
 
 98
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, p_endline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value
+    (@., non_rec, p_endline, [ A1905 ], [ (x, A1905/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -621,7 +623,8 @@
 
 99
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, p_newline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value
+    (@., non_rec, p_newline, [ A1920 ], [ (x, A1920/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -636,7 +639,7 @@
 
 102
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, perr_c, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_c, [ A1935 ], [ (x, A1935/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -659,7 +662,7 @@
 
 103
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, perr_s, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_s, [ A1950 ], [ (x, A1950/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -682,7 +685,7 @@
 
 104
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, perr_n, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, perr_n, [ A1965 ], [ (x, A1965/0) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -697,7 +700,9 @@
 
 106
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, perr_endline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value
+    (@., non_rec, perr_endline, [ A1980 ], [ (x, A1980/0) ], Some Type (unit/1))
+    =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -720,7 +725,9 @@
 
 107
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, perr_newline, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value
+    (@., non_rec, perr_newline, [ A1995 ], [ (x, A1995/0) ], Some Type (unit/1))
+    =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -735,7 +742,7 @@
 
 110
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, r_s, [ A ], [ (x, A) ], Some Type (string/1)) =
+  Value (@., non_rec, r_s, [ A2010 ], [ (x, A2010/0) ], Some Type (string/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -750,7 +757,7 @@
 
 111
 (. -[ IO/0 ]-> .,
-  Value (@., non_rec, r_n, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, r_n, [ A2025 ], [ (x, A2025/0) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [

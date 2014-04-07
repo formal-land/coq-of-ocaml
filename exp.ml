@@ -289,12 +289,18 @@ and import_let_fun (env : unit FullEnvi.t) (rec_flag : Asttypes.rec_flag)
       env_with_let
     else
       env in
-  let e_schema = Schema.of_type (Type.of_type_expr env.FullEnvi.typs e.exp_type) in
+  (*let e_schema = Schema.of_type env (Type.of_type_expr env.FullEnvi.typs e.exp_type) in*)
+  let (e_typ, (env, free_typ_vars)) = Type.of_type_expr env e.exp_type in
+  (*let free_typ_vars = e_schema.Schema.variables in*)
+  let free_typ_vars = Name.Set.elements free_typ_vars in
+  (*let env = List.fold_left (fun env free_typ_var ->
+    FullEnvi.add_free_typ_var [] free_typ_var env)
+    env free_typ_vars in*)
   let e = of_expression env e in
   let (args_names, e_body) = open_function e in
-  let e_typ = e_schema.Schema.typ in
+  (*let e_typ = e_schema.Schema.typ in*)
   let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
-  (env_with_let, is_rec, pattern, e_schema.Schema.variables,
+  (env_with_let, is_rec, pattern, free_typ_vars,
     List.combine args_names args_typs, e_body_typ, e_body)
 
 (** Substitute the name [x] used as a variable (not as a constructor for

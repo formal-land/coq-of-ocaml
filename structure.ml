@@ -271,7 +271,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       when PathName.of_path path = PathName.of_name ["Pervasives"] "ref" ->
       let r = {
         Reference.name = Name.of_ident x;
-        typ = Type.of_type_expr env.FullEnvi.typs typ } in
+        typ = fst (Type.of_type_expr env typ) } in
       (Reference.update_env r env, Reference (loc, r))
     | Tstr_value (is_rec, [{
       vb_pat = pattern; vb_expr = e;
@@ -290,10 +290,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       (match typ.type_kind with
       | Type_variant cases ->
         let constructors =
-          let env_typs = Envi.add_name name () env.FullEnvi.typs in
+          let env = FullEnvi.add_typ [] name env in
           cases |> List.map (fun {cd_id = constr; cd_args = typs} ->
             (Name.of_ident constr, typs |> List.map (fun typ ->
-              Type.of_type_expr env_typs typ))) in
+              fst (Type.of_type_expr env typ)))) in
         let ind = {
           Inductive.name = name;
           typ_vars = typ_vars;
@@ -301,7 +301,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         (Inductive.update_env ind env, Inductive (loc, ind))
       | Type_record (fields, _) ->
         let fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
-          (Name.of_ident x, Type.of_type_expr env.FullEnvi.typs typ)) in
+          (Name.of_ident x, fst (Type.of_type_expr env typ))) in
         let r = {
           Record.name = name;
           fields = fields } in
@@ -312,14 +312,14 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
           let syn = {
             Synonym.name = name;
             typ_vars = typ_vars;
-            value = Type.of_type_expr env.FullEnvi.typs typ } in
+            value = fst (Type.of_type_expr env typ) } in
           (Synonym.update_env syn env, Synonym (loc, syn))
         | None -> Error.raise loc "Type definition not handled."))
     | Tstr_exception { cd_id = name; cd_args = args } ->
       let name = Name.of_ident name in
       let typ =
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
-          Type.of_type_expr env.FullEnvi.typs typ)) in
+          fst (Type.of_type_expr env typ))) in
       let exn = { Exception.name = name; typ = typ} in
       (Exception.update_env exn env, Exception (loc, exn))
     (* | Tstr_open (_, path, _, _) -> (Error.raise loc "TODO", Open (PathName.of_path 0 path)) *)

@@ -1,8 +1,9 @@
 3
 ((),
   Value
-    (@coq_rec, rec, f_map, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
-      Some Type (list/1, A)) =
+    (@coq_rec, rec, f_map, [ A704; A709 ],
+      [ (f, (A709/0 -> A704/0)); (l, Type (list/1, A709/0)) ],
+      Some Type (list/1, A704/0)) =
     Match
       (4, Variable (4, l/0),
         [
@@ -24,9 +25,12 @@
 9
 ((),
   Value
-    (@free_rec, rec, f_map2_rec, [ A; B ],
-      [ (counter, Type (nat/1)); (f, (B -> A)); (l, Type (list/1, B)) ],
-      Some Type (list/1, A)) =
+    (@free_rec, rec, f_map2_rec, [ A745; A750 ],
+      [
+        (counter, Type (nat/1));
+        (f, (A750/0 -> A745/0));
+        (l, Type (list/1, A750/0))
+      ], Some Type (list/1, A745/0)) =
     Match
       (?, Variable (?, counter/0),
         [
@@ -80,8 +84,9 @@
 9
 ((),
   Value
-    (@., non_rec, f_map2, [ A; B ], [ (f, (B -> A)); (l, Type (list/1, B)) ],
-      Some Type (list/1, A)) =
+    (@., non_rec, f_map2, [ A745; A750 ],
+      [ (f, (A750/0 -> A745/0)); (l, Type (list/1, A750/0)) ],
+      Some Type (list/1, A745/0)) =
     Apply
       (?, Variable (?, f_map2_rec/0),
         [
@@ -132,7 +137,7 @@
 
 23
 ((),
-  Value (@., non_rec, n2, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (@., non_rec, n2, [ A824 ], [ (x, A824/0) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x/0),
         [

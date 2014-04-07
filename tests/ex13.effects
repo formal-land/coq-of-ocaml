@@ -1,8 +1,8 @@
 3
 (. -[ OCaml.Failure/1 ]-> .,
   Value
-    (@., non_rec, tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
-    =
+    (@., non_rec, tail, [ A696 ], [ (l, Type (list/1, A696/0)) ],
+      Some Type (list/1, A696/0)) =
     Match
       ((4, Effect ([ OCaml.Failure/1 ], .)),
         Variable ((4, Effect ([ ], .)), l/0),
@@ -188,7 +188,7 @@
 
 16
 (. -[ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, x, [ A ], [ (z, A) ], Some Type (unit/1)) =
+  Value (@., non_rec, x, [ A748 ], [ (z, A748/0) ], Some Type (unit/1)) =
     Apply
       ((16, Effect ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ], .)),
         Variable

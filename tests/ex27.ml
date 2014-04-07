@@ -66,12 +66,12 @@ let rec mapi_aux i f = function
 
 let mapi f l = mapi_aux 0 f l
 
-(*let rev_map f l =
+let rev_map f l =
   let rec rmap_f accu = function
     | [] -> accu
     | a::l -> rmap_f (f a :: accu) l
-  in
-  rmap_f [] l*)
+  [@@coq_rec] in
+  rmap_f [] l
 
 let rec iter f = function
     [] -> ()
@@ -104,14 +104,14 @@ let rec map2 f l1 l2 =
   | (_, _) -> invalid_arg "List.map2"
 [@@coq_rec]
 
-(*let rev_map2 f l1 l2 =
+let rev_map2 f l1 l2 =
   let rec rmap2_f accu l1 l2 =
     match (l1, l2) with
     | ([], []) -> accu
     | (a1::l1, a2::l2) -> rmap2_f (f a1 a2 :: accu) l1 l2
     | (_, _) -> invalid_arg "List.rev_map2"
-  in
-  rmap2_f [] l1 l2*)
+  [@@coq_rec] in
+  rmap2_f [] l1 l2
 
 let rec iter2 f l1 l2 =
   match (l1, l2) with
@@ -160,34 +160,34 @@ let rec _exists2 p l1 l2 =
 
 (*let rec mem x = function
     [] -> false
-  | a::l -> compare a x = 0 || mem x l*)
+  | a::l -> compare a x = 0 || mem x l
 
-(*let rec memq x = function
+let rec memq x = function
     [] -> false
-  | a::l -> a == x || memq x l*)
+  | a::l -> a == x || memq x l
 
-(*let rec assoc x = function
+let rec assoc x = function
     [] -> raise Not_found
-  | (a,b)::l -> if compare a x = 0 then b else assoc x l*)
+  | (a,b)::l -> if compare a x = 0 then b else assoc x l
 
-(*let rec assq x = function
+let rec assq x = function
     [] -> raise Not_found
-  | (a,b)::l -> if a == x then b else assq x l*)
+  | (a,b)::l -> if a == x then b else assq x l
 
-(*let rec mem_assoc x = function
+let rec mem_assoc x = function
   | [] -> false
-  | (a, b) :: l -> compare a x = 0 || mem_assoc x l*)
+  | (a, b) :: l -> compare a x = 0 || mem_assoc x l
 
-(*let rec mem_assq x = function
+let rec mem_assq x = function
   | [] -> false
-  | (a, b) :: l -> a == x || mem_assq x l*)
+  | (a, b) :: l -> a == x || mem_assq x l
 
-(*let rec remove_assoc x = function
+let rec remove_assoc x = function
   | [] -> []
   | (a, b as pair) :: l ->
-      if compare a x = 0 then l else pair :: remove_assoc x l*)
+      if compare a x = 0 then l else pair :: remove_assoc x l
 
-(*let rec remove_assq x = function
+let rec remove_assq x = function
   | [] -> []
   | (a, b as pair) :: l -> if a == x then l else pair :: remove_assq x l*)
 
@@ -196,19 +196,21 @@ let rec find p = function
   | x :: l -> if p x then x else find p l
 [@@coq_rec]
 
-(*let find_all p =
+let find_all p =
   let rec find accu = function
   | [] -> rev accu
-  | x :: l -> if p x then find (x :: accu) l else find accu l in
+  | x :: l -> if p x then find (x :: accu) l else find accu l
+  [@@coq_rec] in
   find []
 
-let filter = find_all*)
+let filter = find_all
 
-(*let partition p l =
+let partition p l =
   let rec part yes no = function
   | [] -> (rev yes, rev no)
-  | x :: l -> if p x then part (x :: yes) no l else part yes (x :: no) l in
-  part [] [] l*)
+  | x :: l -> if p x then part (x :: yes) no l else part yes (x :: no) l
+  [@@coq_rec] in
+  part [] [] l
 
 let rec split = function
     [] -> ([], [])
