@@ -4,21 +4,21 @@
 
 9
 ((),
-  Value (@., non_rec, r, [ ], [ ], Some Type (SizedString.t/0)) =
+  Value (non_rec, @., r, [ ], [ ], Some Type (SizedString.t/0)) =
     Record
       (9, (SizedString.name/0, Constant (9, String("gre"))),
         (SizedString.size/0, Constant (9, Int(3)))))
 
 10
 ((),
-  Value (@., non_rec, r', [ ], [ ], Some Type (SizedString.t/0)) =
+  Value (non_rec, @., r', [ ], [ ], Some Type (SizedString.t/0)) =
     Record
       (10, (SizedString.name/0, Constant (10, String("haha"))),
         (SizedString.size/0, Constant (10, Int(4)))))
 
 12
 ((),
-  Value (@., non_rec, s, [ ], [ ], Some Type (Z/1)) =
+  Value (non_rec, @., s, [ ], [ ], Some Type (Z/1)) =
     Apply
       (12, Variable (12, Z.add/0),
         [
@@ -29,7 +29,7 @@
 14
 ((),
   Value
-    (@., non_rec, f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)) =
+    (non_rec, @., f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -39,12 +39,12 @@
 
 18
 ((),
-  Value (@., non_rec, b, [ ], [ ], Some Type (bool/1)) =
+  Value (non_rec, @., b, [ ], [ ], Some Type (bool/1)) =
     Apply (18, Variable (18, f/0), [ Variable (18, r/0) ]))
 
 19
 ((),
-  Value (@., non_rec, b', [ ], [ ], Some Type (bool/1)) =
+  Value (non_rec, @., b', [ ], [ ], Some Type (bool/1)) =
     Apply (19, Variable (19, f/0), [ Variable (19, r'/0) ]))
 
 21 Module Point:
@@ -52,13 +52,13 @@
     ([ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ])
   
   27 ((),
-    Value (@., non_rec, p, [ ], [ ], Some Type (t/0)) =
+    Value (non_rec, @., p, [ ], [ ], Some Type (t/0)) =
       Record
         (27, (x/0, Constant (27, Int(5))), (y/0, Constant (27, Int(-3))),
           (z/0, Constant (27, Int(1)))))
   
   29 ((),
-    Value (@., non_rec, b, [ ], [ ], Some Type (bool/2)) =
+    Value (non_rec, @., b, [ ], [ ], Some Type (bool/2)) =
       Match
         (29, Variable (29, p/0),
           [

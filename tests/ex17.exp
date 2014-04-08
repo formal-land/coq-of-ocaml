@@ -2,14 +2,14 @@
 
 5
 ((),
-  Value (@., non_rec, f, [ A; B ], [ (x, A) ], Some B) =
+  Value (non_rec, @., f, [ A; B ], [ (x, A) ], Some B) =
     Apply (5, Variable (5, raise_Outside/0), [ Tuple (?) ]))
 
 7 Module G:
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
   
   10 ((),
-    Value (@., non_rec, g, [ A ], [ (b, Type (bool/2)) ], Some A) =
+    Value (non_rec, @., g, [ A ], [ (b, Type (bool/2)) ], Some A) =
       IfThenElse
         (11, Variable (11, b/0),
           Apply
@@ -20,7 +20,7 @@
 17
 ((),
   Value
-    (@., rec, h_rec, [ A; B ],
+    (rec, @., h_rec, [ A; B ],
       [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some B) =
     Match
       (?, Variable (?, counter/0),
@@ -97,7 +97,7 @@
 
 17
 ((),
-  Value (@., non_rec, h, [ A; B ], [ (l, Type (list/1, A)) ], Some B) =
+  Value (non_rec, @., h, [ A; B ], [ (l, Type (list/1, A)) ], Some B) =
     Apply
       (?, Variable (?, h_rec/0),
         [

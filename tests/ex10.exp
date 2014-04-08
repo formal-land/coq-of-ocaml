@@ -4,7 +4,7 @@
   
   8 ((),
     Value
-      (@., rec, sum_rec, [ ],
+      (rec, @., sum_rec, [ ],
         [ (counter, Type (nat/2)); (l, Type (t/0, Type (Z/2))) ],
         Some Type (Z/2)) =
       Match
@@ -53,7 +53,7 @@
   
   8 ((),
     Value
-      (@., non_rec, sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2))
+      (non_rec, @., sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2))
       =
       Apply
         (?, Variable (?, sum_rec/0),
@@ -64,7 +64,7 @@
   
   13 ((),
     Value
-      (@., rec, of_list_rec, [ A ],
+      (rec, @., of_list_rec, [ A ],
         [ (counter, Type (nat/2)); (x, Type (list/2, A)) ], Some Type (t/0, A))
       =
       Match
@@ -109,7 +109,7 @@
   
   13 ((),
     Value
-      (@., non_rec, of_list, [ A ], [ (x, Type (list/2, A)) ],
+      (non_rec, @., of_list, [ A ], [ (x, Type (list/2, A)) ],
         Some Type (t/0, A)) =
       Apply
         (?, Variable (?, of_list_rec/0),
@@ -120,12 +120,12 @@
   
   17 Module Inside:
     18 ((),
-      Value (@., non_rec, x, [ ], [ ], Some Type (Z/3)) =
+      Value (non_rec, @., x, [ ], [ ], Some Type (Z/3)) =
         Constant (18, Int(12)))
 
 22
 ((),
-  Value (@., non_rec, n, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (non_rec, @., n, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x/0),
         [

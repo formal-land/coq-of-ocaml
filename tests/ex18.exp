@@ -2,7 +2,7 @@
 
 3
 ((),
-  Value (@., non_rec, plus_one, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (non_rec, @., plus_one, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       (?, Variable (?, x/0),
         [
@@ -27,7 +27,7 @@
 
 8
 ((),
-  Value (@., non_rec, fail, [ A; B ], [ (x, A) ], Some B) =
+  Value (non_rec, @., fail, [ A; B ], [ (x, A) ], Some B) =
     Match
       (?, Variable (?, x/0),
         [
@@ -49,14 +49,14 @@
 
 10
 ((),
-  Value (@., non_rec, reset, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (non_rec, @., reset, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [ (Any, Apply (11, Variable (?, write_r/0), [ Constant (11, Int(0)) ])) ]))
 
 13
 ((),
-  Value (@., non_rec, incr, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (non_rec, @., incr, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       (?, Variable (?, x/0),
         [

@@ -1,12 +1,12 @@
 3
 ((),
-  Value (@., non_rec, l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
+  Value (non_rec, @., l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
     Match
       (?, Variable (?, x/0),
         [
           (Any,
             Let 4
-              (@., rec, map_rec, [ B; C ],
+              (rec, @., map_rec, [ B; C ],
                 [
                   (counter, Type (nat/1));
                   (f, (B -> C));
@@ -77,7 +77,7 @@
                           ]))
                   ]) in
             Let 4
-              (@., non_rec, map, [ B; C ],
+              (non_rec, @., map, [ B; C ],
                 [ (f, (B -> C)); (x_1, Type (list/1, B)) ],
                 Some Type (list/1, C)) =
               Apply
@@ -96,7 +96,7 @@
                     Variable (?, x_1/0)
                   ]) in
             Let 7
-              (@., rec, loop_rec, [ B ],
+              (rec, @., loop_rec, [ B ],
                 [ (counter, Type (nat/1)); (x, B) ], Some B) =
               Match
                 (?, Variable (?, counter/0),
@@ -116,7 +116,7 @@
                         (7,
                           x/0))
                   ]) in
-            Let 7 (@., non_rec, loop, [ B ], [ (x, B) ], Some B) =
+            Let 7 (non_rec, @., loop, [ B ], [ (x, B) ], Some B) =
               Apply
                 (?, Variable (?, loop_rec/0),
                   [

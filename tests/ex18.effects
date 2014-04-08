@@ -2,7 +2,7 @@
 
 3
 (. -[ r/0 ]-> .,
-  Value (@., non_rec, plus_one, [ A ], [ (x, A) ], Some Type (Z/1)) =
+  Value (non_rec, @., plus_one, [ A ], [ (x, A) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ r/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -51,7 +51,7 @@
 
 8
 (. -[ OCaml.Failure/1; s/0 ]-> .,
-  Value (@., non_rec, fail, [ A; B ], [ (x, A) ], Some B) =
+  Value (non_rec, @., fail, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Failure/1; s/0 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -100,7 +100,7 @@
 
 10
 (. -[ r/0 ]-> .,
-  Value (@., non_rec, reset, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (non_rec, @., reset, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ r/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
@@ -115,7 +115,7 @@
 
 13
 (. -[ r/0 ]-> .,
-  Value (@., non_rec, incr, [ A ], [ (x, A) ], Some Type (unit/1)) =
+  Value (non_rec, @., incr, [ A ], [ (x, A) ], Some Type (unit/1)) =
     Match
       ((?, Effect ([ r/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [

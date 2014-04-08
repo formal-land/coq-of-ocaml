@@ -2,7 +2,7 @@
 
 5
 ((),
-  Value (@., non_rec, x1, [ ], [ ], Some Type (Z/1)) =
+  Value (non_rec, @., x1, [ ], [ ], Some Type (Z/1)) =
     Match
       (6,
         Run
@@ -16,7 +16,7 @@
 9
 ((),
   Value
-    (@., non_rec, x2, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/1 ], B))
+    (non_rec, @., x2, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/1 ], B))
     =
     Match
       (?, Variable (?, x/0),
@@ -56,7 +56,7 @@
 13
 ((),
   Value
-    (@., non_rec, x3, [ ], [ (b, Type (bool/1)) ],
+    (non_rec, @., x3, [ ], [ (b, Type (bool/1)) ],
       Some Monad ([ OCaml.Failure/1 ], Type (Z/1))) =
     Bind
       (?,

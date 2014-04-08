@@ -1,14 +1,14 @@
 3
 ((),
   Value
-    (@., non_rec, l, [ A ], [ (x, A) ],
+    (non_rec, @., l, [ A ], [ (x, A) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (list/1, Type (Z/1)))) =
     Match
       (?, Variable (?, x/0),
         [
           (Any,
             Let 4
-              (@., rec, map_rec, [ B; C ],
+              (rec, @., map_rec, [ B; C ],
                 [
                   (counter, Type (nat/1));
                   (f, (B -> C));
@@ -94,7 +94,7 @@
                           ]))
                   ]) in
             Let 4
-              (@., non_rec, map, [ B; C ],
+              (non_rec, @., map, [ B; C ],
                 [ (f, (B -> C)); (x_1, Type (list/1, B)) ],
                 Some
                   Monad
@@ -144,7 +144,7 @@
                           ])))
               in
             Let 7
-              (@., rec, loop_rec, [ B ],
+              (rec, @., loop_rec, [ B ],
                 [ (counter, Type (nat/1)); (x, B) ],
                 Some Monad ([ NonTermination/1 ], B)) =
               Match
@@ -168,7 +168,7 @@
                               x/0)))
                   ]) in
             Let 7
-              (@., non_rec, loop, [ B ], [ (x, B) ],
+              (non_rec, @., loop, [ B ], [ (x, B) ],
                 Some
                   Monad
                     ([

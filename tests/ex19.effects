@@ -2,7 +2,7 @@
 
 5
 (.,
-  Value (@., non_rec, x1, [ ], [ ], Some Type (Z/1)) =
+  Value (non_rec, @., x1, [ ], [ ], Some Type (Z/1)) =
     Match
       ((6, Effect ([ ], .)),
         Run
@@ -19,7 +19,7 @@
 
 9
 (. -[ OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, x2, [ A; B ], [ (x, A) ], Some B) =
+  Value (non_rec, @., x2, [ A; B ], [ (x, A) ], Some B) =
     Match
       ((?, Effect ([ OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -96,7 +96,7 @@
 
 13
 (. -[ OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
+  Value (non_rec, @., x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
     Match
       ((14, Effect ([ OCaml.Failure/1 ], .)),
         Run

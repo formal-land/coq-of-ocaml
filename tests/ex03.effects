@@ -1,17 +1,17 @@
 3
 (.,
-  Value (@., non_rec, n1, [ ], [ ], Some Type (Z/1)) =
-    Let (4, Effect ([ ], .)) (@., non_rec, m, [ ], [ ], None) =
+  Value (non_rec, @., n1, [ ], [ ], Some Type (Z/1)) =
+    Let (4, Effect ([ ], .)) (non_rec, @., m, [ ], [ ], None) =
       Constant ((4, Effect ([ ], .)), Int(12)) in
-    Let (5, Effect ([ ], .)) (@., non_rec, n1, [ ], [ ], None) =
+    Let (5, Effect ([ ], .)) (non_rec, @., n1, [ ], [ ], None) =
       Variable ((5, Effect ([ ], .)), m/0) in
     Variable ((6, Effect ([ ], .)), n1/0))
 
 8
 (.,
-  Value (@., non_rec, n2, [ ], [ ], Some Type (Z/1)) =
+  Value (non_rec, @., n2, [ ], [ ], Some Type (Z/1)) =
     Let (9, Effect ([ ], .))
-      (@., non_rec, p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C) =
+      (non_rec, @., p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C) =
       Apply
         ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), c/0),
           [
@@ -28,7 +28,7 @@
                         x/0)))
           ]) in
     Let (10, Effect ([ ], .))
-      (@., non_rec, c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ], Some A)
+      (non_rec, @., c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ], Some A)
       =
       Apply
         ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), f/0),

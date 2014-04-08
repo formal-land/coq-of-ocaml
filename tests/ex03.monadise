@@ -1,22 +1,22 @@
 3
 ((),
-  Value (@., non_rec, n1, [ ], [ ], Some Type (Z/1)) =
-    Let ? (@., non_rec, m, [ ], [ ], None) =
+  Value (non_rec, @., n1, [ ], [ ], Some Type (Z/1)) =
+    Let ? (non_rec, @., m, [ ], [ ], None) =
       Constant (4, Int(12)) in
-    Let ? (@., non_rec, n1, [ ], [ ], None) =
+    Let ? (non_rec, @., n1, [ ], [ ], None) =
       Variable (5, m/0) in
     Variable (6, n1/0))
 
 8
 ((),
-  Value (@., non_rec, n2, [ ], [ ], Some Type (Z/1)) =
+  Value (non_rec, @., n2, [ ], [ ], Some Type (Z/1)) =
     Let 9
-      (@., non_rec, p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C) =
+      (non_rec, @., p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C) =
       Apply
         (9, Variable (9, c/0),
           [ Function (9, x, Function (9, y, Variable (9, x/0))) ]) in
     Let 10
-      (@., non_rec, c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ], Some A)
+      (non_rec, @., c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ], Some A)
       =
       Apply
         (10, Variable (10, f/0),

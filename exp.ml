@@ -9,30 +9,38 @@ module Header = struct
     the names and types of the arguments, the return type, the body and the expression
     in which we do the "let". We need to group [Let] and [Function] in one constructor
     to make the Coq's fixpoint operator work (and have a nicer pretty-printing). *)
-  type t =
-    Recursivity.t * Attribute.t * Name.t * Name.t list * (Name.t * Type.t) list * Type.t option
+  type t = {
+    is_rec : Recursivity.t;
+    attribute : Attribute.t;
+    name : Name.t;
+    typ_vars : Name.t list;
+    args : (Name.t * Type.t) list;
+    typ : Type.t option }
 
   let pp (header : t) : SmartPrint.t =
-    let (is_rec, attr, x, typ_vars, args, typ) = header in
     OCaml.tuple [
-      Attribute.pp attr; Recursivity.pp is_rec; Name.pp x;
-      OCaml.list Name.pp typ_vars;
-      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) args;
-      OCaml.option Type.pp typ]
+      Recursivity.pp header.is_rec; Attribute.pp header.attribute; Name.pp header.name;
+      OCaml.list Name.pp header.typ_vars;
+      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) header.args;
+      OCaml.option Type.pp header.typ]
 
-  let variable (x : Name.t) : t =
-    (Recursivity.New false, Attribute.None, x, [], [], None)
+  let variable (x : Name.t) : t = {
+    is_rec = Recursivity.New false;
+    attribute = Attribute.None;
+    name = x;
+    typ_vars = [];
+    args = [];
+    typ = None }
 
   let env_in_header (header : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
-    let (is_rec, _, x, _, args, _) = header in
     let env_vars =
-      if Recursivity.to_bool is_rec then
-        Envi.add_name x () env.FullEnvi.vars
+      if Recursivity.to_bool header.is_rec then
+        Envi.add_name header.name () env.FullEnvi.vars
       else
         env.FullEnvi.vars in
     let env_vars =
       List.fold_left (fun env_vars (y, _) -> Envi.add_name y () env_vars)
-        env_vars args in
+        env_vars header.args in
     { env with FullEnvi.vars = env_vars }
 end
 
@@ -149,10 +157,17 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     let e2 = of_expression env e2 in
     (match (pattern, args) with
     | (Pattern.Variable name, []) ->
-      Let (l, (Recursivity.New false, attr, name, [], [], None), body, e2)
+      Let (l, Header.variable name , body, e2)
     | (_, []) -> Match (l, body, [pattern, e2])
     | (Pattern.Variable name, _) ->
-      Let (l, (rec_flag, attr, name, free_typ_vars, args, Some body_typ), body, e2)
+      let header = {
+        Header.is_rec = rec_flag;
+        attribute = attr;
+        name = name;
+        typ_vars = free_typ_vars;
+        args = args;
+        typ = Some body_typ } in
+      Let (l, header, body, e2)
     | _ -> Error.raise l "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
@@ -316,19 +331,19 @@ let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
       Function (a, y, e)
     else
       Function (a, y, substitute x e' e)
-  | Let (a, (is_rec, attr, y, typ_args, args, typ), e1, e2) ->
+  | Let (a, header, e1, e2) ->
     let e1 =
-      if (Recursivity.to_bool is_rec && y = x)
-        || List.exists (fun (y, _) -> y = x) args then
+      if (Recursivity.to_bool header.Header.is_rec && header.Header.name = x)
+        || List.exists (fun (y, _) -> y = x) header.Header.args then
         e1
       else
         substitute x e' e1 in
     let e2 =
-      if y = x then
+      if header.Header.name = x then
         e2
       else
         substitute x e' e2 in
-    Let (a, (is_rec, attr, y, typ_args, args, typ), e1, e2)
+    Let (a, header, e1, e2)
   | Match (a, e, cases) ->
     let e = substitute x e' e in
     let cases = cases |> List.map (fun (p, e) ->
@@ -405,18 +420,20 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
 and monadise_let_rec_definition (env : unit FullEnvi.t)
   (header : Header.t) (e : Loc.t t)
   : unit FullEnvi.t * (Header.t * Loc.t t) list =
-  let (is_rec, attr, x, typ_vars, args, typ) = header in
-  if Recursivity.to_bool is_rec && attr <> Attribute.CoqRec then
+  (* let (is_rec, attr, x, typ_vars, args, typ) = header in *)
+  if Recursivity.to_bool header.Header.is_rec && header.Header.attribute <> Attribute.CoqRec then
     let var (x : Name.t) env : Loc.t t =
       Variable (Loc.Unknown,
         Envi.bound_name (PathName.of_name [] x) env.FullEnvi.vars) in
-    let (x_rec, _) = Envi.fresh (x ^ "_rec") () env.FullEnvi.vars in
+    let (x_rec, _) = Envi.fresh (header.Header.name ^ "_rec") () env.FullEnvi.vars in
     let (counter, _) = Envi.fresh "counter" () env.FullEnvi.vars in
     let args_x_rec =
       (counter,
         Type.Apply (Envi.bound_name (PathName.of_name [] "nat") env.FullEnvi.typs, []))
-          :: args in
-    let header_x_rec = (is_rec, attr, x_rec, typ_vars, args_x_rec, typ) in
+          :: header.Header.args in
+    let header_x_rec = { header with
+      Header.name = x_rec;
+      args = args_x_rec } in
     let env_in_x_rec = Header.env_in_header header_x_rec env in
     let e_x_rec = monadise_let_rec env_in_x_rec e in
     let e_x_rec = Match (Loc.Unknown, var counter env_in_x_rec, [
@@ -424,20 +441,22 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
         Apply (Loc.Unknown, var "not_terminated" env_in_x_rec, [Tuple (Loc.Unknown, [])]));
       (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env_in_x_rec.FullEnvi.constructors,
         [Pattern.Variable counter]),
-        substitute x
+        substitute header.Header.name
           (Apply (Loc.Unknown, var x_rec env_in_x_rec, [var counter env_in_x_rec])) e_x_rec)]) in
     let env = { env with FullEnvi.vars = Envi.add_name x_rec () env.FullEnvi.vars } in
-    let header_x = (Recursivity.New false, Attribute.None, x, typ_vars, args, typ) in
+    let header_x = { header with
+      Header.is_rec = Recursivity.New false;
+      attribute = Attribute.None } in
     let env_in_x = Header.env_in_header header_x env in
     let e_x = Apply (Loc.Unknown,
       var x_rec env_in_x,
       Apply (Loc.Unknown, var "read_counter" env_in_x, [Tuple (Loc.Unknown, [])]) ::
-      List.map (fun (x, _) -> var x env_in_x) args) in
-    let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
+      List.map (fun (x, _) -> var x env_in_x) header.Header.args) in
+    let env = { env with FullEnvi.vars = Envi.add_name header.Header.name () env.FullEnvi.vars } in
     (env, [ (header_x_rec, e_x_rec); (header_x, e_x) ])
   else
     let e = monadise_let_rec (Header.env_in_header header env) e in
-    let env = { env with FullEnvi.vars = Envi.add_name x () env.FullEnvi.vars } in
+    let env = { env with FullEnvi.vars = Envi.add_name header.Header.name () env.FullEnvi.vars } in
     (env, [(header, e)])
 
 let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
@@ -514,10 +533,12 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
       typ = Effect.Type.Arrow (
         effect_e.Effect.descriptor, effect_e.Effect.typ) } in
     Function ((l, effect), x, e)
-  | Let (l, ((is_rec, _, x, _, args, _) as header), e1, e2) ->
-    let (e1, x_typ) = effects_of_let env is_rec x args e1 in
+  | Let (l, header, e1, e2) ->
+    let (e1, x_typ) =
+      effects_of_let env header.Header.is_rec header.Header.name header.Header.args e1 in
     let effect1 = snd (annotation e1) in
-    let env_in_e2 = { env with FullEnvi.vars = Envi.add_name x x_typ env.FullEnvi.vars } in
+    let env_in_e2 = { env with
+      FullEnvi.vars = Envi.add_name header.Header.name x_typ env.FullEnvi.vars } in
     let e2 = effects env_in_e2 e2 in
     let effect2 = snd (annotation e2) in
     let descriptor = Effect.Descriptor.union
@@ -669,28 +690,29 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
   | Function ((l, _), x, e) ->
     let env = Envi.add_name x () env in
     Function (l, x, monadise env e)
-  | Let ((l, _), (_, _, x, _, [], _), e1, e2) -> (* TODO: use l *)
+  | Let ((l, _), { Header.name = x; args = [] }, e1, e2) -> (* TODO: use l *)
     let (d1, d2) = (descriptor e1, descriptor e2) in
     let e1 = monadise env e1 in
     let env = Envi.add_name x () env in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 (Some x) e2
-  | Let ((l, _), (is_rec, attr, x, typ_args, args, typ), e1, e2) ->
-    let typ = match typ with
+  | Let ((l, _), header, e1, e2) ->
+    let typ = match header.Header.typ with
       | Some typ -> Some (Type.monadise typ (snd (annotation e1)))
       | None -> None in
+    let header = { header with Header.typ = typ } in
     let env_in_e1 =
-      if Recursivity.to_bool is_rec then
-        Envi.add_name x () env
+      if Recursivity.to_bool header.Header.is_rec then
+        Envi.add_name header.Header.name () env
       else
         env in
     let env_in_e1 =
       List.fold_left (fun env_in_e1 (x, _) -> Envi.add_name x () env_in_e1)
-        env_in_e1 args in
+        env_in_e1 header.Header.args in
     let e1 = monadise env_in_e1 e1 in
-    let env_in_e2 = Envi.add_name x () env in
+    let env_in_e2 = Envi.add_name header.Header.name () env in
     let e2 = monadise env_in_e2 e2 in
-    Let (l, (is_rec, attr, x, typ_args, args, typ), e1, e2)
+    Let (l, header, e1, e2)
   | Match ((l, _), e, cases) ->
     monadise_list env [e] d [] (fun es' ->
       match es' with
@@ -747,24 +769,24 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
     Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
   | Function (_, x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
-  | Let (_, (_, _, x, _, [], _), e1, e2) ->
+  | Let (_, { Header.name = x; args = [] }, e1, e2) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
-  | Let (_, (is_rec, _, f_name, typ_vars, xs, f_typ), e_f, e) ->
+  | Let (_, header, e_f, e) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^
-      (if Recursivity.to_bool is_rec then !^ "fix" else empty) ^^
-      Name.to_coq f_name ^^
-      (if typ_vars = []
+      (if Recursivity.to_bool header.Header.is_rec then !^ "fix" else empty) ^^
+      Name.to_coq header.Header.name ^^
+      (if header.Header.typ_vars = []
       then empty
       else braces @@ group (
-        separate space (List.map Name.to_coq typ_vars) ^^
+        separate space (List.map Name.to_coq header.Header.typ_vars) ^^
         !^ ":" ^^ !^ "Type")) ^^
-      group (separate space (xs |> List.map (fun (x, x_typ) ->
+      group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->
         parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false x_typ)))) ^^
-      (match f_typ with
+      (match header.Header.typ with
       | None -> empty
-      | Some f_typ -> !^ ":" ^^ Type.to_coq false f_typ) ^^
+      | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
       !^ ":=" ^^ newline ^^
       indent (to_coq false e_f) ^^ !^ "in" ^^ newline ^^
       to_coq false e)

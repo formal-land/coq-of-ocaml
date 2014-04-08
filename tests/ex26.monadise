@@ -1,7 +1,7 @@
 3
 ((),
   Value
-    (@coq_rec, rec, f_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+    (rec, @coq_rec, f_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
       Some Type (list/1, B)) =
     Match
       (4, Variable (4, l/0),
@@ -24,7 +24,7 @@
 9
 ((),
   Value
-    (@free_rec, rec, f_map2_rec, [ A; B ],
+    (rec, @free_rec, f_map2_rec, [ A; B ],
       [ (counter, Type (nat/1)); (f, (A -> B)); (l, Type (list/1, A)) ],
       Some Monad ([ NonTermination/1 ], Type (list/1, B))) =
     Match
@@ -91,7 +91,7 @@
 9
 ((),
   Value
-    (@., non_rec, f_map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+    (non_rec, @., f_map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (list/1, B))) =
     Bind
       (?,
@@ -106,9 +106,9 @@
 
 15
 ((),
-  Value (@., non_rec, n, [ ], [ ], Some Type (Z/1)) =
+  Value (non_rec, @., n, [ ], [ ], Some Type (Z/1)) =
     Let 16
-      (@coq_rec, rec, sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
+      (rec, @coq_rec, sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
         Some Type (Z/1)) =
       Match
         (17, Variable (17, l/0),
@@ -147,14 +147,14 @@
 23
 ((),
   Value
-    (@., non_rec, n2, [ A ], [ (x, A) ],
+    (non_rec, @., n2, [ A ], [ (x, A) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))) =
     Match
       (?, Variable (?, x/0),
         [
           (Any,
             Let 24
-              (@free_rec, rec, sum_rec, [ ],
+              (rec, @free_rec, sum_rec, [ ],
                 [
                   (counter, Type (nat/1));
                   (l, Type (list/1, Type (Z/1)))
@@ -231,7 +231,7 @@
                           ]))
                   ]) in
             Let 24
-              (@., non_rec, sum, [ ],
+              (non_rec, @., sum, [ ],
                 [ (l, Type (list/1, Type (Z/1))) ],
                 Some
                   Monad

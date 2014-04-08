@@ -1,7 +1,7 @@
 3
 ((),
   Value
-    (@., non_rec, tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
+    (non_rec, @., tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
     =
     Match
       (4, Variable (4, l/0),
@@ -20,7 +20,7 @@
 8
 ((),
   Value
-    (@., rec, print_list_rec, [ ],
+    (rec, @., print_list_rec, [ ],
       [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
       Some Type (unit/1)) =
     Match
@@ -72,7 +72,7 @@
 8
 ((),
   Value
-    (@., non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+    (non_rec, @., print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
       Some Type (unit/1)) =
     Apply
       (?, Variable (?, print_list_rec/0),
@@ -84,13 +84,13 @@
 14
 ((),
   Value
-    (@., non_rec, f, [ ], [ ],
+    (non_rec, @., f, [ ], [ ],
       Some (Type (list/1, Type (string/1)) -> Type (unit/1))) =
     Variable (14, print_list/0))
 
 16
 ((),
-  Value (@., non_rec, x, [ A ], [ (z, A) ], Some Type (unit/1)) =
+  Value (non_rec, @., x, [ A ], [ (z, A) ], Some Type (unit/1)) =
     Apply
       (16, Variable (16, f/0),
         [

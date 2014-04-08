@@ -4,13 +4,13 @@ Inductive set:
 
 7
 ((),
-  Value (@., non_rec, empty, [ ], [ ], Some Type (set/0)) =
+  Value (non_rec, @., empty, [ ], [ ], Some Type (set/0)) =
     Constructor (7, Empty/0))
 
 9
 ((),
   Value
-    (@., rec, member_rec, [ ],
+    (rec, @., member_rec, [ ],
       [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Monad ([ NonTermination/1 ], Type (bool/1))) =
     Match
@@ -110,7 +110,7 @@ Inductive set:
 9
 ((),
   Value
-    (@., non_rec, member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
+    (non_rec, @., member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))) =
     Bind
       (?,
@@ -126,7 +126,7 @@ Inductive set:
 20
 ((),
   Value
-    (@., rec, insert_rec, [ ],
+    (rec, @., insert_rec, [ ],
       [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Monad ([ NonTermination/1 ], Type (set/0))) =
     Match
@@ -271,7 +271,7 @@ Inductive set:
 20
 ((),
   Value
-    (@., non_rec, insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
+    (non_rec, @., insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
       Some Monad ([ Counter/1; NonTermination/1 ], Type (set/0))) =
     Bind
       (?,

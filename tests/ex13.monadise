@@ -1,7 +1,7 @@
 3
 ((),
   Value
-    (@., non_rec, tail, [ A ], [ (l, Type (list/1, A)) ],
+    (non_rec, @., tail, [ A ], [ (l, Type (list/1, A)) ],
       Some Monad ([ OCaml.Failure/1 ], Type (list/1, A))) =
     Match
       (4, Variable (4, l/0),
@@ -20,7 +20,7 @@
 8
 ((),
   Value
-    (@., rec, print_list_rec, [ ],
+    (rec, @., print_list_rec, [ ],
       [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
       Some Monad ([ IO/0; NonTermination/1 ], Type (unit/1))) =
     Match
@@ -88,7 +88,7 @@
 8
 ((),
   Value
-    (@., non_rec, print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+    (non_rec, @., print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
       Some Monad ([ Counter/1; IO/0; NonTermination/1 ], Type (unit/1))) =
     Bind
       (?,
@@ -104,7 +104,7 @@
 14
 ((),
   Value
-    (@., non_rec, f, [ ], [ ],
+    (non_rec, @., f, [ ], [ ],
       Some
         (Type (list/1, Type (string/1)) ->
           Monad ([ Counter/1; IO/0; NonTermination/1 ], Type (unit/1)))) =
@@ -113,7 +113,7 @@
 16
 ((),
   Value
-    (@., non_rec, x, [ A ], [ (z, A) ],
+    (non_rec, @., x, [ A ], [ (z, A) ],
       Some
         Monad
           ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ], Type (unit/1)))

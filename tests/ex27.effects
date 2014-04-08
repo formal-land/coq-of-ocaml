@@ -1,7 +1,7 @@
 16
 (.,
   Value
-    (@coq_rec, rec, length_aux, [ A ],
+    (rec, @coq_rec, length_aux, [ A ],
       [ (len, Type (Z/1)); (x, Type (list/1, A)) ], Some Type (Z/1)) =
     Match
       ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
@@ -47,7 +47,7 @@
 
 21
 (. -> .,
-  Value (@., non_rec, length, [ A ], [ (l, Type (list/1, A)) ], Some Type (Z/1))
+  Value (non_rec, @., length, [ A ], [ (l, Type (list/1, A)) ], Some Type (Z/1))
     =
     Apply
       ((21, Effect ([ ], .)), Variable ((21, Effect ([ ], .)), length_aux/0),
@@ -58,7 +58,7 @@
 
 23
 (. -[ OCaml.Failure/1 ]-> .,
-  Value (@., non_rec, hd, [ A ], [ (x, Type (list/1, A)) ], Some A) =
+  Value (non_rec, @., hd, [ A ], [ (x, Type (list/1, A)) ], Some A) =
     Match
       ((?, Effect ([ OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -90,7 +90,7 @@
 27
 (. -[ OCaml.Failure/1 ]-> .,
   Value
-    (@., non_rec, tl, [ A ], [ (x, Type (list/1, A)) ], Some Type (list/1, A)) =
+    (non_rec, @., tl, [ A ], [ (x, Type (list/1, A)) ], Some Type (list/1, A)) =
     Match
       ((?, Effect ([ OCaml.Failure/1 ], .)),
         Variable ((?, Effect ([ ], .)), x/0),
@@ -122,7 +122,7 @@
 31
 (. -> . -[ OCaml.Failure/1; OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@., non_rec, nth, [ A ], [ (l, Type (list/1, A)); (n, Type (Z/1)) ], Some A)
+    (non_rec, @., nth, [ A ], [ (l, Type (list/1, A)); (n, Type (Z/1)) ], Some A)
     =
     IfThenElse
       ((32, Effect ([ OCaml.Failure/1; OCaml.Invalid_argument/1 ], .)),
@@ -140,7 +140,7 @@
                 OCaml.Pervasives.invalid_arg/1),
             [ Constant ((32, Effect ([ ], .)), String("List.nth")) ]),
         Let (33, Effect ([ OCaml.Failure/1 ], .))
-          (@coq_rec, rec, nth_aux, [ B ],
+          (rec, @coq_rec, nth_aux, [ B ],
             [ (l, Type (list/1, B)); (n, Type (Z/1)) ], Some B) =
           Match
             ((34, Effect ([ OCaml.Failure/1 ], .)),
@@ -287,14 +287,14 @@
 40
 (.,
   Value
-    (@., non_rec, append, [ A ], [ ],
+    (non_rec, @., append, [ A ], [ ],
       Some (Type (list/1, A) -> (Type (list/1, A) -> Type (list/1, A)))) =
     Variable ((40, Effect ([ ], .)), OCaml.Pervasives.app/0))
 
 42
 (.,
   Value
-    (@coq_rec, rec, rev_append, [ A ],
+    (rec, @coq_rec, rev_append, [ A ],
       [ (l1, Type (list/1, A)); (l2, Type (list/1, A)) ], Some Type (list/1, A))
     =
     Match
@@ -334,7 +334,7 @@
 48
 (. -> .,
   Value
-    (@., non_rec, rev, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
+    (non_rec, @., rev, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
     =
     Apply
       ((48, Effect ([ ], .)), Variable ((48, Effect ([ ], .)), rev_append/0),
@@ -346,7 +346,7 @@
 50
 (.,
   Value
-    (@coq_rec, rec, flatten, [ A ], [ (x, Type (list/1, Type (list/1, A))) ],
+    (rec, @coq_rec, flatten, [ A ], [ (x, Type (list/1, Type (list/1, A))) ],
       Some Type (list/1, A)) =
     Match
       ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
@@ -388,21 +388,21 @@
 55
 (.,
   Value
-    (@., non_rec, concat, [ A ], [ ],
+    (non_rec, @., concat, [ A ], [ ],
       Some (Type (list/1, Type (list/1, A)) -> Type (list/1, A))) =
     Variable ((55, Effect ([ ], .)), flatten/0))
 
 57
 (.,
   Value
-    (@coq_rec, rec, map, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
+    (rec, @coq_rec, map, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
       Some Type (list/1, B)) =
     Match
       ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
         [
           (Constructor ([]/1), Constructor ((58, Effect ([ ], .)), []/1));
           (Constructor (cons/1, a, l),
-            Let (59, Effect ([ ], .)) (@., non_rec, r, [ ], [ ], None) =
+            Let (59, Effect ([ ], .)) (non_rec, @., r, [ ], [ ], None) =
               Apply
                 ((59, Effect ([ ], .)),
                   Variable ((59, Effect ([ ], .)), f/0),
@@ -444,7 +444,7 @@
 62
 (.,
   Value
-    (@coq_rec, rec, mapi_aux, [ A; B ],
+    (rec, @coq_rec, mapi_aux, [ A; B ],
       [ (i, Type (Z/1)); (f, (Type (Z/1) -> (A -> B))); (x, Type (list/1, A)) ],
       Some Type (list/1, B)) =
     Match
@@ -452,7 +452,7 @@
         [
           (Constructor ([]/1), Constructor ((63, Effect ([ ], .)), []/1));
           (Constructor (cons/1, a, l),
-            Let (64, Effect ([ ], .)) (@., non_rec, r, [ ], [ ], None) =
+            Let (64, Effect ([ ], .)) (non_rec, @., r, [ ], [ ], None) =
               Apply
                 ((64, Effect ([ ], .)),
                   Variable ((64, Effect ([ ], .)), f/0),
@@ -530,7 +530,7 @@
 67
 (. -> . -> .,
   Value
-    (@., non_rec, mapi, [ A; B ],
+    (non_rec, @., mapi, [ A; B ],
       [ (f, (Type (Z/1) -> (A -> B))); (l, Type (list/1, A)) ],
       Some Type (list/1, B)) =
     Apply
@@ -544,10 +544,10 @@
 69
 (. -> . -> .,
   Value
-    (@., non_rec, rev_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+    (non_rec, @., rev_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
       Some Type (list/1, B)) =
     Let (70, Effect ([ ], .))
-      (@coq_rec, rec, rmap_f, [ ],
+      (rec, @coq_rec, rmap_f, [ ],
         [ (accu, Type (list/1, B)); (x, Type (list/1, A)) ],
         Some Type (list/1, B)) =
       Match
@@ -616,7 +616,7 @@
 76
 (.,
   Value
-    (@coq_rec, rec, iter, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
+    (rec, @coq_rec, iter, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
       Some Type (unit/1)) =
     Match
       ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
@@ -665,7 +665,7 @@
 81
 (.,
   Value
-    (@coq_rec, rec, iteri_aux, [ A; B ],
+    (rec, @coq_rec, iteri_aux, [ A; B ],
       [ (i, Type (Z/1)); (f, (Type (Z/1) -> (A -> B))); (x, Type (list/1, A)) ],
       Some Type (unit/1)) =
     Match
@@ -751,7 +751,7 @@
 86
 (. -> . -> .,
   Value
-    (@., non_rec, iteri, [ A; B ],
+    (non_rec, @., iteri, [ A; B ],
       [ (f, (Type (Z/1) -> (A -> B))); (l, Type (list/1, A)) ],
       Some Type (unit/1)) =
     Apply
@@ -765,7 +765,7 @@
 88
 (.,
   Value
-    (@coq_rec, rec, fold_left, [ A; B ],
+    (rec, @coq_rec, fold_left, [ A; B ],
       [ (f, (A -> (B -> A))); (accu, A); (l, Type (list/1, B)) ], Some A) =
     Match
       ((89, Effect ([ ], .)), Variable ((89, Effect ([ ], .)), l/0),
@@ -813,7 +813,7 @@
 94
 (.,
   Value
-    (@coq_rec, rec, fold_right, [ A; B ],
+    (rec, @coq_rec, fold_right, [ A; B ],
       [ (f, (A -> (B -> B))); (l, Type (list/1, A)); (accu, B) ], Some B) =
     Match
       ((95, Effect ([ ], .)), Variable ((95, Effect ([ ], .)), l/0),
@@ -867,7 +867,7 @@
 100
 (. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@coq_rec, rec, map2, [ A; B; C ],
+    (rec, @coq_rec, map2, [ A; B; C ],
       [ (f, (A -> (B -> C))); (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
       Some Type (list/1, C)) =
     Match
@@ -880,7 +880,7 @@
             Constructor ((102, Effect ([ ], .)), []/1));
           (Tuple (Constructor (cons/1, a1, l1), Constructor (cons/1, a2, l2)),
             Let (103, Effect ([ OCaml.Invalid_argument/1 ], .))
-              (@., non_rec, r, [ ], [ ], None) =
+              (non_rec, @., r, [ ], [ ], None) =
               Apply
                 ((103, Effect ([ ], .)),
                   Variable ((103, Effect ([ ], .)), f/0),
@@ -973,11 +973,11 @@
 107
 (. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@., non_rec, rev_map2, [ A; B; C ],
+    (non_rec, @., rev_map2, [ A; B; C ],
       [ (f, (A -> (B -> C))); (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
       Some Type (list/1, C)) =
     Let (108, Effect ([ OCaml.Invalid_argument/1 ], .))
-      (@coq_rec, rec, rmap2_f, [ ],
+      (rec, @coq_rec, rmap2_f, [ ],
         [
           (accu, Type (list/1, C));
           (l1, Type (list/1, A));
@@ -1104,7 +1104,7 @@
 116
 (. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@coq_rec, rec, iter2, [ A; B; C ],
+    (rec, @coq_rec, iter2, [ A; B; C ],
       [ (f, (A -> (B -> C))); (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
       Some Type (unit/1)) =
     Match
@@ -1208,7 +1208,7 @@
 123
 (. -> . -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@coq_rec, rec, fold_left2, [ A; B; C ],
+    (rec, @coq_rec, fold_left2, [ A; B; C ],
       [
         (f, (A -> (B -> (C -> A))));
         (accu, A);
@@ -1319,7 +1319,7 @@
 130
 (. -> . -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@coq_rec, rec, fold_right2, [ A; B; C ],
+    (rec, @coq_rec, fold_right2, [ A; B; C ],
       [
         (f, (A -> (B -> (C -> C))));
         (l1, Type (list/1, A));
@@ -1434,7 +1434,7 @@
 137
 (.,
   Value
-    (@coq_rec, rec, for_all, [ A ],
+    (rec, @coq_rec, for_all, [ A ],
       [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some Type (bool/1))
     =
     Match
@@ -1503,7 +1503,7 @@
 142
 (.,
   Value
-    (@coq_rec, rec, _exists, [ A ],
+    (rec, @coq_rec, _exists, [ A ],
       [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some Type (bool/1))
     =
     Match
@@ -1572,7 +1572,7 @@
 147
 (. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@coq_rec, rec, for_all2, [ A; B ],
+    (rec, @coq_rec, for_all2, [ A; B ],
       [
         (p, (A -> (B -> Type (bool/1))));
         (l1, Type (list/1, A));
@@ -1692,7 +1692,7 @@
 154
 (. -> . -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@coq_rec, rec, _exists2, [ A; B ],
+    (rec, @coq_rec, _exists2, [ A; B ],
       [
         (p, (A -> (B -> Type (bool/1))));
         (l1, Type (list/1, A));
@@ -1812,7 +1812,7 @@
 194
 (. -> . -[ OCaml.Not_found/1 ]-> .,
   Value
-    (@coq_rec, rec, find, [ A ],
+    (rec, @coq_rec, find, [ A ],
       [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ], Some A) =
     Match
       ((?, Effect ([ OCaml.Not_found/1 ], .)),
@@ -1887,10 +1887,10 @@
 199
 (. -> .,
   Value
-    (@., non_rec, find_all, [ A ], [ (p, (A -> Type (bool/1))) ],
+    (non_rec, @., find_all, [ A ], [ (p, (A -> Type (bool/1))) ],
       Some (Type (list/1, A) -> Type (list/1, A))) =
     Let (200, Effect ([ ], .))
-      (@coq_rec, rec, find, [ ],
+      (rec, @coq_rec, find, [ ],
         [ (accu, Type (list/1, A)); (x, Type (list/1, A)) ],
         Some Type (list/1, A)) =
       Match
@@ -2004,18 +2004,18 @@
 206
 (. -> .,
   Value
-    (@., non_rec, filter, [ A ], [ ],
+    (non_rec, @., filter, [ A ], [ ],
       Some ((A -> Type (bool/1)) -> (Type (list/1, A) -> Type (list/1, A)))) =
     Variable ((206, Effect ([ ], . -> .)), find_all/0))
 
 208
 (. -> . -> .,
   Value
-    (@., non_rec, partition, [ A ],
+    (non_rec, @., partition, [ A ],
       [ (p, (A -> Type (bool/1))); (l, Type (list/1, A)) ],
       Some (Type (list/1, A) * Type (list/1, A))) =
     Let (209, Effect ([ ], .))
-      (@coq_rec, rec, part, [ ],
+      (rec, @coq_rec, part, [ ],
         [
           (yes, Type (list/1, A));
           (no, Type (list/1, A));
@@ -2192,7 +2192,7 @@
 215
 (.,
   Value
-    (@coq_rec, rec, split, [ A; B ], [ (x, Type (list/1, (A * B))) ],
+    (rec, @coq_rec, split, [ A; B ], [ (x, Type (list/1, (A * B))) ],
       Some (Type (list/1, A) * Type (list/1, B))) =
     Match
       ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x/0),
@@ -2275,7 +2275,7 @@
 221
 (. -> . -[ OCaml.Invalid_argument/1 ]-> .,
   Value
-    (@coq_rec, rec, combine, [ A; B ],
+    (rec, @coq_rec, combine, [ A; B ],
       [ (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
       Some Type (list/1, (A * B))) =
     Match
@@ -2358,7 +2358,7 @@
 230
 (. -> . -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (@., rec, merge_rec, [ A ],
+    (rec, @., merge_rec, [ A ],
       [
         (counter, Type (nat/1));
         (cmp, (A -> (A -> Type (Z/1))));
@@ -2653,7 +2653,7 @@
 230
 (. -> . -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, merge, [ A ],
+    (non_rec, @., merge, [ A ],
       [
         (cmp, (A -> (A -> Type (Z/1))));
         (l1, Type (list/1, A));
@@ -2679,7 +2679,7 @@
 239
 (. -> . -[ OCaml.Assert_failure/1 ]-> .,
   Value
-    (@coq_rec, rec, chop, [ A ], [ (k, Type (Z/1)); (l, Type (list/1, A)) ],
+    (rec, @coq_rec, chop, [ A ], [ (k, Type (Z/1)); (l, Type (list/1, A)) ],
       Some Type (list/1, A)) =
     IfThenElse
       ((240, Effect ([ OCaml.Assert_failure/1 ], .)),

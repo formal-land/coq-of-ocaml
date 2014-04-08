@@ -1,7 +1,7 @@
 3
 (. -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (@., rec, map_rec, [ A; B ],
+    (rec, @., map_rec, [ A; B ],
       [ (counter, Type (nat/1)); (f, (A -> B)); (l, Type (list/1, A)) ],
       Some Type (list/1, B)) =
     Match
@@ -130,7 +130,7 @@
 3
 (. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+    (non_rec, @., map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
       Some Type (list/1, B)) =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
@@ -150,7 +150,7 @@
 8
 (. -> . -> . -> . -[ NonTermination/1 ]-> .,
   Value
-    (@., rec, fold_rec, [ A; B ],
+    (rec, @., fold_rec, [ A; B ],
       [
         (counter, Type (nat/1));
         (f, (A -> (B -> A)));
@@ -286,7 +286,7 @@
 8
 (. -> . -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, fold, [ A; B ],
+    (non_rec, @., fold, [ A; B ],
       [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ], Some A) =
     Apply
       ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
@@ -307,7 +307,7 @@
 
 13
 (.,
-  Value (@., non_rec, l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
+  Value (non_rec, @., l, [ ], [ ], Some Type (list/1, Type (Z/1))) =
     Constructor
       ((13, Effect ([ ], .)), cons/1, Constant ((13, Effect ([ ], .)), Int(5)),
         Constructor
@@ -324,7 +324,7 @@
 15
 (. -> . -[ Counter/1; NonTermination/1 ]-> .,
   Value
-    (@., non_rec, n, [ A ],
+    (non_rec, @., n, [ A ],
       [ (incr, (Type (Z/1) -> A)); (plus, (Type (Z/1) -> (A -> Type (Z/1)))) ],
       Some Type (Z/1)) =
     Apply
