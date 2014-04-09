@@ -21,3 +21,11 @@ let of_attributes (attrs : Typedtree.attributes) : t =
     FreeRec
   else
     None
+
+let combine (attr1 : t) (attr2 : t) : t =
+  match (attr1, attr2) with
+  | (None, _) -> attr2
+  | (_, None) -> attr1
+  | (CoqRec, CoqRec) -> CoqRec
+  | (FreeRec, FreeRec) -> FreeRec
+  | (CoqRec, FreeRec) | (FreeRec, CoqRec) -> failwith "Attributes are not compatible."
