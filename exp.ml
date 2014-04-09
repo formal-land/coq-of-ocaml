@@ -10,8 +10,6 @@ module Header = struct
     in which we do the "let". We need to group [Let] and [Function] in one constructor
     to make the Coq's fixpoint operator work (and have a nicer pretty-printing). *)
   type t = {
-    is_rec : Recursivity.t;
-    attribute : Attribute.t;
     name : Name.t;
     typ_vars : Name.t list;
     args : (Name.t * Type.t) list;
@@ -19,12 +17,11 @@ module Header = struct
 
   let pp (header : t) : SmartPrint.t =
     OCaml.tuple [
-      Recursivity.pp header.is_rec; Attribute.pp header.attribute; Name.pp header.name;
-      OCaml.list Name.pp header.typ_vars;
+      Name.pp header.name; OCaml.list Name.pp header.typ_vars;
       OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) header.args;
       OCaml.option Type.pp header.typ]
 
-  let variable (x : Name.t) : t = {
+  (*let variable (x : Name.t) : t = {
     is_rec = Recursivity.New false;
     attribute = Attribute.None;
     name = x;
@@ -41,7 +38,29 @@ module Header = struct
     let env_vars =
       List.fold_left (fun env_vars (y, _) -> Envi.add_name y () env_vars)
         env_vars header.args in
-    { env with FullEnvi.vars = env_vars }
+    { env with FullEnvi.vars = env_vars }*)
+end
+
+module Definition = struct
+  type 'a t = {
+    is_rec : Recursivity.t;
+    attribute : Attribute.t;
+    cases : (Header.t * 'a) list }
+
+  let pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
+    OCaml.tuple [Recursivity.pp def.is_rec; Attribute.pp def.attribute;
+      def.cases |> OCaml.list (fun (header, e) ->
+        OCaml.tuple [Header.pp header; pp_a e])]
+
+  let variable (x : Name.t) (e : 'a) : 'a t =
+    let header = {
+      Header.name = x;
+      typ_vars = [];
+      args = [];
+      typ = None } in
+    { is_rec = Recursivity.New false;
+      attribute = Attribute.None;
+      cases = [header, e] }
 end
 
 (** The simplified OCaml AST we use. We do not use a mutualy recursive type to
@@ -53,7 +72,7 @@ type 'a t =
   | Constructor of 'a * BoundName.t * 'a t list (** A constructor name and a list of arguments. *)
   | Apply of 'a * 'a t * 'a t list (** An application. *)
   | Function of 'a * Name.t * 'a t (** An argument name and a body. *)
-  | Let of 'a * Header.t * 'a t * 'a t
+  | Let of 'a * 'a t Definition.t * 'a t
   | Match of 'a * 'a t * (Pattern.t * 'a t) list (** Match an expression to a list of patterns. *)
   | Record of 'a * (BoundName.t * 'a t) list (** Construct a record giving an expression for each field. *)
   | Field of 'a * 'a t * BoundName.t (** Access to a field of a record. *)
@@ -67,7 +86,7 @@ type 'a t =
 let annotation (e : 'a t) : 'a =
   match e with
   | Constant (a, _) | Variable (a, _) | Tuple (a, _) | Constructor (a, _, _)
-    | Apply (a, _, _) | Function (a, _, _) | Let (a, _, _, _) | Match (a, _, _)
+    | Apply (a, _, _) | Function (a, _, _) | Let (a, _, _) | Match (a, _, _)
     | Record (a, _) | Field (a, _, _) | IfThenElse (a, _, _, _)
     | Sequence (a, _, _) | Return (a, _) | Bind (a, _, _, _) | Lift (a, _, _, _)
     | Run (a, _, _, _) -> a
@@ -80,7 +99,7 @@ let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   | Constructor (a, x, es) -> Constructor (f a, x, List.map (map f) es)
   | Apply (a, e_f, e_xs) -> Apply (f a, map f e_f, List.map (map f) e_xs)
   | Function (a, x, e) -> Function (f a, x, map f e)
-  | Let (a, header, e1, e2) -> Let (f a, header, map f e1, map f e2)
+  | Let (a, def, e2) -> Let (f a, def, map f e2)
   | Match (a, e, cases) ->
     Match (f a, map f e, List.map (fun (p, e) -> (p, map f e)) cases)
   | Record (a, fields) ->
@@ -107,9 +126,8 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
     nest (!^ "Apply" ^^ OCaml.tuple [pp_a a; pp e_f; OCaml.list pp e_xs])
   | Function (a, x, e) ->
     nest (!^ "Function" ^^ OCaml.tuple [pp_a a; Name.pp x; pp e])
-  | Let (a, header, e1, e2) ->
-    nest (!^ "Let" ^^ pp_a a ^^ Header.pp header ^^ !^ "=" ^^ newline ^^
-      indent (pp e1) ^^ !^ "in" ^^ newline ^^
+  | Let (a, def, e2) -> (* TODO: map on def *)
+    nest (!^ "Let" ^^ pp_a a ^^ Definition.pp pp def ^^ !^ "in" ^^ newline ^^
       pp e2)
   | Match (a, e, cases) ->
     nest (!^ "Match" ^^ OCaml.tuple [pp_a a; pp e;
@@ -157,17 +175,17 @@ let rec of_expression (env : unit FullEnvi.t) (e : expression) : Loc.t t =
     let e2 = of_expression env e2 in
     (match (pattern, args) with
     | (Pattern.Variable name, []) ->
-      Let (l, Header.variable name , body, e2)
+      Let (l, Definition.variable name body, e2)
     | (_, []) -> Match (l, body, [pattern, e2])
     | (Pattern.Variable name, _) ->
       let header = {
-        Header.is_rec = rec_flag;
-        attribute = attr;
-        name = name;
+        (*Header.is_rec = rec_flag;
+        attribute = attr;*)
+        Header.name = name;
         typ_vars = free_typ_vars;
         args = args;
         typ = Some body_typ } in
-      Let (l, header, body, e2)
+      failwith "TODO" (*Let (l, header, body, e2)*)
     | _ -> Error.raise l "Cannot match a function definition on a pattern.")
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
   | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
