@@ -3,13 +3,8 @@
   (non_rec, @.,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
-        Let 4
-          (non_rec, @.,
-            [ ((m, [ ], [ ], Some Type (Z/1)), Constant (4, Int(12))) ])
-          in
-        Let 5
-          (non_rec, @.,
-            [ ((n1, [ ], [ ], Some Type (Z/1)), Variable (5, m/0)) ]) in
+        LetVar 4 m = Constant (4, Int(12)) in
+        LetVar 5 n1 = Variable (5, m/0) in
         Variable (6, n1/0))
     ]))
 
@@ -18,7 +13,7 @@
   (non_rec, @.,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
-        Let 9
+        LetFun 9
           (non_rec, @.,
             [
               ((p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C),
@@ -36,7 +31,7 @@
                                   x/0)))
                     ]))
             ]) in
-        Let 10
+        LetFun 10
           (non_rec, @.,
             [
               ((c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ],

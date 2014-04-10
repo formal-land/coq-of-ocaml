@@ -274,7 +274,7 @@
   (non_rec, @.,
     [
       ((n, [ ], [ ], Some Type (Z/1)),
-        Let (16, Effect ([ ], .))
+        LetFun (16, Effect ([ ], .))
           (rec, @coq_rec,
             [
               ((sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
@@ -411,7 +411,7 @@
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
-                Let
+                LetFun
                   (24,
                     Effect
                       ([
@@ -586,7 +586,7 @@
                             ]))
                     ])
                   in
-                Let
+                LetFun
                   (24,
                     Effect
                       ([

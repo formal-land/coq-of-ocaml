@@ -130,7 +130,7 @@
   (non_rec, @.,
     [
       ((n, [ ], [ ], Some Type (Z/1)),
-        Let 16
+        LetFun 16
           (rec, @coq_rec,
             [
               ((sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
@@ -204,7 +204,7 @@
           (?, Variable (?, x/0),
             [
               (Any,
-                Let 24
+                LetFun 24
                   (rec, @free_rec,
                     [
                       ((sum_rec,
@@ -289,7 +289,7 @@
                             ]))
                     ])
                   in
-                Let 24
+                LetFun 24
                   (non_rec, @.,
                     [
                       ((sum,

@@ -39,7 +39,7 @@
                               .)))
                     ]));
               (Constructor (S/1, counter),
-                Let
+                LetFun
                   (4,
                     Effect
                       ([
@@ -387,7 +387,7 @@
                             ]))
                     ])
                   in
-                Let
+                LetFun
                   (4,
                     Effect
                       ([

@@ -358,7 +358,11 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
     match def with
     | Value (loc, def) ->
       let def = Exp.effects_of_def env def in
-      let env = Exp.env_after_def_with_effects env def in (* TODO: check toplevel effects *)
+      (if def.Exp.Definition.cases |> List.exists (fun (header, e) ->
+        header.Exp.Header.args = [] &&
+          not (Effect.Descriptor.is_pure (snd (Exp.annotation e)).Effect.descriptor)) then
+        failwith "Toplevel effects are forbidden.");
+      let env = Exp.env_after_def_with_effects env def in
       (env, Value (loc, def))
     | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in

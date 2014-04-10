@@ -32,7 +32,7 @@
                             (?)
                         ])));
               (Constructor (S/1, counter),
-                Let 4
+                LetFun 4
                   (rec, @.,
                     [
                       ((sum_rec,
@@ -222,7 +222,7 @@
                             ]))
                     ])
                   in
-                Let 4
+                LetFun 4
                   (non_rec, @.,
                     [
                       ((sum,

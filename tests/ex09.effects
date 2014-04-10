@@ -8,7 +8,7 @@
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
-                Let
+                LetFun
                   (4,
                     Effect
                       ([
@@ -207,7 +207,7 @@
                             ]))
                     ])
                   in
-                Let
+                LetFun
                   (4,
                     Effect
                       ([
@@ -303,7 +303,7 @@
                             ]))
                     ])
                   in
-                Let
+                LetFun
                   (7,
                     Effect
                       ([
@@ -382,7 +382,7 @@
                             ]))
                     ])
                   in
-                Let
+                LetFun
                   (7,
                     Effect
                       ([

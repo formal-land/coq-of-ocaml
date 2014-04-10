@@ -9,7 +9,7 @@
           (?, Variable (?, x/0),
             [
               (Any,
-                Let 4
+                LetFun 4
                   (rec, @.,
                     [
                       ((map_rec,
@@ -121,7 +121,7 @@
                             ]))
                     ])
                   in
-                Let 4
+                LetFun 4
                   (non_rec, @.,
                     [
                       ((map,
@@ -197,7 +197,7 @@
                                     ]))))
                     ])
                   in
-                Let 7
+                LetFun 7
                   (rec, @.,
                     [
                       ((loop_rec,
@@ -245,7 +245,7 @@
                             ]))
                     ])
                   in
-                Let 7
+                LetFun 7
                   (non_rec, @.,
                     [
                       ((loop,

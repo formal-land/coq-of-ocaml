@@ -4,7 +4,7 @@
     [
       ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
         Some Type (list/1, B)),
-        Let (4, Effect ([ ], .))
+        LetFun (4, Effect ([ ], .))
           (rec, @coq_rec,
             [
               ((map, [ ], [ (l, Type (list/1, A)) ],
@@ -99,7 +99,7 @@
     [
       ((map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
         Some Type (list/1, B)),
-        Let (12, Effect ([ ], .))
+        LetFun (12, Effect ([ ], .))
           (rec, @coq_rec,
             [
               ((map2, [ C; D ],
