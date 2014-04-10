@@ -5,36 +5,35 @@ open SmartPrint
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
-  type 'a t = {
-    header : Exp.Header.t;
-    body : 'a Exp.t (** Body expression. *) }
+  type 'a t = 'a Exp.t Exp.Definition.t
 
   let pp (pp_a : 'a -> SmartPrint.t) (value : 'a t) : SmartPrint.t =
-    nest (!^ "Value" ^^ Exp.Header.pp value.header ^^ !^ "=" ^^ newline ^^
-      indent (Exp.pp pp_a value.body))
+    nest (!^ "Value" ^^ Exp.Definition.pp (Exp.pp pp_a) value)
   
-  let update_env (value : 'a t) (v : 'b) (env : 'b FullEnvi.t) : 'b FullEnvi.t =
-    { env with FullEnvi.vars = Envi.add_name value.header.Exp.Header.name v env.FullEnvi.vars }
+  (*let update_env (value : 'a t) (v : 'b) (env : 'b FullEnvi.t) : 'b FullEnvi.t =
+
+    { env with FullEnvi.vars = Envi.add_name value.header.Exp.Header.name v env.FullEnvi.vars }*)
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : 'a t) : SmartPrint.t =
-    nest (
-      (if Recursivity.to_bool value.header.Exp.Header.is_rec then
-        !^ "Fixpoint"
-      else
-        !^ "Definition") ^^
-      Name.to_coq value.header.Exp.Header.name ^^
-      (match value.header.Exp.Header.typ_vars with
-      | [] -> empty
-      | _ :: _ ->
-        braces @@ group (separate space (List.map Name.to_coq value.header.Exp.Header.typ_vars) ^^
-        !^ ":" ^^ !^ "Type")) ^^
-      group (separate space (value.header.Exp.Header.args |> List.map (fun (x, t) ->
-        parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
-      (match value.header.Exp.Header.typ with
-      | None -> empty
-      | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
-      !^ ":=" ^^ Exp.to_coq false value.body ^-^ !^ ".")
+    separate (newline ^^ newline) (value.Exp.Definition.cases |> List.map (fun (header, e) ->
+      nest (
+        (if Recursivity.to_bool value.Exp.Definition.is_rec then
+          !^ "Fixpoint"
+        else
+          !^ "Definition") ^^
+        Name.to_coq header.Exp.Header.name ^^
+        (match header.Exp.Header.typ_vars with
+        | [] -> empty
+        | _ :: _ ->
+          braces @@ group (separate space (List.map Name.to_coq header.Exp.Header.typ_vars) ^^
+          !^ ":" ^^ !^ "Type")) ^^
+        group (separate space (header.Exp.Header.args |> List.map (fun (x, t) ->
+          parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
+        (match header.Exp.Header.typ with
+        | None -> empty
+        | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
+        !^ ":=" ^^ Exp.to_coq false e ^-^ !^ ".")))
 end
 
 (** A definition of a sum type. *)
@@ -227,22 +226,21 @@ end
 *)
 
 (** A structure. *)
-type ('a, 'b) t =
-  | Value of Loc.t * 'a * 'b Value.t
+type 'a t =
+  | Value of Loc.t * 'a Value.t
   | Inductive of Loc.t * Inductive.t
   | Record of Loc.t * Record.t
   | Synonym of Loc.t * Synonym.t
   | Exception of Loc.t * Exception.t
   | Reference of Loc.t * Reference.t
   (* | Open of Loc.t * Open.t *)
-  | Module of Loc.t * Name.t * ('a, 'b) t list
+  | Module of Loc.t * Name.t * 'a t list
 
-let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
-  (defs : ('a, 'b) t list) : SmartPrint.t =
-  let pp_one (def : ('a, 'b) t) : SmartPrint.t =
+let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
+  let pp_one (def : 'a t) : SmartPrint.t =
     match def with
-    | Value (loc, a, value) ->
-      Loc.pp loc ^^ OCaml.tuple [pp_a a; Value.pp pp_b value]
+    | Value (loc, value) ->
+      Loc.pp loc ^^ OCaml.tuple [Value.pp pp_a value]
     | Inductive (loc, ind) -> Loc.pp loc ^^ Inductive.pp ind
     | Record (loc, record) -> Loc.pp loc ^^ Record.pp record
     | Synonym (loc, synonym) -> Loc.pp loc ^^ Synonym.pp synonym
@@ -252,14 +250,14 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (pp_b : 'b -> SmartPrint.t)
     | Module (loc, name, defs) ->
       nest (
         Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (pp pp_a pp_b defs)) in
+        indent (pp pp_a defs)) in
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
 let rec of_structure (env : unit FullEnvi.t) (structure : structure)
-  : unit FullEnvi.t * (unit, Loc.t) t list =
+  : unit FullEnvi.t * Loc.t t list =
   let of_structure_item (env : unit FullEnvi.t) (item : structure_item)
-    : unit FullEnvi.t * (unit, Loc.t) t =
+    : unit FullEnvi.t * Loc.t t =
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
     | Tstr_value (_, [{vb_pat = {pat_desc = Tpat_var (x, _)};
@@ -271,24 +269,9 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         Reference.name = Name.of_ident x;
         typ = Type.of_type_expr env typ } in
       (Reference.update_env r env, Reference (loc, r))
-    | Tstr_value (is_rec, [{
-      vb_pat = pattern; vb_expr = e;
-      vb_attributes = attrs}]) ->
-      let (env, is_rec, pattern, typ_vars, args, typ, e) =
-        Exp.import_let_fun env is_rec pattern e in
-      (match pattern with
-      | Pattern.Variable x ->
-        let header = {
-          Exp.Header.is_rec = is_rec;
-          attribute = Attribute.of_attributes attrs;
-          name = x;
-          typ_vars = typ_vars;
-          args = args;
-          typ = Some typ } in
-        (env, Value (loc, (), {
-          Value.header = header;
-          body = e }))
-      | _ -> Error.raise loc "Cannot match a function definition on a pattern.")
+    | Tstr_value (is_rec, cases) ->
+      let (env, def) = Exp.import_let_fun env is_rec cases in
+      (env, Value (loc, def))
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       let name = Name.of_ident name in
       let typ_vars = List.map Type.of_type_expr_variable typ.type_params in
@@ -343,15 +326,14 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
     (env, []) structure.str_items in
   (env, List.rev defs)
 
-let rec monadise_let_rec (env : unit FullEnvi.t) (defs : (unit, Loc.t) t list)
-  : unit FullEnvi.t * (unit, Loc.t) t list =
-  let rec monadise_let_rec_one (env : unit FullEnvi.t) (def : (unit, Loc.t) t)
-    : unit FullEnvi.t * (unit, Loc.t) t list =
+let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
+  : unit FullEnvi.t * Loc.t t list =
+  let rec monadise_let_rec_one (env : unit FullEnvi.t) (def : Loc.t t)
+    : unit FullEnvi.t * Loc.t t list =
     match def with
-    | Value (loc, (), { Value.header = header; body = body }) ->
-      let (env, defs) = Exp.monadise_let_rec_definition env header body in
-      (env, defs |> List.rev |> List.map (fun (header, body) ->
-        Value (loc, (), { Value.header = header; body = body })))
+    | Value (loc, def) ->
+      let (env, defs) = Exp.monadise_let_rec_definition env def in
+      (env, defs |> List.rev |> List.map (fun def -> Value (loc, def)))
     | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in
       let (env, defs) = monadise_let_rec env defs in
@@ -368,21 +350,15 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : (unit, Loc.t) t list)
     (env, []) defs in
   (env, List.rev defs)
 
-let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
-  : Effect.Type.t FullEnvi.t * (Effect.Type.t, 'a * Effect.t) t list =
-  let rec effects_one (env : Effect.Type.t FullEnvi.t) (def : (unit, 'a) t)
-    : Effect.Type.t FullEnvi.t * (Effect.Type.t, 'a * Effect.t) t =
+let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
+  : Effect.Type.t FullEnvi.t * ('a * Effect.t) t list =
+  let rec effects_one (env : Effect.Type.t FullEnvi.t) (def : 'a t)
+    : Effect.Type.t FullEnvi.t * ('a * Effect.t) t =
     match def with
-    | Value (loc, (), { Value.header = header; body = e }) ->
-      let (e, x_typ) =
-        Exp.effects_of_let env header.Exp.Header.is_rec header.Exp.Header.name
-          header.Exp.Header.args e in
-      let descriptor = (snd (Exp.annotation e)).Effect.descriptor in
-      if Effect.Descriptor.is_pure descriptor || header.Exp.Header.args <> [] then
-        let value = { Value.header = header; body = e } in
-        (Value.update_env value x_typ env, Value (loc, x_typ, value))
-      else
-        failwith "Effects unexpected for toplevel values."
+    | Value (loc, def) ->
+      let def = Exp.effects_of_def env def in
+      let env = Exp.env_after_def_with_effects env def in (* TODO: check toplevel effects *)
+      (env, Value (loc, def))
     | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in
       let (env, defs) = effects env defs in
@@ -403,36 +379,33 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : (unit, 'a) t list)
       (env, []) defs in
   (env, List.rev defs)
 
-let rec monadise (env : unit Envi.t)
-  (defs : (Effect.Type.t, Loc.t * Effect.t) t list)
-  : unit Envi.t * (unit, Loc.t) t list =
-  let rec monadise_one (env : unit Envi.t)
-    (def : (Effect.Type.t, Loc.t * Effect.t) t)
-    : unit Envi.t * (unit, Loc.t) t =
+let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
+  : unit FullEnvi.t * Loc.t t list =
+  let rec monadise_one (env : unit FullEnvi.t) (def : (Loc.t * Effect.t) t)
+    : unit FullEnvi.t * Loc.t t =
     match def with
-    | Value (loc, effect, { Value.header = header; body = body }) ->
-      let typ = match header.Exp.Header.typ with
-        | None -> None
-        | Some typ -> Some (Type.monadise typ (snd (Exp.annotation body))) in
-      let header = { header with Exp.Header.typ = typ } in
-      let env_in_body =
-        if Recursivity.to_bool header.Exp.Header.is_rec then
-          Envi.add_name header.Exp.Header.name () env
-        else
-          env in
-      let env_in_body =
-        List.fold_left (fun env_in_body (x, _) -> Envi.add_name x () env_in_body)
-          env_in_body header.Exp.Header.args in
-      let body = Exp.monadise env_in_body body in
-      let env = Envi.add_name header.Exp.Header.name () env in
-      (env, Value (loc, (), { Value.header = header; body = body }))
+    | Value (loc, def) ->
+      let env_in_def = Exp.Definition.env_in_def def env in
+      let def = { def with
+        Exp.Definition.cases = def.Exp.Definition.cases |> List.map (fun (header, e) ->
+          let typ = match header.Exp.Header.typ with
+          | Some typ -> Some (Type.monadise typ (snd (Exp.annotation e)))
+          | None -> None in
+        let header = { header with Exp.Header.typ = typ } in
+        let env = Exp.Header.env_in_header header env_in_def () in
+        let e = Exp.monadise env e in
+        (header, e)) } in
+      let env = Exp.Definition.env_after_def def env in
+      (env, Value (loc, def))
     | Module (loc, name, defs) ->
-      let (env, defs) = monadise (Envi.open_module env) defs in
-      (Envi.close_module env (fun _ _ -> ()) name, Module (loc, name, defs))
+      let (env, defs) = monadise (FullEnvi.open_module env) defs in
+      (FullEnvi.close_module env name, Module (loc, name, defs))
     | Exception (loc, exn) ->
-      (Envi.add_name exn.Exception.name () env, Exception (loc, exn))
+      let env = FullEnvi.add_var [] exn.Exception.name () env in
+      (env, Exception (loc, exn))
     | Reference (loc, r) ->
-      (Envi.add_name r.Reference.name () env, Reference (loc, r))
+      let env = FullEnvi.add_var [] r.Reference.name () env in
+      (env, Reference (loc, r))
     | Inductive (loc, ind) -> (env, Inductive (loc, ind))
     | Record (loc, record) -> (env, Record (loc, record))
     | Synonym (loc, synonym) -> (env, Synonym (loc, synonym)) in
@@ -444,10 +417,10 @@ let rec monadise (env : unit Envi.t)
   (env, List.rev defs)
 
 (** Pretty-print a structure to Coq. *)
-let rec to_coq (defs : ('a, 'b) t list) : SmartPrint.t =
-  let to_coq_one (def : ('a, 'b) t) : SmartPrint.t =
+let rec to_coq (defs : 'a t list) : SmartPrint.t =
+  let to_coq_one (def : 'a t) : SmartPrint.t =
     match def with
-    | Value (_, _, value) -> Value.to_coq value
+    | Value (_, value) -> Value.to_coq value
     | Inductive (_, ind) -> Inductive.to_coq ind
     | Record (_, record) -> Record.to_coq record
     | Synonym (_, s) -> Synonym.to_coq s

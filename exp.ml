@@ -700,7 +700,7 @@ let rec monadise (env : unit FullEnvi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
   let bind d1 d2 d e1 x e2 =
     if Effect.Descriptor.is_pure d1 then
       match x with
-      | Some x -> failwith "TODO" (*Let (Loc.Unknown, Header.variable x, e1, e2)*)
+      | Some x -> Let (Loc.Unknown, Definition.variable x e1, e2)
       | None -> e2
     else
       Bind (Loc.Unknown, lift d1 d e1, x, lift d2 d e2) in
@@ -819,24 +819,23 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
   | Let (_, def, e) ->
-    (*Pp.parens paren @@ nest (
-      !^ "let" ^^
-      (if Recursivity.to_bool header.Header.is_rec then !^ "fix" else empty) ^^
-      Name.to_coq header.Header.name ^^
-      (if header.Header.typ_vars = []
-      then empty
-      else braces @@ group (
-        separate space (List.map Name.to_coq header.Header.typ_vars) ^^
-        !^ ":" ^^ !^ "Type")) ^^
-      group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->
-        parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false x_typ)))) ^^
-      (match header.Header.typ with
-      | None -> empty
-      | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
-      !^ ":=" ^^ newline ^^
-      indent (to_coq false e_f) ^^ !^ "in" ^^ newline ^^
-      to_coq false e)*)
-    failwith "TODO"
+    Pp.parens paren @@ nest (separate (newline ^^ newline)
+      (def.Definition.cases |> List.map (fun (header, e) ->
+        !^ "let" ^^
+        (if Recursivity.to_bool def.Definition.is_rec then !^ "fix" else empty) ^^
+        Name.to_coq header.Header.name ^^
+        (if header.Header.typ_vars = []
+        then empty
+        else braces @@ group (
+          separate space (List.map Name.to_coq header.Header.typ_vars) ^^
+          !^ ":" ^^ !^ "Type")) ^^
+        group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->
+          parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false x_typ)))) ^^
+        (match header.Header.typ with
+        | None -> empty
+        | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
+        !^ ":=" ^^ newline ^^
+        indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (_, e, cases) ->
     nest (
       !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^

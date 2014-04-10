@@ -8,25 +8,25 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
       | "exp" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        Structure.pp OCaml.unit Loc.pp defs
+        Structure.pp Loc.pp defs
       | "effects" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
         let (_, defs) = Structure.effects PervasivesModule.env_with_effects defs in
         let pp_annotation (l, effect) =
           OCaml.tuple [Loc.pp l; Effect.pp effect] in
-        Structure.pp (Effect.Type.pp false) pp_annotation defs
+        Structure.pp pp_annotation defs
       | "monadise" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
         let (_, defs) = Structure.effects PervasivesModule.env_with_effects defs in
-        let (_, defs) = Structure.monadise PervasivesModule.env.FullEnvi.vars defs in
-        Structure.pp OCaml.unit Loc.pp defs
+        let (_, defs) = Structure.monadise PervasivesModule.env defs in
+        Structure.pp Loc.pp defs
       | "v" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
         let (_, defs) = Structure.effects PervasivesModule.env_with_effects defs in
-        let (_, defs) = Structure.monadise PervasivesModule.env.FullEnvi.vars defs in
+        let (_, defs) = Structure.monadise PervasivesModule.env defs in
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import CoqOfOCaml." ^^ newline;
           !^ "Local Open Scope Z_scope.";
