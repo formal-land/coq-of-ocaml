@@ -21,45 +21,47 @@ let rec pp (typ : t) : SmartPrint.t =
     Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
-let rec of_type_expr_new_free_vars (env : 'a FullEnvi.t) (typ : Types.type_expr)
-  : t * ('a FullEnvi.t * Name.Set.t) =
-  let var (x : string) =
-    let x_path_name = PathName.of_name [] x in
-    let (env, free_typ_vars, name) =
-      if Envi.mem x_path_name env.FullEnvi.free_typ_vars then (
-        let x_bound_name = Envi.bound_name x_path_name env.FullEnvi.free_typ_vars in
-        let name = Envi.find x_bound_name env.FullEnvi.free_typ_vars (fun x -> x) in
-        (env, Name.Set.empty, name)
-      ) else (
-        let (env, name) = FullEnvi.add_free_typ_var x env in
-        (env, Name.Set.singleton name, name)) in
-    let typ = Variable name in
-    (typ, (env, free_typ_vars)) in
+let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t)
+  (typ_vars : Name.t Name.Map.t) (typ : Types.type_expr)
+  : t * Name.t Name.Map.t * Name.Set.t =
   match typ.desc with
-  | Tvar None -> var (Printf.sprintf "A%d" typ.id)
+  | Tvar None ->
+    let x = Printf.sprintf "A%d" typ.id in
+    let (typ_vars, new_typ_vars, name) =
+      if Name.Map.mem x typ_vars then (
+        let name = Name.Map.find x typ_vars in
+        (typ_vars, Name.Set.empty, name)
+      ) else (
+        let n = Name.Map.cardinal typ_vars in
+        let name = String.make 1 (Char.chr (Char.code 'A' + n)) in
+        let typ_vars = Name.Map.add x name typ_vars in
+        (typ_vars, Name.Set.singleton name, name)) in
+    let typ = Variable name in
+    (typ, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
-    let (typ_x, (env, free_typ_vars_x)) = of_type_expr_new_free_vars env typ_x in
-    let (typ_y, (env, free_typ_vars_y)) = of_type_expr_new_free_vars env typ_y in
-    (Arrow (typ_x, typ_y), (env, Name.Set.union free_typ_vars_x free_typ_vars_y))
+    let (typ_x, typ_vars, new_typ_vars_x) = of_type_expr_new_typ_vars env typ_vars typ_x in
+    let (typ_y, typ_vars, new_typ_vars_y) = of_type_expr_new_typ_vars env typ_vars typ_y in
+    (Arrow (typ_x, typ_y), typ_vars, Name.Set.union new_typ_vars_x new_typ_vars_y)
   | Ttuple typs ->
-    let (typs, (env, free_typ_vars)) = of_typs_exprs_new_free_vars env typs in
-    (Tuple typs, (env, free_typ_vars))
+    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env typ_vars typs in
+    (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    let (typs, (env, free_typ_vars)) = of_typs_exprs_new_free_vars env typs in
+    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env typ_vars typs in
     let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.typs in
-    (Apply (x, typs), (env, free_typ_vars))
-  | Tlink typ -> of_type_expr_new_free_vars env typ
-  | Tpoly (typ, []) -> of_type_expr_new_free_vars env typ
-  | _ -> failwith "type not handled"
+    (Apply (x, typs), typ_vars, new_typ_vars)
+  | Tlink typ -> of_type_expr_new_typ_vars env typ_vars typ
+  | Tpoly (typ, []) -> of_type_expr_new_typ_vars env typ_vars typ
+  | _ -> failwith "Type not handled."
 
-and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t) (typs : Types.type_expr list)
-  : t list * ('a FullEnvi.t * Name.Set.t) =
-  let (typs, env, free_typ_vars) =
-    List.fold_left (fun (typs, env, free_typ_vars) typ ->
-      let (typ, (env, free_typ_vars')) = of_type_expr_new_free_vars env typ in
-      (typ :: typs, env, Name.Set.union free_typ_vars free_typ_vars'))
-      ([], env, Name.Set.empty) typs in
-  (List.rev typs, (env, free_typ_vars))
+and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t)
+  (typ_vars : Name.t Name.Map.t) (typs : Types.type_expr list)
+  : t list * Name.t Name.Map.t * Name.Set.t =
+  let (typs, typ_vars, new_typ_vars) =
+    List.fold_left (fun (typs, typ_vars, new_typ_vars) typ ->
+      let (typ, typ_vars, new_typ_vars') = of_type_expr_new_typ_vars env typ_vars typ in
+      (typ :: typs, typ_vars, Name.Set.union new_typ_vars new_typ_vars'))
+      ([], typ_vars, Name.Set.empty) typs in
+  (List.rev typs, typ_vars, new_typ_vars)
 
 let rec of_type_expr (env : 'a FullEnvi.t) (typ : Types.type_expr) : t =
   match typ.desc with
@@ -73,7 +75,7 @@ let rec of_type_expr (env : 'a FullEnvi.t) (typ : Types.type_expr) : t =
     Apply (x, List.map (of_type_expr env) typs)
   | Tlink typ -> of_type_expr env typ
   | Tpoly (typ, []) -> of_type_expr env typ
-  | _ -> failwith "type not handled"
+  | _ -> failwith "Type not handled."
 
 let of_type_expr_variable (typ : Types.type_expr) : Name.t =
   match typ.desc with

@@ -271,7 +271,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         typ = Type.of_type_expr env typ } in
       (Reference.update_env r env, Reference (loc, r))
     | Tstr_value (is_rec, cases) ->
-      let (env, def) = Exp.import_let_fun env is_rec cases in
+      let (env, def) = Exp.import_let_fun env Name.Map.empty is_rec cases in
       (env, Value (loc, def))
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       let name = Name.of_ident name in
