@@ -1,0 +1,327 @@
+3
+(Value
+  (rec, @coq_rec,
+    [
+      ((odd_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+        Match
+          (4, Variable (4, l/0),
+            [
+              (Constructor ([]/1), Constructor (5, false/1));
+              (Constructor (cons/1, Any, l),
+                Apply
+                  (6,
+                    Variable
+                      (6,
+                        negb/0),
+                    [
+                      Apply
+                        (6,
+                          Variable
+                            (6,
+                              even_length/0),
+                          [
+                            Variable
+                              (6,
+                                l/0)
+                          ])
+                    ]))
+            ]));
+      ((even_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+        Match
+          (10, Variable (10, l/0),
+            [
+              (Constructor ([]/1), Constructor (11, true/1));
+              (Constructor (cons/1, Any, l),
+                Apply
+                  (12,
+                    Variable
+                      (12,
+                        negb/0),
+                    [
+                      Apply
+                        (12,
+                          Variable
+                            (12,
+                              odd_length/0),
+                          [
+                            Variable
+                              (12,
+                                l/0)
+                          ])
+                    ]))
+            ]))
+    ]))
+
+14
+(Value
+  (rec, @coq_rec,
+    [
+      ((odd_length_with_print, [ A ], [ (l, Type (list/1, A)) ],
+        Some Monad ([ IO/0 ], Type (bool/1))),
+        Match
+          (15, Variable (15, l/0),
+            [
+              (Constructor ([]/1),
+                Bind
+                  (?,
+                    Apply
+                      (16,
+                        Variable
+                          (16,
+                            OCaml.Pervasives.print_endline/0),
+                        [
+                          Constant
+                            (16,
+                              String("false"))
+                        ]),
+                    None,
+                    Return
+                      (?,
+                        Constructor
+                          (16,
+                            false/1))));
+              (Constructor (cons/1, Any, l),
+                Bind
+                  (?,
+                    Apply
+                      (17,
+                        Variable
+                          (17,
+                            even_length_with_print/0),
+                        [
+                          Variable
+                            (17,
+                              l/0)
+                        ]),
+                    Some
+                      x,
+                    Return
+                      (?,
+                        Apply
+                          (17,
+                            Variable
+                              (17,
+                                negb/0),
+                            [
+                              Variable
+                                (?,
+                                  x/0)
+                            ]))))
+            ]));
+      ((even_length_with_print, [ A ], [ (l, Type (list/1, A)) ],
+        Some Monad ([ IO/0 ], Type (bool/1))),
+        Match
+          (21, Variable (21, l/0),
+            [
+              (Constructor ([]/1), Return (?, Constructor (22, true/1)));
+              (Constructor (cons/1, Any, l),
+                Bind
+                  (?,
+                    Apply
+                      (23,
+                        Variable
+                          (23,
+                            odd_length_with_print/0),
+                        [
+                          Variable
+                            (23,
+                              l/0)
+                        ]),
+                    Some
+                      x,
+                    Return
+                      (?,
+                        Apply
+                          (23,
+                            Variable
+                              (23,
+                                negb/0),
+                            [
+                              Variable
+                                (?,
+                                  x/0)
+                            ]))))
+            ]))
+    ]))
+
+25
+(Value
+  (rec, @.,
+    [
+      ((odd_length_free_rec, [ A ],
+        [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+        Some Monad ([ NonTermination/1 ], Type (bool/1))),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (26,
+                    Variable
+                      (26,
+                        l/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Return
+                          (?,
+                            Constructor
+                              (27,
+                                false/1)));
+                      (Constructor
+                        (cons/1,
+                          Any,
+                          l),
+                        Bind
+                          (?,
+                            Apply
+                              (28,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        even_length_free_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    (28,
+                                      l/0)
+                                ]),
+                            Some
+                              x,
+                            Return
+                              (?,
+                                Apply
+                                  (28,
+                                    Variable
+                                      (28,
+                                        negb/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          x/0)
+                                    ]))))
+                    ]))
+            ]));
+      ((even_length_free_rec, [ A ],
+        [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+        Some Monad ([ NonTermination/1 ], Type (bool/1))),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (31,
+                    Variable
+                      (31,
+                        l/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Return
+                          (?,
+                            Constructor
+                              (32,
+                                true/1)));
+                      (Constructor
+                        (cons/1,
+                          Any,
+                          l),
+                        Bind
+                          (?,
+                            Apply
+                              (33,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        odd_length_free_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    (33,
+                                      l/0)
+                                ]),
+                            Some
+                              x,
+                            Return
+                              (?,
+                                Apply
+                                  (33,
+                                    Variable
+                                      (33,
+                                        negb/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          x/0)
+                                    ]))))
+                    ]))
+            ]))
+    ]))
+
+25
+(Value
+  (non_rec, @.,
+    [
+      ((odd_length_free, [ A ], [ (l, Type (list/1, A)) ],
+        Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))),
+        Bind
+          (?,
+            Lift
+              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+            Some x,
+            Lift
+              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+                Apply
+                  (?, Variable (?, odd_length_free_rec/0),
+                    [ Variable (?, x/0); Variable (?, l/0) ]))))
+    ]))
+
+25
+(Value
+  (non_rec, @.,
+    [
+      ((even_length_free, [ A ], [ (l, Type (list/1, A)) ],
+        Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))),
+        Bind
+          (?,
+            Lift
+              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+            Some x,
+            Lift
+              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+                Apply
+                  (?, Variable (?, even_length_free_rec/0),
+                    [ Variable (?, x/0); Variable (?, l/0) ]))))
+    ]))

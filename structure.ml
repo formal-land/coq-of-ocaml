@@ -10,18 +10,19 @@ module Value = struct
   let pp (pp_a : 'a -> SmartPrint.t) (value : 'a t) : SmartPrint.t =
     nest (!^ "Value" ^^ Exp.Definition.pp (Exp.pp pp_a) value)
   
-  (*let update_env (value : 'a t) (v : 'b) (env : 'b FullEnvi.t) : 'b FullEnvi.t =
-
-    { env with FullEnvi.vars = Envi.add_name value.header.Exp.Header.name v env.FullEnvi.vars }*)
-
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : 'a t) : SmartPrint.t =
+    let firt_case = ref true in
     separate (newline ^^ newline) (value.Exp.Definition.cases |> List.map (fun (header, e) ->
       nest (
-        (if Recursivity.to_bool value.Exp.Definition.is_rec then
-          !^ "Fixpoint"
-        else
-          !^ "Definition") ^^
+        (if !firt_case then (
+          firt_case := false;
+          if Recursivity.to_bool value.Exp.Definition.is_rec then
+            !^ "Fixpoint"
+          else
+            !^ "Definition"
+        ) else
+          !^ "with") ^^
         Name.to_coq header.Exp.Header.name ^^
         (match header.Exp.Header.typ_vars with
         | [] -> empty
@@ -33,7 +34,7 @@ module Value = struct
         (match header.Exp.Header.typ with
         | None -> empty
         | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
-        !^ ":=" ^^ Exp.to_coq false e ^-^ !^ ".")))
+        !^ ":=" ^^ Exp.to_coq false e))) ^-^ !^ "."
 end
 
 (** A definition of a sum type. *)

@@ -465,7 +465,7 @@ and monadise_let_rec_definition (env : unit FullEnvi.t) (def : Loc.t t Definitio
       let (name_rec, _) = Envi.fresh (header.Header.name ^ "_rec") () env_in_def.FullEnvi.vars in
       ({ header with Header.name = name_rec }, e)) } in
     let env_after_def' = Definition.env_in_def def' env in
-    let def' = { def' with Definition.cases = List.map2 (fun name (header, e) ->
+    let def' = { def' with Definition.cases = def'.Definition.cases |> List.map (fun (header, e) ->
       let name_rec = header.Header.name in
       let (counter, _) = Envi.fresh "counter" () env_after_def'.FullEnvi.vars in
       let args_rec =
@@ -475,14 +475,22 @@ and monadise_let_rec_definition (env : unit FullEnvi.t) (def : Loc.t t Definitio
       let header_rec = { header with Header.name = name_rec; args = args_rec } in
       let env_in_name_rec = Header.env_in_header header_rec env_after_def' () in
       let e_name_rec = monadise_let_rec env_in_name_rec e in
-      let e_name_rec = Match (Loc.Unknown, var counter env_in_name_rec, [
-        (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O") env_in_name_rec.FullEnvi.constructors, []),
-          Apply (Loc.Unknown, var "not_terminated" env_in_name_rec, [Tuple (Loc.Unknown, [])]));
-        (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env_in_name_rec.FullEnvi.constructors,
-          [Pattern.Variable counter]),
+      (header_rec, e_name_rec)) } in
+    let def' = { def' with Definition.cases = List.map2 (fun name (header, e) ->
+      let counter = fst (List.hd header.Header.args) in
+      let env = Header.env_in_header header env_after_def' () in
+      let e_name_rec =
+        List.fold_left2 (fun e_name_rec name (header, e) ->
           substitute name
-            (Apply (Loc.Unknown, var name_rec env_in_name_rec, [var counter env_in_name_rec])) e_name_rec)]) in
-      (header_rec, e_name_rec))
+            (Apply (Loc.Unknown, var header.Header.name env, [var counter env])) e_name_rec)
+          e (Definition.names def) def'.Definition.cases in
+      let e_name_rec = Match (Loc.Unknown, var counter env, [
+        (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O") env.FullEnvi.constructors, []),
+          Apply (Loc.Unknown, var "not_terminated" env, [Tuple (Loc.Unknown, [])]));
+        (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env.FullEnvi.constructors,
+          [Pattern.Variable counter]),
+          e_name_rec)]) in
+      (header, e_name_rec))
       (Definition.names def) def'.Definition.cases } in
     let defs = List.map2 (fun name_rec (header, _) ->
       let env = Header.env_in_header header env_after_def' () in
@@ -826,10 +834,15 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
   | Let (_, def, e) ->
+    let firt_case = ref true in (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
     Pp.parens paren @@ nest (separate (newline ^^ newline)
       (def.Definition.cases |> List.map (fun (header, e) ->
-        !^ "let" ^^
-        (if Recursivity.to_bool def.Definition.is_rec then !^ "fix" else empty) ^^
+        (if !firt_case then (
+          firt_case := false;
+          !^ "let" ^^
+          (if Recursivity.to_bool def.Definition.is_rec then !^ "fix" else empty)
+        ) else
+          !^ "with") ^^
         Name.to_coq header.Header.name ^^
         (if header.Header.typ_vars = []
         then empty
