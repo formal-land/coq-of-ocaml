@@ -663,6 +663,13 @@ and env_after_def_with_effects (env : Effect.Type.t FullEnvi.t)
     FullEnvi.add_var [] header.Header.name effect_typ env)
     env def.Definition.cases
 
+and env_in_def_with_effects (env : Effect.Type.t FullEnvi.t)
+  (def : (Loc.t * Effect.t) t Definition.t) : Effect.Type.t FullEnvi.t =
+  if Recursivity.to_bool def.Definition.is_rec then
+    env_after_def_with_effects env def
+  else
+    env
+
 and effects_of_def_step (env : Effect.Type.t FullEnvi.t) (def : Loc.t t Definition.t)
   : (Loc.t * Effect.t) t Definition.t =
   { def with Definition.cases = def.Definition.cases |> List.map (fun (header, e) ->
@@ -672,11 +679,7 @@ and effects_of_def_step (env : Effect.Type.t FullEnvi.t) (def : Loc.t t Definiti
 and effects_of_def (env : Effect.Type.t FullEnvi.t) (def : Loc.t t Definition.t)
   : (Loc.t * Effect.t) t Definition.t =
   let rec fix_effect (def' : (Loc.t * Effect.t) t Definition.t) =
-    let env =
-      if Recursivity.to_bool def.Definition.is_rec then
-        env_after_def_with_effects env def'
-      else
-        env in
+    let env = env_in_def_with_effects env def' in
     let def'' = effects_of_def_step env def in
     if def' = def'' then
       def'
@@ -684,7 +687,7 @@ and effects_of_def (env : Effect.Type.t FullEnvi.t) (def : Loc.t t Definition.t)
       fix_effect def'' in
   fix_effect (effects_of_def_step env def)
 
-let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
+let rec monadise (env : unit FullEnvi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
   let descriptor e = (snd (annotation e)).Effect.descriptor in
   let lift d1 d2 e =
     if Effect.Descriptor.eq d1 d2 then
@@ -711,13 +714,10 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
         monadise_list env es d (map fst e :: es') k
       else
         let e' = monadise env e in
-        let (x, env) = Envi.fresh "x" () env in
+        let (x, env_vars) = Envi.fresh "x" () env.FullEnvi.vars in
+        let env = { env with FullEnvi.vars = env_vars } in
         bind d_e d d e' (Some x) (monadise_list env es d
-          (Variable (Loc.Unknown, Envi.bound_name (PathName.of_name [] x) env) :: es') k) in
-  (*let rec split_application typ e_xs : t list list =
-    match e_xs with
-    | [] -> [[]]
-    | e_x :: e_xs ->  in*)
+          (Variable (Loc.Unknown, Envi.bound_name (PathName.of_name [] x) env.FullEnvi.vars) :: es') k) in
   let d = descriptor e in
   match e with
   | Constant ((l, _), c) -> Constant (l, c)
@@ -737,37 +737,34 @@ let rec monadise (env : unit Envi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
         lift return_descriptor d (Apply (l, e_f, e_xs))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
   | Function ((l, _), x, e) ->
-    let env = Envi.add_name x () env in
+    let env = FullEnvi.add_var [] x () env in
     Function (l, x, monadise env e)
-  | Let ((l, _), { Header.name = x; args = [] }, e1, e2) -> (* TODO: use l *)
+  | Let ((l, _), { Definition.cases = [{ Header.name = x; args = [] }, e1] }, e2) -> (* TODO: use l *)
     let (d1, d2) = (descriptor e1, descriptor e2) in
     let e1 = monadise env e1 in
-    let env = Envi.add_name x () env in
+    let env = FullEnvi.add_var [] x () env in
     let e2 = monadise env e2 in
     bind d1 d2 d e1 (Some x) e2
-  | Let ((l, _), header, e1, e2) ->
-    let typ = match header.Header.typ with
-      | Some typ -> Some (Type.monadise typ (snd (annotation e1)))
-      | None -> None in
-    let header = { header with Header.typ = typ } in
-    let env_in_e1 =
-      if Recursivity.to_bool header.Header.is_rec then
-        Envi.add_name header.Header.name () env
-      else
-        env in
-    let env_in_e1 =
-      List.fold_left (fun env_in_e1 (x, _) -> Envi.add_name x () env_in_e1)
-        env_in_e1 header.Header.args in
-    let e1 = monadise env_in_e1 e1 in
-    let env_in_e2 = Envi.add_name header.Header.name () env in
-    let e2 = monadise env_in_e2 e2 in
-    Let (l, header, e1, e2)
+  | Let ((l, _), def, e2) ->
+    let env_in_def = Definition.env_in_def def env in
+    let def = { def with
+      Definition.cases = def.Definition.cases |> List.map (fun (header, e) ->
+        let typ = match header.Header.typ with
+        | Some typ -> Some (Type.monadise typ (snd (annotation e)))
+        | None -> None in
+      let header = { header with Header.typ = typ } in
+      let env = Header.env_in_header header env_in_def () in
+      let e = monadise env e in
+      (header, e)) } in
+    let env = Definition.env_after_def def env in
+    let e2 = monadise env e2 in
+    Let (l, def, e2)
   | Match ((l, _), e, cases) ->
     monadise_list env [e] d [] (fun es' ->
       match es' with
       | [e] ->
         let cases = cases |> List.map (fun (p, e)->
-          let env = Name.Set.fold (fun x env -> Envi.add_name x () env)
+          let env = Name.Set.fold (fun x env -> FullEnvi.add_var [] x () env)
             (Pattern.free_variables p) env in
           (p, lift (descriptor e) d (monadise env e))) in
         Match (l, e, cases)
@@ -818,11 +815,11 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
     Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
   | Function (_, x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
-  | Let (_, { Header.name = x; args = [] }, e1, e2) ->
+  | Let (_, { Definition.cases = [{ Header.name = x; args = [] }, e1] }, e2) ->
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
-  | Let (_, header, e_f, e) ->
-    Pp.parens paren @@ nest (
+  | Let (_, def, e) ->
+    (*Pp.parens paren @@ nest (
       !^ "let" ^^
       (if Recursivity.to_bool header.Header.is_rec then !^ "fix" else empty) ^^
       Name.to_coq header.Header.name ^^
@@ -838,7 +835,8 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
       | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
       !^ ":=" ^^ newline ^^
       indent (to_coq false e_f) ^^ !^ "in" ^^ newline ^^
-      to_coq false e)
+      to_coq false e)*)
+    failwith "TODO"
   | Match (_, e, cases) ->
     nest (
       !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
