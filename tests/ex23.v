@@ -88,8 +88,8 @@ Definition e_sys_blocked {A B : Type} (x : A) : M [ OCaml.Sys_blocked_io ] B :=
   | _ => OCaml.raise_Sys_blocked_io tt
   end.
 
-Definition e_rec_module {A B : Type} (x : A) :
-  M [ OCaml.Undefined_recursive_module ] B :=
+Definition e_rec_module {A B : Type} (x : A)
+  : M [ OCaml.Undefined_recursive_module ] B :=
   match x with
   | _ => OCaml.raise_Undefined_recursive_module (("error" % string, 1, 2))
   end.

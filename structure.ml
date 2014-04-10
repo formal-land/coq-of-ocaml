@@ -33,8 +33,8 @@ module Value = struct
           parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
         (match header.Exp.Header.typ with
         | None -> empty
-        | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
-        !^ ":=" ^^ Exp.to_coq false e))) ^-^ !^ "."
+        | Some typ -> !^ ": " ^-^ Type.to_coq false typ) ^-^
+        !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
 end
 
 (** A definition of a sum type. *)

@@ -25,8 +25,8 @@ Definition t {A : Type} (x : A) : M [ OCaml.Failure ] (list Z) :=
   | _ => OCaml.List.tl l2
   end.
 
-Definition x {A : Type} (x : A) : M [ OCaml.Failure; OCaml.Invalid_argument ] Z
-  :=
+Definition x {A : Type} (x : A)
+  : M [ OCaml.Failure; OCaml.Invalid_argument ] Z :=
   match x with
   | _ => OCaml.List.nth l2 1
   end.

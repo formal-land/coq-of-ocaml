@@ -11,8 +11,8 @@ Definition tail {A : Type} (l : list A) : M [ OCaml.Failure ] (list A) :=
     OCaml.Pervasives.failwith "Cannot take the tail of an empty list." % string
   end.
 
-Fixpoint print_list_rec (counter : nat) (x : list string) :
-  M [ IO; NonTermination ] unit :=
+Fixpoint print_list_rec (counter : nat) (x : list string)
+  : M [ IO; NonTermination ] unit :=
   match counter with
   | O => lift [_;_] "01" (not_terminated tt)
   | S counter =>
@@ -24,16 +24,16 @@ Fixpoint print_list_rec (counter : nat) (x : list string) :
     end
   end.
 
-Definition print_list (x : list string) : M [ Counter; IO; NonTermination ] unit
-  :=
+Definition print_list (x : list string)
+  : M [ Counter; IO; NonTermination ] unit :=
   let! x_1 := lift [_;_;_] "100" (read_counter tt) in
   lift [_;_;_] "011" (print_list_rec x_1 x).
 
 Definition f : (list string) -> M [ Counter; IO; NonTermination ] unit :=
   print_list.
 
-Definition x {A : Type} (z : A) :
-  M [ Counter; IO; NonTermination; OCaml.Failure ] unit :=
+Definition x {A : Type} (z : A)
+  : M [ Counter; IO; NonTermination; OCaml.Failure ] unit :=
   let! x :=
     lift [_;_;_;_] "0001"
       (tail

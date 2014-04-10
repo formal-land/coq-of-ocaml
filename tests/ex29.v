@@ -34,8 +34,8 @@ with even_length_with_print {A : Type} (l : list A) : M [ IO ] bool :=
     ret (negb x)
   end.
 
-Fixpoint odd_length_free_rec {A : Type} (counter : nat) (l : list A) :
-  M [ NonTermination ] bool :=
+Fixpoint odd_length_free_rec {A : Type} (counter : nat) (l : list A)
+  : M [ NonTermination ] bool :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -47,8 +47,8 @@ Fixpoint odd_length_free_rec {A : Type} (counter : nat) (l : list A) :
     end
   end
 
-with even_length_free_rec {A : Type} (counter : nat) (l : list A) :
-  M [ NonTermination ] bool :=
+with even_length_free_rec {A : Type} (counter : nat) (l : list A)
+  : M [ NonTermination ] bool :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -60,12 +60,12 @@ with even_length_free_rec {A : Type} (counter : nat) (l : list A) :
     end
   end.
 
-Definition odd_length_free {A : Type} (l : list A) :
-  M [ Counter; NonTermination ] bool :=
+Definition odd_length_free {A : Type} (l : list A)
+  : M [ Counter; NonTermination ] bool :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (odd_length_free_rec x l).
 
-Definition even_length_free {A : Type} (l : list A) :
-  M [ Counter; NonTermination ] bool :=
+Definition even_length_free {A : Type} (l : list A)
+  : M [ Counter; NonTermination ] bool :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (even_length_free_rec x l).

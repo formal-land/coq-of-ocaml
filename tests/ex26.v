@@ -10,8 +10,8 @@ Fixpoint f_map {A B : Type} (f : A -> B) (l : list A) : list B :=
   | cons x l => cons (f x) (f_map f l)
   end.
 
-Fixpoint f_map2_rec {A B : Type} (counter : nat) (f : A -> B) (l : list A) :
-  M [ NonTermination ] (list B) :=
+Fixpoint f_map2_rec {A B : Type} (counter : nat) (f : A -> B) (l : list A)
+  : M [ NonTermination ] (list B) :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -23,8 +23,8 @@ Fixpoint f_map2_rec {A B : Type} (counter : nat) (f : A -> B) (l : list A) :
     end
   end.
 
-Definition f_map2 {A B : Type} (f : A -> B) (l : list A) :
-  M [ Counter; NonTermination ] (list B) :=
+Definition f_map2 {A B : Type} (f : A -> B) (l : list A)
+  : M [ Counter; NonTermination ] (list B) :=
   let! x := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (f_map2_rec x f l).
 

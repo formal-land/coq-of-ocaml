@@ -226,15 +226,18 @@ let rec combine l1 l2 =
 [@@coq_rec]
 
 (** sorting *)
-
 let rec merge cmp l1 l2 =
-  match l1, l2 with
-  | [], l2 -> l2
-  | l1, [] -> l1
-  | h1 :: t1, h2 :: t2 ->
-      if cmp h1 h2 <= 0
-      then h1 :: merge cmp t1 l2
-      else h2 :: merge cmp l1 t2
+  let rec merge_aux l2 =
+    match l1, l2 with
+    | [], l2 -> l2
+    | l1, [] -> l1
+    | h1 :: t1, h2 :: t2 ->
+        if cmp h1 h2 <= 0
+        then h1 :: merge cmp t1 l2
+        else h2 :: merge_aux t2
+  [@@coq_rec] in
+  merge_aux l2
+[@@coq_rec]
 
 let rec chop k l =
   if k = 0 then l else begin
@@ -244,205 +247,192 @@ let rec chop k l =
   end
 [@@coq_rec]
 
-let rec stable_sort_rev_merge cmp l1 l2 accu =
-  match l1, l2 with
-  | [], l2 -> rev_append l2 accu
-  | l1, [] -> rev_append l1 accu
-  | h1::t1, h2::t2 ->
-      if cmp h1 h2 <= 0
-      then stable_sort_rev_merge cmp t1 l2 (h1::accu)
-      else stable_sort_rev_merge cmp l1 t2 (h2::accu)
+module StableSort = struct
+  let rec rev_merge cmp l1 l2 accu =
+    let rec rev_merge_aux l2 accu =
+      match l1, l2 with
+      | [], l2 -> rev_append l2 accu
+      | l1, [] -> rev_append l1 accu
+      | h1::t1, h2::t2 ->
+          if cmp h1 h2 <= 0
+          then rev_merge cmp t1 l2 (h1::accu)
+          else rev_merge_aux t2 (h2::accu)
+    [@@coq_rec] in
+    rev_merge_aux l2 accu
+  [@@coq_rec]
 
-let rec stable_sort_rev_merge_rev cmp l1 l2 accu =
-  match l1, l2 with
-  | [], l2 -> rev_append l2 accu
-  | l1, [] -> rev_append l1 accu
-  | h1::t1, h2::t2 ->
-      if cmp h1 h2 > 0
-      then stable_sort_rev_merge_rev cmp t1 l2 (h1::accu)
-      else stable_sort_rev_merge_rev cmp l1 t2 (h2::accu)
+  let rec rev_merge_rev cmp l1 l2 accu =
+    let rec rev_merge_rev_aux l2 accu =
+      match l1, l2 with
+      | [], l2 -> rev_append l2 accu
+      | l1, [] -> rev_append l1 accu
+      | h1::t1, h2::t2 ->
+          if cmp h1 h2 > 0
+          then rev_merge_rev cmp t1 l2 (h1::accu)
+          else rev_merge_rev_aux t2 (h2::accu)
+    [@@coq_rec] in
+    rev_merge_rev_aux l2 accu
+  [@@coq_rec]
 
-let rec stable_sort_sort cmp n l =
-  match n, l with
-  | 2, x1 :: x2 :: _ ->
-     if cmp x1 x2 <= 0 then [x1; x2] else [x2; x1]
-  | 3, x1 :: x2 :: x3 :: _ ->
-     if cmp x1 x2 <= 0 then begin
-       if cmp x2 x3 <= 0 then [x1; x2; x3]
-       else if cmp x1 x3 <= 0 then [x1; x3; x2]
-       else [x3; x1; x2]
-     end else begin
-       if cmp x1 x3 <= 0 then [x2; x1; x3]
-       else if cmp x2 x3 <= 0 then [x2; x3; x1]
-       else [x3; x2; x1]
-     end
-  | n, l ->
-     let n1 = n / 2 in
-     let n2 = n - n1 in
-     let l2 = chop n1 l in
-     let s1 = stable_sort_rev_sort cmp n1 l in
-     let s2 = stable_sort_rev_sort cmp n2 l2 in
-     stable_sort_rev_merge_rev cmp s1 s2 []
+  let rec sort cmp n l =
+    match n, l with
+    | 2, x1 :: x2 :: _ ->
+       if cmp x1 x2 <= 0 then [x1; x2] else [x2; x1]
+    | 3, x1 :: x2 :: x3 :: _ ->
+       if cmp x1 x2 <= 0 then begin
+         if cmp x2 x3 <= 0 then [x1; x2; x3]
+         else if cmp x1 x3 <= 0 then [x1; x3; x2]
+         else [x3; x1; x2]
+       end else begin
+         if cmp x1 x3 <= 0 then [x2; x1; x3]
+         else if cmp x2 x3 <= 0 then [x2; x3; x1]
+         else [x3; x2; x1]
+       end
+    | n, l ->
+       let n1 = n / 2 in
+       let n2 = n - n1 in
+       let l2 = chop n1 l in
+       let s1 = rev_sort cmp n1 l in
+       let s2 = rev_sort cmp n2 l2 in
+       rev_merge_rev cmp s1 s2 []
 
-and stable_sort_rev_sort cmp n l =
-  match n, l with
-  | 2, x1 :: x2 :: _ ->
-     if cmp x1 x2 > 0 then [x1; x2] else [x2; x1]
-  | 3, x1 :: x2 :: x3 :: _ ->
-     if cmp x1 x2 > 0 then begin
-       if cmp x2 x3 > 0 then [x1; x2; x3]
-       else if cmp x1 x3 > 0 then [x1; x3; x2]
-       else [x3; x1; x2]
-     end else begin
-       if cmp x1 x3 > 0 then [x2; x1; x3]
-       else if cmp x2 x3 > 0 then [x2; x3; x1]
-       else [x3; x2; x1]
-     end
-  | n, l ->
-     let n1 = n / 2 in
-     let n2 = n - n1 in
-     let l2 = chop n1 l in
-     let s1 = stable_sort_sort cmp n1 l in
-     let s2 = stable_sort_sort cmp n2 l2 in
-     stable_sort_rev_merge cmp s1 s2 []
+  and rev_sort cmp n l =
+    match n, l with
+    | 2, x1 :: x2 :: _ ->
+       if cmp x1 x2 > 0 then [x1; x2] else [x2; x1]
+    | 3, x1 :: x2 :: x3 :: _ ->
+       if cmp x1 x2 > 0 then begin
+         if cmp x2 x3 > 0 then [x1; x2; x3]
+         else if cmp x1 x3 > 0 then [x1; x3; x2]
+         else [x3; x1; x2]
+       end else begin
+         if cmp x1 x3 > 0 then [x2; x1; x3]
+         else if cmp x2 x3 > 0 then [x2; x3; x1]
+         else [x3; x2; x1]
+       end
+    | n, l ->
+       let n1 = n / 2 in
+       let n2 = n - n1 in
+       let l2 = chop n1 l in
+       let s1 = sort cmp n1 l in
+       let s2 = sort cmp n2 l2 in
+       rev_merge cmp s1 s2 []
+end
 
 let stable_sort cmp l =
   let len = length l in
-  if len < 2 then l else stable_sort_sort cmp len l
+  if len < 2 then l else StableSort.sort cmp len l
 
 let sort = stable_sort
 let fast_sort = stable_sort
 
-(* Note: on a list of length between about 100000 (depending on the minor
-   heap size and the type of the list) and Sys.max_array_size, it is
-   actually faster to use the following, but it might also use more memory
-   because the argument list cannot be deallocated incrementally.
+module SortUniq = struct
+  (** sorting + removing duplicates *)
+  let rec rev_merge cmp l1 l2 accu =
+    let rec rev_merge_aux l2 accu =
+      match l1, l2 with
+      | [], l2 -> rev_append l2 accu
+      | l1, [] -> rev_append l1 accu
+      | h1::t1, h2::t2 ->
+          let c = cmp h1 h2 in
+          if c = 0 then rev_merge cmp t1 t2 (h1::accu)
+          else if c < 0
+          then rev_merge cmp t1 l2 (h1::accu)
+          else rev_merge_aux t2 (h2::accu)
+    [@@coq_rec] in
+    rev_merge_aux l2 accu
+  [@@coq_rec]
 
-   Also, there seems to be a bug in this code or in the
-   implementation of obj_truncate.
+  let rec rev_merge_rev cmp l1 l2 accu =
+    let rec rev_merge_rev_aux l2 accu =
+      match l1, l2 with
+      | [], l2 -> rev_append l2 accu
+      | l1, [] -> rev_append l1 accu
+      | h1::t1, h2::t2 ->
+          let c = cmp h1 h2 in
+          if c = 0 then rev_merge_rev cmp t1 t2 (h1::accu)
+          else if c > 0
+          then rev_merge_rev cmp t1 l2 (h1::accu)
+          else rev_merge_rev_aux t2 (h2::accu)
+    [@@coq_rec] in
+    rev_merge_rev_aux l2 accu
+  [@@coq_rec]
 
-external obj_truncate : 'a array -> int -> unit = "caml_obj_truncate"
+  let rec sort cmp n l =
+    match n, l with
+    | 2, x1 :: x2 :: _ ->
+       let c = cmp x1 x2 in
+       if c = 0 then [x1]
+       else if c < 0 then [x1; x2] else [x2; x1]
+    | 3, x1 :: x2 :: x3 :: _ ->
+       let c = cmp x1 x2 in
+       if c = 0 then begin
+         let c = cmp x2 x3 in
+         if c = 0 then [x2]
+         else if c < 0 then [x2; x3] else [x3; x2]
+       end else if c < 0 then begin
+         let c = cmp x2 x3 in
+         if c = 0 then [x1; x2]
+         else if c < 0 then [x1; x2; x3]
+         else let c = cmp x1 x3 in
+         if c = 0 then [x1; x2]
+         else if c < 0 then [x1; x3; x2]
+         else [x3; x1; x2]
+       end else begin
+         let c = cmp x1 x3 in
+         if c = 0 then [x2; x1]
+         else if c < 0 then [x2; x1; x3]
+         else let c = cmp x2 x3 in
+         if c = 0 then [x2; x1]
+         else if c < 0 then [x2; x3; x1]
+         else [x3; x2; x1]
+       end
+    | n, l ->
+       let n1 = n / 2 in
+       let n2 = n - n1 in
+       let l2 = chop n1 l in
+       let s1 = rev_sort cmp n1 l in
+       let s2 = rev_sort cmp n2 l2 in
+       rev_merge_rev cmp s1 s2 []
 
-let array_to_list_in_place a =
-  let l = Array.length a in
-  let rec loop accu n p =
-    if p <= 0 then accu else begin
-      if p = n then begin
-        obj_truncate a p;
-        loop (a.(p-1) :: accu) (n-1000) (p-1)
-      end else begin
-        loop (a.(p-1) :: accu) n (p-1)
-      end
-    end
-  in
-  loop [] (l-1000) l
-;;
-
-let stable_sort cmp l =
-  let a = Array.of_list l in
-  Array.stable_sort cmp a;
-  array_to_list_in_place a
-;;
-*)
-
-
-(** sorting + removing duplicates *)
-let rec sort_uniq_rev_merge cmp l1 l2 accu =
-  match l1, l2 with
-  | [], l2 -> rev_append l2 accu
-  | l1, [] -> rev_append l1 accu
-  | h1::t1, h2::t2 ->
-      let c = cmp h1 h2 in
-      if c = 0 then sort_uniq_rev_merge cmp t1 t2 (h1::accu)
-      else if c < 0
-      then sort_uniq_rev_merge cmp t1 l2 (h1::accu)
-      else sort_uniq_rev_merge cmp l1 t2 (h2::accu)
-
-let rec sort_uniq_rev_merge_rev cmp l1 l2 accu =
-  match l1, l2 with
-  | [], l2 -> rev_append l2 accu
-  | l1, [] -> rev_append l1 accu
-  | h1::t1, h2::t2 ->
-      let c = cmp h1 h2 in
-      if c = 0 then sort_uniq_rev_merge_rev cmp t1 t2 (h1::accu)
-      else if c > 0
-      then sort_uniq_rev_merge_rev cmp t1 l2 (h1::accu)
-      else sort_uniq_rev_merge_rev cmp l1 t2 (h2::accu)
-
-let rec sort_uniq_sort cmp n l =
-  match n, l with
-  | 2, x1 :: x2 :: _ ->
-     let c = cmp x1 x2 in
-     if c = 0 then [x1]
-     else if c < 0 then [x1; x2] else [x2; x1]
-  | 3, x1 :: x2 :: x3 :: _ ->
-     let c = cmp x1 x2 in
-     if c = 0 then begin
-       let c = cmp x2 x3 in
-       if c = 0 then [x2]
-       else if c < 0 then [x2; x3] else [x3; x2]
-     end else if c < 0 then begin
-       let c = cmp x2 x3 in
-       if c = 0 then [x1; x2]
-       else if c < 0 then [x1; x2; x3]
-       else let c = cmp x1 x3 in
-       if c = 0 then [x1; x2]
-       else if c < 0 then [x1; x3; x2]
-       else [x3; x1; x2]
-     end else begin
-       let c = cmp x1 x3 in
-       if c = 0 then [x2; x1]
-       else if c < 0 then [x2; x1; x3]
-       else let c = cmp x2 x3 in
-       if c = 0 then [x2; x1]
-       else if c < 0 then [x2; x3; x1]
-       else [x3; x2; x1]
-     end
-  | n, l ->
-     let n1 = n / 2 in
-     let n2 = n - n1 in
-     let l2 = chop n1 l in
-     let s1 = sort_uniq_rev_sort cmp n1 l in
-     let s2 = sort_uniq_rev_sort cmp n2 l2 in
-     sort_uniq_rev_merge_rev cmp s1 s2 []
-
-and sort_uniq_rev_sort cmp n l =
-  match n, l with
-  | 2, x1 :: x2 :: _ ->
-     let c = cmp x1 x2 in
-     if c = 0 then [x1]
-     else if c > 0 then [x1; x2] else [x2; x1]
-  | 3, x1 :: x2 :: x3 :: _ ->
-     let c = cmp x1 x2 in
-     if c = 0 then begin
-       let c = cmp x2 x3 in
-       if c = 0 then [x2]
-       else if c > 0 then [x2; x3] else [x3; x2]
-     end else if c > 0 then begin
-       let c = cmp x2 x3 in
-       if c = 0 then [x1; x2]
-       else if c > 0 then [x1; x2; x3]
-       else let c = cmp x1 x3 in
-       if c = 0 then [x1; x2]
-       else if c > 0 then [x1; x3; x2]
-       else [x3; x1; x2]
-     end else begin
-       let c = cmp x1 x3 in
-       if c = 0 then [x2; x1]
-       else if c > 0 then [x2; x1; x3]
-       else let c = cmp x2 x3 in
-       if c = 0 then [x2; x1]
-       else if c > 0 then [x2; x3; x1]
-       else [x3; x2; x1]
-     end
-  | n, l ->
-     let n1 = n / 2 in
-     let n2 = n - n1 in
-     let l2 = chop n1 l in
-     let s1 = sort_uniq_sort cmp n1 l in
-     let s2 = sort_uniq_sort cmp n2 l2 in
-     sort_uniq_rev_merge cmp s1 s2 []
+  and rev_sort cmp n l =
+    match n, l with
+    | 2, x1 :: x2 :: _ ->
+       let c = cmp x1 x2 in
+       if c = 0 then [x1]
+       else if c > 0 then [x1; x2] else [x2; x1]
+    | 3, x1 :: x2 :: x3 :: _ ->
+       let c = cmp x1 x2 in
+       if c = 0 then begin
+         let c = cmp x2 x3 in
+         if c = 0 then [x2]
+         else if c > 0 then [x2; x3] else [x3; x2]
+       end else if c > 0 then begin
+         let c = cmp x2 x3 in
+         if c = 0 then [x1; x2]
+         else if c > 0 then [x1; x2; x3]
+         else let c = cmp x1 x3 in
+         if c = 0 then [x1; x2]
+         else if c > 0 then [x1; x3; x2]
+         else [x3; x1; x2]
+       end else begin
+         let c = cmp x1 x3 in
+         if c = 0 then [x2; x1]
+         else if c > 0 then [x2; x1; x3]
+         else let c = cmp x2 x3 in
+         if c = 0 then [x2; x1]
+         else if c > 0 then [x2; x3; x1]
+         else [x3; x2; x1]
+       end
+    | n, l ->
+       let n1 = n / 2 in
+       let n2 = n - n1 in
+       let l2 = chop n1 l in
+       let s1 = sort cmp n1 l in
+       let s2 = sort cmp n2 l2 in
+       rev_merge cmp s1 s2 []
+end
 
 let sort_uniq cmp l =
   let len = length l in
-  if len < 2 then l else sort_uniq_sort cmp len l
+  if len < 2 then l else SortUniq.sort cmp len l

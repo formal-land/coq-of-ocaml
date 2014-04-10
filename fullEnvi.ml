@@ -13,7 +13,7 @@ let empty (close_lift_vars : 'a -> Name.t -> 'a) : 'a t = {
   typs = Envi.empty;
   descriptors = Envi.empty;
   constructors = Envi.empty;
-  fields = Envi.empty;
+  fields = Envi.empty
 }
 
 let add_var (path : Name.t list) (base : Name.t) (v : 'a) (env : 'a t) : 'a t =

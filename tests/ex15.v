@@ -12,8 +12,8 @@ Arguments Node _ _ _.
 
 Definition empty : set := Empty.
 
-Fixpoint member_rec (counter : nat) (x : Z) (s : set) :
-  M [ NonTermination ] bool :=
+Fixpoint member_rec (counter : nat) (x : Z) (s : set)
+  : M [ NonTermination ] bool :=
   match counter with
   | O => not_terminated tt
   | S counter =>
@@ -34,8 +34,8 @@ Definition member (x : Z) (s : set) : M [ Counter; NonTermination ] bool :=
   let! x_1 := lift [_;_] "10" (read_counter tt) in
   lift [_;_] "01" (member_rec x_1 x s).
 
-Fixpoint insert_rec (counter : nat) (x : Z) (s : set) : M [ NonTermination ] set
-  :=
+Fixpoint insert_rec (counter : nat) (x : Z) (s : set)
+  : M [ NonTermination ] set :=
   match counter with
   | O => not_terminated tt
   | S counter =>

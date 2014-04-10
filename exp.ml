@@ -839,7 +839,7 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (_, x, e1, e2) ->
     Pp.parens paren @@ nest (
-      !^ "let" ^^ Name.to_coq x ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
+      !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
   | LetFun (_, def, e) ->
     let firt_case = ref true in (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
     Pp.parens paren @@ nest (separate (newline ^^ newline)
@@ -860,8 +860,8 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
           parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false x_typ)))) ^^
         (match header.Header.typ with
         | None -> empty
-        | Some typ -> !^ ":" ^^ Type.to_coq false typ) ^^
-        !^ ":=" ^^ newline ^^
+        | Some typ -> !^ ": " ^-^ Type.to_coq false typ) ^-^
+        !^ " :=" ^^ newline ^^
         indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (_, e, cases) ->
     nest (
@@ -871,7 +871,7 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
       !^ "end")
   | Record (_, fields) ->
     nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
-      nest (BoundName.to_coq x ^^ !^ ":=" ^^ to_coq false e))) ^^ !^ "|}")
+      nest (BoundName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))) ^^ !^ "|}")
   | Field (_, e, x) -> Pp.parens paren @@ nest (BoundName.to_coq x ^^ to_coq true e)
   | IfThenElse (_, e1, e2, e3) ->
     Pp.parens paren @@ nest (
@@ -894,7 +894,7 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "let!" ^^ (match x with
         | None -> !^ "_"
-        | Some x -> Name.to_coq x) ^^ !^ ":=" ^^
+        | Some x -> Name.to_coq x) ^-^ !^ " :=" ^^
         to_coq false e1 ^^ !^ "in" ^^ newline ^^
       to_coq false e2)
   | Lift (_, d1, d2, e) ->

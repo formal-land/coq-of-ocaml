@@ -24,14 +24,14 @@ Definition tl {A : Type} (x : list A) : M [ OCaml.Failure ] (list A) :=
   | cons a l => ret l
   end.
 
-Definition nth {A : Type} (l : list A) (n : Z) :
-  M [ OCaml.Failure; OCaml.Invalid_argument ] A :=
+Definition nth {A : Type} (l : list A) (n : Z)
+  : M [ OCaml.Failure; OCaml.Invalid_argument ] A :=
   if OCaml.Pervasives.lt n 0 then
     lift [_;_] "01" (OCaml.Pervasives.invalid_arg "List.nth" % string)
   else
     lift [_;_] "10"
-      (let fix nth_aux {B : Type} (l : list B) (n : Z) : M [ OCaml.Failure ] B
-        :=
+      (let fix nth_aux {B : Type} (l : list B) (n : Z)
+        : M [ OCaml.Failure ] B :=
         match l with
         | [] => OCaml.Pervasives.failwith "nth" % string
         | cons a l =>
@@ -69,8 +69,8 @@ Fixpoint map {A B : Type} (f : A -> B) (x : list A) : list B :=
     cons r (map f l)
   end.
 
-Fixpoint mapi_aux {A B : Type} (i : Z) (f : Z -> A -> B) (x : list A) : list B
-  :=
+Fixpoint mapi_aux {A B : Type} (i : Z) (f : Z -> A -> B) (x : list A)
+  : list B :=
   match x with
   | [] => []
   | cons a l =>
@@ -110,15 +110,15 @@ Fixpoint fold_left {A B : Type} (f : A -> B -> A) (accu : A) (l : list B) : A :=
   | cons a l => fold_left f (f accu a) l
   end.
 
-Fixpoint fold_right {A B : Type} (f : A -> B -> B) (l : list A) (accu : B) : B
-  :=
+Fixpoint fold_right {A B : Type} (f : A -> B -> B) (l : list A) (accu : B)
+  : B :=
   match l with
   | [] => accu
   | cons a l => f a (fold_right f l accu)
   end.
 
-Fixpoint map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B) :
-  M [ OCaml.Invalid_argument ] (list C) :=
+Fixpoint map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
+  : M [ OCaml.Invalid_argument ] (list C) :=
   match (l1, l2) with
   | ([], []) => ret []
   | (cons a1 l1, cons a2 l2) =>
@@ -130,8 +130,8 @@ Fixpoint map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B) :
 
 Definition rev_map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
   : M [ OCaml.Invalid_argument ] (list C) :=
-  let fix rmap2_f (accu : list C) (l1 : list A) (l2 : list B) :
-    M [ OCaml.Invalid_argument ] (list C) :=
+  let fix rmap2_f (accu : list C) (l1 : list A) (l2 : list B)
+    : M [ OCaml.Invalid_argument ] (list C) :=
     match (l1, l2) with
     | ([], []) => ret accu
     | (cons a1 l1, cons a2 l2) => rmap2_f (cons (f a1 a2) accu) l1 l2
@@ -139,8 +139,8 @@ Definition rev_map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
     end in
   rmap2_f [] l1 l2.
 
-Fixpoint iter2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B) :
-  M [ OCaml.Invalid_argument ] unit :=
+Fixpoint iter2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
+  : M [ OCaml.Invalid_argument ] unit :=
   match (l1, l2) with
   | ([], []) => ret tt
   | (cons a1 l1, cons a2 l2) => iter2 f l1 l2
@@ -148,8 +148,8 @@ Fixpoint iter2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B) :
   end.
 
 Fixpoint fold_left2 {A B C : Type}
-  (f : A -> B -> C -> A) (accu : A) (l1 : list B) (l2 : list C) :
-  M [ OCaml.Invalid_argument ] A :=
+  (f : A -> B -> C -> A) (accu : A) (l1 : list B) (l2 : list C)
+  : M [ OCaml.Invalid_argument ] A :=
   match (l1, l2) with
   | ([], []) => ret accu
   | (cons a1 l1, cons a2 l2) => fold_left2 f (f accu a1 a2) l1 l2
@@ -157,8 +157,8 @@ Fixpoint fold_left2 {A B C : Type}
   end.
 
 Fixpoint fold_right2 {A B C : Type}
-  (f : A -> B -> C -> C) (l1 : list A) (l2 : list B) (accu : C) :
-  M [ OCaml.Invalid_argument ] C :=
+  (f : A -> B -> C -> C) (l1 : list A) (l2 : list B) (accu : C)
+  : M [ OCaml.Invalid_argument ] C :=
   match (l1, l2) with
   | ([], []) => ret accu
   | (cons a1 l1, cons a2 l2) =>
@@ -199,8 +199,8 @@ Fixpoint _exists2 {A B : Type} (p : A -> B -> bool) (l1 : list A) (l2 : list B)
   | (_, _) => OCaml.Pervasives.invalid_arg "List.exists2" % string
   end.
 
-Fixpoint find {A : Type} (p : A -> bool) (x : list A) : M [ OCaml.Not_found ] A
-  :=
+Fixpoint find {A : Type} (p : A -> bool) (x : list A)
+  : M [ OCaml.Not_found ] A :=
   match x with
   | [] => OCaml.raise_Not_found tt
   | cons x l =>
@@ -224,10 +224,10 @@ Definition find_all {A : Type} (p : A -> bool) : (list A) -> list A :=
 
 Definition filter {A : Type} : (A -> bool) -> (list A) -> list A := find_all.
 
-Definition partition {A : Type} (p : A -> bool) (l : list A) :
-  (list A) * (list A) :=
-  let fix part (yes : list A) (no : list A) (x : list A) : (list A) * (list A)
-    :=
+Definition partition {A : Type} (p : A -> bool) (l : list A)
+  : (list A) * (list A) :=
+  let fix part (yes : list A) (no : list A) (x : list A)
+    : (list A) * (list A) :=
     match x with
     | [] => ((rev yes), (rev no))
     | cons x l =>
@@ -247,8 +247,8 @@ Fixpoint split {A B : Type} (x : list (A * B)) : (list A) * (list B) :=
     end
   end.
 
-Fixpoint combine {A B : Type} (l1 : list A) (l2 : list B) :
-  M [ OCaml.Invalid_argument ] (list (A * B)) :=
+Fixpoint combine {A B : Type} (l1 : list A) (l2 : list B)
+  : M [ OCaml.Invalid_argument ] (list (A * B)) :=
   match (l1, l2) with
   | ([], []) => ret []
   | (cons a1 l1, cons a2 l2) =>
@@ -257,32 +257,22 @@ Fixpoint combine {A B : Type} (l1 : list A) (l2 : list B) :
   | (_, _) => OCaml.Pervasives.invalid_arg "List.combine" % string
   end.
 
-Fixpoint merge_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) :
-  M [ NonTermination ] (list A) :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
+Fixpoint merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
+  : list A :=
+  let fix merge_aux (l2 : list A) : list A :=
     match (l1, l2) with
-    | ([], l2) => ret l2
-    | (l1, []) => ret l1
+    | ([], l2) => l2
+    | (l1, []) => l1
     | (cons h1 t1, cons h2 t2) =>
       if OCaml.Pervasives.le (cmp h1 h2) 0 then
-        let! x := (merge_rec counter) cmp t1 l2 in
-        ret (cons h1 x)
+        cons h1 (merge cmp t1 l2)
       else
-        let! x := (merge_rec counter) cmp l1 t2 in
-        ret (cons h2 x)
-    end
-  end.
+        cons h2 (merge_aux t2)
+    end in
+  merge_aux l2.
 
-Definition merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) :
-  M [ Counter; NonTermination ] (list A) :=
-  let! x := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (merge_rec x cmp l1 l2).
-
-Fixpoint chop {A : Type} (k : Z) (l : list A) :
-  M [ OCaml.Assert_failure ] (list A) :=
+Fixpoint chop {A : Type} (k : Z) (l : list A)
+  : M [ OCaml.Assert_failure ] (list A) :=
   if equiv_decb k 0 then
     ret l
   else
@@ -291,376 +281,342 @@ Fixpoint chop {A : Type} (k : Z) (l : list A) :
     | _ => OCaml.assert false
     end.
 
-Fixpoint stable_sort_rev_merge_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
-  (accu : list A) : M [ NonTermination ] (list A) :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
-    match (l1, l2) with
-    | ([], l2) => ret (rev_append l2 accu)
-    | (l1, []) => ret (rev_append l1 accu)
-    | (cons h1 t1, cons h2 t2) =>
-      if OCaml.Pervasives.le (cmp h1 h2) 0 then
-        (stable_sort_rev_merge_rec counter) cmp t1 l2 (cons h1 accu)
-      else
-        (stable_sort_rev_merge_rec counter) cmp l1 t2 (cons h2 accu)
-    end
-  end.
-
-Definition stable_sort_rev_merge {A : Type}
-  (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) :
-  M [ Counter; NonTermination ] (list A) :=
-  let! x := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (stable_sort_rev_merge_rec x cmp l1 l2 accu).
-
-Fixpoint stable_sort_rev_merge_rev_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
-  (accu : list A) : M [ NonTermination ] (list A) :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
-    match (l1, l2) with
-    | ([], l2) => ret (rev_append l2 accu)
-    | (l1, []) => ret (rev_append l1 accu)
-    | (cons h1 t1, cons h2 t2) =>
-      if OCaml.Pervasives.gt (cmp h1 h2) 0 then
-        (stable_sort_rev_merge_rev_rec counter) cmp t1 l2 (cons h1 accu)
-      else
-        (stable_sort_rev_merge_rev_rec counter) cmp l1 t2 (cons h2 accu)
-    end
-  end.
-
-Definition stable_sort_rev_merge_rev {A : Type}
-  (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) :
-  M [ Counter; NonTermination ] (list A) :=
-  let! x := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (stable_sort_rev_merge_rev_rec x cmp l1 l2 accu).
-
-Fixpoint stable_sort_sort_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  match counter with
-  | O => lift [_;_;_] "010" (not_terminated tt)
-  | S counter =>
-    match (n, l) with
-    | (2, cons x1 (cons x2 _)) =>
-      ret
-        (if OCaml.Pervasives.le (cmp x1 x2) 0 then
-          cons x1 (cons x2 [])
+Module StableSort.
+  Fixpoint rev_merge {A : Type}
+    (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_aux (l2 : list A) (accu : list A) : list A :=
+      match (l1, l2) with
+      | ([], l2) => rev_append l2 accu
+      | (l1, []) => rev_append l1 accu
+      | (cons h1 t1, cons h2 t2) =>
+        if OCaml.Pervasives.le (cmp h1 h2) 0 then
+          rev_merge cmp t1 l2 (cons h1 accu)
         else
-          cons x2 (cons x1 []))
-    | (3, cons x1 (cons x2 (cons x3 _))) =>
-      ret
-        (if OCaml.Pervasives.le (cmp x1 x2) 0 then
-          if OCaml.Pervasives.le (cmp x2 x3) 0 then
-            cons x1 (cons x2 (cons x3 []))
+          rev_merge_aux t2 (cons h2 accu)
+      end in
+    rev_merge_aux l2 accu.
+  
+  Fixpoint rev_merge_rev {A : Type}
+    (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_rev_aux (l2 : list A) (accu : list A) : list A :=
+      match (l1, l2) with
+      | ([], l2) => rev_append l2 accu
+      | (l1, []) => rev_append l1 accu
+      | (cons h1 t1, cons h2 t2) =>
+        if OCaml.Pervasives.gt (cmp h1 h2) 0 then
+          rev_merge_rev cmp t1 l2 (cons h1 accu)
+        else
+          rev_merge_rev_aux t2 (cons h2 accu)
+      end in
+    rev_merge_rev_aux l2 accu.
+  
+  Fixpoint sort_rec {A : Type}
+    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ NonTermination; OCaml.Assert_failure ] (list A) :=
+    match counter with
+    | O => lift [_;_] "10" (not_terminated tt)
+    | S counter =>
+      match (n, l) with
+      | (2, cons x1 (cons x2 _)) =>
+        ret
+          (if OCaml.Pervasives.le (cmp x1 x2) 0 then
+            cons x1 (cons x2 [])
+          else
+            cons x2 (cons x1 []))
+      | (3, cons x1 (cons x2 (cons x3 _))) =>
+        ret
+          (if OCaml.Pervasives.le (cmp x1 x2) 0 then
+            if OCaml.Pervasives.le (cmp x2 x3) 0 then
+              cons x1 (cons x2 (cons x3 []))
+            else
+              if OCaml.Pervasives.le (cmp x1 x3) 0 then
+                cons x1 (cons x3 (cons x2 []))
+              else
+                cons x3 (cons x1 (cons x2 []))
           else
             if OCaml.Pervasives.le (cmp x1 x3) 0 then
-              cons x1 (cons x3 (cons x2 []))
+              cons x2 (cons x1 (cons x3 []))
             else
-              cons x3 (cons x1 (cons x2 []))
-        else
-          if OCaml.Pervasives.le (cmp x1 x3) 0 then
-            cons x2 (cons x1 (cons x3 []))
-          else
-            if OCaml.Pervasives.le (cmp x2 x3) 0 then
-              cons x2 (cons x3 (cons x1 []))
-            else
-              cons x3 (cons x2 (cons x1 [])))
-    | (n, l) =>
-      let n1 := Z.div n 2 in
-      let n2 := Z.sub n n1 in
-      let! l2 := lift [_;_;_] "001" (chop n1 l) in
-      let! s1 := (stable_sort_rev_sort_rec counter) cmp n1 l in
-      let! s2 := (stable_sort_rev_sort_rec counter) cmp n2 l2 in
-      lift [_;_;_] "110" (stable_sort_rev_merge_rev cmp s1 s2 [])
+              if OCaml.Pervasives.le (cmp x2 x3) 0 then
+                cons x2 (cons x3 (cons x1 []))
+              else
+                cons x3 (cons x2 (cons x1 [])))
+      | (n, l) =>
+        let n1 := Z.div n 2 in
+        let n2 := Z.sub n n1 in
+        let! l2 := lift [_;_] "01" (chop n1 l) in
+        let! s1 := (rev_sort_rec counter) cmp n1 l in
+        let! s2 := (rev_sort_rec counter) cmp n2 l2 in
+        ret (rev_merge_rev cmp s1 s2 [])
+      end
     end
-  end
-
-with stable_sort_rev_sort_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  match counter with
-  | O => lift [_;_;_] "010" (not_terminated tt)
-  | S counter =>
-    match (n, l) with
-    | (2, cons x1 (cons x2 _)) =>
-      ret
-        (if OCaml.Pervasives.gt (cmp x1 x2) 0 then
-          cons x1 (cons x2 [])
-        else
-          cons x2 (cons x1 []))
-    | (3, cons x1 (cons x2 (cons x3 _))) =>
-      ret
-        (if OCaml.Pervasives.gt (cmp x1 x2) 0 then
-          if OCaml.Pervasives.gt (cmp x2 x3) 0 then
-            cons x1 (cons x2 (cons x3 []))
+  
+  with rev_sort_rec {A : Type}
+    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ NonTermination; OCaml.Assert_failure ] (list A) :=
+    match counter with
+    | O => lift [_;_] "10" (not_terminated tt)
+    | S counter =>
+      match (n, l) with
+      | (2, cons x1 (cons x2 _)) =>
+        ret
+          (if OCaml.Pervasives.gt (cmp x1 x2) 0 then
+            cons x1 (cons x2 [])
+          else
+            cons x2 (cons x1 []))
+      | (3, cons x1 (cons x2 (cons x3 _))) =>
+        ret
+          (if OCaml.Pervasives.gt (cmp x1 x2) 0 then
+            if OCaml.Pervasives.gt (cmp x2 x3) 0 then
+              cons x1 (cons x2 (cons x3 []))
+            else
+              if OCaml.Pervasives.gt (cmp x1 x3) 0 then
+                cons x1 (cons x3 (cons x2 []))
+              else
+                cons x3 (cons x1 (cons x2 []))
           else
             if OCaml.Pervasives.gt (cmp x1 x3) 0 then
-              cons x1 (cons x3 (cons x2 []))
+              cons x2 (cons x1 (cons x3 []))
             else
-              cons x3 (cons x1 (cons x2 []))
-        else
-          if OCaml.Pervasives.gt (cmp x1 x3) 0 then
-            cons x2 (cons x1 (cons x3 []))
-          else
-            if OCaml.Pervasives.gt (cmp x2 x3) 0 then
-              cons x2 (cons x3 (cons x1 []))
-            else
-              cons x3 (cons x2 (cons x1 [])))
-    | (n, l) =>
-      let n1 := Z.div n 2 in
-      let n2 := Z.sub n n1 in
-      let! l2 := lift [_;_;_] "001" (chop n1 l) in
-      let! s1 := (stable_sort_sort_rec counter) cmp n1 l in
-      let! s2 := (stable_sort_sort_rec counter) cmp n2 l2 in
-      lift [_;_;_] "110" (stable_sort_rev_merge cmp s1 s2 [])
-    end
-  end.
+              if OCaml.Pervasives.gt (cmp x2 x3) 0 then
+                cons x2 (cons x3 (cons x1 []))
+              else
+                cons x3 (cons x2 (cons x1 [])))
+      | (n, l) =>
+        let n1 := Z.div n 2 in
+        let n2 := Z.sub n n1 in
+        let! l2 := lift [_;_] "01" (chop n1 l) in
+        let! s1 := (sort_rec counter) cmp n1 l in
+        let! s2 := (sort_rec counter) cmp n2 l2 in
+        ret (rev_merge cmp s1 s2 [])
+      end
+    end.
+  
+  Definition sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
+    let! x := lift [_;_;_] "100" (read_counter tt) in
+    lift [_;_;_] "011" (sort_rec x cmp n l).
+  
+  Definition rev_sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
+    let! x := lift [_;_;_] "100" (read_counter tt) in
+    lift [_;_;_] "011" (rev_sort_rec x cmp n l).
+End StableSort.
 
-Definition stable_sort_sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
+Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
   : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  let! x := lift [_;_;_] "100" (read_counter tt) in
-  stable_sort_sort_rec x cmp n l.
-
-Definition stable_sort_rev_sort {A : Type}
-  (cmp : A -> A -> Z) (n : Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  let! x := lift [_;_;_] "100" (read_counter tt) in
-  stable_sort_rev_sort_rec x cmp n l.
-
-Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
   let len := length l in
   if OCaml.Pervasives.lt len 2 then
     ret l
   else
-    stable_sort_sort cmp len l.
+    StableSort.sort cmp len l.
 
-Definition sort {A : Type} :
-  (A -> A -> Z) ->
+Definition sort {A : Type}
+  : (A -> A -> Z) ->
     (list A) -> M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
   stable_sort.
 
-Definition fast_sort {A : Type} :
-  (A -> A -> Z) ->
+Definition fast_sort {A : Type}
+  : (A -> A -> Z) ->
     (list A) -> M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
   stable_sort.
 
-Fixpoint sort_uniq_rev_merge_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
-  (accu : list A) : M [ NonTermination ] (list A) :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
-    match (l1, l2) with
-    | ([], l2) => ret (rev_append l2 accu)
-    | (l1, []) => ret (rev_append l1 accu)
-    | (cons h1 t1, cons h2 t2) =>
-      let c := cmp h1 h2 in
-      if equiv_decb c 0 then
-        (sort_uniq_rev_merge_rec counter) cmp t1 t2 (cons h1 accu)
-      else
-        if OCaml.Pervasives.lt c 0 then
-          (sort_uniq_rev_merge_rec counter) cmp t1 l2 (cons h1 accu)
-        else
-          (sort_uniq_rev_merge_rec counter) cmp l1 t2 (cons h2 accu)
-    end
-  end.
-
-Definition sort_uniq_rev_merge {A : Type}
-  (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) :
-  M [ Counter; NonTermination ] (list A) :=
-  let! x := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (sort_uniq_rev_merge_rec x cmp l1 l2 accu).
-
-Fixpoint sort_uniq_rev_merge_rev_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
-  (accu : list A) : M [ NonTermination ] (list A) :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
-    match (l1, l2) with
-    | ([], l2) => ret (rev_append l2 accu)
-    | (l1, []) => ret (rev_append l1 accu)
-    | (cons h1 t1, cons h2 t2) =>
-      let c := cmp h1 h2 in
-      if equiv_decb c 0 then
-        (sort_uniq_rev_merge_rev_rec counter) cmp t1 t2 (cons h1 accu)
-      else
-        if OCaml.Pervasives.gt c 0 then
-          (sort_uniq_rev_merge_rev_rec counter) cmp t1 l2 (cons h1 accu)
-        else
-          (sort_uniq_rev_merge_rev_rec counter) cmp l1 t2 (cons h2 accu)
-    end
-  end.
-
-Definition sort_uniq_rev_merge_rev {A : Type}
-  (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) :
-  M [ Counter; NonTermination ] (list A) :=
-  let! x := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (sort_uniq_rev_merge_rev_rec x cmp l1 l2 accu).
-
-Fixpoint sort_uniq_sort_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  match counter with
-  | O => lift [_;_;_] "010" (not_terminated tt)
-  | S counter =>
-    match (n, l) with
-    | (2, cons x1 (cons x2 _)) =>
-      ret
-        (let c := cmp x1 x2 in
+Module SortUniq.
+  Fixpoint rev_merge {A : Type}
+    (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_aux (l2 : list A) (accu : list A) : list A :=
+      match (l1, l2) with
+      | ([], l2) => rev_append l2 accu
+      | (l1, []) => rev_append l1 accu
+      | (cons h1 t1, cons h2 t2) =>
+        let c := cmp h1 h2 in
         if equiv_decb c 0 then
-          cons x1 []
+          rev_merge cmp t1 t2 (cons h1 accu)
         else
           if OCaml.Pervasives.lt c 0 then
-            cons x1 (cons x2 [])
+            rev_merge cmp t1 l2 (cons h1 accu)
           else
-            cons x2 (cons x1 []))
-    | (3, cons x1 (cons x2 (cons x3 _))) =>
-      ret
-        (let c := cmp x1 x2 in
+            rev_merge_aux t2 (cons h2 accu)
+      end in
+    rev_merge_aux l2 accu.
+  
+  Fixpoint rev_merge_rev {A : Type}
+    (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_rev_aux (l2 : list A) (accu : list A) : list A :=
+      match (l1, l2) with
+      | ([], l2) => rev_append l2 accu
+      | (l1, []) => rev_append l1 accu
+      | (cons h1 t1, cons h2 t2) =>
+        let c := cmp h1 h2 in
         if equiv_decb c 0 then
-          let c := cmp x2 x3 in
+          rev_merge_rev cmp t1 t2 (cons h1 accu)
+        else
+          if OCaml.Pervasives.gt c 0 then
+            rev_merge_rev cmp t1 l2 (cons h1 accu)
+          else
+            rev_merge_rev_aux t2 (cons h2 accu)
+      end in
+    rev_merge_rev_aux l2 accu.
+  
+  Fixpoint sort_rec {A : Type}
+    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ NonTermination; OCaml.Assert_failure ] (list A) :=
+    match counter with
+    | O => lift [_;_] "10" (not_terminated tt)
+    | S counter =>
+      match (n, l) with
+      | (2, cons x1 (cons x2 _)) =>
+        ret
+          (let c := cmp x1 x2 in
           if equiv_decb c 0 then
-            cons x2 []
+            cons x1 []
           else
             if OCaml.Pervasives.lt c 0 then
-              cons x2 (cons x3 [])
-            else
-              cons x3 (cons x2 [])
-        else
-          if OCaml.Pervasives.lt c 0 then
-            let c := cmp x2 x3 in
-            if equiv_decb c 0 then
               cons x1 (cons x2 [])
             else
-              if OCaml.Pervasives.lt c 0 then
-                cons x1 (cons x2 (cons x3 []))
-              else
-                let c := cmp x1 x3 in
-                if equiv_decb c 0 then
-                  cons x1 (cons x2 [])
-                else
-                  if OCaml.Pervasives.lt c 0 then
-                    cons x1 (cons x3 (cons x2 []))
-                  else
-                    cons x3 (cons x1 (cons x2 []))
-          else
-            let c := cmp x1 x3 in
+              cons x2 (cons x1 []))
+      | (3, cons x1 (cons x2 (cons x3 _))) =>
+        ret
+          (let c := cmp x1 x2 in
+          if equiv_decb c 0 then
+            let c := cmp x2 x3 in
             if equiv_decb c 0 then
-              cons x2 (cons x1 [])
+              cons x2 []
             else
               if OCaml.Pervasives.lt c 0 then
-                cons x2 (cons x1 (cons x3 []))
+                cons x2 (cons x3 [])
               else
-                let c := cmp x2 x3 in
-                if equiv_decb c 0 then
-                  cons x2 (cons x1 [])
-                else
-                  if OCaml.Pervasives.lt c 0 then
-                    cons x2 (cons x3 (cons x1 []))
-                  else
-                    cons x3 (cons x2 (cons x1 [])))
-    | (n, l) =>
-      let n1 := Z.div n 2 in
-      let n2 := Z.sub n n1 in
-      let! l2 := lift [_;_;_] "001" (chop n1 l) in
-      let! s1 := (sort_uniq_rev_sort_rec counter) cmp n1 l in
-      let! s2 := (sort_uniq_rev_sort_rec counter) cmp n2 l2 in
-      lift [_;_;_] "110" (sort_uniq_rev_merge_rev cmp s1 s2 [])
-    end
-  end
-
-with sort_uniq_rev_sort_rec {A : Type}
-  (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  match counter with
-  | O => lift [_;_;_] "010" (not_terminated tt)
-  | S counter =>
-    match (n, l) with
-    | (2, cons x1 (cons x2 _)) =>
-      ret
-        (let c := cmp x1 x2 in
-        if equiv_decb c 0 then
-          cons x1 []
-        else
-          if OCaml.Pervasives.gt c 0 then
-            cons x1 (cons x2 [])
+                cons x3 (cons x2 [])
           else
-            cons x2 (cons x1 []))
-    | (3, cons x1 (cons x2 (cons x3 _))) =>
-      ret
-        (let c := cmp x1 x2 in
-        if equiv_decb c 0 then
-          let c := cmp x2 x3 in
+            if OCaml.Pervasives.lt c 0 then
+              let c := cmp x2 x3 in
+              if equiv_decb c 0 then
+                cons x1 (cons x2 [])
+              else
+                if OCaml.Pervasives.lt c 0 then
+                  cons x1 (cons x2 (cons x3 []))
+                else
+                  let c := cmp x1 x3 in
+                  if equiv_decb c 0 then
+                    cons x1 (cons x2 [])
+                  else
+                    if OCaml.Pervasives.lt c 0 then
+                      cons x1 (cons x3 (cons x2 []))
+                    else
+                      cons x3 (cons x1 (cons x2 []))
+            else
+              let c := cmp x1 x3 in
+              if equiv_decb c 0 then
+                cons x2 (cons x1 [])
+              else
+                if OCaml.Pervasives.lt c 0 then
+                  cons x2 (cons x1 (cons x3 []))
+                else
+                  let c := cmp x2 x3 in
+                  if equiv_decb c 0 then
+                    cons x2 (cons x1 [])
+                  else
+                    if OCaml.Pervasives.lt c 0 then
+                      cons x2 (cons x3 (cons x1 []))
+                    else
+                      cons x3 (cons x2 (cons x1 [])))
+      | (n, l) =>
+        let n1 := Z.div n 2 in
+        let n2 := Z.sub n n1 in
+        let! l2 := lift [_;_] "01" (chop n1 l) in
+        let! s1 := (rev_sort_rec counter) cmp n1 l in
+        let! s2 := (rev_sort_rec counter) cmp n2 l2 in
+        ret (rev_merge_rev cmp s1 s2 [])
+      end
+    end
+  
+  with rev_sort_rec {A : Type}
+    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ NonTermination; OCaml.Assert_failure ] (list A) :=
+    match counter with
+    | O => lift [_;_] "10" (not_terminated tt)
+    | S counter =>
+      match (n, l) with
+      | (2, cons x1 (cons x2 _)) =>
+        ret
+          (let c := cmp x1 x2 in
           if equiv_decb c 0 then
-            cons x2 []
+            cons x1 []
           else
             if OCaml.Pervasives.gt c 0 then
-              cons x2 (cons x3 [])
-            else
-              cons x3 (cons x2 [])
-        else
-          if OCaml.Pervasives.gt c 0 then
-            let c := cmp x2 x3 in
-            if equiv_decb c 0 then
               cons x1 (cons x2 [])
             else
-              if OCaml.Pervasives.gt c 0 then
-                cons x1 (cons x2 (cons x3 []))
-              else
-                let c := cmp x1 x3 in
-                if equiv_decb c 0 then
-                  cons x1 (cons x2 [])
-                else
-                  if OCaml.Pervasives.gt c 0 then
-                    cons x1 (cons x3 (cons x2 []))
-                  else
-                    cons x3 (cons x1 (cons x2 []))
-          else
-            let c := cmp x1 x3 in
+              cons x2 (cons x1 []))
+      | (3, cons x1 (cons x2 (cons x3 _))) =>
+        ret
+          (let c := cmp x1 x2 in
+          if equiv_decb c 0 then
+            let c := cmp x2 x3 in
             if equiv_decb c 0 then
-              cons x2 (cons x1 [])
+              cons x2 []
             else
               if OCaml.Pervasives.gt c 0 then
-                cons x2 (cons x1 (cons x3 []))
+                cons x2 (cons x3 [])
               else
-                let c := cmp x2 x3 in
-                if equiv_decb c 0 then
-                  cons x2 (cons x1 [])
+                cons x3 (cons x2 [])
+          else
+            if OCaml.Pervasives.gt c 0 then
+              let c := cmp x2 x3 in
+              if equiv_decb c 0 then
+                cons x1 (cons x2 [])
+              else
+                if OCaml.Pervasives.gt c 0 then
+                  cons x1 (cons x2 (cons x3 []))
                 else
-                  if OCaml.Pervasives.gt c 0 then
-                    cons x2 (cons x3 (cons x1 []))
+                  let c := cmp x1 x3 in
+                  if equiv_decb c 0 then
+                    cons x1 (cons x2 [])
                   else
-                    cons x3 (cons x2 (cons x1 [])))
-    | (n, l) =>
-      let n1 := Z.div n 2 in
-      let n2 := Z.sub n n1 in
-      let! l2 := lift [_;_;_] "001" (chop n1 l) in
-      let! s1 := (sort_uniq_sort_rec counter) cmp n1 l in
-      let! s2 := (sort_uniq_sort_rec counter) cmp n2 l2 in
-      lift [_;_;_] "110" (sort_uniq_rev_merge cmp s1 s2 [])
-    end
-  end.
+                    if OCaml.Pervasives.gt c 0 then
+                      cons x1 (cons x3 (cons x2 []))
+                    else
+                      cons x3 (cons x1 (cons x2 []))
+            else
+              let c := cmp x1 x3 in
+              if equiv_decb c 0 then
+                cons x2 (cons x1 [])
+              else
+                if OCaml.Pervasives.gt c 0 then
+                  cons x2 (cons x1 (cons x3 []))
+                else
+                  let c := cmp x2 x3 in
+                  if equiv_decb c 0 then
+                    cons x2 (cons x1 [])
+                  else
+                    if OCaml.Pervasives.gt c 0 then
+                      cons x2 (cons x3 (cons x1 []))
+                    else
+                      cons x3 (cons x2 (cons x1 [])))
+      | (n, l) =>
+        let n1 := Z.div n 2 in
+        let n2 := Z.sub n n1 in
+        let! l2 := lift [_;_] "01" (chop n1 l) in
+        let! s1 := (sort_rec counter) cmp n1 l in
+        let! s2 := (sort_rec counter) cmp n2 l2 in
+        ret (rev_merge cmp s1 s2 [])
+      end
+    end.
+  
+  Definition sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
+    let! x := lift [_;_;_] "100" (read_counter tt) in
+    lift [_;_;_] "011" (sort_rec x cmp n l).
+  
+  Definition rev_sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
+    let! x := lift [_;_;_] "100" (read_counter tt) in
+    lift [_;_;_] "011" (rev_sort_rec x cmp n l).
+End SortUniq.
 
-Definition sort_uniq_sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  let! x := lift [_;_;_] "100" (read_counter tt) in
-  sort_uniq_sort_rec x cmp n l.
-
-Definition sort_uniq_rev_sort {A : Type}
-  (cmp : A -> A -> Z) (n : Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  let! x := lift [_;_;_] "100" (read_counter tt) in
-  sort_uniq_rev_sort_rec x cmp n l.
-
-Definition sort_uniq {A : Type} (cmp : A -> A -> Z) (l : list A) :
-  M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
+Definition sort_uniq {A : Type} (cmp : A -> A -> Z) (l : list A)
+  : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
   let len := length l in
   if OCaml.Pervasives.lt len 2 then
     ret l
   else
-    sort_uniq_sort cmp len l.
+    SortUniq.sort cmp len l.

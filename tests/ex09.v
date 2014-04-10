@@ -7,8 +7,8 @@ Set Implicit Arguments.
 Definition l {A : Type} (x : A) : M [ Counter; NonTermination ] (list Z) :=
   match x with
   | _ =>
-    let fix map_rec {B C : Type} (counter : nat) (f : B -> C) (x_1 : list B) :
-      M [ NonTermination ] (list C) :=
+    let fix map_rec {B C : Type} (counter : nat) (f : B -> C) (x_1 : list B)
+      : M [ NonTermination ] (list C) :=
       match counter with
       | O => not_terminated tt
       | S counter =>
@@ -19,12 +19,12 @@ Definition l {A : Type} (x : A) : M [ Counter; NonTermination ] (list Z) :=
           ret (cons (f x) x_2)
         end
       end in
-    let map {B C : Type} (f : B -> C) (x_1 : list B) :
-      M [ Counter; NonTermination ] (list C) :=
+    let map {B C : Type} (f : B -> C) (x_1 : list B)
+      : M [ Counter; NonTermination ] (list C) :=
       let! x_2 := lift [_;_] "10" (read_counter tt) in
       lift [_;_] "01" (map_rec x_2 f x_1) in
-    let fix loop_rec {B : Type} (counter : nat) (x : B) : M [ NonTermination ] B
-      :=
+    let fix loop_rec {B : Type} (counter : nat) (x : B)
+      : M [ NonTermination ] B :=
       match counter with
       | O => not_terminated tt
       | S counter => ret x

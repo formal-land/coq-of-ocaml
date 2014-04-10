@@ -24,8 +24,8 @@ Module G.
       lift [_;_] "10" (raise_Outside tt).
 End G.
 
-Fixpoint h_rec {A B : Type} (counter : nat) (l : list A) :
-  M [ IO; NonTermination; Outside; G.Inside ] B :=
+Fixpoint h_rec {A B : Type} (counter : nat) (l : list A)
+  : M [ IO; NonTermination; Outside; G.Inside ] B :=
   match counter with
   | O => lift [_;_;_;_] "0100" (not_terminated tt)
   | S counter =>
@@ -41,7 +41,7 @@ Fixpoint h_rec {A B : Type} (counter : nat) (l : list A) :
     end
   end.
 
-Definition h {A B : Type} (l : list A) :
-  M [ Counter; IO; NonTermination; Outside; G.Inside ] B :=
+Definition h {A B : Type} (l : list A)
+  : M [ Counter; IO; NonTermination; Outside; G.Inside ] B :=
   let! x := lift [_;_;_;_;_] "10000" (read_counter tt) in
   lift [_;_;_;_;_] "01111" (h_rec x l).

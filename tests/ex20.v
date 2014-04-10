@@ -4,13 +4,13 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Fixpoint sums_rec (counter : nat) (ls : list (list Z)) :
-  M [ Counter; NonTermination ] (list Z) :=
+Fixpoint sums_rec (counter : nat) (ls : list (list Z))
+  : M [ Counter; NonTermination ] (list Z) :=
   match counter with
   | O => lift [_;_] "01" (not_terminated tt)
   | S counter =>
-    let fix sum_rec (counter_1 : nat) (xs : list Z) :
-      M [ Counter; NonTermination ] Z :=
+    let fix sum_rec (counter_1 : nat) (xs : list Z)
+      : M [ Counter; NonTermination ] Z :=
       match counter_1 with
       | O => lift [_;_] "01" (not_terminated tt)
       | S counter_1 =>
