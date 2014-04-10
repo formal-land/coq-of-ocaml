@@ -1,257 +1,357 @@
 3
-((),
-  Value
-    (non_rec, @., l, [ A ], [ (x, A) ],
-      Some Monad ([ Counter/1; NonTermination/1 ], Type (list/1, Type (Z/1)))) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Let 4
-              (rec, @., map_rec, [ B; C ],
-                [
-                  (counter, Type (nat/1));
-                  (f, (B -> C));
-                  (x_1, Type (list/1, B))
-                ],
-                Some
-                  Monad
-                    ([ NonTermination/1 ],
-                      Type (list/1, C))) =
-              Match
-                (?, Variable (?, counter/0),
-                  [
-                    (Constructor (O/1),
-                      Apply
-                        (?,
-                          Variable
-                            (?,
-                              not_terminated/1),
-                          [
-                            Tuple
-                              (?)
-                          ]));
-                    (Constructor (S/1, counter),
-                      Match
-                        (?,
-                          Variable
-                            (?,
-                              x_1/0),
-                          [
-                            (Constructor
-                              ([]/1),
-                              Return
-                                (?,
-                                  Constructor
-                                    (5,
-                                      []/1)));
-                            (Constructor
-                              (cons/1,
-                                x,
-                                xs),
-                              Bind
-                                (?,
-                                  Apply
-                                    (6,
-                                      Apply
-                                        (?,
-                                          Variable
-                                            (?,
-                                              map_rec/0),
-                                          [
-                                            Variable
+(Value
+  (non_rec, @.,
+    [
+      ((l, [ A ], [ (x, A) ],
+        Some
+          Monad ([ Counter/1; NonTermination/1 ], Type (list/1, Type (Z/1)))),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Let 4
+                  (rec, @.,
+                    [
+                      ((map_rec,
+                        [
+                          B;
+                          C
+                        ],
+                        [
+                          (counter,
+                            Type
+                              (nat/1));
+                          (f,
+                            (B
+                              ->
+                              C));
+                          (x_1,
+                            Type
+                              (list/1,
+                                B))
+                        ],
+                        Some
+                          Monad
+                            ([
+                              NonTermination/1
+                            ],
+                              Type
+                                (list/1,
+                                  C))),
+                        Match
+                          (?,
+                            Variable
+                              (?,
+                                counter/0),
+                            [
+                              (Constructor
+                                (O/1),
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        not_terminated/1),
+                                    [
+                                      Tuple
+                                        (?)
+                                    ]));
+                              (Constructor
+                                (S/1,
+                                  counter),
+                                Match
+                                  (?,
+                                    Variable
+                                      (?,
+                                        x_1/0),
+                                    [
+                                      (Constructor
+                                        ([]/1),
+                                        Return
+                                          (?,
+                                            Constructor
+                                              (5,
+                                                []/1)));
+                                      (Constructor
+                                        (cons/1,
+                                          x,
+                                          xs),
+                                        Bind
+                                          (?,
+                                            Apply
+                                              (6,
+                                                Apply
+                                                  (?,
+                                                    Variable
+                                                      (?,
+                                                        map_rec/0),
+                                                    [
+                                                      Variable
+                                                        (?,
+                                                          counter/0)
+                                                    ]),
+                                                [
+                                                  Variable
+                                                    (6,
+                                                      f/0);
+                                                  Variable
+                                                    (6,
+                                                      xs/0)
+                                                ]),
+                                            Some
+                                              x_2,
+                                            Return
                                               (?,
-                                                counter/0)
-                                          ]),
-                                      [
-                                        Variable
-                                          (6,
-                                            f/0);
-                                        Variable
-                                          (6,
-                                            xs/0)
-                                      ]),
-                                  Some
-                                    x_2,
-                                  Return
-                                    (?,
-                                      Constructor
-                                        (6,
-                                          cons/1,
-                                          Apply
-                                            (6,
-                                              Variable
-                                                (6,
-                                                  f/0),
-                                              [
-                                                Variable
+                                                Constructor
                                                   (6,
-                                                    x/0)
-                                              ]),
-                                          Variable
-                                            (?,
-                                              x_2/0)))))
-                          ]))
-                  ]) in
-            Let 4
-              (non_rec, @., map, [ B; C ],
-                [ (f, (B -> C)); (x_1, Type (list/1, B)) ],
-                Some
-                  Monad
-                    ([
-                      Counter/1;
-                      NonTermination/1
-                    ], Type (list/1, C))) =
-              Bind
-                (?,
-                  Lift
-                    (?, [ Counter/1 ],
-                      [
-                        Counter/1;
-                        NonTermination/1
-                      ],
-                      Apply
-                        (?,
-                          Variable
-                            (?,
-                              read_counter/1),
-                          [
-                            Tuple
-                              (?)
-                          ])),
-                  Some x_2,
-                  Lift
-                    (?, [ NonTermination/1 ],
-                      [
-                        Counter/1;
-                        NonTermination/1
-                      ],
-                      Apply
-                        (?,
-                          Variable
-                            (?,
-                              map_rec/0),
-                          [
+                                                    cons/1,
+                                                    Apply
+                                                      (6,
+                                                        Variable
+                                                          (6,
+                                                            f/0),
+                                                        [
+                                                          Variable
+                                                            (6,
+                                                              x/0)
+                                                        ]),
+                                                    Variable
+                                                      (?,
+                                                        x_2/0)))))
+                                    ]))
+                            ]))
+                    ])
+                  in
+                Let 4
+                  (non_rec, @.,
+                    [
+                      ((map,
+                        [
+                          B;
+                          C
+                        ],
+                        [
+                          (f,
+                            (B
+                              ->
+                              C));
+                          (x_1,
+                            Type
+                              (list/1,
+                                B))
+                        ],
+                        Some
+                          Monad
+                            ([
+                              Counter/1;
+                              NonTermination/1
+                            ],
+                              Type
+                                (list/1,
+                                  C))),
+                        Bind
+                          (?,
+                            Lift
+                              (?,
+                                [
+                                  Counter/1
+                                ],
+                                [
+                                  Counter/1;
+                                  NonTermination/1
+                                ],
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        read_counter/1),
+                                    [
+                                      Tuple
+                                        (?)
+                                    ])),
+                            Some
+                              x_2,
+                            Lift
+                              (?,
+                                [
+                                  NonTermination/1
+                                ],
+                                [
+                                  Counter/1;
+                                  NonTermination/1
+                                ],
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        map_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          x_2/0);
+                                      Variable
+                                        (?,
+                                          f/0);
+                                      Variable
+                                        (?,
+                                          x_1/0)
+                                    ]))))
+                    ])
+                  in
+                Let 7
+                  (rec, @.,
+                    [
+                      ((loop_rec,
+                        [
+                          B
+                        ],
+                        [
+                          (counter,
+                            Type
+                              (nat/1));
+                          (x,
+                            B)
+                        ],
+                        Some
+                          Monad
+                            ([
+                              NonTermination/1
+                            ],
+                              B)),
+                        Match
+                          (?,
                             Variable
                               (?,
-                                x_2/0);
-                            Variable
+                                counter/0),
+                            [
+                              (Constructor
+                                (O/1),
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        not_terminated/1),
+                                    [
+                                      Tuple
+                                        (?)
+                                    ]));
+                              (Constructor
+                                (S/1,
+                                  counter),
+                                Return
+                                  (?,
+                                    Variable
+                                      (7,
+                                        x/0)))
+                            ]))
+                    ])
+                  in
+                Let 7
+                  (non_rec, @.,
+                    [
+                      ((loop,
+                        [
+                          B
+                        ],
+                        [
+                          (x,
+                            B)
+                        ],
+                        Some
+                          Monad
+                            ([
+                              Counter/1;
+                              NonTermination/1
+                            ],
+                              B)),
+                        Bind
+                          (?,
+                            Lift
                               (?,
-                                f/0);
-                            Variable
+                                [
+                                  Counter/1
+                                ],
+                                [
+                                  Counter/1;
+                                  NonTermination/1
+                                ],
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        read_counter/1),
+                                    [
+                                      Tuple
+                                        (?)
+                                    ])),
+                            Some
+                              x_1,
+                            Lift
                               (?,
-                                x_1/0)
-                          ])))
-              in
-            Let 7
-              (rec, @., loop_rec, [ B ],
-                [ (counter, Type (nat/1)); (x, B) ],
-                Some Monad ([ NonTermination/1 ], B)) =
-              Match
-                (?, Variable (?, counter/0),
-                  [
-                    (Constructor (O/1),
-                      Apply
-                        (?,
-                          Variable
-                            (?,
-                              not_terminated/1),
-                          [
-                            Tuple
-                              (?)
-                          ]));
-                    (Constructor (S/1, counter),
-                      Return
-                        (?,
-                          Variable
-                            (7,
-                              x/0)))
-                  ]) in
-            Let 7
-              (non_rec, @., loop, [ B ], [ (x, B) ],
-                Some
-                  Monad
-                    ([
-                      Counter/1;
-                      NonTermination/1
-                    ], B)) =
-              Bind
-                (?,
-                  Lift
-                    (?, [ Counter/1 ],
-                      [
-                        Counter/1;
-                        NonTermination/1
-                      ],
-                      Apply
-                        (?,
-                          Variable
-                            (?,
-                              read_counter/1),
-                          [
-                            Tuple
-                              (?)
-                          ])),
-                  Some x_1,
-                  Lift
-                    (?, [ NonTermination/1 ],
-                      [
-                        Counter/1;
-                        NonTermination/1
-                      ],
-                      Apply
-                        (?,
-                          Variable
-                            (?,
-                              loop_rec/0),
-                          [
-                            Variable
-                              (?,
-                                x_1/0);
-                            Variable
-                              (?,
-                                x/0)
-                          ])))
-              in
-            Apply
-              (8, Variable (8, map/0),
-                [
-                  Function
-                    (8,
-                      n,
-                      Apply
+                                [
+                                  NonTermination/1
+                                ],
+                                [
+                                  Counter/1;
+                                  NonTermination/1
+                                ],
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        loop_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          x_1/0);
+                                      Variable
+                                        (?,
+                                          x/0)
+                                    ]))))
+                    ])
+                  in
+                Apply
+                  (8,
+                    Variable
+                      (8,
+                        map/0),
+                    [
+                      Function
                         (8,
-                          Variable
+                          n,
+                          Apply
                             (8,
-                              Z.add/0),
-                          [
-                            Variable
-                              (8,
-                                n/0);
-                            Constant
-                              (8,
-                                Int(1))
-                          ]));
-                  Constructor
-                    (8,
-                      cons/1,
-                      Constant
-                        (8,
-                          Int(5)),
+                              Variable
+                                (8,
+                                  Z.add/0),
+                              [
+                                Variable
+                                  (8,
+                                    n/0);
+                                Constant
+                                  (8,
+                                    Int(1))
+                              ]));
                       Constructor
                         (8,
                           cons/1,
                           Constant
                             (8,
-                              Int(7)),
+                              Int(5)),
                           Constructor
                             (8,
                               cons/1,
                               Constant
                                 (8,
-                                  Int(8)),
+                                  Int(7)),
                               Constructor
                                 (8,
-                                  []/1))))
-                ]))
-        ]))
+                                  cons/1,
+                                  Constant
+                                    (8,
+                                      Int(8)),
+                                  Constructor
+                                    (8,
+                                      []/1))))
+                    ]))
+            ]))
+    ]))

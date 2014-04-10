@@ -3,332 +3,432 @@ Inductive t1:
   ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
 
 8
-(.,
-  Value (non_rec, @., n, [ ], [ ], Some Type (t1/0)) =
-    Constructor
-      ((8, Effect ([ ], .)), C2/0, Constructor ((8, Effect ([ ], .)), false/1),
-        Constant ((8, Effect ([ ], .)), Int(3))))
+(Value
+  (non_rec, @.,
+    [
+      ((n, [ ], [ ], Some Type (t1/0)),
+        Constructor
+          ((8, Effect ([ ], .)), C2/0,
+            Constructor ((8, Effect ([ ], .)), false/1),
+            Constant ((8, Effect ([ ], .)), Int(3))))
+    ]))
 
 10
-(.,
-  Value (non_rec, @., m, [ ], [ ], Some Type (bool/1)) =
-    Match
-      ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), n/0),
-        [
-          (Constructor (C2/0, b, Any), Variable ((11, Effect ([ ], .)), b/0));
-          (Any, Constructor ((12, Effect ([ ], .)), true/1))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((m, [ ], [ ], Some Type (bool/1)),
+        Match
+          ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), n/0),
+            [
+              (Constructor (C2/0, b, Any),
+                Variable ((11, Effect ([ ], .)), b/0));
+              (Any, Constructor ((12, Effect ([ ], .)), true/1))
+            ]))
+    ]))
 
 14
 Inductive t2:
   ([ a ], [ (D1, [ ]); (D2, [ a; Type (t2/0, a) ]) ])
 
 18
-(. -> . -[ NonTermination/1 ]-> .,
-  Value
-    (rec, @., of_list_rec, [ A ],
-      [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some Type (t2/0, A)) =
-    Match
-      ((?, Effect ([ NonTermination/1 ], .)),
-        Variable ((?, Effect ([ ], .)), counter/0),
-        [
-          (Constructor (O/1),
-            Apply
-              ((?, Effect ([ NonTermination/1 ], .)),
-                Variable
+(Value
+  (rec, @.,
+    [
+      ((of_list_rec, [ A ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+        Some Type (t2/0, A)),
+        Match
+          ((?, Effect ([ NonTermination/1 ], .)),
+            Variable ((?, Effect ([ ], .)), counter/0),
+            [
+              (Constructor (O/1),
+                Apply
                   ((?,
                     Effect
-                      ([ ],
-                        .
-                          -[
-                            NonTermination/1
-                          ]-> .)),
-                    not_terminated/1),
-                [ Tuple ((?, Effect ([ ], .))) ]));
-          (Constructor (S/1, counter),
-            Match
-              ((19, Effect ([ NonTermination/1 ], .)),
-                Variable ((19, Effect ([ ], .)), l/0),
-                [
-                  (Constructor ([]/1),
-                    Constructor
-                      ((20,
+                      ([
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((?,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                NonTermination/1
+                              ]->
+                              .)),
+                        not_terminated/1),
+                    [
+                      Tuple
+                        ((?,
+                          Effect
+                            ([
+                            ],
+                              .)))
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  ((19,
+                    Effect
+                      ([
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((19,
                         Effect
                           ([
                           ],
                             .)),
-                        D1/0));
-                  (Constructor (cons/1, x, xs),
-                    Constructor
-                      ((21,
-                        Effect
-                          ([
-                            NonTermination/1
-                          ],
-                            .)),
-                        D2/0,
-                        Variable
-                          ((21,
+                        l/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Constructor
+                          ((20,
                             Effect
                               ([
                               ],
                                 .)),
-                            x/0),
-                        Apply
+                            D1/0));
+                      (Constructor
+                        (cons/1,
+                          x,
+                          xs),
+                        Constructor
                           ((21,
                             Effect
                               ([
                                 NonTermination/1
                               ],
                                 .)),
-                            Apply
-                              ((?,
+                            D2/0,
+                            Variable
+                              ((21,
                                 Effect
                                   ([
                                   ],
-                                    .
-                                      -[
-                                        NonTermination/1
-                                      ]->
-                                      .)),
-                                Variable
+                                    .)),
+                                x/0),
+                            Apply
+                              ((21,
+                                Effect
+                                  ([
+                                    NonTermination/1
+                                  ],
+                                    .)),
+                                Apply
                                   ((?,
                                     Effect
                                       ([
                                       ],
                                         .
-                                          ->
-                                          .
-                                            -[
-                                              NonTermination/1
-                                            ]->
-                                            .)),
-                                    of_list_rec/0),
-                                [
-                                  Variable
-                                    ((?,
-                                      Effect
-                                        ([
-                                        ],
+                                          -[
+                                            NonTermination/1
+                                          ]->
                                           .)),
-                                      counter/0)
-                                ]),
-                            [
-                              Variable
-                                ((21,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  xs/0)
-                            ])))
-                ]))
-        ]))
-
-18
-(. -[ Counter/1; NonTermination/1 ]-> .,
-  Value
-    (non_rec, @., of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A))
-    =
-    Apply
-      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Variable
-          ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)), of_list_rec/0),
-        [
-          Apply
-            ((?, Effect ([ Counter/1 ], .)),
-              Variable
-                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
-                  read_counter/1),
-              [ Tuple ((?, Effect ([ ], .))) ]);
-          Variable ((?, Effect ([ ], .)), l/0)
-        ]))
-
-23
-(. -> . -[ NonTermination/1 ]-> .,
-  Value
-    (rec, @., sum_rec, [ ],
-      [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1))
-    =
-    Match
-      ((?, Effect ([ NonTermination/1 ], .)),
-        Variable ((?, Effect ([ ], .)), counter/0),
-        [
-          (Constructor (O/1),
-            Apply
-              ((?, Effect ([ NonTermination/1 ], .)),
-                Variable
-                  ((?,
-                    Effect
-                      ([ ],
-                        .
-                          -[
-                            NonTermination/1
-                          ]-> .)),
-                    not_terminated/1),
-                [ Tuple ((?, Effect ([ ], .))) ]));
-          (Constructor (S/1, counter),
-            Match
-              ((24, Effect ([ NonTermination/1 ], .)),
-                Variable ((24, Effect ([ ], .)), l/0),
-                [
-                  (Constructor (D1/0),
-                    Constant
-                      ((25,
-                        Effect
-                          ([
-                          ],
-                            .)),
-                        Int(0)));
-                  (Constructor (D2/0, x, xs),
-                    Apply
-                      ((26,
-                        Effect
-                          ([
-                            NonTermination/1
-                          ],
-                            .)),
-                        Variable
-                          ((26,
-                            Effect
-                              ([
-                              ],
-                                .)),
-                            Z.add/0),
-                        [
-                          Variable
-                            ((26,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              x/0);
-                          Apply
-                            ((26,
-                              Effect
-                                ([
-                                  NonTermination/1
-                                ],
-                                  .)),
-                              Apply
-                                ((?,
-                                  Effect
-                                    ([
-                                    ],
-                                      .
-                                        -[
-                                          NonTermination/1
-                                        ]->
-                                        .)),
-                                  Variable
-                                    ((?,
-                                      Effect
-                                        ([
-                                        ],
-                                          .
-                                            ->
-                                            .
-                                              -[
-                                                NonTermination/1
-                                              ]->
-                                              .)),
-                                      sum_rec/0),
-                                  [
                                     Variable
                                       ((?,
                                         Effect
                                           ([
                                           ],
-                                            .)),
-                                        counter/0)
-                                  ]),
-                              [
-                                Variable
-                                  ((26,
-                                    Effect
-                                      ([
-                                      ],
-                                        .)),
-                                    xs/0)
-                              ])
-                        ]))
-                ]))
-        ]))
+                                            .
+                                              ->
+                                              .
+                                                -[
+                                                  NonTermination/1
+                                                ]->
+                                                .)),
+                                        of_list_rec/0),
+                                    [
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
+                                              .)),
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    ((21,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      xs/0)
+                                ])))
+                    ]))
+            ]))
+    ]))
 
-23
-(. -[ Counter/1; NonTermination/1 ]-> .,
-  Value
-    (non_rec, @., sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)) =
-    Apply
-      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Variable
-          ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)), sum_rec/0),
-        [
-          Apply
-            ((?, Effect ([ Counter/1 ], .)),
-              Variable
-                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
-                  read_counter/1),
-              [ Tuple ((?, Effect ([ ], .))) ]);
-          Variable ((?, Effect ([ ], .)), l/0)
-        ]))
-
-28
-(. -[ Counter/1; NonTermination/1 ]-> .,
-  Value (non_rec, @., s, [ A ], [ (x, A) ], Some Type (Z/1)) =
-    Match
-      ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
-        Variable ((?, Effect ([ ], .)), x/0),
-        [
-          (Any,
-            Apply
-              ((28, Effect ([ Counter/1; NonTermination/1 ], .)),
-                Variable
-                  ((28,
-                    Effect
-                      ([ ],
-                        .
-                          -[
-                            Counter/1;
-                            NonTermination/1
-                          ]-> .)),
-                    sum/0),
-                [
-                  Apply
-                    ((28,
+18
+(Value
+  (non_rec, @.,
+    [
+      ((of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)),
+        Apply
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+            Variable
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+                of_list_rec/0),
+            [
+              Apply
+                ((?, Effect ([ Counter/1 ], .)),
+                  Variable
+                    ((?,
                       Effect
                         ([
-                          Counter/1;
-                          NonTermination/1
                         ],
-                          .)),
-                      Variable
-                        ((28,
+                          .
+                            -[
+                              Counter/1
+                            ]->
+                            .)),
+                      read_counter/1),
+                  [
+                    Tuple
+                      ((?,
+                        Effect
+                          ([
+                          ],
+                            .)))
+                  ]);
+              Variable ((?, Effect ([ ], .)), l/0)
+            ]))
+    ]))
+
+23
+(Value
+  (rec, @.,
+    [
+      ((sum_rec, [ ], [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ],
+        Some Type (Z/1)),
+        Match
+          ((?, Effect ([ NonTermination/1 ], .)),
+            Variable ((?, Effect ([ ], .)), counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  ((?,
+                    Effect
+                      ([
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((?,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                NonTermination/1
+                              ]->
+                              .)),
+                        not_terminated/1),
+                    [
+                      Tuple
+                        ((?,
                           Effect
                             ([
                             ],
-                              .
-                                -[
-                                  Counter/1;
-                                  NonTermination/1
-                                ]->
-                                .)),
-                          of_list/0),
-                      [
-                        Constructor
-                          ((28,
+                              .)))
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  ((24,
+                    Effect
+                      ([
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((24,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        l/0),
+                    [
+                      (Constructor
+                        (D1/0),
+                        Constant
+                          ((25,
                             Effect
                               ([
                               ],
                                 .)),
-                            cons/1,
-                            Constant
-                              ((28,
+                            Int(0)));
+                      (Constructor
+                        (D2/0,
+                          x,
+                          xs),
+                        Apply
+                          ((26,
+                            Effect
+                              ([
+                                NonTermination/1
+                              ],
+                                .)),
+                            Variable
+                              ((26,
                                 Effect
                                   ([
                                   ],
                                     .)),
-                                Int(5)),
+                                Z.add/0),
+                            [
+                              Variable
+                                ((26,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  x/0);
+                              Apply
+                                ((26,
+                                  Effect
+                                    ([
+                                      NonTermination/1
+                                    ],
+                                      .)),
+                                  Apply
+                                    ((?,
+                                      Effect
+                                        ([
+                                        ],
+                                          .
+                                            -[
+                                              NonTermination/1
+                                            ]->
+                                            .)),
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
+                                              .
+                                                ->
+                                                .
+                                                  -[
+                                                    NonTermination/1
+                                                  ]->
+                                                  .)),
+                                          sum_rec/0),
+                                      [
+                                        Variable
+                                          ((?,
+                                            Effect
+                                              ([
+                                              ],
+                                                .)),
+                                            counter/0)
+                                      ]),
+                                  [
+                                    Variable
+                                      ((26,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        xs/0)
+                                  ])
+                            ]))
+                    ]))
+            ]))
+    ]))
+
+23
+(Value
+  (non_rec, @.,
+    [
+      ((sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)),
+        Apply
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+            Variable
+              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+                sum_rec/0),
+            [
+              Apply
+                ((?, Effect ([ Counter/1 ], .)),
+                  Variable
+                    ((?,
+                      Effect
+                        ([
+                        ],
+                          .
+                            -[
+                              Counter/1
+                            ]->
+                            .)),
+                      read_counter/1),
+                  [
+                    Tuple
+                      ((?,
+                        Effect
+                          ([
+                          ],
+                            .)))
+                  ]);
+              Variable ((?, Effect ([ ], .)), l/0)
+            ]))
+    ]))
+
+28
+(Value
+  (non_rec, @.,
+    [
+      ((s, [ A ], [ (x, A) ], Some Type (Z/1)),
+        Match
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x/0),
+            [
+              (Any,
+                Apply
+                  ((28,
+                    Effect
+                      ([
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((28,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                Counter/1;
+                                NonTermination/1
+                              ]->
+                              .)),
+                        sum/0),
+                    [
+                      Apply
+                        ((28,
+                          Effect
+                            ([
+                              Counter/1;
+                              NonTermination/1
+                            ],
+                              .)),
+                          Variable
+                            ((28,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    -[
+                                      Counter/1;
+                                      NonTermination/1
+                                    ]->
+                                    .)),
+                              of_list/0),
+                          [
                             Constructor
                               ((28,
                                 Effect
@@ -342,7 +442,7 @@ Inductive t2:
                                       ([
                                       ],
                                         .)),
-                                    Int(7)),
+                                    Int(5)),
                                 Constructor
                                   ((28,
                                     Effect
@@ -356,14 +456,29 @@ Inductive t2:
                                           ([
                                           ],
                                             .)),
-                                        Int(3)),
+                                        Int(7)),
                                     Constructor
                                       ((28,
                                         Effect
                                           ([
                                           ],
                                             .)),
-                                        []/1))))
-                      ])
-                ]))
-        ]))
+                                        cons/1,
+                                        Constant
+                                          ((28,
+                                            Effect
+                                              ([
+                                              ],
+                                                .)),
+                                            Int(3)),
+                                        Constructor
+                                          ((28,
+                                            Effect
+                                              ([
+                                              ],
+                                                .)),
+                                            []/1))))
+                          ])
+                    ]))
+            ]))
+    ]))

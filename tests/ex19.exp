@@ -1,68 +1,92 @@
 3 Exception (Error, ())
 
 5
-((),
-  Value (non_rec, @., x1, [ ], [ ], Some Type (Z/1)) =
-    Match
-      (6,
-        Run
-          (?, Error/0, [ ],
-            Apply (6, Variable (6, raise_Error/0), [ Tuple (?) ])),
-        [
-          (Constructor (inl/1, x), Variable (?, x/0));
-          (Constructor (inr/1, Tuple ()), Constant (7, Int(12)))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((x1, [ ], [ ], Some Type (Z/1)),
+        Match
+          (6,
+            Run
+              (?, Error/0, [ ],
+                Apply (6, Variable (6, raise_Error/0), [ Tuple (?) ])),
+            [
+              (Constructor (inl/1, x), Variable (?, x/0));
+              (Constructor (inr/1, Tuple ()), Constant (7, Int(12)))
+            ]))
+    ]))
 
 9
-((),
-  Value (non_rec, @., x2, [ A; B ], [ (x, A) ], Some B) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Match
-              (10,
-                Run
-                  (?, Error/0, [ ],
-                    Apply
-                      (10,
-                        Variable
-                          (10,
-                            raise_Error/0),
-                        [ Tuple (?) ])),
-                [
-                  (Constructor (inl/1, x),
-                    Variable
+(Value
+  (non_rec, @.,
+    [
+      ((x2, [ A; B ], [ (x, A) ], Some B),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Match
+                  (10,
+                    Run
                       (?,
-                        x/0));
-                  (Constructor (inr/1, Tuple ()),
-                    Apply
-                      (11,
-                        Variable
-                          (11,
-                            OCaml.Pervasives.failwith/1),
+                        Error/0,
                         [
-                          Constant
-                            (11,
-                              String("arg"))
-                        ]))
-                ]))
-        ]))
+                        ],
+                        Apply
+                          (10,
+                            Variable
+                              (10,
+                                raise_Error/0),
+                            [
+                              Tuple
+                                (?)
+                            ])),
+                    [
+                      (Constructor
+                        (inl/1,
+                          x),
+                        Variable
+                          (?,
+                            x/0));
+                      (Constructor
+                        (inr/1,
+                          Tuple
+                            ()),
+                        Apply
+                          (11,
+                            Variable
+                              (11,
+                                OCaml.Pervasives.failwith/1),
+                            [
+                              Constant
+                                (11,
+                                  String("arg"))
+                            ]))
+                    ]))
+            ]))
+    ]))
 
 13
-((),
-  Value (non_rec, @., x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
-    Match
-      (14,
-        Run
-          (?, Error/0, [ ],
-            IfThenElse
-              (14, Variable (14, b/0),
-                Apply
-                  (14, Variable (14, OCaml.Pervasives.failwith/1),
-                    [ Constant (14, String("arg")) ]),
-                Apply (14, Variable (14, raise_Error/0), [ Tuple (?) ]))),
-        [
-          (Constructor (inl/1, x), Variable (?, x/0));
-          (Constructor (inr/1, Tuple ()), Constant (15, Int(12)))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)),
+        Match
+          (14,
+            Run
+              (?, Error/0, [ ],
+                IfThenElse
+                  (14, Variable (14, b/0),
+                    Apply
+                      (14,
+                        Variable
+                          (14, OCaml.Pervasives.failwith/1),
+                        [ Constant (14, String("arg")) ]),
+                    Apply
+                      (14, Variable (14, raise_Error/0),
+                        [ Tuple (?) ]))),
+            [
+              (Constructor (inl/1, x), Variable (?, x/0));
+              (Constructor (inr/1, Tuple ()), Constant (15, Int(12)))
+            ]))
+    ]))

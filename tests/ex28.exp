@@ -1,67 +1,110 @@
 3
-((),
-  Value
-    (non_rec, @., map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-      Some Type (list/1, B)) =
-    Let 4
-      (rec, @coq_rec, map, [ ], [ (l, Type (list/1, A)) ], Some Type (list/1, B))
-      =
-      Match
-        (5, Variable (5, l/0),
-          [
-            (Constructor ([]/1), Constructor (6, []/1));
-            (Constructor (cons/1, x, l),
-              Constructor
-                (7, cons/1,
-                  Apply
-                    (7, Variable (7, f/0),
-                      [
-                        Variable
+(Value
+  (non_rec, @.,
+    [
+      ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+        Some Type (list/1, B)),
+        Let 4
+          (rec, @coq_rec,
+            [
+              ((map, [ ], [ (l, Type (list/1, A)) ],
+                Some Type (list/1, B)),
+                Match
+                  (5, Variable (5, l/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Constructor
+                          (6,
+                            []/1));
+                      (Constructor
+                        (cons/1,
+                          x,
+                          l),
+                        Constructor
                           (7,
-                            x/0)
-                      ]),
-                  Apply
-                    (7, Variable (7, map/0),
-                      [
-                        Variable
-                          (7,
-                            l/0)
-                      ])))
-          ]) in
-    Apply (9, Variable (9, map/0), [ Variable (9, l/0) ]))
+                            cons/1,
+                            Apply
+                              (7,
+                                Variable
+                                  (7,
+                                    f/0),
+                                [
+                                  Variable
+                                    (7,
+                                      x/0)
+                                ]),
+                            Apply
+                              (7,
+                                Variable
+                                  (7,
+                                    map/0),
+                                [
+                                  Variable
+                                    (7,
+                                      l/0)
+                                ])))
+                    ]))
+            ]) in
+        Apply (9, Variable (9, map/0), [ Variable (9, l/0) ]))
+    ]))
 
 11
-((),
-  Value
-    (non_rec, @., map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-      Some Type (list/1, B)) =
-    Let 12
-      (rec, @coq_rec, map2, [ C; D ], [ (f, (C -> D)); (l, Type (list/1, C)) ],
-        Some Type (list/1, D)) =
-      Match
-        (13, Variable (13, l/0),
-          [
-            (Constructor ([]/1), Constructor (14, []/1));
-            (Constructor (cons/1, x, l),
-              Constructor
-                (15, cons/1,
-                  Apply
-                    (15, Variable (15, f/0),
-                      [
-                        Variable
+(Value
+  (non_rec, @.,
+    [
+      ((map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
+        Some Type (list/1, B)),
+        Let 12
+          (rec, @coq_rec,
+            [
+              ((map2, [ C; D ],
+                [ (f, (C -> D)); (l, Type (list/1, C)) ],
+                Some Type (list/1, D)),
+                Match
+                  (13,
+                    Variable
+                      (13,
+                        l/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Constructor
+                          (14,
+                            []/1));
+                      (Constructor
+                        (cons/1,
+                          x,
+                          l),
+                        Constructor
                           (15,
-                            x/0)
-                      ]),
-                  Apply
-                    (15, Variable (15, map2/0),
-                      [
-                        Variable
-                          (15,
-                            f/0);
-                        Variable
-                          (15,
-                            l/0)
-                      ])))
-          ]) in
-    Apply
-      (17, Variable (17, map2/0), [ Variable (17, f/0); Variable (17, l/0) ]))
+                            cons/1,
+                            Apply
+                              (15,
+                                Variable
+                                  (15,
+                                    f/0),
+                                [
+                                  Variable
+                                    (15,
+                                      x/0)
+                                ]),
+                            Apply
+                              (15,
+                                Variable
+                                  (15,
+                                    map2/0),
+                                [
+                                  Variable
+                                    (15,
+                                      f/0);
+                                  Variable
+                                    (15,
+                                      l/0)
+                                ])))
+                    ]))
+            ]) in
+        Apply
+          (17, Variable (17, map2/0),
+            [ Variable (17, f/0); Variable (17, l/0) ]))
+    ]))

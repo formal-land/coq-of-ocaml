@@ -1,127 +1,152 @@
 3
-((),
-  Value
-    (non_rec, @., tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
-    =
-    Match
-      (4, Variable (4, l/0),
-        [
-          (Constructor (cons/1, Any, xs), Variable (5, xs/0));
-          (Constructor ([]/1),
-            Apply
-              (6, Variable (6, OCaml.Pervasives.failwith/1),
-                [
-                  Constant
-                    (6,
-                      String("Cannot take the tail of an empty list."))
-                ]))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A)),
+        Match
+          (4, Variable (4, l/0),
+            [
+              (Constructor (cons/1, Any, xs), Variable (5, xs/0));
+              (Constructor ([]/1),
+                Apply
+                  (6,
+                    Variable
+                      (6,
+                        OCaml.Pervasives.failwith/1),
+                    [
+                      Constant
+                        (6,
+                          String("Cannot take the tail of an empty list."))
+                    ]))
+            ]))
+    ]))
 
 8
-((),
-  Value
-    (rec, @., print_list_rec, [ ],
-      [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
-      Some Type (unit/1)) =
-    Match
-      (?, Variable (?, counter/0),
-        [
-          (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
-          (Constructor (S/1, counter),
-            Match
-              (?, Variable (?, x/0),
-                [
-                  (Constructor ([]/1),
-                    Constructor
-                      (9,
-                        tt/1));
-                  (Constructor (cons/1, x, xs),
-                    Sequence
-                      (11,
-                        Apply
+(Value
+  (rec, @.,
+    [
+      ((print_list_rec, [ ],
+        [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
+        Some Type (unit/1)),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (?, Variable (?, x/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Constructor
+                          (9,
+                            tt/1));
+                      (Constructor
+                        (cons/1,
+                          x,
+                          xs),
+                        Sequence
                           (11,
-                            Variable
-                              (11,
-                                OCaml.Pervasives.print_string/0),
-                            [
-                              Variable
-                                (11,
-                                  x/0)
-                            ]),
-                        Apply
-                          (12,
                             Apply
-                              (?,
+                              (11,
                                 Variable
-                                  (?,
-                                    print_list_rec/0),
+                                  (11,
+                                    OCaml.Pervasives.print_string/0),
                                 [
                                   Variable
-                                    (?,
-                                      counter/0)
+                                    (11,
+                                      x/0)
                                 ]),
-                            [
-                              Variable
-                                (12,
-                                  xs/0)
-                            ])))
-                ]))
-        ]))
+                            Apply
+                              (12,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        print_list_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          counter/0)
+                                    ]),
+                                [
+                                  Variable
+                                    (12,
+                                      xs/0)
+                                ])))
+                    ]))
+            ]))
+    ]))
 
 8
-((),
-  Value
-    (non_rec, @., print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
-      Some Type (unit/1)) =
-    Apply
-      (?, Variable (?, print_list_rec/0),
-        [
-          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
-          Variable (?, x/0)
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+        Some Type (unit/1)),
+        Apply
+          (?, Variable (?, print_list_rec/0),
+            [
+              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Variable (?, x/0)
+            ]))
+    ]))
 
 14
-((),
-  Value
-    (non_rec, @., f, [ ], [ ],
-      Some (Type (list/1, Type (string/1)) -> Type (unit/1))) =
-    Variable (14, print_list/0))
+(Value
+  (non_rec, @.,
+    [
+      ((f, [ ], [ ], Some (Type (list/1, Type (string/1)) -> Type (unit/1))),
+        Variable (14, print_list/0))
+    ]))
 
 16
-((),
-  Value (non_rec, @., x, [ A ], [ (z, A) ], Some Type (unit/1)) =
-    Apply
-      (16, Variable (16, f/0),
-        [
-          Apply
-            (16, Variable (16, tail/0),
-              [
-                Constructor
-                  (16, cons/1,
-                    Constant
-                      (16,
-                        String("Stop")),
+(Value
+  (non_rec, @.,
+    [
+      ((x, [ A ], [ (z, A) ], Some Type (unit/1)),
+        Apply
+          (16, Variable (16, f/0),
+            [
+              Apply
+                (16, Variable (16, tail/0),
+                  [
                     Constructor
                       (16,
                         cons/1,
                         Constant
                           (16,
-                            String("Hello")),
+                            String("Stop")),
                         Constructor
                           (16,
                             cons/1,
                             Constant
                               (16,
-                                String(" ")),
+                                String("Hello")),
                             Constructor
                               (16,
                                 cons/1,
                                 Constant
                                   (16,
-                                    String("world")),
+                                    String(" ")),
                                 Constructor
                                   (16,
-                                    []/1)))))
-              ])
-        ]))
+                                    cons/1,
+                                    Constant
+                                      (16,
+                                        String("world")),
+                                    Constructor
+                                      (16,
+                                        []/1)))))
+                  ])
+            ]))
+    ]))

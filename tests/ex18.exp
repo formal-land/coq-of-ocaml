@@ -1,87 +1,122 @@
 1 Reference (r, Type (Z/1))
 
 3
-((),
-  Value (non_rec, @., plus_one, [ A ], [ (x, A) ], Some Type (Z/1)) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Apply
-              (4, Variable (4, Z.add/0),
-                [
-                  Apply
-                    (4,
-                      Variable
-                        (?,
-                          read_r/0),
-                      [
-                        Tuple
-                          (?)
-                      ]);
-                  Constant (4, Int(1))
-                ]))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((plus_one, [ A ], [ (x, A) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (4,
+                    Variable
+                      (4,
+                        Z.add/0),
+                    [
+                      Apply
+                        (4,
+                          Variable
+                            (?,
+                              read_r/0),
+                          [
+                            Tuple
+                              (?)
+                          ]);
+                      Constant
+                        (4,
+                          Int(1))
+                    ]))
+            ]))
+    ]))
 
 6 Reference (s, Type (string/1))
 
 8
-((),
-  Value (non_rec, @., fail, [ A; B ], [ (x, A) ], Some B) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Apply
-              (8, Variable (8, OCaml.Pervasives.failwith/1),
-                [
-                  Apply
-                    (8,
-                      Variable
-                        (?,
-                          read_s/0),
-                      [
-                        Tuple
-                          (?)
-                      ])
-                ]))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((fail, [ A; B ], [ (x, A) ], Some B),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (8,
+                    Variable
+                      (8,
+                        OCaml.Pervasives.failwith/1),
+                    [
+                      Apply
+                        (8,
+                          Variable
+                            (?,
+                              read_s/0),
+                          [
+                            Tuple
+                              (?)
+                          ])
+                    ]))
+            ]))
+    ]))
 
 10
-((),
-  Value (non_rec, @., reset, [ A ], [ (x, A) ], Some Type (unit/1)) =
-    Match
-      (?, Variable (?, x/0),
-        [ (Any, Apply (11, Variable (?, write_r/0), [ Constant (11, Int(0)) ])) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((reset, [ A ], [ (x, A) ], Some Type (unit/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (11,
+                    Variable
+                      (?,
+                        write_r/0),
+                    [
+                      Constant
+                        (11,
+                          Int(0))
+                    ]))
+            ]))
+    ]))
 
 13
-((),
-  Value (non_rec, @., incr, [ A ], [ (x, A) ], Some Type (unit/1)) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Apply
-              (14, Variable (?, write_r/0),
-                [
-                  Apply
-                    (14,
-                      Variable
+(Value
+  (non_rec, @.,
+    [
+      ((incr, [ A ], [ (x, A) ], Some Type (unit/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (14,
+                    Variable
+                      (?,
+                        write_r/0),
+                    [
+                      Apply
                         (14,
-                          Z.add/0),
-                      [
-                        Apply
-                          (14,
-                            Variable
-                              (?,
-                                read_r/0),
-                            [
-                              Tuple
-                                (?)
-                            ]);
-                        Constant
-                          (14,
-                            Int(1))
-                      ])
-                ]))
-        ]))
+                          Variable
+                            (14,
+                              Z.add/0),
+                          [
+                            Apply
+                              (14,
+                                Variable
+                                  (?,
+                                    read_r/0),
+                                [
+                                  Tuple
+                                    (?)
+                                ]);
+                            Constant
+                              (14,
+                                Int(1))
+                          ])
+                    ]))
+            ]))
+    ]))

@@ -1,39 +1,54 @@
 3
-(.,
-  Value (non_rec, @., t0, [ ], [ ], Some Type (unit/1)) =
-    Constructor ((3, Effect ([ ], .)), tt/1))
+(Value
+  (non_rec, @.,
+    [
+      ((t0, [ ], [ ], Some Type (unit/1)),
+        Constructor ((3, Effect ([ ], .)), tt/1))
+    ]))
 
 5
-(.,
-  Value (non_rec, @., t1, [ ], [ ], Some (Type (ascii/1) * Type (string/1))) =
-    Tuple
-      ((5, Effect ([ ], .)), Constant ((5, Effect ([ ], .)), Char("c")),
-        Constant ((5, Effect ([ ], .)), String("one"))))
+(Value
+  (non_rec, @.,
+    [
+      ((t1, [ ], [ ], Some (Type (ascii/1) * Type (string/1))),
+        Tuple
+          ((5, Effect ([ ], .)), Constant ((5, Effect ([ ], .)), Char("c")),
+            Constant ((5, Effect ([ ], .)), String("one"))))
+    ]))
 
 7
-(.,
-  Value
-    (non_rec, @., t2, [ ], [ ],
-      Some
-        (Type (Z/1) * Type (Z/1) * Type (Z/1) * Type (bool/1) * Type (bool/1)))
-    =
-    Tuple
-      ((7, Effect ([ ], .)), Constant ((7, Effect ([ ], .)), Int(1)),
-        Constant ((7, Effect ([ ], .)), Int(2)),
-        Constant ((7, Effect ([ ], .)), Int(3)),
-        Constructor ((7, Effect ([ ], .)), false/1),
-        Constructor ((7, Effect ([ ], .)), true/1)))
+(Value
+  (non_rec, @.,
+    [
+      ((t2, [ ], [ ],
+        Some
+          (Type (Z/1) * Type (Z/1) * Type (Z/1) * Type (bool/1) *
+            Type (bool/1))),
+        Tuple
+          ((7, Effect ([ ], .)), Constant ((7, Effect ([ ], .)), Int(1)),
+            Constant ((7, Effect ([ ], .)), Int(2)),
+            Constant ((7, Effect ([ ], .)), Int(3)),
+            Constructor ((7, Effect ([ ], .)), false/1),
+            Constructor ((7, Effect ([ ], .)), true/1)))
+    ]))
 
 9
-(. -> .,
-  Value (non_rec, @., f, [ A ], [ (x, A) ], Some (A * A)) =
-    Tuple
-      ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), x/0),
-        Variable ((9, Effect ([ ], .)), x/0)))
+(Value
+  (non_rec, @.,
+    [
+      ((f, [ A ], [ (x, A) ], Some (A * A)),
+        Tuple
+          ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), x/0),
+            Variable ((9, Effect ([ ], .)), x/0)))
+    ]))
 
 11
-(.,
-  Value (non_rec, @., t3, [ ], [ ], Some (Type (Z/1) * Type (Z/1))) =
-    Apply
-      ((11, Effect ([ ], .)), Variable ((11, Effect ([ ], . -> .)), f/0),
-        [ Constant ((11, Effect ([ ], .)), Int(12)) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((t3, [ ], [ ], Some (Type (Z/1) * Type (Z/1))),
+        Apply
+          ((11, Effect ([ ], .)),
+            Variable ((11, Effect ([ ], . -> .)), f/0),
+            [ Constant ((11, Effect ([ ], .)), Int(12)) ]))
+    ]))

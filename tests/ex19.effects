@@ -1,122 +1,172 @@
 3 Exception (Error, ())
 
 5
-(.,
-  Value (non_rec, @., x1, [ ], [ ], Some Type (Z/1)) =
-    Match
-      ((6, Effect ([ ], .)),
-        Run
-          ((?, Effect ([ ], .)), Error/0, [ ],
-            Apply
-              ((6, Effect ([ Error/0 ], .)),
-                Variable ((6, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
-                [ Tuple ((?, Effect ([ ], .))) ])),
-        [
-          (Constructor (inl/1, x), Variable ((?, Effect ([ ], .)), x/0));
-          (Constructor (inr/1, Tuple ()),
-            Constant ((7, Effect ([ ], .)), Int(12)))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((x1, [ ], [ ], Some Type (Z/1)),
+        Match
+          ((6, Effect ([ ], .)),
+            Run
+              ((?, Effect ([ ], .)), Error/0, [ ],
+                Apply
+                  ((6, Effect ([ Error/0 ], .)),
+                    Variable
+                      ((6, Effect ([ ], . -[ Error/0 ]-> .)),
+                        raise_Error/0),
+                    [ Tuple ((?, Effect ([ ], .))) ])),
+            [
+              (Constructor (inl/1, x),
+                Variable ((?, Effect ([ ], .)), x/0));
+              (Constructor (inr/1, Tuple ()),
+                Constant ((7, Effect ([ ], .)), Int(12)))
+            ]))
+    ]))
 
 9
-(. -[ OCaml.Failure/1 ]-> .,
-  Value (non_rec, @., x2, [ A; B ], [ (x, A) ], Some B) =
-    Match
-      ((?, Effect ([ OCaml.Failure/1 ], .)),
-        Variable ((?, Effect ([ ], .)), x/0),
-        [
-          (Any,
-            Match
-              ((10, Effect ([ OCaml.Failure/1 ], .)),
-                Run
-                  ((?, Effect ([ ], .)), Error/0, [ ],
-                    Apply
-                      ((10,
-                        Effect
-                          ([
-                            Error/0
-                          ], .)),
-                        Variable
-                          ((10,
-                            Effect
-                              ([
-                              ],
-                                .
-                                  -[
-                                    Error/0
-                                  ]->
-                                  .)),
-                            raise_Error/0),
-                        [
-                          Tuple
-                            ((?,
-                              Effect
-                                ([
-                                ],
-                                  .)))
-                        ])),
-                [
-                  (Constructor (inl/1, x),
-                    Variable
+(Value
+  (non_rec, @.,
+    [
+      ((x2, [ A; B ], [ (x, A) ], Some B),
+        Match
+          ((?, Effect ([ OCaml.Failure/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x/0),
+            [
+              (Any,
+                Match
+                  ((10,
+                    Effect
+                      ([
+                        OCaml.Failure/1
+                      ],
+                        .)),
+                    Run
                       ((?,
                         Effect
                           ([
                           ],
                             .)),
-                        x/0));
-                  (Constructor (inr/1, Tuple ()),
-                    Apply
-                      ((11,
-                        Effect
-                          ([
-                            OCaml.Failure/1
-                          ],
-                            .)),
+                        Error/0,
+                        [
+                        ],
+                        Apply
+                          ((10,
+                            Effect
+                              ([
+                                Error/0
+                              ],
+                                .)),
+                            Variable
+                              ((10,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      -[
+                                        Error/0
+                                      ]->
+                                      .)),
+                                raise_Error/0),
+                            [
+                              Tuple
+                                ((?,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)))
+                            ])),
+                    [
+                      (Constructor
+                        (inl/1,
+                          x),
                         Variable
-                          ((11,
+                          ((?,
                             Effect
                               ([
                               ],
+                                .)),
+                            x/0));
+                      (Constructor
+                        (inr/1,
+                          Tuple
+                            ()),
+                        Apply
+                          ((11,
+                            Effect
+                              ([
+                                OCaml.Failure/1
+                              ],
+                                .)),
+                            Variable
+                              ((11,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      -[
+                                        OCaml.Failure/1
+                                      ]->
+                                      .)),
+                                OCaml.Pervasives.failwith/1),
+                            [
+                              Constant
+                                ((11,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  String("arg"))
+                            ]))
+                    ]))
+            ]))
+    ]))
+
+13
+(Value
+  (non_rec, @.,
+    [
+      ((x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)),
+        Match
+          ((14, Effect ([ OCaml.Failure/1 ], .)),
+            Run
+              ((?, Effect ([ OCaml.Failure/1 ], .)), Error/0, [ ],
+                IfThenElse
+                  ((14, Effect ([ OCaml.Failure/1; Error/0 ], .)),
+                    Variable ((14, Effect ([ ], .)), b/0),
+                    Apply
+                      ((14, Effect ([ OCaml.Failure/1 ], .)),
+                        Variable
+                          ((14,
+                            Effect
+                              ([ ],
                                 .
                                   -[
                                     OCaml.Failure/1
-                                  ]->
-                                  .)),
+                                  ]-> .)),
                             OCaml.Pervasives.failwith/1),
                         [
                           Constant
-                            ((11,
+                            ((14,
                               Effect
                                 ([
                                 ],
                                   .)),
                               String("arg"))
-                        ]))
-                ]))
-        ]))
-
-13
-(. -[ OCaml.Failure/1 ]-> .,
-  Value (non_rec, @., x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)) =
-    Match
-      ((14, Effect ([ OCaml.Failure/1 ], .)),
-        Run
-          ((?, Effect ([ OCaml.Failure/1 ], .)), Error/0, [ ],
-            IfThenElse
-              ((14, Effect ([ OCaml.Failure/1; Error/0 ], .)),
-                Variable ((14, Effect ([ ], .)), b/0),
-                Apply
-                  ((14, Effect ([ OCaml.Failure/1 ], .)),
-                    Variable
-                      ((14, Effect ([ ], . -[ OCaml.Failure/1 ]-> .)),
-                        OCaml.Pervasives.failwith/1),
-                    [ Constant ((14, Effect ([ ], .)), String("arg")) ]),
-                Apply
-                  ((14, Effect ([ Error/0 ], .)),
-                    Variable
-                      ((14, Effect ([ ], . -[ Error/0 ]-> .)), raise_Error/0),
-                    [ Tuple ((?, Effect ([ ], .))) ]))),
-        [
-          (Constructor (inl/1, x), Variable ((?, Effect ([ ], .)), x/0));
-          (Constructor (inr/1, Tuple ()),
-            Constant ((15, Effect ([ ], .)), Int(12)))
-        ]))
+                        ]),
+                    Apply
+                      ((14, Effect ([ Error/0 ], .)),
+                        Variable
+                          ((14,
+                            Effect
+                              ([ ], . -[ Error/0 ]-> .)),
+                            raise_Error/0),
+                        [ Tuple ((?, Effect ([ ], .))) ]))),
+            [
+              (Constructor (inl/1, x),
+                Variable ((?, Effect ([ ], .)), x/0));
+              (Constructor (inr/1, Tuple ()),
+                Constant
+                  ((15, Effect ([ ], .)),
+                    Int(12)))
+            ]))
+    ]))

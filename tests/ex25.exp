@@ -1,409 +1,571 @@
 3
-((),
-  Value (non_rec, @., l1, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Constructor (3, []/1))
+(Value
+  (non_rec, @.,
+    [ ((l1, [ ], [ ], Some Type (list/1, Type (Z/1))), Constructor (3, []/1)) ]))
 
 4
-((),
-  Value (non_rec, @., l2, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Constructor
-      (4, cons/1, Constant (4, Int(1)),
+(Value
+  (non_rec, @.,
+    [
+      ((l2, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Constructor
-          (4, cons/1, Constant (4, Int(2)),
+          (4, cons/1, Constant (4, Int(1)),
             Constructor
-              (4, cons/1, Constant (4, Int(3)),
+              (4, cons/1, Constant (4, Int(2)),
                 Constructor
-                  (4, cons/1, Constant (4, Int(4)), Constructor (4, []/1))))))
+                  (4, cons/1, Constant (4, Int(3)),
+                    Constructor
+                      (4, cons/1, Constant (4, Int(4)),
+                        Constructor (4, []/1))))))
+    ]))
 
 5
-((),
-  Value
-    (non_rec, @., l3, [ ], [ ],
-      Some Type (list/1, (Type (Z/1) * Type (string/1)))) =
-    Constructor
-      (5, cons/1, Tuple (5, Constant (5, Int(1)), Constant (5, String("one"))),
+(Value
+  (non_rec, @.,
+    [
+      ((l3, [ ], [ ], Some Type (list/1, (Type (Z/1) * Type (string/1)))),
         Constructor
           (5, cons/1,
-            Tuple (5, Constant (5, Int(2)), Constant (5, String("two"))),
-            Constructor (5, []/1))))
+            Tuple (5, Constant (5, Int(1)), Constant (5, String("one"))),
+            Constructor
+              (5, cons/1,
+                Tuple
+                  (5, Constant (5, Int(2)),
+                    Constant (5, String("two"))),
+                Constructor (5, []/1))))
+    ]))
 
 7
-((),
-  Value (non_rec, @., s1, [ ], [ ], Some Type (Z/1)) =
-    Apply (7, Variable (7, OCaml.List.length/0), [ Variable (7, l1/0) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((s1, [ ], [ ], Some Type (Z/1)),
+        Apply (7, Variable (7, OCaml.List.length/0), [ Variable (7, l1/0) ]))
+    ]))
 
 8
-((),
-  Value (non_rec, @., s2, [ ], [ ], Some Type (Z/1)) =
-    Apply (8, Variable (8, OCaml.List.length/0), [ Variable (8, l2/0) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((s2, [ ], [ ], Some Type (Z/1)),
+        Apply (8, Variable (8, OCaml.List.length/0), [ Variable (8, l2/0) ]))
+    ]))
 
 9
-((),
-  Value (non_rec, @., h, [ A ], [ (x, A) ], Some Type (Z/1)) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Apply
-              (9, Variable (9, OCaml.List.hd/0),
-                [ Variable (9, l2/0) ]))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((h, [ A ], [ (x, A) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (9,
+                    Variable
+                      (9,
+                        OCaml.List.hd/0),
+                    [
+                      Variable
+                        (9,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
 
 10
-((),
-  Value (non_rec, @., t, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Apply
-              (10, Variable (10, OCaml.List.tl/0),
-                [ Variable (10, l2/0) ]))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((t, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (10,
+                    Variable
+                      (10,
+                        OCaml.List.tl/0),
+                    [
+                      Variable
+                        (10,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
 
 11
-((),
-  Value (non_rec, @., x, [ A ], [ (x, A) ], Some Type (Z/1)) =
-    Match
-      (?, Variable (?, x/0),
-        [
-          (Any,
-            Apply
-              (11, Variable (11, OCaml.List.nth/0),
-                [ Variable (11, l2/0); Constant (11, Int(1)) ]))
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((x, [ A ], [ (x, A) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (11,
+                    Variable
+                      (11,
+                        OCaml.List.nth/0),
+                    [
+                      Variable
+                        (11,
+                          l2/0);
+                      Constant
+                        (11,
+                          Int(1))
+                    ]))
+            ]))
+    ]))
 
 12
-((),
-  Value (non_rec, @., rl, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply (12, Variable (12, List.rev/0), [ Variable (12, l2/0) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((rl, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply (12, Variable (12, List.rev/0), [ Variable (12, l2/0) ]))
+    ]))
 
 13
-((),
-  Value (non_rec, @., ll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply
-      (13, Variable (13, OCaml.Pervasives.app/0),
-        [ Variable (13, l2/0); Variable (13, l2/0) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((ll, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (13, Variable (13, OCaml.Pervasives.app/0),
+            [ Variable (13, l2/0); Variable (13, l2/0) ]))
+    ]))
 
 14
-((),
-  Value (non_rec, @., rll, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply
-      (14, Variable (14, List.rev_append/0),
-        [ Variable (14, l2/0); Variable (14, l2/0) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((rll, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (14, Variable (14, List.rev_append/0),
+            [ Variable (14, l2/0); Variable (14, l2/0) ]))
+    ]))
 
 15
-((),
-  Value (non_rec, @., lc, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply
-      (15, Variable (15, OCaml.List.flatten/0),
-        [
-          Constructor
-            (15, cons/1, Variable (15, l1/0),
+(Value
+  (non_rec, @.,
+    [
+      ((lc, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (15, Variable (15, OCaml.List.flatten/0),
+            [
               Constructor
-                (15, cons/1, Variable (15, l2/0),
+                (15, cons/1, Variable (15, l1/0),
                   Constructor
-                    (15, cons/1,
-                      Variable (15, l1/0),
+                    (15,
+                      cons/1,
+                      Variable
+                        (15,
+                          l2/0),
                       Constructor
-                        (15, cons/1,
+                        (15,
+                          cons/1,
                           Variable
                             (15,
-                              l2/0),
+                              l1/0),
                           Constructor
                             (15,
-                              []/1)))))
-        ]))
+                              cons/1,
+                              Variable
+                                (15,
+                                  l2/0),
+                              Constructor
+                                (15,
+                                  []/1)))))
+            ]))
+    ]))
 
 16
-((),
-  Value (non_rec, @., lf, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply
-      (16, Variable (16, OCaml.List.flatten/0),
-        [
-          Constructor
-            (16, cons/1, Variable (16, l1/0),
+(Value
+  (non_rec, @.,
+    [
+      ((lf, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (16, Variable (16, OCaml.List.flatten/0),
+            [
               Constructor
-                (16, cons/1, Variable (16, l2/0),
+                (16, cons/1, Variable (16, l1/0),
                   Constructor
-                    (16, cons/1,
-                      Variable (16, l1/0),
+                    (16,
+                      cons/1,
+                      Variable
+                        (16,
+                          l2/0),
                       Constructor
-                        (16, cons/1,
+                        (16,
+                          cons/1,
                           Variable
                             (16,
-                              l2/0),
+                              l1/0),
                           Constructor
                             (16,
-                              []/1)))))
-        ]))
+                              cons/1,
+                              Variable
+                                (16,
+                                  l2/0),
+                              Constructor
+                                (16,
+                                  []/1)))))
+            ]))
+    ]))
 
 21
-((),
-  Value (non_rec, @., m, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply
-      (21, Variable (21, List.map/0),
-        [
-          Function
-            (21, x,
-              Apply
-                (21, Variable (21, Z.add/0),
-                  [
-                    Variable (21, x/0);
-                    Constant (21, Int(1))
-                  ]));
-          Variable (21, l2/0)
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((m, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (21, Variable (21, List.map/0),
+            [
+              Function
+                (21, x,
+                  Apply
+                    (21,
+                      Variable
+                        (21,
+                          Z.add/0),
+                      [
+                        Variable
+                          (21,
+                            x/0);
+                        Constant
+                          (21,
+                            Int(1))
+                      ]));
+              Variable (21, l2/0)
+            ]))
+    ]))
 
 22
-((),
-  Value (non_rec, @., mi, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply
-      (22, Variable (22, OCaml.List.mapi/0),
-        [
-          Function
-            (22, i,
+(Value
+  (non_rec, @.,
+    [
+      ((mi, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (22, Variable (22, OCaml.List.mapi/0),
+            [
               Function
-                (22, x,
-                  Apply
-                    (22, Variable (22, Z.add/0),
-                      [
-                        Variable
-                          (22,
-                            x/0);
-                        Variable
-                          (22,
-                            i/0)
-                      ])));
-          Variable (22, l2/0)
-        ]))
+                (22, i,
+                  Function
+                    (22,
+                      x,
+                      Apply
+                        (22,
+                          Variable
+                            (22,
+                              Z.add/0),
+                          [
+                            Variable
+                              (22,
+                                x/0);
+                            Variable
+                              (22,
+                                i/0)
+                          ])));
+              Variable (22, l2/0)
+            ]))
+    ]))
 
 23
-((),
-  Value (non_rec, @., rm, [ ], [ ], Some Type (list/1, Type (Z/1))) =
-    Apply
-      (23, Variable (23, OCaml.List.rev_map/0),
-        [
-          Function
-            (23, x,
-              Apply
-                (23, Variable (23, Z.add/0),
-                  [
-                    Variable (23, x/0);
-                    Constant (23, Int(1))
-                  ]));
-          Variable (23, l2/0)
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((rm, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (23, Variable (23, OCaml.List.rev_map/0),
+            [
+              Function
+                (23, x,
+                  Apply
+                    (23,
+                      Variable
+                        (23,
+                          Z.add/0),
+                      [
+                        Variable
+                          (23,
+                            x/0);
+                        Constant
+                          (23,
+                            Int(1))
+                      ]));
+              Variable (23, l2/0)
+            ]))
+    ]))
 
 24
-((),
-  Value (non_rec, @., fl, [ ], [ ], Some Type (Z/1)) =
-    Apply
-      (24, Variable (24, OCaml.List.fold_left/0),
-        [
-          Function
-            (24, s,
+(Value
+  (non_rec, @.,
+    [
+      ((fl, [ ], [ ], Some Type (Z/1)),
+        Apply
+          (24, Variable (24, OCaml.List.fold_left/0),
+            [
               Function
-                (24, x,
-                  Apply
-                    (24, Variable (24, Z.add/0),
-                      [
-                        Variable
-                          (24,
-                            s/0);
-                        Variable
-                          (24,
-                            x/0)
-                      ])));
-          Constant (24, Int(0));
-          Variable (24, l2/0)
-        ]))
+                (24, s,
+                  Function
+                    (24,
+                      x,
+                      Apply
+                        (24,
+                          Variable
+                            (24,
+                              Z.add/0),
+                          [
+                            Variable
+                              (24,
+                                s/0);
+                            Variable
+                              (24,
+                                x/0)
+                          ])));
+              Constant (24, Int(0));
+              Variable (24, l2/0)
+            ]))
+    ]))
 
 25
-((),
-  Value (non_rec, @., fr, [ ], [ ], Some Type (Z/1)) =
-    Apply
-      (25, Variable (25, OCaml.List.fold_right/0),
-        [
-          Function
-            (25, x,
+(Value
+  (non_rec, @.,
+    [
+      ((fr, [ ], [ ], Some Type (Z/1)),
+        Apply
+          (25, Variable (25, OCaml.List.fold_right/0),
+            [
               Function
-                (25, s,
-                  Apply
-                    (25, Variable (25, Z.add/0),
-                      [
-                        Variable
-                          (25,
-                            s/0);
-                        Variable
-                          (25,
-                            x/0)
-                      ])));
-          Variable (25, l2/0);
-          Constant (25, Int(0))
-        ]))
+                (25, x,
+                  Function
+                    (25,
+                      s,
+                      Apply
+                        (25,
+                          Variable
+                            (25,
+                              Z.add/0),
+                          [
+                            Variable
+                              (25,
+                                s/0);
+                            Variable
+                              (25,
+                                x/0)
+                          ])));
+              Variable (25, l2/0);
+              Constant (25, Int(0))
+            ]))
+    ]))
 
 29
-((),
-  Value (non_rec, @., m2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))) =
-    Match
-      (?, Variable (?, x_1/0),
-        [
-          (Any,
-            Apply
-              (29, Variable (29, OCaml.List.map2/0),
-                [
-                  Function
-                    (29,
-                      x,
+(Value
+  (non_rec, @.,
+    [
+      ((m2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (29,
+                    Variable
+                      (29,
+                        OCaml.List.map2/0),
+                    [
                       Function
                         (29,
-                          y,
-                          Apply
+                          x,
+                          Function
                             (29,
-                              Variable
+                              y,
+                              Apply
                                 (29,
-                                  Z.add/0),
-                              [
-                                Variable
-                                  (29,
-                                    x/0);
-                                Variable
-                                  (29,
-                                    y/0)
-                              ])));
-                  Variable (29, l2/0);
-                  Variable (29, l2/0)
-                ]))
-        ]))
+                                  Variable
+                                    (29,
+                                      Z.add/0),
+                                  [
+                                    Variable
+                                      (29,
+                                        x/0);
+                                    Variable
+                                      (29,
+                                        y/0)
+                                  ])));
+                      Variable
+                        (29,
+                          l2/0);
+                      Variable
+                        (29,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
 
 30
-((),
-  Value (non_rec, @., rm2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1)))
-    =
-    Match
-      (?, Variable (?, x_1/0),
-        [
-          (Any,
-            Apply
-              (30, Variable (30, OCaml.List.rev_map2/0),
-                [
-                  Function
-                    (30,
-                      x,
+(Value
+  (non_rec, @.,
+    [
+      ((rm2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (30,
+                    Variable
+                      (30,
+                        OCaml.List.rev_map2/0),
+                    [
                       Function
                         (30,
-                          y,
-                          Apply
+                          x,
+                          Function
                             (30,
-                              Variable
+                              y,
+                              Apply
                                 (30,
-                                  Z.add/0),
-                              [
-                                Variable
-                                  (30,
-                                    x/0);
-                                Variable
-                                  (30,
-                                    y/0)
-                              ])));
-                  Variable (30, l2/0);
-                  Variable (30, l2/0)
-                ]))
-        ]))
+                                  Variable
+                                    (30,
+                                      Z.add/0),
+                                  [
+                                    Variable
+                                      (30,
+                                        x/0);
+                                    Variable
+                                      (30,
+                                        y/0)
+                                  ])));
+                      Variable
+                        (30,
+                          l2/0);
+                      Variable
+                        (30,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
 
 31
-((),
-  Value (non_rec, @., fl2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
-    Match
-      (?, Variable (?, x_1/0),
-        [
-          (Any,
-            Apply
-              (31, Variable (31, OCaml.List.fold_left2/0),
-                [
-                  Function
-                    (31,
-                      s,
+(Value
+  (non_rec, @.,
+    [
+      ((fl2, [ A ], [ (x_1, A) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (31,
+                    Variable
+                      (31,
+                        OCaml.List.fold_left2/0),
+                    [
                       Function
                         (31,
-                          x,
+                          s,
                           Function
                             (31,
-                              y,
-                              Apply
+                              x,
+                              Function
                                 (31,
-                                  Variable
+                                  y,
+                                  Apply
                                     (31,
-                                      Z.add/0),
-                                  [
-                                    Apply
-                                      (31,
+                                      Variable
+                                        (31,
+                                          Z.add/0),
+                                      [
+                                        Apply
+                                          (31,
+                                            Variable
+                                              (31,
+                                                Z.add/0),
+                                            [
+                                              Variable
+                                                (31,
+                                                  s/0);
+                                              Variable
+                                                (31,
+                                                  x/0)
+                                            ]);
                                         Variable
                                           (31,
-                                            Z.add/0),
-                                        [
-                                          Variable
-                                            (31,
-                                              s/0);
-                                          Variable
-                                            (31,
-                                              x/0)
-                                        ]);
-                                    Variable
-                                      (31,
-                                        y/0)
-                                  ]))));
-                  Constant (31, Int(0));
-                  Variable (31, l2/0);
-                  Variable (31, l2/0)
-                ]))
-        ]))
+                                            y/0)
+                                      ]))));
+                      Constant
+                        (31,
+                          Int(0));
+                      Variable
+                        (31,
+                          l2/0);
+                      Variable
+                        (31,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
 
 32
-((),
-  Value (non_rec, @., fr2, [ A ], [ (x_1, A) ], Some Type (Z/1)) =
-    Match
-      (?, Variable (?, x_1/0),
-        [
-          (Any,
-            Apply
-              (32, Variable (32, OCaml.List.fold_right2/0),
-                [
-                  Function
-                    (32,
-                      s,
+(Value
+  (non_rec, @.,
+    [
+      ((fr2, [ A ], [ (x_1, A) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (32,
+                    Variable
+                      (32,
+                        OCaml.List.fold_right2/0),
+                    [
                       Function
                         (32,
-                          x,
+                          s,
                           Function
                             (32,
-                              y,
-                              Apply
+                              x,
+                              Function
                                 (32,
-                                  Variable
+                                  y,
+                                  Apply
                                     (32,
-                                      Z.add/0),
-                                  [
-                                    Apply
-                                      (32,
+                                      Variable
+                                        (32,
+                                          Z.add/0),
+                                      [
+                                        Apply
+                                          (32,
+                                            Variable
+                                              (32,
+                                                Z.add/0),
+                                            [
+                                              Variable
+                                                (32,
+                                                  s/0);
+                                              Variable
+                                                (32,
+                                                  x/0)
+                                            ]);
                                         Variable
                                           (32,
-                                            Z.add/0),
-                                        [
-                                          Variable
-                                            (32,
-                                              s/0);
-                                          Variable
-                                            (32,
-                                              x/0)
-                                        ]);
-                                    Variable
-                                      (32,
-                                        y/0)
-                                  ]))));
-                  Variable (32, l2/0);
-                  Variable (32, l2/0);
-                  Constant (32, Int(0))
-                ]))
-        ]))
+                                            y/0)
+                                      ]))));
+                      Variable
+                        (32,
+                          l2/0);
+                      Variable
+                        (32,
+                          l2/0);
+                      Constant
+                        (32,
+                          Int(0))
+                    ]))
+            ]))
+    ]))

@@ -1,110 +1,115 @@
 3
-(. -[ OCaml.Failure/1 ]-> .,
-  Value
-    (non_rec, @., tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A))
-    =
-    Match
-      ((4, Effect ([ OCaml.Failure/1 ], .)),
-        Variable ((4, Effect ([ ], .)), l/0),
-        [
-          (Constructor (cons/1, Any, xs), Variable ((5, Effect ([ ], .)), xs/0));
-          (Constructor ([]/1),
-            Apply
-              ((6, Effect ([ OCaml.Failure/1 ], .)),
-                Variable
+(Value
+  (non_rec, @.,
+    [
+      ((tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A)),
+        Match
+          ((4, Effect ([ OCaml.Failure/1 ], .)),
+            Variable ((4, Effect ([ ], .)), l/0),
+            [
+              (Constructor (cons/1, Any, xs),
+                Variable ((5, Effect ([ ], .)), xs/0));
+              (Constructor ([]/1),
+                Apply
                   ((6,
                     Effect
-                      ([ ],
-                        .
-                          -[
-                            OCaml.Failure/1
-                          ]-> .)),
-                    OCaml.Pervasives.failwith/1),
-                [
-                  Constant
-                    ((6,
-                      Effect
-                        ([
-                        ],
-                          .)),
-                      String("Cannot take the tail of an empty list."))
-                ]))
-        ]))
+                      ([
+                        OCaml.Failure/1
+                      ],
+                        .)),
+                    Variable
+                      ((6,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                OCaml.Failure/1
+                              ]->
+                              .)),
+                        OCaml.Pervasives.failwith/1),
+                    [
+                      Constant
+                        ((6,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          String("Cannot take the tail of an empty list."))
+                    ]))
+            ]))
+    ]))
 
 8
-(. -> . -[ IO/0; NonTermination/1 ]-> .,
-  Value
-    (rec, @., print_list_rec, [ ],
-      [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
-      Some Type (unit/1)) =
-    Match
-      ((?, Effect ([ IO/0; NonTermination/1 ], .)),
-        Variable ((?, Effect ([ ], .)), counter/0),
-        [
-          (Constructor (O/1),
-            Apply
-              ((?, Effect ([ NonTermination/1 ], .)),
-                Variable
+(Value
+  (rec, @.,
+    [
+      ((print_list_rec, [ ],
+        [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
+        Some Type (unit/1)),
+        Match
+          ((?, Effect ([ IO/0; NonTermination/1 ], .)),
+            Variable ((?, Effect ([ ], .)), counter/0),
+            [
+              (Constructor (O/1),
+                Apply
                   ((?,
                     Effect
-                      ([ ],
-                        .
-                          -[
-                            NonTermination/1
-                          ]-> .)),
-                    not_terminated/1),
-                [ Tuple ((?, Effect ([ ], .))) ]));
-          (Constructor (S/1, counter),
-            Match
-              ((?, Effect ([ IO/0; NonTermination/1 ], .)),
-                Variable ((?, Effect ([ ], .)), x/0),
-                [
-                  (Constructor ([]/1),
-                    Constructor
-                      ((9,
+                      ([
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((?,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                NonTermination/1
+                              ]->
+                              .)),
+                        not_terminated/1),
+                    [
+                      Tuple
+                        ((?,
+                          Effect
+                            ([
+                            ],
+                              .)))
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  ((?,
+                    Effect
+                      ([
+                        IO/0;
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((?,
                         Effect
                           ([
                           ],
                             .)),
-                        tt/1));
-                  (Constructor (cons/1, x, xs),
-                    Sequence
-                      ((11,
-                        Effect
-                          ([
-                            IO/0;
-                            NonTermination/1
-                          ],
-                            .)),
-                        Apply
-                          ((11,
+                        x/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Constructor
+                          ((9,
                             Effect
                               ([
-                                IO/0
                               ],
                                 .)),
-                            Variable
-                              ((11,
-                                Effect
-                                  ([
-                                  ],
-                                    .
-                                      -[
-                                        IO/0
-                                      ]->
-                                      .)),
-                                OCaml.Pervasives.print_string/0),
-                            [
-                              Variable
-                                ((11,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  x/0)
-                            ]),
-                        Apply
-                          ((12,
+                            tt/1));
+                      (Constructor
+                        (cons/1,
+                          x,
+                          xs),
+                        Sequence
+                          ((11,
                             Effect
                               ([
                                 IO/0;
@@ -112,108 +117,163 @@
                               ],
                                 .)),
                             Apply
-                              ((?,
+                              ((11,
                                 Effect
                                   ([
+                                    IO/0
                                   ],
-                                    .
-                                      -[
-                                        IO/0;
-                                        NonTermination/1
-                                      ]->
-                                      .)),
+                                    .)),
                                 Variable
+                                  ((11,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          -[
+                                            IO/0
+                                          ]->
+                                          .)),
+                                    OCaml.Pervasives.print_string/0),
+                                [
+                                  Variable
+                                    ((11,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      x/0)
+                                ]),
+                            Apply
+                              ((12,
+                                Effect
+                                  ([
+                                    IO/0;
+                                    NonTermination/1
+                                  ],
+                                    .)),
+                                Apply
                                   ((?,
                                     Effect
                                       ([
                                       ],
                                         .
-                                          ->
-                                          .
-                                            -[
-                                              IO/0;
-                                              NonTermination/1
-                                            ]->
-                                            .)),
-                                    print_list_rec/0),
+                                          -[
+                                            IO/0;
+                                            NonTermination/1
+                                          ]->
+                                          .)),
+                                    Variable
+                                      ((?,
+                                        Effect
+                                          ([
+                                          ],
+                                            .
+                                              ->
+                                              .
+                                                -[
+                                                  IO/0;
+                                                  NonTermination/1
+                                                ]->
+                                                .)),
+                                        print_list_rec/0),
+                                    [
+                                      Variable
+                                        ((?,
+                                          Effect
+                                            ([
+                                            ],
+                                              .)),
+                                          counter/0)
+                                    ]),
                                 [
                                   Variable
-                                    ((?,
+                                    ((12,
                                       Effect
                                         ([
                                         ],
                                           .)),
-                                      counter/0)
-                                ]),
-                            [
-                              Variable
-                                ((12,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  xs/0)
-                            ])))
-                ]))
-        ]))
+                                      xs/0)
+                                ])))
+                    ]))
+            ]))
+    ]))
 
 8
-(. -[ Counter/1; IO/0; NonTermination/1 ]-> .,
-  Value
-    (non_rec, @., print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
-      Some Type (unit/1)) =
-    Apply
-      ((?, Effect ([ Counter/1; IO/0; NonTermination/1 ], .)),
-        Variable
-          ((?, Effect ([ ], . -> . -[ IO/0; NonTermination/1 ]-> .)),
-            print_list_rec/0),
-        [
-          Apply
-            ((?, Effect ([ Counter/1 ], .)),
-              Variable
-                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
-                  read_counter/1),
-              [ Tuple ((?, Effect ([ ], .))) ]);
-          Variable ((?, Effect ([ ], .)), x/0)
-        ]))
-
-14
-(. -[ Counter/1; IO/0; NonTermination/1 ]-> .,
-  Value
-    (non_rec, @., f, [ ], [ ],
-      Some (Type (list/1, Type (string/1)) -> Type (unit/1))) =
-    Variable
-      ((14, Effect ([ ], . -[ Counter/1; IO/0; NonTermination/1 ]-> .)),
-        print_list/0))
-
-16
-(. -[ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ]-> .,
-  Value (non_rec, @., x, [ A ], [ (z, A) ], Some Type (unit/1)) =
-    Apply
-      ((16, Effect ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ], .)),
-        Variable
-          ((16, Effect ([ ], . -[ Counter/1; IO/0; NonTermination/1 ]-> .)), f/0),
-        [
-          Apply
-            ((16, Effect ([ OCaml.Failure/1 ], .)),
-              Variable
-                ((16, Effect ([ ], . -[ OCaml.Failure/1 ]-> .)),
-                  tail/0),
-              [
-                Constructor
-                  ((16,
-                    Effect
-                      ([
-                      ],
-                        .)),
-                    cons/1,
-                    Constant
-                      ((16,
+(Value
+  (non_rec, @.,
+    [
+      ((print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+        Some Type (unit/1)),
+        Apply
+          ((?, Effect ([ Counter/1; IO/0; NonTermination/1 ], .)),
+            Variable
+              ((?, Effect ([ ], . -> . -[ IO/0; NonTermination/1 ]-> .)),
+                print_list_rec/0),
+            [
+              Apply
+                ((?, Effect ([ Counter/1 ], .)),
+                  Variable
+                    ((?,
+                      Effect
+                        ([
+                        ],
+                          .
+                            -[
+                              Counter/1
+                            ]->
+                            .)),
+                      read_counter/1),
+                  [
+                    Tuple
+                      ((?,
                         Effect
                           ([
                           ],
+                            .)))
+                  ]);
+              Variable ((?, Effect ([ ], .)), x/0)
+            ]))
+    ]))
+
+14
+(Value
+  (non_rec, @.,
+    [
+      ((f, [ ], [ ], Some (Type (list/1, Type (string/1)) -> Type (unit/1))),
+        Variable
+          ((14, Effect ([ ], . -[ Counter/1; IO/0; NonTermination/1 ]-> .)),
+            print_list/0))
+    ]))
+
+16
+(Value
+  (non_rec, @.,
+    [
+      ((x, [ A ], [ (z, A) ], Some Type (unit/1)),
+        Apply
+          ((16,
+            Effect
+              ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ], .)),
+            Variable
+              ((16,
+                Effect
+                  ([ ], . -[ Counter/1; IO/0; NonTermination/1 ]-> .)),
+                f/0),
+            [
+              Apply
+                ((16, Effect ([ OCaml.Failure/1 ], .)),
+                  Variable
+                    ((16,
+                      Effect
+                        ([
+                        ],
+                          .
+                            -[
+                              OCaml.Failure/1
+                            ]->
                             .)),
-                        String("Stop")),
+                      tail/0),
+                  [
                     Constructor
                       ((16,
                         Effect
@@ -227,7 +287,7 @@
                               ([
                               ],
                                 .)),
-                            String("Hello")),
+                            String("Stop")),
                         Constructor
                           ((16,
                             Effect
@@ -241,7 +301,7 @@
                                   ([
                                   ],
                                     .)),
-                                String(" ")),
+                                String("Hello")),
                             Constructor
                               ((16,
                                 Effect
@@ -255,13 +315,28 @@
                                       ([
                                       ],
                                         .)),
-                                    String("world")),
+                                    String(" ")),
                                 Constructor
                                   ((16,
                                     Effect
                                       ([
                                       ],
                                         .)),
-                                    []/1)))))
-              ])
-        ]))
+                                    cons/1,
+                                    Constant
+                                      ((16,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        String("world")),
+                                    Constructor
+                                      ((16,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        []/1)))))
+                  ])
+            ]))
+    ]))

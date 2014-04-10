@@ -1,264 +1,352 @@
 3 Exception (Outside, ())
 
 5
-(. -[ Outside/0 ]-> .,
-  Value (non_rec, @., f, [ A; B ], [ (x, A) ], Some B) =
-    Apply
-      ((5, Effect ([ Outside/0 ], .)),
-        Variable ((5, Effect ([ ], . -[ Outside/0 ]-> .)), raise_Outside/0),
-        [ Tuple ((?, Effect ([ ], .))) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((f, [ A; B ], [ (x, A) ], Some B),
+        Apply
+          ((5, Effect ([ Outside/0 ], .)),
+            Variable
+              ((5, Effect ([ ], . -[ Outside/0 ]-> .)), raise_Outside/0),
+            [ Tuple ((?, Effect ([ ], .))) ]))
+    ]))
 
 7 Module G:
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
   
-  10 (. -[ Outside/1; Inside/0 ]-> .,
-    Value (non_rec, @., g, [ A ], [ (b, Type (bool/2)) ], Some A) =
-      IfThenElse
-        ((11, Effect ([ Outside/1; Inside/0 ], .)),
-          Variable ((11, Effect ([ ], .)), b/0),
-          Apply
-            ((12, Effect ([ Inside/0 ], .)),
-              Variable ((12, Effect ([ ], . -[ Inside/0 ]-> .)), raise_Inside/0),
-              [
-                Tuple
-                  ((?, Effect ([ ], .)),
-                    Constant
-                      ((12, Effect ([ ], .)),
-                        Int(12)),
-                    Constant
-                      ((12, Effect ([ ], .)),
-                        String("no")))
-              ]),
-          Apply
-            ((14, Effect ([ Outside/1 ], .)),
-              Variable
-                ((14, Effect ([ ], . -[ Outside/1 ]-> .)), raise_Outside/1),
-              [ Tuple ((?, Effect ([ ], .))) ])))
-
-17
-(. -> . -[ IO/0; NonTermination/1; Outside/0; G.Inside/0 ]-> .,
-  Value
-    (rec, @., h_rec, [ A; B ],
-      [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some B) =
-    Match
-      ((?, Effect ([ IO/0; NonTermination/1; Outside/0; G.Inside/0 ], .)),
-        Variable ((?, Effect ([ ], .)), counter/0),
-        [
-          (Constructor (O/1),
-            Apply
-              ((?, Effect ([ NonTermination/1 ], .)),
-                Variable
-                  ((?,
-                    Effect
-                      ([ ],
-                        .
-                          -[
-                            NonTermination/1
-                          ]-> .)),
-                    not_terminated/1),
-                [ Tuple ((?, Effect ([ ], .))) ]));
-          (Constructor (S/1, counter),
-            Match
-              ((18,
-                Effect
-                  ([
-                    IO/0;
-                    NonTermination/1;
-                    Outside/0;
-                    G.Inside/0
-                  ], .)),
-                Variable ((18, Effect ([ ], .)), l/0),
-                [
-                  (Constructor ([]/1),
-                    Sequence
-                      ((19,
+  10 (Value
+    (non_rec, @.,
+      [
+        ((g, [ A ], [ (b, Type (bool/2)) ], Some A),
+          IfThenElse
+            ((11, Effect ([ Outside/1; Inside/0 ], .)),
+              Variable ((11, Effect ([ ], .)), b/0),
+              Apply
+                ((12, Effect ([ Inside/0 ], .)),
+                  Variable
+                    ((12,
+                      Effect
+                        ([ ],
+                          . -[ Inside/0 ]->
+                            .)),
+                      raise_Inside/0),
+                  [
+                    Tuple
+                      ((?,
                         Effect
                           ([
-                            IO/0;
-                            Outside/0;
-                            G.Inside/0
                           ],
                             .)),
-                        Apply
-                          ((19,
+                        Constant
+                          ((12,
                             Effect
                               ([
-                                IO/0
                               ],
                                 .)),
-                            Variable
-                              ((19,
-                                Effect
-                                  ([
-                                  ],
-                                    .
-                                      -[
-                                        IO/0
-                                      ]->
-                                      .)),
-                                OCaml.Pervasives.print_string/0),
-                            [
-                              Constant
-                                ((19,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  String("no tail"))
-                            ]),
-                        Apply
+                            Int(12)),
+                        Constant
+                          ((12,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            String("no")))
+                  ]),
+              Apply
+                ((14, Effect ([ Outside/1 ], .)),
+                  Variable
+                    ((14,
+                      Effect
+                        ([ ],
+                          . -[ Outside/1 ]->
+                            .)),
+                      raise_Outside/1),
+                  [ Tuple ((?, Effect ([ ], .))) ])))
+      ]))
+
+17
+(Value
+  (rec, @.,
+    [
+      ((h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+        Some B),
+        Match
+          ((?, Effect ([ IO/0; NonTermination/1; Outside/0; G.Inside/0 ], .)),
+            Variable ((?, Effect ([ ], .)), counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  ((?,
+                    Effect
+                      ([
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((?,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                NonTermination/1
+                              ]->
+                              .)),
+                        not_terminated/1),
+                    [
+                      Tuple
+                        ((?,
+                          Effect
+                            ([
+                            ],
+                              .)))
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  ((18,
+                    Effect
+                      ([
+                        IO/0;
+                        NonTermination/1;
+                        Outside/0;
+                        G.Inside/0
+                      ],
+                        .)),
+                    Variable
+                      ((18,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        l/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Sequence
                           ((19,
                             Effect
                               ([
+                                IO/0;
                                 Outside/0;
                                 G.Inside/0
                               ],
                                 .)),
-                            Variable
+                            Apply
                               ((19,
+                                Effect
+                                  ([
+                                    IO/0
+                                  ],
+                                    .)),
+                                Variable
+                                  ((19,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          -[
+                                            IO/0
+                                          ]->
+                                          .)),
+                                    OCaml.Pervasives.print_string/0),
+                                [
+                                  Constant
+                                    ((19,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      String("no tail"))
+                                ]),
+                            Apply
+                              ((19,
+                                Effect
+                                  ([
+                                    Outside/0;
+                                    G.Inside/0
+                                  ],
+                                    .)),
+                                Variable
+                                  ((19,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          -[
+                                            Outside/0;
+                                            G.Inside/0
+                                          ]->
+                                          .)),
+                                    G.g/0),
+                                [
+                                  Constructor
+                                    ((19,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      false/1)
+                                ])));
+                      (Constructor
+                        (cons/1,
+                          x,
+                          Constructor
+                            ([]/1)),
+                        Apply
+                          ((20,
+                            Effect
+                              ([
+                                G.Inside/0
+                              ],
+                                .)),
+                            Variable
+                              ((20,
                                 Effect
                                   ([
                                   ],
                                     .
                                       -[
-                                        Outside/0;
                                         G.Inside/0
                                       ]->
                                       .)),
-                                G.g/0),
+                                G.raise_Inside/0),
                             [
-                              Constructor
-                                ((19,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  false/1)
-                            ])));
-                  (Constructor
-                    (cons/1,
-                      x,
-                      Constructor
-                        ([]/1)),
-                    Apply
-                      ((20,
-                        Effect
-                          ([
-                            G.Inside/0
-                          ],
-                            .)),
-                        Variable
-                          ((20,
-                            Effect
-                              ([
-                              ],
-                                .
-                                  -[
-                                    G.Inside/0
-                                  ]->
-                                  .)),
-                            G.raise_Inside/0),
-                        [
-                          Tuple
-                            ((?,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              Constant
-                                ((20,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  Int(0)),
-                              Constant
-                                ((20,
-                                  Effect
-                                    ([
-                                    ],
-                                      .)),
-                                  String("gg")))
-                        ]));
-                  (Constructor (cons/1, Any, xs),
-                    Apply
-                      ((21,
-                        Effect
-                          ([
-                            IO/0;
-                            NonTermination/1;
-                            Outside/0;
-                            G.Inside/0
-                          ],
-                            .)),
-                        Apply
-                          ((?,
-                            Effect
-                              ([
-                              ],
-                                .
-                                  -[
-                                    IO/0;
-                                    NonTermination/1;
-                                    Outside/0;
-                                    G.Inside/0
-                                  ]->
-                                  .)),
-                            Variable
-                              ((?,
-                                Effect
-                                  ([
-                                  ],
-                                    .
-                                      ->
-                                      .
-                                        -[
-                                          IO/0;
-                                          NonTermination/1;
-                                          Outside/0;
-                                          G.Inside/0
-                                        ]->
-                                        .)),
-                                h_rec/0),
-                            [
-                              Variable
+                              Tuple
                                 ((?,
                                   Effect
                                     ([
                                     ],
                                       .)),
-                                  counter/0)
-                            ]),
-                        [
-                          Variable
-                            ((21,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              xs/0)
-                        ]))
-                ]))
-        ]))
+                                  Constant
+                                    ((20,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      Int(0)),
+                                  Constant
+                                    ((20,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      String("gg")))
+                            ]));
+                      (Constructor
+                        (cons/1,
+                          Any,
+                          xs),
+                        Apply
+                          ((21,
+                            Effect
+                              ([
+                                IO/0;
+                                NonTermination/1;
+                                Outside/0;
+                                G.Inside/0
+                              ],
+                                .)),
+                            Apply
+                              ((?,
+                                Effect
+                                  ([
+                                  ],
+                                    .
+                                      -[
+                                        IO/0;
+                                        NonTermination/1;
+                                        Outside/0;
+                                        G.Inside/0
+                                      ]->
+                                      .)),
+                                Variable
+                                  ((?,
+                                    Effect
+                                      ([
+                                      ],
+                                        .
+                                          ->
+                                          .
+                                            -[
+                                              IO/0;
+                                              NonTermination/1;
+                                              Outside/0;
+                                              G.Inside/0
+                                            ]->
+                                            .)),
+                                    h_rec/0),
+                                [
+                                  Variable
+                                    ((?,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      counter/0)
+                                ]),
+                            [
+                              Variable
+                                ((21,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  xs/0)
+                            ]))
+                    ]))
+            ]))
+    ]))
 
 17
-(. -[ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ]-> .,
-  Value (non_rec, @., h, [ A; B ], [ (l, Type (list/1, A)) ], Some B) =
-    Apply
-      ((?,
-        Effect ([ Counter/1; IO/0; NonTermination/1; Outside/0; G.Inside/0 ], .)),
-        Variable
+(Value
+  (non_rec, @.,
+    [
+      ((h, [ A; B ], [ (l, Type (list/1, A)) ], Some B),
+        Apply
           ((?,
             Effect
-              ([ ],
-                . -> . -[ IO/0; NonTermination/1; Outside/0; G.Inside/0 ]-> .)),
-            h_rec/0),
-        [
-          Apply
-            ((?, Effect ([ Counter/1 ], .)),
-              Variable
-                ((?, Effect ([ ], . -[ Counter/1 ]-> .)),
-                  read_counter/1),
-              [ Tuple ((?, Effect ([ ], .))) ]);
-          Variable ((?, Effect ([ ], .)), l/0)
-        ]))
+              ([
+                Counter/1;
+                IO/0;
+                NonTermination/1;
+                Outside/0;
+                G.Inside/0
+              ], .)),
+            Variable
+              ((?,
+                Effect
+                  ([ ],
+                    . ->
+                      .
+                        -[
+                          IO/0;
+                          NonTermination/1;
+                          Outside/0;
+                          G.Inside/0
+                        ]-> .)), h_rec/0),
+            [
+              Apply
+                ((?, Effect ([ Counter/1 ], .)),
+                  Variable
+                    ((?,
+                      Effect
+                        ([
+                        ],
+                          .
+                            -[
+                              Counter/1
+                            ]->
+                            .)),
+                      read_counter/1),
+                  [
+                    Tuple
+                      ((?,
+                        Effect
+                          ([
+                          ],
+                            .)))
+                  ]);
+              Variable ((?, Effect ([ ], .)), l/0)
+            ]))
+    ]))

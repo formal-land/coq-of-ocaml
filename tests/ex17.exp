@@ -1,106 +1,143 @@
 3 Exception (Outside, ())
 
 5
-((),
-  Value (non_rec, @., f, [ A; B ], [ (x, A) ], Some B) =
-    Apply (5, Variable (5, raise_Outside/0), [ Tuple (?) ]))
+(Value
+  (non_rec, @.,
+    [
+      ((f, [ A; B ], [ (x, A) ], Some B),
+        Apply (5, Variable (5, raise_Outside/0), [ Tuple (?) ]))
+    ]))
 
 7 Module G:
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
   
-  10 ((),
-    Value (non_rec, @., g, [ A ], [ (b, Type (bool/2)) ], Some A) =
-      IfThenElse
-        (11, Variable (11, b/0),
-          Apply
-            (12, Variable (12, raise_Inside/0),
-              [ Tuple (?, Constant (12, Int(12)), Constant (12, String("no"))) ]),
-          Apply (14, Variable (14, raise_Outside/1), [ Tuple (?) ])))
+  10 (Value
+    (non_rec, @.,
+      [
+        ((g, [ A ], [ (b, Type (bool/2)) ], Some A),
+          IfThenElse
+            (11, Variable (11, b/0),
+              Apply
+                (12, Variable (12, raise_Inside/0),
+                  [
+                    Tuple
+                      (?,
+                        Constant
+                          (12,
+                            Int(12)),
+                        Constant
+                          (12,
+                            String("no")))
+                  ]),
+              Apply
+                (14, Variable (14, raise_Outside/1),
+                  [ Tuple (?) ])))
+      ]))
 
 17
-((),
-  Value
-    (rec, @., h_rec, [ A; B ],
-      [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some B) =
-    Match
-      (?, Variable (?, counter/0),
-        [
-          (Constructor (O/1),
-            Apply (?, Variable (?, not_terminated/1), [ Tuple (?) ]));
-          (Constructor (S/1, counter),
-            Match
-              (18, Variable (18, l/0),
-                [
-                  (Constructor ([]/1),
-                    Sequence
-                      (19,
-                        Apply
+(Value
+  (rec, @.,
+    [
+      ((h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+        Some B),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (18,
+                    Variable
+                      (18,
+                        l/0),
+                    [
+                      (Constructor
+                        ([]/1),
+                        Sequence
                           (19,
-                            Variable
+                            Apply
                               (19,
-                                OCaml.Pervasives.print_string/0),
-                            [
-                              Constant
-                                (19,
-                                  String("no tail"))
-                            ]),
+                                Variable
+                                  (19,
+                                    OCaml.Pervasives.print_string/0),
+                                [
+                                  Constant
+                                    (19,
+                                      String("no tail"))
+                                ]),
+                            Apply
+                              (19,
+                                Variable
+                                  (19,
+                                    G.g/0),
+                                [
+                                  Constructor
+                                    (19,
+                                      false/1)
+                                ])));
+                      (Constructor
+                        (cons/1,
+                          x,
+                          Constructor
+                            ([]/1)),
                         Apply
-                          (19,
-                            Variable
-                              (19,
-                                G.g/0),
-                            [
-                              Constructor
-                                (19,
-                                  false/1)
-                            ])));
-                  (Constructor
-                    (cons/1,
-                      x,
-                      Constructor
-                        ([]/1)),
-                    Apply
-                      (20,
-                        Variable
                           (20,
-                            G.raise_Inside/0),
-                        [
-                          Tuple
-                            (?,
-                              Constant
-                                (20,
-                                  Int(0)),
-                              Constant
-                                (20,
-                                  String("gg")))
-                        ]));
-                  (Constructor (cons/1, Any, xs),
-                    Apply
-                      (21,
-                        Apply
-                          (?,
                             Variable
+                              (20,
+                                G.raise_Inside/0),
+                            [
+                              Tuple
+                                (?,
+                                  Constant
+                                    (20,
+                                      Int(0)),
+                                  Constant
+                                    (20,
+                                      String("gg")))
+                            ]));
+                      (Constructor
+                        (cons/1,
+                          Any,
+                          xs),
+                        Apply
+                          (21,
+                            Apply
                               (?,
-                                h_rec/0),
+                                Variable
+                                  (?,
+                                    h_rec/0),
+                                [
+                                  Variable
+                                    (?,
+                                      counter/0)
+                                ]),
                             [
                               Variable
-                                (?,
-                                  counter/0)
-                            ]),
-                        [
-                          Variable
-                            (21,
-                              xs/0)
-                        ]))
-                ]))
-        ]))
+                                (21,
+                                  xs/0)
+                            ]))
+                    ]))
+            ]))
+    ]))
 
 17
-((),
-  Value (non_rec, @., h, [ A; B ], [ (l, Type (list/1, A)) ], Some B) =
-    Apply
-      (?, Variable (?, h_rec/0),
-        [
-          Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
-          Variable (?, l/0)
-        ]))
+(Value
+  (non_rec, @.,
+    [
+      ((h, [ A; B ], [ (l, Type (list/1, A)) ], Some B),
+        Apply
+          (?, Variable (?, h_rec/0),
+            [
+              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Variable (?, l/0)
+            ]))
+    ]))
