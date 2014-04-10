@@ -495,7 +495,7 @@ and monadise_let_rec_definition (env : unit FullEnvi.t) (def : Loc.t t Definitio
         cases = [header, e] })
       (Definition.names def') def.Definition.cases in
     let env = List.fold_left (fun env def -> Definition.env_after_def def env) env defs in
-    (env, defs)
+    (env, def' :: defs)
   else
     let def = { def with
       Definition.cases = def.Definition.cases |> List.map (fun (header, e) ->
@@ -685,6 +685,13 @@ and effects_of_def (env : Effect.Type.t FullEnvi.t) (def : Loc.t t Definition.t)
       def'
     else
       fix_effect def'' in
+  let env =
+    if Recursivity.to_bool def.Definition.is_rec then
+      List.fold_left (fun env (header, _) ->
+        FullEnvi.add_var [] header.Header.name Effect.Type.Pure env)
+        env def.Definition.cases
+    else
+      env in
   fix_effect (effects_of_def_step env def)
 
 let rec monadise (env : unit FullEnvi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
