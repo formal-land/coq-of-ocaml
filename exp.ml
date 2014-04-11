@@ -842,7 +842,7 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
       !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
   | LetFun (_, def, e) ->
     let firt_case = ref true in (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
-    Pp.parens paren @@ nest (separate (newline ^^ newline)
+    Pp.parens paren @@ nest (separate newline
       (def.Definition.cases |> List.map (fun (header, e) ->
         (if !firt_case then (
           firt_case := false;
