@@ -328,6 +328,35 @@ Module StableSort.
       end in
     rev_merge_rev_aux l2 accu.
   
+  Ltac certify_sort_rec n n1 n2 Pl2 :=
+    try (apply Z_div_pos; omega);
+    try (
+      assert (n = 2 * (n / 2) + (n mod 2)); [
+        apply Z_div_mod_eq; omega|];
+      assert (n2 = (n / 2) + (n mod 2)); [
+        unfold n2, n1; omega|];
+      assert (0 <= n1); [
+       apply Z_div_pos; omega|];
+      assert (0 <= n mod 2); [
+        apply Z_mod_lt; omega|];
+      omega);
+    try (
+      assert (n1 <= n); [
+        unfold n1;
+        assert (n / 2 = n - (n / 2) - (n mod 2)); [
+          rewrite (Z_div_mod_eq n 2) at 2; omega|];
+        assert (0 <= n / 2); [
+          apply Z_div_pos; omega|];
+        assert (0 <= n mod 2); [
+          apply Z_mod_lt; omega|];
+        omega|];
+      omega);
+    try (
+      rewrite Pl2;
+      assert (0 <= n / 2); [
+        apply Z_div_pos; omega|];
+      unfold n2, n1; omega).
+  
   Fixpoint sort_rec {A : Type}
     (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
     : 0 <= n -> n <= length l ->
@@ -373,34 +402,7 @@ Module StableSort.
         let! s2 := rev_sort_rec A counter cmp n2 l2 _ _ in
         ret (rev_merge_rev cmp s1 s2 [])
       end
-    end);
-    try (apply Z_div_pos; omega);
-    try (
-      assert (n = 2 * (n / 2) + (n mod 2)); [
-        apply Z_div_mod_eq; omega|];
-      assert (n2 = (n / 2) + (n mod 2)); [
-        unfold n2, n1; omega|];
-      assert (0 <= n1); [
-       apply Z_div_pos; omega|];
-      assert (0 <= n mod 2); [
-        apply Z_mod_lt; omega|];
-      omega);
-    try (
-      assert (n1 <= n); [
-        unfold n1;
-        assert (n / 2 = n - (n / 2) - (n mod 2)); [
-          rewrite (Z_div_mod_eq n 2) at 2; omega|];
-        assert (0 <= n / 2); [
-          apply Z_div_pos; omega|];
-        assert (0 <= n mod 2); [
-          apply Z_mod_lt; omega|];
-        omega|];
-      omega);
-    try (
-      rewrite Pl2;
-      assert (0 <= n / 2); [
-        apply Z_div_pos; omega|];
-      unfold n2, n1; omega).
+    end); certify_sort_rec n n1 n2 Pl2.
   refine (
     match counter with
     | O => fun Hn_pos Hn_le_length => not_terminated tt
@@ -438,34 +440,7 @@ Module StableSort.
         let! s2 := sort_rec A counter cmp n2 l2 _ _ in
         ret (rev_merge cmp s1 s2 [])
       end
-    end);
-    try (apply Z_div_pos; omega);
-    try (
-      assert (n = 2 * (n / 2) + (n mod 2)); [
-        apply Z_div_mod_eq; omega|];
-      assert (n2 = (n / 2) + (n mod 2)); [
-        unfold n2, n1; omega|];
-      assert (0 <= n1); [
-       apply Z_div_pos; omega|];
-      assert (0 <= n mod 2); [
-        apply Z_mod_lt; omega|];
-      omega);
-    try (
-      assert (n1 <= n); [
-        unfold n1;
-        assert (n / 2 = n - (n / 2) - (n mod 2)); [
-          rewrite (Z_div_mod_eq n 2) at 2; omega|];
-        assert (0 <= n / 2); [
-          apply Z_div_pos; omega|];
-        assert (0 <= n mod 2); [
-          apply Z_mod_lt; omega|];
-        omega|];
-      omega);
-    try (
-      rewrite Pl2;
-      assert (0 <= n / 2); [
-        apply Z_div_pos; omega|];
-      unfold n2, n1; omega).
+    end); certify_sort_rec n n1 n2 Pl2.
   Defined.
   
   Definition sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
