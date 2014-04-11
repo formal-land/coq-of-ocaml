@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Fixpoint map_rec {A B : Type} (counter : nat) (f : A -> B) (l : list A)
   : M [ NonTermination ] (list B) :=

@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Definition e_invalid {A B : Type} (x : A) : M [ OCaml.Invalid_argument ] B :=
   match x with

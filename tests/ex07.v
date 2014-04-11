@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Definition b : bool :=
   orb (equiv_decb false true) (andb (nequiv_decb tt tt) (negb true)).

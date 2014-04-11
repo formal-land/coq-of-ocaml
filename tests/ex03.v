@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Definition n1 : Z :=
   let m := 12 in

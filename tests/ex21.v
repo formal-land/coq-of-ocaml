@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Definition f {A B C : Type} (x : A) : M [ IO ] (B -> M [ OCaml.Failure ] C) :=
   let! _ := OCaml.Pervasives.print_string "Hi" % string in

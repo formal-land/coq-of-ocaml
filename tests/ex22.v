@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Definition op_plus_plus_plus (x : Z) (y : Z) : Z := Z.add x y.
 

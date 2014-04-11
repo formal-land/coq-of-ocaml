@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Definition map {A B : Type} (f : A -> B) (l : list A) : list B :=
   let fix map (l : list A) : list B :=

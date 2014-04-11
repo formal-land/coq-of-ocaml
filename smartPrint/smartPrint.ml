@@ -36,120 +36,14 @@ module Atom = struct
      Must succeed (no uncaught [Overflow] exception). *)
   let rec eval (width : int) (tab : int) (i : int) (a : t) (p : int) (last_break : Break.t option)
     : t * int * Break.t option =
-    (* Eval "at best" a list of atoms splitting all the spaces. The flag [can_nest]
-       sets if we indent when we break lines. *)
-    let rec eval_list_all (width : int) (tab : int) (i : int) (_as : t list) (p : int)
-      (last_break : Break.t option) (can_nest : bool)
-      : t list * int * Break.t option =
-      match _as with
-      | [] -> (_as, p, last_break)
-      | Break Break.Space :: _as ->
-        (match last_break with
-        | None ->
-          let (_as, p, last_break) =
-            eval_list_all width tab (if can_nest then i + tab else i) _as 0 (Some Break.Newline) false in
-          if can_nest then
-            ([Break Break.Newline; Indent (1, GroupAll (false, _as))], p, last_break)
-          else
-            (Break Break.Newline :: _as, p, last_break)
-        | _ -> eval_list_all width tab i _as p last_break can_nest)
-      | a :: _as ->
-        let (a, p, last_break) = eval width tab i a p last_break in
-        let (_as, p, last_break) = eval_list_all width tab i _as p last_break can_nest in
-        (a :: _as, p, last_break) in
-
-    (* Like [try_eval_flat] but for a list of atoms. *)
-    let rec try_eval_list_flat (width : int) (tab : int) (i : int) (_as : t list) (p : int) (last_break : Break.t option)
-      : int * Break.t option =
-      (* Try to print an atom without evaluating the spaces. May raise [Overflow] if we
-        overflow the line [width]. *)
-      let rec try_eval_flat (width : int) (tab : int) (i : int) (a : t) (p : int) (last_break : Break.t option)
-        : int * Break.t option =
-        let try_return (p, last_break) =
-          if p > width then
-            raise Overflow
-          else
-            (p, last_break) in
-        match a with
-        | String (_, _, l) ->
-          let p = match last_break with
-            | Some Break.Newline -> p + i + l
-            | _ -> p + l in
-          try_return (p, None)
-        | Break Break.Space ->
-          (match last_break with
-          | None -> try_return (p + 1, Some Break.Space)
-          | _ -> try_return (p, last_break))
-        | Break Break.Newline -> raise Overflow
-        | GroupOne (can_nest, _as) ->
-          let (p, last_break) = try_eval_list_flat width tab (i + tab) _as p last_break in
-          (p, last_break)
-        | GroupAll (can_nest, _as) ->
-          let (p, last_break) = try_eval_list_flat width tab (i + tab) _as p last_break in
-          (p, last_break)
-        | Indent (_, a) -> try_eval_flat width tab i a p last_break in
-      match _as with
-      | [] -> (p, last_break)
-      | a :: _as ->
-        let (p, last_break) = try_eval_flat width tab i a p last_break in
-        let (p, last_break) = try_eval_list_flat width tab i _as p last_break in
-        (p, last_break) in
-
-    (* Eval "at best" a list of atoms using the "split only when necessary" policy. The [can_fail]
-       flag controls if we can raise an [Overflow], the [can_nest] if we can nest when we break,
-       [in_nest] if we have already nested. *)
-    let rec try_eval_list_one (width : int) (tab : int) (i : int) (_as : t list) (p : int)
-      (last_break : Break.t option) (can_fail : bool) (can_nest : bool) (in_nest : bool)
-      : t list * int * Break.t option =
-      match _as with
-      | [] -> (_as, p, last_break)
-      | Break Break.Space :: _as ->
-        (match last_break with
-        | None ->
-          (* If it is not possible in flat mode, switch back to "at best". *)
-          (try let (_as, p, last_break) = try_eval_list_one width tab i _as (p + 1) (Some Break.Space) true can_nest in_nest in
-            (Break Break.Space :: _as, p, last_break) with
-          | Overflow ->
-            let do_indent = can_nest && not in_nest in
-            let (_as, p, last_break) = try_eval_list_one width tab (if do_indent then i + tab else i)
-              _as 0 (Some Break.Newline) false can_nest can_nest in
-            if do_indent then
-              ([Break Break.Newline; Indent (1, GroupOne (false, _as))], p, last_break)
-            else
-              (Break Break.Newline :: _as, p, last_break))
-        | _ -> try_eval_list_one width tab i _as p last_break can_fail can_nest in_nest)
-      | Break Break.Newline :: _as ->
-        let (_as, p, last_break) =
-          (* If there is an explicit newline we always undo the nesting. *)
-          if in_nest then
-            try_eval_list_one width tab (i - tab) _as 0 (Some Break.Newline) false can_nest false
-          else
-            try_eval_list_one width tab i _as 0 (Some Break.Newline) false can_nest false in
-        if in_nest then
-          ([Break Break.Newline; Indent (- 1, GroupOne (false, _as))], p, last_break)
-        else
-          (Break Break.Newline :: _as, p, last_break)
-      | a :: _as ->
-        let (a, p, last_break) =
-          (* If [Overflow] is possible we try in flat mode, else "at best". *)
-          if can_fail then
-            let (p, last_break) = try_eval_list_flat width tab i [a] p last_break in
-            (a, p, last_break)
-          else
-            eval width tab i a p last_break in
-        let (_as, p, last_break) = try_eval_list_one width tab i _as p last_break can_fail can_nest in_nest in
-        (a :: _as, p, last_break) in
-
     match a with
     | String (_, _, l) ->
-      let p = match last_break with
-        | Some Break.Newline -> p + i + l
-        | _ -> p + l in
-      (a, p, None)
+      (a, (if last_break = Some Break.Newline then p + i + l else p + l), None)
     | Break Break.Space ->
-      (match last_break with
-      | None -> (a, p + 1, Some Break.Space)
-      | _ -> (a, p, last_break))
+      if last_break = None then
+        (a, p + 1, Some Break.Space)
+      else
+        (a, p, last_break)
     | Break Break.Newline -> (a, 0, Some Break.Newline)
     | GroupOne (can_nest, _as) ->
       let (_as, p, last_break) = try_eval_list_one width tab i _as p last_break false can_nest false in
@@ -164,12 +58,115 @@ module Atom = struct
       let (a, p, last_break) = eval width tab (i + n * tab) a p last_break in
       (Indent (n, a), p, last_break)
 
+  (* Try to print an atom without evaluating the spaces. May raise [Overflow] if we
+     overflow the line [width]. *)
+  and try_eval_flat (width : int) (tab : int) (i : int) (a : t) (p : int) (last_break : Break.t option)
+    : int * Break.t option =
+    let try_return (p, last_break) =
+      if p > width then
+        raise Overflow
+      else
+        (p, last_break) in
+    match a with
+    | String (_, _, l) ->
+      try_return ((if last_break = Some Break.Newline then p + i + l else p + l), None)
+    | Break Break.Space ->
+      if last_break = None then
+        try_return (p + 1, Some Break.Space)
+      else
+        try_return (p, last_break)
+    | Break Break.Newline -> raise Overflow
+    | GroupOne (can_nest, _as) ->
+      let (p, last_break) = try_eval_list_flat width tab (i + tab) _as p last_break in
+      (p, last_break)
+    | GroupAll (can_nest, _as) ->
+      let (p, last_break) = try_eval_list_flat width tab (i + tab) _as p last_break in
+      (p, last_break)
+    | Indent (_, a) -> try_eval_flat width tab i a p last_break
+
+  (* Like [try_eval_flat] but for a list of atoms. *)
+  and try_eval_list_flat (width : int) (tab : int) (i : int) (_as : t list) (p : int) (last_break : Break.t option)
+    : int * Break.t option =
+    match _as with
+    | [] -> (p, last_break)
+    | a :: _as ->
+      let (p, last_break) = try_eval_flat width tab i a p last_break in
+      let (p, last_break) = try_eval_list_flat width tab i _as p last_break in
+      (p, last_break)
+
+  (* Eval "at best" a list of atoms using the "split only when necessary" policy. The [can_fail]
+     flag controls if we can raise an [Overflow], the [can_nest] if we can nest when we break,
+     [in_nest] if we have already nested. *)
+  and try_eval_list_one (width : int) (tab : int) (i : int) (_as : t list) (p : int)
+    (last_break : Break.t option) (can_fail : bool) (can_nest : bool) (in_nest : bool)
+    : t list * int * Break.t option =
+    match _as with
+    | [] -> (_as, p, last_break)
+    | Break Break.Space :: _as ->
+      if last_break = None then
+        (* If it is not possible in flat mode, switch back to "at best". *)
+        (try let (_as, p, last_break) = try_eval_list_one width tab i _as (p + 1) (Some Break.Space) true can_nest in_nest in
+          (Break Break.Space :: _as, p, last_break) with
+        | Overflow ->
+          let do_indent = can_nest && not in_nest in
+          let (_as, p, last_break) = try_eval_list_one width tab (if do_indent then i + tab else i)
+            _as 0 (Some Break.Newline) false can_nest can_nest in
+          if do_indent then
+            ([Break Break.Newline; Indent (1, GroupOne (false, _as))], p, last_break)
+          else
+            (Break Break.Newline :: _as, p, last_break))
+      else
+        try_eval_list_one width tab i _as p last_break can_fail can_nest in_nest
+    | Break Break.Newline :: _as ->
+      let (_as, p, last_break) =
+        (* If there is an explicit newline we always undo the nesting. *)
+        if in_nest then
+          try_eval_list_one width tab (i - tab) _as 0 (Some Break.Newline) false can_nest false
+        else
+          try_eval_list_one width tab i _as 0 (Some Break.Newline) false can_nest false in
+      if in_nest then
+        ([Break Break.Newline; Indent (- 1, GroupOne (false, _as))], p, last_break)
+      else
+        (Break Break.Newline :: _as, p, last_break)
+    | a :: _as ->
+      let (a, p, last_break) =
+        (* If [Overflow] is possible we try in flat mode, else "at best". *)
+        if can_fail then
+          let (p, last_break) = try_eval_flat width tab i a p last_break in
+          (a, p, last_break)
+        else
+          eval width tab i a p last_break in
+      let (_as, p, last_break) = try_eval_list_one width tab i _as p last_break can_fail can_nest in_nest in
+      (a :: _as, p, last_break)
+
+  (* Eval "at best" a list of atoms splitting all the spaces. The flag [can_nest]
+     sets if we indent when we break lines. *)
+  and eval_list_all (width : int) (tab : int) (i : int) (_as : t list) (p : int)
+    (last_break : Break.t option) (can_nest : bool)
+    : t list * int * Break.t option =
+    match _as with
+    | [] -> (_as, p, last_break)
+    | Break Break.Space :: _as ->
+      if last_break = None then (
+        let (_as, p, last_break) =
+          eval_list_all width tab (if can_nest then i + tab else i) _as 0 (Some Break.Newline) false in
+        if can_nest then
+          ([Break Break.Newline; Indent (1, GroupAll (false, _as))], p, last_break)
+        else
+          (Break Break.Newline :: _as, p, last_break)
+      ) else
+        eval_list_all width tab i _as p last_break can_nest
+    | a :: _as ->
+      let (a, p, last_break) = eval width tab i a p last_break in
+      let (_as, p, last_break) = eval_list_all width tab i _as p last_break can_nest in
+      (a :: _as, p, last_break)
+
   (* Evaluate the breaks with a maximal [width] per line and a tabulation width [tab]. *)
   let render (width : int) (tab : int) (_as : t list) : t =
     let (a, _, _) = eval width tab 0 (GroupOne (false, _as)) 0 (Some Break.Newline) in
     a
   
-  (* A buffer eating trailing spaces. *)
+  (*(* A buffer eating trailing spaces. *)
   module NonTrailingBuffer = struct
     module Config = struct
       type t = {
@@ -241,10 +238,10 @@ module Atom = struct
           ref_last_break := aux a i !ref_last_break);*) (* TODO: handle iter *)
         !ref_last_break
       | Indent (n, a) -> aux a (i + n * tab) last_break in
-    ignore (aux a 0 (Some Break.Newline))
+    ignore (aux a 0 (Some Break.Newline))*)
 end
 
-
+(*
 (* A document is a binary tree of atoms so that concatenation happens in O(1). *)
 type t =
   | Empty
@@ -428,4 +425,4 @@ let to_out_channel (width : int) (tab : int) (c : out_channel) (d : t) : unit =
     (output_char c) (output_string c) output_sub_string d
 
 let to_stdout (width : int) (tab : int) (d : t) : unit =
-  to_out_channel width tab stdout d*)
+  to_out_channel width tab stdout d*) *)

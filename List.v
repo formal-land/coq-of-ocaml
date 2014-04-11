@@ -1,8 +1,8 @@
 Require Import CoqOfOCaml.
+Require Import Coq.Program.Program.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Fixpoint length_aux {A : Type} (len : Z) (x : list A) : Z :=
   match x with
@@ -275,26 +275,7 @@ Fixpoint merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
     end in
   merge_aux l2.
 
-Require Import Coq.Program.Program.
-
-Fixpoint chop {A : Type} (k : Z) (l : list A)
-  (Hk_pos : 0 <= k) (Hk_le_length : k <= length l) {struct l}
-  : list A.
-  refine (
-    match Z.eq_dec k 0 with
-    | left _ => l
-    | right Hk_neq_0 => _
-    end).
-  destruct l as [|x t].
-  - apply False_rect.
-    unfold length in Hk_le_length; simpl in Hk_le_length.
-    omega.
-  - refine (chop A (Z.sub k 1) t _ _).
-    + omega.
-    + rewrite length_cons in Hk_le_length; omega.
-Defined.
-
-Fixpoint chop' {A : Type} (k : Z) (l : list A) {struct l}
+Fixpoint chop {A : Type} (k : Z) (l : list A) {struct l}
   : 0 <= k -> k <= length l -> list A.
   refine (
     match Z.eq_dec k 0 with
@@ -302,7 +283,7 @@ Fixpoint chop' {A : Type} (k : Z) (l : list A) {struct l}
     | right Hk_neq_0 =>
       match l with
       | [] => fun Hk_pos Hk_le_length => !
-      | cons x t => fun Hk_pos Hk_le_length => chop' A (Z.sub k 1) t _ _
+      | cons x t => fun Hk_pos Hk_le_length => chop A (Z.sub k 1) t _ _
       end
     end).
   - unfold length in Hk_le_length; simpl in Hk_le_length;

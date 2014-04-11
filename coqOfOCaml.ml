@@ -30,8 +30,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import CoqOfOCaml." ^^ newline;
           !^ "Local Open Scope Z_scope.";
-          !^ "Import ListNotations.";
-          !^ "Set Implicit Arguments."]) ^^ newline ^^
+          !^ "Import ListNotations."]) ^^ newline ^^
         Structure.to_coq defs
       | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
     to_stdout 80 2 document;

@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Fixpoint length_aux {A : Type} (len : Z) (x : list A) : Z :=
   match x with

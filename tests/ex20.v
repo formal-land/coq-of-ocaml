@@ -2,7 +2,6 @@ Require Import CoqOfOCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.
-Set Implicit Arguments.
 
 Fixpoint sums_rec (counter : nat) (ls : list (list Z))
   : M [ Counter; NonTermination ] (list Z) :=
