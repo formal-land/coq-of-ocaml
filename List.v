@@ -16,6 +16,9 @@ Lemma length_cons {A : Type} (x : A) (l : list A)
   : length (x :: l) = length l + 1.
 Admitted.
 
+Lemma length_is_pos {A : Type} (l : list A) : 0 <= length l.
+Admitted.
+
 Definition hd {A : Type} (x : list A) : M [ OCaml.Failure ] A :=
   match x with
   | [] => OCaml.Pervasives.failwith "hd" % string
@@ -276,20 +279,24 @@ Fixpoint merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
   merge_aux l2.
 
 Fixpoint chop {A : Type} (k : Z) (l : list A) {struct l}
-  : 0 <= k -> k <= length l -> list A.
+  : 0 <= k -> k <= length l -> { l' : list A | length l' = length l - k }.
   refine (
     match Z.eq_dec k 0 with
-    | left _ => fun Hk_pos Hk_le_length => l
+    | left _ => fun Hk_pos Hk_le_length => exist _ l _
     | right Hk_neq_0 =>
       match l with
       | [] => fun Hk_pos Hk_le_length => !
-      | cons x t => fun Hk_pos Hk_le_length => chop A (Z.sub k 1) t _ _
+      | cons x t => fun Hk_pos Hk_le_length =>
+        let (l', _) := chop A (Z.sub k 1) t _ _ in
+        exist _ l' _
       end
     end).
+  - omega.
   - unfold length in Hk_le_length; simpl in Hk_le_length;
     omega.
   - omega.
   - rewrite length_cons in Hk_le_length; omega.
+  - rewrite length_cons; omega.
 Defined.
 
 Module StableSort.
@@ -323,18 +330,24 @@ Module StableSort.
   
   Fixpoint sort_rec {A : Type}
     (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ NonTermination; OCaml.Assert_failure ] (list A) :=
+    : 0 <= n -> n <= length l ->
+      M [ NonTermination ] (list A)
+  with rev_sort_rec {A : Type}
+    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
+    : 0 <= n -> n <= length l ->
+      M [ NonTermination ] (list A).
+  refine (
     match counter with
-    | O => lift [_;_] "10" (not_terminated tt)
+    | O => fun Hn_pos Hn_le_length => not_terminated tt
     | S counter =>
       match (n, l) with
-      | (2, cons x1 (cons x2 _)) =>
+      | (2, cons x1 (cons x2 _)) => fun Hn_pos Hn_le_length =>
         ret
           (if OCaml.Pervasives.le (cmp x1 x2) 0 then
             cons x1 (cons x2 [])
           else
             cons x2 (cons x1 []))
-      | (3, cons x1 (cons x2 (cons x3 _))) =>
+      | (3, cons x1 (cons x2 (cons x3 _))) => fun Hn_pos Hn_le_length =>
         ret
           (if OCaml.Pervasives.le (cmp x1 x2) 0 then
             if OCaml.Pervasives.le (cmp x2 x3) 0 then
@@ -352,30 +365,54 @@ Module StableSort.
                 cons x2 (cons x3 (cons x1 []))
               else
                 cons x3 (cons x2 (cons x1 [])))
-      | (n, l) =>
-        let n1 := Z.div n 2 in
-        let n2 := Z.sub n n1 in
-        let! l2 := lift [_;_] "01" (chop n1 l) in
-        let! s1 := (rev_sort_rec counter) cmp n1 l in
-        let! s2 := (rev_sort_rec counter) cmp n2 l2 in
+      | _ => fun Hn_pos Hn_le_length =>
+        let n1 := n / 2 in
+        let n2 := n - n1 in
+        let (l2, Pl2) := chop n1 l _ _ in
+        let! s1 := rev_sort_rec A counter cmp n1 l _ _ in
+        let! s2 := rev_sort_rec A counter cmp n2 l2 _ _ in
         ret (rev_merge_rev cmp s1 s2 [])
       end
-    end
-  
-  with rev_sort_rec {A : Type}
-    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ NonTermination; OCaml.Assert_failure ] (list A) :=
+    end);
+    try (apply Z_div_pos; omega);
+    try (
+      assert (n = 2 * (n / 2) + (n mod 2)); [
+        apply Z_div_mod_eq; omega|];
+      assert (n2 = (n / 2) + (n mod 2)); [
+        unfold n2, n1; omega|];
+      assert (0 <= n1); [
+       apply Z_div_pos; omega|];
+      assert (0 <= n mod 2); [
+        apply Z_mod_lt; omega|];
+      omega);
+    try (
+      assert (n1 <= n); [
+        unfold n1;
+        assert (n / 2 = n - (n / 2) - (n mod 2)); [
+          rewrite (Z_div_mod_eq n 2) at 2; omega|];
+        assert (0 <= n / 2); [
+          apply Z_div_pos; omega|];
+        assert (0 <= n mod 2); [
+          apply Z_mod_lt; omega|];
+        omega|];
+      omega);
+    try (
+      rewrite Pl2;
+      assert (0 <= n / 2); [
+        apply Z_div_pos; omega|];
+      unfold n2, n1; omega).
+  refine (
     match counter with
-    | O => lift [_;_] "10" (not_terminated tt)
+    | O => fun Hn_pos Hn_le_length => not_terminated tt
     | S counter =>
       match (n, l) with
-      | (2, cons x1 (cons x2 _)) =>
+      | (2, cons x1 (cons x2 _)) => fun Hn_pos Hn_le_length =>
         ret
           (if OCaml.Pervasives.gt (cmp x1 x2) 0 then
             cons x1 (cons x2 [])
           else
             cons x2 (cons x1 []))
-      | (3, cons x1 (cons x2 (cons x3 _))) =>
+      | (3, cons x1 (cons x2 (cons x3 _))) => fun Hn_pos Hn_le_length =>
         ret
           (if OCaml.Pervasives.gt (cmp x1 x2) 0 then
             if OCaml.Pervasives.gt (cmp x2 x3) 0 then
@@ -393,43 +430,77 @@ Module StableSort.
                 cons x2 (cons x3 (cons x1 []))
               else
                 cons x3 (cons x2 (cons x1 [])))
-      | (n, l) =>
-        let n1 := Z.div n 2 in
-        let n2 := Z.sub n n1 in
-        let! l2 := lift [_;_] "01" (chop n1 l) in
-        let! s1 := (sort_rec counter) cmp n1 l in
-        let! s2 := (sort_rec counter) cmp n2 l2 in
+      | _ => fun Hn_pos Hn_le_length =>
+        let n1 := n / 2 in
+        let n2 := n - n1 in
+        let (l2, Pl2) := chop n1 l _ _ in
+        let! s1 := sort_rec A counter cmp n1 l _ _ in
+        let! s2 := sort_rec A counter cmp n2 l2 _ _ in
         ret (rev_merge cmp s1 s2 [])
       end
-    end.
+    end);
+    try (apply Z_div_pos; omega);
+    try (
+      assert (n = 2 * (n / 2) + (n mod 2)); [
+        apply Z_div_mod_eq; omega|];
+      assert (n2 = (n / 2) + (n mod 2)); [
+        unfold n2, n1; omega|];
+      assert (0 <= n1); [
+       apply Z_div_pos; omega|];
+      assert (0 <= n mod 2); [
+        apply Z_mod_lt; omega|];
+      omega);
+    try (
+      assert (n1 <= n); [
+        unfold n1;
+        assert (n / 2 = n - (n / 2) - (n mod 2)); [
+          rewrite (Z_div_mod_eq n 2) at 2; omega|];
+        assert (0 <= n / 2); [
+          apply Z_div_pos; omega|];
+        assert (0 <= n mod 2); [
+          apply Z_mod_lt; omega|];
+        omega|];
+      omega);
+    try (
+      rewrite Pl2;
+      assert (0 <= n / 2); [
+        apply Z_div_pos; omega|];
+      unfold n2, n1; omega).
+  Defined.
   
   Definition sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-    let! x := lift [_;_;_] "100" (read_counter tt) in
-    lift [_;_;_] "011" (sort_rec x cmp n l).
+    (Hn_pos : 0 <= n) (Hn_le_length : n <= length l)
+    : M [ Counter; NonTermination ] (list A) :=
+    let! x := lift [_;_] "10" (read_counter tt) in
+    lift [_;_] "01" (sort_rec x cmp n l Hn_pos Hn_le_length).
   
   Definition rev_sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-    let! x := lift [_;_;_] "100" (read_counter tt) in
-    lift [_;_;_] "011" (rev_sort_rec x cmp n l).
+    (Hn_pos : 0 <= n) (Hn_le_length : n <= length l)
+    : M [ Counter; NonTermination ] (list A) :=
+    let! x := lift [_;_] "10" (read_counter tt) in
+    lift [_;_] "01" (rev_sort_rec x cmp n l Hn_pos Hn_le_length).
 End StableSort.
 
 Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
-  : M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
-  let len := length l in
-  if OCaml.Pervasives.lt len 2 then
-    ret l
-  else
-    StableSort.sort cmp len l.
+  : M [ Counter; NonTermination ] (list A).
+  refine (
+    let len := length l in
+    if OCaml.Pervasives.lt len 2 then
+      ret l
+    else
+      StableSort.sort cmp len l _ _).
+  - apply length_is_pos.
+  - unfold len; omega.
+Defined.
 
 Definition sort {A : Type}
   : (A -> A -> Z) ->
-    (list A) -> M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
+    (list A) -> M [ Counter; NonTermination ] (list A) :=
   stable_sort.
 
 Definition fast_sort {A : Type}
   : (A -> A -> Z) ->
-    (list A) -> M [ Counter; NonTermination; OCaml.Assert_failure ] (list A) :=
+    (list A) -> M [ Counter; NonTermination ] (list A) :=
   stable_sort.
 
 Module SortUniq.
