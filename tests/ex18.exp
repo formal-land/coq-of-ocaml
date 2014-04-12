@@ -1,10 +1,10 @@
-1 Reference (r, Type (Z/1))
+1 Reference (r, Type (Z/0))
 
 3
 (Value
   (non_rec, @.,
     [
-      ((plus_one, [ A ], [ (x, A) ], Some Type (Z/1)),
+      ((plus_one, [ A ], [ (x, A) ], Some Type (Z/0)),
         Match
           (?, Variable (?, x/0),
             [
@@ -31,7 +31,7 @@
             ]))
     ]))
 
-6 Reference (s, Type (string/1))
+6 Reference (s, Type (string/0))
 
 8
 (Value
@@ -46,7 +46,7 @@
                   (8,
                     Variable
                       (8,
-                        OCaml.Pervasives.failwith/1),
+                        OCaml.Pervasives.failwith/0),
                     [
                       Apply
                         (8,
@@ -65,7 +65,7 @@
 (Value
   (non_rec, @.,
     [
-      ((reset, [ A ], [ (x, A) ], Some Type (unit/1)),
+      ((reset, [ A ], [ (x, A) ], Some Type (unit/0)),
         Match
           (?, Variable (?, x/0),
             [
@@ -87,7 +87,7 @@
 (Value
   (non_rec, @.,
     [
-      ((incr, [ A ], [ (x, A) ], Some Type (unit/1)),
+      ((incr, [ A ], [ (x, A) ], Some Type (unit/0)),
         Match
           (?, Variable (?, x/0),
             [

@@ -64,7 +64,6 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_var ["OCaml"; "Pervasives"] "invalid_arg" Global (Arrow (d [["OCaml"], "Invalid_argument"], Pure))
   |> add_var ["OCaml"; "Pervasives"] "failwith" Global (Arrow (d [["OCaml"], "Failure"], Pure))
   |> add_exn ["OCaml"; "Pervasives"] "Exit" Global
-  |> open_module
   (* Comparisons *)
   |> add_var [] "equiv_decb" Global Pure
   |> add_var [] "nequiv_decb" Global Pure

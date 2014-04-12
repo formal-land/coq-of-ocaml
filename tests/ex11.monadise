@@ -1,6 +1,6 @@
 3 Module SizedString:
   4 Record t:
-    ([ (name, Type (string/2)); (size, Type (Z/2)) ])
+    ([ (name, Type (string/1)); (size, Type (Z/1)) ])
 
 9
 (Value
@@ -26,7 +26,7 @@
 (Value
   (non_rec, @.,
     [
-      ((s, [ ], [ ], Some Type (Z/1)),
+      ((s, [ ], [ ], Some Type (Z/0)),
         Apply
           (12, Variable (12, Z.add/0),
             [
@@ -39,13 +39,13 @@
 (Value
   (non_rec, @.,
     [
-      ((f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)),
+      ((f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/0)),
         Match
           (?, Variable (?, x/0),
             [
               (Record ((SizedString.size/0, Int(3))),
-                Constructor (15, true/1));
-              (Any, Constructor (16, false/1))
+                Constructor (15, true/0));
+              (Any, Constructor (16, false/0))
             ]))
     ]))
 
@@ -53,7 +53,7 @@
 (Value
   (non_rec, @.,
     [
-      ((b, [ ], [ ], Some Type (bool/1)),
+      ((b, [ ], [ ], Some Type (bool/0)),
         Apply (18, Variable (18, f/0), [ Variable (18, r/0) ]))
     ]))
 
@@ -61,13 +61,13 @@
 (Value
   (non_rec, @.,
     [
-      ((b', [ ], [ ], Some Type (bool/1)),
+      ((b', [ ], [ ], Some Type (bool/0)),
         Apply (19, Variable (19, f/0), [ Variable (19, r'/0) ]))
     ]))
 
 21 Module Point:
   22 Record t:
-    ([ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ])
+    ([ (x, Type (Z/1)); (y, Type (Z/1)); (z, Type (Z/1)) ])
   
   27 (Value
     (non_rec, @.,
@@ -82,14 +82,14 @@
   29 (Value
     (non_rec, @.,
       [
-        ((b, [ ], [ ], Some Type (bool/2)),
+        ((b, [ ], [ ], Some Type (bool/1)),
           Match
             (29, Variable (29, p/0),
               [
                 (Record ((x/0, Int(5)), (z/0, Int(1))),
                   Constructor
                     (30,
-                      true/2));
-                (Any, Constructor (31, false/2))
+                      true/1));
+                (Any, Constructor (31, false/1))
               ]))
       ]))

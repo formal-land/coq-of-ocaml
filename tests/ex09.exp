@@ -2,7 +2,7 @@
 (Value
   (non_rec, @.,
     [
-      ((l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))),
+      ((l, [ A ], [ (x, A) ], Some Type (list/0, Type (Z/0))),
         Match
           (?, Variable (?, x/0),
             [
@@ -18,19 +18,19 @@
                         [
                           (counter,
                             Type
-                              (nat/1));
+                              (nat/0));
                           (f,
                             (B
                               ->
                               C));
                           (x_1,
                             Type
-                              (list/1,
+                              (list/0,
                                 B))
                         ],
                         Some
                           Type
-                            (list/1,
+                            (list/0,
                               C)),
                         Match
                           (?,
@@ -39,18 +39,18 @@
                                 counter/0),
                             [
                               (Constructor
-                                (O/1),
+                                (O/0),
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        not_terminated/1),
+                                        not_terminated/0),
                                     [
                                       Tuple
                                         (?)
                                     ]));
                               (Constructor
-                                (S/1,
+                                (S/0,
                                   counter),
                                 Match
                                   (?,
@@ -59,17 +59,17 @@
                                         x_1/0),
                                     [
                                       (Constructor
-                                        ([]/1),
+                                        ([]/0),
                                         Constructor
                                           (5,
-                                            []/1));
+                                            []/0));
                                       (Constructor
-                                        (cons/1,
+                                        (cons/0,
                                           x,
                                           xs),
                                         Constructor
                                           (6,
-                                            cons/1,
+                                            cons/0,
                                             Apply
                                               (6,
                                                 Variable
@@ -119,12 +119,12 @@
                               C));
                           (x_1,
                             Type
-                              (list/1,
+                              (list/0,
                                 B))
                         ],
                         Some
                           Type
-                            (list/1,
+                            (list/0,
                               C)),
                         Apply
                           (?,
@@ -136,7 +136,7 @@
                                 (?,
                                   Variable
                                     (?,
-                                      read_counter/1),
+                                      read_counter/0),
                                   [
                                     Tuple
                                       (?)
@@ -160,7 +160,7 @@
                         [
                           (counter,
                             Type
-                              (nat/1));
+                              (nat/0));
                           (x,
                             B)
                         ],
@@ -173,18 +173,18 @@
                                 counter/0),
                             [
                               (Constructor
-                                (O/1),
+                                (O/0),
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        not_terminated/1),
+                                        not_terminated/0),
                                     [
                                       Tuple
                                         (?)
                                     ]));
                               (Constructor
-                                (S/1,
+                                (S/0,
                                   counter),
                                 Variable
                                   (7,
@@ -215,7 +215,7 @@
                                 (?,
                                   Variable
                                     (?,
-                                      read_counter/1),
+                                      read_counter/0),
                                   [
                                     Tuple
                                       (?)
@@ -250,25 +250,25 @@
                               ]));
                       Constructor
                         (8,
-                          cons/1,
+                          cons/0,
                           Constant
                             (8,
                               Int(5)),
                           Constructor
                             (8,
-                              cons/1,
+                              cons/0,
                               Constant
                                 (8,
                                   Int(7)),
                               Constructor
                                 (8,
-                                  cons/1,
+                                  cons/0,
                                   Constant
                                     (8,
                                       Int(8)),
                                   Constructor
                                     (8,
-                                      []/1))))
+                                      []/0))))
                     ]))
             ]))
     ]))

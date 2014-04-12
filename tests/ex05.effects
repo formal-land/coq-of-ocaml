@@ -2,41 +2,41 @@
 (Value
   (non_rec, @.,
     [
-      ((n, [ ], [ ], Some Type (Z/1)),
+      ((n, [ ], [ ], Some Type (Z/0)),
         Match
           ((3, Effect ([ ], .)),
             Tuple
               ((3, Effect ([ ], .)),
                 Constructor
-                  ((3, Effect ([ ], .)), cons/1,
+                  ((3, Effect ([ ], .)), cons/0,
                     Constant ((3, Effect ([ ], .)), Int(1)),
                     Constructor
-                      ((3, Effect ([ ], .)), cons/1,
+                      ((3, Effect ([ ], .)), cons/0,
                         Constant
                           ((3, Effect ([ ], .)), Int(2)),
                         Constructor
-                          ((3, Effect ([ ], .)), []/1))),
-                Constructor ((3, Effect ([ ], .)), false/1)),
+                          ((3, Effect ([ ], .)), []/0))),
+                Constructor ((3, Effect ([ ], .)), false/0)),
             [
               (Tuple
                 (Constructor
-                  (cons/1, x,
+                  (cons/0, x,
                     Constructor
-                      (cons/1,
+                      (cons/0,
                         Any,
                         Constructor
-                          ([]/1))),
-                  Constructor (true/1)),
+                          ([]/0))),
+                  Constructor (true/0)),
                 Variable ((4, Effect ([ ], .)), x/0));
               (Tuple
                 (Constructor
-                  (cons/1, Any,
+                  (cons/0, Any,
                     Constructor
-                      (cons/1,
+                      (cons/0,
                         y,
                         Constructor
-                          ([]/1))),
-                  Constructor (false/1)),
+                          ([]/0))),
+                  Constructor (false/0)),
                 Variable ((5, Effect ([ ], .)), y/0));
               (Any, Constant ((6, Effect ([ ], .)), Int(0)))
             ]))

@@ -1,12 +1,12 @@
 3
 (Value
-  (non_rec, @., [ ((t0, [ ], [ ], Some Type (unit/1)), Constructor (3, tt/1)) ]))
+  (non_rec, @., [ ((t0, [ ], [ ], Some Type (unit/0)), Constructor (3, tt/0)) ]))
 
 5
 (Value
   (non_rec, @.,
     [
-      ((t1, [ ], [ ], Some (Type (ascii/1) * Type (string/1))),
+      ((t1, [ ], [ ], Some (Type (ascii/0) * Type (string/0))),
         Tuple (5, Constant (5, Char("c")), Constant (5, String("one"))))
     ]))
 
@@ -16,12 +16,12 @@
     [
       ((t2, [ ], [ ],
         Some
-          (Type (Z/1) * Type (Z/1) * Type (Z/1) * Type (bool/1) *
-            Type (bool/1))),
+          (Type (Z/0) * Type (Z/0) * Type (Z/0) * Type (bool/0) *
+            Type (bool/0))),
         Tuple
           (7, Constant (7, Int(1)), Constant (7, Int(2)),
-            Constant (7, Int(3)), Constructor (7, false/1),
-            Constructor (7, true/1)))
+            Constant (7, Int(3)), Constructor (7, false/0),
+            Constructor (7, true/0)))
     ]))
 
 9
@@ -36,6 +36,6 @@
 (Value
   (non_rec, @.,
     [
-      ((t3, [ ], [ ], Some (Type (Z/1) * Type (Z/1))),
+      ((t3, [ ], [ ], Some (Type (Z/0) * Type (Z/0))),
         Apply (11, Variable (11, f/0), [ Constant (11, Int(12)) ]))
     ]))

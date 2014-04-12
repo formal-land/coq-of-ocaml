@@ -2,19 +2,19 @@
 (Value
   (non_rec, @.,
     [
-      ((tail, [ A ], [ (l, Type (list/1, A)) ],
-        Some Monad ([ OCaml.Failure/1 ], Type (list/1, A))),
+      ((tail, [ A ], [ (l, Type (list/0, A)) ],
+        Some Monad ([ OCaml.Failure/0 ], Type (list/0, A))),
         Match
           (4, Variable (4, l/0),
             [
-              (Constructor (cons/1, Any, xs),
+              (Constructor (cons/0, Any, xs),
                 Return (?, Variable (5, xs/0)));
-              (Constructor ([]/1),
+              (Constructor ([]/0),
                 Apply
                   (6,
                     Variable
                       (6,
-                        OCaml.Pervasives.failwith/1),
+                        OCaml.Pervasives.failwith/0),
                     [
                       Constant
                         (6,
@@ -28,43 +28,43 @@
   (rec, @.,
     [
       ((print_list_rec, [ ],
-        [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
-        Some Monad ([ IO/0; NonTermination/1 ], Type (unit/1))),
+        [ (counter, Type (nat/0)); (x, Type (list/0, Type (string/0))) ],
+        Some Monad ([ IO/0; NonTermination/0 ], Type (unit/0))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Lift
                   (?,
                     [
-                      NonTermination/1
+                      NonTermination/0
                     ],
                     [
                       IO/0;
-                      NonTermination/1
+                      NonTermination/0
                     ],
                     Apply
                       (?,
                         Variable
                           (?,
-                            not_terminated/1),
+                            not_terminated/0),
                         [
                           Tuple
                             (?)
                         ])));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (?, Variable (?, x/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Return
                           (?,
                             Constructor
                               (9,
-                                tt/1)));
+                                tt/0)));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Bind
@@ -76,7 +76,7 @@
                                 ],
                                 [
                                   IO/0;
-                                  NonTermination/1
+                                  NonTermination/0
                                 ],
                                 Apply
                                   (11,
@@ -114,17 +114,17 @@
 (Value
   (non_rec, @.,
     [
-      ((print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
-        Some Monad ([ Counter/1; IO/0; NonTermination/1 ], Type (unit/1))),
+      ((print_list, [ ], [ (x, Type (list/0, Type (string/0))) ],
+        Some Monad ([ Counter/0; IO/0; NonTermination/0 ], Type (unit/0))),
         Bind
           (?,
             Lift
-              (?, [ Counter/1 ], [ Counter/1; IO/0; NonTermination/1 ],
-                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+              (?, [ Counter/0 ], [ Counter/0; IO/0; NonTermination/0 ],
+                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
             Some x_1,
             Lift
-              (?, [ IO/0; NonTermination/1 ],
-                [ Counter/1; IO/0; NonTermination/1 ],
+              (?, [ IO/0; NonTermination/0 ],
+                [ Counter/0; IO/0; NonTermination/0 ],
                 Apply
                   (?, Variable (?, print_list_rec/0),
                     [ Variable (?, x_1/0); Variable (?, x/0) ]))))
@@ -136,8 +136,8 @@
     [
       ((f, [ ], [ ],
         Some
-          (Type (list/1, Type (string/1)) ->
-            Monad ([ Counter/1; IO/0; NonTermination/1 ], Type (unit/1)))),
+          (Type (list/0, Type (string/0)) ->
+            Monad ([ Counter/0; IO/0; NonTermination/0 ], Type (unit/0)))),
         Variable (14, print_list/0))
     ]))
 
@@ -148,46 +148,46 @@
       ((x, [ A ], [ (z, A) ],
         Some
           Monad
-            ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ],
-              Type (unit/1))),
+            ([ Counter/0; IO/0; NonTermination/0; OCaml.Failure/0 ],
+              Type (unit/0))),
         Bind
           (?,
             Lift
-              (?, [ OCaml.Failure/1 ],
-                [ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ],
+              (?, [ OCaml.Failure/0 ],
+                [ Counter/0; IO/0; NonTermination/0; OCaml.Failure/0 ],
                 Apply
                   (16, Variable (16, tail/0),
                     [
                       Constructor
                         (16,
-                          cons/1,
+                          cons/0,
                           Constant
                             (16,
                               String("Stop")),
                           Constructor
                             (16,
-                              cons/1,
+                              cons/0,
                               Constant
                                 (16,
                                   String("Hello")),
                               Constructor
                                 (16,
-                                  cons/1,
+                                  cons/0,
                                   Constant
                                     (16,
                                       String(" ")),
                                   Constructor
                                     (16,
-                                      cons/1,
+                                      cons/0,
                                       Constant
                                         (16,
                                           String("world")),
                                       Constructor
                                         (16,
-                                          []/1)))))
+                                          []/0)))))
                     ])), Some x,
             Lift
-              (?, [ Counter/1; IO/0; NonTermination/1 ],
-                [ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ],
+              (?, [ Counter/0; IO/0; NonTermination/0 ],
+                [ Counter/0; IO/0; NonTermination/0; OCaml.Failure/0 ],
                 Apply (16, Variable (16, f/0), [ Variable (?, x/0) ]))))
     ]))

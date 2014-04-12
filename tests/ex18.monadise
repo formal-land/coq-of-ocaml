@@ -1,10 +1,10 @@
-1 Reference (r, Type (Z/1))
+1 Reference (r, Type (Z/0))
 
 3
 (Value
   (non_rec, @.,
     [
-      ((plus_one, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (Z/1))),
+      ((plus_one, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (Z/0))),
         Match
           (?, Variable (?, x/0),
             [
@@ -40,13 +40,13 @@
             ]))
     ]))
 
-6 Reference (s, Type (string/1))
+6 Reference (s, Type (string/0))
 
 8
 (Value
   (non_rec, @.,
     [
-      ((fail, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/1; s/0 ], B)),
+      ((fail, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/0; s/0 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -59,7 +59,7 @@
                           s/0
                         ],
                         [
-                          OCaml.Failure/1;
+                          OCaml.Failure/0;
                           s/0
                         ],
                         Apply
@@ -76,17 +76,17 @@
                     Lift
                       (?,
                         [
-                          OCaml.Failure/1
+                          OCaml.Failure/0
                         ],
                         [
-                          OCaml.Failure/1;
+                          OCaml.Failure/0;
                           s/0
                         ],
                         Apply
                           (8,
                             Variable
                               (8,
-                                OCaml.Pervasives.failwith/1),
+                                OCaml.Pervasives.failwith/0),
                             [
                               Variable
                                 (?,
@@ -99,7 +99,7 @@
 (Value
   (non_rec, @.,
     [
-      ((reset, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1))),
+      ((reset, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/0))),
         Match
           (?, Variable (?, x/0),
             [
@@ -121,7 +121,7 @@
 (Value
   (non_rec, @.,
     [
-      ((incr, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1))),
+      ((incr, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/0))),
         Match
           (?, Variable (?, x/0),
             [

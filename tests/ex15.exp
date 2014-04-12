@@ -1,6 +1,6 @@
 3
 Inductive set:
-  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/1); Type (set/0) ]) ])
+  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/0); Type (set/0) ]) ])
 
 7
 (Value
@@ -12,22 +12,22 @@ Inductive set:
   (rec, @.,
     [
       ((member_rec, [ ],
-        [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
-        Some Type (bool/1)),
+        [ (counter, Type (nat/0)); (x, Type (Z/0)); (s, Type (set/0)) ],
+        Some Type (bool/0)),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (10,
                     Variable
@@ -38,7 +38,7 @@ Inductive set:
                         (Empty/0),
                         Constructor
                           (11,
-                            false/1));
+                            false/0));
                       (Constructor
                         (Node/0,
                           s1,
@@ -116,7 +116,7 @@ Inductive set:
                                     ]),
                                 Constructor
                                   (18,
-                                    true/1))))
+                                    true/0))))
                     ]))
             ]))
     ]))
@@ -125,11 +125,11 @@ Inductive set:
 (Value
   (non_rec, @.,
     [
-      ((member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ], Some Type (bool/1)),
+      ((member, [ ], [ (x, Type (Z/0)); (s, Type (set/0)) ], Some Type (bool/0)),
         Apply
           (?, Variable (?, member_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, x/0);
               Variable (?, s/0)
             ]))
@@ -140,22 +140,22 @@ Inductive set:
   (rec, @.,
     [
       ((insert_rec, [ ],
-        [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
+        [ (counter, Type (nat/0)); (x, Type (Z/0)); (s, Type (set/0)) ],
         Some Type (set/0)),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (21,
                     Variable
@@ -280,11 +280,11 @@ Inductive set:
 (Value
   (non_rec, @.,
     [
-      ((insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ], Some Type (set/0)),
+      ((insert, [ ], [ (x, Type (Z/0)); (s, Type (set/0)) ], Some Type (set/0)),
         Apply
           (?, Variable (?, insert_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, x/0);
               Variable (?, s/0)
             ]))

@@ -2,8 +2,8 @@
 (Value
   (non_rec, @.,
     [
-      ((op_plus_plus_plus, [ ], [ (x, Type (Z/1)); (y, Type (Z/1)) ],
-        Some Type (Z/1)),
+      ((op_plus_plus_plus, [ ], [ (x, Type (Z/0)); (y, Type (Z/0)) ],
+        Some Type (Z/0)),
         Apply
           ((3, Effect ([ ], .)), Variable ((3, Effect ([ ], .)), Z.add/0),
             [
@@ -16,7 +16,7 @@
 (Value
   (non_rec, @.,
     [
-      ((op_tilde_tilde, [ ], [ (x, Type (Z/1)) ], Some Type (Z/1)),
+      ((op_tilde_tilde, [ ], [ (x, Type (Z/0)) ], Some Type (Z/0)),
         Apply
           ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), Z.opp/0),
             [ Variable ((4, Effect ([ ], .)), x/0) ]))
@@ -26,7 +26,7 @@
 (Value
   (non_rec, @.,
     [
-      ((z, [ ], [ ], Some Type (Z/1)),
+      ((z, [ ], [ ], Some Type (Z/0)),
         Apply
           ((6, Effect ([ ], .)),
             Variable ((6, Effect ([ ], . -> . -> .)), op_plus_plus_plus/0),

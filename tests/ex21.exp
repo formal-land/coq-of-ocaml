@@ -11,7 +11,7 @@
             Function
               (5, y,
                 Apply
-                  (5, Variable (5, OCaml.Pervasives.failwith/1),
+                  (5, Variable (5, OCaml.Pervasives.failwith/0),
                     [ Constant (5, String("Bye")) ]))))
     ]))
 

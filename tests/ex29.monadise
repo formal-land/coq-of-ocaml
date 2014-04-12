@@ -2,12 +2,12 @@
 (Value
   (rec, @coq_rec,
     [
-      ((odd_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+      ((odd_length, [ A ], [ (l, Type (list/0, A)) ], Some Type (bool/0)),
         Match
           (4, Variable (4, l/0),
             [
-              (Constructor ([]/1), Constructor (5, false/1));
-              (Constructor (cons/1, Any, l),
+              (Constructor ([]/0), Constructor (5, false/0));
+              (Constructor (cons/0, Any, l),
                 Apply
                   (6,
                     Variable
@@ -26,12 +26,12 @@
                           ])
                     ]))
             ]));
-      ((even_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+      ((even_length, [ A ], [ (l, Type (list/0, A)) ], Some Type (bool/0)),
         Match
           (10, Variable (10, l/0),
             [
-              (Constructor ([]/1), Constructor (11, true/1));
-              (Constructor (cons/1, Any, l),
+              (Constructor ([]/0), Constructor (11, true/0));
+              (Constructor (cons/0, Any, l),
                 Apply
                   (12,
                     Variable
@@ -56,12 +56,12 @@
 (Value
   (rec, @coq_rec,
     [
-      ((odd_length_with_print, [ A ], [ (l, Type (list/1, A)) ],
-        Some Monad ([ IO/0 ], Type (bool/1))),
+      ((odd_length_with_print, [ A ], [ (l, Type (list/0, A)) ],
+        Some Monad ([ IO/0 ], Type (bool/0))),
         Match
           (15, Variable (15, l/0),
             [
-              (Constructor ([]/1),
+              (Constructor ([]/0),
                 Bind
                   (?,
                     Apply
@@ -79,8 +79,8 @@
                       (?,
                         Constructor
                           (16,
-                            false/1))));
-              (Constructor (cons/1, Any, l),
+                            false/0))));
+              (Constructor (cons/0, Any, l),
                 Bind
                   (?,
                     Apply
@@ -108,13 +108,13 @@
                                   x/0)
                             ]))))
             ]));
-      ((even_length_with_print, [ A ], [ (l, Type (list/1, A)) ],
-        Some Monad ([ IO/0 ], Type (bool/1))),
+      ((even_length_with_print, [ A ], [ (l, Type (list/0, A)) ],
+        Some Monad ([ IO/0 ], Type (bool/0))),
         Match
           (21, Variable (21, l/0),
             [
-              (Constructor ([]/1), Return (?, Constructor (22, true/1)));
-              (Constructor (cons/1, Any, l),
+              (Constructor ([]/0), Return (?, Constructor (22, true/0)));
+              (Constructor (cons/0, Any, l),
                 Bind
                   (?,
                     Apply
@@ -149,22 +149,22 @@
   (rec, @.,
     [
       ((odd_length_free_rec, [ A ],
-        [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
-        Some Monad ([ NonTermination/1 ], Type (bool/1))),
+        [ (counter, Type (nat/0)); (l, Type (list/0, A)) ],
+        Some Monad ([ NonTermination/0 ], Type (bool/0))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (26,
                     Variable
@@ -172,14 +172,14 @@
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Return
                           (?,
                             Constructor
                               (27,
-                                false/1)));
+                                false/0)));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           Any,
                           l),
                         Bind
@@ -218,22 +218,22 @@
                     ]))
             ]));
       ((even_length_free_rec, [ A ],
-        [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
-        Some Monad ([ NonTermination/1 ], Type (bool/1))),
+        [ (counter, Type (nat/0)); (l, Type (list/0, A)) ],
+        Some Monad ([ NonTermination/0 ], Type (bool/0))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (31,
                     Variable
@@ -241,14 +241,14 @@
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Return
                           (?,
                             Constructor
                               (32,
-                                true/1)));
+                                true/0)));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           Any,
                           l),
                         Bind
@@ -292,16 +292,16 @@
 (Value
   (non_rec, @.,
     [
-      ((odd_length_free, [ A ], [ (l, Type (list/1, A)) ],
-        Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))),
+      ((odd_length_free, [ A ], [ (l, Type (list/0, A)) ],
+        Some Monad ([ Counter/0; NonTermination/0 ], Type (bool/0))),
         Bind
           (?,
             Lift
-              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
+                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
             Some x,
             Lift
-              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+              (?, [ NonTermination/0 ], [ Counter/0; NonTermination/0 ],
                 Apply
                   (?, Variable (?, odd_length_free_rec/0),
                     [ Variable (?, x/0); Variable (?, l/0) ]))))
@@ -311,16 +311,16 @@
 (Value
   (non_rec, @.,
     [
-      ((even_length_free, [ A ], [ (l, Type (list/1, A)) ],
-        Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))),
+      ((even_length_free, [ A ], [ (l, Type (list/0, A)) ],
+        Some Monad ([ Counter/0; NonTermination/0 ], Type (bool/0))),
         Bind
           (?,
             Lift
-              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
+                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
             Some x,
             Lift
-              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+              (?, [ NonTermination/0 ], [ Counter/0; NonTermination/0 ],
                 Apply
                   (?, Variable (?, even_length_free_rec/0),
                     [ Variable (?, x/0); Variable (?, l/0) ]))))

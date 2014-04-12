@@ -4,7 +4,7 @@
     [
       ((f, [ A; B; C ], [ (x, A) ], Some (B -> C)),
         Sequence
-          ((4, Effect ([ IO/0 ], . -[ OCaml.Failure/1 ]-> .)),
+          ((4, Effect ([ IO/0 ], . -[ OCaml.Failure/0 ]-> .)),
             Apply
               ((4, Effect ([ IO/0 ], .)),
                 Variable
@@ -12,14 +12,14 @@
                     OCaml.Pervasives.print_string/0),
                 [ Constant ((4, Effect ([ ], .)), String("Hi")) ]),
             Function
-              ((5, Effect ([ ], . -[ OCaml.Failure/1 ]-> .)), y,
+              ((5, Effect ([ ], . -[ OCaml.Failure/0 ]-> .)), y,
                 Apply
-                  ((5, Effect ([ OCaml.Failure/1 ], .)),
+                  ((5, Effect ([ OCaml.Failure/0 ], .)),
                     Variable
                       ((5,
                         Effect
-                          ([ ], . -[ OCaml.Failure/1 ]-> .)),
-                        OCaml.Pervasives.failwith/1),
+                          ([ ], . -[ OCaml.Failure/0 ]-> .)),
+                        OCaml.Pervasives.failwith/0),
                     [
                       Constant
                         ((5,
@@ -37,7 +37,7 @@
     [
       ((r, [ A; B ], [ (x, A) ], Some B),
         Match
-          ((?, Effect ([ IO/0; OCaml.Failure/1 ], .)),
+          ((?, Effect ([ IO/0; OCaml.Failure/0 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -46,7 +46,7 @@
                     Effect
                       ([
                         IO/0;
-                        OCaml.Failure/1
+                        OCaml.Failure/0
                       ],
                         .)),
                     Apply
@@ -57,7 +57,7 @@
                           ],
                             .
                               -[
-                                OCaml.Failure/1
+                                OCaml.Failure/0
                               ]->
                               .)),
                         Variable
@@ -71,7 +71,7 @@
                                   ]->
                                   .
                                     -[
-                                      OCaml.Failure/1
+                                      OCaml.Failure/0
                                     ]->
                                     .)),
                             f/0),

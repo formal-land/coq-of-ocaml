@@ -1,28 +1,28 @@
 3
 Inductive tree:
-  ([ ], [ (Leaf, [ ]); (Node, [ Type (tree/0); Type (Z/1); Type (tree/0) ]) ])
+  ([ ], [ (Leaf, [ ]); (Node, [ Type (tree/0); Type (Z/0); Type (tree/0) ]) ])
 
 7
 (Value
   (rec, @.,
     [
       ((find_rec, [ ],
-        [ (counter, Type (nat/1)); (x, Type (Z/1)); (t, Type (tree/0)) ],
-        Some Monad ([ NonTermination/1 ], Type (bool/1))),
+        [ (counter, Type (nat/0)); (x, Type (Z/0)); (t, Type (tree/0)) ],
+        Some Monad ([ NonTermination/0 ], Type (bool/0))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (8, Variable (8, t/0),
                     [
@@ -32,7 +32,7 @@ Inductive tree:
                           (?,
                             Constructor
                               (9,
-                                false/1)));
+                                false/0)));
                       (Constructor
                         (Node/0,
                           t1,
@@ -112,7 +112,7 @@ Inductive tree:
                                   (?,
                                     Constructor
                                       (16,
-                                        true/1)))))
+                                        true/0)))))
                     ]))
             ]))
     ]))
@@ -121,16 +121,16 @@ Inductive tree:
 (Value
   (non_rec, @.,
     [
-      ((find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ],
-        Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))),
+      ((find, [ ], [ (x, Type (Z/0)); (t, Type (tree/0)) ],
+        Some Monad ([ Counter/0; NonTermination/0 ], Type (bool/0))),
         Bind
           (?,
             Lift
-              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
+                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
             Some x_1,
             Lift
-              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+              (?, [ NonTermination/0 ], [ Counter/0; NonTermination/0 ],
                 Apply
                   (?, Variable (?, find_rec/0),
                     [

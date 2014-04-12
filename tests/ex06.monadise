@@ -3,34 +3,34 @@
   (rec, @.,
     [
       ((map_rec, [ A; B ],
-        [ (counter, Type (nat/1)); (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Monad ([ NonTermination/1 ], Type (list/1, B))),
+        [ (counter, Type (nat/0)); (f, (A -> B)); (l, Type (list/0, A)) ],
+        Some Monad ([ NonTermination/0 ], Type (list/0, B))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (4, Variable (4, l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Return
                           (?,
                             Constructor
                               (5,
-                                []/1)));
+                                []/0)));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Bind
@@ -61,7 +61,7 @@
                               (?,
                                 Constructor
                                   (6,
-                                    cons/1,
+                                    cons/0,
                                     Apply
                                       (6,
                                         Variable
@@ -83,16 +83,16 @@
 (Value
   (non_rec, @.,
     [
-      ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Monad ([ Counter/1; NonTermination/1 ], Type (list/1, B))),
+      ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/0, A)) ],
+        Some Monad ([ Counter/0; NonTermination/0 ], Type (list/0, B))),
         Bind
           (?,
             Lift
-              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
+                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
             Some x,
             Lift
-              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+              (?, [ NonTermination/0 ], [ Counter/0; NonTermination/0 ],
                 Apply
                   (?, Variable (?, map_rec/0),
                     [
@@ -108,37 +108,37 @@
     [
       ((fold_rec, [ A; B ],
         [
-          (counter, Type (nat/1));
+          (counter, Type (nat/0));
           (f, (A -> (B -> A)));
           (a, A);
-          (l, Type (list/1, B))
-        ], Some Monad ([ NonTermination/1 ], A)),
+          (l, Type (list/0, B))
+        ], Some Monad ([ NonTermination/0 ], A)),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (9, Variable (9, l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Return
                           (?,
                             Variable
                               (10,
                                 a/0)));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Apply
@@ -182,16 +182,16 @@
 (Value
   (non_rec, @.,
     [
-      ((fold, [ A; B ], [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ],
-        Some Monad ([ Counter/1; NonTermination/1 ], A)),
+      ((fold, [ A; B ], [ (f, (A -> (B -> A))); (a, A); (l, Type (list/0, B)) ],
+        Some Monad ([ Counter/0; NonTermination/0 ], A)),
         Bind
           (?,
             Lift
-              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
-                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
+              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
+                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
             Some x,
             Lift
-              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
+              (?, [ NonTermination/0 ], [ Counter/0; NonTermination/0 ],
                 Apply
                   (?, Variable (?, fold_rec/0),
                     [
@@ -206,16 +206,16 @@
 (Value
   (non_rec, @.,
     [
-      ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((l, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Constructor
-          (13, cons/1, Constant (13, Int(5)),
+          (13, cons/0, Constant (13, Int(5)),
             Constructor
-              (13, cons/1, Constant (13, Int(6)),
+              (13, cons/0, Constant (13, Int(6)),
                 Constructor
-                  (13, cons/1, Constant (13, Int(7)),
+                  (13, cons/0, Constant (13, Int(7)),
                     Constructor
-                      (13, cons/1, Constant (13, Int(2)),
-                        Constructor (13, []/1))))))
+                      (13, cons/0, Constant (13, Int(2)),
+                        Constructor (13, []/0))))))
     ]))
 
 15
@@ -224,9 +224,9 @@
     [
       ((n, [ A ],
         [
-          (incr, (Type (Z/1) -> A));
-          (plus, (Type (Z/1) -> (A -> Type (Z/1))))
-        ], Some Monad ([ Counter/1; NonTermination/1 ], Type (Z/1))),
+          (incr, (Type (Z/0) -> A));
+          (plus, (Type (Z/0) -> (A -> Type (Z/0))))
+        ], Some Monad ([ Counter/0; NonTermination/0 ], Type (Z/0))),
         Bind
           (?,
             Apply

@@ -2,7 +2,7 @@
 (Value
   (non_rec, @.,
     [
-      ((f, [ ], [ (n, Type (Z/1)); (b, Type (bool/1)) ], Some Type (Z/1)),
+      ((f, [ ], [ (n, Type (Z/0)); (b, Type (bool/0)) ], Some Type (Z/0)),
         IfThenElse
           (4, Variable (4, b/0),
             Apply

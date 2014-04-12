@@ -4,7 +4,7 @@
     [
       ((l, [ A ], [ (x, A) ],
         Some
-          Monad ([ Counter/1; NonTermination/1 ], Type (list/1, Type (Z/1)))),
+          Monad ([ Counter/0; NonTermination/0 ], Type (list/0, Type (Z/0)))),
         Match
           (?, Variable (?, x/0),
             [
@@ -20,23 +20,23 @@
                         [
                           (counter,
                             Type
-                              (nat/1));
+                              (nat/0));
                           (f,
                             (B
                               ->
                               C));
                           (x_1,
                             Type
-                              (list/1,
+                              (list/0,
                                 B))
                         ],
                         Some
                           Monad
                             ([
-                              NonTermination/1
+                              NonTermination/0
                             ],
                               Type
-                                (list/1,
+                                (list/0,
                                   C))),
                         Match
                           (?,
@@ -45,18 +45,18 @@
                                 counter/0),
                             [
                               (Constructor
-                                (O/1),
+                                (O/0),
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        not_terminated/1),
+                                        not_terminated/0),
                                     [
                                       Tuple
                                         (?)
                                     ]));
                               (Constructor
-                                (S/1,
+                                (S/0,
                                   counter),
                                 Match
                                   (?,
@@ -65,14 +65,14 @@
                                         x_1/0),
                                     [
                                       (Constructor
-                                        ([]/1),
+                                        ([]/0),
                                         Return
                                           (?,
                                             Constructor
                                               (5,
-                                                []/1)));
+                                                []/0)));
                                       (Constructor
-                                        (cons/1,
+                                        (cons/0,
                                           x,
                                           xs),
                                         Bind
@@ -103,7 +103,7 @@
                                               (?,
                                                 Constructor
                                                   (6,
-                                                    cons/1,
+                                                    cons/0,
                                                     Apply
                                                       (6,
                                                         Variable
@@ -136,34 +136,34 @@
                               C));
                           (x_1,
                             Type
-                              (list/1,
+                              (list/0,
                                 B))
                         ],
                         Some
                           Monad
                             ([
-                              Counter/1;
-                              NonTermination/1
+                              Counter/0;
+                              NonTermination/0
                             ],
                               Type
-                                (list/1,
+                                (list/0,
                                   C))),
                         Bind
                           (?,
                             Lift
                               (?,
                                 [
-                                  Counter/1
+                                  Counter/0
                                 ],
                                 [
-                                  Counter/1;
-                                  NonTermination/1
+                                  Counter/0;
+                                  NonTermination/0
                                 ],
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        read_counter/1),
+                                        read_counter/0),
                                     [
                                       Tuple
                                         (?)
@@ -173,11 +173,11 @@
                             Lift
                               (?,
                                 [
-                                  NonTermination/1
+                                  NonTermination/0
                                 ],
                                 [
-                                  Counter/1;
-                                  NonTermination/1
+                                  Counter/0;
+                                  NonTermination/0
                                 ],
                                 Apply
                                   (?,
@@ -207,14 +207,14 @@
                         [
                           (counter,
                             Type
-                              (nat/1));
+                              (nat/0));
                           (x,
                             B)
                         ],
                         Some
                           Monad
                             ([
-                              NonTermination/1
+                              NonTermination/0
                             ],
                               B)),
                         Match
@@ -224,18 +224,18 @@
                                 counter/0),
                             [
                               (Constructor
-                                (O/1),
+                                (O/0),
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        not_terminated/1),
+                                        not_terminated/0),
                                     [
                                       Tuple
                                         (?)
                                     ]));
                               (Constructor
-                                (S/1,
+                                (S/0,
                                   counter),
                                 Return
                                   (?,
@@ -259,8 +259,8 @@
                         Some
                           Monad
                             ([
-                              Counter/1;
-                              NonTermination/1
+                              Counter/0;
+                              NonTermination/0
                             ],
                               B)),
                         Bind
@@ -268,17 +268,17 @@
                             Lift
                               (?,
                                 [
-                                  Counter/1
+                                  Counter/0
                                 ],
                                 [
-                                  Counter/1;
-                                  NonTermination/1
+                                  Counter/0;
+                                  NonTermination/0
                                 ],
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        read_counter/1),
+                                        read_counter/0),
                                     [
                                       Tuple
                                         (?)
@@ -288,11 +288,11 @@
                             Lift
                               (?,
                                 [
-                                  NonTermination/1
+                                  NonTermination/0
                                 ],
                                 [
-                                  Counter/1;
-                                  NonTermination/1
+                                  Counter/0;
+                                  NonTermination/0
                                 ],
                                 Apply
                                   (?,
@@ -333,25 +333,25 @@
                               ]));
                       Constructor
                         (8,
-                          cons/1,
+                          cons/0,
                           Constant
                             (8,
                               Int(5)),
                           Constructor
                             (8,
-                              cons/1,
+                              cons/0,
                               Constant
                                 (8,
                                   Int(7)),
                               Constructor
                                 (8,
-                                  cons/1,
+                                  cons/0,
                                   Constant
                                     (8,
                                       Int(8)),
                                   Constructor
                                     (8,
-                                      []/1))))
+                                      []/0))))
                     ]))
             ]))
     ]))

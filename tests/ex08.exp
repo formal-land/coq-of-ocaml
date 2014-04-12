@@ -1,25 +1,25 @@
 3
 Inductive t1:
-  ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
+  ([ ], [ (C1, [ Type (Z/0) ]); (C2, [ Type (bool/0); Type (Z/0) ]); (C3, [ ]) ])
 
 8
 (Value
   (non_rec, @.,
     [
       ((n, [ ], [ ], Some Type (t1/0)),
-        Constructor (8, C2/0, Constructor (8, false/1), Constant (8, Int(3))))
+        Constructor (8, C2/0, Constructor (8, false/0), Constant (8, Int(3))))
     ]))
 
 10
 (Value
   (non_rec, @.,
     [
-      ((m, [ ], [ ], Some Type (bool/1)),
+      ((m, [ ], [ ], Some Type (bool/0)),
         Match
           (10, Variable (10, n/0),
             [
               (Constructor (C2/0, b, Any), Variable (11, b/0));
-              (Any, Constructor (12, true/1))
+              (Any, Constructor (12, true/0))
             ]))
     ]))
 
@@ -31,22 +31,22 @@ Inductive t2:
 (Value
   (rec, @.,
     [
-      ((of_list_rec, [ A ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+      ((of_list_rec, [ A ], [ (counter, Type (nat/0)); (l, Type (list/0, A)) ],
         Some Type (t2/0, A)),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (19,
                     Variable
@@ -54,12 +54,12 @@ Inductive t2:
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           (20,
                             D1/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Constructor
@@ -93,11 +93,11 @@ Inductive t2:
 (Value
   (non_rec, @.,
     [
-      ((of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)),
+      ((of_list, [ A ], [ (l, Type (list/0, A)) ], Some Type (t2/0, A)),
         Apply
           (?, Variable (?, of_list_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, l/0)
             ]))
     ]))
@@ -106,22 +106,22 @@ Inductive t2:
 (Value
   (rec, @.,
     [
-      ((sum_rec, [ ], [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ],
-        Some Type (Z/1)),
+      ((sum_rec, [ ], [ (counter, Type (nat/0)); (l, Type (t2/0, Type (Z/0))) ],
+        Some Type (Z/0)),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (24,
                     Variable
@@ -172,11 +172,11 @@ Inductive t2:
 (Value
   (non_rec, @.,
     [
-      ((sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)),
+      ((sum, [ ], [ (l, Type (t2/0, Type (Z/0))) ], Some Type (Z/0)),
         Apply
           (?, Variable (?, sum_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, l/0)
             ]))
     ]))
@@ -185,7 +185,7 @@ Inductive t2:
 (Value
   (non_rec, @.,
     [
-      ((s, [ A ], [ (x, A) ], Some Type (Z/1)),
+      ((s, [ A ], [ (x, A) ], Some Type (Z/0)),
         Match
           (?, Variable (?, x/0),
             [
@@ -204,25 +204,25 @@ Inductive t2:
                           [
                             Constructor
                               (28,
-                                cons/1,
+                                cons/0,
                                 Constant
                                   (28,
                                     Int(5)),
                                 Constructor
                                   (28,
-                                    cons/1,
+                                    cons/0,
                                     Constant
                                       (28,
                                         Int(7)),
                                     Constructor
                                       (28,
-                                        cons/1,
+                                        cons/0,
                                         Constant
                                           (28,
                                             Int(3)),
                                         Constructor
                                           (28,
-                                            []/1))))
+                                            []/0))))
                           ])
                     ]))
             ]))

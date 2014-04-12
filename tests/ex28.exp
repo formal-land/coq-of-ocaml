@@ -2,28 +2,28 @@
 (Value
   (non_rec, @.,
     [
-      ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Type (list/1, B)),
+      ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/0, A)) ],
+        Some Type (list/0, B)),
         LetFun 4
           (rec, @coq_rec,
             [
-              ((map, [ ], [ (l, Type (list/1, A)) ],
-                Some Type (list/1, B)),
+              ((map, [ ], [ (l, Type (list/0, A)) ],
+                Some Type (list/0, B)),
                 Match
                   (5, Variable (5, l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           (6,
-                            []/1));
+                            []/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           l),
                         Constructor
                           (7,
-                            cons/1,
+                            cons/0,
                             Apply
                               (7,
                                 Variable
@@ -53,14 +53,14 @@
 (Value
   (non_rec, @.,
     [
-      ((map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Type (list/1, B)),
+      ((map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/0, A)) ],
+        Some Type (list/0, B)),
         LetFun 12
           (rec, @coq_rec,
             [
               ((map2, [ C; D ],
-                [ (f, (C -> D)); (l, Type (list/1, C)) ],
-                Some Type (list/1, D)),
+                [ (f, (C -> D)); (l, Type (list/0, C)) ],
+                Some Type (list/0, D)),
                 Match
                   (13,
                     Variable
@@ -68,17 +68,17 @@
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           (14,
-                            []/1));
+                            []/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           l),
                         Constructor
                           (15,
-                            cons/1,
+                            cons/0,
                             Apply
                               (15,
                                 Variable

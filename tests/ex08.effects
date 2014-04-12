@@ -1,6 +1,6 @@
 3
 Inductive t1:
-  ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
+  ([ ], [ (C1, [ Type (Z/0) ]); (C2, [ Type (bool/0); Type (Z/0) ]); (C3, [ ]) ])
 
 8
 (Value
@@ -9,7 +9,7 @@ Inductive t1:
       ((n, [ ], [ ], Some Type (t1/0)),
         Constructor
           ((8, Effect ([ ], .)), C2/0,
-            Constructor ((8, Effect ([ ], .)), false/1),
+            Constructor ((8, Effect ([ ], .)), false/0),
             Constant ((8, Effect ([ ], .)), Int(3))))
     ]))
 
@@ -17,13 +17,13 @@ Inductive t1:
 (Value
   (non_rec, @.,
     [
-      ((m, [ ], [ ], Some Type (bool/1)),
+      ((m, [ ], [ ], Some Type (bool/0)),
         Match
           ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), n/0),
             [
               (Constructor (C2/0, b, Any),
                 Variable ((11, Effect ([ ], .)), b/0));
-              (Any, Constructor ((12, Effect ([ ], .)), true/1))
+              (Any, Constructor ((12, Effect ([ ], .)), true/0))
             ]))
     ]))
 
@@ -35,18 +35,18 @@ Inductive t2:
 (Value
   (rec, @.,
     [
-      ((of_list_rec, [ A ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+      ((of_list_rec, [ A ], [ (counter, Type (nat/0)); (l, Type (list/0, A)) ],
         Some Type (t2/0, A)),
         Match
-          ((?, Effect ([ NonTermination/1 ], .)),
+          ((?, Effect ([ NonTermination/0 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -56,10 +56,10 @@ Inductive t2:
                           ],
                             .
                               -[
-                                NonTermination/1
+                                NonTermination/0
                               ]->
                               .)),
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         ((?,
@@ -68,12 +68,12 @@ Inductive t2:
                             ],
                               .)))
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   ((19,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -85,7 +85,7 @@ Inductive t2:
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           ((20,
                             Effect
@@ -94,14 +94,14 @@ Inductive t2:
                                 .)),
                             D1/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Constructor
                           ((21,
                             Effect
                               ([
-                                NonTermination/1
+                                NonTermination/0
                               ],
                                 .)),
                             D2/0,
@@ -116,7 +116,7 @@ Inductive t2:
                               ((21,
                                 Effect
                                   ([
-                                    NonTermination/1
+                                    NonTermination/0
                                   ],
                                     .)),
                                 Apply
@@ -126,7 +126,7 @@ Inductive t2:
                                       ],
                                         .
                                           -[
-                                            NonTermination/1
+                                            NonTermination/0
                                           ]->
                                           .)),
                                     Variable
@@ -138,7 +138,7 @@ Inductive t2:
                                               ->
                                               .
                                                 -[
-                                                  NonTermination/1
+                                                  NonTermination/0
                                                 ]->
                                                 .)),
                                         of_list_rec/0),
@@ -168,15 +168,15 @@ Inductive t2:
 (Value
   (non_rec, @.,
     [
-      ((of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)),
+      ((of_list, [ A ], [ (l, Type (list/0, A)) ], Some Type (t2/0, A)),
         Apply
-          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/0 ]-> .)),
                 of_list_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/1 ], .)),
+                ((?, Effect ([ Counter/0 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -184,10 +184,10 @@ Inductive t2:
                         ],
                           .
                             -[
-                              Counter/1
+                              Counter/0
                             ]->
                             .)),
-                      read_counter/1),
+                      read_counter/0),
                   [
                     Tuple
                       ((?,
@@ -204,18 +204,18 @@ Inductive t2:
 (Value
   (rec, @.,
     [
-      ((sum_rec, [ ], [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ],
-        Some Type (Z/1)),
+      ((sum_rec, [ ], [ (counter, Type (nat/0)); (l, Type (t2/0, Type (Z/0))) ],
+        Some Type (Z/0)),
         Match
-          ((?, Effect ([ NonTermination/1 ], .)),
+          ((?, Effect ([ NonTermination/0 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -225,10 +225,10 @@ Inductive t2:
                           ],
                             .
                               -[
-                                NonTermination/1
+                                NonTermination/0
                               ]->
                               .)),
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         ((?,
@@ -237,12 +237,12 @@ Inductive t2:
                             ],
                               .)))
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   ((24,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -270,7 +270,7 @@ Inductive t2:
                           ((26,
                             Effect
                               ([
-                                NonTermination/1
+                                NonTermination/0
                               ],
                                 .)),
                             Variable
@@ -292,7 +292,7 @@ Inductive t2:
                                 ((26,
                                   Effect
                                     ([
-                                      NonTermination/1
+                                      NonTermination/0
                                     ],
                                       .)),
                                   Apply
@@ -302,7 +302,7 @@ Inductive t2:
                                         ],
                                           .
                                             -[
-                                              NonTermination/1
+                                              NonTermination/0
                                             ]->
                                             .)),
                                       Variable
@@ -314,7 +314,7 @@ Inductive t2:
                                                 ->
                                                 .
                                                   -[
-                                                    NonTermination/1
+                                                    NonTermination/0
                                                   ]->
                                                   .)),
                                           sum_rec/0),
@@ -345,15 +345,15 @@ Inductive t2:
 (Value
   (non_rec, @.,
     [
-      ((sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)),
+      ((sum, [ ], [ (l, Type (t2/0, Type (Z/0))) ], Some Type (Z/0)),
         Apply
-          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/0 ]-> .)),
                 sum_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/1 ], .)),
+                ((?, Effect ([ Counter/0 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -361,10 +361,10 @@ Inductive t2:
                         ],
                           .
                             -[
-                              Counter/1
+                              Counter/0
                             ]->
                             .)),
-                      read_counter/1),
+                      read_counter/0),
                   [
                     Tuple
                       ((?,
@@ -381,9 +381,9 @@ Inductive t2:
 (Value
   (non_rec, @.,
     [
-      ((s, [ A ], [ (x, A) ], Some Type (Z/1)),
+      ((s, [ A ], [ (x, A) ], Some Type (Z/0)),
         Match
-          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -391,8 +391,8 @@ Inductive t2:
                   ((28,
                     Effect
                       ([
-                        Counter/1;
-                        NonTermination/1
+                        Counter/0;
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -402,8 +402,8 @@ Inductive t2:
                           ],
                             .
                               -[
-                                Counter/1;
-                                NonTermination/1
+                                Counter/0;
+                                NonTermination/0
                               ]->
                               .)),
                         sum/0),
@@ -412,8 +412,8 @@ Inductive t2:
                         ((28,
                           Effect
                             ([
-                              Counter/1;
-                              NonTermination/1
+                              Counter/0;
+                              NonTermination/0
                             ],
                               .)),
                           Variable
@@ -423,8 +423,8 @@ Inductive t2:
                                 ],
                                   .
                                     -[
-                                      Counter/1;
-                                      NonTermination/1
+                                      Counter/0;
+                                      NonTermination/0
                                     ]->
                                     .)),
                               of_list/0),
@@ -435,7 +435,7 @@ Inductive t2:
                                   ([
                                   ],
                                     .)),
-                                cons/1,
+                                cons/0,
                                 Constant
                                   ((28,
                                     Effect
@@ -449,7 +449,7 @@ Inductive t2:
                                       ([
                                       ],
                                         .)),
-                                    cons/1,
+                                    cons/0,
                                     Constant
                                       ((28,
                                         Effect
@@ -463,7 +463,7 @@ Inductive t2:
                                           ([
                                           ],
                                             .)),
-                                        cons/1,
+                                        cons/0,
                                         Constant
                                           ((28,
                                             Effect
@@ -477,7 +477,7 @@ Inductive t2:
                                               ([
                                               ],
                                                 .)),
-                                            []/1))))
+                                            []/0))))
                           ])
                     ]))
             ]))

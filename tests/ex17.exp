@@ -9,12 +9,12 @@
     ]))
 
 7 Module G:
-  8 Exception (Inside, (Type (Z/2) * Type (string/2)))
+  8 Exception (Inside, (Type (Z/1) * Type (string/1)))
   
   10 (Value
     (non_rec, @.,
       [
-        ((g, [ A ], [ (b, Type (bool/2)) ], Some A),
+        ((g, [ A ], [ (b, Type (bool/1)) ], Some A),
           IfThenElse
             (11, Variable (11, b/0),
               Apply
@@ -38,22 +38,22 @@
 (Value
   (rec, @.,
     [
-      ((h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
+      ((h_rec, [ A; B ], [ (counter, Type (nat/0)); (l, Type (list/0, A)) ],
         Some B),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (18,
                     Variable
@@ -61,7 +61,7 @@
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Sequence
                           (19,
                             Apply
@@ -82,13 +82,13 @@
                                 [
                                   Constructor
                                     (19,
-                                      false/1)
+                                      false/0)
                                 ])));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           Constructor
-                            ([]/1)),
+                            ([]/0)),
                         Apply
                           (20,
                             Variable
@@ -105,7 +105,7 @@
                                       String("gg")))
                             ]));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           Any,
                           xs),
                         Apply
@@ -133,11 +133,11 @@
 (Value
   (non_rec, @.,
     [
-      ((h, [ A; B ], [ (l, Type (list/1, A)) ], Some B),
+      ((h, [ A; B ], [ (l, Type (list/0, A)) ], Some B),
         Apply
           (?, Variable (?, h_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, l/0)
             ]))
     ]))

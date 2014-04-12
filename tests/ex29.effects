@@ -2,15 +2,15 @@
 (Value
   (rec, @coq_rec,
     [
-      ((odd_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+      ((odd_length, [ A ], [ (l, Type (list/0, A)) ], Some Type (bool/0)),
         Match
           ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), l/0),
             [
-              (Constructor ([]/1),
+              (Constructor ([]/0),
                 Constructor
                   ((5, Effect ([ ], .)),
-                    false/1));
-              (Constructor (cons/1, Any, l),
+                    false/0));
+              (Constructor (cons/0, Any, l),
                 Apply
                   ((6, Effect ([ ], .)),
                     Variable
@@ -47,15 +47,15 @@
                           ])
                     ]))
             ]));
-      ((even_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+      ((even_length, [ A ], [ (l, Type (list/0, A)) ], Some Type (bool/0)),
         Match
           ((10, Effect ([ ], .)), Variable ((10, Effect ([ ], .)), l/0),
             [
-              (Constructor ([]/1),
+              (Constructor ([]/0),
                 Constructor
                   ((11, Effect ([ ], .)),
-                    true/1));
-              (Constructor (cons/1, Any, l),
+                    true/0));
+              (Constructor (cons/0, Any, l),
                 Apply
                   ((12, Effect ([ ], .)),
                     Variable
@@ -98,13 +98,13 @@
 (Value
   (rec, @coq_rec,
     [
-      ((odd_length_with_print, [ A ], [ (l, Type (list/1, A)) ],
-        Some Type (bool/1)),
+      ((odd_length_with_print, [ A ], [ (l, Type (list/0, A)) ],
+        Some Type (bool/0)),
         Match
           ((15, Effect ([ IO/0 ], .)),
             Variable ((15, Effect ([ ], .)), l/0),
             [
-              (Constructor ([]/1),
+              (Constructor ([]/0),
                 Sequence
                   ((16,
                     Effect
@@ -145,8 +145,8 @@
                           ([
                           ],
                             .)),
-                        false/1)));
-              (Constructor (cons/1, Any, l),
+                        false/0)));
+              (Constructor (cons/0, Any, l),
                 Apply
                   ((17,
                     Effect
@@ -191,17 +191,17 @@
                           ])
                     ]))
             ]));
-      ((even_length_with_print, [ A ], [ (l, Type (list/1, A)) ],
-        Some Type (bool/1)),
+      ((even_length_with_print, [ A ], [ (l, Type (list/0, A)) ],
+        Some Type (bool/0)),
         Match
           ((21, Effect ([ IO/0 ], .)),
             Variable ((21, Effect ([ ], .)), l/0),
             [
-              (Constructor ([]/1),
+              (Constructor ([]/0),
                 Constructor
                   ((22, Effect ([ ], .)),
-                    true/1));
-              (Constructor (cons/1, Any, l),
+                    true/0));
+              (Constructor (cons/0, Any, l),
                 Apply
                   ((23,
                     Effect
@@ -253,17 +253,17 @@
   (rec, @.,
     [
       ((odd_length_free_rec, [ A ],
-        [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some Type (bool/1)),
+        [ (counter, Type (nat/0)); (l, Type (list/0, A)) ], Some Type (bool/0)),
         Match
-          ((?, Effect ([ NonTermination/1 ], .)),
+          ((?, Effect ([ NonTermination/0 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -273,10 +273,10 @@
                           ],
                             .
                               -[
-                                NonTermination/1
+                                NonTermination/0
                               ]->
                               .)),
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         ((?,
@@ -285,12 +285,12 @@
                             ],
                               .)))
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   ((26,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -302,23 +302,23 @@
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           ((27,
                             Effect
                               ([
                               ],
                                 .)),
-                            false/1));
+                            false/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           Any,
                           l),
                         Apply
                           ((28,
                             Effect
                               ([
-                                NonTermination/1
+                                NonTermination/0
                               ],
                                 .)),
                             Variable
@@ -333,7 +333,7 @@
                                 ((28,
                                   Effect
                                     ([
-                                      NonTermination/1
+                                      NonTermination/0
                                     ],
                                       .)),
                                   Apply
@@ -343,7 +343,7 @@
                                         ],
                                           .
                                             -[
-                                              NonTermination/1
+                                              NonTermination/0
                                             ]->
                                             .)),
                                       Variable
@@ -355,7 +355,7 @@
                                                 ->
                                                 .
                                                   -[
-                                                    NonTermination/1
+                                                    NonTermination/0
                                                   ]->
                                                   .)),
                                           even_length_free_rec/0),
@@ -381,17 +381,17 @@
                     ]))
             ]));
       ((even_length_free_rec, [ A ],
-        [ (counter, Type (nat/1)); (l, Type (list/1, A)) ], Some Type (bool/1)),
+        [ (counter, Type (nat/0)); (l, Type (list/0, A)) ], Some Type (bool/0)),
         Match
-          ((?, Effect ([ NonTermination/1 ], .)),
+          ((?, Effect ([ NonTermination/0 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -401,10 +401,10 @@
                           ],
                             .
                               -[
-                                NonTermination/1
+                                NonTermination/0
                               ]->
                               .)),
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         ((?,
@@ -413,12 +413,12 @@
                             ],
                               .)))
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   ((31,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -430,23 +430,23 @@
                         l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           ((32,
                             Effect
                               ([
                               ],
                                 .)),
-                            true/1));
+                            true/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           Any,
                           l),
                         Apply
                           ((33,
                             Effect
                               ([
-                                NonTermination/1
+                                NonTermination/0
                               ],
                                 .)),
                             Variable
@@ -461,7 +461,7 @@
                                 ((33,
                                   Effect
                                     ([
-                                      NonTermination/1
+                                      NonTermination/0
                                     ],
                                       .)),
                                   Apply
@@ -471,7 +471,7 @@
                                         ],
                                           .
                                             -[
-                                              NonTermination/1
+                                              NonTermination/0
                                             ]->
                                             .)),
                                       Variable
@@ -483,7 +483,7 @@
                                                 ->
                                                 .
                                                   -[
-                                                    NonTermination/1
+                                                    NonTermination/0
                                                   ]->
                                                   .)),
                                           odd_length_free_rec/0),
@@ -514,15 +514,15 @@
 (Value
   (non_rec, @.,
     [
-      ((odd_length_free, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+      ((odd_length_free, [ A ], [ (l, Type (list/0, A)) ], Some Type (bool/0)),
         Apply
-          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/0 ]-> .)),
                 odd_length_free_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/1 ], .)),
+                ((?, Effect ([ Counter/0 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -530,10 +530,10 @@
                         ],
                           .
                             -[
-                              Counter/1
+                              Counter/0
                             ]->
                             .)),
-                      read_counter/1),
+                      read_counter/0),
                   [
                     Tuple
                       ((?,
@@ -550,15 +550,15 @@
 (Value
   (non_rec, @.,
     [
-      ((even_length_free, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
+      ((even_length_free, [ A ], [ (l, Type (list/0, A)) ], Some Type (bool/0)),
         Apply
-          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ NonTermination/1 ]-> .)),
+              ((?, Effect ([ ], . -> . -[ NonTermination/0 ]-> .)),
                 even_length_free_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/1 ], .)),
+                ((?, Effect ([ Counter/0 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -566,10 +566,10 @@
                         ],
                           .
                             -[
-                              Counter/1
+                              Counter/0
                             ]->
                             .)),
-                      read_counter/1),
+                      read_counter/0),
                   [
                     Tuple
                       ((?,

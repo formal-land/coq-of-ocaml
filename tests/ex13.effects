@@ -2,19 +2,19 @@
 (Value
   (non_rec, @.,
     [
-      ((tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A)),
+      ((tail, [ A ], [ (l, Type (list/0, A)) ], Some Type (list/0, A)),
         Match
-          ((4, Effect ([ OCaml.Failure/1 ], .)),
+          ((4, Effect ([ OCaml.Failure/0 ], .)),
             Variable ((4, Effect ([ ], .)), l/0),
             [
-              (Constructor (cons/1, Any, xs),
+              (Constructor (cons/0, Any, xs),
                 Variable ((5, Effect ([ ], .)), xs/0));
-              (Constructor ([]/1),
+              (Constructor ([]/0),
                 Apply
                   ((6,
                     Effect
                       ([
-                        OCaml.Failure/1
+                        OCaml.Failure/0
                       ],
                         .)),
                     Variable
@@ -24,10 +24,10 @@
                           ],
                             .
                               -[
-                                OCaml.Failure/1
+                                OCaml.Failure/0
                               ]->
                               .)),
-                        OCaml.Pervasives.failwith/1),
+                        OCaml.Pervasives.failwith/0),
                     [
                       Constant
                         ((6,
@@ -45,18 +45,18 @@
   (rec, @.,
     [
       ((print_list_rec, [ ],
-        [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
-        Some Type (unit/1)),
+        [ (counter, Type (nat/0)); (x, Type (list/0, Type (string/0))) ],
+        Some Type (unit/0)),
         Match
-          ((?, Effect ([ IO/0; NonTermination/1 ], .)),
+          ((?, Effect ([ IO/0; NonTermination/0 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -66,10 +66,10 @@
                           ],
                             .
                               -[
-                                NonTermination/1
+                                NonTermination/0
                               ]->
                               .)),
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         ((?,
@@ -78,13 +78,13 @@
                             ],
                               .)))
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   ((?,
                     Effect
                       ([
                         IO/0;
-                        NonTermination/1
+                        NonTermination/0
                       ],
                         .)),
                     Variable
@@ -96,16 +96,16 @@
                         x/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           ((9,
                             Effect
                               ([
                               ],
                                 .)),
-                            tt/1));
+                            tt/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Sequence
@@ -113,7 +113,7 @@
                             Effect
                               ([
                                 IO/0;
-                                NonTermination/1
+                                NonTermination/0
                               ],
                                 .)),
                             Apply
@@ -148,7 +148,7 @@
                                 Effect
                                   ([
                                     IO/0;
-                                    NonTermination/1
+                                    NonTermination/0
                                   ],
                                     .)),
                                 Apply
@@ -159,7 +159,7 @@
                                         .
                                           -[
                                             IO/0;
-                                            NonTermination/1
+                                            NonTermination/0
                                           ]->
                                           .)),
                                     Variable
@@ -172,7 +172,7 @@
                                               .
                                                 -[
                                                   IO/0;
-                                                  NonTermination/1
+                                                  NonTermination/0
                                                 ]->
                                                 .)),
                                         print_list_rec/0),
@@ -202,16 +202,16 @@
 (Value
   (non_rec, @.,
     [
-      ((print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
-        Some Type (unit/1)),
+      ((print_list, [ ], [ (x, Type (list/0, Type (string/0))) ],
+        Some Type (unit/0)),
         Apply
-          ((?, Effect ([ Counter/1; IO/0; NonTermination/1 ], .)),
+          ((?, Effect ([ Counter/0; IO/0; NonTermination/0 ], .)),
             Variable
-              ((?, Effect ([ ], . -> . -[ IO/0; NonTermination/1 ]-> .)),
+              ((?, Effect ([ ], . -> . -[ IO/0; NonTermination/0 ]-> .)),
                 print_list_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/1 ], .)),
+                ((?, Effect ([ Counter/0 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -219,10 +219,10 @@
                         ],
                           .
                             -[
-                              Counter/1
+                              Counter/0
                             ]->
                             .)),
-                      read_counter/1),
+                      read_counter/0),
                   [
                     Tuple
                       ((?,
@@ -239,9 +239,9 @@
 (Value
   (non_rec, @.,
     [
-      ((f, [ ], [ ], Some (Type (list/1, Type (string/1)) -> Type (unit/1))),
+      ((f, [ ], [ ], Some (Type (list/0, Type (string/0)) -> Type (unit/0))),
         Variable
-          ((14, Effect ([ ], . -[ Counter/1; IO/0; NonTermination/1 ]-> .)),
+          ((14, Effect ([ ], . -[ Counter/0; IO/0; NonTermination/0 ]-> .)),
             print_list/0))
     ]))
 
@@ -249,19 +249,19 @@
 (Value
   (non_rec, @.,
     [
-      ((x, [ A ], [ (z, A) ], Some Type (unit/1)),
+      ((x, [ A ], [ (z, A) ], Some Type (unit/0)),
         Apply
           ((16,
             Effect
-              ([ Counter/1; IO/0; NonTermination/1; OCaml.Failure/1 ], .)),
+              ([ Counter/0; IO/0; NonTermination/0; OCaml.Failure/0 ], .)),
             Variable
               ((16,
                 Effect
-                  ([ ], . -[ Counter/1; IO/0; NonTermination/1 ]-> .)),
+                  ([ ], . -[ Counter/0; IO/0; NonTermination/0 ]-> .)),
                 f/0),
             [
               Apply
-                ((16, Effect ([ OCaml.Failure/1 ], .)),
+                ((16, Effect ([ OCaml.Failure/0 ], .)),
                   Variable
                     ((16,
                       Effect
@@ -269,7 +269,7 @@
                         ],
                           .
                             -[
-                              OCaml.Failure/1
+                              OCaml.Failure/0
                             ]->
                             .)),
                       tail/0),
@@ -280,7 +280,7 @@
                           ([
                           ],
                             .)),
-                        cons/1,
+                        cons/0,
                         Constant
                           ((16,
                             Effect
@@ -294,7 +294,7 @@
                               ([
                               ],
                                 .)),
-                            cons/1,
+                            cons/0,
                             Constant
                               ((16,
                                 Effect
@@ -308,7 +308,7 @@
                                   ([
                                   ],
                                     .)),
-                                cons/1,
+                                cons/0,
                                 Constant
                                   ((16,
                                     Effect
@@ -322,7 +322,7 @@
                                       ([
                                       ],
                                         .)),
-                                    cons/1,
+                                    cons/0,
                                     Constant
                                       ((16,
                                         Effect
@@ -336,7 +336,7 @@
                                           ([
                                           ],
                                             .)),
-                                        []/1)))))
+                                        []/0)))))
                   ])
             ]))
     ]))

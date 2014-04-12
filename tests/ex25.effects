@@ -2,57 +2,57 @@
 (Value
   (non_rec, @.,
     [
-      ((l1, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Constructor ((3, Effect ([ ], .)), []/1))
+      ((l1, [ ], [ ], Some Type (list/0, Type (Z/0))),
+        Constructor ((3, Effect ([ ], .)), []/0))
     ]))
 
 4
 (Value
   (non_rec, @.,
     [
-      ((l2, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((l2, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Constructor
-          ((4, Effect ([ ], .)), cons/1,
+          ((4, Effect ([ ], .)), cons/0,
             Constant ((4, Effect ([ ], .)), Int(1)),
             Constructor
-              ((4, Effect ([ ], .)), cons/1,
+              ((4, Effect ([ ], .)), cons/0,
                 Constant ((4, Effect ([ ], .)), Int(2)),
                 Constructor
-                  ((4, Effect ([ ], .)), cons/1,
+                  ((4, Effect ([ ], .)), cons/0,
                     Constant ((4, Effect ([ ], .)), Int(3)),
                     Constructor
-                      ((4, Effect ([ ], .)), cons/1,
+                      ((4, Effect ([ ], .)), cons/0,
                         Constant
                           ((4, Effect ([ ], .)), Int(4)),
                         Constructor
-                          ((4, Effect ([ ], .)), []/1))))))
+                          ((4, Effect ([ ], .)), []/0))))))
     ]))
 
 5
 (Value
   (non_rec, @.,
     [
-      ((l3, [ ], [ ], Some Type (list/1, (Type (Z/1) * Type (string/1)))),
+      ((l3, [ ], [ ], Some Type (list/0, (Type (Z/0) * Type (string/0)))),
         Constructor
-          ((5, Effect ([ ], .)), cons/1,
+          ((5, Effect ([ ], .)), cons/0,
             Tuple
               ((5, Effect ([ ], .)),
                 Constant ((5, Effect ([ ], .)), Int(1)),
                 Constant ((5, Effect ([ ], .)), String("one"))),
             Constructor
-              ((5, Effect ([ ], .)), cons/1,
+              ((5, Effect ([ ], .)), cons/0,
                 Tuple
                   ((5, Effect ([ ], .)),
                     Constant ((5, Effect ([ ], .)), Int(2)),
                     Constant ((5, Effect ([ ], .)), String("two"))),
-                Constructor ((5, Effect ([ ], .)), []/1))))
+                Constructor ((5, Effect ([ ], .)), []/0))))
     ]))
 
 7
 (Value
   (non_rec, @.,
     [
-      ((s1, [ ], [ ], Some Type (Z/1)),
+      ((s1, [ ], [ ], Some Type (Z/0)),
         Apply
           ((7, Effect ([ ], .)),
             Variable ((7, Effect ([ ], .)), OCaml.List.length/0),
@@ -63,7 +63,7 @@
 (Value
   (non_rec, @.,
     [
-      ((s2, [ ], [ ], Some Type (Z/1)),
+      ((s2, [ ], [ ], Some Type (Z/0)),
         Apply
           ((8, Effect ([ ], .)),
             Variable ((8, Effect ([ ], .)), OCaml.List.length/0),
@@ -74,7 +74,7 @@
 (Value
   (non_rec, @.,
     [
-      ((h, [ A ], [ (x, A) ], Some Type (Z/1)),
+      ((h, [ A ], [ (x, A) ], Some Type (Z/0)),
         Match
           ((?, Effect ([ OCaml.Failure/0 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
@@ -114,7 +114,7 @@
 (Value
   (non_rec, @.,
     [
-      ((t, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))),
+      ((t, [ A ], [ (x, A) ], Some Type (list/0, Type (Z/0))),
         Match
           ((?, Effect ([ OCaml.Failure/0 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
@@ -154,7 +154,7 @@
 (Value
   (non_rec, @.,
     [
-      ((x, [ A ], [ (x, A) ], Some Type (Z/1)),
+      ((x, [ A ], [ (x, A) ], Some Type (Z/0)),
         Match
           ((?, Effect ([ OCaml.Failure/0; OCaml.Invalid_argument/0 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
@@ -205,7 +205,7 @@
 (Value
   (non_rec, @.,
     [
-      ((rl, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((rl, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((12, Effect ([ ], .)),
             Variable ((12, Effect ([ ], .)), List.rev/0),
@@ -216,7 +216,7 @@
 (Value
   (non_rec, @.,
     [
-      ((ll, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((ll, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((13, Effect ([ ], .)),
             Variable ((13, Effect ([ ], .)), OCaml.Pervasives.app/0),
@@ -230,7 +230,7 @@
 (Value
   (non_rec, @.,
     [
-      ((rll, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((rll, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((14, Effect ([ ], .)),
             Variable ((14, Effect ([ ], .)), List.rev_append/0),
@@ -244,13 +244,13 @@
 (Value
   (non_rec, @.,
     [
-      ((lc, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((lc, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((15, Effect ([ ], .)),
             Variable ((15, Effect ([ ], .)), OCaml.List.flatten/0),
             [
               Constructor
-                ((15, Effect ([ ], .)), cons/1,
+                ((15, Effect ([ ], .)), cons/0,
                   Variable
                     ((15,
                       Effect
@@ -264,7 +264,7 @@
                         ([
                         ],
                           .)),
-                      cons/1,
+                      cons/0,
                       Variable
                         ((15,
                           Effect
@@ -278,7 +278,7 @@
                             ([
                             ],
                               .)),
-                          cons/1,
+                          cons/0,
                           Variable
                             ((15,
                               Effect
@@ -292,7 +292,7 @@
                                 ([
                                 ],
                                   .)),
-                              cons/1,
+                              cons/0,
                               Variable
                                 ((15,
                                   Effect
@@ -306,7 +306,7 @@
                                     ([
                                     ],
                                       .)),
-                                  []/1)))))
+                                  []/0)))))
             ]))
     ]))
 
@@ -314,13 +314,13 @@
 (Value
   (non_rec, @.,
     [
-      ((lf, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((lf, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((16, Effect ([ ], .)),
             Variable ((16, Effect ([ ], .)), OCaml.List.flatten/0),
             [
               Constructor
-                ((16, Effect ([ ], .)), cons/1,
+                ((16, Effect ([ ], .)), cons/0,
                   Variable
                     ((16,
                       Effect
@@ -334,7 +334,7 @@
                         ([
                         ],
                           .)),
-                      cons/1,
+                      cons/0,
                       Variable
                         ((16,
                           Effect
@@ -348,7 +348,7 @@
                             ([
                             ],
                               .)),
-                          cons/1,
+                          cons/0,
                           Variable
                             ((16,
                               Effect
@@ -362,7 +362,7 @@
                                 ([
                                 ],
                                   .)),
-                              cons/1,
+                              cons/0,
                               Variable
                                 ((16,
                                   Effect
@@ -376,7 +376,7 @@
                                     ([
                                     ],
                                       .)),
-                                  []/1)))))
+                                  []/0)))))
             ]))
     ]))
 
@@ -384,7 +384,7 @@
 (Value
   (non_rec, @.,
     [
-      ((m, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((m, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((21, Effect ([ ], .)),
             Variable ((21, Effect ([ ], .)), List.map/0),
@@ -428,7 +428,7 @@
 (Value
   (non_rec, @.,
     [
-      ((mi, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((mi, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((22, Effect ([ ], .)),
             Variable ((22, Effect ([ ], .)), OCaml.List.mapi/0),
@@ -481,7 +481,7 @@
 (Value
   (non_rec, @.,
     [
-      ((rm, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((rm, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Apply
           ((23, Effect ([ ], .)),
             Variable ((23, Effect ([ ], .)), OCaml.List.rev_map/0),
@@ -525,7 +525,7 @@
 (Value
   (non_rec, @.,
     [
-      ((fl, [ ], [ ], Some Type (Z/1)),
+      ((fl, [ ], [ ], Some Type (Z/0)),
         Apply
           ((24, Effect ([ ], .)),
             Variable ((24, Effect ([ ], .)), OCaml.List.fold_left/0),
@@ -579,7 +579,7 @@
 (Value
   (non_rec, @.,
     [
-      ((fr, [ ], [ ], Some Type (Z/1)),
+      ((fr, [ ], [ ], Some Type (Z/0)),
         Apply
           ((25, Effect ([ ], .)),
             Variable ((25, Effect ([ ], .)), OCaml.List.fold_right/0),
@@ -633,7 +633,7 @@
 (Value
   (non_rec, @.,
     [
-      ((m2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+      ((m2, [ A ], [ (x_1, A) ], Some Type (list/0, Type (Z/0))),
         Match
           ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
             Variable ((?, Effect ([ ], .)), x_1/0),
@@ -733,7 +733,7 @@
 (Value
   (non_rec, @.,
     [
-      ((rm2, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+      ((rm2, [ A ], [ (x_1, A) ], Some Type (list/0, Type (Z/0))),
         Match
           ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
             Variable ((?, Effect ([ ], .)), x_1/0),
@@ -833,7 +833,7 @@
 (Value
   (non_rec, @.,
     [
-      ((fl2, [ A ], [ (x_1, A) ], Some Type (Z/1)),
+      ((fl2, [ A ], [ (x_1, A) ], Some Type (Z/0)),
         Match
           ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
             Variable ((?, Effect ([ ], .)), x_1/0),
@@ -977,7 +977,7 @@
 (Value
   (non_rec, @.,
     [
-      ((fr2, [ A ], [ (x_1, A) ], Some Type (Z/1)),
+      ((fr2, [ A ], [ (x_1, A) ], Some Type (Z/0)),
         Match
           ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
             Variable ((?, Effect ([ ], .)), x_1/0),

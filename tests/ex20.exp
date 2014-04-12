@@ -4,23 +4,23 @@
     [
       ((sums_rec, [ ],
         [
-          (counter, Type (nat/1));
-          (ls, Type (list/1, Type (list/1, Type (Z/1))))
-        ], Some Type (list/1, Type (Z/1))),
+          (counter, Type (nat/0));
+          (ls, Type (list/0, Type (list/0, Type (Z/0))))
+        ], Some Type (list/0, Type (Z/0))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 LetFun 4
                   (rec, @.,
                     [
@@ -30,16 +30,16 @@
                         [
                           (counter_1,
                             Type
-                              (nat/1));
+                              (nat/0));
                           (xs,
                             Type
-                              (list/1,
+                              (list/0,
                                 Type
-                                  (Z/1)))
+                                  (Z/0)))
                         ],
                         Some
                           Type
-                            (Z/1)),
+                            (Z/0)),
                         Match
                           (?,
                             Variable
@@ -47,18 +47,18 @@
                                 counter_1/0),
                             [
                               (Constructor
-                                (O/1),
+                                (O/0),
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        not_terminated/1),
+                                        not_terminated/0),
                                     [
                                       Tuple
                                         (?)
                                     ]));
                               (Constructor
-                                (S/1,
+                                (S/0,
                                   counter_1),
                                 Match
                                   (5,
@@ -67,12 +67,12 @@
                                         xs/0),
                                     [
                                       (Constructor
-                                        ([]/1),
+                                        ([]/0),
                                         Constant
                                           (6,
                                             Int(0)));
                                       (Constructor
-                                        (cons/1,
+                                        (cons/0,
                                           x,
                                           xs),
                                         IfThenElse
@@ -107,23 +107,23 @@
                                                     [
                                                       Constructor
                                                         (9,
-                                                          cons/1,
+                                                          cons/0,
                                                           Constructor
                                                             (9,
-                                                              cons/1,
+                                                              cons/0,
                                                               Constant
                                                                 (9,
                                                                   Int(13)),
                                                               Constructor
                                                                 (9,
-                                                                  []/1)),
+                                                                  []/0)),
                                                           Constructor
                                                             (9,
-                                                              []/1))
+                                                              []/0))
                                                     ]),
                                                 [
                                                   (Constructor
-                                                    (cons/1,
+                                                    (cons/0,
                                                       x,
                                                       Any),
                                                     Apply
@@ -184,13 +184,13 @@
                         [
                           (xs,
                             Type
-                              (list/1,
+                              (list/0,
                                 Type
-                                  (Z/1)))
+                                  (Z/0)))
                         ],
                         Some
                           Type
-                            (Z/1)),
+                            (Z/0)),
                         Apply
                           (?,
                             Variable
@@ -201,7 +201,7 @@
                                 (?,
                                   Variable
                                     (?,
-                                      read_counter/1),
+                                      read_counter/0),
                                   [
                                     Tuple
                                       (?)
@@ -219,17 +219,17 @@
                         ls/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           (15,
-                            []/1));
+                            []/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           xs,
                           ls),
                         Constructor
                           (16,
-                            cons/1,
+                            cons/0,
                             Apply
                               (16,
                                 Variable
@@ -265,12 +265,12 @@
 (Value
   (non_rec, @.,
     [
-      ((sums, [ ], [ (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
-        Some Type (list/1, Type (Z/1))),
+      ((sums, [ ], [ (ls, Type (list/0, Type (list/0, Type (Z/0)))) ],
+        Some Type (list/0, Type (Z/0))),
         Apply
           (?, Variable (?, sums_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, ls/0)
             ]))
     ]))

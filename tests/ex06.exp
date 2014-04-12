@@ -3,37 +3,37 @@
   (rec, @.,
     [
       ((map_rec, [ A; B ],
-        [ (counter, Type (nat/1)); (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Type (list/1, B)),
+        [ (counter, Type (nat/0)); (f, (A -> B)); (l, Type (list/0, A)) ],
+        Some Type (list/0, B)),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (4, Variable (4, l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Constructor
                           (5,
-                            []/1));
+                            []/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Constructor
                           (6,
-                            cons/1,
+                            cons/0,
                             Apply
                               (6,
                                 Variable
@@ -72,12 +72,12 @@
 (Value
   (non_rec, @.,
     [
-      ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Type (list/1, B)),
+      ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/0, A)) ],
+        Some Type (list/0, B)),
         Apply
           (?, Variable (?, map_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, f/0);
               Variable (?, l/0)
             ]))
@@ -89,35 +89,35 @@
     [
       ((fold_rec, [ A; B ],
         [
-          (counter, Type (nat/1));
+          (counter, Type (nat/0));
           (f, (A -> (B -> A)));
           (a, A);
-          (l, Type (list/1, B))
+          (l, Type (list/0, B))
         ], Some A),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/1),
+              (Constructor (O/0),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/1),
+                        not_terminated/0),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/1, counter),
+              (Constructor (S/0, counter),
                 Match
                   (9, Variable (9, l/0),
                     [
                       (Constructor
-                        ([]/1),
+                        ([]/0),
                         Variable
                           (10,
                             a/0));
                       (Constructor
-                        (cons/1,
+                        (cons/0,
                           x,
                           xs),
                         Apply
@@ -161,12 +161,12 @@
 (Value
   (non_rec, @.,
     [
-      ((fold, [ A; B ], [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ],
+      ((fold, [ A; B ], [ (f, (A -> (B -> A))); (a, A); (l, Type (list/0, B)) ],
         Some A),
         Apply
           (?, Variable (?, fold_rec/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
               Variable (?, f/0);
               Variable (?, a/0);
               Variable (?, l/0)
@@ -177,16 +177,16 @@
 (Value
   (non_rec, @.,
     [
-      ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((l, [ ], [ ], Some Type (list/0, Type (Z/0))),
         Constructor
-          (13, cons/1, Constant (13, Int(5)),
+          (13, cons/0, Constant (13, Int(5)),
             Constructor
-              (13, cons/1, Constant (13, Int(6)),
+              (13, cons/0, Constant (13, Int(6)),
                 Constructor
-                  (13, cons/1, Constant (13, Int(7)),
+                  (13, cons/0, Constant (13, Int(7)),
                     Constructor
-                      (13, cons/1, Constant (13, Int(2)),
-                        Constructor (13, []/1))))))
+                      (13, cons/0, Constant (13, Int(2)),
+                        Constructor (13, []/0))))))
     ]))
 
 15
@@ -195,9 +195,9 @@
     [
       ((n, [ A ],
         [
-          (incr, (Type (Z/1) -> A));
-          (plus, (Type (Z/1) -> (A -> Type (Z/1))))
-        ], Some Type (Z/1)),
+          (incr, (Type (Z/0) -> A));
+          (plus, (Type (Z/0) -> (A -> Type (Z/0))))
+        ], Some Type (Z/0)),
         Apply
           (16, Variable (16, fold/0),
             [
