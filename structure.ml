@@ -51,12 +51,10 @@ module Inductive = struct
       OCaml.list (fun (x, typs) -> OCaml.tuple [Name.pp x; OCaml.list Type.pp typs]) ind.constructors]))
 
   let update_env (ind : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    { env with
-      FullEnvi.typs = Envi.add_name ind.name () env.FullEnvi.typs;
-      constructors =
-        List.fold_left (fun constructors (x, _) ->
-          Envi.add_name x () constructors)
-          env.FullEnvi.constructors ind.constructors }
+    let env = FullEnvi.add_typ [] ind.name Envi.Visibility.Global env in
+    List.fold_left (fun env (x, _) ->
+      FullEnvi.add_constructor [] x Envi.Visibility.Global env)
+      env ind.constructors
 
   (** Pretty-print a sum type definition to Coq. *)
   let to_coq (ind : t) : SmartPrint.t =
@@ -91,12 +89,10 @@ module Record = struct
       OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) r.fields]))
 
   let update_env (r : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    { env with
-      FullEnvi.typs = Envi.add_name r.name () env.FullEnvi.typs;
-      fields =
-        List.fold_left (fun fields (x, _) ->
-          Envi.add_name x () fields)
-          env.FullEnvi.fields r.fields }
+    let env = FullEnvi.add_typ [] r.name Envi.Visibility.Global env in
+    List.fold_left (fun env (x, _) ->
+      FullEnvi.add_field [] x Envi.Visibility.Global env)
+      env r.fields
 
   (** Pretty-print a record definition to Coq. *)
   let to_coq (r : t) : SmartPrint.t =
@@ -119,7 +115,7 @@ module Synonym = struct
       Name.pp s.name; OCaml.list Name.pp s.typ_vars; Type.pp s.value])
 
   let update_env (s : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    { env with FullEnvi.typs = Envi.add_name s.name () env.FullEnvi.typs }
+    FullEnvi.add_typ [] s.name Envi.Visibility.Global env
 
   let to_coq (s : t) : SmartPrint.t =
     nest (
@@ -137,22 +133,11 @@ module Exception = struct
     nest (!^ "Exception" ^^ OCaml.tuple [Name.pp exn.name; Type.pp exn.typ])
 
   let update_env (exn : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
-    { env with
-      FullEnvi.vars = Envi.add_name ("raise_" ^ exn.name) () env.FullEnvi.vars;
-      descriptors = Envi.add_name exn.name () env.FullEnvi.descriptors }
+    FullEnvi.add_exception [] exn.name Envi.Visibility.Global env
 
   let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t) (loc : Loc.t)
     : Effect.Type.t FullEnvi.t =
-    let env = { env with
-      FullEnvi.descriptors = Envi.add_name exn.name () env.FullEnvi.descriptors } in
-    let effect_typ =
-      Effect.Type.Arrow (
-        Effect.Descriptor.singleton
-          loc
-          (Envi.bound_name (PathName.of_name [] exn.name) env.FullEnvi.descriptors),
-        Effect.Type.Pure) in
-    { env with
-      FullEnvi.vars = Envi.add_name ("raise_" ^ exn.name) effect_typ env.FullEnvi.vars }
+    FullEnvi.add_exception_with_effects [] exn.name loc Envi.Visibility.Global env
 
   let to_coq (exn : t) : SmartPrint.t =
     !^ "Definition" ^^ Name.to_coq exn.name ^^ !^ ":=" ^^
@@ -174,28 +159,23 @@ module Reference = struct
     nest (!^ "Reference" ^^ OCaml.tuple [Name.pp r.name; Type.pp r.typ])
 
   let update_env (r : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
-    { env with
-      FullEnvi.vars =
-        Envi.add_name ("read_" ^ r.name) () (
-        Envi.add_name ("write_" ^ r.name) ()
-          (env.FullEnvi.vars));
-      descriptors = Envi.add_name r.name () env.FullEnvi.descriptors }
+    env
+    |> FullEnvi.add_var [] ("read_" ^ r.name) Envi.Visibility.Global ()
+    |> FullEnvi.add_var [] ("write_" ^ r.name) Envi.Visibility.Global ()
+    |> FullEnvi.add_descriptor [] r.name Envi.Visibility.Global
 
   let update_env_with_effects (r : t) (env : Effect.Type.t FullEnvi.t) (loc : Loc.t)
     : Effect.Type.t FullEnvi.t =
-    let env = { env with
-      FullEnvi.descriptors = Envi.add_name r.name () env.FullEnvi.descriptors } in
+    let env = FullEnvi.add_descriptor [] r.name Envi.Visibility.Global env in
     let effect_typ =
       Effect.Type.Arrow (
         Effect.Descriptor.singleton
           loc
           (Envi.bound_name (PathName.of_name [] r.name) env.FullEnvi.descriptors),
         Effect.Type.Pure) in
-    { env with
-      FullEnvi.vars =
-        Envi.add_name ("read_" ^ r.name) effect_typ (
-        Envi.add_name ("write_" ^ r.name) effect_typ
-          (env.FullEnvi.vars)) }
+    env
+    |> FullEnvi.add_var [] ("read_" ^ r.name) Envi.Visibility.Global effect_typ
+    |> FullEnvi.add_var [] ("write_" ^ r.name) Envi.Visibility.Global effect_typ
 
   let to_coq (r : t) : SmartPrint.t =
     !^ "Definition" ^^ Name.to_coq r.name ^^ !^ ":=" ^^
@@ -271,7 +251,8 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         typ = Type.of_type_expr env typ } in
       (Reference.update_env r env, Reference (loc, r))
     | Tstr_value (is_rec, cases) ->
-      let (env, def) = Exp.import_let_fun env Name.Map.empty is_rec cases in
+      let (env, def) =
+        Exp.import_let_fun env Envi.Visibility.Global Name.Map.empty is_rec cases in
       (env, Value (loc, def))
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       let name = Name.of_ident name in
@@ -279,7 +260,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       (match typ.type_kind with
       | Type_variant cases ->
         let constructors =
-          let env = FullEnvi.add_typ [] name env in
+          let env = FullEnvi.add_typ [] name Envi.Visibility.Global env in
           cases |> List.map (fun {cd_id = constr; cd_args = typs} ->
             (Name.of_ident constr, typs |> List.map (fun typ ->
               Type.of_type_expr env typ))) in
@@ -333,7 +314,8 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
     : unit FullEnvi.t * Loc.t t list =
     match def with
     | Value (loc, def) ->
-      let (env, defs) = Exp.monadise_let_rec_definition env def in
+      let (env, defs) =
+        Exp.monadise_let_rec_definition env Envi.Visibility.Global def in
       (env, defs |> List.rev |> List.map (fun def -> Value (loc, def)))
     | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in
@@ -357,12 +339,12 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
     : Effect.Type.t FullEnvi.t * ('a * Effect.t) t =
     match def with
     | Value (loc, def) ->
-      let def = Exp.effects_of_def env def in
+      let def = Exp.effects_of_def env Envi.Visibility.Global def in
       (if def.Exp.Definition.cases |> List.exists (fun (header, e) ->
         header.Exp.Header.args = [] &&
           not (Effect.Descriptor.is_pure (snd (Exp.annotation e)).Effect.descriptor)) then
         failwith "Toplevel effects are forbidden.");
-      let env = Exp.env_after_def_with_effects env def in
+      let env = Exp.env_after_def_with_effects env Envi.Visibility.Global def in
       (env, Value (loc, def))
     | Module (loc, name, defs) ->
       let env = FullEnvi.open_module env in
@@ -390,7 +372,7 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
     : unit FullEnvi.t * Loc.t t =
     match def with
     | Value (loc, def) ->
-      let env_in_def = Exp.Definition.env_in_def def env in
+      let env_in_def = Exp.Definition.env_in_def def Envi.Visibility.Global env in
       let def = { def with
         Exp.Definition.cases = def.Exp.Definition.cases |> List.map (fun (header, e) ->
           let typ = match header.Exp.Header.typ with
@@ -400,16 +382,16 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
         let env = Exp.Header.env_in_header header env_in_def () in
         let e = Exp.monadise env e in
         (header, e)) } in
-      let env = Exp.Definition.env_after_def def env in
+      let env = Exp.Definition.env_after_def def Envi.Visibility.Global env in
       (env, Value (loc, def))
     | Module (loc, name, defs) ->
       let (env, defs) = monadise (FullEnvi.open_module env) defs in
       (FullEnvi.close_module env name, Module (loc, name, defs))
     | Exception (loc, exn) ->
-      let env = FullEnvi.add_var [] exn.Exception.name () env in
+      let env = Exception.update_env exn env in
       (env, Exception (loc, exn))
     | Reference (loc, r) ->
-      let env = FullEnvi.add_var [] r.Reference.name () env in
+      let env = Reference.update_env r env in
       (env, Reference (loc, r))
     | Inductive (loc, ind) -> (env, Inductive (loc, ind))
     | Record (loc, record) -> (env, Record (loc, record))

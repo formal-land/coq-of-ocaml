@@ -16,36 +16,36 @@ let empty (close_lift_vars : 'a -> Name.t -> 'a) : 'a t = {
   fields = Envi.empty
 }
 
-let add_var (path : Name.t list) (base : Name.t) (v : 'a) (env : 'a t) : 'a t =
-  { env with vars = Envi.add (PathName.of_name path base) v env.vars }
+let add_var (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (v : 'a) (env : 'a t) : 'a t =
+  { env with vars = Envi.add (PathName.of_name path base) visibility v env.vars }
 
-let add_typ (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
-  { env with typs = Envi.add (PathName.of_name path base) () env.typs }
+let add_typ (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with typs = Envi.add (PathName.of_name path base) visibility () env.typs }
 
-let add_descriptor (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
-  { env with descriptors = Envi.add (PathName.of_name path base) () env.descriptors }
+let add_descriptor (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with descriptors = Envi.add (PathName.of_name path base) visibility () env.descriptors }
 
-let add_exception (path : Name.t list) (base : Name.t) (env : unit t) : unit t =
+let add_exception (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : unit t) : unit t =
   env
-  |> add_descriptor path base
-  |> add_var path ("raise_" ^ base) ()
+  |> add_descriptor path base visibility
+  |> add_var path ("raise_" ^ base) visibility ()
 
 let add_exception_with_effects (path : Name.t list) (base : Name.t)
-  (loc : Loc.t) (env : Effect.Type.t t) : Effect.Type.t t =
-  let env = add_descriptor path base env in
+  (loc : Loc.t) (visibility : Envi.Visibility.t) (env : Effect.Type.t t) : Effect.Type.t t =
+  let env = add_descriptor path base visibility env in
   let effect_typ =
     Effect.Type.Arrow (
       Effect.Descriptor.singleton
         loc
         (Envi.bound_name (PathName.of_name path base) env.descriptors),
       Effect.Type.Pure) in
-  add_var path ("raise_" ^ base) effect_typ env
+  add_var path ("raise_" ^ base) visibility effect_typ env
 
-let add_constructor (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
-  { env with constructors = Envi.add (PathName.of_name path base) () env.constructors }
+let add_constructor (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with constructors = Envi.add (PathName.of_name path base) visibility () env.constructors }
 
-let add_field (path : Name.t list) (base : Name.t) (env : 'a t) : 'a t =
-  { env with fields = Envi.add (PathName.of_name path base) () env.fields }
+let add_field (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with fields = Envi.add (PathName.of_name path base) visibility () env.fields }
 
 let open_module (env : 'a t) : 'a t = {
   vars = Envi.open_module env.vars;
