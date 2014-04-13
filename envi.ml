@@ -28,7 +28,7 @@ module Segment = struct
     PathName.Map.cardinal segment.names
 
   let empty : 'a t = {
-    opens = [];
+    opens = [[]]; (** By default we open the empty path. *)
     names = PathName.Map.empty }
 
   let add (x : PathName.t) (visibility : Visibility.t) (v : 'a)
@@ -52,6 +52,9 @@ module Segment = struct
       let x = { x with PathName.path = module_name :: x.PathName.path } in
       add x visibility (prefix module_name v) segment2)
       segment1.names segment2
+
+  let open_module (module_name : Name.t list) (segment : 'a t) : 'a t =
+    { segment with opens = module_name :: segment.opens }
 end
 
 type 'a t = 'a Segment.t list
@@ -74,17 +77,31 @@ let add (x : PathName.t) (visibility : Visibility.t) (v : 'a) (env : 'a t)
   | segment :: env -> Segment.add x visibility v segment :: env
   | [] -> failwith "The environment must be a non-empty list."
 
-let rec depth (x : PathName.t) (env : 'a t) : int =
+let rec find_first (f : 'a -> 'b option) (l : 'a list) : 'b option =
+  match l with
+  | [] -> None
+  | x :: l ->
+    (match f x with
+    | None -> find_first f l
+    | y -> y)
+
+let rec depth (x : PathName.t) (env : 'a t) : int option =
   match env with
   | segment :: env ->
     if Segment.mem x segment then
-      0
+      Some 0
     else
-      1 + depth x env
-  | [] -> raise (NotFound x)
+      segment.Segment.opens |> find_first (fun path ->
+        let x = { x with PathName.path = path @ x.PathName.path } in
+        match depth x env with
+        | None -> None
+        | Some d -> Some (d + 1))
+  | [] -> None
 
 let bound_name (x : PathName.t) (env : 'a t) : BoundName.t =
-  { BoundName.path_name = x; depth = depth x env }
+  match depth x env with
+  | Some d -> { BoundName.path_name = x; depth = d }
+  | None -> raise (NotFound x)
 
 let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
   let segment =
@@ -99,7 +116,9 @@ let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
   iterate_open_lift v x.BoundName.depth
 
 let mem (x : PathName.t) (env : 'a t) : bool =
-  try let _ = depth x env in true with NotFound _ -> false
+  match depth x env with
+  | Some _ -> true
+  | None -> false
 
 (** Add a fresh local name beginning with [prefix] in [env]. *)
 let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
