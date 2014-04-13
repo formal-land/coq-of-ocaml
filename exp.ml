@@ -13,11 +13,14 @@ module Header = struct
   let pp (header : t) : SmartPrint.t =
     OCaml.tuple [
       Name.pp header.name; OCaml.list Name.pp header.typ_vars;
-      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) header.args;
+      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ])
+        header.args;
       OCaml.option Type.pp header.typ]
 
-  let env_in_header (header : t) (env : 'a FullEnvi.t) (v : 'a) : 'a FullEnvi.t =
-    List.fold_left (fun env (x, _) -> FullEnvi.add_var [] x Envi.Visibility.Local v env)
+  let env_in_header (header : t) (env : 'a FullEnvi.t) (v : 'a)
+    : 'a FullEnvi.t =
+    List.fold_left (fun env (x, _) ->
+      FullEnvi.add_var [] x Envi.Visibility.Local v env)
       env header.args
 end
 
@@ -54,28 +57,32 @@ type 'a t =
   | Constant of 'a * Constant.t
   | Variable of 'a * BoundName.t
   | Tuple of 'a * 'a t list (** A tuple of expressions. *)
-  | Constructor of 'a * BoundName.t * 'a t list (** A constructor name and a list of arguments. *)
+  | Constructor of 'a * BoundName.t * 'a t list
+    (** A constructor name and a list of arguments. *)
   | Apply of 'a * 'a t * 'a t list (** An application. *)
   | Function of 'a * Name.t * 'a t (** An argument name and a body. *)
   | LetVar of 'a * Name.t * 'a t * 'a t
   | LetFun of 'a * 'a t Definition.t * 'a t
-  | Match of 'a * 'a t * (Pattern.t * 'a t) list (** Match an expression to a list of patterns. *)
-  | Record of 'a * (BoundName.t * 'a t) list (** Construct a record giving an expression for each field. *)
+  | Match of 'a * 'a t * (Pattern.t * 'a t) list
+    (** Match an expression to a list of patterns. *)
+  | Record of 'a * (BoundName.t * 'a t) list
+    (** Construct a record giving an expression for each field. *)
   | Field of 'a * 'a t * BoundName.t (** Access to a field of a record. *)
   | IfThenElse of 'a * 'a t * 'a t * 'a t (** The "else" part may be unit. *)
   | Sequence of 'a * 'a t * 'a t (** A sequence of two expressions. *)
   | Return of 'a * 'a t (** Monadic return. *)
   | Bind of 'a * 'a t * Name.t option * 'a t (** Monadic bind. *)
-  | Lift of 'a * Effect.Descriptor.t * Effect.Descriptor.t * 'a t (** Monadic lift. *)
+  | Lift of 'a * Effect.Descriptor.t * Effect.Descriptor.t * 'a t
+    (** Monadic lift. *)
   | Run of 'a * BoundName.t * Effect.Descriptor.t * 'a t
 
 let annotation (e : 'a t) : 'a =
   match e with
   | Constant (a, _) | Variable (a, _) | Tuple (a, _) | Constructor (a, _, _)
-    | Apply (a, _, _) | Function (a, _, _) | LetVar (a, _, _, _) | LetFun (a, _, _)
-    | Match (a, _, _) | Record (a, _) | Field (a, _, _) | IfThenElse (a, _, _, _)
-    | Sequence (a, _, _) | Return (a, _) | Bind (a, _, _, _) | Lift (a, _, _, _)
-    | Run (a, _, _, _) -> a
+    | Apply (a, _, _) | Function (a, _, _) | LetVar (a, _, _, _)
+    | LetFun (a, _, _) | Match (a, _, _) | Record (a, _) | Field (a, _, _)
+    | IfThenElse (a, _, _, _) | Sequence (a, _, _) | Return (a, _)
+    | Bind (a, _, _, _) | Lift (a, _, _, _) | Run (a, _, _, _) -> a
 
 let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   match e with
@@ -106,18 +113,22 @@ let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
   match e with
-  | Constant (a, c) -> nest (!^ "Constant" ^^ OCaml.tuple [pp_a a; Constant.pp c])
-  | Variable (a, x) -> nest (!^ "Variable" ^^ OCaml.tuple [pp_a a; BoundName.pp x])
+  | Constant (a, c) ->
+    nest (!^ "Constant" ^^ OCaml.tuple [pp_a a; Constant.pp c])
+  | Variable (a, x) ->
+    nest (!^ "Variable" ^^ OCaml.tuple [pp_a a; BoundName.pp x])
   | Tuple (a, es) ->
     nest (!^ "Tuple" ^^ OCaml.tuple (pp_a a :: List.map pp es))
   | Constructor (a, x, es) ->
-    nest (!^ "Constructor" ^^ OCaml.tuple (pp_a a :: BoundName.pp x :: List.map pp es))
+    nest (!^ "Constructor" ^^
+      OCaml.tuple (pp_a a :: BoundName.pp x :: List.map pp es))
   | Apply (a, e_f, e_xs) ->
     nest (!^ "Apply" ^^ OCaml.tuple [pp_a a; pp e_f; OCaml.list pp e_xs])
   | Function (a, x, e) ->
     nest (!^ "Function" ^^ OCaml.tuple [pp_a a; Name.pp x; pp e])
   | LetVar (a, x, e1, e2) ->
-    nest (!^ "LetVar" ^^ pp_a a ^^ Name.pp x ^^ !^ "=" ^^ pp e1 ^^ !^ "in" ^^ newline ^^
+    nest (!^ "LetVar" ^^
+      pp_a a ^^ Name.pp x ^^ !^ "=" ^^ pp e1 ^^ !^ "in" ^^ newline ^^
       pp e2)
   | LetFun (a, def, e2) ->
     nest (!^ "LetFun" ^^ pp_a a ^^ newline ^^ indent (Definition.pp pp def) ^^
@@ -127,8 +138,9 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
       cases |> OCaml.list (fun (p, e) ->
         nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
   | Record (a, fields) ->
-    nest (!^ "Record" ^^ OCaml.tuple (pp_a a :: (fields |> List.map (fun (x, e) ->
-      nest @@ parens (BoundName.pp x ^-^ !^ "," ^^ pp e)))))
+    nest (!^ "Record" ^^
+      OCaml.tuple (pp_a a :: (fields |> List.map (fun (x, e) ->
+        nest @@ parens (BoundName.pp x ^-^ !^ "," ^^ pp e)))))
   | Field (a, e, x) ->
     nest (!^ "Field" ^^ OCaml.tuple [pp_a a; pp e; BoundName.pp x])
   | IfThenElse (a, e1, e2, e3) ->
@@ -139,10 +151,11 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   | Bind (a, e1, x, e2) -> nest (!^ "Bind" ^^ OCaml.tuple
     [pp_a a; pp e1; nest (OCaml.option Name.pp x); pp e2])
   | Lift (a, d1, d2, e) ->
-    nest (!^ "Lift" ^^
-      OCaml.tuple [pp_a a; Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
+    nest (!^ "Lift" ^^ OCaml.tuple [
+      pp_a a; Effect.Descriptor.pp d1; Effect.Descriptor.pp d2; pp e])
   | Run (a, x, d, e) ->
-    nest (!^ "Run" ^^ OCaml.tuple [pp_a a; BoundName.pp x; Effect.Descriptor.pp d; pp e])
+    nest (!^ "Run" ^^ OCaml.tuple [
+      pp_a a; BoundName.pp x; Effect.Descriptor.pp d; pp e])
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -178,7 +191,8 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
       let e2 = of_expression env typ_vars e2 in
       Match (l, e1, [p, e2]))
   | Texp_let (is_rec, cases, e) ->
-    let (env, def) = import_let_fun env Envi.Visibility.Local typ_vars is_rec cases in
+    let (env, def) =
+      import_let_fun env Envi.Visibility.Local typ_vars is_rec cases in
     let e = of_expression env typ_vars e in
     LetFun (l, def, e)
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
@@ -204,7 +218,8 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
           let x = Envi.bound_name x env.FullEnvi.vars in
           let es = List.map (of_expression env typ_vars) es in
           Apply (l, Variable (l_exn, x), [Tuple (Loc.Unknown, es)])
-        | _ -> Error.raise l "Constructor of an exception expected after a 'raise'.")
+        | _ ->
+          Error.raise l "Constructor of an exception expected after a 'raise'.")
       | _ -> Error.raise l "Expected one argument for 'raise'.")
     | Texp_ident (path, _, _)
       when PathName.of_path path = PathName.of_name ["Pervasives"] "!" ->
@@ -213,7 +228,8 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
         (match e_x.exp_desc with
         | Texp_ident (path, _, _) ->
           let read = PathName.of_path path in
-          let read = { read with PathName.base = "read_" ^ read.PathName.base } in
+          let read =
+            { read with PathName.base = "read_" ^ read.PathName.base } in
           let read = Envi.bound_name read env.FullEnvi.vars in
           Apply (l, Variable (Loc.Unknown, read), [Tuple (Loc.Unknown, [])])
         | _ -> Error.raise l "Name of a reference expected after '!'.")
@@ -225,7 +241,8 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
         (match e_r.exp_desc with
         | Texp_ident (path, _, _) ->
           let write = PathName.of_path path in
-          let write = { write with PathName.base = "write_" ^ write.PathName.base } in
+          let write =
+            { write with PathName.base = "write_" ^ write.PathName.base } in
           let write = Envi.bound_name write env.FullEnvi.vars in
           let e_v = of_expression env typ_vars e_v in
           Apply (l, Variable (Loc.Unknown, write), [e_v])
@@ -264,7 +281,8 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
       of_expression env typ_vars e2, e3)
   | Texp_sequence (e1, e2) ->
     Sequence (l, of_expression env typ_vars e1, of_expression env typ_vars e2)
-  | Texp_try (e1, [{c_lhs = {pat_desc = Tpat_construct (x, _, ps)}; c_rhs = e2}]) ->
+  | Texp_try (e1,
+    [{c_lhs = {pat_desc = Tpat_construct (x, _, ps)}; c_rhs = e2}]) ->
     let e1 = of_expression env typ_vars e1 in
     let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.descriptors in
     let p = Pattern.Tuple (List.map (Pattern.of_pattern env) ps) in
@@ -291,7 +309,8 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     Apply (l, Variable (l, assert_function), [of_expression env typ_vars e])
   | _ -> Error.raise l "Expression not handled."
 
-(** Generate a variable and a "match" on this variable from a list of patterns. *)
+(** Generate a variable and a "match" on this variable from a list of
+    patterns. *)
 and open_cases (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   (cases : case list) : Name.t * Loc.t t =
   let (x, env_vars) = Envi.fresh "x" () env.FullEnvi.vars in
@@ -371,11 +390,12 @@ let rec substitute (x : Name.t) (e' : 'a t) (e : 'a t) : 'a t =
       if (Recursivity.to_bool def.Definition.is_rec && is_x_a_name) then
         def
       else
-        { def with Definition.cases = def.Definition.cases |> List.map (fun (header, e1) ->
-          if List.exists (fun (y, _) -> y = x) header.Header.args then
-            (header, e1)
-          else
-            (header, substitute x e' e1)) } in
+        { def with Definition.cases =
+          def.Definition.cases |> List.map (fun (header, e1) ->
+            if List.exists (fun (y, _) -> y = x) header.Header.args then
+              (header, e1)
+            else
+              (header, substitute x e' e1)) } in
     let e2 = if is_x_a_name then e2 else substitute x e' e2 in
     LetFun (a, def, e2)
   | Match (a, e, cases) ->
@@ -427,7 +447,8 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
     let e2 = monadise_let_rec env e2 in
     LetVar (a, x, e1, e2)
   | LetFun (a, def, e2) ->
-    let (env, defs) = monadise_let_rec_definition env Envi.Visibility.Local def in
+    let (env, defs) =
+      monadise_let_rec_definition env Envi.Visibility.Local def in
     let e2 = monadise_let_rec env e2 in
     List.fold_right (fun def e2 -> LetFun (a, def, e2)) defs e2
   | Match (a, e, cases) ->
@@ -458,28 +479,35 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (e : Loc.t t) : Loc.t t =
 and monadise_let_rec_definition (env : unit FullEnvi.t)
   (visibility : Envi.Visibility.t) (def : Loc.t t Definition.t)
   : unit FullEnvi.t * Loc.t t Definition.t list =
-  if Recursivity.to_bool def.Definition.is_rec && def.Definition.attribute <> Attribute.CoqRec then
+  if Recursivity.to_bool def.Definition.is_rec &&
+    def.Definition.attribute <> Attribute.CoqRec then
     let var (x : Name.t) env : Loc.t t =
       Variable (Loc.Unknown,
         Envi.bound_name (PathName.of_name [] x) env.FullEnvi.vars) in
     let env_in_def = Definition.env_in_def def visibility env in
     (* Add the suffix "_rec" to the names. *)
-    let def' = { def with Definition.cases = def.Definition.cases |> List.map (fun (header, e) ->
-      let (name_rec, _) = Envi.fresh (header.Header.name ^ "_rec") () env_in_def.FullEnvi.vars in
-      ({ header with Header.name = name_rec }, e)) } in
+    let def' = { def with Definition.cases =
+      def.Definition.cases |> List.map (fun (header, e) ->
+        let (name_rec, _) = Envi.fresh (header.Header.name ^ "_rec") ()
+          env_in_def.FullEnvi.vars in
+        ({ header with Header.name = name_rec }, e)) } in
     let env_after_def' = Definition.env_in_def def' visibility env in
     (* Add the argument "counter" and monadise the bodies. *)
-    let def' = { def' with Definition.cases = def'.Definition.cases |> List.map (fun (header, e) ->
-      let name_rec = header.Header.name in
-      let (counter, _) = Envi.fresh "counter" () env_after_def'.FullEnvi.vars in
-      let args_rec =
-        (counter,
-          Type.Apply (Envi.bound_name (PathName.of_name [] "nat") env_after_def'.FullEnvi.typs, []))
-          :: header.Header.args in
-      let header_rec = { header with Header.name = name_rec; args = args_rec } in
-      let env_in_name_rec = Header.env_in_header header_rec env_after_def' () in
-      let e_name_rec = monadise_let_rec env_in_name_rec e in
-      (header_rec, e_name_rec)) } in
+    let def' = { def' with Definition.cases =
+      def'.Definition.cases |> List.map (fun (header, e) ->
+        let name_rec = header.Header.name in
+        let (counter, _) = Envi.fresh "counter" () env_after_def'.FullEnvi.vars in
+        let args_rec =
+          (counter,
+            Type.Apply (Envi.bound_name (PathName.of_name [] "nat")
+              env_after_def'.FullEnvi.typs,
+            [])) :: header.Header.args in
+        let header_rec =
+          { header with Header.name = name_rec; args = args_rec } in
+        let env_in_name_rec =
+          Header.env_in_header header_rec env_after_def' () in
+        let e_name_rec = monadise_let_rec env_in_name_rec e in
+        (header_rec, e_name_rec)) } in
     (* Do the substitutions. *)
     let def' = { def' with Definition.cases = List.map2 (fun name (header, e) ->
       let counter = fst (List.hd header.Header.args) in
@@ -487,12 +515,16 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
       let e_name_rec =
         List.fold_left2 (fun e_name_rec name (header, e) ->
           substitute name
-            (Apply (Loc.Unknown, var header.Header.name env, [var counter env])) e_name_rec)
+            (Apply (Loc.Unknown, var header.Header.name env,
+              [var counter env])) e_name_rec)
           e (Definition.names def) def'.Definition.cases in
       let e_name_rec = Match (Loc.Unknown, var counter env, [
-        (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O") env.FullEnvi.constructors, []),
-          Apply (Loc.Unknown, var "not_terminated" env, [Tuple (Loc.Unknown, [])]));
-        (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "S") env.FullEnvi.constructors,
+        (Pattern.Constructor (Envi.bound_name (PathName.of_name [] "O")
+          env.FullEnvi.constructors, []),
+          Apply (Loc.Unknown, var "not_terminated" env,
+            [Tuple (Loc.Unknown, [])]));
+        (Pattern.Constructor (
+          Envi.bound_name (PathName.of_name [] "S") env.FullEnvi.constructors,
           [Pattern.Variable counter]),
           e_name_rec)]) in
       (header, e_name_rec))
@@ -502,8 +534,9 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
       let env = Header.env_in_header header env_after_def' () in
       let e = Apply (Loc.Unknown,
         var name_rec env,
-        Apply (Loc.Unknown, var "read_counter" env, [Tuple (Loc.Unknown, [])]) ::
-        List.map (fun (x, _) -> var x env) header.Header.args) in
+        Apply (Loc.Unknown, var "read_counter" env,
+          [Tuple (Loc.Unknown, [])]) ::
+            List.map (fun (x, _) -> var x env) header.Header.args) in
       { Definition.is_rec = Recursivity.New false;
         attribute = Attribute.None;
         cases = [header, e] })
@@ -558,7 +591,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
     let effect_e_f = snd (annotation e_f) in
     let e_xs = List.map (effects env) e_xs in
     let effects_e_xs = List.map (fun e_x -> snd (annotation e_x)) e_xs in
-    if List.for_all (fun effect_e_x -> Effect.Type.is_pure effect_e_x.Effect.typ) effects_e_xs then
+    if effects_e_xs |> List.for_all (fun effect_e_x ->
+      Effect.Type.is_pure effect_e_x.Effect.typ) then
       let rec e_xss typ e_xs : ('b t list * Effect.Descriptor.t) list =
         match e_xs with
         | [] -> []
@@ -586,7 +620,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
     else
       Error.raise l "Function arguments cannot have functional effects."
   | Function (l, x, e) ->
-    let env = FullEnvi.add_var [] x Envi.Visibility.Local Effect.Type.Pure env in
+    let env =
+      FullEnvi.add_var [] x Envi.Visibility.Local Effect.Type.Pure env in
     let e = effects env e in
     let effect_e = snd (annotation e) in
     let effect = {
@@ -597,7 +632,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
   | LetVar (l, x, e1, e2) ->
     let e1 = effects env e1 in
     let effect1 = snd (annotation e1) in
-    let env = FullEnvi.add_var [] x Envi.Visibility.Local effect1.Effect.typ env in
+    let env =
+      FullEnvi.add_var [] x Envi.Visibility.Local effect1.Effect.typ env in
     let e2 = effects env e2 in
     let effect2 = snd (annotation e2) in
     let descriptor = Effect.Descriptor.union [
@@ -669,11 +705,12 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
   | Run (l, x, d, e) ->
     let e = effects env e in
     let effect_e = snd (annotation e) in
-    let effect = { effect_e with
-      Effect.descriptor = Effect.Descriptor.remove x effect_e.Effect.descriptor } in
+    let effect = { effect_e with Effect.descriptor =
+      Effect.Descriptor.remove x effect_e.Effect.descriptor } in
     Run ((l, effect), x, d, e)
   | Return _ | Bind _ | Lift _ ->
-    Error.raise Loc.Unknown "Cannot compute effects on an explicit return, bind or lift."
+    Error.raise Loc.Unknown
+      "Cannot compute effects on an explicit return, bind or lift."
 
 and env_after_def_with_effects (env : Effect.Type.t FullEnvi.t)
   (visibility : Envi.Visibility.t) (def : (Loc.t * Effect.t) t Definition.t)
@@ -685,11 +722,12 @@ and env_after_def_with_effects (env : Effect.Type.t FullEnvi.t)
     FullEnvi.add_var [] header.Header.name visibility effect_typ env)
     env def.Definition.cases
 
-and effects_of_def_step (env : Effect.Type.t FullEnvi.t) (def : Loc.t t Definition.t)
-  : (Loc.t * Effect.t) t Definition.t =
-  { def with Definition.cases = def.Definition.cases |> List.map (fun (header, e) ->
-    let env = Header.env_in_header header env Effect.Type.Pure in
-    (header, effects env e)) }
+and effects_of_def_step (env : Effect.Type.t FullEnvi.t)
+  (def : Loc.t t Definition.t) : (Loc.t * Effect.t) t Definition.t =
+  { def with Definition.cases =
+    def.Definition.cases |> List.map (fun (header, e) ->
+      let env = Header.env_in_header header env Effect.Type.Pure in
+      (header, effects env e)) }
 
 and effects_of_def (env : Effect.Type.t FullEnvi.t)
   (visibility : Envi.Visibility.t) (def : Loc.t t Definition.t)
@@ -760,7 +798,8 @@ let rec monadise (env : unit FullEnvi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     monadise_list env (e_f :: e_xs) d [] (fun es' ->
       match es' with
       | e_f :: e_xs ->
-        let return_descriptor = Effect.Type.return_descriptor effect_f (List.length e_xs) in
+        let return_descriptor =
+          Effect.Type.return_descriptor effect_f (List.length e_xs) in
         lift return_descriptor d (Apply (l, e_f, e_xs))
       | _ -> failwith "Wrong answer from 'monadise_list'.")
   | Function ((l, _), x, e) ->
@@ -824,7 +863,8 @@ let rec monadise (env : unit FullEnvi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     Run (l, x, descriptor e, monadise env e)
   | Return _ | Bind _ | Lift _ -> failwith "Unexpected arguments for 'monadise'."
 
-(** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is set). *)
+(** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
+    set). *)
 let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
   match e with
   | Constant (_, c) -> Constant.to_coq c
@@ -838,7 +878,8 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
     if es = [] then
       BoundName.to_coq x
     else
-      Pp.parens paren @@ nest @@ separate space (BoundName.to_coq x :: List.map (to_coq true) es)
+      Pp.parens paren @@ nest @@ separate space
+        (BoundName.to_coq x :: List.map (to_coq true) es)
   | Apply (_, e_f, e_xs) ->
     Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
   | Function (_, x, e) ->

@@ -16,22 +16,30 @@ let empty (leave_prefix_vars : Name.t -> 'a -> 'a) : 'a t = {
   fields = Envi.empty
 }
 
-let add_var (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (v : 'a) (env : 'a t) : 'a t =
-  { env with vars = Envi.add (PathName.of_name path base) visibility v env.vars }
+let add_var (path : Name.t list) (base : Name.t)
+  (visibility : Envi.Visibility.t) (v : 'a) (env : 'a t) : 'a t =
+  { env with vars =
+    Envi.add (PathName.of_name path base) visibility v env.vars }
 
-let add_typ (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
-  { env with typs = Envi.add (PathName.of_name path base) visibility () env.typs }
+let add_typ (path : Name.t list) (base : Name.t)
+  (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with typs =
+    Envi.add (PathName.of_name path base) visibility () env.typs }
 
-let add_descriptor (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
-  { env with descriptors = Envi.add (PathName.of_name path base) visibility () env.descriptors }
+let add_descriptor (path : Name.t list) (base : Name.t)
+  (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with descriptors =
+    Envi.add (PathName.of_name path base) visibility () env.descriptors }
 
-let add_exception (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : unit t) : unit t =
+let add_exception (path : Name.t list) (base : Name.t)
+  (visibility : Envi.Visibility.t) (env : unit t) : unit t =
   env
   |> add_descriptor path base visibility
   |> add_var path ("raise_" ^ base) visibility ()
 
 let add_exception_with_effects (path : Name.t list) (base : Name.t)
-  (loc : Loc.t) (visibility : Envi.Visibility.t) (env : Effect.Type.t t) : Effect.Type.t t =
+  (loc : Loc.t) (visibility : Envi.Visibility.t) (env : Effect.Type.t t)
+  : Effect.Type.t t =
   let env = add_descriptor path base visibility env in
   let effect_typ =
     Effect.Type.Arrow (
@@ -41,11 +49,15 @@ let add_exception_with_effects (path : Name.t list) (base : Name.t)
       Effect.Type.Pure) in
   add_var path ("raise_" ^ base) visibility effect_typ env
 
-let add_constructor (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
-  { env with constructors = Envi.add (PathName.of_name path base) visibility () env.constructors }
+let add_constructor (path : Name.t list) (base : Name.t)
+  (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with constructors =
+    Envi.add (PathName.of_name path base) visibility () env.constructors }
 
-let add_field (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
-  { env with fields = Envi.add (PathName.of_name path base) visibility () env.fields }
+let add_field (path : Name.t list) (base : Name.t)
+  (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
+  { env with fields =
+    Envi.add (PathName.of_name path base) visibility () env.fields }
 
 let enter_module (env : 'a t) : 'a t =
   { vars = Envi.enter_module env.vars;
@@ -60,8 +72,10 @@ let leave_module (env : 'a t) (module_name : Name.t) : 'a t =
   { vars = Envi.leave_module env.vars env.leave_prefix_vars module_name;
     leave_prefix_vars = env.leave_prefix_vars;
     typs = Envi.leave_module env.typs leave_prefix_unit module_name;
-    descriptors = Envi.leave_module env.descriptors leave_prefix_unit module_name;
-    constructors = Envi.leave_module env.constructors leave_prefix_unit module_name;
+    descriptors =
+      Envi.leave_module env.descriptors leave_prefix_unit module_name;
+    constructors =
+      Envi.leave_module env.constructors leave_prefix_unit module_name;
     fields = Envi.leave_module env.fields leave_prefix_unit module_name }
 
 let open_module (env : 'a t) (module_name : PathName.t) : 'a t =

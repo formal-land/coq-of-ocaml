@@ -12,20 +12,23 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
       | "effects" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) = Structure.effects PervasivesModule.env_with_effects defs in
+        let (_, defs) =
+          Structure.effects PervasivesModule.env_with_effects defs in
         let pp_annotation (l, effect) =
           OCaml.tuple [Loc.pp l; Effect.pp effect] in
         Structure.pp pp_annotation defs
       | "monadise" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) = Structure.effects PervasivesModule.env_with_effects defs in
+        let (_, defs) =
+          Structure.effects PervasivesModule.env_with_effects defs in
         let (_, defs) = Structure.monadise PervasivesModule.env defs in
         Structure.pp Loc.pp defs
       | "v" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) = Structure.effects PervasivesModule.env_with_effects defs in
+        let (_, defs) =
+          Structure.effects PervasivesModule.env_with_effects defs in
         let (_, defs) = Structure.monadise PervasivesModule.env defs in
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import CoqOfOCaml." ^^ newline;
@@ -45,7 +48,8 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
 let parse_cmt (file_name : string) : Typedtree.structure =
   let (_, cmt) = Cmt_format.read file_name in
   match cmt with
-  | Some { Cmt_format.cmt_annots = Cmt_format.Implementation structure } -> structure
+  | Some { Cmt_format.cmt_annots = Cmt_format.Implementation structure } ->
+    structure
   | _ -> failwith "Cannot extract cmt data."
 
 (** The main function. *)
