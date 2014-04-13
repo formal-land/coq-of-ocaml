@@ -78,7 +78,7 @@ let leave_module (env : 'a t) (module_name : Name.t) : 'a t =
       Envi.leave_module env.constructors leave_prefix_unit module_name;
     fields = Envi.leave_module env.fields leave_prefix_unit module_name }
 
-let open_module (env : 'a t) (module_name : PathName.t) : 'a t =
+let open_module (env : 'a t) (module_name : Name.t list) : 'a t =
   { vars = Envi.open_module env.vars module_name;
     leave_prefix_vars = env.leave_prefix_vars;
     typs = Envi.open_module env.typs module_name;

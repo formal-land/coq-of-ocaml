@@ -53,7 +53,7 @@ module Segment = struct
       add x visibility (prefix module_name v) segment2)
       segment1.names segment2
 
-  let open_module (module_name : Name.t list) (segment : 'a t) : 'a t =
+  let open_module (segment : 'a t) (module_name : Name.t list) : 'a t =
     { segment with opens = module_name :: segment.opens }
 end
 
@@ -148,5 +148,7 @@ let leave_module (env : 'a t) (prefix : Name.t -> 'a -> 'a)
     Segment.merge segment1 segment2 prefix module_name :: env
   | _ -> failwith "You should have entered in at least one module."
 
-let open_module (env : 'a t) (module_name : PathName.t) : 'a t =
-  failwith "TODO"
+let open_module (env : 'a t) (module_name : Name.t list) : 'a t =
+  match env with
+  | segment :: env -> Segment.open_module segment module_name :: env
+  | _ -> failwith "You should have entered in at least one module."

@@ -194,17 +194,17 @@ end
 
 (** The "open" construct to open a module. *)
 module Open = struct
-  type t = PathName.t
+  type t = Name.t list
 
   let pp (o : t) : SmartPrint.t =
-    nest (!^ "Open" ^^ OCaml.tuple [PathName.pp o])
+    nest (!^ "Open" ^^ separate (!^ ".") (List.map Name.pp o))
 
   let update_env (o : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    failwith "TODO"
+    FullEnvi.open_module env o
 
   (** Pretty-print an open construct to Coq. *)
   let to_coq (o : t): SmartPrint.t =
-    nest (!^ "Require Import" ^^ PathName.to_coq o ^-^ !^ ".")
+    nest (!^ "Import" ^^ separate (!^ ".") (List.map Name.pp o) ^-^ !^ ".")
 end
 
 (** A structure. *)
@@ -295,6 +295,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       (Exception.update_env exn env, Exception (loc, exn))
     | Tstr_open (_, path, _, _) ->
       let o = PathName.of_path path in
+      let o = o.PathName.path @ [o.PathName.base] in
       (Open.update_env o env, Open (loc, o))
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
@@ -320,16 +321,17 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
       let (env, defs) =
         Exp.monadise_let_rec_definition env Envi.Visibility.Global def in
       (env, defs |> List.rev |> List.map (fun def -> Value (loc, def)))
-    | Module (loc, name, defs) ->
-      let env = FullEnvi.enter_module env in
-      let (env, defs) = monadise_let_rec env defs in
-      let env = FullEnvi.leave_module env name in
-      (env, [Module (loc, name, defs)])
     | Inductive (loc, ind) -> (Inductive.update_env ind env, [def])
     | Record (loc, record) -> (Record.update_env record env, [def])
     | Synonym (loc, synonym) -> (Synonym.update_env synonym env, [def])
     | Exception (loc, exn) -> (Exception.update_env exn env, [def])
-    | Reference (loc, r) -> (Reference.update_env r env, [def]) in
+    | Reference (loc, r) -> (Reference.update_env r env, [def])
+    | Open (loc, o) -> (Open.update_env o env, [def])
+    | Module (loc, name, defs) ->
+      let env = FullEnvi.enter_module env in
+      let (env, defs) = monadise_let_rec env defs in
+      let env = FullEnvi.leave_module env name in
+      (env, [Module (loc, name, defs)]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))
@@ -349,18 +351,19 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
         failwith "Toplevel effects are forbidden.");
       let env = Exp.env_after_def_with_effects env Envi.Visibility.Global def in
       (env, Value (loc, def))
-    | Module (loc, name, defs) ->
-      let env = FullEnvi.enter_module env in
-      let (env, defs) = effects env defs in
-      let env = FullEnvi.leave_module env name in
-      (env, Module (loc, name, defs))
+    | Inductive (loc, ind) -> (Inductive.update_env ind env, Inductive (loc, ind))
+    | Record (loc, record) -> (Record.update_env record env, Record (loc, record))
+    | Synonym (loc, synonym) -> (Synonym.update_env synonym env, Synonym (loc, synonym))
     | Exception (loc, exn) ->
       (Exception.update_env_with_effects exn env loc, Exception (loc, exn))
     | Reference (loc, r) ->
       (Reference.update_env_with_effects r env loc, Reference (loc, r))
-    | Inductive (loc, ind) -> (Inductive.update_env ind env, Inductive (loc, ind))
-    | Record (loc, record) -> (Record.update_env record env, Record (loc, record))
-    | Synonym (loc, synonym) -> (Synonym.update_env synonym env, Synonym (loc, synonym)) in
+    | Open (loc, o) -> (Open.update_env o env, Open (loc, o))
+    | Module (loc, name, defs) ->
+      let env = FullEnvi.enter_module env in
+      let (env, defs) = effects env defs in
+      let env = FullEnvi.leave_module env name in
+      (env, Module (loc, name, defs)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env, def) =
@@ -387,18 +390,16 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
         (header, e)) } in
       let env = Exp.Definition.env_after_def def Envi.Visibility.Global env in
       (env, Value (loc, def))
-    | Module (loc, name, defs) ->
-      let (env, defs) = monadise (FullEnvi.enter_module env) defs in
-      (FullEnvi.leave_module env name, Module (loc, name, defs))
-    | Exception (loc, exn) ->
-      let env = Exception.update_env exn env in
-      (env, Exception (loc, exn))
-    | Reference (loc, r) ->
-      let env = Reference.update_env r env in
-      (env, Reference (loc, r))
     | Inductive (loc, ind) -> (env, Inductive (loc, ind))
     | Record (loc, record) -> (env, Record (loc, record))
-    | Synonym (loc, synonym) -> (env, Synonym (loc, synonym)) in
+    | Synonym (loc, synonym) -> (env, Synonym (loc, synonym))
+    | Exception (loc, exn) ->
+      (Exception.update_env exn env, Exception (loc, exn))
+    | Reference (loc, r) -> (Reference.update_env r env, Reference (loc, r))
+    | Open (loc, o) -> (Open.update_env o env, Open (loc, o))
+    | Module (loc, name, defs) ->
+      let (env, defs) = monadise (FullEnvi.enter_module env) defs in
+      (FullEnvi.leave_module env name, Module (loc, name, defs)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env_units, def) = monadise_one env def in
@@ -416,7 +417,7 @@ let rec to_coq (defs : 'a t list) : SmartPrint.t =
     | Synonym (_, s) -> Synonym.to_coq s
     | Exception (_, exn) -> Exception.to_coq exn
     | Reference (_, r) -> Reference.to_coq r
-    (* | Open o -> Open.to_coq o *)
+    | Open (_, o) -> Open.to_coq o
     | Module (_, name, defs) ->
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
