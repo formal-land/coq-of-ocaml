@@ -1,15 +1,15 @@
 type 'a t = {
   vars : 'a Envi.t;
-  close_lift_vars : 'a -> Name.t -> 'a;
+  leave_prefix_vars : Name.t -> 'a -> 'a;
   typs : unit Envi.t;
   descriptors: unit Envi.t;
   constructors : unit Envi.t;
   fields : unit Envi.t
 }
 
-let empty (close_lift_vars : 'a -> Name.t -> 'a) : 'a t = {
+let empty (leave_prefix_vars : Name.t -> 'a -> 'a) : 'a t = {
   vars = Envi.empty;
-  close_lift_vars = close_lift_vars;
+  leave_prefix_vars = leave_prefix_vars;
   typs = Envi.empty;
   descriptors = Envi.empty;
   constructors = Envi.empty;
@@ -47,22 +47,27 @@ let add_constructor (path : Name.t list) (base : Name.t) (visibility : Envi.Visi
 let add_field (path : Name.t list) (base : Name.t) (visibility : Envi.Visibility.t) (env : 'a t) : 'a t =
   { env with fields = Envi.add (PathName.of_name path base) visibility () env.fields }
 
-let open_module (env : 'a t) : 'a t = {
-  vars = Envi.open_module env.vars;
-  close_lift_vars = env.close_lift_vars;
-  typs = Envi.open_module env.typs;
-  descriptors = Envi.open_module env.descriptors;
-  constructors = Envi.open_module env.constructors;
-  fields = Envi.open_module env.fields
-}
+let enter_module (env : 'a t) : 'a t =
+  { vars = Envi.enter_module env.vars;
+    leave_prefix_vars = env.leave_prefix_vars;
+    typs = Envi.enter_module env.typs;
+    descriptors = Envi.enter_module env.descriptors;
+    constructors = Envi.enter_module env.constructors;
+    fields = Envi.enter_module env.fields }
 
-let close_module (env : 'a t) (name : Name.t) : 'a t = 
-  let close_lift_unit = fun _ _ -> () in
-  {
-    vars = Envi.close_module env.vars env.close_lift_vars name;
-    close_lift_vars = env.close_lift_vars;
-    typs = Envi.close_module env.typs close_lift_unit name;
-    descriptors = Envi.close_module env.descriptors close_lift_unit name;
-    constructors = Envi.close_module env.constructors close_lift_unit name;
-    fields = Envi.close_module env.fields close_lift_unit name
-  }
+let leave_module (env : 'a t) (module_name : Name.t) : 'a t = 
+  let leave_prefix_unit = fun _ () -> () in
+  { vars = Envi.leave_module env.vars env.leave_prefix_vars module_name;
+    leave_prefix_vars = env.leave_prefix_vars;
+    typs = Envi.leave_module env.typs leave_prefix_unit module_name;
+    descriptors = Envi.leave_module env.descriptors leave_prefix_unit module_name;
+    constructors = Envi.leave_module env.constructors leave_prefix_unit module_name;
+    fields = Envi.leave_module env.fields leave_prefix_unit module_name }
+
+let open_module (env : 'a t) (module_name : PathName.t) : 'a t =
+  { vars = Envi.open_module env.vars module_name;
+    leave_prefix_vars = env.leave_prefix_vars;
+    typs = Envi.open_module env.typs module_name;
+    descriptors = Envi.open_module env.descriptors module_name;
+    constructors = Envi.open_module env.constructors module_name;
+    fields = Envi.open_module env.fields module_name }

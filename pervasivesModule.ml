@@ -14,7 +14,7 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   let add_exn path base =
     add_exception_with_effects path base
       (Loc.Ether (PathName.of_name path base)) in
-  FullEnvi.empty Effect.Type.close_lift
+  FullEnvi.empty Effect.Type.leave_prefix
   (* Values specific to the translation to Coq *)
   |> add_typ [] "nat" Global
   |> add_constructor [] "O" Global
@@ -305,4 +305,4 @@ let env_with_effects : Effect.Type.t FullEnvi.t = {
 let env : unit FullEnvi.t =
   { env_with_effects with
     vars = Envi.map env_with_effects.vars (fun _ -> ());
-    close_lift_vars = (fun _ _ -> ()) }
+    leave_prefix_vars = (fun _ () -> ()) }

@@ -54,11 +54,11 @@ module Descriptor = struct
     double_quotes (separate empty
       (List.map (fun b -> if b then !^ "1" else !^ "0") bs))
 
-  let open_lift (d : t) : t =
-    Map.map BoundName.open_lift d
+  let enter_lift (d : t) : t =
+    Map.map BoundName.enter_lift d
 
-  let close_lift (d : t) (name : Name.t) : t =
-    Map.map (fun x -> BoundName.close_lift x name) d
+  let leave_prefix (name : Name.t) (d : t) : t =
+    Map.map (fun x -> BoundName.leave_prefix name x) d
 end
 
 module Type = struct
@@ -115,15 +115,15 @@ module Type = struct
         Arrow (Descriptor.union [d1; d2], aux typ1 typ2) in
     List.fold_left aux Pure typs
 
-  let rec open_lift (typ : t) : t =
+  let rec enter_lift (typ : t) : t =
     match typ with
     | Pure -> Pure
-    | Arrow (d, typ) -> Arrow (Descriptor.open_lift d, open_lift typ)
+    | Arrow (d, typ) -> Arrow (Descriptor.enter_lift d, enter_lift typ)
 
-  let rec close_lift (typ : t) (x : Name.t) : t =
+  let rec leave_prefix (x : Name.t) (typ : t) : t =
     match typ with
     | Pure -> Pure
-    | Arrow (d, typ) -> Arrow (Descriptor.close_lift d x, close_lift typ x)
+    | Arrow (d, typ) -> Arrow (Descriptor.leave_prefix x d, leave_prefix x typ)
 end
 
 type t = { descriptor : Descriptor.t; typ : Type.t }

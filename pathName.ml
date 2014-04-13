@@ -253,3 +253,6 @@ let of_path (p : Path.t) : t =
     | Path.Papply _ -> failwith "application of paths not handled" in
   let (path, base) = aux p in
   convert (of_name (List.rev path) base)
+
+let to_coq (x : t) : SmartPrint.t =
+  separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))

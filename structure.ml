@@ -192,7 +192,6 @@ module Reference = struct
       !^ "fun s => (inl tt, (x, tt)).")
 end
 
-(*
 (** The "open" construct to open a module. *)
 module Open = struct
   type t = PathName.t
@@ -200,11 +199,13 @@ module Open = struct
   let pp (o : t) : SmartPrint.t =
     nest (!^ "Open" ^^ OCaml.tuple [PathName.pp o])
 
+  let update_env (o : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+    failwith "TODO"
+
   (** Pretty-print an open construct to Coq. *)
   let to_coq (o : t): SmartPrint.t =
     nest (!^ "Require Import" ^^ PathName.to_coq o ^-^ !^ ".")
 end
-*)
 
 (** A structure. *)
 type 'a t =
@@ -214,7 +215,7 @@ type 'a t =
   | Synonym of Loc.t * Synonym.t
   | Exception of Loc.t * Exception.t
   | Reference of Loc.t * Reference.t
-  (* | Open of Loc.t * Open.t *)
+  | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
@@ -227,7 +228,7 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
     | Synonym (loc, synonym) -> Loc.pp loc ^^ Synonym.pp synonym
     | Exception (loc, exn) -> Loc.pp loc ^^ Exception.pp exn
     | Reference (loc, r) -> Loc.pp loc ^^ Reference.pp r
-    (* | Open (loc, o) -> Loc.pp loc ^^ Open.pp o *)
+    | Open (loc, o) -> Loc.pp loc ^^ Open.pp o
     | Module (loc, name, defs) ->
       nest (
         Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
@@ -292,13 +293,15 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
           Type.of_type_expr env typ)) in
       let exn = { Exception.name = name; typ = typ} in
       (Exception.update_env exn env, Exception (loc, exn))
-    (* | Tstr_open (_, path, _, _) -> (Error.raise loc "TODO", Open (PathName.of_path 0 path)) *)
+    | Tstr_open (_, path, _, _) ->
+      let o = PathName.of_path path in
+      (Open.update_env o env, Open (loc, o))
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }} ->
       let name = Name.of_ident name in
-      let env = FullEnvi.open_module env in
+      let env = FullEnvi.enter_module env in
       let (env, structures) = of_structure env structure in
-      let env = FullEnvi.close_module env name in
+      let env = FullEnvi.leave_module env name in
       (env, Module (loc, name, structures))
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
@@ -318,9 +321,9 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
         Exp.monadise_let_rec_definition env Envi.Visibility.Global def in
       (env, defs |> List.rev |> List.map (fun def -> Value (loc, def)))
     | Module (loc, name, defs) ->
-      let env = FullEnvi.open_module env in
+      let env = FullEnvi.enter_module env in
       let (env, defs) = monadise_let_rec env defs in
-      let env = FullEnvi.close_module env name in
+      let env = FullEnvi.leave_module env name in
       (env, [Module (loc, name, defs)])
     | Inductive (loc, ind) -> (Inductive.update_env ind env, [def])
     | Record (loc, record) -> (Record.update_env record env, [def])
@@ -347,9 +350,9 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
       let env = Exp.env_after_def_with_effects env Envi.Visibility.Global def in
       (env, Value (loc, def))
     | Module (loc, name, defs) ->
-      let env = FullEnvi.open_module env in
+      let env = FullEnvi.enter_module env in
       let (env, defs) = effects env defs in
-      let env = FullEnvi.close_module env name in
+      let env = FullEnvi.leave_module env name in
       (env, Module (loc, name, defs))
     | Exception (loc, exn) ->
       (Exception.update_env_with_effects exn env loc, Exception (loc, exn))
@@ -385,8 +388,8 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
       let env = Exp.Definition.env_after_def def Envi.Visibility.Global env in
       (env, Value (loc, def))
     | Module (loc, name, defs) ->
-      let (env, defs) = monadise (FullEnvi.open_module env) defs in
-      (FullEnvi.close_module env name, Module (loc, name, defs))
+      let (env, defs) = monadise (FullEnvi.enter_module env) defs in
+      (FullEnvi.leave_module env name, Module (loc, name, defs))
     | Exception (loc, exn) ->
       let env = Exception.update_env exn env in
       (env, Exception (loc, exn))
