@@ -55,16 +55,8 @@ Module Effect.
       | (e, true) :: ebs => e :: sub ebs
       end.
     
-    Fixpoint negsub (ebs : list (t * bool)) : list t :=
-      match ebs with
-      | [] => []
-      | (_, true) :: ebs => negsub ebs
-      | (e, false) :: ebs => e :: negsub ebs
-      end.
-    
-    Fixpoint filter_state (ebs : list (t * bool))
-      (s : state (domain ebs)) {struct ebs}
-      : state (sub ebs).
+    Fixpoint filter_state (ebs : list (t * bool)) (s : state (domain ebs))
+      {struct ebs} : state (sub ebs).
       destruct ebs as [|[e b] ebs].
       - exact s.
       - destruct b; simpl in *.
@@ -95,18 +87,6 @@ Module Effect.
         + exact (fst s2, expand_state ebs s1 (snd s2)).
     Defined.
   End Ebs.
-  
-  Module Filter.
-    Definition S (e : t) : t :=
-      make (Effect.S e) Empty_set.
-    
-    Fixpoint states (ebs : list (t * bool)) : list t :=
-      match ebs with
-      | [] => []
-      | (e, false) :: ebs => e :: states ebs
-      | (e, true) :: ebs => S e :: states ebs
-      end.
-  End Filter.
 End Effect.
 
 Module Raw.
@@ -180,49 +160,6 @@ Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
 Definition lift {A : Type} (es : list Effect.t) (bs : string)
   (x : M _ A) : M _ A :=
   of_raw (Raw.lift es bs (to_raw x)).
-
-(*Module Run.
-  Fixpoint errors_input (ebs : list (Effect.t * bool))
-    (s : Effect.state (Effect.Filter.states ebs)) {struct ebs}
-    : Effect.state (Effect.Ebs.domain ebs).
-    destruct ebs as [|[e b] ebs].
-    - exact s.
-    - destruct b; exact (
-        let (s, ss) := s in
-        (s, errors_input _ ss)).
-  Defined.
-
-  Fixpoint errors_output (ebs : list (Effect.t * bool))
-    (s : Effect.state (Effect.Ebs.domain ebs)) {struct ebs}
-    : Effect.state (Effect.Filter.states ebs).
-    destruct ebs as [|[e b] ebs].
-    - exact s.
-    - destruct b; exact (
-        let (s, ss) := s in
-        (s, errors_output _ ss)).
-  Defined.
-
-  Fixpoint errors_error (ebs : list (Effect.t * bool))
-    (err : Effect.error (Effect.Ebs.domain ebs)) {struct ebs}
-    : Effect.error (Effect.Ebs.sub ebs) + Effect.error (Effect.Filter.states ebs).
-    destruct ebs as [|(e, b) ebs].
-    - destruct err.
-    - destruct err as [err | err].
-      + destruct b; [exact (inl (inl err)) | exact (inr (inl err))].
-      + destruct (errors_error _ err) as [err' | err'];
-          [apply inl | apply inr]; destruct b; try apply inr; exact err'.
-  Defined.
-
-  Definition errors {A : Type} (ebs : list (Effect.t * bool))
-    (x : M (Effect.Ebs.domain ebs) A)
-    : M (Effect.Filter.states ebs) (A + Effect.error (Effect.Ebs.sub ebs)) :=
-    fun s =>
-      let (r, s) := x (errors_input _ s) in
-      (match r with
-      | inl x => inl (inl x)
-      | inr err => sum_assoc_left (inr (errors_error _ err))
-      end, errors_output _ s).
-End Run.*)
 
 Module Exception.
   Fixpoint remove_nth (es : list Effect.t) (n : nat) : list Effect.t :=
