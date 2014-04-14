@@ -186,7 +186,8 @@ module Reference = struct
     newline ^^ indent (
       !^ "fun s => (inl (fst s), s).") ^^
     newline ^^ newline ^^
-    !^ "Definition" ^^ Name.to_coq ("write_" ^ r.name) ^^ parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false r.typ) ^^ !^ ":" ^^
+    !^ "Definition" ^^ Name.to_coq ("write_" ^ r.name) ^^
+      parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false r.typ) ^^ !^ ":" ^^
       !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ !^ "unit" ^^ !^ ":=" ^^
     newline ^^ indent (
       !^ "fun s => (inl tt, (x, tt)).")
@@ -298,7 +299,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let o = o.PathName.path @ [o.PathName.base] in
       (Open.update_env o env, Open (loc, o))
     | Tstr_module {mb_id = name;
-      mb_expr = { mod_desc = Tmod_structure structure }} ->
+      mb_expr = { mod_desc = Tmod_structure structure }}
+    | Tstr_module {mb_id = name;
+      mb_expr = { mod_desc =
+        Tmod_constraint ({ mod_desc = Tmod_structure structure }, _, _, _) }} ->
       let name = Name.of_ident name in
       let env = FullEnvi.enter_module env in
       let (env, structures) = of_structure env structure in
