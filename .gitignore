@@ -17,3 +17,5 @@ _build/
 smartPrint/*.v
 smartPrint/*.monadise
 \#*\#
+*.sublime-project
+*.sublime-workspace
