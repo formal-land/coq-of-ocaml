@@ -9,7 +9,7 @@ Definition raise_Error {A : Type} (x : unit) : M [ Error ] A :=
   fun s => (inr (inl x), s).
 
 Definition x1 : Z :=
-  match unret (Exception.run 0 (raise_Error tt) tt) with
+  match Exception.run 0 (raise_Error tt) tt with
   | inl x => x
   | inr tt => 12
   end.
@@ -17,7 +17,7 @@ Definition x1 : Z :=
 Definition x2 {A B : Type} (x : A) : M [ OCaml.Failure ] B :=
   match x with
   | _ =>
-    match unret (Exception.run 0 (raise_Error tt) tt) with
+    match Exception.run 0 (raise_Error tt) tt with
     | inl x => ret x
     | inr tt => OCaml.Pervasives.failwith "arg" % string
     end

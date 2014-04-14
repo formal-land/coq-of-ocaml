@@ -931,11 +931,7 @@ let rec to_coq (paren : bool) (e : 'a t) : SmartPrint.t =
   | Run (_, x, d, e) ->
     let n = Effect.Descriptor.index x d in
     let output = nest (!^ "Exception.run" ^^ OCaml.int n ^^ to_coq true e ^^ !^ "tt") in
-    Pp.parens paren (
-      if Effect.Descriptor.is_pure (Effect.Descriptor.remove x d) then
-        nest (!^ "unret" ^^ parens output)
-      else
-        output)
+    Pp.parens paren output
   | Return (_, e) -> Pp.parens paren @@ nest (!^ "ret" ^^ to_coq true e)
   | Bind (_, e1, x, e2) ->
     Pp.parens paren @@ nest (

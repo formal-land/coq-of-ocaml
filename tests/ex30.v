@@ -17,7 +17,7 @@ Module N.
     end.
   
   Definition x : unit :=
-    match unret (Exception.run 0 (f tt) tt) with
+    match Exception.run 0 (f tt) tt with
     | inl x => x
     | inr (_) => tt
     end.
@@ -25,14 +25,14 @@ Module N.
   Import M.
   
   Definition y : unit :=
-    match unret (Exception.run 0 (M.f tt) tt) with
+    match Exception.run 0 (M.f tt) tt with
     | inl x => x
     | inr (_) => tt
     end.
 End N.
 
 Definition b : unit :=
-  match unret (Exception.run 0 (N.f tt) tt) with
+  match Exception.run 0 (N.f tt) tt with
   | inl x => x
   | inr (_) => tt
   end.
@@ -40,7 +40,7 @@ Definition b : unit :=
 Import N.
 
 Definition b' : unit :=
-  match unret (Exception.run 0 (N.f tt) tt) with
+  match Exception.run 0 (N.f tt) tt with
   | inl x => x
   | inr (_) => tt
   end.

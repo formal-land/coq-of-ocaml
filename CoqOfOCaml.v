@@ -109,50 +109,79 @@ Module Effect.
   End Filter.
 End Effect.
 
+Module Raw.
+  Definition M (es : list Effect.t) (A : Type) : Type :=
+    Effect.state es -> (A + Effect.error es) * Effect.state es.
+
+  Definition ret {es : list Effect.t} {A : Type} (x : A) : M es A :=
+    fun s => (inl x, s).
+
+  Definition bind {es : list Effect.t} {A B : Type}
+    (x : M es A) (f : A -> M es B) : M es B :=
+    fun s =>
+      let (x, s) := x s in
+      match x with
+      | inl x => f x s
+      | inr e => (inr e, s)
+      end.
+
+  Definition lift {A : Type} (es : list Effect.t) (bs : string)
+    (x : M _ A) : M _ A :=
+    let aux (ebs : list (Effect.t * bool)) (x : M (Effect.Ebs.sub ebs) A)
+      : M (Effect.Ebs.domain ebs) A :=
+      fun s =>
+        let (r, s') := x (Effect.Ebs.filter_state ebs s) in
+        let s := Effect.Ebs.expand_state ebs s' s in
+        match r with
+        | inl x => (inl x, s)
+        | inr err => (inr (Effect.Ebs.expand_exception ebs err), s)
+        end in
+    let fix bool_list (s : string) : list bool :=
+      match s with
+      | EmptyString => []
+      | String "0" s => false :: bool_list s
+      | String _ s => true :: bool_list s
+      end in
+    aux (List.combine es (bool_list bs)) x.
+End Raw.
+
 Definition M (es : list Effect.t) (A : Type) : Type :=
-  Effect.state es -> (A + Effect.error es) * Effect.state es.
+  match es with
+  | [] => A
+  | _ => Effect.state es -> (A + Effect.error es) * Effect.state es
+  end.
+
+Definition of_raw {es : list Effect.t} {A : Type} : Raw.M es A -> M es A :=
+  match es with
+  | [] => fun x =>
+    match x tt with
+    | (inl x, _) => x
+    | (inr err, _) => match err with end
+    end
+  | _ => fun x => x
+  end.
+
+Definition to_raw {es : list Effect.t} {A : Type} : M es A -> Raw.M es A :=
+  match es with
+  | [] => fun x => fun tt => (inl x, tt)
+  | _ => fun x => x
+  end.
 
 Definition ret {es : list Effect.t} {A : Type} (x : A) : M es A :=
-  fun s => (inl x, s).
-
-Definition unret {A : Type} (x: M [] A) : A :=
-  match x tt with
-  | (inl x, _) => x
-  | (inr err, _) => match err with end
-  end.
+  of_raw (Raw.ret x).
 
 Definition bind {es : list Effect.t} {A B : Type}
   (x : M es A) (f : A -> M es B) : M es B :=
-  fun s =>
-    let (x, s) := x s in
-    match x with
-    | inl x => f x s
-    | inr e => (inr e, s)
-    end.
+  of_raw (Raw.bind (to_raw x) (fun x => to_raw (f x))).
 
 Notation "'let!' X ':=' A 'in' B" := (bind A (fun X => B))
   (at level 200, X ident, A at level 100, B at level 200).
 
 Definition lift {A : Type} (es : list Effect.t) (bs : string)
   (x : M _ A) : M _ A :=
-  let aux (ebs : list (Effect.t * bool)) (x : M (Effect.Ebs.sub ebs) A)
-    : M (Effect.Ebs.domain ebs) A :=
-    fun s =>
-      let (r, s') := x (Effect.Ebs.filter_state ebs s) in
-      let s := Effect.Ebs.expand_state ebs s' s in
-      match r with
-      | inl x => (inl x, s)
-      | inr err => (inr (Effect.Ebs.expand_exception ebs err), s)
-      end in
-  let fix bool_list (s : string) : list bool :=
-    match s with
-    | EmptyString => []
-    | String "0" s => false :: bool_list s
-    | String _ s => true :: bool_list s
-    end in
-  aux (List.combine es (bool_list bs)) x.
+  of_raw (Raw.lift es bs (to_raw x)).
 
-Module Run.
+(*Module Run.
   Fixpoint errors_input (ebs : list (Effect.t * bool))
     (s : Effect.state (Effect.Filter.states ebs)) {struct ebs}
     : Effect.state (Effect.Ebs.domain ebs).
@@ -193,7 +222,7 @@ Module Run.
       | inl x => inl (inl x)
       | inr err => sum_assoc_left (inr (errors_error _ err))
       end, errors_output _ s).
-End Run.
+End Run.*)
 
 Module Exception.
   Fixpoint remove_nth (es : list Effect.t) (n : nat) : list Effect.t :=
@@ -251,12 +280,12 @@ Module Exception.
   Definition run {A : Type} {es : list Effect.t} (n : nat)
     (x : M es A) (tt' : nth_is_stateless es n)
     : M (remove_nth es n) (A + Effect.E (List.nth n es Effect.nil)) :=
-    fun s =>
-      let (r, s) := x (input _ _ tt' s) in
+    of_raw (fun s =>
+      let (r, s) := (to_raw x) (input _ _ tt' s) in
       (match r with
       | inl x => inl (inl x)
       | inr err => sum_assoc_left (inr (error _ _ err))
-      end, output _ _ s).
+      end, output _ _ s)).
 End Exception.
 
 (** A stream which may be finite. *)
