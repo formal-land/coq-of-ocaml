@@ -1,0 +1,17 @@
+3 Module M:
+  6 (Value
+    (non_rec, @.,
+      [ ((b, [ ], [ ], Some Type (bool/1)), Constructor (6, false/1)) ]))
+  
+  7 (Value
+    (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/1)), Constant (7, Int(12))) ]))
+
+10
+(Value
+  (non_rec, @.,
+    [
+      ((n, [ ], [ ], Some Type (Z/0)),
+        Apply
+          (10, Variable (10, Z.add/0),
+            [ Variable (10, M.n/0); Constant (10, Int(2)) ]))
+    ]))
