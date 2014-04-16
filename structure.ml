@@ -382,12 +382,14 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
     : unit FullEnvi.t * Loc.t t =
     match def with
     | Value (loc, def) ->
-      let env_in_def = Exp.Definition.env_in_def def Envi.Visibility.Global env in
+      let env_in_def =
+        Exp.Definition.env_in_def def Envi.Visibility.Global env in
       let def = { def with
-        Exp.Definition.cases = def.Exp.Definition.cases |> List.map (fun (header, e) ->
-          let typ = match header.Exp.Header.typ with
-          | Some typ -> Some (Type.monadise typ (snd (Exp.annotation e)))
-          | None -> None in
+        Exp.Definition.cases =
+          def.Exp.Definition.cases |> List.map (fun (header, e) ->
+            let typ = match header.Exp.Header.typ with
+            | Some typ -> Some (Type.monadise typ (snd (Exp.annotation e)))
+            | None -> None in
         let header = { header with Exp.Header.typ = typ } in
         let env = Exp.Header.env_in_header header env_in_def () in
         let e = Exp.monadise env e in

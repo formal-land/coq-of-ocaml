@@ -2,6 +2,8 @@ open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
+  let _ = Interface.pp in
+  print_newline ();
   try
     let document =
       match mode with

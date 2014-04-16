@@ -132,15 +132,15 @@ let pp (effect : t) : SmartPrint.t =
   nest (!^ "Effect" ^^ OCaml.tuple [
     Descriptor.pp effect.descriptor; Type.pp false effect.typ])
 
-let function_typ (args_names : Name.t list) (body_effect : t) : Type.t =
-  match args_names with
+let function_typ (args : 'a list) (body_effect : t) : Type.t =
+  match args with
   | [] -> body_effect.typ
-  | _ :: args_names ->
+  | _ :: args ->
     List.fold_left (fun effect_typ _ ->
       Type.Arrow (Descriptor.pure, effect_typ))
       (Type.Arrow
           (body_effect.descriptor, body_effect.typ))
-      args_names
+      args
 
 let union (effects : t list) : t =
   { descriptor =

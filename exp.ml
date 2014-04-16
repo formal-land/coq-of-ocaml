@@ -496,7 +496,8 @@ and monadise_let_rec_definition (env : unit FullEnvi.t)
     let def' = { def' with Definition.cases =
       def'.Definition.cases |> List.map (fun (header, e) ->
         let name_rec = header.Header.name in
-        let (counter, _) = Envi.fresh "counter" () env_after_def'.FullEnvi.vars in
+        let (counter, _) =
+          Envi.fresh "counter" () env_after_def'.FullEnvi.vars in
         let args_rec =
           (counter,
             Type.Apply (Envi.bound_name (PathName.of_name [] "nat")
@@ -717,8 +718,7 @@ and env_after_def_with_effects (env : Effect.Type.t FullEnvi.t)
   : Effect.Type.t FullEnvi.t =
   List.fold_left (fun env (header, e) ->
     let effect = snd (annotation e) in
-    let args_names = List.map fst header.Header.args in
-    let effect_typ = Effect.function_typ args_names effect in
+    let effect_typ = Effect.function_typ header.Header.args effect in
     FullEnvi.add_var [] header.Header.name visibility effect_typ env)
     env def.Definition.cases
 
