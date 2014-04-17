@@ -1,0 +1,18 @@
+Interface Ex11 =
+  Interface SizedString =
+    Typ t
+    Field name
+    Field size
+  Var (r, .)
+  Var (r', .)
+  Var (s, .)
+  Var (f, .)
+  Var (b, .)
+  Var (b', .)
+  Interface Point =
+    Typ t
+    Field x
+    Field y
+    Field z
+    Var (p, .)
+    Var (b, .)

@@ -1,9 +1,8 @@
 open SmartPrint
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
-let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
-  let _ = Interface.pp in
-  print_newline ();
+let of_ocaml (structure : Typedtree.structure) (mode : string)
+  (module_name : string) : unit =
   try
     let document =
       match mode with
@@ -26,6 +25,14 @@ let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
           Structure.effects PervasivesModule.env_with_effects defs in
         let (_, defs) = Structure.monadise PervasivesModule.env defs in
         Structure.pp Loc.pp defs
+      | "interface" ->
+        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
+        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
+        let (_, defs) =
+          Structure.effects PervasivesModule.env_with_effects defs in
+        let interface = Interface.Interface
+          (module_name, Interface.of_structures defs) in
+        Interface.pp interface
       | "v" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
@@ -54,6 +61,9 @@ let parse_cmt (file_name : string) : Typedtree.structure =
     structure
   | _ -> failwith "Cannot extract cmt data."
 
+let module_name (file_name : string) : string =
+  String.capitalize @@ Filename.chop_extension @@ Filename.basename file_name
+
 (** The main function. *)
 let main () =
   let file_name = ref None in
@@ -64,7 +74,7 @@ let main () =
   Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage options usage_msg
-  | Some file_name -> of_ocaml (parse_cmt file_name) !mode;
+  | Some file_name -> of_ocaml (parse_cmt file_name) !mode (module_name file_name);
   (*print_newline ();
   to_stdout 80 2 @@ Structure.pp [PervasivesModule.pervasives]*)
 

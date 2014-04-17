@@ -8,8 +8,12 @@ module Shape = struct
   let rec pp (shape : t) : SmartPrint.t =
     match shape with
     | Pure -> !^ "."
-    | Arrow (ds, shape) -> nest (!^ "Arrow" ^^ OCaml.tuple [
-      OCaml.list PathName.pp ds; pp shape])
+    | Arrow (ds, shape) -> nest (
+      !^ "." ^^
+      (match ds with
+      | [] -> !^ "->"
+      | _ :: _ -> !^ "-" ^-^ OCaml.list PathName.pp ds ^-^ !^ "->") ^^
+      pp shape)
 
   let rec of_effect_typ (typ : Effect.Type.t) : t =
     match typ with
@@ -46,8 +50,8 @@ let rec pp (interface : t) : SmartPrint.t =
   match interface with
   | Declaration d -> Declaration.pp d
   | Interface (x, ds) ->
-    !^ "Interface" ^^ Name.pp x ^^ !^ "=" ^^ newline ^^ indent (
-      separate newline (List.map pp ds))
+    !^ "Interface" ^^ Name.pp x ^^ !^ "=" ^^ newline ^^ indent
+      (separate newline (List.map pp ds))
 
 let rec of_structures (defs : ('a * Effect.t) Structure.t list) : t list =
   List.flatten (List.map of_structure defs)
@@ -59,7 +63,7 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
       let name = header.Exp.Header.name in
       let typ =
         Effect.function_typ header.Exp.Header.args (snd (Exp.annotation e)) in
-      (name, Shape.of_effect_typ typ)) in
+      (name, Shape.of_effect_typ @@ Effect.Type.compress typ)) in
     values |> List.map (fun (name, typ) ->
       Declaration (Declaration.Var (name, typ)))
   | Structure.Inductive (_, ind) ->
@@ -79,3 +83,11 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
     [ Declaration (Declaration.Descriptor name);
       Declaration (Declaration.Var (name,
         Shape.Arrow ([PathName.of_name [] name], Shape.Pure))) ]
+  | Structure.Reference (_, r) ->
+    let name = r.Structure.Reference.name in
+    let shape = Shape.Arrow ([PathName.of_name [] name], Shape.Pure) in
+    [ Declaration (Declaration.Descriptor name);
+      Declaration (Declaration.Var ("read_" ^ name, shape));
+      Declaration (Declaration.Var ("write_" ^ name, shape)) ]
+  | Structure.Open _ -> []
+  | Structure.Module (_, name, defs) -> [Interface (name, of_structures defs)]

@@ -1,0 +1,3 @@
+Interface Ex28 =
+  Var (map, .)
+  Var (map2, .)

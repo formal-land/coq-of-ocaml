@@ -1,0 +1,13 @@
+Interface Ex07 =
+  Var (b, .)
+  Var (n1, .)
+  Var (n2, .)
+  Var (n3, .)
+  Var (n4, .)
+  Var (n5, .)
+  Var (s, .)
+  Var (c, .)
+  Var (x, .)
+  Var (p, .)
+  Var (l, .)
+  Var (y, .)

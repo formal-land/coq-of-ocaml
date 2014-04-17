@@ -1,0 +1,9 @@
+Interface Ex29 =
+  Var (odd_length, .)
+  Var (even_length, .)
+  Var (odd_length_with_print, . -[ IO ]-> .)
+  Var (even_length_with_print, . -[ IO ]-> .)
+  Var (odd_length_free_rec, . -> . -[ NonTermination ]-> .)
+  Var (even_length_free_rec, . -> . -[ NonTermination ]-> .)
+  Var (odd_length_free, . -[ Counter; NonTermination ]-> .)
+  Var (even_length_free, . -[ Counter; NonTermination ]-> .)

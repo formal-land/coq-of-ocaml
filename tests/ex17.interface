@@ -1,0 +1,10 @@
+Interface Ex17 =
+  Descriptor Outside
+  Var (Outside, . -[ Outside ]-> .)
+  Var (f, . -[ Outside ]-> .)
+  Interface G =
+    Descriptor Inside
+    Var (Inside, . -[ Inside ]-> .)
+    Var (g, . -[ Outside; Inside ]-> .)
+  Var (h_rec, . -> . -[ IO; NonTermination; Outside; G.Inside ]-> .)
+  Var (h, . -[ Counter; IO; NonTermination; Outside; G.Inside ]-> .)

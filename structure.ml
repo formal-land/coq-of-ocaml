@@ -135,8 +135,8 @@ module Exception = struct
   let update_env (exn : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
     FullEnvi.add_exception [] exn.name Envi.Visibility.Global env
 
-  let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t) (loc : Loc.t)
-    : Effect.Type.t FullEnvi.t =
+  let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t)
+    (loc : Loc.t) : Effect.Type.t FullEnvi.t =
     FullEnvi.add_exception_with_effects [] exn.name loc Envi.Visibility.Global env
 
   let to_coq (exn : t) : SmartPrint.t =

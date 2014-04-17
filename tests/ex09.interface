@@ -1,0 +1,2 @@
+Interface Ex09 =
+  Var (l, . -[ Counter; NonTermination ]-> .)

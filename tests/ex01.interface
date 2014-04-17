@@ -1,0 +1,3 @@
+Interface Ex01 =
+  Var (f, .)
+  Var (n, .)

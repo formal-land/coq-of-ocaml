@@ -94,6 +94,8 @@ tests.check('effects')
 puts
 tests.check('monadise')
 puts
+tests.check('interface')
+puts
 tests.check('v')
 puts
 tests.coq

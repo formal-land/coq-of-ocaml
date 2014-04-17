@@ -1,0 +1,5 @@
+Interface Ex31 =
+  Interface M =
+    Var (b, .)
+    Var (n, .)
+  Var (n, .)

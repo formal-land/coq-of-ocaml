@@ -17,6 +17,7 @@ cmt: $(TESTS_INPUT:.ml=.cmt)
 exp: $(TESTS_INPUT:.ml=.exp)
 effects: $(TESTS_INPUT:.ml=.effects)
 monadise: $(TESTS_INPUT:.ml=.monadise)
+interface: $(TESTS_INPUT:.ml=.interface)
 v: $(TESTS_INPUT:.ml=.v)
 vo: $(TESTS_INPUT:.ml=.vo)
 
@@ -31,6 +32,9 @@ vo: $(TESTS_INPUT:.ml=.vo)
 
 %.monadise: %.cmt default
 	./$(OUTPUT) -mode monadise $< >$@
+
+%.interface: %.cmt default
+	./$(OUTPUT) -mode interface $< >$@
 
 %.v: %.cmt default
 	./$(OUTPUT) -mode v $< >$@

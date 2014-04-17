@@ -69,21 +69,29 @@ module Type = struct
     | Pure
     | Arrow of Descriptor.t * t
 
-  let rec pp (paren : bool) (typ : t) : SmartPrint.t =
+  let rec pp (typ : t) : SmartPrint.t =
     match typ with
     | Pure -> !^ "."
-    | Arrow (d, typ) -> Pp.parens paren @@ nest (
+    | Arrow (d, typ) -> nest (
       !^ "." ^^
       (if Descriptor.is_pure d then
         !^ "->"
       else
         !^ "-" ^-^ Descriptor.pp d ^-^ !^ "->") ^^
-      pp false typ)
+      pp typ)
 
   let rec is_pure (typ : t) : bool =
     match typ with
     | Pure -> true
     | Arrow (d, typ) -> Descriptor.is_pure d && is_pure typ
+
+  let rec compress (typ : t) : t =
+    if is_pure typ then
+      Pure
+    else
+      match typ with
+      | Pure -> Pure
+      | Arrow (d, typ) -> Arrow (d, compress typ)
 
   let rec eq (typ1 : t) (typ2 : t) : bool =
     match (typ1, typ2) with
@@ -133,7 +141,7 @@ type t = { descriptor : Descriptor.t; typ : Type.t }
 
 let pp (effect : t) : SmartPrint.t =
   nest (!^ "Effect" ^^ OCaml.tuple [
-    Descriptor.pp effect.descriptor; Type.pp false effect.typ])
+    Descriptor.pp effect.descriptor; Type.pp effect.typ])
 
 let function_typ (args : 'a list) (body_effect : t) : Type.t =
   match args with
