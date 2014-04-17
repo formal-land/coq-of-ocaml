@@ -1,8 +1,28 @@
 open SmartPrint
 
+module Shape = struct
+  type t =
+    | Pure
+    | Arrow of PathName.t list * t
+
+  let rec pp (shape : t) : SmartPrint.t =
+    match shape with
+    | Pure -> !^ "."
+    | Arrow (ds, shape) -> nest (!^ "Arrow" ^^ OCaml.tuple [
+      OCaml.list PathName.pp ds; pp shape])
+
+  let rec of_effect_typ (typ : Effect.Type.t) : t =
+    match typ with
+    | Effect.Type.Pure -> Pure
+    | Effect.Type.Arrow (d, typ) ->
+      let ds = Effect.Descriptor.elements d |> List.map (fun x ->
+        x.BoundName.path_name) in
+      Arrow (ds, of_effect_typ typ)
+end
+
 module Declaration = struct
   type t =
-    | Var of Name.t * Effect.Type.t
+    | Var of Name.t * Shape.t
     | Typ of Name.t
     | Descriptor of Name.t
     | Constructor of Name.t
@@ -10,8 +30,8 @@ module Declaration = struct
 
   let pp (d : t) : SmartPrint.t =
     match d with
-    | Var (x, typ) ->
-      !^ "Var" ^^ OCaml.tuple [Name.pp x; Effect.Type.pp false typ]
+    | Var (x, shape) ->
+      !^ "Var" ^^ OCaml.tuple [Name.pp x; Shape.pp shape]
     | Typ x -> !^ "Typ" ^^ Name.pp x
     | Descriptor x -> !^ "Descriptor" ^^ Name.pp x
     | Constructor x -> !^ "Constructor" ^^ Name.pp x
@@ -39,7 +59,7 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
       let name = header.Exp.Header.name in
       let typ =
         Effect.function_typ header.Exp.Header.args (snd (Exp.annotation e)) in
-      (name, typ)) in
+      (name, Shape.of_effect_typ typ)) in
     values |> List.map (fun (name, typ) ->
       Declaration (Declaration.Var (name, typ)))
   | Structure.Inductive (_, ind) ->
@@ -57,4 +77,5 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
   | Structure.Exception (_, exn) ->
     let name = exn.Structure.Exception.name in
     [ Declaration (Declaration.Descriptor name);
-      Declaration (Declaration.Var (name, Arrow (d [[], name], Pure))) ]
+      Declaration (Declaration.Var (name,
+        Shape.Arrow ([PathName.of_name [] name], Shape.Pure))) ]

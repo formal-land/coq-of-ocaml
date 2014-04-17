@@ -28,6 +28,9 @@ module Descriptor = struct
   let remove (x : BoundName.t) (d : t) : t =
     Map.filter (fun _ y -> x <> y) d
 
+  let elements (d : t) : BoundName.t list =
+    List.map snd (Map.bindings d)
+
   let index (x : BoundName.t) (d : t) : int =
     let rec find_index l f =
       match l with
