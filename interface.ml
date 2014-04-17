@@ -35,6 +35,15 @@ module Declaration = struct
     | Descriptor x -> !^ "Descriptor" ^^ Name.pp x
     | Constructor x -> !^ "Constructor" ^^ Name.pp x
     | Field x -> !^ "Field" ^^ Name.pp x
+
+  let to_json (d : t) : json =
+    match d with
+    | Var (x, shape) ->
+      `Variant ("Var", Some (`List [Name.to_json x; Shape.to_json shape]))
+    | Typ x -> `Variant ("Typ", Some (Name.to_json x))
+    | Descriptor x -> `Variant ("Descriptor", Some (Name.to_json x))
+    | Constructor x -> `Variant ("Constructor", Some (Name.to_json x))
+    | Field x -> `Variant ("Field", Some (Name.to_json x))
 end
 
 type t =
@@ -85,3 +94,10 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
       Declaration (Declaration.Var ("write_" ^ name, shape)) ]
   | Structure.Open _ -> []
   | Structure.Module (_, name, defs) -> [Interface (name, of_structures defs)]
+
+let rec to_json (interface : t) : json =
+  match interface with
+  | Declaration d -> `Variant ("Declaration", Some (Declaration.to_json d))
+  | Interface (x, ds) ->
+    `Variant ("Interface",
+      Some (`List [Name.to_json x; `List (List.map to_json ds)]))
