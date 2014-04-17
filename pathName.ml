@@ -260,3 +260,18 @@ let to_coq (x : t) : SmartPrint.t =
 
 let to_json (x : t) : json =
   `List (List.map Name.to_json (x.path @ [x.base]))
+
+let of_json (json : json) : t =
+  let rec split_at_last l =
+    match l with
+    | [] -> assert false
+    | [x] -> ([], x)
+    | x :: l ->
+      let (path, base) = split_at_last l in
+      (x :: path, base) in
+  match json with
+  | `List jsons ->
+    let names = List.map Name.of_json jsons in
+    let (path, base) = split_at_last names in
+    of_name path base
+  | _ -> failwith "List expected."

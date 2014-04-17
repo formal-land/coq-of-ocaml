@@ -40,7 +40,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
           Structure.effects PervasivesModule.env_with_effects defs in
         let interface = Interface.Interface
           (module_name, Interface.of_structures defs) in
-        !^ (Yojson.Safe.to_string ~std:true (`List [Interface.to_json interface]))
+        !^ (Interface.to_json_string interface)
       | "v" ->
         let (_, defs) = Structure.of_structure PervasivesModule.env structure in
         let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in

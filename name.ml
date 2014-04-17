@@ -82,3 +82,8 @@ let to_coq (x : t) : SmartPrint.t =
 
 let to_json (x : t) : json =
   `String x
+
+let of_json (json : json) : t =
+  match json with
+  | `String x -> x
+  | _ -> failwith "String expected."

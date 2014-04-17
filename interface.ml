@@ -17,6 +17,13 @@ module Shape = struct
 
   let to_json (shape : t) : json =
     `List (List.map (fun ds -> `List (List.map PathName.to_json ds)) shape)
+
+  let of_json (json : json) : t =
+    let of_list f json =
+      match json with
+      | `List jsons -> List.map f jsons
+      | _ -> failwith "List expected." in
+    of_list (of_list PathName.of_json) json
 end
 
 module Declaration = struct
@@ -44,6 +51,18 @@ module Declaration = struct
     | Descriptor x -> `Variant ("Descriptor", Some (Name.to_json x))
     | Constructor x -> `Variant ("Constructor", Some (Name.to_json x))
     | Field x -> `Variant ("Field", Some (Name.to_json x))
+
+  let of_json (json : json) : t =
+    match json with
+    | `List [`String c; arg] ->
+      (match (c, arg) with
+      | ("Var", `List [x; shape]) -> Var (Name.of_json x, Shape.of_json shape)
+      | ("Typ", x) -> Typ (Name.of_json x)
+      | ("Descriptor", x) -> Descriptor (Name.of_json x)
+      | ("Constructor", x) -> Constructor (Name.of_json x)
+      | ("Field", x) -> Field (Name.of_json x)
+      | _ -> failwith "Unknown field.")
+    | _ -> failwith "List expected."
 end
 
 type t =
@@ -101,3 +120,23 @@ let rec to_json (interface : t) : json =
   | Interface (x, ds) ->
     `Variant ("Interface",
       Some (`List [Name.to_json x; `List (List.map to_json ds)]))
+
+let rec of_json (json : json) : t =
+  match json with
+  | `List [`String "Declaration"; d] -> Declaration (Declaration.of_json d)
+  | `List [`String "Interface"; `List [x; `List ds]] ->
+    Interface (Name.of_json x, List.map of_json ds)
+  | _ -> failwith "Wrong JSON format."
+
+let to_json_string (interface : t) : string =
+  pretty_to_string ~std:true (`Assoc [
+    "content", to_json interface;
+    "version", `String "1"])
+
+let of_json_string (json : string) : t =
+  match from_string json with
+  | `Assoc jsons ->
+    (match List.assq "version" jsons with
+    | `String "1" -> of_json @@ List.assq "content" jsons
+    | _ -> failwith "Wrong interface version.")
+  | _ -> failwith "Wrong JSON format."
