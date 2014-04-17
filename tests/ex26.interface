@@ -1,6 +1,6 @@
 Interface Ex26 =
-  Var (f_map, .)
-  Var (f_map2_rec, . -> . -> . -[ NonTermination ]-> .)
-  Var (f_map2, . -> . -[ Counter; NonTermination ]-> .)
-  Var (n, .)
-  Var (n2, . -[ Counter; NonTermination ]-> .)
+  Var (f_map, [ ])
+  Var (f_map2_rec, [ [ ]; [ ]; [ NonTermination ] ])
+  Var (f_map2, [ [ ]; [ Counter; NonTermination ] ])
+  Var (n, [ ])
+  Var (n2, [ [ Counter; NonTermination ] ])

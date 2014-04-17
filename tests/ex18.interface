@@ -1,11 +1,11 @@
 Interface Ex18 =
   Descriptor r
-  Var (read_r, . -[ r ]-> .)
-  Var (write_r, . -[ r ]-> .)
-  Var (plus_one, . -[ r ]-> .)
+  Var (read_r, [ [ r ] ])
+  Var (write_r, [ [ r ] ])
+  Var (plus_one, [ [ r ] ])
   Descriptor s
-  Var (read_s, . -[ s ]-> .)
-  Var (write_s, . -[ s ]-> .)
-  Var (fail, . -[ OCaml.Failure; s ]-> .)
-  Var (reset, . -[ r ]-> .)
-  Var (incr, . -[ r ]-> .)
+  Var (read_s, [ [ s ] ])
+  Var (write_s, [ [ s ] ])
+  Var (fail, [ [ OCaml.Failure; s ] ])
+  Var (reset, [ [ r ] ])
+  Var (incr, [ [ r ] ])

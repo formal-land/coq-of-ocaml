@@ -1,2 +1,2 @@
 Interface Ex14 =
-  Var (f, .)
+  Var (f, [ ])

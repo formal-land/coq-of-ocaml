@@ -1,2 +1,2 @@
 Interface Ex05 =
-  Var (n, .)
+  Var (n, [ ])

@@ -1,6 +1,6 @@
 Interface Ex19 =
   Descriptor Error
-  Var (Error, . -[ Error ]-> .)
-  Var (x1, .)
-  Var (x2, . -[ OCaml.Failure ]-> .)
-  Var (x3, . -[ OCaml.Failure ]-> .)
+  Var (Error, [ [ Error ] ])
+  Var (x1, [ ])
+  Var (x2, [ [ OCaml.Failure ] ])
+  Var (x3, [ [ OCaml.Failure ] ])

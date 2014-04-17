@@ -1,6 +1,7 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open Asttypes
 open SmartPrint
+open Yojson.Safe
 
 type t = {
   path : Name.t list;
@@ -256,3 +257,6 @@ let of_path (p : Path.t) : t =
 
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
+
+let to_json (x : t) : json =
+  `List (List.map Name.to_json (x.path @ [x.base]))

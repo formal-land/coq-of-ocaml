@@ -1,2 +1,2 @@
 Interface Ex09 =
-  Var (l, . -[ Counter; NonTermination ]-> .)
+  Var (l, [ [ Counter; NonTermination ] ])

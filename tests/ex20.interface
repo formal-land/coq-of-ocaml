@@ -1,3 +1,3 @@
 Interface Ex20 =
-  Var (sums_rec, . -> . -[ Counter; NonTermination ]-> .)
-  Var (sums, . -[ Counter; NonTermination ]-> .)
+  Var (sums_rec, [ [ ]; [ Counter; NonTermination ] ])
+  Var (sums, [ [ Counter; NonTermination ] ])

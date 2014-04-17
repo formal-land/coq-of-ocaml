@@ -1,27 +1,22 @@
 open SmartPrint
+open Yojson.Safe
 
 module Shape = struct
-  type t =
-    | Pure
-    | Arrow of PathName.t list * t
+  type t = PathName.t list list
 
   let rec pp (shape : t) : SmartPrint.t =
-    match shape with
-    | Pure -> !^ "."
-    | Arrow (ds, shape) -> nest (
-      !^ "." ^^
-      (match ds with
-      | [] -> !^ "->"
-      | _ :: _ -> !^ "-" ^-^ OCaml.list PathName.pp ds ^-^ !^ "->") ^^
-      pp shape)
+    OCaml.list (OCaml.list PathName.pp) shape
 
   let rec of_effect_typ (typ : Effect.Type.t) : t =
     match typ with
-    | Effect.Type.Pure -> Pure
+    | Effect.Type.Pure -> []
     | Effect.Type.Arrow (d, typ) ->
       let ds = Effect.Descriptor.elements d |> List.map (fun x ->
         x.BoundName.path_name) in
-      Arrow (ds, of_effect_typ typ)
+      ds :: of_effect_typ typ
+
+  let to_json (shape : t) : json =
+    `List (List.map (fun ds -> `List (List.map PathName.to_json ds)) shape)
 end
 
 module Declaration = struct
@@ -81,11 +76,10 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
   | Structure.Exception (_, exn) ->
     let name = exn.Structure.Exception.name in
     [ Declaration (Declaration.Descriptor name);
-      Declaration (Declaration.Var (name,
-        Shape.Arrow ([PathName.of_name [] name], Shape.Pure))) ]
+      Declaration (Declaration.Var (name, [[PathName.of_name [] name]])) ]
   | Structure.Reference (_, r) ->
     let name = r.Structure.Reference.name in
-    let shape = Shape.Arrow ([PathName.of_name [] name], Shape.Pure) in
+    let shape = [[PathName.of_name [] name]] in
     [ Declaration (Declaration.Descriptor name);
       Declaration (Declaration.Var ("read_" ^ name, shape));
       Declaration (Declaration.Var ("write_" ^ name, shape)) ]

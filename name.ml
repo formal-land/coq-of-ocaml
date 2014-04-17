@@ -1,6 +1,7 @@
 (** Local identifiers, used for variable names in patterns for example. *)
 open Typedtree
 open SmartPrint
+open Yojson.Safe
 
 (** Just a [string] (no freshness counter for now). *)
 type t = string
@@ -78,3 +79,6 @@ let unsafe_fresh : string -> t =
 (** Pretty-print a name to Coq. *)
 let to_coq (x : t) : SmartPrint.t =
   !^ x
+
+let to_json (x : t) : json =
+  `String x
