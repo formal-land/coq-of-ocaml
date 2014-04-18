@@ -1,57 +1,41 @@
 open SmartPrint
 
+let exp (structure : Typedtree.structure) : Loc.t Structure.t list =
+  let (_, defs) = Structure.of_structure PervasivesModule.env structure in
+  snd @@ Structure.monadise_let_rec PervasivesModule.env defs
+
+let effects (structure : Typedtree.structure)
+  : (Loc.t * Effect.t) Structure.t list =
+  snd @@ Structure.effects PervasivesModule.env_with_effects @@ exp structure
+
+let monadise (structure : Typedtree.structure) : Loc.t Structure.t list =
+  snd @@ Structure.monadise PervasivesModule.env @@ effects structure
+
+let interface (structure : Typedtree.structure) (module_name : string)
+  : Interface.t =
+  Interface.Interface (module_name, Interface.of_structures (effects structure))
+
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string)
   (module_name : string) : unit =
   try
     let document =
       match mode with
-      | "exp" ->
-        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
-        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        Structure.pp Loc.pp defs
+      | "exp" -> Structure.pp Loc.pp @@ exp structure
       | "effects" ->
-        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
-        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) =
-          Structure.effects PervasivesModule.env_with_effects defs in
         let pp_annotation (l, effect) =
           OCaml.tuple [Loc.pp l; Effect.pp effect] in
-        Structure.pp pp_annotation defs
-      | "monadise" ->
-        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
-        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) =
-          Structure.effects PervasivesModule.env_with_effects defs in
-        let (_, defs) = Structure.monadise PervasivesModule.env defs in
-        Structure.pp Loc.pp defs
-      | "interface" ->
-        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
-        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) =
-          Structure.effects PervasivesModule.env_with_effects defs in
-        let interface = Interface.Interface
-          (module_name, Interface.of_structures defs) in
-        Interface.pp interface
-      | "json" ->
-        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
-        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) =
-          Structure.effects PervasivesModule.env_with_effects defs in
-        let interface = Interface.Interface
-          (module_name, Interface.of_structures defs) in
-        !^ (Interface.to_json_string interface)
+        Structure.pp pp_annotation @@ effects structure
+      | "monadise" -> Structure.pp Loc.pp @@ monadise structure
       | "v" ->
-        let (_, defs) = Structure.of_structure PervasivesModule.env structure in
-        let (_, defs) = Structure.monadise_let_rec PervasivesModule.env defs in
-        let (_, defs) =
-          Structure.effects PervasivesModule.env_with_effects defs in
-        let (_, defs) = Structure.monadise PervasivesModule.env defs in
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import CoqOfOCaml." ^^ newline;
           !^ "Local Open Scope Z_scope.";
           !^ "Import ListNotations."]) ^^ newline ^^
-        Structure.to_coq defs
+        Structure.to_coq (monadise structure)
+      | "interface" -> Interface.pp @@ interface structure module_name
+      | "json" ->
+        !^ (Interface.to_json_string (interface structure module_name))
       | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
     to_stdout 80 2 document;
     print_newline ();
@@ -83,7 +67,5 @@ let main () =
   match !file_name with
   | None -> Arg.usage options usage_msg
   | Some file_name -> of_ocaml (parse_cmt file_name) !mode (module_name file_name);
-  (*print_newline ();
-  to_stdout 80 2 @@ Structure.pp [PervasivesModule.pervasives]*)
 
 ;;main ()
