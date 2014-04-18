@@ -1,7 +1,7 @@
 (** Local identifiers, used for variable names in patterns for example. *)
 open Typedtree
 open SmartPrint
-open Yojson.Safe
+open Yojson.Basic
 
 (** Just a [string] (no freshness counter for now). *)
 type t = string

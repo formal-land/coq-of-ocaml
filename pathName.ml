@@ -1,7 +1,7 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open Asttypes
 open SmartPrint
-open Yojson.Safe
+open Yojson.Basic
 
 type t = {
   path : Name.t list;

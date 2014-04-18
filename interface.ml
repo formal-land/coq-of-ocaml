@@ -1,5 +1,5 @@
 open SmartPrint
-open Yojson.Safe
+open Yojson.Basic
 
 module Shape = struct
   type t = PathName.t list list
@@ -46,11 +46,11 @@ module Declaration = struct
   let to_json (d : t) : json =
     match d with
     | Var (x, shape) ->
-      `Variant ("Var", Some (`List [Name.to_json x; Shape.to_json shape]))
-    | Typ x -> `Variant ("Typ", Some (Name.to_json x))
-    | Descriptor x -> `Variant ("Descriptor", Some (Name.to_json x))
-    | Constructor x -> `Variant ("Constructor", Some (Name.to_json x))
-    | Field x -> `Variant ("Field", Some (Name.to_json x))
+      `List [`String "Var"; `List [Name.to_json x; Shape.to_json shape]]
+    | Typ x -> `List [`String "Typ"; Name.to_json x]
+    | Descriptor x -> `List [`String "Descriptor"; Name.to_json x]
+    | Constructor x -> `List [`String "Constructor"; Name.to_json x]
+    | Field x -> `List [`String "Field"; Name.to_json x]
 
   let of_json (json : json) : t =
     match json with
@@ -116,10 +116,10 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
 
 let rec to_json (interface : t) : json =
   match interface with
-  | Declaration d -> `Variant ("Declaration", Some (Declaration.to_json d))
+  | Declaration d -> `List [`String "Declaration"; Declaration.to_json d]
   | Interface (x, ds) ->
-    `Variant ("Interface",
-      Some (`List [Name.to_json x; `List (List.map to_json ds)]))
+    `List [`String "Interface";
+      `List [Name.to_json x; `List (List.map to_json ds)]]
 
 let rec of_json (json : json) : t =
   match json with
