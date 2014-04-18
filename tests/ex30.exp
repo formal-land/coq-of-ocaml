@@ -11,7 +11,7 @@
                     (4,
                       Variable
                         (4,
-                          OCaml.Pervasives.failwith/1),
+                          OCaml.Pervasives.failwith/2),
                       [
                         Constant
                           (4,
@@ -33,11 +33,11 @@
                     (8,
                       Variable
                         (8,
-                          OCaml.assert/1),
+                          OCaml.assert/2),
                       [
                         Constructor
                           (8,
-                            false/1)
+                            false/2)
                       ]))
               ]))
       ]))
@@ -45,18 +45,18 @@
   9 (Value
     (non_rec, @.,
       [
-        ((x, [ ], [ ], Some Type (unit/1)),
+        ((x, [ ], [ ], Some Type (unit/2)),
           Match
             (9,
               Run
-                (?, OCaml.Assert_failure/1, [ ],
+                (?, OCaml.Assert_failure/2, [ ],
                   Apply
                     (9, Variable (9, f/0),
-                      [ Constructor (9, tt/1) ])),
+                      [ Constructor (9, tt/2) ])),
               [
-                (Constructor (inl/1, x), Variable (?, x/0));
-                (Constructor (inr/1, Tuple (Any)),
-                  Constructor (9, tt/1))
+                (Constructor (inl/2, x), Variable (?, x/0));
+                (Constructor (inr/2, Tuple (Any)),
+                  Constructor (9, tt/2))
               ]))
       ]))
   
@@ -65,18 +65,18 @@
   11 (Value
     (non_rec, @.,
       [
-        ((y, [ ], [ ], Some Type (unit/1)),
+        ((y, [ ], [ ], Some Type (unit/2)),
           Match
             (11,
               Run
-                (?, OCaml.Failure/1, [ ],
+                (?, OCaml.Failure/2, [ ],
                   Apply
                     (11, Variable (11, M.f/1),
-                      [ Constructor (11, tt/1) ])),
+                      [ Constructor (11, tt/2) ])),
               [
-                (Constructor (inl/1, x), Variable (?, x/0));
-                (Constructor (inr/1, Tuple (Any)),
-                  Constructor (11, tt/1))
+                (Constructor (inl/2, x), Variable (?, x/0));
+                (Constructor (inr/2, Tuple (Any)),
+                  Constructor (11, tt/2))
               ]))
       ]))
 
@@ -84,17 +84,17 @@
 (Value
   (non_rec, @.,
     [
-      ((b, [ ], [ ], Some Type (unit/0)),
+      ((b, [ ], [ ], Some Type (unit/1)),
         Match
           (14,
             Run
-              (?, OCaml.Assert_failure/0, [ ],
+              (?, OCaml.Assert_failure/1, [ ],
                 Apply
                   (14, Variable (14, N.f/0),
-                    [ Constructor (14, tt/0) ])),
+                    [ Constructor (14, tt/1) ])),
             [
-              (Constructor (inl/0, x), Variable (?, x/0));
-              (Constructor (inr/0, Tuple (Any)), Constructor (14, tt/0))
+              (Constructor (inl/1, x), Variable (?, x/0));
+              (Constructor (inr/1, Tuple (Any)), Constructor (14, tt/1))
             ]))
     ]))
 
@@ -104,16 +104,16 @@
 (Value
   (non_rec, @.,
     [
-      ((b', [ ], [ ], Some Type (unit/0)),
+      ((b', [ ], [ ], Some Type (unit/1)),
         Match
           (16,
             Run
-              (?, OCaml.Assert_failure/0, [ ],
+              (?, OCaml.Assert_failure/1, [ ],
                 Apply
                   (16, Variable (16, N.f/0),
-                    [ Constructor (16, tt/0) ])),
+                    [ Constructor (16, tt/1) ])),
             [
-              (Constructor (inl/0, x), Variable (?, x/0));
-              (Constructor (inr/0, Tuple (Any)), Constructor (16, tt/0))
+              (Constructor (inl/1, x), Variable (?, x/0));
+              (Constructor (inr/1, Tuple (Any)), Constructor (16, tt/1))
             ]))
     ]))

@@ -1,82 +1,82 @@
 4
 (Value
-  (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/0)), Constant (4, Int(12))) ]))
+  (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/1)), Constant (4, Int(12))) ]))
 
 5
 (Value
   (non_rec, @.,
-    [ ((c1, [ ], [ ], Some Type (ascii/0)), Constant (5, Char("a"))) ]))
+    [ ((c1, [ ], [ ], Some Type (ascii/1)), Constant (5, Char("a"))) ]))
 
 6
 (Value
   (non_rec, @.,
-    [ ((c2, [ ], [ ], Some Type (ascii/0)), Constant (6, Char("\\n"))) ]))
+    [ ((c2, [ ], [ ], Some Type (ascii/1)), Constant (6, Char("\\n"))) ]))
 
 7
 (Value
   (non_rec, @.,
-    [ ((c3, [ ], [ ], Some Type (ascii/0)), Constant (7, Char("\\t"))) ]))
+    [ ((c3, [ ], [ ], Some Type (ascii/1)), Constant (7, Char("\\t"))) ]))
 
 8
 (Value
   (non_rec, @.,
-    [ ((c4, [ ], [ ], Some Type (ascii/0)), Constant (8, Char("\""))) ]))
+    [ ((c4, [ ], [ ], Some Type (ascii/1)), Constant (8, Char("\""))) ]))
 
 9
 (Value
   (non_rec, @.,
-    [ ((s, [ ], [ ], Some Type (string/0)), Constant (9, String("hi\n\t:)\""))) ]))
+    [ ((s, [ ], [ ], Some Type (string/1)), Constant (9, String("hi\n\t:)\""))) ]))
 
 11
 (Value
   (non_rec, @.,
-    [ ((b1, [ ], [ ], Some Type (bool/0)), Constructor (11, false/0)) ]))
+    [ ((b1, [ ], [ ], Some Type (bool/1)), Constructor (11, false/1)) ]))
 
 12
 (Value
   (non_rec, @.,
-    [ ((b2, [ ], [ ], Some Type (bool/0)), Constructor (12, true/0)) ]))
+    [ ((b2, [ ], [ ], Some Type (bool/1)), Constructor (12, true/1)) ]))
 
 13
 (Value
-  (non_rec, @., [ ((u, [ ], [ ], Some Type (unit/0)), Constructor (13, tt/0)) ]))
+  (non_rec, @., [ ((u, [ ], [ ], Some Type (unit/1)), Constructor (13, tt/1)) ]))
 
 16
 (Value
   (non_rec, @.,
-    [ ((l1, [ A ], [ ], Some Type (list/0, A)), Constructor (16, []/0)) ]))
+    [ ((l1, [ A ], [ ], Some Type (list/1, A)), Constructor (16, []/1)) ]))
 
 17
 (Value
   (non_rec, @.,
     [
-      ((l2, [ ], [ ], Some Type (list/0, Type (Z/0))),
+      ((l2, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Constructor
-          (17, cons/0, Constant (17, Int(0)),
+          (17, cons/1, Constant (17, Int(0)),
             Constructor
-              (17, cons/0, Constant (17, Int(1)),
+              (17, cons/1, Constant (17, Int(1)),
                 Constructor
-                  (17, cons/0, Constant (17, Int(2)),
+                  (17, cons/1, Constant (17, Int(2)),
                     Constructor
-                      (17, cons/0, Constant (17, Int(3)),
-                        Constructor (17, []/0))))))
+                      (17, cons/1, Constant (17, Int(3)),
+                        Constructor (17, []/1))))))
     ]))
 
 18
 (Value
   (non_rec, @.,
     [
-      ((o, [ ], [ ], Some Type (option/0, Type (Z/0))),
+      ((o, [ ], [ ], Some Type (option/1, Type (Z/1))),
         IfThenElse
-          (18, Variable (18, b1/0), Constructor (18, None/0),
-            Constructor (18, Some/0, Variable (18, n/0))))
+          (18, Variable (18, b1/0), Constructor (18, None/1),
+            Constructor (18, Some/1, Variable (18, n/0))))
     ]))
 
 26
 (Value
   (non_rec, @.,
     [
-      ((e_match, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Match_failure/0 ], B)),
+      ((e_match, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Match_failure/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -85,7 +85,7 @@
                   (26,
                     Variable
                       (26,
-                        OCaml.raise_Match_failure/0),
+                        OCaml.raise_Match_failure/1),
                     [
                       Tuple
                         (?,
@@ -109,7 +109,7 @@
   (non_rec, @.,
     [
       ((e_assert, [ A; B ], [ (x, A) ],
-        Some Monad ([ OCaml.Assert_failure/0 ], B)),
+        Some Monad ([ OCaml.Assert_failure/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -118,7 +118,7 @@
                   (27,
                     Variable
                       (27,
-                        OCaml.raise_Assert_failure/0),
+                        OCaml.raise_Assert_failure/1),
                     [
                       Tuple
                         (?,
@@ -142,7 +142,7 @@
   (non_rec, @.,
     [
       ((e_invalid, [ A; B ], [ (x, A) ],
-        Some Monad ([ OCaml.Invalid_argument/0 ], B)),
+        Some Monad ([ OCaml.Invalid_argument/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -151,7 +151,7 @@
                   (28,
                     Variable
                       (28,
-                        OCaml.raise_Invalid_argument/0),
+                        OCaml.raise_Invalid_argument/1),
                     [
                       Tuple
                         (?,
@@ -166,7 +166,7 @@
 (Value
   (non_rec, @.,
     [
-      ((e_failure, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/0 ], B)),
+      ((e_failure, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -175,7 +175,7 @@
                   (29,
                     Variable
                       (29,
-                        OCaml.raise_Failure/0),
+                        OCaml.raise_Failure/1),
                     [
                       Tuple
                         (?,
@@ -190,7 +190,7 @@
 (Value
   (non_rec, @.,
     [
-      ((e_not_found, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Not_found/0 ], B)),
+      ((e_not_found, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Not_found/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -199,7 +199,7 @@
                   (30,
                     Variable
                       (30,
-                        OCaml.raise_Not_found/0),
+                        OCaml.raise_Not_found/1),
                     [
                       Tuple
                         (?)
@@ -212,7 +212,7 @@
   (non_rec, @.,
     [
       ((e_out_of_mem, [ A; B ], [ (x, A) ],
-        Some Monad ([ OCaml.Out_of_memory/0 ], B)),
+        Some Monad ([ OCaml.Out_of_memory/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -221,7 +221,7 @@
                   (31,
                     Variable
                       (31,
-                        OCaml.raise_Out_of_memory/0),
+                        OCaml.raise_Out_of_memory/1),
                     [
                       Tuple
                         (?)
@@ -234,7 +234,7 @@
   (non_rec, @.,
     [
       ((e_overflow, [ A; B ], [ (x, A) ],
-        Some Monad ([ OCaml.Stack_overflow/0 ], B)),
+        Some Monad ([ OCaml.Stack_overflow/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -243,7 +243,7 @@
                   (32,
                     Variable
                       (32,
-                        OCaml.raise_Stack_overflow/0),
+                        OCaml.raise_Stack_overflow/1),
                     [
                       Tuple
                         (?)
@@ -255,7 +255,7 @@
 (Value
   (non_rec, @.,
     [
-      ((e_sys_err, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Sys_error/0 ], B)),
+      ((e_sys_err, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Sys_error/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -264,7 +264,7 @@
                   (33,
                     Variable
                       (33,
-                        OCaml.raise_Sys_error/0),
+                        OCaml.raise_Sys_error/1),
                     [
                       Tuple
                         (?,
@@ -279,7 +279,7 @@
 (Value
   (non_rec, @.,
     [
-      ((e_EOF, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.End_of_file/0 ], B)),
+      ((e_EOF, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.End_of_file/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -288,7 +288,7 @@
                   (34,
                     Variable
                       (34,
-                        OCaml.raise_End_of_file/0),
+                        OCaml.raise_End_of_file/1),
                     [
                       Tuple
                         (?)
@@ -301,7 +301,7 @@
   (non_rec, @.,
     [
       ((e_div, [ A; B ], [ (x, A) ],
-        Some Monad ([ OCaml.Division_by_zero/0 ], B)),
+        Some Monad ([ OCaml.Division_by_zero/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -310,7 +310,7 @@
                   (35,
                     Variable
                       (35,
-                        OCaml.raise_Division_by_zero/0),
+                        OCaml.raise_Division_by_zero/1),
                     [
                       Tuple
                         (?)
@@ -323,7 +323,7 @@
   (non_rec, @.,
     [
       ((e_sys_blocked, [ A; B ], [ (x, A) ],
-        Some Monad ([ OCaml.Sys_blocked_io/0 ], B)),
+        Some Monad ([ OCaml.Sys_blocked_io/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -332,7 +332,7 @@
                   (36,
                     Variable
                       (36,
-                        OCaml.raise_Sys_blocked_io/0),
+                        OCaml.raise_Sys_blocked_io/1),
                     [
                       Tuple
                         (?)
@@ -345,7 +345,7 @@
   (non_rec, @.,
     [
       ((e_rec_module, [ A; B ], [ (x, A) ],
-        Some Monad ([ OCaml.Undefined_recursive_module/0 ], B)),
+        Some Monad ([ OCaml.Undefined_recursive_module/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -354,7 +354,7 @@
                   (37,
                     Variable
                       (37,
-                        OCaml.raise_Undefined_recursive_module/0),
+                        OCaml.raise_Undefined_recursive_module/1),
                     [
                       Tuple
                         (?,

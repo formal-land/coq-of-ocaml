@@ -4,22 +4,22 @@
     [
       ((f, [ A; B; C ], [ (x, A) ], Some (B -> C)),
         Sequence
-          ((4, Effect ([ IO/0 ], . -[ OCaml.Failure/0 ]-> .)),
+          ((4, Effect ([ IO/1 ], . -[ OCaml.Failure/1 ]-> .)),
             Apply
-              ((4, Effect ([ IO/0 ], .)),
+              ((4, Effect ([ IO/1 ], .)),
                 Variable
-                  ((4, Effect ([ ], . -[ IO/0 ]-> .)),
-                    OCaml.Pervasives.print_string/0),
+                  ((4, Effect ([ ], . -[ IO/1 ]-> .)),
+                    OCaml.Pervasives.print_string/1),
                 [ Constant ((4, Effect ([ ], .)), String("Hi")) ]),
             Function
-              ((5, Effect ([ ], . -[ OCaml.Failure/0 ]-> .)), y,
+              ((5, Effect ([ ], . -[ OCaml.Failure/1 ]-> .)), y,
                 Apply
-                  ((5, Effect ([ OCaml.Failure/0 ], .)),
+                  ((5, Effect ([ OCaml.Failure/1 ], .)),
                     Variable
                       ((5,
                         Effect
-                          ([ ], . -[ OCaml.Failure/0 ]-> .)),
-                        OCaml.Pervasives.failwith/0),
+                          ([ ], . -[ OCaml.Failure/1 ]-> .)),
+                        OCaml.Pervasives.failwith/1),
                     [
                       Constant
                         ((5,
@@ -37,7 +37,7 @@
     [
       ((r, [ A; B ], [ (x, A) ], Some B),
         Match
-          ((?, Effect ([ IO/0; OCaml.Failure/0 ], .)),
+          ((?, Effect ([ IO/1; OCaml.Failure/1 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -45,19 +45,19 @@
                   ((7,
                     Effect
                       ([
-                        IO/0;
-                        OCaml.Failure/0
+                        IO/1;
+                        OCaml.Failure/1
                       ],
                         .)),
                     Apply
                       ((7,
                         Effect
                           ([
-                            IO/0
+                            IO/1
                           ],
                             .
                               -[
-                                OCaml.Failure/0
+                                OCaml.Failure/1
                               ]->
                               .)),
                         Variable
@@ -67,11 +67,11 @@
                               ],
                                 .
                                   -[
-                                    IO/0
+                                    IO/1
                                   ]->
                                   .
                                     -[
-                                      OCaml.Failure/0
+                                      OCaml.Failure/1
                                     ]->
                                     .)),
                             f/0),

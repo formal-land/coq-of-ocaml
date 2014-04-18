@@ -10,7 +10,7 @@
 (Value
   (non_rec, @.,
     [
-      ((n, [ ], [ ], Some Type (Z/0)),
+      ((n, [ ], [ ], Some Type (Z/1)),
         Apply
           ((5, Effect ([ ], .)),
             Variable ((5, Effect ([ ], . -> . -> .)), f/0),

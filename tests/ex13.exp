@@ -2,17 +2,17 @@
 (Value
   (non_rec, @.,
     [
-      ((tail, [ A ], [ (l, Type (list/0, A)) ], Some Type (list/0, A)),
+      ((tail, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A)),
         Match
           (4, Variable (4, l/0),
             [
-              (Constructor (cons/0, Any, xs), Variable (5, xs/0));
-              (Constructor ([]/0),
+              (Constructor (cons/1, Any, xs), Variable (5, xs/0));
+              (Constructor ([]/1),
                 Apply
                   (6,
                     Variable
                       (6,
-                        OCaml.Pervasives.failwith/0),
+                        OCaml.Pervasives.failwith/1),
                     [
                       Constant
                         (6,
@@ -26,32 +26,32 @@
   (rec, @.,
     [
       ((print_list_rec, [ ],
-        [ (counter, Type (nat/0)); (x, Type (list/0, Type (string/0))) ],
-        Some Type (unit/0)),
+        [ (counter, Type (nat/1)); (x, Type (list/1, Type (string/1))) ],
+        Some Type (unit/1)),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/0),
+              (Constructor (O/1),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/0),
+                        not_terminated/1),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/0, counter),
+              (Constructor (S/1, counter),
                 Match
                   (?, Variable (?, x/0),
                     [
                       (Constructor
-                        ([]/0),
+                        ([]/1),
                         Constructor
                           (9,
-                            tt/0));
+                            tt/1));
                       (Constructor
-                        (cons/0,
+                        (cons/1,
                           x,
                           xs),
                         Sequence
@@ -60,7 +60,7 @@
                               (11,
                                 Variable
                                   (11,
-                                    OCaml.Pervasives.print_string/0),
+                                    OCaml.Pervasives.print_string/1),
                                 [
                                   Variable
                                     (11,
@@ -91,12 +91,12 @@
 (Value
   (non_rec, @.,
     [
-      ((print_list, [ ], [ (x, Type (list/0, Type (string/0))) ],
-        Some Type (unit/0)),
+      ((print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
+        Some Type (unit/1)),
         Apply
           (?, Variable (?, print_list_rec/0),
             [
-              Apply (?, Variable (?, read_counter/0), [ Tuple (?) ]);
+              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
               Variable (?, x/0)
             ]))
     ]))
@@ -105,7 +105,7 @@
 (Value
   (non_rec, @.,
     [
-      ((f, [ ], [ ], Some (Type (list/0, Type (string/0)) -> Type (unit/0))),
+      ((f, [ ], [ ], Some (Type (list/1, Type (string/1)) -> Type (unit/1))),
         Variable (14, print_list/0))
     ]))
 
@@ -113,7 +113,7 @@
 (Value
   (non_rec, @.,
     [
-      ((x, [ A ], [ (z, A) ], Some Type (unit/0)),
+      ((x, [ A ], [ (z, A) ], Some Type (unit/1)),
         Apply
           (16, Variable (16, f/0),
             [
@@ -122,31 +122,31 @@
                   [
                     Constructor
                       (16,
-                        cons/0,
+                        cons/1,
                         Constant
                           (16,
                             String("Stop")),
                         Constructor
                           (16,
-                            cons/0,
+                            cons/1,
                             Constant
                               (16,
                                 String("Hello")),
                             Constructor
                               (16,
-                                cons/0,
+                                cons/1,
                                 Constant
                                   (16,
                                     String(" ")),
                                 Constructor
                                   (16,
-                                    cons/0,
+                                    cons/1,
                                     Constant
                                       (16,
                                         String("world")),
                                     Constructor
                                       (16,
-                                        []/0)))))
+                                        []/1)))))
                   ])
             ]))
     ]))

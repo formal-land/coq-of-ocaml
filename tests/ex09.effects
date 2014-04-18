@@ -2,9 +2,9 @@
 (Value
   (non_rec, @.,
     [
-      ((l, [ A ], [ (x, A) ], Some Type (list/0, Type (Z/0))),
+      ((l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))),
         Match
-          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -12,8 +12,8 @@
                   (4,
                     Effect
                       ([
-                        Counter/0;
-                        NonTermination/0
+                        Counter/1;
+                        NonTermination/1
                       ],
                         .))
                   (rec, @.,
@@ -26,25 +26,25 @@
                         [
                           (counter,
                             Type
-                              (nat/0));
+                              (nat/1));
                           (f,
                             (B
                               ->
                               C));
                           (x_1,
                             Type
-                              (list/0,
+                              (list/1,
                                 B))
                         ],
                         Some
                           Type
-                            (list/0,
+                            (list/1,
                               C)),
                         Match
                           ((?,
                             Effect
                               ([
-                                NonTermination/0
+                                NonTermination/1
                               ],
                                 .)),
                             Variable
@@ -56,12 +56,12 @@
                                 counter/0),
                             [
                               (Constructor
-                                (O/0),
+                                (O/1),
                                 Apply
                                   ((?,
                                     Effect
                                       ([
-                                        NonTermination/0
+                                        NonTermination/1
                                       ],
                                         .)),
                                     Variable
@@ -71,10 +71,10 @@
                                           ],
                                             .
                                               -[
-                                                NonTermination/0
+                                                NonTermination/1
                                               ]->
                                               .)),
-                                        not_terminated/0),
+                                        not_terminated/1),
                                     [
                                       Tuple
                                         ((?,
@@ -84,13 +84,13 @@
                                               .)))
                                     ]));
                               (Constructor
-                                (S/0,
+                                (S/1,
                                   counter),
                                 Match
                                   ((?,
                                     Effect
                                       ([
-                                        NonTermination/0
+                                        NonTermination/1
                                       ],
                                         .)),
                                     Variable
@@ -102,26 +102,26 @@
                                         x_1/0),
                                     [
                                       (Constructor
-                                        ([]/0),
+                                        ([]/1),
                                         Constructor
                                           ((5,
                                             Effect
                                               ([
                                               ],
                                                 .)),
-                                            []/0));
+                                            []/1));
                                       (Constructor
-                                        (cons/0,
+                                        (cons/1,
                                           x,
                                           xs),
                                         Constructor
                                           ((6,
                                             Effect
                                               ([
-                                                NonTermination/0
+                                                NonTermination/1
                                               ],
                                                 .)),
-                                            cons/0,
+                                            cons/1,
                                             Apply
                                               ((6,
                                                 Effect
@@ -148,7 +148,7 @@
                                               ((6,
                                                 Effect
                                                   ([
-                                                    NonTermination/0
+                                                    NonTermination/1
                                                   ],
                                                     .)),
                                                 Apply
@@ -160,7 +160,7 @@
                                                           ->
                                                           .
                                                             -[
-                                                              NonTermination/0
+                                                              NonTermination/1
                                                             ]->
                                                             .)),
                                                     Variable
@@ -174,7 +174,7 @@
                                                                 ->
                                                                 .
                                                                   -[
-                                                                    NonTermination/0
+                                                                    NonTermination/1
                                                                   ]->
                                                                   .)),
                                                         map_rec/0),
@@ -211,8 +211,8 @@
                   (4,
                     Effect
                       ([
-                        Counter/0;
-                        NonTermination/0
+                        Counter/1;
+                        NonTermination/1
                       ],
                         .))
                   (non_rec, @.,
@@ -229,19 +229,19 @@
                               C));
                           (x_1,
                             Type
-                              (list/0,
+                              (list/1,
                                 B))
                         ],
                         Some
                           Type
-                            (list/0,
+                            (list/1,
                               C)),
                         Apply
                           ((?,
                             Effect
                               ([
-                                Counter/0;
-                                NonTermination/0
+                                Counter/1;
+                                NonTermination/1
                               ],
                                 .)),
                             Variable
@@ -255,7 +255,7 @@
                                         ->
                                         .
                                           -[
-                                            NonTermination/0
+                                            NonTermination/1
                                           ]->
                                           .)),
                                 map_rec/0),
@@ -264,7 +264,7 @@
                                 ((?,
                                   Effect
                                     ([
-                                      Counter/0
+                                      Counter/1
                                     ],
                                       .)),
                                   Variable
@@ -274,10 +274,10 @@
                                         ],
                                           .
                                             -[
-                                              Counter/0
+                                              Counter/1
                                             ]->
                                             .)),
-                                      read_counter/0),
+                                      read_counter/1),
                                   [
                                     Tuple
                                       ((?,
@@ -307,8 +307,8 @@
                   (7,
                     Effect
                       ([
-                        Counter/0;
-                        NonTermination/0
+                        Counter/1;
+                        NonTermination/1
                       ],
                         .))
                   (rec, @.,
@@ -320,7 +320,7 @@
                         [
                           (counter,
                             Type
-                              (nat/0));
+                              (nat/1));
                           (x,
                             B)
                         ],
@@ -330,7 +330,7 @@
                           ((?,
                             Effect
                               ([
-                                NonTermination/0
+                                NonTermination/1
                               ],
                                 .)),
                             Variable
@@ -342,12 +342,12 @@
                                 counter/0),
                             [
                               (Constructor
-                                (O/0),
+                                (O/1),
                                 Apply
                                   ((?,
                                     Effect
                                       ([
-                                        NonTermination/0
+                                        NonTermination/1
                                       ],
                                         .)),
                                     Variable
@@ -357,10 +357,10 @@
                                           ],
                                             .
                                               -[
-                                                NonTermination/0
+                                                NonTermination/1
                                               ]->
                                               .)),
-                                        not_terminated/0),
+                                        not_terminated/1),
                                     [
                                       Tuple
                                         ((?,
@@ -370,7 +370,7 @@
                                               .)))
                                     ]));
                               (Constructor
-                                (S/0,
+                                (S/1,
                                   counter),
                                 Variable
                                   ((7,
@@ -386,8 +386,8 @@
                   (7,
                     Effect
                       ([
-                        Counter/0;
-                        NonTermination/0
+                        Counter/1;
+                        NonTermination/1
                       ],
                         .))
                   (non_rec, @.,
@@ -406,8 +406,8 @@
                           ((?,
                             Effect
                               ([
-                                Counter/0;
-                                NonTermination/0
+                                Counter/1;
+                                NonTermination/1
                               ],
                                 .)),
                             Variable
@@ -419,7 +419,7 @@
                                       ->
                                       .
                                         -[
-                                          NonTermination/0
+                                          NonTermination/1
                                         ]->
                                         .)),
                                 loop_rec/0),
@@ -428,7 +428,7 @@
                                 ((?,
                                   Effect
                                     ([
-                                      Counter/0
+                                      Counter/1
                                     ],
                                       .)),
                                   Variable
@@ -438,10 +438,10 @@
                                         ],
                                           .
                                             -[
-                                              Counter/0
+                                              Counter/1
                                             ]->
                                             .)),
-                                      read_counter/0),
+                                      read_counter/1),
                                   [
                                     Tuple
                                       ((?,
@@ -464,8 +464,8 @@
                   ((8,
                     Effect
                       ([
-                        Counter/0;
-                        NonTermination/0
+                        Counter/1;
+                        NonTermination/1
                       ],
                         .)),
                     Variable
@@ -477,8 +477,8 @@
                               ->
                               .
                                 -[
-                                  Counter/0;
-                                  NonTermination/0
+                                  Counter/1;
+                                  NonTermination/1
                                 ]->
                                 .)),
                         map/0),
@@ -504,7 +504,7 @@
                                     ([
                                     ],
                                       .)),
-                                  Z.add/0),
+                                  Z.add/1),
                               [
                                 Variable
                                   ((8,
@@ -527,7 +527,7 @@
                             ([
                             ],
                               .)),
-                          cons/0,
+                          cons/1,
                           Constant
                             ((8,
                               Effect
@@ -541,7 +541,7 @@
                                 ([
                                 ],
                                   .)),
-                              cons/0,
+                              cons/1,
                               Constant
                                 ((8,
                                   Effect
@@ -555,7 +555,7 @@
                                     ([
                                     ],
                                       .)),
-                                  cons/0,
+                                  cons/1,
                                   Constant
                                     ((8,
                                       Effect
@@ -569,7 +569,7 @@
                                         ([
                                         ],
                                           .)),
-                                      []/0))))
+                                      []/1))))
                     ]))
             ]))
     ]))

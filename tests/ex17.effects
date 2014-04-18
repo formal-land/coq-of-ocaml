@@ -13,12 +13,12 @@
     ]))
 
 7 Module G:
-  8 Exception (Inside, (Type (Z/1) * Type (string/1)))
+  8 Exception (Inside, (Type (Z/2) * Type (string/2)))
   
   10 (Value
     (non_rec, @.,
       [
-        ((g, [ A ], [ (b, Type (bool/1)) ], Some A),
+        ((g, [ A ], [ (b, Type (bool/2)) ], Some A),
           IfThenElse
             ((11, Effect ([ Outside/1; Inside/0 ], .)),
               Variable ((11, Effect ([ ], .)), b/0),
@@ -69,18 +69,18 @@
 (Value
   (rec, @.,
     [
-      ((h_rec, [ A; B ], [ (counter, Type (nat/0)); (l, Type (list/0, A)) ],
+      ((h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
         Some B),
         Match
-          ((?, Effect ([ IO/0; NonTermination/0; Outside/0; G.Inside/0 ], .)),
+          ((?, Effect ([ IO/1; NonTermination/1; Outside/0; G.Inside/0 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/0),
+              (Constructor (O/1),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/0
+                        NonTermination/1
                       ],
                         .)),
                     Variable
@@ -90,10 +90,10 @@
                           ],
                             .
                               -[
-                                NonTermination/0
+                                NonTermination/1
                               ]->
                               .)),
-                        not_terminated/0),
+                        not_terminated/1),
                     [
                       Tuple
                         ((?,
@@ -102,13 +102,13 @@
                             ],
                               .)))
                     ]));
-              (Constructor (S/0, counter),
+              (Constructor (S/1, counter),
                 Match
                   ((18,
                     Effect
                       ([
-                        IO/0;
-                        NonTermination/0;
+                        IO/1;
+                        NonTermination/1;
                         Outside/0;
                         G.Inside/0
                       ],
@@ -122,12 +122,12 @@
                         l/0),
                     [
                       (Constructor
-                        ([]/0),
+                        ([]/1),
                         Sequence
                           ((19,
                             Effect
                               ([
-                                IO/0;
+                                IO/1;
                                 Outside/0;
                                 G.Inside/0
                               ],
@@ -136,7 +136,7 @@
                               ((19,
                                 Effect
                                   ([
-                                    IO/0
+                                    IO/1
                                   ],
                                     .)),
                                 Variable
@@ -146,10 +146,10 @@
                                       ],
                                         .
                                           -[
-                                            IO/0
+                                            IO/1
                                           ]->
                                           .)),
-                                    OCaml.Pervasives.print_string/0),
+                                    OCaml.Pervasives.print_string/1),
                                 [
                                   Constant
                                     ((19,
@@ -186,13 +186,13 @@
                                         ([
                                         ],
                                           .)),
-                                      false/0)
+                                      false/1)
                                 ])));
                       (Constructor
-                        (cons/0,
+                        (cons/1,
                           x,
                           Constructor
-                            ([]/0)),
+                            ([]/1)),
                         Apply
                           ((20,
                             Effect
@@ -234,15 +234,15 @@
                                       String("gg")))
                             ]));
                       (Constructor
-                        (cons/0,
+                        (cons/1,
                           Any,
                           xs),
                         Apply
                           ((21,
                             Effect
                               ([
-                                IO/0;
-                                NonTermination/0;
+                                IO/1;
+                                NonTermination/1;
                                 Outside/0;
                                 G.Inside/0
                               ],
@@ -254,8 +254,8 @@
                                   ],
                                     .
                                       -[
-                                        IO/0;
-                                        NonTermination/0;
+                                        IO/1;
+                                        NonTermination/1;
                                         Outside/0;
                                         G.Inside/0
                                       ]->
@@ -269,8 +269,8 @@
                                           ->
                                           .
                                             -[
-                                              IO/0;
-                                              NonTermination/0;
+                                              IO/1;
+                                              NonTermination/1;
                                               Outside/0;
                                               G.Inside/0
                                             ]->
@@ -302,14 +302,14 @@
 (Value
   (non_rec, @.,
     [
-      ((h, [ A; B ], [ (l, Type (list/0, A)) ], Some B),
+      ((h, [ A; B ], [ (l, Type (list/1, A)) ], Some B),
         Apply
           ((?,
             Effect
               ([
-                Counter/0;
-                IO/0;
-                NonTermination/0;
+                Counter/1;
+                IO/1;
+                NonTermination/1;
                 Outside/0;
                 G.Inside/0
               ], .)),
@@ -320,14 +320,14 @@
                     . ->
                       .
                         -[
-                          IO/0;
-                          NonTermination/0;
+                          IO/1;
+                          NonTermination/1;
                           Outside/0;
                           G.Inside/0
                         ]-> .)), h_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/0 ], .)),
+                ((?, Effect ([ Counter/1 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -335,10 +335,10 @@
                         ],
                           .
                             -[
-                              Counter/0
+                              Counter/1
                             ]->
                             .)),
-                      read_counter/0),
+                      read_counter/1),
                   [
                     Tuple
                       ((?,

@@ -4,15 +4,15 @@
 (Value
   (non_rec, @.,
     [
-      ((x1, [ ], [ ], Some Type (Z/0)),
+      ((x1, [ ], [ ], Some Type (Z/1)),
         Match
           (6,
             Run
               (?, Error/0, [ ],
                 Apply (6, Variable (6, raise_Error/0), [ Tuple (?) ])),
             [
-              (Constructor (inl/0, x), Variable (?, x/0));
-              (Constructor (inr/0, Tuple ()), Constant (7, Int(12)))
+              (Constructor (inl/1, x), Variable (?, x/0));
+              (Constructor (inr/1, Tuple ()), Constant (7, Int(12)))
             ]))
     ]))
 
@@ -20,7 +20,7 @@
 (Value
   (non_rec, @.,
     [
-      ((x2, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/0 ], B)),
+      ((x2, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/1 ], B)),
         Match
           (?, Variable (?, x/0),
             [
@@ -43,7 +43,7 @@
                             ])),
                     [
                       (Constructor
-                        (inl/0,
+                        (inl/1,
                           x),
                         Return
                           (?,
@@ -51,14 +51,14 @@
                               (?,
                                 x/0)));
                       (Constructor
-                        (inr/0,
+                        (inr/1,
                           Tuple
                             ()),
                         Apply
                           (11,
                             Variable
                               (11,
-                                OCaml.Pervasives.failwith/0),
+                                OCaml.Pervasives.failwith/1),
                             [
                               Constant
                                 (11,
@@ -72,22 +72,22 @@
 (Value
   (non_rec, @.,
     [
-      ((x3, [ ], [ (b, Type (bool/0)) ],
-        Some Monad ([ OCaml.Failure/0 ], Type (Z/0))),
+      ((x3, [ ], [ (b, Type (bool/1)) ],
+        Some Monad ([ OCaml.Failure/1 ], Type (Z/1))),
         Bind
           (?,
             Run
-              (?, Error/0, [ OCaml.Failure/0; Error/0 ],
+              (?, Error/0, [ OCaml.Failure/1; Error/0 ],
                 IfThenElse
                   (14, Variable (14, b/0),
                     Lift
-                      (?, [ OCaml.Failure/0 ],
-                        [ OCaml.Failure/0; Error/0 ],
+                      (?, [ OCaml.Failure/1 ],
+                        [ OCaml.Failure/1; Error/0 ],
                         Apply
                           (14,
                             Variable
                               (14,
-                                OCaml.Pervasives.failwith/0),
+                                OCaml.Pervasives.failwith/1),
                             [
                               Constant
                                 (14,
@@ -95,20 +95,20 @@
                             ])),
                     Lift
                       (?, [ Error/0 ],
-                        [ OCaml.Failure/0; Error/0 ],
+                        [ OCaml.Failure/1; Error/0 ],
                         Apply
                           (14, Variable (14, raise_Error/0),
                             [ Tuple (?) ])))), Some x,
             Match
               (14, Variable (?, x/0),
                 [
-                  (Constructor (inl/0, x),
+                  (Constructor (inl/1, x),
                     Return
                       (?,
                         Variable
                           (?,
                             x/0)));
-                  (Constructor (inr/0, Tuple ()),
+                  (Constructor (inr/1, Tuple ()),
                     Return
                       (?,
                         Constant

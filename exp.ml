@@ -579,8 +579,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
         { Effect.descriptor = Effect.Descriptor.pure;
           typ = Envi.find x env.FullEnvi.vars Effect.Type.enter_lift } in
       Variable ((l, effect), x)
-    with Not_found -> failwith (SmartPrint.to_string 80 2
-      (BoundName.pp x ^^ !^ "not found.")))
+    with Not_found ->
+      failwith (SmartPrint.to_string 80 2 (BoundName.pp x ^^ !^ "not found.")))
   | Tuple (l, es) ->
     let (es, effect) = compound es in
     Tuple ((l, effect), es)

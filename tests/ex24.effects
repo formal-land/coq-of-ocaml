@@ -4,7 +4,7 @@
     [
       ((e_invalid, [ A; B ], [ (x, A) ], Some B),
         Match
-          ((?, Effect ([ OCaml.Invalid_argument/0 ], .)),
+          ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -12,7 +12,7 @@
                   ((5,
                     Effect
                       ([
-                        OCaml.Invalid_argument/0
+                        OCaml.Invalid_argument/1
                       ],
                         .)),
                     Variable
@@ -22,10 +22,10 @@
                           ],
                             .
                               -[
-                                OCaml.Invalid_argument/0
+                                OCaml.Invalid_argument/1
                               ]->
                               .)),
-                        OCaml.Pervasives.invalid_arg/0),
+                        OCaml.Pervasives.invalid_arg/1),
                     [
                       Constant
                         ((5,
@@ -44,7 +44,7 @@
     [
       ((e_failure, [ A; B ], [ (x, A) ], Some B),
         Match
-          ((?, Effect ([ OCaml.Failure/0 ], .)),
+          ((?, Effect ([ OCaml.Failure/1 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -52,7 +52,7 @@
                   ((6,
                     Effect
                       ([
-                        OCaml.Failure/0
+                        OCaml.Failure/1
                       ],
                         .)),
                     Variable
@@ -62,10 +62,10 @@
                           ],
                             .
                               -[
-                                OCaml.Failure/0
+                                OCaml.Failure/1
                               ]->
                               .)),
-                        OCaml.Pervasives.failwith/0),
+                        OCaml.Pervasives.failwith/1),
                     [
                       Constant
                         ((6,
@@ -84,7 +84,7 @@
     [
       ((e_exit1, [ A; B ], [ (x, A) ], Some B),
         Match
-          ((?, Effect ([ OCaml.Pervasives.Exit/0 ], .)),
+          ((?, Effect ([ OCaml.Pervasives.Exit/1 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -92,7 +92,7 @@
                   ((7,
                     Effect
                       ([
-                        OCaml.Pervasives.Exit/0
+                        OCaml.Pervasives.Exit/1
                       ],
                         .)),
                     Variable
@@ -102,10 +102,10 @@
                           ],
                             .
                               -[
-                                OCaml.Pervasives.Exit/0
+                                OCaml.Pervasives.Exit/1
                               ]->
                               .)),
-                        OCaml.Pervasives.raise_Exit/0),
+                        OCaml.Pervasives.raise_Exit/1),
                     [
                       Tuple
                         ((?,
@@ -123,7 +123,7 @@
     [
       ((e_exit2, [ A; B ], [ (x, A) ], Some B),
         Match
-          ((?, Effect ([ OCaml.Pervasives.Exit/0 ], .)),
+          ((?, Effect ([ OCaml.Pervasives.Exit/1 ], .)),
             Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
@@ -131,7 +131,7 @@
                   ((8,
                     Effect
                       ([
-                        OCaml.Pervasives.Exit/0
+                        OCaml.Pervasives.Exit/1
                       ],
                         .)),
                     Variable
@@ -141,10 +141,10 @@
                           ],
                             .
                               -[
-                                OCaml.Pervasives.Exit/0
+                                OCaml.Pervasives.Exit/1
                               ]->
                               .)),
-                        OCaml.Pervasives.raise_Exit/0),
+                        OCaml.Pervasives.raise_Exit/1),
                     [
                       Tuple
                         ((?,
@@ -160,10 +160,10 @@
 (Value
   (non_rec, @.,
     [
-      ((b_eq, [ ], [ ], Some Type (bool/0)),
+      ((b_eq, [ ], [ ], Some Type (bool/1)),
         Apply
           ((11, Effect ([ ], .)),
-            Variable ((11, Effect ([ ], .)), equiv_decb/0),
+            Variable ((11, Effect ([ ], .)), equiv_decb/1),
             [
               Constant ((11, Effect ([ ], .)), Int(1));
               Constant ((11, Effect ([ ], .)), Int(2))
@@ -174,13 +174,13 @@
 (Value
   (non_rec, @.,
     [
-      ((b_neq1, [ ], [ ], Some Type (bool/0)),
+      ((b_neq1, [ ], [ ], Some Type (bool/1)),
         Apply
           ((12, Effect ([ ], .)),
-            Variable ((12, Effect ([ ], .)), nequiv_decb/0),
+            Variable ((12, Effect ([ ], .)), nequiv_decb/1),
             [
-              Constructor ((12, Effect ([ ], .)), true/0);
-              Constructor ((12, Effect ([ ], .)), false/0)
+              Constructor ((12, Effect ([ ], .)), true/1);
+              Constructor ((12, Effect ([ ], .)), false/1)
             ]))
     ]))
 
@@ -188,13 +188,13 @@
 (Value
   (non_rec, @.,
     [
-      ((b_neq2, [ ], [ ], Some Type (bool/0)),
+      ((b_neq2, [ ], [ ], Some Type (bool/1)),
         Apply
           ((13, Effect ([ ], .)),
-            Variable ((13, Effect ([ ], .)), nequiv_decb/0),
+            Variable ((13, Effect ([ ], .)), nequiv_decb/1),
             [
-              Constructor ((13, Effect ([ ], .)), tt/0);
-              Constructor ((13, Effect ([ ], .)), tt/0)
+              Constructor ((13, Effect ([ ], .)), tt/1);
+              Constructor ((13, Effect ([ ], .)), tt/1)
             ]))
     ]))
 
@@ -202,10 +202,10 @@
 (Value
   (non_rec, @.,
     [
-      ((b_lt, [ ], [ ], Some Type (bool/0)),
+      ((b_lt, [ ], [ ], Some Type (bool/1)),
         Apply
           ((14, Effect ([ ], .)),
-            Variable ((14, Effect ([ ], .)), OCaml.Pervasives.lt/0),
+            Variable ((14, Effect ([ ], .)), OCaml.Pervasives.lt/1),
             [
               Constant ((14, Effect ([ ], .)), Int(1));
               Constant ((14, Effect ([ ], .)), Int(2))
@@ -216,10 +216,10 @@
 (Value
   (non_rec, @.,
     [
-      ((b_gt, [ ], [ ], Some Type (bool/0)),
+      ((b_gt, [ ], [ ], Some Type (bool/1)),
         Apply
           ((15, Effect ([ ], .)),
-            Variable ((15, Effect ([ ], .)), OCaml.Pervasives.gt/0),
+            Variable ((15, Effect ([ ], .)), OCaml.Pervasives.gt/1),
             [
               Constant ((15, Effect ([ ], .)), Int(1));
               Constant ((15, Effect ([ ], .)), Int(2))
@@ -230,13 +230,13 @@
 (Value
   (non_rec, @.,
     [
-      ((b_le, [ ], [ ], Some Type (bool/0)),
+      ((b_le, [ ], [ ], Some Type (bool/1)),
         Apply
           ((16, Effect ([ ], .)),
-            Variable ((16, Effect ([ ], .)), OCaml.Pervasives.le/0),
+            Variable ((16, Effect ([ ], .)), OCaml.Pervasives.le/1),
             [
-              Constructor ((16, Effect ([ ], .)), true/0);
-              Constructor ((16, Effect ([ ], .)), false/0)
+              Constructor ((16, Effect ([ ], .)), true/1);
+              Constructor ((16, Effect ([ ], .)), false/1)
             ]))
     ]))
 
@@ -244,13 +244,13 @@
 (Value
   (non_rec, @.,
     [
-      ((b_ge, [ ], [ ], Some Type (bool/0)),
+      ((b_ge, [ ], [ ], Some Type (bool/1)),
         Apply
           ((17, Effect ([ ], .)),
-            Variable ((17, Effect ([ ], .)), OCaml.Pervasives.ge/0),
+            Variable ((17, Effect ([ ], .)), OCaml.Pervasives.ge/1),
             [
-              Constructor ((17, Effect ([ ], .)), tt/0);
-              Constructor ((17, Effect ([ ], .)), tt/0)
+              Constructor ((17, Effect ([ ], .)), tt/1);
+              Constructor ((17, Effect ([ ], .)), tt/1)
             ]))
     ]))
 
@@ -258,10 +258,10 @@
 (Value
   (non_rec, @.,
     [
-      ((comp, [ ], [ ], Some Type (Z/0)),
+      ((comp, [ ], [ ], Some Type (Z/1)),
         Apply
           ((18, Effect ([ ], .)),
-            Variable ((18, Effect ([ ], .)), OCaml.Pervasives.compare/0),
+            Variable ((18, Effect ([ ], .)), OCaml.Pervasives.compare/1),
             [
               Constant ((18, Effect ([ ], .)), Int(1));
               Constant ((18, Effect ([ ], .)), Int(2))
@@ -272,10 +272,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_min, [ ], [ ], Some Type (Z/0)),
+      ((n_min, [ ], [ ], Some Type (Z/1)),
         Apply
           ((19, Effect ([ ], .)),
-            Variable ((19, Effect ([ ], .)), OCaml.Pervasives.min/0),
+            Variable ((19, Effect ([ ], .)), OCaml.Pervasives.min/1),
             [
               Constant ((19, Effect ([ ], .)), Int(1));
               Constant ((19, Effect ([ ], .)), Int(2))
@@ -286,10 +286,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_max, [ ], [ ], Some Type (Z/0)),
+      ((n_max, [ ], [ ], Some Type (Z/1)),
         Apply
           ((20, Effect ([ ], .)),
-            Variable ((20, Effect ([ ], .)), OCaml.Pervasives.max/0),
+            Variable ((20, Effect ([ ], .)), OCaml.Pervasives.max/1),
             [
               Constant ((20, Effect ([ ], .)), Int(1));
               Constant ((20, Effect ([ ], .)), Int(2))
@@ -300,22 +300,22 @@
 (Value
   (non_rec, @.,
     [
-      ((b_not, [ ], [ ], Some Type (bool/0)),
+      ((b_not, [ ], [ ], Some Type (bool/1)),
         Apply
-          ((25, Effect ([ ], .)), Variable ((25, Effect ([ ], .)), negb/0),
-            [ Constructor ((25, Effect ([ ], .)), false/0) ]))
+          ((25, Effect ([ ], .)), Variable ((25, Effect ([ ], .)), negb/1),
+            [ Constructor ((25, Effect ([ ], .)), false/1) ]))
     ]))
 
 26
 (Value
   (non_rec, @.,
     [
-      ((b_and, [ ], [ ], Some Type (bool/0)),
+      ((b_and, [ ], [ ], Some Type (bool/1)),
         Apply
-          ((26, Effect ([ ], .)), Variable ((26, Effect ([ ], .)), andb/0),
+          ((26, Effect ([ ], .)), Variable ((26, Effect ([ ], .)), andb/1),
             [
-              Constructor ((26, Effect ([ ], .)), true/0);
-              Constructor ((26, Effect ([ ], .)), false/0)
+              Constructor ((26, Effect ([ ], .)), true/1);
+              Constructor ((26, Effect ([ ], .)), false/1)
             ]))
     ]))
 
@@ -323,12 +323,12 @@
 (Value
   (non_rec, @.,
     [
-      ((b_and_old, [ ], [ ], Some Type (bool/0)),
+      ((b_and_old, [ ], [ ], Some Type (bool/1)),
         Apply
-          ((27, Effect ([ ], .)), Variable ((27, Effect ([ ], .)), andb/0),
+          ((27, Effect ([ ], .)), Variable ((27, Effect ([ ], .)), andb/1),
             [
-              Constructor ((27, Effect ([ ], .)), true/0);
-              Constructor ((27, Effect ([ ], .)), false/0)
+              Constructor ((27, Effect ([ ], .)), true/1);
+              Constructor ((27, Effect ([ ], .)), false/1)
             ]))
     ]))
 
@@ -336,12 +336,12 @@
 (Value
   (non_rec, @.,
     [
-      ((b_or, [ ], [ ], Some Type (bool/0)),
+      ((b_or, [ ], [ ], Some Type (bool/1)),
         Apply
-          ((28, Effect ([ ], .)), Variable ((28, Effect ([ ], .)), orb/0),
+          ((28, Effect ([ ], .)), Variable ((28, Effect ([ ], .)), orb/1),
             [
-              Constructor ((28, Effect ([ ], .)), true/0);
-              Constructor ((28, Effect ([ ], .)), false/0)
+              Constructor ((28, Effect ([ ], .)), true/1);
+              Constructor ((28, Effect ([ ], .)), false/1)
             ]))
     ]))
 
@@ -349,12 +349,12 @@
 (Value
   (non_rec, @.,
     [
-      ((b_or_old, [ ], [ ], Some Type (bool/0)),
+      ((b_or_old, [ ], [ ], Some Type (bool/1)),
         Apply
-          ((29, Effect ([ ], .)), Variable ((29, Effect ([ ], .)), orb/0),
+          ((29, Effect ([ ], .)), Variable ((29, Effect ([ ], .)), orb/1),
             [
-              Constructor ((29, Effect ([ ], .)), true/0);
-              Constructor ((29, Effect ([ ], .)), false/0)
+              Constructor ((29, Effect ([ ], .)), true/1);
+              Constructor ((29, Effect ([ ], .)), false/1)
             ]))
     ]))
 
@@ -362,11 +362,11 @@
 (Value
   (non_rec, @.,
     [
-      ((app1, [ ], [ ], Some Type (Z/0)),
+      ((app1, [ ], [ ], Some Type (Z/1)),
         Apply
           ((32, Effect ([ ], .)),
             Variable
-              ((32, Effect ([ ], .)), OCaml.Pervasives.reverse_apply/0),
+              ((32, Effect ([ ], .)), OCaml.Pervasives.reverse_apply/1),
             [
               Constant ((32, Effect ([ ], .)), Int(12));
               Function
@@ -385,9 +385,9 @@
 (Value
   (non_rec, @.,
     [
-      ((app2, [ ], [ ], Some Type (Z/0)),
+      ((app2, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((33, Effect ([ ], .)), Variable ((33, Effect ([ ], .)), apply/0),
+          ((33, Effect ([ ], .)), Variable ((33, Effect ([ ], .)), apply/1),
             [
               Function
                 ((33, Effect ([ ], . -> .)), x,
@@ -406,9 +406,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_neg1, [ ], [ ], Some Type (Z/0)),
+      ((n_neg1, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((36, Effect ([ ], .)), Variable ((36, Effect ([ ], .)), Z.opp/0),
+          ((36, Effect ([ ], .)), Variable ((36, Effect ([ ], .)), Z.opp/1),
             [ Constant ((36, Effect ([ ], .)), Int(12)) ]))
     ]))
 
@@ -416,7 +416,7 @@
 (Value
   (non_rec, @.,
     [
-      ((n_neg2, [ ], [ ], Some Type (Z/0)),
+      ((n_neg2, [ ], [ ], Some Type (Z/1)),
         Constant ((37, Effect ([ ], .)), Int(-12)))
     ]))
 
@@ -424,9 +424,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_pos1, [ ], [ ], Some Type (Z/0)),
+      ((n_pos1, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((38, Effect ([ ], .)), Variable ((38, Effect ([ ], .)), /0),
+          ((38, Effect ([ ], .)), Variable ((38, Effect ([ ], .)), /1),
             [ Constant ((38, Effect ([ ], .)), Int(12)) ]))
     ]))
 
@@ -434,7 +434,7 @@
 (Value
   (non_rec, @.,
     [
-      ((n_pos2, [ ], [ ], Some Type (Z/0)),
+      ((n_pos2, [ ], [ ], Some Type (Z/1)),
         Constant ((39, Effect ([ ], .)), Int(12)))
     ]))
 
@@ -442,10 +442,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_succ, [ ], [ ], Some Type (Z/0)),
+      ((n_succ, [ ], [ ], Some Type (Z/1)),
         Apply
           ((40, Effect ([ ], .)),
-            Variable ((40, Effect ([ ], .)), Z.succ/0),
+            Variable ((40, Effect ([ ], .)), Z.succ/1),
             [ Constant ((40, Effect ([ ], .)), Int(1)) ]))
     ]))
 
@@ -453,10 +453,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_pred, [ ], [ ], Some Type (Z/0)),
+      ((n_pred, [ ], [ ], Some Type (Z/1)),
         Apply
           ((41, Effect ([ ], .)),
-            Variable ((41, Effect ([ ], .)), Z.pred/0),
+            Variable ((41, Effect ([ ], .)), Z.pred/1),
             [ Constant ((41, Effect ([ ], .)), Int(1)) ]))
     ]))
 
@@ -464,9 +464,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_plus, [ ], [ ], Some Type (Z/0)),
+      ((n_plus, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((42, Effect ([ ], .)), Variable ((42, Effect ([ ], .)), Z.add/0),
+          ((42, Effect ([ ], .)), Variable ((42, Effect ([ ], .)), Z.add/1),
             [
               Constant ((42, Effect ([ ], .)), Int(1));
               Constant ((42, Effect ([ ], .)), Int(2))
@@ -477,9 +477,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_minus, [ ], [ ], Some Type (Z/0)),
+      ((n_minus, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((43, Effect ([ ], .)), Variable ((43, Effect ([ ], .)), Z.sub/0),
+          ((43, Effect ([ ], .)), Variable ((43, Effect ([ ], .)), Z.sub/1),
             [
               Constant ((43, Effect ([ ], .)), Int(1));
               Constant ((43, Effect ([ ], .)), Int(2))
@@ -490,9 +490,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_times, [ ], [ ], Some Type (Z/0)),
+      ((n_times, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((44, Effect ([ ], .)), Variable ((44, Effect ([ ], .)), Z.mul/0),
+          ((44, Effect ([ ], .)), Variable ((44, Effect ([ ], .)), Z.mul/1),
             [
               Constant ((44, Effect ([ ], .)), Int(1));
               Constant ((44, Effect ([ ], .)), Int(2))
@@ -503,9 +503,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_div, [ ], [ ], Some Type (Z/0)),
+      ((n_div, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((45, Effect ([ ], .)), Variable ((45, Effect ([ ], .)), Z.div/0),
+          ((45, Effect ([ ], .)), Variable ((45, Effect ([ ], .)), Z.div/1),
             [
               Constant ((45, Effect ([ ], .)), Int(1));
               Constant ((45, Effect ([ ], .)), Int(2))
@@ -516,10 +516,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_mod, [ ], [ ], Some Type (Z/0)),
+      ((n_mod, [ ], [ ], Some Type (Z/1)),
         Apply
           ((46, Effect ([ ], .)),
-            Variable ((46, Effect ([ ], .)), Z.modulo/0),
+            Variable ((46, Effect ([ ], .)), Z.modulo/1),
             [
               Constant ((46, Effect ([ ], .)), Int(1));
               Constant ((46, Effect ([ ], .)), Int(2))
@@ -530,9 +530,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_abs, [ ], [ ], Some Type (Z/0)),
+      ((n_abs, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((47, Effect ([ ], .)), Variable ((47, Effect ([ ], .)), Z.abs/0),
+          ((47, Effect ([ ], .)), Variable ((47, Effect ([ ], .)), Z.abs/1),
             [ Constant ((47, Effect ([ ], .)), Int(1)) ]))
     ]))
 
@@ -540,10 +540,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_land, [ ], [ ], Some Type (Z/0)),
+      ((n_land, [ ], [ ], Some Type (Z/1)),
         Apply
           ((52, Effect ([ ], .)),
-            Variable ((52, Effect ([ ], .)), Z.land/0),
+            Variable ((52, Effect ([ ], .)), Z.land/1),
             [
               Constant ((52, Effect ([ ], .)), Int(12));
               Constant ((52, Effect ([ ], .)), Int(13))
@@ -554,9 +554,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n_lor, [ ], [ ], Some Type (Z/0)),
+      ((n_lor, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((53, Effect ([ ], .)), Variable ((53, Effect ([ ], .)), Z.lor/0),
+          ((53, Effect ([ ], .)), Variable ((53, Effect ([ ], .)), Z.lor/1),
             [
               Constant ((53, Effect ([ ], .)), Int(12));
               Constant ((53, Effect ([ ], .)), Int(13))
@@ -567,10 +567,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_lxor, [ ], [ ], Some Type (Z/0)),
+      ((n_lxor, [ ], [ ], Some Type (Z/1)),
         Apply
           ((54, Effect ([ ], .)),
-            Variable ((54, Effect ([ ], .)), Z.lxor/0),
+            Variable ((54, Effect ([ ], .)), Z.lxor/1),
             [
               Constant ((54, Effect ([ ], .)), Int(12));
               Constant ((54, Effect ([ ], .)), Int(13))
@@ -581,10 +581,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_lsl, [ ], [ ], Some Type (Z/0)),
+      ((n_lsl, [ ], [ ], Some Type (Z/1)),
         Apply
           ((56, Effect ([ ], .)),
-            Variable ((56, Effect ([ ], .)), Z.shiftl/0),
+            Variable ((56, Effect ([ ], .)), Z.shiftl/1),
             [
               Constant ((56, Effect ([ ], .)), Int(12));
               Constant ((56, Effect ([ ], .)), Int(13))
@@ -595,10 +595,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n_lsr, [ ], [ ], Some Type (Z/0)),
+      ((n_lsr, [ ], [ ], Some Type (Z/1)),
         Apply
           ((57, Effect ([ ], .)),
-            Variable ((57, Effect ([ ], .)), Z.shiftr/0),
+            Variable ((57, Effect ([ ], .)), Z.shiftr/1),
             [
               Constant ((57, Effect ([ ], .)), Int(12));
               Constant ((57, Effect ([ ], .)), Int(13))
@@ -609,10 +609,10 @@
 (Value
   (non_rec, @.,
     [
-      ((ss, [ ], [ ], Some Type (string/0)),
+      ((ss, [ ], [ ], Some Type (string/1)),
         Apply
           ((64, Effect ([ ], .)),
-            Variable ((64, Effect ([ ], .)), String.append/0),
+            Variable ((64, Effect ([ ], .)), String.append/1),
             [
               Constant ((64, Effect ([ ], .)), String("begin"));
               Constant ((64, Effect ([ ], .)), String("end"))
@@ -623,11 +623,11 @@
 (Value
   (non_rec, @.,
     [
-      ((n_char, [ ], [ ], Some Type (Z/0)),
+      ((n_char, [ ], [ ], Some Type (Z/1)),
         Apply
           ((67, Effect ([ ], .)),
             Variable
-              ((67, Effect ([ ], .)), OCaml.Pervasives.int_of_char/0),
+              ((67, Effect ([ ], .)), OCaml.Pervasives.int_of_char/1),
             [ Constant ((67, Effect ([ ], .)), Char("c")) ]))
     ]))
 
@@ -635,11 +635,11 @@
 (Value
   (non_rec, @.,
     [
-      ((char_n, [ ], [ ], Some Type (ascii/0)),
+      ((char_n, [ ], [ ], Some Type (ascii/1)),
         Apply
           ((68, Effect ([ ], .)),
             Variable
-              ((68, Effect ([ ], .)), OCaml.Pervasives.char_of_int/0),
+              ((68, Effect ([ ], .)), OCaml.Pervasives.char_of_int/1),
             [ Constant ((68, Effect ([ ], .)), Int(23)) ]))
     ]))
 
@@ -647,10 +647,10 @@
 (Value
   (non_rec, @.,
     [
-      ((i, [ ], [ ], Some Type (unit/0)),
+      ((i, [ ], [ ], Some Type (unit/1)),
         Apply
           ((71, Effect ([ ], .)),
-            Variable ((71, Effect ([ ], .)), OCaml.Pervasives.ignore/0),
+            Variable ((71, Effect ([ ], .)), OCaml.Pervasives.ignore/1),
             [ Constant ((71, Effect ([ ], .)), Int(12)) ]))
     ]))
 
@@ -658,23 +658,23 @@
 (Value
   (non_rec, @.,
     [
-      ((s_bool, [ ], [ ], Some Type (string/0)),
+      ((s_bool, [ ], [ ], Some Type (string/1)),
         Apply
           ((74, Effect ([ ], .)),
             Variable
-              ((74, Effect ([ ], .)), OCaml.Pervasives.string_of_bool/0),
-            [ Constructor ((74, Effect ([ ], .)), false/0) ]))
+              ((74, Effect ([ ], .)), OCaml.Pervasives.string_of_bool/1),
+            [ Constructor ((74, Effect ([ ], .)), false/1) ]))
     ]))
 
 75
 (Value
   (non_rec, @.,
     [
-      ((bool_s, [ ], [ ], Some Type (bool/0)),
+      ((bool_s, [ ], [ ], Some Type (bool/1)),
         Apply
           ((75, Effect ([ ], .)),
             Variable
-              ((75, Effect ([ ], .)), OCaml.Pervasives.bool_of_string/0),
+              ((75, Effect ([ ], .)), OCaml.Pervasives.bool_of_string/1),
             [ Constant ((75, Effect ([ ], .)), String("false")) ]))
     ]))
 
@@ -682,11 +682,11 @@
 (Value
   (non_rec, @.,
     [
-      ((s_n, [ ], [ ], Some Type (string/0)),
+      ((s_n, [ ], [ ], Some Type (string/1)),
         Apply
           ((76, Effect ([ ], .)),
             Variable
-              ((76, Effect ([ ], .)), OCaml.Pervasives.string_of_int/0),
+              ((76, Effect ([ ], .)), OCaml.Pervasives.string_of_int/1),
             [ Constant ((76, Effect ([ ], .)), Int(12)) ]))
     ]))
 
@@ -694,11 +694,11 @@
 (Value
   (non_rec, @.,
     [
-      ((n_s, [ ], [ ], Some Type (Z/0)),
+      ((n_s, [ ], [ ], Some Type (Z/1)),
         Apply
           ((77, Effect ([ ], .)),
             Variable
-              ((77, Effect ([ ], .)), OCaml.Pervasives.int_of_string/0),
+              ((77, Effect ([ ], .)), OCaml.Pervasives.int_of_string/1),
             [ Constant ((77, Effect ([ ], .)), String("12")) ]))
     ]))
 
@@ -706,9 +706,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n1, [ ], [ ], Some Type (Z/0)),
+      ((n1, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((82, Effect ([ ], .)), Variable ((82, Effect ([ ], .)), fst/0),
+          ((82, Effect ([ ], .)), Variable ((82, Effect ([ ], .)), fst/1),
             [
               Tuple
                 ((82, Effect ([ ], .)),
@@ -733,9 +733,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n2, [ ], [ ], Some Type (Z/0)),
+      ((n2, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((83, Effect ([ ], .)), Variable ((83, Effect ([ ], .)), snd/0),
+          ((83, Effect ([ ], .)), Variable ((83, Effect ([ ], .)), snd/1),
             [
               Tuple
                 ((83, Effect ([ ], .)),
@@ -760,13 +760,13 @@
 (Value
   (non_rec, @.,
     [
-      ((ll, [ ], [ ], Some Type (list/0, Type (Z/0))),
+      ((ll, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Apply
           ((86, Effect ([ ], .)),
-            Variable ((86, Effect ([ ], .)), OCaml.Pervasives.app/0),
+            Variable ((86, Effect ([ ], .)), OCaml.Pervasives.app/1),
             [
               Constructor
-                ((86, Effect ([ ], .)), cons/0,
+                ((86, Effect ([ ], .)), cons/1,
                   Constant
                     ((86,
                       Effect
@@ -780,7 +780,7 @@
                         ([
                         ],
                           .)),
-                      cons/0,
+                      cons/1,
                       Constant
                         ((86,
                           Effect
@@ -794,9 +794,9 @@
                             ([
                             ],
                               .)),
-                          []/0)));
+                          []/1)));
               Constructor
-                ((86, Effect ([ ], .)), cons/0,
+                ((86, Effect ([ ], .)), cons/1,
                   Constant
                     ((86,
                       Effect
@@ -810,7 +810,7 @@
                         ([
                         ],
                           .)),
-                      cons/0,
+                      cons/1,
                       Constant
                         ((86,
                           Effect
@@ -824,7 +824,7 @@
                             ([
                             ],
                               .)),
-                          []/0)))
+                          []/1)))
             ]))
     ]))
 
@@ -832,16 +832,16 @@
 (Value
   (non_rec, @.,
     [
-      ((p_c, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((p_c, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((94,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -851,10 +851,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.print_char/0),
+                        OCaml.Pervasives.print_char/1),
                     [
                       Constant
                         ((94,
@@ -871,16 +871,16 @@
 (Value
   (non_rec, @.,
     [
-      ((p_s, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((p_s, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((95,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -890,10 +890,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.print_string/0),
+                        OCaml.Pervasives.print_string/1),
                     [
                       Constant
                         ((95,
@@ -910,16 +910,16 @@
 (Value
   (non_rec, @.,
     [
-      ((p_n, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((p_n, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((96,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -929,10 +929,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.print_int/0),
+                        OCaml.Pervasives.print_int/1),
                     [
                       Constant
                         ((96,
@@ -949,16 +949,16 @@
 (Value
   (non_rec, @.,
     [
-      ((p_endline, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((p_endline, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((98,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -968,10 +968,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.print_endline/0),
+                        OCaml.Pervasives.print_endline/1),
                     [
                       Constant
                         ((98,
@@ -988,16 +988,16 @@
 (Value
   (non_rec, @.,
     [
-      ((p_newline, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((p_newline, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((99,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1007,10 +1007,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.print_newline/0),
+                        OCaml.Pervasives.print_newline/1),
                     [
                       Constructor
                         ((99,
@@ -1018,7 +1018,7 @@
                             ([
                             ],
                               .)),
-                          tt/0)
+                          tt/1)
                     ]))
             ]))
     ]))
@@ -1027,16 +1027,16 @@
 (Value
   (non_rec, @.,
     [
-      ((perr_c, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((perr_c, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((102,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1046,10 +1046,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.prerr_char/0),
+                        OCaml.Pervasives.prerr_char/1),
                     [
                       Constant
                         ((102,
@@ -1066,16 +1066,16 @@
 (Value
   (non_rec, @.,
     [
-      ((perr_s, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((perr_s, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((103,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1085,10 +1085,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.prerr_string/0),
+                        OCaml.Pervasives.prerr_string/1),
                     [
                       Constant
                         ((103,
@@ -1105,16 +1105,16 @@
 (Value
   (non_rec, @.,
     [
-      ((perr_n, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((perr_n, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((104,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1124,10 +1124,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.prerr_int/0),
+                        OCaml.Pervasives.prerr_int/1),
                     [
                       Constant
                         ((104,
@@ -1144,16 +1144,16 @@
 (Value
   (non_rec, @.,
     [
-      ((perr_endline, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((perr_endline, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((106,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1163,10 +1163,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.prerr_endline/0),
+                        OCaml.Pervasives.prerr_endline/1),
                     [
                       Constant
                         ((106,
@@ -1183,16 +1183,16 @@
 (Value
   (non_rec, @.,
     [
-      ((perr_newline, [ A ], [ (x, A) ], Some Type (unit/0)),
+      ((perr_newline, [ A ], [ (x, A) ], Some Type (unit/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((107,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1202,10 +1202,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.prerr_newline/0),
+                        OCaml.Pervasives.prerr_newline/1),
                     [
                       Constructor
                         ((107,
@@ -1213,7 +1213,7 @@
                             ([
                             ],
                               .)),
-                          tt/0)
+                          tt/1)
                     ]))
             ]))
     ]))
@@ -1222,16 +1222,16 @@
 (Value
   (non_rec, @.,
     [
-      ((r_s, [ A ], [ (x, A) ], Some Type (string/0)),
+      ((r_s, [ A ], [ (x, A) ], Some Type (string/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((110,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1241,10 +1241,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.read_line/0),
+                        OCaml.Pervasives.read_line/1),
                     [
                       Constructor
                         ((110,
@@ -1252,7 +1252,7 @@
                             ([
                             ],
                               .)),
-                          tt/0)
+                          tt/1)
                     ]))
             ]))
     ]))
@@ -1261,16 +1261,16 @@
 (Value
   (non_rec, @.,
     [
-      ((r_n, [ A ], [ (x, A) ], Some Type (Z/0)),
+      ((r_n, [ A ], [ (x, A) ], Some Type (Z/1)),
         Match
-          ((?, Effect ([ IO/0 ], .)), Variable ((?, Effect ([ ], .)), x/0),
+          ((?, Effect ([ IO/1 ], .)), Variable ((?, Effect ([ ], .)), x/0),
             [
               (Any,
                 Apply
                   ((111,
                     Effect
                       ([
-                        IO/0
+                        IO/1
                       ],
                         .)),
                     Variable
@@ -1280,10 +1280,10 @@
                           ],
                             .
                               -[
-                                IO/0
+                                IO/1
                               ]->
                               .)),
-                        OCaml.Pervasives.read_int/0),
+                        OCaml.Pervasives.read_int/1),
                     [
                       Constructor
                         ((111,
@@ -1291,7 +1291,7 @@
                             ([
                             ],
                               .)),
-                          tt/0)
+                          tt/1)
                     ]))
             ]))
     ]))

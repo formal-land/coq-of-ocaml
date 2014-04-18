@@ -4,34 +4,34 @@
     [
       ((sums_rec, [ ],
         [
-          (counter, Type (nat/0));
-          (ls, Type (list/0, Type (list/0, Type (Z/0))))
+          (counter, Type (nat/1));
+          (ls, Type (list/1, Type (list/1, Type (Z/1))))
         ],
         Some
-          Monad ([ Counter/0; NonTermination/0 ], Type (list/0, Type (Z/0)))),
+          Monad ([ Counter/1; NonTermination/1 ], Type (list/1, Type (Z/1)))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/0),
+              (Constructor (O/1),
                 Lift
                   (?,
                     [
-                      NonTermination/0
+                      NonTermination/1
                     ],
                     [
-                      Counter/0;
-                      NonTermination/0
+                      Counter/1;
+                      NonTermination/1
                     ],
                     Apply
                       (?,
                         Variable
                           (?,
-                            not_terminated/0),
+                            not_terminated/1),
                         [
                           Tuple
                             (?)
                         ])));
-              (Constructor (S/0, counter),
+              (Constructor (S/1, counter),
                 LetFun 4
                   (rec, @.,
                     [
@@ -41,21 +41,21 @@
                         [
                           (counter_1,
                             Type
-                              (nat/0));
+                              (nat/1));
                           (xs,
                             Type
-                              (list/0,
+                              (list/1,
                                 Type
-                                  (Z/0)))
+                                  (Z/1)))
                         ],
                         Some
                           Monad
                             ([
-                              Counter/0;
-                              NonTermination/0
+                              Counter/1;
+                              NonTermination/1
                             ],
                               Type
-                                (Z/0))),
+                                (Z/1))),
                         Match
                           (?,
                             Variable
@@ -63,27 +63,27 @@
                                 counter_1/0),
                             [
                               (Constructor
-                                (O/0),
+                                (O/1),
                                 Lift
                                   (?,
                                     [
-                                      NonTermination/0
+                                      NonTermination/1
                                     ],
                                     [
-                                      Counter/0;
-                                      NonTermination/0
+                                      Counter/1;
+                                      NonTermination/1
                                     ],
                                     Apply
                                       (?,
                                         Variable
                                           (?,
-                                            not_terminated/0),
+                                            not_terminated/1),
                                         [
                                           Tuple
                                             (?)
                                         ])));
                               (Constructor
-                                (S/0,
+                                (S/1,
                                   counter_1),
                                 Match
                                   (5,
@@ -92,14 +92,14 @@
                                         xs/0),
                                     [
                                       (Constructor
-                                        ([]/0),
+                                        ([]/1),
                                         Return
                                           (?,
                                             Constant
                                               (6,
                                                 Int(0))));
                                       (Constructor
-                                        (cons/0,
+                                        (cons/1,
                                           x,
                                           xs),
                                         IfThenElse
@@ -108,7 +108,7 @@
                                               (8,
                                                 Variable
                                                   (8,
-                                                    equiv_decb/0),
+                                                    equiv_decb/1),
                                                 [
                                                   Variable
                                                     (8,
@@ -134,19 +134,19 @@
                                                     [
                                                       Constructor
                                                         (9,
-                                                          cons/0,
+                                                          cons/1,
                                                           Constructor
                                                             (9,
-                                                              cons/0,
+                                                              cons/1,
                                                               Constant
                                                                 (9,
                                                                   Int(13)),
                                                               Constructor
                                                                 (9,
-                                                                  []/0)),
+                                                                  []/1)),
                                                           Constructor
                                                             (9,
-                                                              []/0))
+                                                              []/1))
                                                     ]),
                                                 Some
                                                   x_1,
@@ -157,7 +157,7 @@
                                                         x_1/0),
                                                     [
                                                       (Constructor
-                                                        (cons/0,
+                                                        (cons/1,
                                                           x,
                                                           Any),
                                                         Return
@@ -166,7 +166,7 @@
                                                               (10,
                                                                 Variable
                                                                   (10,
-                                                                    Z.sub/0),
+                                                                    Z.sub/1),
                                                                 [
                                                                   Variable
                                                                     (10,
@@ -209,7 +209,7 @@
                                                       (13,
                                                         Variable
                                                           (13,
-                                                            Z.add/0),
+                                                            Z.add/1),
                                                         [
                                                           Variable
                                                             (13,
@@ -231,34 +231,34 @@
                         [
                           (xs,
                             Type
-                              (list/0,
+                              (list/1,
                                 Type
-                                  (Z/0)))
+                                  (Z/1)))
                         ],
                         Some
                           Monad
                             ([
-                              Counter/0;
-                              NonTermination/0
+                              Counter/1;
+                              NonTermination/1
                             ],
                               Type
-                                (Z/0))),
+                                (Z/1))),
                         Bind
                           (?,
                             Lift
                               (?,
                                 [
-                                  Counter/0
+                                  Counter/1
                                 ],
                                 [
-                                  Counter/0;
-                                  NonTermination/0
+                                  Counter/1;
+                                  NonTermination/1
                                 ],
                                 Apply
                                   (?,
                                     Variable
                                       (?,
-                                        read_counter/0),
+                                        read_counter/1),
                                     [
                                       Tuple
                                         (?)
@@ -287,14 +287,14 @@
                         ls/0),
                     [
                       (Constructor
-                        ([]/0),
+                        ([]/1),
                         Return
                           (?,
                             Constructor
                               (15,
-                                []/0)));
+                                []/1)));
                       (Constructor
-                        (cons/0,
+                        (cons/1,
                           xs,
                           ls),
                         Bind
@@ -336,7 +336,7 @@
                                   (?,
                                     Constructor
                                       (16,
-                                        cons/0,
+                                        cons/1,
                                         Variable
                                           (?,
                                             x/0),
@@ -351,14 +351,14 @@
 (Value
   (non_rec, @.,
     [
-      ((sums, [ ], [ (ls, Type (list/0, Type (list/0, Type (Z/0)))) ],
+      ((sums, [ ], [ (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
         Some
-          Monad ([ Counter/0; NonTermination/0 ], Type (list/0, Type (Z/0)))),
+          Monad ([ Counter/1; NonTermination/1 ], Type (list/1, Type (Z/1)))),
         Bind
           (?,
             Lift
-              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
-                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
+              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
             Some x,
             Apply
               (?, Variable (?, sums_rec/0),

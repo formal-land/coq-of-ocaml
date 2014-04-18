@@ -2,45 +2,45 @@
 (Value
   (non_rec, @.,
     [
-      ((b, [ ], [ ], Some Type (bool/0)),
+      ((b, [ ], [ ], Some Type (bool/1)),
         Apply
-          (3, Variable (3, orb/0),
+          (3, Variable (3, orb/1),
             [
               Apply
-                (3, Variable (3, equiv_decb/0),
+                (3, Variable (3, equiv_decb/1),
                   [
                     Constructor
                       (3,
-                        false/0);
+                        false/1);
                     Constructor
                       (3,
-                        true/0)
+                        true/1)
                   ]);
               Apply
-                (3, Variable (3, andb/0),
+                (3, Variable (3, andb/1),
                   [
                     Apply
                       (3,
                         Variable
                           (3,
-                            nequiv_decb/0),
+                            nequiv_decb/1),
                         [
                           Constructor
                             (3,
-                              tt/0);
+                              tt/1);
                           Constructor
                             (3,
-                              tt/0)
+                              tt/1)
                         ]);
                     Apply
                       (3,
                         Variable
                           (3,
-                            negb/0),
+                            negb/1),
                         [
                           Constructor
                             (3,
-                              true/0)
+                              true/1)
                         ])
                   ])
             ]))
@@ -50,13 +50,13 @@
 (Value
   (non_rec, @.,
     [
-      ((n1, [ ], [ ], Some Type (Z/0)),
+      ((n1, [ ], [ ], Some Type (Z/1)),
         Apply
-          (5, Variable (5, Z.add/0),
+          (5, Variable (5, Z.add/1),
             [
               Constant (5, Int(1));
               Apply
-                (5, Variable (5, Z.mul/0),
+                (5, Variable (5, Z.mul/1),
                   [
                     Constant
                       (5,
@@ -72,18 +72,18 @@
 (Value
   (non_rec, @.,
     [
-      ((n2, [ ], [ ], Some Type (Z/0)),
+      ((n2, [ ], [ ], Some Type (Z/1)),
         Apply
-          (7, Variable (7, Z.sub/0),
+          (7, Variable (7, Z.sub/1),
             [
               Apply
-                (7, Variable (7, Z.add/0),
+                (7, Variable (7, Z.add/1),
                   [
                     Apply
                       (7,
                         Variable
                           (7,
-                            Z.abs/0),
+                            Z.abs/1),
                         [
                           Constant
                             (7,
@@ -94,19 +94,19 @@
                         Int(1))
                   ]);
               Apply
-                (7, Variable (7, Z.mul/0),
+                (7, Variable (7, Z.mul/1),
                   [
                     Apply
                       (7,
                         Variable
                           (7,
-                            Z.modulo/0),
+                            Z.modulo/1),
                         [
                           Apply
                             (7,
                               Variable
                                 (7,
-                                  Z.div/0),
+                                  Z.div/1),
                               [
                                 Constant
                                   (7,
@@ -130,12 +130,12 @@
 (Value
   (non_rec, @.,
     [
-      ((n3, [ ], [ ], Some Type (Z/0)),
+      ((n3, [ ], [ ], Some Type (Z/1)),
         Apply
-          (9, Variable (9, Z.pred/0),
+          (9, Variable (9, Z.pred/1),
             [
               Apply
-                (9, Variable (9, Z.succ/0),
+                (9, Variable (9, Z.succ/1),
                   [
                     Constant
                       (9,
@@ -148,18 +148,18 @@
 (Value
   (non_rec, @.,
     [
-      ((n4, [ ], [ ], Some Type (Z/0)),
+      ((n4, [ ], [ ], Some Type (Z/1)),
         Apply
-          (11, Variable (11, Z.lxor/0),
+          (11, Variable (11, Z.lxor/1),
             [
               Apply
-                (11, Variable (11, Z.lor/0),
+                (11, Variable (11, Z.lor/1),
                   [
                     Apply
                       (11,
                         Variable
                           (11,
-                            Z.land/0),
+                            Z.land/1),
                         [
                           Constant
                             (11,
@@ -180,12 +180,12 @@
 (Value
   (non_rec, @.,
     [
-      ((n5, [ ], [ ], Some Type (Z/0)),
+      ((n5, [ ], [ ], Some Type (Z/1)),
         Apply
-          (13, Variable (13, Z.add/0),
+          (13, Variable (13, Z.add/1),
             [
               Apply
-                (13, Variable (13, Z.shiftl/0),
+                (13, Variable (13, Z.shiftl/1),
                   [
                     Constant
                       (13,
@@ -195,7 +195,7 @@
                         Int(4))
                   ]);
               Apply
-                (13, Variable (13, Z.shiftr/0),
+                (13, Variable (13, Z.shiftr/1),
                   [
                     Constant
                       (13,
@@ -211,9 +211,9 @@
 (Value
   (non_rec, @.,
     [
-      ((s, [ ], [ ], Some Type (string/0)),
+      ((s, [ ], [ ], Some Type (string/1)),
         Apply
-          (15, Variable (15, String.append/0),
+          (15, Variable (15, String.append/1),
             [ Constant (15, String("ghj")); Constant (15, String("klm")) ]))
     ]))
 
@@ -221,18 +221,18 @@
 (Value
   (non_rec, @.,
     [
-      ((c, [ ], [ ], Some Type (ascii/0)),
+      ((c, [ ], [ ], Some Type (ascii/1)),
         Apply
-          (17, Variable (17, OCaml.Pervasives.char_of_int/0),
+          (17, Variable (17, OCaml.Pervasives.char_of_int/1),
             [
               Apply
-                (17, Variable (17, Z.add/0),
+                (17, Variable (17, Z.add/1),
                   [
                     Apply
                       (17,
                         Variable
                           (17,
-                            OCaml.Pervasives.int_of_char/0),
+                            OCaml.Pervasives.int_of_char/1),
                         [
                           Constant
                             (17,
@@ -249,9 +249,9 @@
 (Value
   (non_rec, @.,
     [
-      ((x, [ ], [ ], Some Type (unit/0)),
+      ((x, [ ], [ ], Some Type (unit/1)),
         Apply
-          (19, Variable (19, OCaml.Pervasives.ignore/0),
+          (19, Variable (19, OCaml.Pervasives.ignore/1),
             [ Constant (19, Int(23)) ]))
     ]))
 
@@ -259,12 +259,12 @@
 (Value
   (non_rec, @.,
     [
-      ((p, [ ], [ ], Some Type (Z/0)),
+      ((p, [ ], [ ], Some Type (Z/1)),
         Apply
-          (21, Variable (21, Z.add/0),
+          (21, Variable (21, Z.add/1),
             [
               Apply
-                (21, Variable (21, fst/0),
+                (21, Variable (21, fst/1),
                   [
                     Tuple
                       (21,
@@ -276,7 +276,7 @@
                             Int(2)))
                   ]);
               Apply
-                (21, Variable (21, snd/0),
+                (21, Variable (21, snd/1),
                   [
                     Tuple
                       (21,
@@ -294,24 +294,24 @@
 (Value
   (non_rec, @.,
     [
-      ((l, [ ], [ ], Some Type (list/0, Type (Z/0))),
+      ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Apply
-          (23, Variable (23, OCaml.Pervasives.app/0),
+          (23, Variable (23, OCaml.Pervasives.app/1),
             [
               Constructor
-                (23, cons/0, Constant (23, Int(1)),
+                (23, cons/1, Constant (23, Int(1)),
                   Constructor
                     (23,
-                      cons/0,
+                      cons/1,
                       Constant
                         (23,
                           Int(2)),
                       Constructor
                         (23,
-                          []/0)));
+                          []/1)));
               Constructor
-                (23, cons/0, Constant (23, Int(3)),
-                  Constructor (23, []/0))
+                (23, cons/1, Constant (23, Int(3)),
+                  Constructor (23, []/1))
             ]))
     ]))
 
@@ -319,9 +319,9 @@
 (Value
   (non_rec, @.,
     [
-      ((y, [ ], [ ], Some Type (Z/0)),
+      ((y, [ ], [ ], Some Type (Z/1)),
         Apply
-          (25, Variable (25, apply/0),
+          (25, Variable (25, apply/1),
             [
               Function
                 (25, n,
@@ -329,7 +329,7 @@
                     (25,
                       Variable
                         (25,
-                          Z.add/0),
+                          Z.add/1),
                       [
                         Variable
                           (25,

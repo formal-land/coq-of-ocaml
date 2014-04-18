@@ -6,22 +6,22 @@
     (rec, @.,
       [
         ((sum_rec, [ ],
-          [ (counter, Type (nat/1)); (l, Type (t/0, Type (Z/1))) ],
-          Some Type (Z/1)),
+          [ (counter, Type (nat/2)); (l, Type (t/0, Type (Z/2))) ],
+          Some Type (Z/2)),
           Match
             (?, Variable (?, counter/0),
               [
-                (Constructor (O/1),
+                (Constructor (O/2),
                   Apply
                     (?,
                       Variable
                         (?,
-                          not_terminated/1),
+                          not_terminated/2),
                       [
                         Tuple
                           (?)
                       ]));
-                (Constructor (S/1, counter),
+                (Constructor (S/2, counter),
                   Match
                     (9,
                       Variable
@@ -41,7 +41,7 @@
                             (11,
                               Variable
                                 (11,
-                                  Z.add/1),
+                                  Z.add/2),
                               [
                                 Variable
                                   (11,
@@ -71,7 +71,7 @@
   8 (Value
     (non_rec, @.,
       [
-        ((sum, [ ], [ (l, Type (t/0, Type (Z/1))) ], Some Type (Z/1)),
+        ((sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2)),
           Apply
             (?, Variable (?, sum_rec/0),
               [
@@ -79,7 +79,7 @@
                   (?,
                     Variable
                       (?,
-                        read_counter/1),
+                        read_counter/2),
                     [
                       Tuple
                         (?)
@@ -92,22 +92,22 @@
     (rec, @.,
       [
         ((of_list_rec, [ A ],
-          [ (counter, Type (nat/1)); (x, Type (list/1, A)) ],
+          [ (counter, Type (nat/2)); (x, Type (list/2, A)) ],
           Some Type (t/0, A)),
           Match
             (?, Variable (?, counter/0),
               [
-                (Constructor (O/1),
+                (Constructor (O/2),
                   Apply
                     (?,
                       Variable
                         (?,
-                          not_terminated/1),
+                          not_terminated/2),
                       [
                         Tuple
                           (?)
                       ]));
-                (Constructor (S/1, counter),
+                (Constructor (S/2, counter),
                   Match
                     (?,
                       Variable
@@ -115,12 +115,12 @@
                           x/0),
                       [
                         (Constructor
-                          ([]/1),
+                          ([]/2),
                           Constructor
                             (14,
                               Nil/0));
                         (Constructor
-                          (cons/1,
+                          (cons/2,
                             x,
                             xs),
                           Constructor
@@ -153,7 +153,7 @@
   13 (Value
     (non_rec, @.,
       [
-        ((of_list, [ A ], [ (x, Type (list/1, A)) ], Some Type (t/0, A)),
+        ((of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)),
           Apply
             (?, Variable (?, of_list_rec/0),
               [
@@ -161,7 +161,7 @@
                   (?,
                     Variable
                       (?,
-                        read_counter/1),
+                        read_counter/2),
                     [
                       Tuple
                         (?)
@@ -172,13 +172,13 @@
   
   17 Module Inside:
     18 (Value
-      (non_rec, @., [ ((x, [ ], [ ], Some Type (Z/2)), Constant (18, Int(12))) ]))
+      (non_rec, @., [ ((x, [ ], [ ], Some Type (Z/3)), Constant (18, Int(12))) ]))
 
 22
 (Value
   (non_rec, @.,
     [
-      ((n, [ A ], [ (x, A) ], Some Type (Z/0)),
+      ((n, [ A ], [ (x, A) ], Some Type (Z/1)),
         Match
           (?, Variable (?, x/0),
             [
@@ -197,31 +197,31 @@
                           [
                             Constructor
                               (22,
-                                cons/0,
+                                cons/1,
                                 Constant
                                   (22,
                                     Int(5)),
                                 Constructor
                                   (22,
-                                    cons/0,
+                                    cons/1,
                                     Constant
                                       (22,
                                         Int(7)),
                                     Constructor
                                       (22,
-                                        cons/0,
+                                        cons/1,
                                         Constant
                                           (22,
                                             Int(6)),
                                         Constructor
                                           (22,
-                                            cons/0,
+                                            cons/1,
                                             Variable
                                               (22,
                                                 List2.Inside.x/0),
                                             Constructor
                                               (22,
-                                                []/0)))))
+                                                []/1)))))
                           ])
                     ]))
             ]))

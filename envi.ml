@@ -18,7 +18,7 @@ module Segment = struct
 
   let pp (segment : 'a t) : SmartPrint.t =
     nest (!^ "open" ^^ OCaml.list (fun path ->
-      separate (!^ ".") (List.map Name.pp path))
+      double_quotes (separate (!^ ".") (List.map Name.pp path)))
       segment.opens) ^^
     OCaml.list (fun (x, (visibility, _)) ->
       nest (Visibility.pp visibility ^^ PathName.pp x))
@@ -85,22 +85,22 @@ let rec find_first (f : 'a -> 'b option) (l : 'a list) : 'b option =
     | None -> find_first f l
     | y -> y)
 
-let rec depth (x : PathName.t) (env : 'a t) : int option =
+let rec depth (x : PathName.t) (env : 'a t) : (PathName.t * int) option =
   match env with
   | segment :: env ->
     if Segment.mem x segment then
-      Some 0
+      Some (x, 0)
     else
       segment.Segment.opens |> find_first (fun path ->
         let x = { x with PathName.path = path @ x.PathName.path } in
         match depth x env with
         | None -> None
-        | Some d -> Some (d + 1))
+        | Some (x, d) -> Some (x, d + 1))
   | [] -> None
 
 let bound_name (x : PathName.t) (env : 'a t) : BoundName.t =
   match depth x env with
-  | Some d -> { BoundName.path_name = x; depth = d }
+  | Some (x, d) -> { BoundName.path_name = x; depth = d }
   | None -> raise (NotFound x)
 
 let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =

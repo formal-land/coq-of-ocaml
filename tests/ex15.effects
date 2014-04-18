@@ -1,6 +1,6 @@
 3
 Inductive set:
-  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/0); Type (set/0) ]) ])
+  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/1); Type (set/0) ]) ])
 
 7
 (Value
@@ -15,18 +15,18 @@ Inductive set:
   (rec, @.,
     [
       ((member_rec, [ ],
-        [ (counter, Type (nat/0)); (x, Type (Z/0)); (s, Type (set/0)) ],
-        Some Type (bool/0)),
+        [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
+        Some Type (bool/1)),
         Match
-          ((?, Effect ([ NonTermination/0 ], .)),
+          ((?, Effect ([ NonTermination/1 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/0),
+              (Constructor (O/1),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/0
+                        NonTermination/1
                       ],
                         .)),
                     Variable
@@ -36,10 +36,10 @@ Inductive set:
                           ],
                             .
                               -[
-                                NonTermination/0
+                                NonTermination/1
                               ]->
                               .)),
-                        not_terminated/0),
+                        not_terminated/1),
                     [
                       Tuple
                         ((?,
@@ -48,12 +48,12 @@ Inductive set:
                             ],
                               .)))
                     ]));
-              (Constructor (S/0, counter),
+              (Constructor (S/1, counter),
                 Match
                   ((10,
                     Effect
                       ([
-                        NonTermination/0
+                        NonTermination/1
                       ],
                         .)),
                     Variable
@@ -72,7 +72,7 @@ Inductive set:
                               ([
                               ],
                                 .)),
-                            false/0));
+                            false/1));
                       (Constructor
                         (Node/0,
                           s1,
@@ -82,7 +82,7 @@ Inductive set:
                           ((13,
                             Effect
                               ([
-                                NonTermination/0
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -97,7 +97,7 @@ Inductive set:
                                       ([
                                       ],
                                         .)),
-                                    OCaml.Pervasives.lt/0),
+                                    OCaml.Pervasives.lt/1),
                                 [
                                   Variable
                                     ((13,
@@ -118,7 +118,7 @@ Inductive set:
                               ((14,
                                 Effect
                                   ([
-                                    NonTermination/0
+                                    NonTermination/1
                                   ],
                                     .)),
                                 Apply
@@ -130,7 +130,7 @@ Inductive set:
                                           ->
                                           .
                                             -[
-                                              NonTermination/0
+                                              NonTermination/1
                                             ]->
                                             .)),
                                     Variable
@@ -144,7 +144,7 @@ Inductive set:
                                                 ->
                                                 .
                                                   -[
-                                                    NonTermination/0
+                                                    NonTermination/1
                                                   ]->
                                                   .)),
                                         member_rec/0),
@@ -177,7 +177,7 @@ Inductive set:
                               ((15,
                                 Effect
                                   ([
-                                    NonTermination/0
+                                    NonTermination/1
                                   ],
                                     .)),
                                 Apply
@@ -192,7 +192,7 @@ Inductive set:
                                           ([
                                           ],
                                             .)),
-                                        OCaml.Pervasives.lt/0),
+                                        OCaml.Pervasives.lt/1),
                                     [
                                       Variable
                                         ((15,
@@ -213,7 +213,7 @@ Inductive set:
                                   ((16,
                                     Effect
                                       ([
-                                        NonTermination/0
+                                        NonTermination/1
                                       ],
                                         .)),
                                     Apply
@@ -225,7 +225,7 @@ Inductive set:
                                               ->
                                               .
                                                 -[
-                                                  NonTermination/0
+                                                  NonTermination/1
                                                 ]->
                                                 .)),
                                         Variable
@@ -239,7 +239,7 @@ Inductive set:
                                                     ->
                                                     .
                                                       -[
-                                                        NonTermination/0
+                                                        NonTermination/1
                                                       ]->
                                                       .)),
                                             member_rec/0),
@@ -274,7 +274,7 @@ Inductive set:
                                       ([
                                       ],
                                         .)),
-                                    true/0))))
+                                    true/1))))
                     ]))
             ]))
     ]))
@@ -283,15 +283,15 @@ Inductive set:
 (Value
   (non_rec, @.,
     [
-      ((member, [ ], [ (x, Type (Z/0)); (s, Type (set/0)) ], Some Type (bool/0)),
+      ((member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ], Some Type (bool/1)),
         Apply
-          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
             Variable
-              ((?, Effect ([ ], . -> . -> . -[ NonTermination/0 ]-> .)),
+              ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
                 member_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/0 ], .)),
+                ((?, Effect ([ Counter/1 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -299,10 +299,10 @@ Inductive set:
                         ],
                           .
                             -[
-                              Counter/0
+                              Counter/1
                             ]->
                             .)),
-                      read_counter/0),
+                      read_counter/1),
                   [
                     Tuple
                       ((?,
@@ -321,18 +321,18 @@ Inductive set:
   (rec, @.,
     [
       ((insert_rec, [ ],
-        [ (counter, Type (nat/0)); (x, Type (Z/0)); (s, Type (set/0)) ],
+        [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
         Some Type (set/0)),
         Match
-          ((?, Effect ([ NonTermination/0 ], .)),
+          ((?, Effect ([ NonTermination/1 ], .)),
             Variable ((?, Effect ([ ], .)), counter/0),
             [
-              (Constructor (O/0),
+              (Constructor (O/1),
                 Apply
                   ((?,
                     Effect
                       ([
-                        NonTermination/0
+                        NonTermination/1
                       ],
                         .)),
                     Variable
@@ -342,10 +342,10 @@ Inductive set:
                           ],
                             .
                               -[
-                                NonTermination/0
+                                NonTermination/1
                               ]->
                               .)),
-                        not_terminated/0),
+                        not_terminated/1),
                     [
                       Tuple
                         ((?,
@@ -354,12 +354,12 @@ Inductive set:
                             ],
                               .)))
                     ]));
-              (Constructor (S/0, counter),
+              (Constructor (S/1, counter),
                 Match
                   ((21,
                     Effect
                       ([
-                        NonTermination/0
+                        NonTermination/1
                       ],
                         .)),
                     Variable
@@ -409,7 +409,7 @@ Inductive set:
                           ((24,
                             Effect
                               ([
-                                NonTermination/0
+                                NonTermination/1
                               ],
                                 .)),
                             Apply
@@ -424,7 +424,7 @@ Inductive set:
                                       ([
                                       ],
                                         .)),
-                                    OCaml.Pervasives.lt/0),
+                                    OCaml.Pervasives.lt/1),
                                 [
                                   Variable
                                     ((24,
@@ -445,7 +445,7 @@ Inductive set:
                               ((25,
                                 Effect
                                   ([
-                                    NonTermination/0
+                                    NonTermination/1
                                   ],
                                     .)),
                                 Node/0,
@@ -453,7 +453,7 @@ Inductive set:
                                   ((25,
                                     Effect
                                       ([
-                                        NonTermination/0
+                                        NonTermination/1
                                       ],
                                         .)),
                                     Apply
@@ -465,7 +465,7 @@ Inductive set:
                                               ->
                                               .
                                                 -[
-                                                  NonTermination/0
+                                                  NonTermination/1
                                                 ]->
                                                 .)),
                                         Variable
@@ -479,7 +479,7 @@ Inductive set:
                                                     ->
                                                     .
                                                       -[
-                                                        NonTermination/0
+                                                        NonTermination/1
                                                       ]->
                                                       .)),
                                             insert_rec/0),
@@ -526,7 +526,7 @@ Inductive set:
                               ((26,
                                 Effect
                                   ([
-                                    NonTermination/0
+                                    NonTermination/1
                                   ],
                                     .)),
                                 Apply
@@ -541,7 +541,7 @@ Inductive set:
                                           ([
                                           ],
                                             .)),
-                                        OCaml.Pervasives.lt/0),
+                                        OCaml.Pervasives.lt/1),
                                     [
                                       Variable
                                         ((26,
@@ -562,7 +562,7 @@ Inductive set:
                                   ((27,
                                     Effect
                                       ([
-                                        NonTermination/0
+                                        NonTermination/1
                                       ],
                                         .)),
                                     Node/0,
@@ -584,7 +584,7 @@ Inductive set:
                                       ((27,
                                         Effect
                                           ([
-                                            NonTermination/0
+                                            NonTermination/1
                                           ],
                                             .)),
                                         Apply
@@ -596,7 +596,7 @@ Inductive set:
                                                   ->
                                                   .
                                                     -[
-                                                      NonTermination/0
+                                                      NonTermination/1
                                                     ]->
                                                     .)),
                                             Variable
@@ -610,7 +610,7 @@ Inductive set:
                                                         ->
                                                         .
                                                           -[
-                                                            NonTermination/0
+                                                            NonTermination/1
                                                           ]->
                                                           .)),
                                                 insert_rec/0),
@@ -654,15 +654,15 @@ Inductive set:
 (Value
   (non_rec, @.,
     [
-      ((insert, [ ], [ (x, Type (Z/0)); (s, Type (set/0)) ], Some Type (set/0)),
+      ((insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ], Some Type (set/0)),
         Apply
-          ((?, Effect ([ Counter/0; NonTermination/0 ], .)),
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
             Variable
-              ((?, Effect ([ ], . -> . -> . -[ NonTermination/0 ]-> .)),
+              ((?, Effect ([ ], . -> . -> . -[ NonTermination/1 ]-> .)),
                 insert_rec/0),
             [
               Apply
-                ((?, Effect ([ Counter/0 ], .)),
+                ((?, Effect ([ Counter/1 ], .)),
                   Variable
                     ((?,
                       Effect
@@ -670,10 +670,10 @@ Inductive set:
                         ],
                           .
                             -[
-                              Counter/0
+                              Counter/1
                             ]->
                             .)),
-                      read_counter/0),
+                      read_counter/1),
                   [
                     Tuple
                       ((?,

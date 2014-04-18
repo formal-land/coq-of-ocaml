@@ -4,7 +4,7 @@
       [
         ((f, [ A; B ], [ (x, A) ], Some B),
           Match
-            ((?, Effect ([ OCaml.Failure/1 ], .)),
+            ((?, Effect ([ OCaml.Failure/2 ], .)),
               Variable ((?, Effect ([ ], .)), x/0),
               [
                 (Any,
@@ -12,7 +12,7 @@
                     ((4,
                       Effect
                         ([
-                          OCaml.Failure/1
+                          OCaml.Failure/2
                         ],
                           .)),
                       Variable
@@ -22,10 +22,10 @@
                             ],
                               .
                                 -[
-                                  OCaml.Failure/1
+                                  OCaml.Failure/2
                                 ]->
                                 .)),
-                          OCaml.Pervasives.failwith/1),
+                          OCaml.Pervasives.failwith/2),
                       [
                         Constant
                           ((4,
@@ -44,7 +44,7 @@
       [
         ((f, [ A; B ], [ (x, A) ], Some B),
           Match
-            ((?, Effect ([ OCaml.Assert_failure/1 ], .)),
+            ((?, Effect ([ OCaml.Assert_failure/2 ], .)),
               Variable ((?, Effect ([ ], .)), x/0),
               [
                 (Any,
@@ -52,7 +52,7 @@
                     ((8,
                       Effect
                         ([
-                          OCaml.Assert_failure/1
+                          OCaml.Assert_failure/2
                         ],
                           .)),
                       Variable
@@ -62,10 +62,10 @@
                             ],
                               .
                                 -[
-                                  OCaml.Assert_failure/1
+                                  OCaml.Assert_failure/2
                                 ]->
                                 .)),
-                          OCaml.assert/1),
+                          OCaml.assert/2),
                       [
                         Constructor
                           ((8,
@@ -73,7 +73,7 @@
                               ([
                               ],
                                 .)),
-                            false/1)
+                            false/2)
                       ]))
               ]))
       ]))
@@ -81,17 +81,17 @@
   9 (Value
     (non_rec, @.,
       [
-        ((x, [ ], [ ], Some Type (unit/1)),
+        ((x, [ ], [ ], Some Type (unit/2)),
           Match
             ((9, Effect ([ ], .)),
               Run
-                ((?, Effect ([ ], .)), OCaml.Assert_failure/1,
+                ((?, Effect ([ ], .)), OCaml.Assert_failure/2,
                   [ ],
                   Apply
                     ((9,
                       Effect
                         ([
-                          OCaml.Assert_failure/1
+                          OCaml.Assert_failure/2
                         ], .)),
                       Variable
                         ((9,
@@ -99,7 +99,7 @@
                             ([ ],
                               .
                                 -[
-                                  OCaml.Assert_failure/1
+                                  OCaml.Assert_failure/2
                                 ]->
                                 .)),
                           f/0),
@@ -110,10 +110,10 @@
                               ([
                               ],
                                 .)),
-                            tt/1)
+                            tt/2)
                       ])),
               [
-                (Constructor (inl/1, x),
+                (Constructor (inl/2, x),
                   Variable
                     ((?,
                       Effect
@@ -121,14 +121,14 @@
                         ],
                           .)),
                       x/0));
-                (Constructor (inr/1, Tuple (Any)),
+                (Constructor (inr/2, Tuple (Any)),
                   Constructor
                     ((9,
                       Effect
                         ([
                         ],
                           .)),
-                      tt/1))
+                      tt/2))
               ]))
       ]))
   
@@ -137,22 +137,22 @@
   11 (Value
     (non_rec, @.,
       [
-        ((y, [ ], [ ], Some Type (unit/1)),
+        ((y, [ ], [ ], Some Type (unit/2)),
           Match
             ((11, Effect ([ ], .)),
               Run
-                ((?, Effect ([ ], .)), OCaml.Failure/1, [ ],
+                ((?, Effect ([ ], .)), OCaml.Failure/2, [ ],
                   Apply
                     ((11,
                       Effect
-                        ([ OCaml.Failure/1 ], .)),
+                        ([ OCaml.Failure/2 ], .)),
                       Variable
                         ((11,
                           Effect
                             ([ ],
                               .
                                 -[
-                                  OCaml.Failure/1
+                                  OCaml.Failure/2
                                 ]->
                                 .)),
                           M.f/1),
@@ -163,10 +163,10 @@
                               ([
                               ],
                                 .)),
-                            tt/1)
+                            tt/2)
                       ])),
               [
-                (Constructor (inl/1, x),
+                (Constructor (inl/2, x),
                   Variable
                     ((?,
                       Effect
@@ -174,14 +174,14 @@
                         ],
                           .)),
                       x/0));
-                (Constructor (inr/1, Tuple (Any)),
+                (Constructor (inr/2, Tuple (Any)),
                   Constructor
                     ((11,
                       Effect
                         ([
                         ],
                           .)),
-                      tt/1))
+                      tt/2))
               ]))
       ]))
 
@@ -189,28 +189,28 @@
 (Value
   (non_rec, @.,
     [
-      ((b, [ ], [ ], Some Type (unit/0)),
+      ((b, [ ], [ ], Some Type (unit/1)),
         Match
           ((14, Effect ([ ], .)),
             Run
-              ((?, Effect ([ ], .)), OCaml.Assert_failure/0, [ ],
+              ((?, Effect ([ ], .)), OCaml.Assert_failure/1, [ ],
                 Apply
-                  ((14, Effect ([ OCaml.Assert_failure/0 ], .)),
+                  ((14, Effect ([ OCaml.Assert_failure/1 ], .)),
                     Variable
                       ((14,
                         Effect
                           ([ ],
                             .
-                              -[ OCaml.Assert_failure/0 ]->
+                              -[ OCaml.Assert_failure/1 ]->
                               .)), N.f/0),
-                    [ Constructor ((14, Effect ([ ], .)), tt/0) ])),
+                    [ Constructor ((14, Effect ([ ], .)), tt/1) ])),
             [
-              (Constructor (inl/0, x),
+              (Constructor (inl/1, x),
                 Variable ((?, Effect ([ ], .)), x/0));
-              (Constructor (inr/0, Tuple (Any)),
+              (Constructor (inr/1, Tuple (Any)),
                 Constructor
                   ((14, Effect ([ ], .)),
-                    tt/0))
+                    tt/1))
             ]))
     ]))
 
@@ -220,27 +220,27 @@
 (Value
   (non_rec, @.,
     [
-      ((b', [ ], [ ], Some Type (unit/0)),
+      ((b', [ ], [ ], Some Type (unit/1)),
         Match
           ((16, Effect ([ ], .)),
             Run
-              ((?, Effect ([ ], .)), OCaml.Assert_failure/0, [ ],
+              ((?, Effect ([ ], .)), OCaml.Assert_failure/1, [ ],
                 Apply
-                  ((16, Effect ([ OCaml.Assert_failure/0 ], .)),
+                  ((16, Effect ([ OCaml.Assert_failure/1 ], .)),
                     Variable
                       ((16,
                         Effect
                           ([ ],
                             .
-                              -[ OCaml.Assert_failure/0 ]->
+                              -[ OCaml.Assert_failure/1 ]->
                               .)), N.f/0),
-                    [ Constructor ((16, Effect ([ ], .)), tt/0) ])),
+                    [ Constructor ((16, Effect ([ ], .)), tt/1) ])),
             [
-              (Constructor (inl/0, x),
+              (Constructor (inl/1, x),
                 Variable ((?, Effect ([ ], .)), x/0));
-              (Constructor (inr/0, Tuple (Any)),
+              (Constructor (inr/1, Tuple (Any)),
                 Constructor
                   ((16, Effect ([ ], .)),
-                    tt/0))
+                    tt/1))
             ]))
     ]))

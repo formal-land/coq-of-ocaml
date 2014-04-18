@@ -30,19 +30,19 @@ Definition x {A : Type} (x : A)
   | _ => OCaml.List.nth l2 1
   end.
 
-Definition rl : list Z := List.rev l2.
+Definition rl : list Z := OCaml.List.rev l2.
 
-Definition ll : list Z := OCaml.Pervasives.app l2 l2.
+Definition ll : list Z := OCaml.List.append l2 l2.
 
-Definition rll : list Z := List.rev_append l2 l2.
+Definition rll : list Z := OCaml.List.rev_append l2 l2.
 
 Definition lc : list Z :=
-  OCaml.List.flatten (cons l1 (cons l2 (cons l1 (cons l2 [])))).
+  OCaml.List.concat (cons l1 (cons l2 (cons l1 (cons l2 [])))).
 
 Definition lf : list Z :=
   OCaml.List.flatten (cons l1 (cons l2 (cons l1 (cons l2 [])))).
 
-Definition m : list Z := List.map (fun x => Z.add x 1) l2.
+Definition m : list Z := OCaml.List.map (fun x => Z.add x 1) l2.
 
 Definition mi : list Z := OCaml.List.mapi (fun i => fun x => Z.add x i) l2.
 

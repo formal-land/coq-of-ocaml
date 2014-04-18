@@ -2,13 +2,13 @@
 (Value
   (non_rec, @.,
     [
-      ((f, [ ], [ (n, Type (Z/0)); (b, Type (bool/0)) ], Some Type (Z/0)),
+      ((f, [ ], [ (n, Type (Z/1)); (b, Type (bool/1)) ], Some Type (Z/1)),
         IfThenElse
           (4, Variable (4, b/0),
             Apply
-              (5, Variable (5, Z.add/0),
+              (5, Variable (5, Z.add/1),
                 [ Variable (5, n/0); Constant (5, Int(1)) ]),
             Apply
-              (7, Variable (7, Z.sub/0),
+              (7, Variable (7, Z.sub/1),
                 [ Variable (7, n/0); Constant (7, Int(1)) ])))
     ]))

@@ -4,15 +4,15 @@
 (Value
   (non_rec, @.,
     [
-      ((x1, [ ], [ ], Some Type (Z/0)),
+      ((x1, [ ], [ ], Some Type (Z/1)),
         Match
           (6,
             Run
               (?, Error/0, [ ],
                 Apply (6, Variable (6, raise_Error/0), [ Tuple (?) ])),
             [
-              (Constructor (inl/0, x), Variable (?, x/0));
-              (Constructor (inr/0, Tuple ()), Constant (7, Int(12)))
+              (Constructor (inl/1, x), Variable (?, x/0));
+              (Constructor (inr/1, Tuple ()), Constant (7, Int(12)))
             ]))
     ]))
 
@@ -43,20 +43,20 @@
                             ])),
                     [
                       (Constructor
-                        (inl/0,
+                        (inl/1,
                           x),
                         Variable
                           (?,
                             x/0));
                       (Constructor
-                        (inr/0,
+                        (inr/1,
                           Tuple
                             ()),
                         Apply
                           (11,
                             Variable
                               (11,
-                                OCaml.Pervasives.failwith/0),
+                                OCaml.Pervasives.failwith/1),
                             [
                               Constant
                                 (11,
@@ -70,7 +70,7 @@
 (Value
   (non_rec, @.,
     [
-      ((x3, [ ], [ (b, Type (bool/0)) ], Some Type (Z/0)),
+      ((x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)),
         Match
           (14,
             Run
@@ -80,13 +80,13 @@
                     Apply
                       (14,
                         Variable
-                          (14, OCaml.Pervasives.failwith/0),
+                          (14, OCaml.Pervasives.failwith/1),
                         [ Constant (14, String("arg")) ]),
                     Apply
                       (14, Variable (14, raise_Error/0),
                         [ Tuple (?) ]))),
             [
-              (Constructor (inl/0, x), Variable (?, x/0));
-              (Constructor (inr/0, Tuple ()), Constant (15, Int(12)))
+              (Constructor (inl/1, x), Variable (?, x/0));
+              (Constructor (inr/1, Tuple ()), Constant (15, Int(12)))
             ]))
     ]))

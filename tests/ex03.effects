@@ -2,7 +2,7 @@
 (Value
   (non_rec, @.,
     [
-      ((n1, [ ], [ ], Some Type (Z/0)),
+      ((n1, [ ], [ ], Some Type (Z/1)),
         LetVar (4, Effect ([ ], .)) m =
           Constant ((4, Effect ([ ], .)), Int(12)) in
         LetVar (5, Effect ([ ], .)) n1 = Variable ((5, Effect ([ ], .)), m/0)
@@ -14,7 +14,7 @@
 (Value
   (non_rec, @.,
     [
-      ((n2, [ ], [ ], Some Type (Z/0)),
+      ((n2, [ ], [ ], Some Type (Z/1)),
         LetFun (9, Effect ([ ], .))
           (non_rec, @.,
             [
@@ -61,7 +61,7 @@
         LetFun (10, Effect ([ ], .))
           (non_rec, @.,
             [
-              ((c, [ A ], [ (f, (Type (Z/0) -> (Type (Z/0) -> A))) ],
+              ((c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ],
                 Some A),
                 Apply
                   ((10, Effect ([ ], .)),

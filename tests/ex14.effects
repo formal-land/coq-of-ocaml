@@ -2,19 +2,19 @@
 (Value
   (non_rec, @.,
     [
-      ((f, [ ], [ (n, Type (Z/0)); (b, Type (bool/0)) ], Some Type (Z/0)),
+      ((f, [ ], [ (n, Type (Z/1)); (b, Type (bool/1)) ], Some Type (Z/1)),
         IfThenElse
           ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), b/0),
             Apply
               ((5, Effect ([ ], .)),
-                Variable ((5, Effect ([ ], .)), Z.add/0),
+                Variable ((5, Effect ([ ], .)), Z.add/1),
                 [
                   Variable ((5, Effect ([ ], .)), n/0);
                   Constant ((5, Effect ([ ], .)), Int(1))
                 ]),
             Apply
               ((7, Effect ([ ], .)),
-                Variable ((7, Effect ([ ], .)), Z.sub/0),
+                Variable ((7, Effect ([ ], .)), Z.sub/1),
                 [
                   Variable ((7, Effect ([ ], .)), n/0);
                   Constant ((7, Effect ([ ], .)), Int(1))

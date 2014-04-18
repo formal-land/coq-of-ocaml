@@ -1,6 +1,6 @@
 3
 Inductive set:
-  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/0); Type (set/0) ]) ])
+  ([ ], [ (Empty, [ ]); (Node, [ Type (set/0); Type (Z/1); Type (set/0) ]) ])
 
 7
 (Value
@@ -12,22 +12,22 @@ Inductive set:
   (rec, @.,
     [
       ((member_rec, [ ],
-        [ (counter, Type (nat/0)); (x, Type (Z/0)); (s, Type (set/0)) ],
-        Some Monad ([ NonTermination/0 ], Type (bool/0))),
+        [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
+        Some Monad ([ NonTermination/1 ], Type (bool/1))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/0),
+              (Constructor (O/1),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/0),
+                        not_terminated/1),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/0, counter),
+              (Constructor (S/1, counter),
                 Match
                   (10,
                     Variable
@@ -40,7 +40,7 @@ Inductive set:
                           (?,
                             Constructor
                               (11,
-                                false/0)));
+                                false/1)));
                       (Constructor
                         (Node/0,
                           s1,
@@ -52,7 +52,7 @@ Inductive set:
                               (13,
                                 Variable
                                   (13,
-                                    OCaml.Pervasives.lt/0),
+                                    OCaml.Pervasives.lt/1),
                                 [
                                   Variable
                                     (13,
@@ -87,7 +87,7 @@ Inductive set:
                                   (15,
                                     Variable
                                       (15,
-                                        OCaml.Pervasives.lt/0),
+                                        OCaml.Pervasives.lt/1),
                                     [
                                       Variable
                                         (15,
@@ -120,7 +120,7 @@ Inductive set:
                                   (?,
                                     Constructor
                                       (18,
-                                        true/0)))))
+                                        true/1)))))
                     ]))
             ]))
     ]))
@@ -129,16 +129,16 @@ Inductive set:
 (Value
   (non_rec, @.,
     [
-      ((member, [ ], [ (x, Type (Z/0)); (s, Type (set/0)) ],
-        Some Monad ([ Counter/0; NonTermination/0 ], Type (bool/0))),
+      ((member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
+        Some Monad ([ Counter/1; NonTermination/1 ], Type (bool/1))),
         Bind
           (?,
             Lift
-              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
-                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
+              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
             Some x_1,
             Lift
-              (?, [ NonTermination/0 ], [ Counter/0; NonTermination/0 ],
+              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
                 Apply
                   (?, Variable (?, member_rec/0),
                     [
@@ -153,22 +153,22 @@ Inductive set:
   (rec, @.,
     [
       ((insert_rec, [ ],
-        [ (counter, Type (nat/0)); (x, Type (Z/0)); (s, Type (set/0)) ],
-        Some Monad ([ NonTermination/0 ], Type (set/0))),
+        [ (counter, Type (nat/1)); (x, Type (Z/1)); (s, Type (set/0)) ],
+        Some Monad ([ NonTermination/1 ], Type (set/0))),
         Match
           (?, Variable (?, counter/0),
             [
-              (Constructor (O/0),
+              (Constructor (O/1),
                 Apply
                   (?,
                     Variable
                       (?,
-                        not_terminated/0),
+                        not_terminated/1),
                     [
                       Tuple
                         (?)
                     ]));
-              (Constructor (S/0, counter),
+              (Constructor (S/1, counter),
                 Match
                   (21,
                     Variable
@@ -202,7 +202,7 @@ Inductive set:
                               (24,
                                 Variable
                                   (24,
-                                    OCaml.Pervasives.lt/0),
+                                    OCaml.Pervasives.lt/1),
                                 [
                                   Variable
                                     (24,
@@ -255,7 +255,7 @@ Inductive set:
                                   (26,
                                     Variable
                                       (26,
-                                        OCaml.Pervasives.lt/0),
+                                        OCaml.Pervasives.lt/1),
                                     [
                                       Variable
                                         (26,
@@ -315,16 +315,16 @@ Inductive set:
 (Value
   (non_rec, @.,
     [
-      ((insert, [ ], [ (x, Type (Z/0)); (s, Type (set/0)) ],
-        Some Monad ([ Counter/0; NonTermination/0 ], Type (set/0))),
+      ((insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ],
+        Some Monad ([ Counter/1; NonTermination/1 ], Type (set/0))),
         Bind
           (?,
             Lift
-              (?, [ Counter/0 ], [ Counter/0; NonTermination/0 ],
-                Apply (?, Variable (?, read_counter/0), [ Tuple (?) ])),
+              (?, [ Counter/1 ], [ Counter/1; NonTermination/1 ],
+                Apply (?, Variable (?, read_counter/1), [ Tuple (?) ])),
             Some x_1,
             Lift
-              (?, [ NonTermination/0 ], [ Counter/0; NonTermination/0 ],
+              (?, [ NonTermination/1 ], [ Counter/1; NonTermination/1 ],
                 Apply
                   (?, Variable (?, insert_rec/0),
                     [

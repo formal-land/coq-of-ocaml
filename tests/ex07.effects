@@ -2,9 +2,9 @@
 (Value
   (non_rec, @.,
     [
-      ((b, [ ], [ ], Some Type (bool/0)),
+      ((b, [ ], [ ], Some Type (bool/1)),
         Apply
-          ((3, Effect ([ ], .)), Variable ((3, Effect ([ ], .)), orb/0),
+          ((3, Effect ([ ], .)), Variable ((3, Effect ([ ], .)), orb/1),
             [
               Apply
                 ((3, Effect ([ ], .)),
@@ -14,7 +14,7 @@
                         ([
                         ],
                           .)),
-                      equiv_decb/0),
+                      equiv_decb/1),
                   [
                     Constructor
                       ((3,
@@ -22,14 +22,14 @@
                           ([
                           ],
                             .)),
-                        false/0);
+                        false/1);
                     Constructor
                       ((3,
                         Effect
                           ([
                           ],
                             .)),
-                        true/0)
+                        true/1)
                   ]);
               Apply
                 ((3, Effect ([ ], .)),
@@ -39,7 +39,7 @@
                         ([
                         ],
                           .)),
-                      andb/0),
+                      andb/1),
                   [
                     Apply
                       ((3,
@@ -53,7 +53,7 @@
                               ([
                               ],
                                 .)),
-                            nequiv_decb/0),
+                            nequiv_decb/1),
                         [
                           Constructor
                             ((3,
@@ -61,14 +61,14 @@
                                 ([
                                 ],
                                   .)),
-                              tt/0);
+                              tt/1);
                           Constructor
                             ((3,
                               Effect
                                 ([
                                 ],
                                   .)),
-                              tt/0)
+                              tt/1)
                         ]);
                     Apply
                       ((3,
@@ -82,7 +82,7 @@
                               ([
                               ],
                                 .)),
-                            negb/0),
+                            negb/1),
                         [
                           Constructor
                             ((3,
@@ -90,7 +90,7 @@
                                 ([
                                 ],
                                   .)),
-                              true/0)
+                              true/1)
                         ])
                   ])
             ]))
@@ -100,9 +100,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n1, [ ], [ ], Some Type (Z/0)),
+      ((n1, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((5, Effect ([ ], .)), Variable ((5, Effect ([ ], .)), Z.add/0),
+          ((5, Effect ([ ], .)), Variable ((5, Effect ([ ], .)), Z.add/1),
             [
               Constant ((5, Effect ([ ], .)), Int(1));
               Apply
@@ -113,7 +113,7 @@
                         ([
                         ],
                           .)),
-                      Z.mul/0),
+                      Z.mul/1),
                   [
                     Constant
                       ((5,
@@ -137,9 +137,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n2, [ ], [ ], Some Type (Z/0)),
+      ((n2, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((7, Effect ([ ], .)), Variable ((7, Effect ([ ], .)), Z.sub/0),
+          ((7, Effect ([ ], .)), Variable ((7, Effect ([ ], .)), Z.sub/1),
             [
               Apply
                 ((7, Effect ([ ], .)),
@@ -149,7 +149,7 @@
                         ([
                         ],
                           .)),
-                      Z.add/0),
+                      Z.add/1),
                   [
                     Apply
                       ((7,
@@ -163,7 +163,7 @@
                               ([
                               ],
                                 .)),
-                            Z.abs/0),
+                            Z.abs/1),
                         [
                           Constant
                             ((7,
@@ -189,7 +189,7 @@
                         ([
                         ],
                           .)),
-                      Z.mul/0),
+                      Z.mul/1),
                   [
                     Apply
                       ((7,
@@ -203,7 +203,7 @@
                               ([
                               ],
                                 .)),
-                            Z.modulo/0),
+                            Z.modulo/1),
                         [
                           Apply
                             ((7,
@@ -217,7 +217,7 @@
                                     ([
                                     ],
                                       .)),
-                                  Z.div/0),
+                                  Z.div/1),
                               [
                                 Constant
                                   ((7,
@@ -257,9 +257,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n3, [ ], [ ], Some Type (Z/0)),
+      ((n3, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), Z.pred/0),
+          ((9, Effect ([ ], .)), Variable ((9, Effect ([ ], .)), Z.pred/1),
             [
               Apply
                 ((9, Effect ([ ], .)),
@@ -269,7 +269,7 @@
                         ([
                         ],
                           .)),
-                      Z.succ/0),
+                      Z.succ/1),
                   [
                     Constant
                       ((9,
@@ -286,10 +286,10 @@
 (Value
   (non_rec, @.,
     [
-      ((n4, [ ], [ ], Some Type (Z/0)),
+      ((n4, [ ], [ ], Some Type (Z/1)),
         Apply
           ((11, Effect ([ ], .)),
-            Variable ((11, Effect ([ ], .)), Z.lxor/0),
+            Variable ((11, Effect ([ ], .)), Z.lxor/1),
             [
               Apply
                 ((11, Effect ([ ], .)),
@@ -299,7 +299,7 @@
                         ([
                         ],
                           .)),
-                      Z.lor/0),
+                      Z.lor/1),
                   [
                     Apply
                       ((11,
@@ -313,7 +313,7 @@
                               ([
                               ],
                                 .)),
-                            Z.land/0),
+                            Z.land/1),
                         [
                           Constant
                             ((11,
@@ -346,9 +346,9 @@
 (Value
   (non_rec, @.,
     [
-      ((n5, [ ], [ ], Some Type (Z/0)),
+      ((n5, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((13, Effect ([ ], .)), Variable ((13, Effect ([ ], .)), Z.add/0),
+          ((13, Effect ([ ], .)), Variable ((13, Effect ([ ], .)), Z.add/1),
             [
               Apply
                 ((13, Effect ([ ], .)),
@@ -358,7 +358,7 @@
                         ([
                         ],
                           .)),
-                      Z.shiftl/0),
+                      Z.shiftl/1),
                   [
                     Constant
                       ((13,
@@ -383,7 +383,7 @@
                         ([
                         ],
                           .)),
-                      Z.shiftr/0),
+                      Z.shiftr/1),
                   [
                     Constant
                       ((13,
@@ -407,10 +407,10 @@
 (Value
   (non_rec, @.,
     [
-      ((s, [ ], [ ], Some Type (string/0)),
+      ((s, [ ], [ ], Some Type (string/1)),
         Apply
           ((15, Effect ([ ], .)),
-            Variable ((15, Effect ([ ], .)), String.append/0),
+            Variable ((15, Effect ([ ], .)), String.append/1),
             [
               Constant ((15, Effect ([ ], .)), String("ghj"));
               Constant ((15, Effect ([ ], .)), String("klm"))
@@ -421,11 +421,11 @@
 (Value
   (non_rec, @.,
     [
-      ((c, [ ], [ ], Some Type (ascii/0)),
+      ((c, [ ], [ ], Some Type (ascii/1)),
         Apply
           ((17, Effect ([ ], .)),
             Variable
-              ((17, Effect ([ ], .)), OCaml.Pervasives.char_of_int/0),
+              ((17, Effect ([ ], .)), OCaml.Pervasives.char_of_int/1),
             [
               Apply
                 ((17, Effect ([ ], .)),
@@ -435,7 +435,7 @@
                         ([
                         ],
                           .)),
-                      Z.add/0),
+                      Z.add/1),
                   [
                     Apply
                       ((17,
@@ -449,7 +449,7 @@
                               ([
                               ],
                                 .)),
-                            OCaml.Pervasives.int_of_char/0),
+                            OCaml.Pervasives.int_of_char/1),
                         [
                           Constant
                             ((17,
@@ -474,10 +474,10 @@
 (Value
   (non_rec, @.,
     [
-      ((x, [ ], [ ], Some Type (unit/0)),
+      ((x, [ ], [ ], Some Type (unit/1)),
         Apply
           ((19, Effect ([ ], .)),
-            Variable ((19, Effect ([ ], .)), OCaml.Pervasives.ignore/0),
+            Variable ((19, Effect ([ ], .)), OCaml.Pervasives.ignore/1),
             [ Constant ((19, Effect ([ ], .)), Int(23)) ]))
     ]))
 
@@ -485,9 +485,9 @@
 (Value
   (non_rec, @.,
     [
-      ((p, [ ], [ ], Some Type (Z/0)),
+      ((p, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((21, Effect ([ ], .)), Variable ((21, Effect ([ ], .)), Z.add/0),
+          ((21, Effect ([ ], .)), Variable ((21, Effect ([ ], .)), Z.add/1),
             [
               Apply
                 ((21, Effect ([ ], .)),
@@ -497,7 +497,7 @@
                         ([
                         ],
                           .)),
-                      fst/0),
+                      fst/1),
                   [
                     Tuple
                       ((21,
@@ -528,7 +528,7 @@
                         ([
                         ],
                           .)),
-                      snd/0),
+                      snd/1),
                   [
                     Tuple
                       ((21,
@@ -558,13 +558,13 @@
 (Value
   (non_rec, @.,
     [
-      ((l, [ ], [ ], Some Type (list/0, Type (Z/0))),
+      ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Apply
           ((23, Effect ([ ], .)),
-            Variable ((23, Effect ([ ], .)), OCaml.Pervasives.app/0),
+            Variable ((23, Effect ([ ], .)), OCaml.Pervasives.app/1),
             [
               Constructor
-                ((23, Effect ([ ], .)), cons/0,
+                ((23, Effect ([ ], .)), cons/1,
                   Constant
                     ((23,
                       Effect
@@ -578,7 +578,7 @@
                         ([
                         ],
                           .)),
-                      cons/0,
+                      cons/1,
                       Constant
                         ((23,
                           Effect
@@ -592,9 +592,9 @@
                             ([
                             ],
                               .)),
-                          []/0)));
+                          []/1)));
               Constructor
-                ((23, Effect ([ ], .)), cons/0,
+                ((23, Effect ([ ], .)), cons/1,
                   Constant
                     ((23,
                       Effect
@@ -608,7 +608,7 @@
                         ([
                         ],
                           .)),
-                      []/0))
+                      []/1))
             ]))
     ]))
 
@@ -616,9 +616,9 @@
 (Value
   (non_rec, @.,
     [
-      ((y, [ ], [ ], Some Type (Z/0)),
+      ((y, [ ], [ ], Some Type (Z/1)),
         Apply
-          ((25, Effect ([ ], .)), Variable ((25, Effect ([ ], .)), apply/0),
+          ((25, Effect ([ ], .)), Variable ((25, Effect ([ ], .)), apply/1),
             [
               Function
                 ((25, Effect ([ ], . -> .)), n,
@@ -634,7 +634,7 @@
                             ([
                             ],
                               .)),
-                          Z.add/0),
+                          Z.add/1),
                       [
                         Variable
                           ((25,

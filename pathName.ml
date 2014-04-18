@@ -129,6 +129,7 @@ let convert (x : t) : t =
   (* Operations on format strings *)
   (* Program termination *)
 
+(*
   (* List *)
   | { path = ["List"]; base = "length" } -> { path = ["OCaml"; "List"]; base = "length" }
   | { path = ["List"]; base = "hd" } -> { path = ["OCaml"; "List"]; base = "hd" }
@@ -164,6 +165,7 @@ let convert (x : t) : t =
   (* Association lists *)
   (* Lists of pairs *)
   (* Sorting *)
+*)
 
   (*| { path = ["Pervasives"]; base = base } ->
     (match base with
