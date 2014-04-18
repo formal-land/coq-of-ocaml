@@ -1,25 +1,80 @@
-Interface Ex23 =
-  Var (n, [ ])
-  Var (c1, [ ])
-  Var (c2, [ ])
-  Var (c3, [ ])
-  Var (c4, [ ])
-  Var (s, [ ])
-  Var (b1, [ ])
-  Var (b2, [ ])
-  Var (u, [ ])
-  Var (l1, [ ])
-  Var (l2, [ ])
-  Var (o, [ ])
-  Var (e_match, [ [ OCaml.Match_failure ] ])
-  Var (e_assert, [ [ OCaml.Assert_failure ] ])
-  Var (e_invalid, [ [ OCaml.Invalid_argument ] ])
-  Var (e_failure, [ [ OCaml.Failure ] ])
-  Var (e_not_found, [ [ OCaml.Not_found ] ])
-  Var (e_out_of_mem, [ [ OCaml.Out_of_memory ] ])
-  Var (e_overflow, [ [ OCaml.Stack_overflow ] ])
-  Var (e_sys_err, [ [ OCaml.Sys_error ] ])
-  Var (e_EOF, [ [ OCaml.End_of_file ] ])
-  Var (e_div, [ [ OCaml.Division_by_zero ] ])
-  Var (e_sys_blocked, [ [ OCaml.Sys_blocked_io ] ])
-  Var (e_rec_module, [ [ OCaml.Undefined_recursive_module ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex23",
+      [
+        [ "Declaration", [ "Var", [ "n", [] ] ] ],
+        [ "Declaration", [ "Var", [ "c1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "c2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "c3", [] ] ] ],
+        [ "Declaration", [ "Var", [ "c4", [] ] ] ],
+        [ "Declaration", [ "Var", [ "s", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "u", [] ] ] ],
+        [ "Declaration", [ "Var", [ "l1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "l2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "o", [] ] ] ],
+        [
+          "Declaration",
+          [ "Var", [ "e_match", [ [ [ "OCaml", "Match_failure" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_assert", [ [ [ "OCaml", "Assert_failure" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_invalid", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_failure", [ [ [ "OCaml", "Failure" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_not_found", [ [ [ "OCaml", "Not_found" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_out_of_mem", [ [ [ "OCaml", "Out_of_memory" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_overflow", [ [ [ "OCaml", "Stack_overflow" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_sys_err", [ [ [ "OCaml", "Sys_error" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_EOF", [ [ [ "OCaml", "End_of_file" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_div", [ [ [ "OCaml", "Division_by_zero" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "e_sys_blocked", [ [ [ "OCaml", "Sys_blocked_io" ] ] ] ]
+          ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [
+              "e_rec_module",
+              [ [ [ "OCaml", "Undefined_recursive_module" ] ] ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

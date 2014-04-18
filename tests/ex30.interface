@@ -1,9 +1,39 @@
-Interface Ex30 =
-  Interface M =
-    Var (f, [ [ OCaml.Failure ] ])
-  Interface N =
-    Var (f, [ [ OCaml.Assert_failure ] ])
-    Var (x, [ ])
-    Var (y, [ ])
-  Var (b, [ ])
-  Var (b', [ ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex30",
+      [
+        [
+          "Interface",
+          [
+            "M",
+            [
+              [
+                "Declaration",
+                [ "Var", [ "f", [ [ [ "OCaml", "Failure" ] ] ] ] ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "Interface",
+          [
+            "N",
+            [
+              [
+                "Declaration",
+                [ "Var", [ "f", [ [ [ "OCaml", "Assert_failure" ] ] ] ] ]
+              ],
+              [ "Declaration", [ "Var", [ "x", [] ] ] ],
+              [ "Declaration", [ "Var", [ "y", [] ] ] ]
+            ]
+          ]
+        ],
+        [ "Declaration", [ "Var", [ "b", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b'", [] ] ] ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

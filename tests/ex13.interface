@@ -1,6 +1,56 @@
-Interface Ex13 =
-  Var (tail, [ [ OCaml.Failure ] ])
-  Var (print_list_rec, [ [ ]; [ IO; NonTermination ] ])
-  Var (print_list, [ [ Counter; IO; NonTermination ] ])
-  Var (f, [ [ Counter; IO; NonTermination ] ])
-  Var (x, [ [ Counter; IO; NonTermination; OCaml.Failure ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex13",
+      [
+        [
+          "Declaration",
+          [ "Var", [ "tail", [ [ [ "OCaml", "Failure" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "print_list_rec", [ [], [ [ "IO" ], [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [
+              "print_list",
+              [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ]
+            ]
+          ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "f", [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [
+              "x",
+              [
+                [
+                  [ "Counter" ],
+                  [ "IO" ],
+                  [ "NonTermination" ],
+                  [ "OCaml", "Failure" ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

@@ -1,3 +1,22 @@
-Interface Ex20 =
-  Var (sums_rec, [ [ ]; [ Counter; NonTermination ] ])
-  Var (sums, [ [ Counter; NonTermination ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex20",
+      [
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "sums_rec", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "sums", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

@@ -1,5 +1,22 @@
-Interface Ex31 =
-  Interface M =
-    Var (b, [ ])
-    Var (n, [ ])
-  Var (n, [ ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex31",
+      [
+        [
+          "Interface",
+          [
+            "M",
+            [
+              [ "Declaration", [ "Var", [ "b", [] ] ] ],
+              [ "Declaration", [ "Var", [ "n", [] ] ] ]
+            ]
+          ]
+        ],
+        [ "Declaration", [ "Var", [ "n", [] ] ] ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

@@ -1,2 +1,15 @@
-Interface Ex09 =
-  Var (l, [ [ Counter; NonTermination ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex09",
+      [
+        [
+          "Declaration",
+          [ "Var", [ "l", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

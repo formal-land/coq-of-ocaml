@@ -33,8 +33,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
           !^ "Local Open Scope Z_scope.";
           !^ "Import ListNotations."]) ^^ newline ^^
         Structure.to_coq (monadise structure)
-      | "interface" -> Interface.pp @@ interface structure module_name
-      | "json" ->
+      | "interface" ->
         !^ (Interface.to_json_string (interface structure module_name))
       | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
     to_stdout 80 2 document;

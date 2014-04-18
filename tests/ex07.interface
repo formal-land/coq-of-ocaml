@@ -1,13 +1,23 @@
-Interface Ex07 =
-  Var (b, [ ])
-  Var (n1, [ ])
-  Var (n2, [ ])
-  Var (n3, [ ])
-  Var (n4, [ ])
-  Var (n5, [ ])
-  Var (s, [ ])
-  Var (c, [ ])
-  Var (x, [ ])
-  Var (p, [ ])
-  Var (l, [ ])
-  Var (y, [ ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex07",
+      [
+        [ "Declaration", [ "Var", [ "b", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n3", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n4", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n5", [] ] ] ],
+        [ "Declaration", [ "Var", [ "s", [] ] ] ],
+        [ "Declaration", [ "Var", [ "c", [] ] ] ],
+        [ "Declaration", [ "Var", [ "x", [] ] ] ],
+        [ "Declaration", [ "Var", [ "p", [] ] ] ],
+        [ "Declaration", [ "Var", [ "l", [] ] ] ],
+        [ "Declaration", [ "Var", [ "y", [] ] ] ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

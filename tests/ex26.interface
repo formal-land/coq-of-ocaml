@@ -1,6 +1,28 @@
-Interface Ex26 =
-  Var (f_map, [ ])
-  Var (f_map2_rec, [ [ ]; [ ]; [ NonTermination ] ])
-  Var (f_map2, [ [ ]; [ Counter; NonTermination ] ])
-  Var (n, [ ])
-  Var (n2, [ [ Counter; NonTermination ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex26",
+      [
+        [ "Declaration", [ "Var", [ "f_map", [] ] ] ],
+        [
+          "Declaration",
+          [ "Var", [ "f_map2_rec", [ [], [], [ [ "NonTermination" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "f_map2", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [ "Declaration", [ "Var", [ "n", [] ] ] ],
+        [
+          "Declaration",
+          [ "Var", [ "n2", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

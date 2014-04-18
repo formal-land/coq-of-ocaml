@@ -1,3 +1,19 @@
-Interface Ex21 =
-  Var (f, [ [ IO ]; [ OCaml.Failure ] ])
-  Var (r, [ [ IO; OCaml.Failure ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex21",
+      [
+        [
+          "Declaration",
+          [ "Var", [ "f", [ [ [ "IO" ] ], [ [ "OCaml", "Failure" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "r", [ [ [ "IO" ], [ "OCaml", "Failure" ] ] ] ] ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

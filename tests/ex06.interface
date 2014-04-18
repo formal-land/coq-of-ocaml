@@ -1,7 +1,38 @@
-Interface Ex06 =
-  Var (map_rec, [ [ ]; [ ]; [ NonTermination ] ])
-  Var (map, [ [ ]; [ Counter; NonTermination ] ])
-  Var (fold_rec, [ [ ]; [ ]; [ ]; [ NonTermination ] ])
-  Var (fold, [ [ ]; [ ]; [ Counter; NonTermination ] ])
-  Var (l, [ ])
-  Var (n, [ [ ]; [ Counter; NonTermination ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex06",
+      [
+        [
+          "Declaration",
+          [ "Var", [ "map_rec", [ [], [], [ [ "NonTermination" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "map", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "fold_rec", [ [], [], [], [ [ "NonTermination" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "fold", [ [], [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [ "Declaration", [ "Var", [ "l", [] ] ] ],
+        [
+          "Declaration",
+          [ "Var", [ "n", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

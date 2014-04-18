@@ -1,62 +1,84 @@
-Interface Ex24 =
-  Var (e_invalid, [ [ OCaml.Invalid_argument ] ])
-  Var (e_failure, [ [ OCaml.Failure ] ])
-  Var (e_exit1, [ [ OCaml.Pervasives.Exit ] ])
-  Var (e_exit2, [ [ OCaml.Pervasives.Exit ] ])
-  Var (b_eq, [ ])
-  Var (b_neq1, [ ])
-  Var (b_neq2, [ ])
-  Var (b_lt, [ ])
-  Var (b_gt, [ ])
-  Var (b_le, [ ])
-  Var (b_ge, [ ])
-  Var (comp, [ ])
-  Var (n_min, [ ])
-  Var (n_max, [ ])
-  Var (b_not, [ ])
-  Var (b_and, [ ])
-  Var (b_and_old, [ ])
-  Var (b_or, [ ])
-  Var (b_or_old, [ ])
-  Var (app1, [ ])
-  Var (app2, [ ])
-  Var (n_neg1, [ ])
-  Var (n_neg2, [ ])
-  Var (n_pos1, [ ])
-  Var (n_pos2, [ ])
-  Var (n_succ, [ ])
-  Var (n_pred, [ ])
-  Var (n_plus, [ ])
-  Var (n_minus, [ ])
-  Var (n_times, [ ])
-  Var (n_div, [ ])
-  Var (n_mod, [ ])
-  Var (n_abs, [ ])
-  Var (n_land, [ ])
-  Var (n_lor, [ ])
-  Var (n_lxor, [ ])
-  Var (n_lsl, [ ])
-  Var (n_lsr, [ ])
-  Var (ss, [ ])
-  Var (n_char, [ ])
-  Var (char_n, [ ])
-  Var (i, [ ])
-  Var (s_bool, [ ])
-  Var (bool_s, [ ])
-  Var (s_n, [ ])
-  Var (n_s, [ ])
-  Var (n1, [ ])
-  Var (n2, [ ])
-  Var (ll, [ ])
-  Var (p_c, [ [ IO ] ])
-  Var (p_s, [ [ IO ] ])
-  Var (p_n, [ [ IO ] ])
-  Var (p_endline, [ [ IO ] ])
-  Var (p_newline, [ [ IO ] ])
-  Var (perr_c, [ [ IO ] ])
-  Var (perr_s, [ [ IO ] ])
-  Var (perr_n, [ [ IO ] ])
-  Var (perr_endline, [ [ IO ] ])
-  Var (perr_newline, [ [ IO ] ])
-  Var (r_s, [ [ IO ] ])
-  Var (r_n, [ [ IO ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex24",
+      [
+        [
+          "Declaration",
+          [ "Var", [ "e_invalid", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_failure", [ [ [ "OCaml", "Failure" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_exit1", [ [ [ "OCaml", "Pervasives", "Exit" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "e_exit2", [ [ [ "OCaml", "Pervasives", "Exit" ] ] ] ] ]
+        ],
+        [ "Declaration", [ "Var", [ "b_eq", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_neq1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_neq2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_lt", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_gt", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_le", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_ge", [] ] ] ],
+        [ "Declaration", [ "Var", [ "comp", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_min", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_max", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_not", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_and", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_and_old", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_or", [] ] ] ],
+        [ "Declaration", [ "Var", [ "b_or_old", [] ] ] ],
+        [ "Declaration", [ "Var", [ "app1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "app2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_neg1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_neg2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_pos1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_pos2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_succ", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_pred", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_plus", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_minus", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_times", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_div", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_mod", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_abs", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_land", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_lor", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_lxor", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_lsl", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_lsr", [] ] ] ],
+        [ "Declaration", [ "Var", [ "ss", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_char", [] ] ] ],
+        [ "Declaration", [ "Var", [ "char_n", [] ] ] ],
+        [ "Declaration", [ "Var", [ "i", [] ] ] ],
+        [ "Declaration", [ "Var", [ "s_bool", [] ] ] ],
+        [ "Declaration", [ "Var", [ "bool_s", [] ] ] ],
+        [ "Declaration", [ "Var", [ "s_n", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n_s", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n1", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n2", [] ] ] ],
+        [ "Declaration", [ "Var", [ "ll", [] ] ] ],
+        [ "Declaration", [ "Var", [ "p_c", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "p_s", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "p_n", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "p_endline", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "p_newline", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "perr_c", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "perr_s", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "perr_n", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "perr_endline", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "perr_newline", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "r_s", [ [ [ "IO" ] ] ] ] ] ],
+        [ "Declaration", [ "Var", [ "r_n", [ [ [ "IO" ] ] ] ] ] ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

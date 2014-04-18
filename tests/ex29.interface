@@ -1,9 +1,55 @@
-Interface Ex29 =
-  Var (odd_length, [ ])
-  Var (even_length, [ ])
-  Var (odd_length_with_print, [ [ IO ] ])
-  Var (even_length_with_print, [ [ IO ] ])
-  Var (odd_length_free_rec, [ [ ]; [ NonTermination ] ])
-  Var (even_length_free_rec, [ [ ]; [ NonTermination ] ])
-  Var (odd_length_free, [ [ Counter; NonTermination ] ])
-  Var (even_length_free, [ [ Counter; NonTermination ] ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex29",
+      [
+        [ "Declaration", [ "Var", [ "odd_length", [] ] ] ],
+        [ "Declaration", [ "Var", [ "even_length", [] ] ] ],
+        [
+          "Declaration",
+          [ "Var", [ "odd_length_with_print", [ [ [ "IO" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [ "Var", [ "even_length_with_print", [ [ [ "IO" ] ] ] ] ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "odd_length_free_rec", [ [], [ [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [ "even_length_free_rec", [ [], [ [ "NonTermination" ] ] ] ]
+          ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [
+              "odd_length_free",
+              [ [ [ "Counter" ], [ "NonTermination" ] ] ]
+            ]
+          ]
+        ],
+        [
+          "Declaration",
+          [
+            "Var",
+            [
+              "even_length_free",
+              [ [ [ "Counter" ], [ "NonTermination" ] ] ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ],
+  "version": "1"
+}

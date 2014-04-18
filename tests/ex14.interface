@@ -1,2 +1,7 @@
-Interface Ex14 =
-  Var (f, [ ])
+{
+  "content": [
+    "Interface",
+    [ "Ex14", [ [ "Declaration", [ "Var", [ "f", [] ] ] ] ] ]
+  ],
+  "version": "1"
+}

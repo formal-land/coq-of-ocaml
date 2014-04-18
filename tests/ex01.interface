@@ -1,3 +1,13 @@
-Interface Ex01 =
-  Var (f, [ ])
-  Var (n, [ ])
+{
+  "content": [
+    "Interface",
+    [
+      "Ex01",
+      [
+        [ "Declaration", [ "Var", [ "f", [] ] ] ],
+        [ "Declaration", [ "Var", [ "n", [] ] ] ]
+      ]
+    ]
+  ],
+  "version": "1"
+}
