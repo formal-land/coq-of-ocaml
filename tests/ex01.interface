@@ -1,13 +1,7 @@
 {
   "content": [
     "Interface",
-    [
-      "Ex01",
-      [
-        [ "Declaration", [ "Var", [ "f", [] ] ] ],
-        [ "Declaration", [ "Var", [ "n", [] ] ] ]
-      ]
-    ]
+    [ "Ex01", [ [ "Var", [ "f", [] ] ], [ "Var", [ "n", [] ] ] ] ]
   ],
   "version": "1"
 }

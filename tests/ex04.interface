@@ -4,15 +4,15 @@
     [
       "Ex04",
       [
-        [ "Declaration", [ "Var", [ "u", [] ] ] ],
-        [ "Declaration", [ "Var", [ "l1", [] ] ] ],
-        [ "Declaration", [ "Var", [ "l2", [] ] ] ],
-        [ "Declaration", [ "Var", [ "l3", [] ] ] ],
-        [ "Declaration", [ "Var", [ "o1", [] ] ] ],
-        [ "Declaration", [ "Var", [ "o2", [] ] ] ],
-        [ "Declaration", [ "Var", [ "c", [] ] ] ],
-        [ "Declaration", [ "Var", [ "s1", [] ] ] ],
-        [ "Declaration", [ "Var", [ "s2", [] ] ] ]
+        [ "Var", [ "u", [] ] ],
+        [ "Var", [ "l1", [] ] ],
+        [ "Var", [ "l2", [] ] ],
+        [ "Var", [ "l3", [] ] ],
+        [ "Var", [ "o1", [] ] ],
+        [ "Var", [ "o2", [] ] ],
+        [ "Var", [ "c", [] ] ],
+        [ "Var", [ "s1", [] ] ],
+        [ "Var", [ "s2", [] ] ]
       ]
     ]
   ],

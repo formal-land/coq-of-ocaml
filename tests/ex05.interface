@@ -1,7 +1,4 @@
 {
-  "content": [
-    "Interface",
-    [ "Ex05", [ [ "Declaration", [ "Var", [ "n", [] ] ] ] ] ]
-  ],
+  "content": [ "Interface", [ "Ex05", [ [ "Var", [ "n", [] ] ] ] ] ],
   "version": "1"
 }

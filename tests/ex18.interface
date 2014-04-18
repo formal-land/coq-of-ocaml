@@ -4,19 +4,16 @@
     [
       "Ex18",
       [
-        [ "Declaration", [ "Descriptor", "r" ] ],
-        [ "Declaration", [ "Var", [ "read_r", [ [ [ "r" ] ] ] ] ] ],
-        [ "Declaration", [ "Var", [ "write_r", [ [ [ "r" ] ] ] ] ] ],
-        [ "Declaration", [ "Var", [ "plus_one", [ [ [ "r" ] ] ] ] ] ],
-        [ "Declaration", [ "Descriptor", "s" ] ],
-        [ "Declaration", [ "Var", [ "read_s", [ [ [ "s" ] ] ] ] ] ],
-        [ "Declaration", [ "Var", [ "write_s", [ [ [ "s" ] ] ] ] ] ],
-        [
-          "Declaration",
-          [ "Var", [ "fail", [ [ [ "OCaml", "Failure" ], [ "s" ] ] ] ] ]
-        ],
-        [ "Declaration", [ "Var", [ "reset", [ [ [ "r" ] ] ] ] ] ],
-        [ "Declaration", [ "Var", [ "incr", [ [ [ "r" ] ] ] ] ] ]
+        [ "Descriptor", "r" ],
+        [ "Var", [ "read_r", [ [ [ "r" ] ] ] ] ],
+        [ "Var", [ "write_r", [ [ [ "r" ] ] ] ] ],
+        [ "Var", [ "plus_one", [ [ [ "r" ] ] ] ] ],
+        [ "Descriptor", "s" ],
+        [ "Var", [ "read_s", [ [ [ "s" ] ] ] ] ],
+        [ "Var", [ "write_s", [ [ [ "s" ] ] ] ] ],
+        [ "Var", [ "fail", [ [ [ "OCaml", "Failure" ], [ "s" ] ] ] ] ],
+        [ "Var", [ "reset", [ [ [ "r" ] ] ] ] ],
+        [ "Var", [ "incr", [ [ [ "r" ] ] ] ] ]
       ]
     ]
   ],

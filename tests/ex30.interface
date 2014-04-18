@@ -6,32 +6,21 @@
       [
         [
           "Interface",
-          [
-            "M",
-            [
-              [
-                "Declaration",
-                [ "Var", [ "f", [ [ [ "OCaml", "Failure" ] ] ] ] ]
-              ]
-            ]
-          ]
+          [ "M", [ [ "Var", [ "f", [ [ [ "OCaml", "Failure" ] ] ] ] ] ] ]
         ],
         [
           "Interface",
           [
             "N",
             [
-              [
-                "Declaration",
-                [ "Var", [ "f", [ [ [ "OCaml", "Assert_failure" ] ] ] ] ]
-              ],
-              [ "Declaration", [ "Var", [ "x", [] ] ] ],
-              [ "Declaration", [ "Var", [ "y", [] ] ] ]
+              [ "Var", [ "f", [ [ [ "OCaml", "Assert_failure" ] ] ] ] ],
+              [ "Var", [ "x", [] ] ],
+              [ "Var", [ "y", [] ] ]
             ]
           ]
         ],
-        [ "Declaration", [ "Var", [ "b", [] ] ] ],
-        [ "Declaration", [ "Var", [ "b'", [] ] ] ]
+        [ "Var", [ "b", [] ] ],
+        [ "Var", [ "b'", [] ] ]
       ]
     ]
   ],

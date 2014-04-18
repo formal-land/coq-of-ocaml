@@ -1,13 +1,7 @@
 {
   "content": [
     "Interface",
-    [
-      "Ex28",
-      [
-        [ "Declaration", [ "Var", [ "map", [] ] ] ],
-        [ "Declaration", [ "Var", [ "map2", [] ] ] ]
-      ]
-    ]
+    [ "Ex28", [ [ "Var", [ "map", [] ] ], [ "Var", [ "map2", [] ] ] ] ]
   ],
   "version": "1"
 }

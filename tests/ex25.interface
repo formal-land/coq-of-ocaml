@@ -4,49 +4,34 @@
     [
       "Ex25",
       [
-        [ "Declaration", [ "Var", [ "l1", [] ] ] ],
-        [ "Declaration", [ "Var", [ "l2", [] ] ] ],
-        [ "Declaration", [ "Var", [ "l3", [] ] ] ],
-        [ "Declaration", [ "Var", [ "s1", [] ] ] ],
-        [ "Declaration", [ "Var", [ "s2", [] ] ] ],
-        [ "Declaration", [ "Var", [ "h", [ [ [ "OCaml", "Failure" ] ] ] ] ] ],
-        [ "Declaration", [ "Var", [ "t", [ [ [ "OCaml", "Failure" ] ] ] ] ] ],
+        [ "Var", [ "l1", [] ] ],
+        [ "Var", [ "l2", [] ] ],
+        [ "Var", [ "l3", [] ] ],
+        [ "Var", [ "s1", [] ] ],
+        [ "Var", [ "s2", [] ] ],
+        [ "Var", [ "h", [ [ [ "OCaml", "Failure" ] ] ] ] ],
+        [ "Var", [ "t", [ [ [ "OCaml", "Failure" ] ] ] ] ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
-            [
-              "x",
-              [ [ [ "OCaml", "Failure" ], [ "OCaml", "Invalid_argument" ] ] ]
-            ]
+            "x",
+            [ [ [ "OCaml", "Failure" ], [ "OCaml", "Invalid_argument" ] ] ]
           ]
         ],
-        [ "Declaration", [ "Var", [ "rl", [] ] ] ],
-        [ "Declaration", [ "Var", [ "ll", [] ] ] ],
-        [ "Declaration", [ "Var", [ "rll", [] ] ] ],
-        [ "Declaration", [ "Var", [ "lc", [] ] ] ],
-        [ "Declaration", [ "Var", [ "lf", [] ] ] ],
-        [ "Declaration", [ "Var", [ "m", [] ] ] ],
-        [ "Declaration", [ "Var", [ "mi", [] ] ] ],
-        [ "Declaration", [ "Var", [ "rm", [] ] ] ],
-        [ "Declaration", [ "Var", [ "fl", [] ] ] ],
-        [ "Declaration", [ "Var", [ "fr", [] ] ] ],
-        [
-          "Declaration",
-          [ "Var", [ "m2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
-          [ "Var", [ "rm2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
-          [ "Var", [ "fl2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
-          [ "Var", [ "fr2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
-        ]
+        [ "Var", [ "rl", [] ] ],
+        [ "Var", [ "ll", [] ] ],
+        [ "Var", [ "rll", [] ] ],
+        [ "Var", [ "lc", [] ] ],
+        [ "Var", [ "lf", [] ] ],
+        [ "Var", [ "m", [] ] ],
+        [ "Var", [ "mi", [] ] ],
+        [ "Var", [ "rm", [] ] ],
+        [ "Var", [ "fl", [] ] ],
+        [ "Var", [ "fr", [] ] ],
+        [ "Var", [ "m2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
+        [ "Var", [ "rm2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
+        [ "Var", [ "fl2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
+        [ "Var", [ "fr2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
       ]
     ]
   ],

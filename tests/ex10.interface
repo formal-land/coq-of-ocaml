@@ -9,45 +9,24 @@
           [
             "List2",
             [
-              [ "Declaration", [ "Typ", "t" ] ],
-              [ "Declaration", [ "Constructor", "Nil" ] ],
-              [ "Declaration", [ "Constructor", "Cons" ] ],
+              [ "Typ", "t" ],
+              [ "Constructor", "Nil" ],
+              [ "Constructor", "Cons" ],
+              [ "Var", [ "sum_rec", [ [], [ [ "NonTermination" ] ] ] ] ],
               [
-                "Declaration",
-                [ "Var", [ "sum_rec", [ [], [ [ "NonTermination" ] ] ] ] ]
+                "Var",
+                [ "sum", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
               ],
+              [ "Var", [ "of_list_rec", [ [], [ [ "NonTermination" ] ] ] ] ],
               [
-                "Declaration",
-                [
-                  "Var",
-                  [ "sum", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-                ]
+                "Var",
+                [ "of_list", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
               ],
-              [
-                "Declaration",
-                [
-                  "Var",
-                  [ "of_list_rec", [ [], [ [ "NonTermination" ] ] ] ]
-                ]
-              ],
-              [
-                "Declaration",
-                [
-                  "Var",
-                  [ "of_list", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-                ]
-              ],
-              [
-                "Interface",
-                [ "Inside", [ [ "Declaration", [ "Var", [ "x", [] ] ] ] ] ]
-              ]
+              [ "Interface", [ "Inside", [ [ "Var", [ "x", [] ] ] ] ] ]
             ]
           ]
         ],
-        [
-          "Declaration",
-          [ "Var", [ "n", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
-        ]
+        [ "Var", [ "n", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
       ]
     ]
   ],

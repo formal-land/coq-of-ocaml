@@ -4,17 +4,11 @@
     [
       "Ex19",
       [
-        [ "Declaration", [ "Descriptor", "Error" ] ],
-        [ "Declaration", [ "Var", [ "Error", [ [ [ "Error" ] ] ] ] ] ],
-        [ "Declaration", [ "Var", [ "x1", [] ] ] ],
-        [
-          "Declaration",
-          [ "Var", [ "x2", [ [ [ "OCaml", "Failure" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
-          [ "Var", [ "x3", [ [ [ "OCaml", "Failure" ] ] ] ] ]
-        ]
+        [ "Descriptor", "Error" ],
+        [ "Var", [ "Error", [ [ [ "Error" ] ] ] ] ],
+        [ "Var", [ "x1", [] ] ],
+        [ "Var", [ "x2", [ [ [ "OCaml", "Failure" ] ] ] ] ],
+        [ "Var", [ "x3", [ [ [ "OCaml", "Failure" ] ] ] ] ]
       ]
     ]
   ],

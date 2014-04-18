@@ -4,189 +4,135 @@
     [
       "Ex27",
       [
-        [ "Declaration", [ "Var", [ "length_aux", [] ] ] ],
-        [ "Declaration", [ "Var", [ "length", [] ] ] ],
+        [ "Var", [ "length_aux", [] ] ],
+        [ "Var", [ "length", [] ] ],
+        [ "Var", [ "hd", [ [ [ "OCaml", "Failure" ] ] ] ] ],
+        [ "Var", [ "tl", [ [ [ "OCaml", "Failure" ] ] ] ] ],
         [
-          "Declaration",
-          [ "Var", [ "hd", [ [ [ "OCaml", "Failure" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
-          [ "Var", [ "tl", [ [ [ "OCaml", "Failure" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
+          "Var",
           [
-            "Var",
+            "nth",
             [
-              "nth",
-              [
-                [],
-                [ [ "OCaml", "Failure" ], [ "OCaml", "Invalid_argument" ] ]
-              ]
+              [],
+              [ [ "OCaml", "Failure" ], [ "OCaml", "Invalid_argument" ] ]
             ]
           ]
         ],
-        [ "Declaration", [ "Var", [ "append", [] ] ] ],
-        [ "Declaration", [ "Var", [ "rev_append", [] ] ] ],
-        [ "Declaration", [ "Var", [ "rev", [] ] ] ],
-        [ "Declaration", [ "Var", [ "flatten", [] ] ] ],
-        [ "Declaration", [ "Var", [ "concat", [] ] ] ],
-        [ "Declaration", [ "Var", [ "map", [] ] ] ],
-        [ "Declaration", [ "Var", [ "mapi_aux", [] ] ] ],
-        [ "Declaration", [ "Var", [ "mapi", [] ] ] ],
-        [ "Declaration", [ "Var", [ "rev_map", [] ] ] ],
-        [ "Declaration", [ "Var", [ "iter", [] ] ] ],
-        [ "Declaration", [ "Var", [ "iteri_aux", [] ] ] ],
-        [ "Declaration", [ "Var", [ "iteri", [] ] ] ],
-        [ "Declaration", [ "Var", [ "fold_left", [] ] ] ],
-        [ "Declaration", [ "Var", [ "fold_right", [] ] ] ],
+        [ "Var", [ "append", [] ] ],
+        [ "Var", [ "rev_append", [] ] ],
+        [ "Var", [ "rev", [] ] ],
+        [ "Var", [ "flatten", [] ] ],
+        [ "Var", [ "concat", [] ] ],
+        [ "Var", [ "map", [] ] ],
+        [ "Var", [ "mapi_aux", [] ] ],
+        [ "Var", [ "mapi", [] ] ],
+        [ "Var", [ "rev_map", [] ] ],
+        [ "Var", [ "iter", [] ] ],
+        [ "Var", [ "iteri_aux", [] ] ],
+        [ "Var", [ "iteri", [] ] ],
+        [ "Var", [ "fold_left", [] ] ],
+        [ "Var", [ "fold_right", [] ] ],
         [
-          "Declaration",
+          "Var",
+          [ "map2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
+        ],
+        [
+          "Var",
+          [ "rev_map2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
+        ],
+        [
+          "Var",
+          [ "iter2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
+        ],
+        [
+          "Var",
           [
-            "Var",
-            [ "map2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
+            "fold_left2",
+            [ [], [], [], [ [ "OCaml", "Invalid_argument" ] ] ]
           ]
         ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
-            [ "rev_map2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
+            "fold_right2",
+            [ [], [], [], [ [ "OCaml", "Invalid_argument" ] ] ]
           ]
         ],
+        [ "Var", [ "for_all", [] ] ],
+        [ "Var", [ "_exists", [] ] ],
         [
-          "Declaration",
-          [
-            "Var",
-            [ "iter2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
-          ]
+          "Var",
+          [ "for_all2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
         ],
         [
-          "Declaration",
-          [
-            "Var",
-            [
-              "fold_left2",
-              [ [], [], [], [ [ "OCaml", "Invalid_argument" ] ] ]
-            ]
-          ]
+          "Var",
+          [ "_exists2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
         ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [
-              "fold_right2",
-              [ [], [], [], [ [ "OCaml", "Invalid_argument" ] ] ]
-            ]
-          ]
-        ],
-        [ "Declaration", [ "Var", [ "for_all", [] ] ] ],
-        [ "Declaration", [ "Var", [ "_exists", [] ] ] ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [ "for_all2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
-          ]
-        ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [ "_exists2", [ [], [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
-          ]
-        ],
-        [
-          "Declaration",
-          [ "Var", [ "find", [ [], [ [ "OCaml", "Not_found" ] ] ] ] ]
-        ],
-        [ "Declaration", [ "Var", [ "find_all", [] ] ] ],
-        [ "Declaration", [ "Var", [ "filter", [] ] ] ],
-        [ "Declaration", [ "Var", [ "partition", [] ] ] ],
-        [ "Declaration", [ "Var", [ "split", [] ] ] ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [ "combine", [ [], [ [ "OCaml", "Invalid_argument" ] ] ] ]
-          ]
-        ],
-        [ "Declaration", [ "Var", [ "merge", [] ] ] ],
-        [
-          "Declaration",
-          [ "Var", [ "chop", [ [], [ [ "OCaml", "Assert_failure" ] ] ] ] ]
-        ],
+        [ "Var", [ "find", [ [], [ [ "OCaml", "Not_found" ] ] ] ] ],
+        [ "Var", [ "find_all", [] ] ],
+        [ "Var", [ "filter", [] ] ],
+        [ "Var", [ "partition", [] ] ],
+        [ "Var", [ "split", [] ] ],
+        [ "Var", [ "combine", [ [], [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
+        [ "Var", [ "merge", [] ] ],
+        [ "Var", [ "chop", [ [], [ [ "OCaml", "Assert_failure" ] ] ] ] ],
         [
           "Interface",
           [
             "StableSort",
             [
-              [ "Declaration", [ "Var", [ "rev_merge", [] ] ] ],
-              [ "Declaration", [ "Var", [ "rev_merge_rev", [] ] ] ],
+              [ "Var", [ "rev_merge", [] ] ],
+              [ "Var", [ "rev_merge_rev", [] ] ],
               [
-                "Declaration",
+                "Var",
                 [
-                  "Var",
+                  "sort_rec",
                   [
-                    "sort_rec",
+                    [],
+                    [],
+                    [],
+                    [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
+                  ]
+                ]
+              ],
+              [
+                "Var",
+                [
+                  "rev_sort_rec",
+                  [
+                    [],
+                    [],
+                    [],
+                    [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
+                  ]
+                ]
+              ],
+              [
+                "Var",
+                [
+                  "sort",
+                  [
+                    [],
+                    [],
                     [
-                      [],
-                      [],
-                      [],
-                      [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
+                      [ "Counter" ],
+                      [ "NonTermination" ],
+                      [ "OCaml", "Assert_failure" ]
                     ]
                   ]
                 ]
               ],
               [
-                "Declaration",
+                "Var",
                 [
-                  "Var",
+                  "rev_sort",
                   [
-                    "rev_sort_rec",
+                    [],
+                    [],
                     [
-                      [],
-                      [],
-                      [],
-                      [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
-                    ]
-                  ]
-                ]
-              ],
-              [
-                "Declaration",
-                [
-                  "Var",
-                  [
-                    "sort",
-                    [
-                      [],
-                      [],
-                      [
-                        [ "Counter" ],
-                        [ "NonTermination" ],
-                        [ "OCaml", "Assert_failure" ]
-                      ]
-                    ]
-                  ]
-                ]
-              ],
-              [
-                "Declaration",
-                [
-                  "Var",
-                  [
-                    "rev_sort",
-                    [
-                      [],
-                      [],
-                      [
-                        [ "Counter" ],
-                        [ "NonTermination" ],
-                        [ "OCaml", "Assert_failure" ]
-                      ]
+                      [ "Counter" ],
+                      [ "NonTermination" ],
+                      [ "OCaml", "Assert_failure" ]
                     ]
                   ]
                 ]
@@ -195,52 +141,43 @@
           ]
         ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
+            "stable_sort",
             [
-              "stable_sort",
+              [],
               [
-                [],
-                [
-                  [ "Counter" ],
-                  [ "NonTermination" ],
-                  [ "OCaml", "Assert_failure" ]
-                ]
+                [ "Counter" ],
+                [ "NonTermination" ],
+                [ "OCaml", "Assert_failure" ]
               ]
             ]
           ]
         ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
+            "sort",
             [
-              "sort",
+              [],
               [
-                [],
-                [
-                  [ "Counter" ],
-                  [ "NonTermination" ],
-                  [ "OCaml", "Assert_failure" ]
-                ]
+                [ "Counter" ],
+                [ "NonTermination" ],
+                [ "OCaml", "Assert_failure" ]
               ]
             ]
           ]
         ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
+            "fast_sort",
             [
-              "fast_sort",
+              [],
               [
-                [],
-                [
-                  [ "Counter" ],
-                  [ "NonTermination" ],
-                  [ "OCaml", "Assert_failure" ]
-                ]
+                [ "Counter" ],
+                [ "NonTermination" ],
+                [ "OCaml", "Assert_failure" ]
               ]
             ]
           ]
@@ -250,70 +187,58 @@
           [
             "SortUniq",
             [
-              [ "Declaration", [ "Var", [ "rev_merge", [] ] ] ],
-              [ "Declaration", [ "Var", [ "rev_merge_rev", [] ] ] ],
+              [ "Var", [ "rev_merge", [] ] ],
+              [ "Var", [ "rev_merge_rev", [] ] ],
               [
-                "Declaration",
+                "Var",
                 [
-                  "Var",
+                  "sort_rec",
                   [
-                    "sort_rec",
+                    [],
+                    [],
+                    [],
+                    [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
+                  ]
+                ]
+              ],
+              [
+                "Var",
+                [
+                  "rev_sort_rec",
+                  [
+                    [],
+                    [],
+                    [],
+                    [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
+                  ]
+                ]
+              ],
+              [
+                "Var",
+                [
+                  "sort",
+                  [
+                    [],
+                    [],
                     [
-                      [],
-                      [],
-                      [],
-                      [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
+                      [ "Counter" ],
+                      [ "NonTermination" ],
+                      [ "OCaml", "Assert_failure" ]
                     ]
                   ]
                 ]
               ],
               [
-                "Declaration",
+                "Var",
                 [
-                  "Var",
+                  "rev_sort",
                   [
-                    "rev_sort_rec",
+                    [],
+                    [],
                     [
-                      [],
-                      [],
-                      [],
-                      [ [ "NonTermination" ], [ "OCaml", "Assert_failure" ] ]
-                    ]
-                  ]
-                ]
-              ],
-              [
-                "Declaration",
-                [
-                  "Var",
-                  [
-                    "sort",
-                    [
-                      [],
-                      [],
-                      [
-                        [ "Counter" ],
-                        [ "NonTermination" ],
-                        [ "OCaml", "Assert_failure" ]
-                      ]
-                    ]
-                  ]
-                ]
-              ],
-              [
-                "Declaration",
-                [
-                  "Var",
-                  [
-                    "rev_sort",
-                    [
-                      [],
-                      [],
-                      [
-                        [ "Counter" ],
-                        [ "NonTermination" ],
-                        [ "OCaml", "Assert_failure" ]
-                      ]
+                      [ "Counter" ],
+                      [ "NonTermination" ],
+                      [ "OCaml", "Assert_failure" ]
                     ]
                   ]
                 ]
@@ -322,18 +247,15 @@
           ]
         ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
+            "sort_uniq",
             [
-              "sort_uniq",
+              [],
               [
-                [],
-                [
-                  [ "Counter" ],
-                  [ "NonTermination" ],
-                  [ "OCaml", "Assert_failure" ]
-                ]
+                [ "Counter" ],
+                [ "NonTermination" ],
+                [ "OCaml", "Assert_failure" ]
               ]
             ]
           ]

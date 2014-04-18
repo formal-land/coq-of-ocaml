@@ -4,47 +4,32 @@
     [
       "Ex13",
       [
+        [ "Var", [ "tail", [ [ [ "OCaml", "Failure" ] ] ] ] ],
         [
-          "Declaration",
-          [ "Var", [ "tail", [ [ [ "OCaml", "Failure" ] ] ] ] ]
+          "Var",
+          [ "print_list_rec", [ [], [ [ "IO" ], [ "NonTermination" ] ] ] ]
         ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
-            [ "print_list_rec", [ [], [ [ "IO" ], [ "NonTermination" ] ] ] ]
+            "print_list",
+            [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ]
           ]
         ],
         [
-          "Declaration",
+          "Var",
+          [ "f", [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ] ]
+        ],
+        [
+          "Var",
           [
-            "Var",
+            "x",
             [
-              "print_list",
-              [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ]
-            ]
-          ]
-        ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [ "f", [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ] ]
-          ]
-        ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [
-              "x",
               [
-                [
-                  [ "Counter" ],
-                  [ "IO" ],
-                  [ "NonTermination" ],
-                  [ "OCaml", "Failure" ]
-                ]
+                [ "Counter" ],
+                [ "IO" ],
+                [ "NonTermination" ],
+                [ "OCaml", "Failure" ]
               ]
             ]
           ]

@@ -6,15 +6,9 @@
       [
         [
           "Interface",
-          [
-            "M",
-            [
-              [ "Declaration", [ "Var", [ "b", [] ] ] ],
-              [ "Declaration", [ "Var", [ "n", [] ] ] ]
-            ]
-          ]
+          [ "M", [ [ "Var", [ "b", [] ] ], [ "Var", [ "n", [] ] ] ] ]
         ],
-        [ "Declaration", [ "Var", [ "n", [] ] ] ]
+        [ "Var", [ "n", [] ] ]
       ]
     ]
   ],

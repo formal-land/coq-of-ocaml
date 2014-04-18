@@ -3,12 +3,7 @@
     "Interface",
     [
       "Ex09",
-      [
-        [
-          "Declaration",
-          [ "Var", [ "l", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
-        ]
-      ]
+      [ [ "Var", [ "l", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ] ]
     ]
   ],
   "version": "1"

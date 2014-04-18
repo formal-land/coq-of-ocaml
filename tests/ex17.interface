@@ -4,58 +4,46 @@
     [
       "Ex17",
       [
-        [ "Declaration", [ "Descriptor", "Outside" ] ],
-        [ "Declaration", [ "Var", [ "Outside", [ [ [ "Outside" ] ] ] ] ] ],
-        [ "Declaration", [ "Var", [ "f", [ [ [ "Outside" ] ] ] ] ] ],
+        [ "Descriptor", "Outside" ],
+        [ "Var", [ "Outside", [ [ [ "Outside" ] ] ] ] ],
+        [ "Var", [ "f", [ [ [ "Outside" ] ] ] ] ],
         [
           "Interface",
           [
             "G",
             [
-              [ "Declaration", [ "Descriptor", "Inside" ] ],
+              [ "Descriptor", "Inside" ],
+              [ "Var", [ "Inside", [ [ [ "Inside" ] ] ] ] ],
+              [ "Var", [ "g", [ [ [ "Outside" ], [ "Inside" ] ] ] ] ]
+            ]
+          ]
+        ],
+        [
+          "Var",
+          [
+            "h_rec",
+            [
+              [],
               [
-                "Declaration",
-                [ "Var", [ "Inside", [ [ [ "Inside" ] ] ] ] ]
-              ],
-              [
-                "Declaration",
-                [ "Var", [ "g", [ [ [ "Outside" ], [ "Inside" ] ] ] ] ]
+                [ "IO" ],
+                [ "NonTermination" ],
+                [ "Outside" ],
+                [ "G", "Inside" ]
               ]
             ]
           ]
         ],
         [
-          "Declaration",
+          "Var",
           [
-            "Var",
+            "h",
             [
-              "h_rec",
               [
-                [],
-                [
-                  [ "IO" ],
-                  [ "NonTermination" ],
-                  [ "Outside" ],
-                  [ "G", "Inside" ]
-                ]
-              ]
-            ]
-          ]
-        ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [
-              "h",
-              [
-                [
-                  [ "Counter" ],
-                  [ "IO" ],
-                  [ "NonTermination" ],
-                  [ "Outside" ],
-                  [ "G", "Inside" ]
-                ]
+                [ "Counter" ],
+                [ "IO" ],
+                [ "NonTermination" ],
+                [ "Outside" ],
+                [ "G", "Inside" ]
               ]
             ]
           ]

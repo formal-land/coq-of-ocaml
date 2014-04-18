@@ -5,16 +5,10 @@
       "Ex20",
       [
         [
-          "Declaration",
-          [
-            "Var",
-            [ "sums_rec", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-          ]
+          "Var",
+          [ "sums_rec", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
         ],
-        [
-          "Declaration",
-          [ "Var", [ "sums", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
-        ]
+        [ "Var", [ "sums", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
       ]
     ]
   ],

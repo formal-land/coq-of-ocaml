@@ -4,14 +4,8 @@
     [
       "Ex21",
       [
-        [
-          "Declaration",
-          [ "Var", [ "f", [ [ [ "IO" ] ], [ [ "OCaml", "Failure" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
-          [ "Var", [ "r", [ [ [ "IO" ], [ "OCaml", "Failure" ] ] ] ] ]
-        ]
+        [ "Var", [ "f", [ [ [ "IO" ] ], [ [ "OCaml", "Failure" ] ] ] ] ],
+        [ "Var", [ "r", [ [ [ "IO" ], [ "OCaml", "Failure" ] ] ] ] ]
       ]
     ]
   ],

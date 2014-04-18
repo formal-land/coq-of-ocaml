@@ -4,11 +4,11 @@
     [
       "Ex02",
       [
-        [ "Declaration", [ "Var", [ "t0", [] ] ] ],
-        [ "Declaration", [ "Var", [ "t1", [] ] ] ],
-        [ "Declaration", [ "Var", [ "t2", [] ] ] ],
-        [ "Declaration", [ "Var", [ "f", [] ] ] ],
-        [ "Declaration", [ "Var", [ "t3", [] ] ] ]
+        [ "Var", [ "t0", [] ] ],
+        [ "Var", [ "t1", [] ] ],
+        [ "Var", [ "t2", [] ] ],
+        [ "Var", [ "f", [] ] ],
+        [ "Var", [ "t3", [] ] ]
       ]
     ]
   ],

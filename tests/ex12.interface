@@ -4,19 +4,13 @@
     [
       "Ex12",
       [
-        [ "Declaration", [ "Typ", "tree" ] ],
-        [ "Declaration", [ "Constructor", "Leaf" ] ],
-        [ "Declaration", [ "Constructor", "Node" ] ],
+        [ "Typ", "tree" ],
+        [ "Constructor", "Leaf" ],
+        [ "Constructor", "Node" ],
+        [ "Var", [ "find_rec", [ [], [], [ [ "NonTermination" ] ] ] ] ],
         [
-          "Declaration",
-          [ "Var", [ "find_rec", [ [], [], [ [ "NonTermination" ] ] ] ] ]
-        ],
-        [
-          "Declaration",
-          [
-            "Var",
-            [ "find", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-          ]
+          "Var",
+          [ "find", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
         ]
       ]
     ]

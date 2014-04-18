@@ -8,30 +8,26 @@
           "Interface",
           [
             "SizedString",
-            [
-              [ "Declaration", [ "Typ", "t" ] ],
-              [ "Declaration", [ "Field", "name" ] ],
-              [ "Declaration", [ "Field", "size" ] ]
-            ]
+            [ [ "Typ", "t" ], [ "Field", "name" ], [ "Field", "size" ] ]
           ]
         ],
-        [ "Declaration", [ "Var", [ "r", [] ] ] ],
-        [ "Declaration", [ "Var", [ "r'", [] ] ] ],
-        [ "Declaration", [ "Var", [ "s", [] ] ] ],
-        [ "Declaration", [ "Var", [ "f", [] ] ] ],
-        [ "Declaration", [ "Var", [ "b", [] ] ] ],
-        [ "Declaration", [ "Var", [ "b'", [] ] ] ],
+        [ "Var", [ "r", [] ] ],
+        [ "Var", [ "r'", [] ] ],
+        [ "Var", [ "s", [] ] ],
+        [ "Var", [ "f", [] ] ],
+        [ "Var", [ "b", [] ] ],
+        [ "Var", [ "b'", [] ] ],
         [
           "Interface",
           [
             "Point",
             [
-              [ "Declaration", [ "Typ", "t" ] ],
-              [ "Declaration", [ "Field", "x" ] ],
-              [ "Declaration", [ "Field", "y" ] ],
-              [ "Declaration", [ "Field", "z" ] ],
-              [ "Declaration", [ "Var", [ "p", [] ] ] ],
-              [ "Declaration", [ "Var", [ "b", [] ] ] ]
+              [ "Typ", "t" ],
+              [ "Field", "x" ],
+              [ "Field", "y" ],
+              [ "Field", "z" ],
+              [ "Var", [ "p", [] ] ],
+              [ "Var", [ "b", [] ] ]
             ]
           ]
         ]
