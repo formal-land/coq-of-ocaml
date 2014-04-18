@@ -201,7 +201,7 @@ module Open = struct
     nest (!^ "Open" ^^ separate (!^ ".") (List.map Name.pp o))
 
   let update_env (o : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    FullEnvi.open_module env o
+    FullEnvi.open_module o env
 
   (** Pretty-print an open construct to Coq. *)
   let to_coq (o : t): SmartPrint.t =
@@ -306,7 +306,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let name = Name.of_ident name in
       let env = FullEnvi.enter_module env in
       let (env, structures) = of_structure env structure in
-      let env = FullEnvi.leave_module env name in
+      let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, structures))
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
@@ -334,7 +334,7 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
     | Module (loc, name, defs) ->
       let env = FullEnvi.enter_module env in
       let (env, defs) = monadise_let_rec env defs in
-      let env = FullEnvi.leave_module env name in
+      let env = FullEnvi.leave_module name env in
       (env, [Module (loc, name, defs)]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
@@ -366,7 +366,7 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
     | Module (loc, name, defs) ->
       let env = FullEnvi.enter_module env in
       let (env, defs) = effects env defs in
-      let env = FullEnvi.leave_module env name in
+      let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, defs)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
@@ -405,7 +405,7 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
     | Open (loc, o) -> (Open.update_env o env, Open (loc, o))
     | Module (loc, name, defs) ->
       let (env, defs) = monadise (FullEnvi.enter_module env) defs in
-      (FullEnvi.leave_module env name, Module (loc, name, defs)) in
+      (FullEnvi.leave_module name env, Module (loc, name, defs)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env_units, def) = monadise_one env def in

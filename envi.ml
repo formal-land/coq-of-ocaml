@@ -17,11 +17,11 @@ module Segment = struct
     names : (Visibility.t * 'a) PathName.Map.t }
 
   let pp (segment : 'a t) : SmartPrint.t =
-    !^ "open" ^^ OCaml.list (fun path ->
+    nest (!^ "open" ^^ OCaml.list (fun path ->
       separate (!^ ".") (List.map Name.pp path))
-      segment.opens ^^
+      segment.opens) ^^
     OCaml.list (fun (x, (visibility, _)) ->
-      Visibility.pp visibility ^^ PathName.pp x)
+      nest (Visibility.pp visibility ^^ PathName.pp x))
       (PathName.Map.bindings segment.names)
 
   let cardinal (segment : 'a t) : int =

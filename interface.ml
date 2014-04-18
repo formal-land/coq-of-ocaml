@@ -15,6 +15,15 @@ module Shape = struct
         x.BoundName.path_name) in
       ds :: of_effect_typ typ
 
+  let to_effect_typ (shape : t) (env : 'a FullEnvi.t) : Effect.Type.t =
+    let descriptor ds =
+      let ds = ds |> List.map (fun d ->
+        Effect.Descriptor.singleton (Loc.Ether d)
+          (Envi.bound_name d env.FullEnvi.descriptors)) in
+      Effect.Descriptor.union ds in
+    List.fold_right (fun ds typ -> Effect.Type.Arrow (descriptor ds, typ))
+      shape Effect.Type.Pure
+
   let to_json (shape : t) : json =
     `List (List.map (fun ds -> `List (List.map PathName.to_json ds)) shape)
 
@@ -41,9 +50,9 @@ let rec pp (interface : t) : SmartPrint.t =
   | Descriptor x -> !^ "Descriptor" ^^ Name.pp x
   | Constructor x -> !^ "Constructor" ^^ Name.pp x
   | Field x -> !^ "Field" ^^ Name.pp x
-  | Interface (x, ds) ->
+  | Interface (x, defs) ->
     !^ "Interface" ^^ Name.pp x ^^ !^ "=" ^^ newline ^^ indent
-      (separate newline (List.map pp ds))
+      (separate newline (List.map pp defs))
 
 let rec of_structures (defs : ('a * Effect.t) Structure.t list) : t list =
   List.flatten (List.map of_structure defs)
@@ -78,6 +87,21 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
   | Structure.Open _ -> []
   | Structure.Module (_, name, defs) -> [Interface (name, of_structures defs)]
 
+let rec to_full_envi (interface : t) (env : Effect.Type.t FullEnvi.t)
+  : Effect.Type.t FullEnvi.t =
+  match interface with
+  | Var (x, shape) ->
+    FullEnvi.add_var [] x Envi.Visibility.Global (Shape.to_effect_typ shape env)
+      env
+  | Typ x -> FullEnvi.add_typ [] x Envi.Visibility.Global env
+  | Descriptor x -> FullEnvi.add_descriptor [] x Envi.Visibility.Global env
+  | Constructor x -> FullEnvi.add_constructor [] x Envi.Visibility.Global env
+  | Field x -> FullEnvi.add_field [] x Envi.Visibility.Global env
+  | Interface (x, defs) ->
+    let env = FullEnvi.enter_module env in
+    let env = List.fold_left (fun env def -> to_full_envi def env) env defs in
+    FullEnvi.leave_module x env
+
 let rec to_json (interface : t) : json =
   match interface with
   | Var (x, shape) ->
@@ -86,9 +110,9 @@ let rec to_json (interface : t) : json =
   | Descriptor x -> `List [`String "Descriptor"; Name.to_json x]
   | Constructor x -> `List [`String "Constructor"; Name.to_json x]
   | Field x -> `List [`String "Field"; Name.to_json x]
-  | Interface (x, ds) ->
+  | Interface (x, defs) ->
     `List [`String "Interface";
-      `List [Name.to_json x; `List (List.map to_json ds)]]
+      `List [Name.to_json x; `List (List.map to_json defs)]]
 
 let rec of_json (json : json) : t =
   match json with
@@ -98,8 +122,8 @@ let rec of_json (json : json) : t =
   | `List [`String "Descriptor"; x] -> Descriptor (Name.of_json x)
   | `List [`String "Constructor"; x] -> Constructor (Name.of_json x)
   | `List [`String "Field"; x] -> Field (Name.of_json x)
-  | `List [`String "Interface"; `List [x; `List ds]] ->
-      Interface (Name.of_json x, List.map of_json ds)
+  | `List [`String "Interface"; `List [x; `List defs]] ->
+      Interface (Name.of_json x, List.map of_json defs)
   | _ -> failwith "Wrong JSON format."
 
 let to_json_string (interface : t) : string =
@@ -110,7 +134,14 @@ let to_json_string (interface : t) : string =
 let of_json_string (json : string) : t =
   match from_string json with
   | `Assoc jsons ->
-    (match List.assq "version" jsons with
-    | `String "1" -> of_json @@ List.assq "content" jsons
+    (match List.assoc "version" jsons with
+    | `String "1" -> of_json @@ List.assoc "content" jsons
     | _ -> failwith "Wrong interface version.")
   | _ -> failwith "Wrong JSON format."
+
+let of_file (file_name : string) : t =
+  let file = open_in_bin file_name in
+  let size = in_channel_length file in
+  let content = String.make size ' ' in
+  really_input file content 0 size;
+  of_json_string content

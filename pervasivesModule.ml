@@ -140,7 +140,11 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   (* Program termination *)
 
   (* List *)
-  |> add_var ["OCaml"; "List"] "length" Global Pure
+  |> enter_module
+  |> Interface.to_full_envi (Interface.of_file "list.interface")
+  |> leave_module "OCaml"
+  (* |> fun env -> SmartPrint.to_stdout 80 2 (FullEnvi.pp env); env *)
+  (*|> add_var ["OCaml"; "List"] "length" Global Pure
   |> add_var ["OCaml"; "List"] "hd" Global (Arrow (d [["OCaml"], "Failure"], Pure))
   |> add_var ["OCaml"; "List"] "tl" Global (Arrow (d [["OCaml"], "Failure"], Pure))
   |> add_var ["OCaml"; "List"] "nth" Global (Arrow (d [], Arrow (d [["OCaml"], "Failure"; ["OCaml"], "Invalid_argument"], Pure)))
@@ -171,7 +175,9 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_var ["List"] "partition" Global Pure
   (* Association lists *)
   (* Lists of pairs *)
-  (* Sorting *)
+  (* Sorting *)*)
+  |> open_module ["OCaml"]
+  (* |> enter_module *)
 
 (*let env_typs : unit Envi.t =
   Envi.open_module @@

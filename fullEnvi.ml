@@ -1,3 +1,5 @@
+open SmartPrint
+
 type 'a t = {
   vars : 'a Envi.t;
   leave_prefix_vars : Name.t -> 'a -> 'a;
@@ -6,6 +8,13 @@ type 'a t = {
   constructors : unit Envi.t;
   fields : unit Envi.t
 }
+
+let pp (env : 'a t) : SmartPrint.t =
+  !^ "vars:" ^^ nest (Envi.pp env.vars) ^^ newline ^^
+  !^ "typs:" ^^ nest (Envi.pp env.typs) ^^ newline ^^
+  !^ "descriptors:" ^^ nest (Envi.pp env.descriptors) ^^ newline ^^
+  !^ "constructors:" ^^ nest (Envi.pp env.constructors) ^^ newline ^^
+  !^ "fields:" ^^ nest (Envi.pp env.fields)
 
 let empty (leave_prefix_vars : Name.t -> 'a -> 'a) : 'a t = {
   vars = Envi.empty;
@@ -67,7 +76,7 @@ let enter_module (env : 'a t) : 'a t =
     constructors = Envi.enter_module env.constructors;
     fields = Envi.enter_module env.fields }
 
-let leave_module (env : 'a t) (module_name : Name.t) : 'a t = 
+let leave_module (module_name : Name.t) (env : 'a t) : 'a t = 
   let leave_prefix_unit = fun _ () -> () in
   { vars = Envi.leave_module env.vars env.leave_prefix_vars module_name;
     leave_prefix_vars = env.leave_prefix_vars;
@@ -78,7 +87,7 @@ let leave_module (env : 'a t) (module_name : Name.t) : 'a t =
       Envi.leave_module env.constructors leave_prefix_unit module_name;
     fields = Envi.leave_module env.fields leave_prefix_unit module_name }
 
-let open_module (env : 'a t) (module_name : Name.t list) : 'a t =
+let open_module (module_name : Name.t list) (env : 'a t) : 'a t =
   { vars = Envi.open_module env.vars module_name;
     leave_prefix_vars = env.leave_prefix_vars;
     typs = Envi.open_module env.typs module_name;
