@@ -1,7 +1,1 @@
-{
-  "content": [
-    "Interface",
-    [ "Ex16", [ [ "Typ", "t1" ], [ "Typ", "t2" ] ] ]
-  ],
-  "version": "1"
-}
+{ "version": "1", "content": [ "Interface", [ "Ex16", [ [ "Typ", "t1" ], [ "Typ", "t2" ] ] ] ] }

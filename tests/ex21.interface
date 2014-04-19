@@ -1,13 +1,10 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
       "Ex21",
-      [
-        [ "Var", [ "f", [ [ [ "IO" ] ], [ [ "OCaml", "Failure" ] ] ] ] ],
-        [ "Var", [ "r", [ [ [ "IO" ], [ "OCaml", "Failure" ] ] ] ] ]
-      ]
+      [ [ "Var", [ "f", [ [ "IO" ], [ "OCaml.Failure" ] ] ] ], [ "Var", [ "r", [ [ "IO", "OCaml.Failure" ] ] ] ] ]
     ]
-  ],
-  "version": "1"
+  ]
 }

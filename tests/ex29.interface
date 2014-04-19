@@ -1,4 +1,5 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
@@ -6,26 +7,13 @@
       [
         [ "Var", [ "odd_length", [] ] ],
         [ "Var", [ "even_length", [] ] ],
-        [ "Var", [ "odd_length_with_print", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "even_length_with_print", [ [ [ "IO" ] ] ] ] ],
-        [
-          "Var",
-          [ "odd_length_free_rec", [ [], [ [ "NonTermination" ] ] ] ]
-        ],
-        [
-          "Var",
-          [ "even_length_free_rec", [ [], [ [ "NonTermination" ] ] ] ]
-        ],
-        [
-          "Var",
-          [ "odd_length_free", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-        ],
-        [
-          "Var",
-          [ "even_length_free", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-        ]
+        [ "Var", [ "odd_length_with_print", [ [ "IO" ] ] ] ],
+        [ "Var", [ "even_length_with_print", [ [ "IO" ] ] ] ],
+        [ "Var", [ "odd_length_free_rec", [ [], [ "NonTermination" ] ] ] ],
+        [ "Var", [ "even_length_free_rec", [ [], [ "NonTermination" ] ] ] ],
+        [ "Var", [ "odd_length_free", [ [ "Counter", "NonTermination" ] ] ] ],
+        [ "Var", [ "even_length_free", [ [ "Counter", "NonTermination" ] ] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }

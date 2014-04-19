@@ -1,4 +1,5 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
@@ -12,23 +13,16 @@
               [ "Typ", "t" ],
               [ "Constructor", "Nil" ],
               [ "Constructor", "Cons" ],
-              [ "Var", [ "sum_rec", [ [], [ [ "NonTermination" ] ] ] ] ],
-              [
-                "Var",
-                [ "sum", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-              ],
-              [ "Var", [ "of_list_rec", [ [], [ [ "NonTermination" ] ] ] ] ],
-              [
-                "Var",
-                [ "of_list", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-              ],
+              [ "Var", [ "sum_rec", [ [], [ "NonTermination" ] ] ] ],
+              [ "Var", [ "sum", [ [ "Counter", "NonTermination" ] ] ] ],
+              [ "Var", [ "of_list_rec", [ [], [ "NonTermination" ] ] ] ],
+              [ "Var", [ "of_list", [ [ "Counter", "NonTermination" ] ] ] ],
               [ "Interface", [ "Inside", [ [ "Var", [ "x", [] ] ] ] ] ]
             ]
           ]
         ],
-        [ "Var", [ "n", [ [ [ "Counter" ], [ "NonTermination" ] ] ] ] ]
+        [ "Var", [ "n", [ [ "Counter", "NonTermination" ] ] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }

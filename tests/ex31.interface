@@ -1,16 +1,10 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
       "Ex31",
-      [
-        [
-          "Interface",
-          [ "M", [ [ "Var", [ "b", [] ] ], [ "Var", [ "n", [] ] ] ] ]
-        ],
-        [ "Var", [ "n", [] ] ]
-      ]
+      [ [ "Interface", [ "M", [ [ "Var", [ "b", [] ] ], [ "Var", [ "n", [] ] ] ] ] ], [ "Var", [ "n", [] ] ] ]
     ]
-  ],
-  "version": "1"
+  ]
 }

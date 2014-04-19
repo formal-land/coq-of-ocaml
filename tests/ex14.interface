@@ -1,4 +1,1 @@
-{
-  "content": [ "Interface", [ "Ex14", [ [ "Var", [ "f", [] ] ] ] ] ],
-  "version": "1"
-}
+{ "version": "1", "content": [ "Interface", [ "Ex14", [ [ "Var", [ "f", [] ] ] ] ] ] }

@@ -1,4 +1,5 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
@@ -9,15 +10,9 @@
         [ "Var", [ "l3", [] ] ],
         [ "Var", [ "s1", [] ] ],
         [ "Var", [ "s2", [] ] ],
-        [ "Var", [ "h", [ [ [ "OCaml", "Failure" ] ] ] ] ],
-        [ "Var", [ "t", [ [ [ "OCaml", "Failure" ] ] ] ] ],
-        [
-          "Var",
-          [
-            "x",
-            [ [ [ "OCaml", "Failure" ], [ "OCaml", "Invalid_argument" ] ] ]
-          ]
-        ],
+        [ "Var", [ "h", [ [ "OCaml.Failure" ] ] ] ],
+        [ "Var", [ "t", [ [ "OCaml.Failure" ] ] ] ],
+        [ "Var", [ "x", [ [ "OCaml.Failure", "OCaml.Invalid_argument" ] ] ] ],
         [ "Var", [ "rl", [] ] ],
         [ "Var", [ "ll", [] ] ],
         [ "Var", [ "rll", [] ] ],
@@ -28,12 +23,11 @@
         [ "Var", [ "rm", [] ] ],
         [ "Var", [ "fl", [] ] ],
         [ "Var", [ "fr", [] ] ],
-        [ "Var", [ "m2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
-        [ "Var", [ "rm2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
-        [ "Var", [ "fl2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
-        [ "Var", [ "fr2", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ]
+        [ "Var", [ "m2", [ [ "OCaml.Invalid_argument" ] ] ] ],
+        [ "Var", [ "rm2", [ [ "OCaml.Invalid_argument" ] ] ] ],
+        [ "Var", [ "fl2", [ [ "OCaml.Invalid_argument" ] ] ] ],
+        [ "Var", [ "fr2", [ [ "OCaml.Invalid_argument" ] ] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }

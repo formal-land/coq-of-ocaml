@@ -1,4 +1,5 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
@@ -8,18 +9,11 @@
         [ "Constructor", "Empty" ],
         [ "Constructor", "Node" ],
         [ "Var", [ "empty", [] ] ],
-        [ "Var", [ "member_rec", [ [], [], [ [ "NonTermination" ] ] ] ] ],
-        [
-          "Var",
-          [ "member", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-        ],
-        [ "Var", [ "insert_rec", [ [], [], [ [ "NonTermination" ] ] ] ] ],
-        [
-          "Var",
-          [ "insert", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-        ]
+        [ "Var", [ "member_rec", [ [], [], [ "NonTermination" ] ] ] ],
+        [ "Var", [ "member", [ [], [ "Counter", "NonTermination" ] ] ] ],
+        [ "Var", [ "insert_rec", [ [], [], [ "NonTermination" ] ] ] ],
+        [ "Var", [ "insert", [ [], [ "Counter", "NonTermination" ] ] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }

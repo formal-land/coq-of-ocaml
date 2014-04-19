@@ -1,4 +1,5 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
@@ -15,6 +16,5 @@
         [ "Var", [ "s2", [] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }

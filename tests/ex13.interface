@@ -1,41 +1,16 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
       "Ex13",
       [
-        [ "Var", [ "tail", [ [ [ "OCaml", "Failure" ] ] ] ] ],
-        [
-          "Var",
-          [ "print_list_rec", [ [], [ [ "IO" ], [ "NonTermination" ] ] ] ]
-        ],
-        [
-          "Var",
-          [
-            "print_list",
-            [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ]
-          ]
-        ],
-        [
-          "Var",
-          [ "f", [ [ [ "Counter" ], [ "IO" ], [ "NonTermination" ] ] ] ]
-        ],
-        [
-          "Var",
-          [
-            "x",
-            [
-              [
-                [ "Counter" ],
-                [ "IO" ],
-                [ "NonTermination" ],
-                [ "OCaml", "Failure" ]
-              ]
-            ]
-          ]
-        ]
+        [ "Var", [ "tail", [ [ "OCaml.Failure" ] ] ] ],
+        [ "Var", [ "print_list_rec", [ [], [ "IO", "NonTermination" ] ] ] ],
+        [ "Var", [ "print_list", [ [ "Counter", "IO", "NonTermination" ] ] ] ],
+        [ "Var", [ "f", [ [ "Counter", "IO", "NonTermination" ] ] ] ],
+        [ "Var", [ "x", [ [ "Counter", "IO", "NonTermination", "OCaml.Failure" ] ] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }

@@ -1,7 +1,1 @@
-{
-  "content": [
-    "Interface",
-    [ "Ex28", [ [ "Var", [ "map", [] ] ], [ "Var", [ "map2", [] ] ] ] ]
-  ],
-  "version": "1"
-}
+{ "version": "1", "content": [ "Interface", [ "Ex28", [ [ "Var", [ "map", [] ] ], [ "Var", [ "map2", [] ] ] ] ] ] }

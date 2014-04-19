@@ -16,7 +16,7 @@ module Shape = struct
       ds :: of_effect_typ typ
 
   let to_effect_typ (shape : t) (env : 'a FullEnvi.t) : Effect.Type.t =
-    let descriptor ds =
+    let descriptor ds : Effect.Descriptor.t =
       let ds = ds |> List.map (fun d ->
         Effect.Descriptor.singleton (Loc.Ether d)
           (Envi.bound_name d env.FullEnvi.descriptors)) in
@@ -127,9 +127,15 @@ let rec of_json (json : json) : t =
   | _ -> failwith "Wrong JSON format."
 
 let to_json_string (interface : t) : string =
-  pretty_to_string ~std:true (`Assoc [
-    "content", to_json interface;
-    "version", `String "1"])
+  let pretty = pretty_format ~std:true (`Assoc [
+    "version", `String "1";
+    "content", to_json interface]) in
+  let buffer = Buffer.create 0 in
+  let formatter = Format.formatter_of_buffer buffer in
+  Format.pp_set_margin formatter 120;
+  Easy_format.Pretty.to_formatter formatter pretty;
+  Format.pp_print_flush formatter ();
+  Buffer.contents buffer
 
 let of_json_string (json : string) : t =
   match from_string json with

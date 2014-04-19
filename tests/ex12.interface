@@ -1,4 +1,5 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
@@ -7,13 +8,9 @@
         [ "Typ", "tree" ],
         [ "Constructor", "Leaf" ],
         [ "Constructor", "Node" ],
-        [ "Var", [ "find_rec", [ [], [], [ [ "NonTermination" ] ] ] ] ],
-        [
-          "Var",
-          [ "find", [ [], [ [ "Counter" ], [ "NonTermination" ] ] ] ]
-        ]
+        [ "Var", [ "find_rec", [ [], [], [ "NonTermination" ] ] ] ],
+        [ "Var", [ "find", [ [], [ "Counter", "NonTermination" ] ] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }

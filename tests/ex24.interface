@@ -1,13 +1,14 @@
 {
+  "version": "1",
   "content": [
     "Interface",
     [
       "Ex24",
       [
-        [ "Var", [ "e_invalid", [ [ [ "OCaml", "Invalid_argument" ] ] ] ] ],
-        [ "Var", [ "e_failure", [ [ [ "OCaml", "Failure" ] ] ] ] ],
-        [ "Var", [ "e_exit1", [ [ [ "OCaml", "Pervasives", "Exit" ] ] ] ] ],
-        [ "Var", [ "e_exit2", [ [ [ "OCaml", "Pervasives", "Exit" ] ] ] ] ],
+        [ "Var", [ "e_invalid", [ [ "OCaml.Invalid_argument" ] ] ] ],
+        [ "Var", [ "e_failure", [ [ "OCaml.Failure" ] ] ] ],
+        [ "Var", [ "e_exit1", [ [ "OCaml.Pervasives.Exit" ] ] ] ],
+        [ "Var", [ "e_exit2", [ [ "OCaml.Pervasives.Exit" ] ] ] ],
         [ "Var", [ "b_eq", [] ] ],
         [ "Var", [ "b_neq1", [] ] ],
         [ "Var", [ "b_neq2", [] ] ],
@@ -53,20 +54,19 @@
         [ "Var", [ "n1", [] ] ],
         [ "Var", [ "n2", [] ] ],
         [ "Var", [ "ll", [] ] ],
-        [ "Var", [ "p_c", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "p_s", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "p_n", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "p_endline", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "p_newline", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "perr_c", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "perr_s", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "perr_n", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "perr_endline", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "perr_newline", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "r_s", [ [ [ "IO" ] ] ] ] ],
-        [ "Var", [ "r_n", [ [ [ "IO" ] ] ] ] ]
+        [ "Var", [ "p_c", [ [ "IO" ] ] ] ],
+        [ "Var", [ "p_s", [ [ "IO" ] ] ] ],
+        [ "Var", [ "p_n", [ [ "IO" ] ] ] ],
+        [ "Var", [ "p_endline", [ [ "IO" ] ] ] ],
+        [ "Var", [ "p_newline", [ [ "IO" ] ] ] ],
+        [ "Var", [ "perr_c", [ [ "IO" ] ] ] ],
+        [ "Var", [ "perr_s", [ [ "IO" ] ] ] ],
+        [ "Var", [ "perr_n", [ [ "IO" ] ] ] ],
+        [ "Var", [ "perr_endline", [ [ "IO" ] ] ] ],
+        [ "Var", [ "perr_newline", [ [ "IO" ] ] ] ],
+        [ "Var", [ "r_s", [ [ "IO" ] ] ] ],
+        [ "Var", [ "r_n", [ [ "IO" ] ] ] ]
       ]
     ]
-  ],
-  "version": "1"
+  ]
 }
