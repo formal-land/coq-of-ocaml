@@ -29,7 +29,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
       | "monadise" -> Structure.pp Loc.pp @@ monadise structure
       | "v" ->
         concat (List.map (fun d -> d ^^ newline) [
-          !^ "Require Import CoqOfOCaml." ^^ newline;
+          !^ "Require Import OCaml.OCaml." ^^ newline;
           !^ "Local Open Scope Z_scope.";
           !^ "Import ListNotations."]) ^^ newline ^^
         Structure.to_coq (monadise structure)

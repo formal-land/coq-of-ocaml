@@ -4,11 +4,10 @@ TESTS_OUTPUT = $(TESTS_INPUT:.ml=.vo)
 
 default:
 	ocamlbuild $(OUTPUT) -lflags -I,+compiler-libs,ocamlcommon.cmxa -package smart_print,compiler-libs,yojson,str
-	coqc CoqOfOCaml.v
 
 clean:
 	ocamlbuild -clean
-	rm -f CoqOfOCaml.vo CoqOfOCaml.glob a.out tests/ex*.cmo tests/ex*.cmi tests/ex*.cmt tests/Nex* tests/ex*.glob tests/ex*.vo
+	rm -f OCaml/*.vo OCaml/*.glob a.out tests/ex*.cmo tests/ex*.cmi tests/ex*.cmt tests/Nex* tests/ex*.glob tests/ex*.vo
 
 test: $(OUTPUT)
 	ruby test.rb

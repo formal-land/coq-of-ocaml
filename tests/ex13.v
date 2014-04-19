@@ -1,4 +1,4 @@
-Require Import CoqOfOCaml.
+Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
 Import ListNotations.

@@ -13,9 +13,11 @@ a.out
 *.native
 *.vo
 *.glob
+*.v.d
 _build/
 smartPrint/*.v
 smartPrint/*.monadise
 \#*\#
 *.sublime-project
 *.sublime-workspace
+OCaml/Makefile
