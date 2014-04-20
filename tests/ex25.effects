@@ -1116,3 +1116,565 @@
                     ]))
             ]))
     ]))
+
+35
+(Value
+  (non_rec, @.,
+    [
+      ((all, [ ], [ ], Some Type (bool/1)),
+        Apply
+          ((35, Effect ([ ], .)),
+            Variable ((35, Effect ([ ], .)), OCaml.List.for_all/1),
+            [
+              Function
+                ((35, Effect ([ ], . -> .)), x,
+                  Apply
+                    ((35,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((35,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          equiv_decb/1),
+                      [
+                        Variable
+                          ((35,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            x/0);
+                        Constant
+                          ((35,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Int(2))
+                      ]));
+              Variable ((35, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+36
+(Value
+  (non_rec, @.,
+    [
+      ((ex, [ ], [ ], Some Type (bool/1)),
+        Apply
+          ((36, Effect ([ ], .)),
+            Variable ((36, Effect ([ ], .)), OCaml.List._exists/1),
+            [
+              Function
+                ((36, Effect ([ ], . -> .)), x,
+                  Apply
+                    ((36,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((36,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          equiv_decb/1),
+                      [
+                        Variable
+                          ((36,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            x/0);
+                        Constant
+                          ((36,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Int(2))
+                      ]));
+              Variable ((36, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+37
+(Value
+  (non_rec, @.,
+    [
+      ((all2, [ A ], [ (x_1, A) ], Some Type (bool/1)),
+        Match
+          ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
+            [
+              (Any,
+                Apply
+                  ((37,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ],
+                        .)),
+                    Variable
+                      ((37,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                ->
+                                .
+                                  -[
+                                    OCaml.Invalid_argument/1
+                                  ]->
+                                  .)),
+                        OCaml.List.for_all2/1),
+                    [
+                      Function
+                        ((37,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .)),
+                          x,
+                          Function
+                            ((37,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    ->
+                                    .)),
+                              y,
+                              Apply
+                                ((37,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Variable
+                                    ((37,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      equiv_decb/1),
+                                  [
+                                    Variable
+                                      ((37,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        x/0);
+                                    Variable
+                                      ((37,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        y/0)
+                                  ])));
+                      Variable
+                        ((37,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0);
+                      Variable
+                        ((37,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0)
+                    ]))
+            ]))
+    ]))
+
+38
+(Value
+  (non_rec, @.,
+    [
+      ((ex2, [ A ], [ (x_1, A) ], Some Type (bool/1)),
+        Match
+          ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
+            [
+              (Any,
+                Apply
+                  ((38,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ],
+                        .)),
+                    Variable
+                      ((38,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                ->
+                                .
+                                  -[
+                                    OCaml.Invalid_argument/1
+                                  ]->
+                                  .)),
+                        OCaml.List._exists2/1),
+                    [
+                      Function
+                        ((38,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .)),
+                          x,
+                          Function
+                            ((38,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    ->
+                                    .)),
+                              y,
+                              Apply
+                                ((38,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Variable
+                                    ((38,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      equiv_decb/1),
+                                  [
+                                    Variable
+                                      ((38,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        x/0);
+                                    Variable
+                                      ((38,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        y/0)
+                                  ])));
+                      Variable
+                        ((38,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0);
+                      Variable
+                        ((38,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0)
+                    ]))
+            ]))
+    ]))
+
+43
+(Value
+  (non_rec, @.,
+    [
+      ((fin, [ A ], [ (x_1, A) ], Some Type (Z/1)),
+        Match
+          ((?, Effect ([ OCaml.Not_found/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
+            [
+              (Any,
+                Apply
+                  ((43,
+                    Effect
+                      ([
+                        OCaml.Not_found/1
+                      ],
+                        .)),
+                    Variable
+                      ((43,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                -[
+                                  OCaml.Not_found/1
+                                ]->
+                                .)),
+                        OCaml.List.find/1),
+                    [
+                      Function
+                        ((43,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .)),
+                          x,
+                          Apply
+                            ((43,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Variable
+                                ((43,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  equiv_decb/1),
+                              [
+                                Variable
+                                  ((43,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    x/0);
+                                Constant
+                                  ((43,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    Int(1))
+                              ]));
+                      Variable
+                        ((43,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0)
+                    ]))
+            ]))
+    ]))
+
+44
+(Value
+  (non_rec, @.,
+    [
+      ((fil, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          ((44, Effect ([ ], .)),
+            Variable ((44, Effect ([ ], .)), OCaml.List.filter/1),
+            [
+              Function
+                ((44, Effect ([ ], . -> .)), x,
+                  Apply
+                    ((44,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((44,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          OCaml.Pervasives.ge/1),
+                      [
+                        Variable
+                          ((44,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            x/0);
+                        Constant
+                          ((44,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Int(2))
+                      ]));
+              Variable ((44, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+45
+(Value
+  (non_rec, @.,
+    [
+      ((fina, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          ((45, Effect ([ ], .)),
+            Variable ((45, Effect ([ ], .)), OCaml.List.find_all/1),
+            [
+              Function
+                ((45, Effect ([ ], . -> .)), x,
+                  Apply
+                    ((45,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((45,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          OCaml.Pervasives.ge/1),
+                      [
+                        Variable
+                          ((45,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            x/0);
+                        Constant
+                          ((45,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Int(2))
+                      ]));
+              Variable ((45, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+46
+(Value
+  (non_rec, @.,
+    [
+      ((par, [ ], [ ],
+        Some (Type (list/1, Type (Z/1)) * Type (list/1, Type (Z/1)))),
+        Apply
+          ((46, Effect ([ ], .)),
+            Variable ((46, Effect ([ ], .)), OCaml.List.partition/1),
+            [
+              Function
+                ((46, Effect ([ ], . -> .)), x,
+                  Apply
+                    ((46,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Variable
+                        ((46,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          OCaml.Pervasives.gt/1),
+                      [
+                        Variable
+                          ((46,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            x/0);
+                        Constant
+                          ((46,
+                            Effect
+                              ([
+                              ],
+                                .)),
+                            Int(2))
+                      ]));
+              Variable ((46, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+57
+(Value
+  (non_rec, @.,
+    [
+      ((sp, [ ], [ ],
+        Some (Type (list/1, Type (Z/1)) * Type (list/1, Type (string/1)))),
+        Apply
+          ((57, Effect ([ ], .)),
+            Variable ((57, Effect ([ ], .)), OCaml.List.split/1),
+            [ Variable ((57, Effect ([ ], .)), l3/0) ]))
+    ]))
+
+58
+(Value
+  (non_rec, @.,
+    [
+      ((com, [ A ], [ (x_1, A) ], Some Type (list/1, (Type (Z/1) * Type (Z/1)))),
+        Match
+          ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
+            [
+              (Any,
+                Apply
+                  ((58,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ],
+                        .)),
+                    Variable
+                      ((58,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                -[
+                                  OCaml.Invalid_argument/1
+                                ]->
+                                .)),
+                        OCaml.List.combine/1),
+                    [
+                      Variable
+                        ((58,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0);
+                      Variable
+                        ((58,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l2/0)
+                    ]))
+            ]))
+    ]))

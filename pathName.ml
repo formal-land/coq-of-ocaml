@@ -129,8 +129,10 @@ let convert (x : t) : t =
   (* Operations on format strings *)
   (* Program termination *)
 
-(*
   (* List *)
+  | { path = ["List"]; base = "exists" } -> { path = ["OCaml"; "List"]; base = "_exists" }
+  | { path = ["List"]; base = "exists2" } -> { path = ["OCaml"; "List"]; base = "_exists2" }
+  (*
   | { path = ["List"]; base = "length" } -> { path = ["OCaml"; "List"]; base = "length" }
   | { path = ["List"]; base = "hd" } -> { path = ["OCaml"; "List"]; base = "hd" }
   | { path = ["List"]; base = "tl" } -> { path = ["OCaml"; "List"]; base = "tl" }

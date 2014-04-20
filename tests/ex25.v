@@ -75,3 +75,39 @@ Definition fr2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
     OCaml.List.fold_right2 (fun s => fun x => fun y => Z.add (Z.add s x) y) l2
       l2 0
   end.
+
+Definition all : bool := OCaml.List.for_all (fun x => equiv_decb x 2) l2.
+
+Definition ex : bool := OCaml.List._exists (fun x => equiv_decb x 2) l2.
+
+Definition all2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
+  match x_1 with
+  | _ => OCaml.List.for_all2 (fun x => fun y => equiv_decb x y) l2 l2
+  end.
+
+Definition ex2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
+  match x_1 with
+  | _ => OCaml.List._exists2 (fun x => fun y => equiv_decb x y) l2 l2
+  end.
+
+Definition fin {A : Type} (x_1 : A) : M [ OCaml.Not_found ] Z :=
+  match x_1 with
+  | _ => OCaml.List.find (fun x => equiv_decb x 1) l2
+  end.
+
+Definition fil : list Z :=
+  OCaml.List.filter (fun x => OCaml.Pervasives.ge x 2) l2.
+
+Definition fina : list Z :=
+  OCaml.List.find_all (fun x => OCaml.Pervasives.ge x 2) l2.
+
+Definition par : (list Z) * (list Z) :=
+  OCaml.List.partition (fun x => OCaml.Pervasives.gt x 2) l2.
+
+Definition sp : (list Z) * (list string) := OCaml.List.split l3.
+
+Definition com {A : Type} (x_1 : A)
+  : M [ OCaml.Invalid_argument ] (list (Z * Z)) :=
+  match x_1 with
+  | _ => OCaml.List.combine l2 l2
+  end.

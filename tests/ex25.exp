@@ -569,3 +569,299 @@
                     ]))
             ]))
     ]))
+
+35
+(Value
+  (non_rec, @.,
+    [
+      ((all, [ ], [ ], Some Type (bool/1)),
+        Apply
+          (35, Variable (35, OCaml.List.for_all/1),
+            [
+              Function
+                (35, x,
+                  Apply
+                    (35,
+                      Variable
+                        (35,
+                          equiv_decb/1),
+                      [
+                        Variable
+                          (35,
+                            x/0);
+                        Constant
+                          (35,
+                            Int(2))
+                      ]));
+              Variable (35, l2/0)
+            ]))
+    ]))
+
+36
+(Value
+  (non_rec, @.,
+    [
+      ((ex, [ ], [ ], Some Type (bool/1)),
+        Apply
+          (36, Variable (36, OCaml.List._exists/1),
+            [
+              Function
+                (36, x,
+                  Apply
+                    (36,
+                      Variable
+                        (36,
+                          equiv_decb/1),
+                      [
+                        Variable
+                          (36,
+                            x/0);
+                        Constant
+                          (36,
+                            Int(2))
+                      ]));
+              Variable (36, l2/0)
+            ]))
+    ]))
+
+37
+(Value
+  (non_rec, @.,
+    [
+      ((all2, [ A ], [ (x_1, A) ], Some Type (bool/1)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (37,
+                    Variable
+                      (37,
+                        OCaml.List.for_all2/1),
+                    [
+                      Function
+                        (37,
+                          x,
+                          Function
+                            (37,
+                              y,
+                              Apply
+                                (37,
+                                  Variable
+                                    (37,
+                                      equiv_decb/1),
+                                  [
+                                    Variable
+                                      (37,
+                                        x/0);
+                                    Variable
+                                      (37,
+                                        y/0)
+                                  ])));
+                      Variable
+                        (37,
+                          l2/0);
+                      Variable
+                        (37,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
+
+38
+(Value
+  (non_rec, @.,
+    [
+      ((ex2, [ A ], [ (x_1, A) ], Some Type (bool/1)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (38,
+                    Variable
+                      (38,
+                        OCaml.List._exists2/1),
+                    [
+                      Function
+                        (38,
+                          x,
+                          Function
+                            (38,
+                              y,
+                              Apply
+                                (38,
+                                  Variable
+                                    (38,
+                                      equiv_decb/1),
+                                  [
+                                    Variable
+                                      (38,
+                                        x/0);
+                                    Variable
+                                      (38,
+                                        y/0)
+                                  ])));
+                      Variable
+                        (38,
+                          l2/0);
+                      Variable
+                        (38,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
+
+43
+(Value
+  (non_rec, @.,
+    [
+      ((fin, [ A ], [ (x_1, A) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (43,
+                    Variable
+                      (43,
+                        OCaml.List.find/1),
+                    [
+                      Function
+                        (43,
+                          x,
+                          Apply
+                            (43,
+                              Variable
+                                (43,
+                                  equiv_decb/1),
+                              [
+                                Variable
+                                  (43,
+                                    x/0);
+                                Constant
+                                  (43,
+                                    Int(1))
+                              ]));
+                      Variable
+                        (43,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
+
+44
+(Value
+  (non_rec, @.,
+    [
+      ((fil, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (44, Variable (44, OCaml.List.filter/1),
+            [
+              Function
+                (44, x,
+                  Apply
+                    (44,
+                      Variable
+                        (44,
+                          OCaml.Pervasives.ge/1),
+                      [
+                        Variable
+                          (44,
+                            x/0);
+                        Constant
+                          (44,
+                            Int(2))
+                      ]));
+              Variable (44, l2/0)
+            ]))
+    ]))
+
+45
+(Value
+  (non_rec, @.,
+    [
+      ((fina, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (45, Variable (45, OCaml.List.find_all/1),
+            [
+              Function
+                (45, x,
+                  Apply
+                    (45,
+                      Variable
+                        (45,
+                          OCaml.Pervasives.ge/1),
+                      [
+                        Variable
+                          (45,
+                            x/0);
+                        Constant
+                          (45,
+                            Int(2))
+                      ]));
+              Variable (45, l2/0)
+            ]))
+    ]))
+
+46
+(Value
+  (non_rec, @.,
+    [
+      ((par, [ ], [ ],
+        Some (Type (list/1, Type (Z/1)) * Type (list/1, Type (Z/1)))),
+        Apply
+          (46, Variable (46, OCaml.List.partition/1),
+            [
+              Function
+                (46, x,
+                  Apply
+                    (46,
+                      Variable
+                        (46,
+                          OCaml.Pervasives.gt/1),
+                      [
+                        Variable
+                          (46,
+                            x/0);
+                        Constant
+                          (46,
+                            Int(2))
+                      ]));
+              Variable (46, l2/0)
+            ]))
+    ]))
+
+57
+(Value
+  (non_rec, @.,
+    [
+      ((sp, [ ], [ ],
+        Some (Type (list/1, Type (Z/1)) * Type (list/1, Type (string/1)))),
+        Apply (57, Variable (57, OCaml.List.split/1), [ Variable (57, l3/0) ]))
+    ]))
+
+58
+(Value
+  (non_rec, @.,
+    [
+      ((com, [ A ], [ (x_1, A) ], Some Type (list/1, (Type (Z/1) * Type (Z/1)))),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (58,
+                    Variable
+                      (58,
+                        OCaml.List.combine/1),
+                    [
+                      Variable
+                        (58,
+                          l2/0);
+                      Variable
+                        (58,
+                          l2/0)
+                    ]))
+            ]))
+    ]))
