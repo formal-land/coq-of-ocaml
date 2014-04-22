@@ -2,20 +2,12 @@
   "version": "1",
   "content": [
     "Interface",
+    "Ex30",
     [
-      "Ex30",
-      [
-        [ "Interface", [ "M", [ [ "Var", [ "f", [ [ "OCaml.Failure" ] ] ] ] ] ] ],
-        [
-          "Interface",
-          [
-            "N",
-            [ [ "Var", [ "f", [ [ "OCaml.Assert_failure" ] ] ] ], [ "Var", [ "x", [] ] ], [ "Var", [ "y", [] ] ] ]
-          ]
-        ],
-        [ "Var", [ "b", [] ] ],
-        [ "Var", [ "b'", [] ] ]
-      ]
+      [ "Interface", "M", [ [ "Var", "f", [ [ "OCaml.Failure" ] ] ] ] ],
+      [ "Interface", "N", [ [ "Var", "f", [ [ "OCaml.Assert_failure" ] ] ], [ "Var", "x", [] ], [ "Var", "y", [] ] ] ],
+      [ "Var", "b", [] ],
+      [ "Var", "b'", [] ]
     ]
   ]
 }

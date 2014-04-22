@@ -105,24 +105,23 @@ let rec to_full_envi (interface : t) (env : Effect.Type.t FullEnvi.t)
 let rec to_json (interface : t) : json =
   match interface with
   | Var (x, shape) ->
-    `List [`String "Var"; `List [Name.to_json x; Shape.to_json shape]]
+    `List [`String "Var"; Name.to_json x; Shape.to_json shape]
   | Typ x -> `List [`String "Typ"; Name.to_json x]
   | Descriptor x -> `List [`String "Descriptor"; Name.to_json x]
   | Constructor x -> `List [`String "Constructor"; Name.to_json x]
   | Field x -> `List [`String "Field"; Name.to_json x]
   | Interface (x, defs) ->
-    `List [`String "Interface";
-      `List [Name.to_json x; `List (List.map to_json defs)]]
+    `List [`String "Interface"; Name.to_json x; `List (List.map to_json defs)]
 
 let rec of_json (json : json) : t =
   match json with
-  | `List [`String "Var"; `List [x; shape]] ->
+  | `List [`String "Var"; x; shape] ->
     Var (Name.of_json x, Shape.of_json shape)
   | `List [`String "Typ"; x] -> Typ (Name.of_json x)
   | `List [`String "Descriptor"; x] -> Descriptor (Name.of_json x)
   | `List [`String "Constructor"; x] -> Constructor (Name.of_json x)
   | `List [`String "Field"; x] -> Field (Name.of_json x)
-  | `List [`String "Interface"; `List [x; `List defs]] ->
+  | `List [`String "Interface"; x; `List defs] ->
       Interface (Name.of_json x, List.map of_json defs)
   | _ -> failwith "Wrong JSON format."
 

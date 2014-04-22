@@ -2,27 +2,23 @@
   "version": "1",
   "content": [
     "Interface",
+    "Ex10",
     [
-      "Ex10",
       [
+        "Interface",
+        "List2",
         [
-          "Interface",
-          [
-            "List2",
-            [
-              [ "Typ", "t" ],
-              [ "Constructor", "Nil" ],
-              [ "Constructor", "Cons" ],
-              [ "Var", [ "sum_rec", [ [], [ "NonTermination" ] ] ] ],
-              [ "Var", [ "sum", [ [ "Counter", "NonTermination" ] ] ] ],
-              [ "Var", [ "of_list_rec", [ [], [ "NonTermination" ] ] ] ],
-              [ "Var", [ "of_list", [ [ "Counter", "NonTermination" ] ] ] ],
-              [ "Interface", [ "Inside", [ [ "Var", [ "x", [] ] ] ] ] ]
-            ]
-          ]
-        ],
-        [ "Var", [ "n", [ [ "Counter", "NonTermination" ] ] ] ]
-      ]
+          [ "Typ", "t" ],
+          [ "Constructor", "Nil" ],
+          [ "Constructor", "Cons" ],
+          [ "Var", "sum_rec", [ [], [ "NonTermination" ] ] ],
+          [ "Var", "sum", [ [ "Counter", "NonTermination" ] ] ],
+          [ "Var", "of_list_rec", [ [], [ "NonTermination" ] ] ],
+          [ "Var", "of_list", [ [ "Counter", "NonTermination" ] ] ],
+          [ "Interface", "Inside", [ [ "Var", "x", [] ] ] ]
+        ]
+      ],
+      [ "Var", "n", [ [ "Counter", "NonTermination" ] ] ]
     ]
   ]
 }

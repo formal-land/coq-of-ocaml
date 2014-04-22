@@ -2,15 +2,13 @@
   "version": "1",
   "content": [
     "Interface",
+    "Ex12",
     [
-      "Ex12",
-      [
-        [ "Typ", "tree" ],
-        [ "Constructor", "Leaf" ],
-        [ "Constructor", "Node" ],
-        [ "Var", [ "find_rec", [ [], [], [ "NonTermination" ] ] ] ],
-        [ "Var", [ "find", [ [], [ "Counter", "NonTermination" ] ] ] ]
-      ]
+      [ "Typ", "tree" ],
+      [ "Constructor", "Leaf" ],
+      [ "Constructor", "Node" ],
+      [ "Var", "find_rec", [ [], [], [ "NonTermination" ] ] ],
+      [ "Var", "find", [ [], [ "Counter", "NonTermination" ] ] ]
     ]
   ]
 }

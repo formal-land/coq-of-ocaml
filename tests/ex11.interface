@@ -2,29 +2,25 @@
   "version": "1",
   "content": [
     "Interface",
+    "Ex11",
     [
-      "Ex11",
+      [ "Interface", "SizedString", [ [ "Typ", "t" ], [ "Field", "name" ], [ "Field", "size" ] ] ],
+      [ "Var", "r", [] ],
+      [ "Var", "r'", [] ],
+      [ "Var", "s", [] ],
+      [ "Var", "f", [] ],
+      [ "Var", "b", [] ],
+      [ "Var", "b'", [] ],
       [
-        [ "Interface", [ "SizedString", [ [ "Typ", "t" ], [ "Field", "name" ], [ "Field", "size" ] ] ] ],
-        [ "Var", [ "r", [] ] ],
-        [ "Var", [ "r'", [] ] ],
-        [ "Var", [ "s", [] ] ],
-        [ "Var", [ "f", [] ] ],
-        [ "Var", [ "b", [] ] ],
-        [ "Var", [ "b'", [] ] ],
+        "Interface",
+        "Point",
         [
-          "Interface",
-          [
-            "Point",
-            [
-              [ "Typ", "t" ],
-              [ "Field", "x" ],
-              [ "Field", "y" ],
-              [ "Field", "z" ],
-              [ "Var", [ "p", [] ] ],
-              [ "Var", [ "b", [] ] ]
-            ]
-          ]
+          [ "Typ", "t" ],
+          [ "Field", "x" ],
+          [ "Field", "y" ],
+          [ "Field", "z" ],
+          [ "Var", "p", [] ],
+          [ "Var", "b", [] ]
         ]
       ]
     ]

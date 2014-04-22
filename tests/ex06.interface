@@ -2,16 +2,14 @@
   "version": "1",
   "content": [
     "Interface",
+    "Ex06",
     [
-      "Ex06",
-      [
-        [ "Var", [ "map_rec", [ [], [], [ "NonTermination" ] ] ] ],
-        [ "Var", [ "map", [ [], [ "Counter", "NonTermination" ] ] ] ],
-        [ "Var", [ "fold_rec", [ [], [], [], [ "NonTermination" ] ] ] ],
-        [ "Var", [ "fold", [ [], [], [ "Counter", "NonTermination" ] ] ] ],
-        [ "Var", [ "l", [] ] ],
-        [ "Var", [ "n", [ [], [ "Counter", "NonTermination" ] ] ] ]
-      ]
+      [ "Var", "map_rec", [ [], [], [ "NonTermination" ] ] ],
+      [ "Var", "map", [ [], [ "Counter", "NonTermination" ] ] ],
+      [ "Var", "fold_rec", [ [], [], [], [ "NonTermination" ] ] ],
+      [ "Var", "fold", [ [], [], [ "Counter", "NonTermination" ] ] ],
+      [ "Var", "l", [] ],
+      [ "Var", "n", [ [], [ "Counter", "NonTermination" ] ] ]
     ]
   ]
 }

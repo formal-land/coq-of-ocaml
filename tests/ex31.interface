@@ -2,9 +2,7 @@
   "version": "1",
   "content": [
     "Interface",
-    [
-      "Ex31",
-      [ [ "Interface", [ "M", [ [ "Var", [ "b", [] ] ], [ "Var", [ "n", [] ] ] ] ] ], [ "Var", [ "n", [] ] ] ]
-    ]
+    "Ex31",
+    [ [ "Interface", "M", [ [ "Var", "b", [] ], [ "Var", "n", [] ] ] ], [ "Var", "n", [] ] ]
   ]
 }

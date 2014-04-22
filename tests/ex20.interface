@@ -2,12 +2,10 @@
   "version": "1",
   "content": [
     "Interface",
+    "Ex20",
     [
-      "Ex20",
-      [
-        [ "Var", [ "sums_rec", [ [], [ "Counter", "NonTermination" ] ] ] ],
-        [ "Var", [ "sums", [ [ "Counter", "NonTermination" ] ] ] ]
-      ]
+      [ "Var", "sums_rec", [ [], [ "Counter", "NonTermination" ] ] ],
+      [ "Var", "sums", [ [ "Counter", "NonTermination" ] ] ]
     ]
   ]
 }
