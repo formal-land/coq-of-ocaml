@@ -1405,6 +1405,20 @@
             ]))
     ]))
 
+39
+(Value
+  (non_rec, @.,
+    [
+      ((me, [ ], [ ], Some Type (bool/1)),
+        Apply
+          ((39, Effect ([ ], .)),
+            Variable ((39, Effect ([ ], .)), OCaml.List.mem/1),
+            [
+              Constant ((39, Effect ([ ], .)), Int(2));
+              Variable ((39, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
 43
 (Value
   (non_rec, @.,
@@ -1618,6 +1632,130 @@
             ]))
     ]))
 
+49
+(Value
+  (non_rec, @.,
+    [
+      ((asso, [ A ], [ (x_1, A) ], Some Type (string/1)),
+        Match
+          ((?, Effect ([ OCaml.Not_found/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
+            [
+              (Any,
+                Apply
+                  ((49,
+                    Effect
+                      ([
+                        OCaml.Not_found/1
+                      ],
+                        .)),
+                    Variable
+                      ((49,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                -[
+                                  OCaml.Not_found/1
+                                ]->
+                                .)),
+                        OCaml.List.assoc/1),
+                    [
+                      Constant
+                        ((49,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Int(2));
+                      Variable
+                        ((49,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l3/0)
+                    ]))
+            ]))
+    ]))
+
+51
+(Value
+  (non_rec, @.,
+    [
+      ((masso, [ A ], [ (x_1, A) ], Some Type (bool/1)),
+        Match
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x_1/0),
+            [
+              (Any,
+                Apply
+                  ((51, Effect ([ ], .)),
+                    Variable
+                      ((51,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        OCaml.List.mem_assoc/1),
+                    [
+                      Constant
+                        ((51,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Int(2));
+                      Variable
+                        ((51,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l3/0)
+                    ]))
+            ]))
+    ]))
+
+53
+(Value
+  (non_rec, @.,
+    [
+      ((rasso, [ A ], [ (x_1, A) ],
+        Some Type (list/1, (Type (Z/1) * Type (string/1)))),
+        Match
+          ((?, Effect ([ ], .)), Variable ((?, Effect ([ ], .)), x_1/0),
+            [
+              (Any,
+                Apply
+                  ((53, Effect ([ ], .)),
+                    Variable
+                      ((53,
+                        Effect
+                          ([
+                          ],
+                            .)),
+                        OCaml.List.remove_assoc/1),
+                    [
+                      Constant
+                        ((53,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Int(2));
+                      Variable
+                        ((53,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          l3/0)
+                    ]))
+            ]))
+    ]))
+
 57
 (Value
   (non_rec, @.,
@@ -1676,5 +1814,261 @@
                               .)),
                           l2/0)
                     ]))
+            ]))
+    ]))
+
+61
+(Value
+  (non_rec, @.,
+    [
+      ((so, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          ((61, Effect ([ ], .)),
+            Variable ((61, Effect ([ ], .)), OCaml.List.sort/1),
+            [
+              Function
+                ((61, Effect ([ ], . -> . -> .)), x,
+                  Function
+                    ((61,
+                      Effect
+                        ([
+                        ],
+                          .
+                            ->
+                            .)),
+                      y,
+                      Apply
+                        ((61,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((61,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Z.sub/1),
+                          [
+                            Variable
+                              ((61,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                y/0);
+                            Variable
+                              ((61,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                x/0)
+                          ])));
+              Variable ((61, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+62
+(Value
+  (non_rec, @.,
+    [
+      ((sso, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          ((62, Effect ([ ], .)),
+            Variable ((62, Effect ([ ], .)), OCaml.List.stable_sort/1),
+            [
+              Function
+                ((62, Effect ([ ], . -> . -> .)), x,
+                  Function
+                    ((62,
+                      Effect
+                        ([
+                        ],
+                          .
+                            ->
+                            .)),
+                      y,
+                      Apply
+                        ((62,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((62,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Z.sub/1),
+                          [
+                            Variable
+                              ((62,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                y/0);
+                            Variable
+                              ((62,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                x/0)
+                          ])));
+              Variable ((62, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+63
+(Value
+  (non_rec, @.,
+    [
+      ((fso, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          ((63, Effect ([ ], .)),
+            Variable ((63, Effect ([ ], .)), OCaml.List.fast_sort/1),
+            [
+              Function
+                ((63, Effect ([ ], . -> . -> .)), x,
+                  Function
+                    ((63,
+                      Effect
+                        ([
+                        ],
+                          .
+                            ->
+                            .)),
+                      y,
+                      Apply
+                        ((63,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((63,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Z.sub/1),
+                          [
+                            Variable
+                              ((63,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                y/0);
+                            Variable
+                              ((63,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                x/0)
+                          ])));
+              Variable ((63, Effect ([ ], .)), l2/0)
+            ]))
+    ]))
+
+64
+(Value
+  (non_rec, @.,
+    [
+      ((me, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          ((64, Effect ([ ], .)),
+            Variable ((64, Effect ([ ], .)), OCaml.List.merge/1),
+            [
+              Function
+                ((64, Effect ([ ], . -> . -> .)), x,
+                  Function
+                    ((64,
+                      Effect
+                        ([
+                        ],
+                          .
+                            ->
+                            .)),
+                      y,
+                      Apply
+                        ((64,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
+                            ((64,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Z.sub/1),
+                          [
+                            Variable
+                              ((64,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                y/0);
+                            Variable
+                              ((64,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                x/0)
+                          ])));
+              Variable ((64, Effect ([ ], .)), l2/0);
+              Constructor
+                ((64, Effect ([ ], .)), cons/1,
+                  Constant
+                    ((64,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      Int(2)),
+                  Constructor
+                    ((64,
+                      Effect
+                        ([
+                        ],
+                          .)),
+                      cons/1,
+                      Constant
+                        ((64,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Int(-1)),
+                      Constructor
+                        ((64,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          cons/1,
+                          Constant
+                            ((64,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              Int(5)),
+                          Constructor
+                            ((64,
+                              Effect
+                                ([
+                                ],
+                                  .)),
+                              []/1))))
             ]))
     ]))

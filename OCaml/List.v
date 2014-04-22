@@ -208,6 +208,16 @@ Fixpoint _exists2 {A B : Type} (p : A -> B -> bool) (l1 : list A) (l2 : list B)
   | (_, _) => Pervasives.invalid_arg "List.exists2" % string
   end.
 
+Fixpoint mem {A : Type} `{EqDec A} (x : A) (l : list A) : bool :=
+  match l with
+  | [] => false
+  | y :: l =>
+    if equiv_decb x y then
+      true
+    else
+      mem x l
+  end.
+
 Fixpoint find {A : Type} (p : A -> bool) (x : list A)
   : M [ Not_found ] A :=
   match x with
@@ -246,6 +256,38 @@ Definition partition {A : Type} (p : A -> bool) (l : list A)
         part yes (cons x no) l
     end in
   part [] [] l.
+
+Fixpoint assoc {A B : Type} `{EqDec A} (x : A) (l : list (A * B))
+  : M [ Not_found ] B :=
+  match l with
+  | [] => raise_Not_found ()
+  | (y, v) :: l =>
+    if equiv_decb x y then
+      ret v
+    else
+      assoc x l
+  end.
+
+Fixpoint mem_assoc {A B : Type} `{EqDec A} (x : A) (l : list (A * B)) : bool :=
+  match l with
+  | [] => false
+  | (y, v) :: l =>
+    if equiv_decb x y then
+      true
+    else
+      mem_assoc x l
+  end.
+
+Fixpoint remove_assoc {A B : Type} `{EqDec A} (x : A) (l : list (A * B))
+  : list (A * B) :=
+  match l with
+  | [] => l
+  | (y, v) :: l =>
+    if equiv_decb x y then
+      l
+    else
+      remove_assoc x l
+  end.
 
 Fixpoint split {A B : Type} (x : list (A * B)) : (list A) * (list B) :=
   match x with
@@ -479,203 +521,3 @@ Definition fast_sort {A : Type}
   : (A -> A -> Z) ->
     (list A) -> M [ Counter; NonTermination ] (list A) :=
   stable_sort.
-
-(*Module SortUniq.
-  Fixpoint rev_merge {A : Type}
-    (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
-    let fix rev_merge_aux (l2 : list A) (accu : list A) : list A :=
-      match (l1, l2) with
-      | ([], l2) => rev_append l2 accu
-      | (l1, []) => rev_append l1 accu
-      | (cons h1 t1, cons h2 t2) =>
-        let c := cmp h1 h2 in
-        if equiv_decb c 0 then
-          rev_merge cmp t1 t2 (cons h1 accu)
-        else
-          if Pervasives.lt c 0 then
-            rev_merge cmp t1 l2 (cons h1 accu)
-          else
-            rev_merge_aux t2 (cons h2 accu)
-      end in
-    rev_merge_aux l2 accu.
-  
-  Fixpoint rev_merge_rev {A : Type}
-    (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
-    let fix rev_merge_rev_aux (l2 : list A) (accu : list A) : list A :=
-      match (l1, l2) with
-      | ([], l2) => rev_append l2 accu
-      | (l1, []) => rev_append l1 accu
-      | (cons h1 t1, cons h2 t2) =>
-        let c := cmp h1 h2 in
-        if equiv_decb c 0 then
-          rev_merge_rev cmp t1 t2 (cons h1 accu)
-        else
-          if Pervasives.gt c 0 then
-            rev_merge_rev cmp t1 l2 (cons h1 accu)
-          else
-            rev_merge_rev_aux t2 (cons h2 accu)
-      end in
-    rev_merge_rev_aux l2 accu.
-  
-  Fixpoint sort_rec {A : Type}
-    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ NonTermination; Assert_failure ] (list A) :=
-    match counter with
-    | O => lift [_;_] "10" (not_terminated tt)
-    | S counter =>
-      match (n, l) with
-      | (2, cons x1 (cons x2 _)) =>
-        ret
-          (let c := cmp x1 x2 in
-          if equiv_decb c 0 then
-            cons x1 []
-          else
-            if Pervasives.lt c 0 then
-              cons x1 (cons x2 [])
-            else
-              cons x2 (cons x1 []))
-      | (3, cons x1 (cons x2 (cons x3 _))) =>
-        ret
-          (let c := cmp x1 x2 in
-          if equiv_decb c 0 then
-            let c := cmp x2 x3 in
-            if equiv_decb c 0 then
-              cons x2 []
-            else
-              if Pervasives.lt c 0 then
-                cons x2 (cons x3 [])
-              else
-                cons x3 (cons x2 [])
-          else
-            if Pervasives.lt c 0 then
-              let c := cmp x2 x3 in
-              if equiv_decb c 0 then
-                cons x1 (cons x2 [])
-              else
-                if Pervasives.lt c 0 then
-                  cons x1 (cons x2 (cons x3 []))
-                else
-                  let c := cmp x1 x3 in
-                  if equiv_decb c 0 then
-                    cons x1 (cons x2 [])
-                  else
-                    if Pervasives.lt c 0 then
-                      cons x1 (cons x3 (cons x2 []))
-                    else
-                      cons x3 (cons x1 (cons x2 []))
-            else
-              let c := cmp x1 x3 in
-              if equiv_decb c 0 then
-                cons x2 (cons x1 [])
-              else
-                if Pervasives.lt c 0 then
-                  cons x2 (cons x1 (cons x3 []))
-                else
-                  let c := cmp x2 x3 in
-                  if equiv_decb c 0 then
-                    cons x2 (cons x1 [])
-                  else
-                    if Pervasives.lt c 0 then
-                      cons x2 (cons x3 (cons x1 []))
-                    else
-                      cons x3 (cons x2 (cons x1 [])))
-      | (n, l) =>
-        let n1 := Z.div n 2 in
-        let n2 := Z.sub n n1 in
-        let! l2 := lift [_;_] "01" (chop n1 l) in
-        let! s1 := (rev_sort_rec counter) cmp n1 l in
-        let! s2 := (rev_sort_rec counter) cmp n2 l2 in
-        ret (rev_merge_rev cmp s1 s2 [])
-      end
-    end
-  
-  with rev_sort_rec {A : Type}
-    (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ NonTermination; Assert_failure ] (list A) :=
-    match counter with
-    | O => lift [_;_] "10" (not_terminated tt)
-    | S counter =>
-      match (n, l) with
-      | (2, cons x1 (cons x2 _)) =>
-        ret
-          (let c := cmp x1 x2 in
-          if equiv_decb c 0 then
-            cons x1 []
-          else
-            if Pervasives.gt c 0 then
-              cons x1 (cons x2 [])
-            else
-              cons x2 (cons x1 []))
-      | (3, cons x1 (cons x2 (cons x3 _))) =>
-        ret
-          (let c := cmp x1 x2 in
-          if equiv_decb c 0 then
-            let c := cmp x2 x3 in
-            if equiv_decb c 0 then
-              cons x2 []
-            else
-              if Pervasives.gt c 0 then
-                cons x2 (cons x3 [])
-              else
-                cons x3 (cons x2 [])
-          else
-            if Pervasives.gt c 0 then
-              let c := cmp x2 x3 in
-              if equiv_decb c 0 then
-                cons x1 (cons x2 [])
-              else
-                if Pervasives.gt c 0 then
-                  cons x1 (cons x2 (cons x3 []))
-                else
-                  let c := cmp x1 x3 in
-                  if equiv_decb c 0 then
-                    cons x1 (cons x2 [])
-                  else
-                    if Pervasives.gt c 0 then
-                      cons x1 (cons x3 (cons x2 []))
-                    else
-                      cons x3 (cons x1 (cons x2 []))
-            else
-              let c := cmp x1 x3 in
-              if equiv_decb c 0 then
-                cons x2 (cons x1 [])
-              else
-                if Pervasives.gt c 0 then
-                  cons x2 (cons x1 (cons x3 []))
-                else
-                  let c := cmp x2 x3 in
-                  if equiv_decb c 0 then
-                    cons x2 (cons x1 [])
-                  else
-                    if Pervasives.gt c 0 then
-                      cons x2 (cons x3 (cons x1 []))
-                    else
-                      cons x3 (cons x2 (cons x1 [])))
-      | (n, l) =>
-        let n1 := Z.div n 2 in
-        let n2 := Z.sub n n1 in
-        let! l2 := lift [_;_] "01" (chop n1 l) in
-        let! s1 := (sort_rec counter) cmp n1 l in
-        let! s2 := (sort_rec counter) cmp n2 l2 in
-        ret (rev_merge cmp s1 s2 [])
-      end
-    end.
-  
-  Definition sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ Counter; NonTermination; Assert_failure ] (list A) :=
-    let! x := lift [_;_;_] "100" (read_counter tt) in
-    lift [_;_;_] "011" (sort_rec x cmp n l).
-  
-  Definition rev_sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
-    : M [ Counter; NonTermination; Assert_failure ] (list A) :=
-    let! x := lift [_;_;_] "100" (read_counter tt) in
-    lift [_;_;_] "011" (rev_sort_rec x cmp n l).
-End SortUniq.
-
-Definition sort_uniq {A : Type} (cmp : A -> A -> Z) (l : list A)
-  : M [ Counter; NonTermination; Assert_failure ] (list A) :=
-  let len := length l in
-  if Pervasives.lt len 2 then
-    ret l
-  else
-    SortUniq.sort cmp len l.*)

@@ -90,6 +90,8 @@ Definition ex2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
   | _ => OCaml.List._exists2 (fun x => fun y => equiv_decb x y) l2 l2
   end.
 
+Definition me : bool := OCaml.List.mem 2 l2.
+
 Definition fin {A : Type} (x_1 : A) : M [ OCaml.Not_found ] Z :=
   match x_1 with
   | _ => OCaml.List.find (fun x => equiv_decb x 1) l2
@@ -104,6 +106,21 @@ Definition fina : list Z :=
 Definition par : (list Z) * (list Z) :=
   OCaml.List.partition (fun x => OCaml.Pervasives.gt x 2) l2.
 
+Definition asso {A : Type} (x_1 : A) : M [ OCaml.Not_found ] string :=
+  match x_1 with
+  | _ => OCaml.List.assoc 2 l3
+  end.
+
+Definition masso {A : Type} (x_1 : A) : bool :=
+  match x_1 with
+  | _ => OCaml.List.mem_assoc 2 l3
+  end.
+
+Definition rasso {A : Type} (x_1 : A) : list (Z * string) :=
+  match x_1 with
+  | _ => OCaml.List.remove_assoc 2 l3
+  end.
+
 Definition sp : (list Z) * (list string) := OCaml.List.split l3.
 
 Definition com {A : Type} (x_1 : A)
@@ -111,3 +128,14 @@ Definition com {A : Type} (x_1 : A)
   match x_1 with
   | _ => OCaml.List.combine l2 l2
   end.
+
+Definition so : list Z := OCaml.List.sort (fun x => fun y => Z.sub y x) l2.
+
+Definition sso : list Z :=
+  OCaml.List.stable_sort (fun x => fun y => Z.sub y x) l2.
+
+Definition fso : list Z := OCaml.List.fast_sort (fun x => fun y => Z.sub y x) l2.
+
+Definition me : list Z :=
+  OCaml.List.merge (fun x => fun y => Z.sub y x) l2
+    (cons 2 (cons (-1) (cons 5 []))).

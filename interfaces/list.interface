@@ -32,42 +32,20 @@
       [ "Var", "_exists", [] ],
       [ "Var", "for_all2", [ [], [], [ "OCaml.Invalid_argument" ] ] ],
       [ "Var", "_exists2", [ [], [], [ "OCaml.Invalid_argument" ] ] ],
+      [ "Var", "mem", [] ],
       [ "Var", "find", [ [], [ "OCaml.Not_found" ] ] ],
       [ "Var", "find_all", [] ],
       [ "Var", "filter", [] ],
       [ "Var", "partition", [] ],
+      [ "Var", "assoc", [ [], [ "OCaml.Not_found" ] ] ],
+      [ "Var", "mem_assoc", [] ],
+      [ "Var", "remove_assoc", [] ],
       [ "Var", "split", [] ],
       [ "Var", "combine", [ [], [ "OCaml.Invalid_argument" ] ] ],
-      [ "Var", "merge", [] ],
-      [ "Var", "chop", [ [], [ "OCaml.Assert_failure" ] ] ],
-      [
-        "Interface",
-        "StableSort",
-        [
-          [ "Var", "rev_merge", [] ],
-          [ "Var", "rev_merge_rev", [] ],
-          [ "Var", "sort_rec", [ [], [], [], [ "NonTermination", "OCaml.Assert_failure" ] ] ],
-          [ "Var", "rev_sort_rec", [ [], [], [], [ "NonTermination", "OCaml.Assert_failure" ] ] ],
-          [ "Var", "sort", [ [], [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ],
-          [ "Var", "rev_sort", [ [], [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ]
-        ]
-      ],
-      [ "Var", "stable_sort", [ [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ],
-      [ "Var", "sort", [ [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ],
-      [ "Var", "fast_sort", [ [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ],
-      [
-        "Interface",
-        "SortUniq",
-        [
-          [ "Var", "rev_merge", [] ],
-          [ "Var", "rev_merge_rev", [] ],
-          [ "Var", "sort_rec", [ [], [], [], [ "NonTermination", "OCaml.Assert_failure" ] ] ],
-          [ "Var", "rev_sort_rec", [ [], [], [], [ "NonTermination", "OCaml.Assert_failure" ] ] ],
-          [ "Var", "sort", [ [], [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ],
-          [ "Var", "rev_sort", [ [], [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ]
-        ]
-      ],
-      [ "Var", "sort_uniq", [ [], [ "Counter", "NonTermination", "OCaml.Assert_failure" ] ] ]
+      [ "Var", "sort", [] ],
+      [ "Var", "stable_sort", [] ],
+      [ "Var", "fast_sort", [] ],
+      [ "Var", "merge", [] ]
     ]
   ]
 }

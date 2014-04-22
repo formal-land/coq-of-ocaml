@@ -720,6 +720,16 @@
             ]))
     ]))
 
+39
+(Value
+  (non_rec, @.,
+    [
+      ((me, [ ], [ ], Some Type (bool/1)),
+        Apply
+          (39, Variable (39, OCaml.List.mem/1),
+            [ Constant (39, Int(2)); Variable (39, l2/0) ]))
+    ]))
+
 43
 (Value
   (non_rec, @.,
@@ -840,6 +850,83 @@
             ]))
     ]))
 
+49
+(Value
+  (non_rec, @.,
+    [
+      ((asso, [ A ], [ (x_1, A) ],
+        Some Monad ([ OCaml.Not_found/1 ], Type (string/1))),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (49,
+                    Variable
+                      (49,
+                        OCaml.List.assoc/1),
+                    [
+                      Constant
+                        (49,
+                          Int(2));
+                      Variable
+                        (49,
+                          l3/0)
+                    ]))
+            ]))
+    ]))
+
+51
+(Value
+  (non_rec, @.,
+    [
+      ((masso, [ A ], [ (x_1, A) ], Some Type (bool/1)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (51,
+                    Variable
+                      (51,
+                        OCaml.List.mem_assoc/1),
+                    [
+                      Constant
+                        (51,
+                          Int(2));
+                      Variable
+                        (51,
+                          l3/0)
+                    ]))
+            ]))
+    ]))
+
+53
+(Value
+  (non_rec, @.,
+    [
+      ((rasso, [ A ], [ (x_1, A) ],
+        Some Type (list/1, (Type (Z/1) * Type (string/1)))),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Any,
+                Apply
+                  (53,
+                    Variable
+                      (53,
+                        OCaml.List.remove_assoc/1),
+                    [
+                      Constant
+                        (53,
+                          Int(2));
+                      Variable
+                        (53,
+                          l3/0)
+                    ]))
+            ]))
+    ]))
+
 57
 (Value
   (non_rec, @.,
@@ -875,5 +962,142 @@
                         (58,
                           l2/0)
                     ]))
+            ]))
+    ]))
+
+61
+(Value
+  (non_rec, @.,
+    [
+      ((so, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (61, Variable (61, OCaml.List.sort/1),
+            [
+              Function
+                (61, x,
+                  Function
+                    (61,
+                      y,
+                      Apply
+                        (61,
+                          Variable
+                            (61,
+                              Z.sub/1),
+                          [
+                            Variable
+                              (61,
+                                y/0);
+                            Variable
+                              (61,
+                                x/0)
+                          ])));
+              Variable (61, l2/0)
+            ]))
+    ]))
+
+62
+(Value
+  (non_rec, @.,
+    [
+      ((sso, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (62, Variable (62, OCaml.List.stable_sort/1),
+            [
+              Function
+                (62, x,
+                  Function
+                    (62,
+                      y,
+                      Apply
+                        (62,
+                          Variable
+                            (62,
+                              Z.sub/1),
+                          [
+                            Variable
+                              (62,
+                                y/0);
+                            Variable
+                              (62,
+                                x/0)
+                          ])));
+              Variable (62, l2/0)
+            ]))
+    ]))
+
+63
+(Value
+  (non_rec, @.,
+    [
+      ((fso, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (63, Variable (63, OCaml.List.fast_sort/1),
+            [
+              Function
+                (63, x,
+                  Function
+                    (63,
+                      y,
+                      Apply
+                        (63,
+                          Variable
+                            (63,
+                              Z.sub/1),
+                          [
+                            Variable
+                              (63,
+                                y/0);
+                            Variable
+                              (63,
+                                x/0)
+                          ])));
+              Variable (63, l2/0)
+            ]))
+    ]))
+
+64
+(Value
+  (non_rec, @.,
+    [
+      ((me, [ ], [ ], Some Type (list/1, Type (Z/1))),
+        Apply
+          (64, Variable (64, OCaml.List.merge/1),
+            [
+              Function
+                (64, x,
+                  Function
+                    (64,
+                      y,
+                      Apply
+                        (64,
+                          Variable
+                            (64,
+                              Z.sub/1),
+                          [
+                            Variable
+                              (64,
+                                y/0);
+                            Variable
+                              (64,
+                                x/0)
+                          ])));
+              Variable (64, l2/0);
+              Constructor
+                (64, cons/1, Constant (64, Int(2)),
+                  Constructor
+                    (64,
+                      cons/1,
+                      Constant
+                        (64,
+                          Int(-1)),
+                      Constructor
+                        (64,
+                          cons/1,
+                          Constant
+                            (64,
+                              Int(5)),
+                          Constructor
+                            (64,
+                              []/1))))
             ]))
     ]))
