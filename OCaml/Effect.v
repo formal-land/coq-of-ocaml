@@ -286,6 +286,24 @@ Module Run.
         | inr ee => inr ee
         end
       end, ss)).
+  
+  (** Expected value for [tt']: [tt]. *)
+  Definition exception {A : Type} {es : list Effect.t} (n : nat) (x : M es A)
+    (tt' : Effect.S (List.nth n es Effect.nil))
+    : M (remove_nth es n) (A + Effect.E (List.nth n es Effect.nil)) :=
+    let! x := run n x tt' in
+    ret (fst x).
+  
+  (** Expected value for [error_is_empty]: [fun err => match err with end]. *)
+  Definition reader {A : Type} {es : list Effect.t} (n : nat) (x : M es A)
+    (error_is_empty : Effect.E (List.nth n es Effect.nil) -> False)
+    : Effect.S (List.nth n es Effect.nil) -> M (remove_nth es n) A :=
+    fun s =>
+      let! x := run n x s in
+      match fst x with
+      | inl x => ret x
+      | inr err => False_rect _ (error_is_empty err)
+      end.
 End Run.
 
 (** A stream which may be finite. *)

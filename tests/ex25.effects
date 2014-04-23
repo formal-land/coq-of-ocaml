@@ -1980,7 +1980,7 @@
 (Value
   (non_rec, @.,
     [
-      ((me, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((mer, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Apply
           ((64, Effect ([ ], .)),
             Variable ((64, Effect ([ ], .)), OCaml.List.merge/1),

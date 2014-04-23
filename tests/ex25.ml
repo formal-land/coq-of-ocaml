@@ -61,4 +61,4 @@ let com _ = List.combine l2 l2
 let so = List.sort (fun x y -> y - x) l2
 let sso = List.stable_sort (fun x y -> y - x) l2
 let fso = List.fast_sort (fun x y -> y - x) l2
-let me = List.merge (fun x y -> y - x) l2 [2; -1; 5]
+let mer = List.merge (fun x y -> y - x) l2 [2; -1; 5]

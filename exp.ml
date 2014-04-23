@@ -79,10 +79,10 @@ type 'a t =
 let annotation (e : 'a t) : 'a =
   match e with
   | Constant (a, _) | Variable (a, _) | Tuple (a, _) | Constructor (a, _, _)
-    | Apply (a, _, _) | Function (a, _, _) | LetVar (a, _, _, _)
-    | LetFun (a, _, _) | Match (a, _, _) | Record (a, _) | Field (a, _, _)
-    | IfThenElse (a, _, _, _) | Sequence (a, _, _) | Return (a, _)
-    | Bind (a, _, _, _) | Lift (a, _, _, _) | Run (a, _, _, _) -> a
+  | Apply (a, _, _) | Function (a, _, _) | LetVar (a, _, _, _)
+  | LetFun (a, _, _) | Match (a, _, _) | Record (a, _) | Field (a, _, _)
+  | IfThenElse (a, _, _, _) | Sequence (a, _, _) | Return (a, _)
+  | Bind (a, _, _, _) | Lift (a, _, _, _) | Run (a, _, _, _) -> a
 
 let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
   match e with

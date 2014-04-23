@@ -1059,7 +1059,7 @@
 (Value
   (non_rec, @.,
     [
-      ((me, [ ], [ ], Some Type (list/1, Type (Z/1))),
+      ((mer, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Apply
           (64, Variable (64, OCaml.List.merge/1),
             [

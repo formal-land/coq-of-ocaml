@@ -136,6 +136,6 @@ Definition sso : list Z :=
 
 Definition fso : list Z := OCaml.List.fast_sort (fun x => fun y => Z.sub y x) l2.
 
-Definition me : list Z :=
+Definition mer : list Z :=
   OCaml.List.merge (fun x => fun y => Z.sub y x) l2
     (cons 2 (cons (-1) (cons 5 []))).

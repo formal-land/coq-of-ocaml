@@ -372,7 +372,7 @@ Module StableSort.
       end in
     rev_merge_rev_aux l2 accu.
   
-  Ltac certify_sort_rec n n1 n2 Pl2 :=
+  Ltac sort_rec_tactic n n1 n2 Pl2 :=
     try (apply Z_div_pos; omega);
     try (
       assert (n = 2 * (n / 2) + (n mod 2)); [
@@ -446,7 +446,7 @@ Module StableSort.
         let! s2 := rev_sort_rec A counter cmp n2 l2 _ _ in
         ret (rev_merge_rev cmp s1 s2 [])
       end
-    end); certify_sort_rec n n1 n2 Pl2.
+    end); sort_rec_tactic n n1 n2 Pl2.
   refine (
     match counter with
     | O => fun Hn_pos Hn_le_length => not_terminated tt
@@ -484,7 +484,7 @@ Module StableSort.
         let! s2 := sort_rec A counter cmp n2 l2 _ _ in
         ret (rev_merge cmp s1 s2 [])
       end
-    end); certify_sort_rec n n1 n2 Pl2.
+    end); sort_rec_tactic n n1 n2 Pl2.
   Defined.
   
   Definition sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
@@ -500,7 +500,7 @@ Module StableSort.
     lift [_;_] "01" (rev_sort_rec x cmp n l Hn_pos Hn_le_length).
 End StableSort.
 
-Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
+Definition _stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
   : M [ Counter; NonTermination ] (list A).
   refine (
     let len := length l in
@@ -512,12 +512,20 @@ Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
   - unfold len; omega.
 Defined.
 
-Definition sort {A : Type}
-  : (A -> A -> Z) ->
-    (list A) -> M [ Counter; NonTermination ] (list A) :=
+Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A) : list A.
+  refine (
+    let n := Lists.List.length l in
+    let l := _stable_sort cmp l in
+    let l := Run.reader (0 % nat) l (fun err => match err with end) n in
+    match Run.exception (0 % nat) l tt with
+    | inl l => l
+    | inr _ => False_rect _ _
+    end).
+  admit.
+Defined.
+
+Definition sort {A : Type} : (A -> A -> Z) -> list A -> list A :=
   stable_sort.
 
-Definition fast_sort {A : Type}
-  : (A -> A -> Z) ->
-    (list A) -> M [ Counter; NonTermination ] (list A) :=
+Definition fast_sort {A : Type} : (A -> A -> Z) -> list A -> list A :=
   stable_sort.
