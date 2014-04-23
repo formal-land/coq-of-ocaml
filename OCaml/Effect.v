@@ -220,6 +220,74 @@ Module Exception.
       end, output _ _ s)).
 End Exception.
 
+Module Run.
+  Fixpoint remove_nth (es : list Effect.t) (n : nat) : list Effect.t :=
+    match es with
+    | [] => []
+    | e :: es =>
+      match n with
+      | O => es
+      | S n => e :: remove_nth es n
+      end
+    end.
+  
+  Fixpoint input (es : list Effect.t) (n : nat)
+    (s : Effect.S (List.nth n es Effect.nil))
+    (ss : Effect.state (remove_nth es n)) {struct es} : Effect.state es.
+    destruct es as [|e es].
+    - exact ss.
+    - destruct n as [|n].
+      + exact (s, ss).
+      + refine (fst ss, input es n s (snd ss)).
+  Defined.
+  
+  Fixpoint output (es : list Effect.t) (n : nat) (ss : Effect.state es)
+    {struct es}
+    : Effect.S (List.nth n es Effect.nil) * Effect.state (remove_nth es n).
+    destruct es as [|e es].
+    - destruct n; exact (tt, ss).
+    - destruct n as [|n].
+      + exact (fst ss, snd ss).
+      + exact (
+        let (s, ss') := output _ _ (snd ss) in
+        (s, (fst ss, ss'))).
+  Defined.
+  
+  Fixpoint error (es : list Effect.t) (n : nat) (err : Effect.error es)
+    {struct es}
+    : Effect.E (nth n es Effect.nil) + Effect.error (remove_nth es n).
+    destruct es as [|e es].
+    - destruct err.
+    - destruct n as [|n].
+      + exact err.
+      + refine (
+          match err with
+          | inl err => inr (inl err)
+          | inr err =>
+            match error _ _ err with
+            | inl err => inl err
+            | inr err => inr (inr err)
+            end
+          end).
+  Defined.
+  
+  Definition run {A : Type} {es : list Effect.t} (n : nat) (x : M es A)
+    : let S := Effect.S (List.nth n es Effect.nil) in
+      let E := Effect.E (List.nth n es Effect.nil) in
+      S -> M (remove_nth es n) ((A + E) * S) :=
+    fun s => of_raw (fun ss =>
+      let (r, ss) := (to_raw x) (input _ _ s ss) in
+      let (s, ss) := output es n ss in
+      (match r with
+      | inl x => inl (inl x, s)
+      | inr err =>
+        match error es n err with
+        | inl e => inl (inr e, s)
+        | inr ee => inr ee
+        end
+      end, ss)).
+End Run.
+
 (** A stream which may be finite. *)
 Module FiniteStream.
   CoInductive t (A : Type) : Type :=
