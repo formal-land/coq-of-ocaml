@@ -192,7 +192,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
       Match (l, e1, [p, e2]))
   | Texp_let (is_rec, cases, e) ->
     let (env, def) =
-      import_let_fun env Envi.Visibility.Local typ_vars is_rec cases in
+      import_let_fun env l Envi.Visibility.Local typ_vars is_rec cases in
     let e = of_expression env typ_vars e in
     LetFun (l, def, e)
   | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
@@ -322,13 +322,15 @@ and open_cases (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   let bound_x = Envi.bound_name (PathName.of_name [] x) env_vars in
   (x, Match (Loc.Unknown, Variable (Loc.Unknown, bound_x), cases))
 
-and import_let_fun (env : unit FullEnvi.t) (visibility : Envi.Visibility.t)
-  (typ_vars : Name.t Name.Map.t) (is_rec : Asttypes.rec_flag)
-  (cases : value_binding list) : unit FullEnvi.t * Loc.t t Definition.t =
+and import_let_fun (env : unit FullEnvi.t) (loc : Loc.t)
+  (visibility : Envi.Visibility.t) (typ_vars : Name.t Name.Map.t)
+  (is_rec : Asttypes.rec_flag) (cases : value_binding list)
+  : unit FullEnvi.t * Loc.t t Definition.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
-  let attrs = cases |> List.map (fun { vb_attributes = attrs } ->
-    Attribute.of_attributes attrs) in
-  let attr = List.fold_left Attribute.combine Attribute.None attrs in
+  let attrs = cases |> List.map (fun { vb_attributes = attrs; vb_expr = e } ->
+    let { exp_loc = loc } = e in
+    Attribute.of_attributes (Loc.of_location loc) attrs) in
+  let attr = List.fold_left (Attribute.combine loc) Attribute.None attrs in
   let cases = cases |> List.map (fun { vb_pat = p; vb_expr = e } ->
     let p = Pattern.of_pattern env p in
     match p with

@@ -11,10 +11,13 @@ let pp (attr : t) : SmartPrint.t =
   | CoqRec -> !^ "@coq_rec"
   | FreeRec -> !^ "@free_rec"
 
-let of_attributes (attrs : Typedtree.attributes) : t =
+let warn_incompatible_attributes (loc : Loc.t) : unit =
+  Error.warn loc "There cannot be both \"@coq_rec\" and \"@free_rec\" attributes."
+
+let of_attributes (loc : Loc.t) (attrs : Typedtree.attributes) : t =
   let attrs : string list = List.map (fun attr -> (fst attr).Asttypes.txt) attrs in
   if List.mem "coq_rec" attrs && List.mem "free_rec" attrs then
-    failwith "There cannot be both \"@coq_rec\" and \"@free_rec\" attributes." else
+    warn_incompatible_attributes loc;
   if List.mem "coq_rec" attrs then
     CoqRec
   else if List.mem "free_rec" attrs then
@@ -22,10 +25,12 @@ let of_attributes (attrs : Typedtree.attributes) : t =
   else
     None
 
-let combine (attr1 : t) (attr2 : t) : t =
+let combine (loc : Loc.t) (attr1 : t) (attr2 : t) : t =
   match (attr1, attr2) with
   | (None, _) -> attr2
   | (_, None) -> attr1
   | (CoqRec, CoqRec) -> CoqRec
   | (FreeRec, FreeRec) -> FreeRec
-  | (CoqRec, FreeRec) | (FreeRec, CoqRec) -> failwith "Attributes are not compatible."
+  | (CoqRec, FreeRec) | (FreeRec, CoqRec) ->
+    warn_incompatible_attributes loc;
+    CoqRec
