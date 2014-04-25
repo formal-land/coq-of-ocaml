@@ -16,12 +16,24 @@ let pp (c : t) : SmartPrint.t =
   | String s -> !^ "String" ^-^ parens (OCaml.string s)
 
 (** Import an OCaml constant. *)
-let of_constant (c : constant) : t =
+let of_constant (loc : Loc.t) (c : constant) : t =
   match c with
   | Const_int n -> Int n
   | Const_char c -> Char c
   | Const_string (s, _) -> String s
-  | _ -> failwith "Constant not handled."
+  | Const_float s ->
+    let n = int_of_float (float_of_string s) in
+    Error.warn loc (Printf.sprintf "Float constant %s is approximated by the integer %d." s n);
+    Int n
+  | Const_int32 n ->
+    Error.warn loc "Constant of type int32 is converted to int.";
+    Int (Int32.to_int n)
+  | Const_int64 n ->
+    Error.warn loc "Constant of type int64 is converted to int.";
+    Int (Int64.to_int n)
+  | Const_nativeint n ->
+    Error.warn loc "Constant of type nativeint is converted to int.";
+    Int (Nativeint.to_int n)
 
 (** Pretty-print a constant to Coq. *)
 let rec to_coq (c : t) : SmartPrint.t =

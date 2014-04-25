@@ -174,7 +174,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   | Texp_ident (path, _, _) ->
     let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.vars in
     Variable (l, x)
-  | Texp_constant constant -> Constant (l, Constant.of_constant constant)
+  | Texp_constant constant -> Constant (l, Constant.of_constant l constant)
   | Texp_let (_, [{ vb_pat = p; vb_expr = e1 }], e2)
     when (match e1.exp_desc with
     | Texp_function _ -> false

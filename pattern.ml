@@ -38,7 +38,7 @@ let rec of_pattern (env : 'a FullEnvi.t) (p : pattern) : t =
     let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.constructors in
     Constructor (x, List.map (of_pattern env) ps)
   | Tpat_alias (p, x, _) -> Alias (of_pattern env p, Name.of_ident x)
-  | Tpat_constant c -> Constant (Constant.of_constant c)
+  | Tpat_constant c -> Constant (Constant.of_constant l c)
   | Tpat_record (fields, _) ->
     Record (fields |> List.map (fun (x, _, p) ->
       let x = Envi.bound_name (PathName.of_loc x) env.FullEnvi.fields in
