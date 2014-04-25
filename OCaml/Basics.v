@@ -219,9 +219,11 @@ Module Pervasives.
   Definition int_of_char (c : ascii) : Z :=
     Z.of_nat (nat_of_ascii c).
 
-  (* TODO: raise Invalid_argument "char_of_int" if the argument is outside the range 0-255. *)
-  Definition char_of_int (n : Z) : ascii :=
-    ascii_of_nat (Z.to_nat n).
+  Definition char_of_int (n : Z) : M [ Invalid_argument ] ascii :=
+    if andb (le 0 n) (le n 255) then
+      ret (ascii_of_nat (Z.to_nat n))
+    else
+      raise_Invalid_argument "char_of_int".
   
   (** * Unit operations *)
   Definition ignore {A : Type} (_ : A) : unit :=
@@ -328,7 +330,7 @@ Module Pervasives.
   (* TODO *)
 End Pervasives.
 
-Module List.
+(*Module List.
   Definition length {A : Type} (l : list A) : Z :=
     Z_of_nat (length l).
   
@@ -432,7 +434,7 @@ Module List.
   (** * Association lists *)
   (** * Lists of pairs *)
   (** * Sorting *)
-End List.
+End List.*)
 
 Module String.
   Definition length (s : string) : Z :=

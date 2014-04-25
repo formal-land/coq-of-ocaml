@@ -14,7 +14,7 @@ let n5 = 156 lsl 4 + 12 lsr 1
 
 let s = "ghj" ^ "klm"
 
-let c = char_of_int (int_of_char 'c' + 1)
+let c _ = char_of_int (int_of_char 'c' + 1)
 
 let x = ignore 23
 

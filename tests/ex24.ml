@@ -65,7 +65,7 @@ let ss = "begin" ^ "end"
 
 (* Character operations *)
 let n_char = int_of_char 'c'
-let char_n = char_of_int 23
+let char_n _ = char_of_int 23
 
 (* Unit operations *)
 let i = ignore 12

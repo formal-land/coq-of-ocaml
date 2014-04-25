@@ -103,7 +103,7 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> add_var ["String"] "append" Global Pure
   (* Character operations *)
   |> add_var ["OCaml"; "Pervasives"] "int_of_char" Global Pure
-  |> add_var ["OCaml"; "Pervasives"] "char_of_int" Global Pure
+  |> add_var ["OCaml"; "Pervasives"] "char_of_int" Global (Arrow (d [["OCaml"], "Invalid_argument"], Pure))
   (* Unit operations *)
   |> add_var ["OCaml"; "Pervasives"] "ignore" Global Pure
   (* String conversion functions *)

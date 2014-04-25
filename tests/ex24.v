@@ -95,7 +95,10 @@ Definition ss : string := String.append "begin" % string "end" % string.
 
 Definition n_char : Z := OCaml.Pervasives.int_of_char "c" % char.
 
-Definition char_n : ascii := OCaml.Pervasives.char_of_int 23.
+Definition char_n {A : Type} (x : A) : M [ OCaml.Invalid_argument ] ascii :=
+  match x with
+  | _ => OCaml.Pervasives.char_of_int 23
+  end.
 
 Definition i : unit := OCaml.Pervasives.ignore 12.
 
