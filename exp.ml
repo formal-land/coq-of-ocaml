@@ -332,10 +332,11 @@ and import_let_fun (env : unit FullEnvi.t) (loc : Loc.t)
     Attribute.of_attributes (Loc.of_location loc) attrs) in
   let attr = List.fold_left (Attribute.combine loc) Attribute.None attrs in
   let cases = cases |> List.map (fun { vb_pat = p; vb_expr = e } ->
+    let loc = Loc.of_location p.pat_loc in
     let p = Pattern.of_pattern env p in
     match p with
     | Pattern.Variable x -> (x, e)
-    | _ -> failwith "A variable name instead of a pattern was expected.") in
+    | _ -> Error.raise loc "A variable name instead of a pattern was expected.") in
   let env_with_let =
     List.fold_left (fun env (x, _) -> FullEnvi.add_var [] x visibility () env)
       env cases in
