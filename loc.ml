@@ -11,5 +11,12 @@ let pp (l : t) : SmartPrint.t =
     let (_, line, _) = Location.get_pos_info start in
     OCaml.int line
 
+let to_user (l : t) : SmartPrint.t =
+  match l with
+  | Unknown -> !^ "?"
+  | Known (start, _) ->
+    let (file_name, line, _) = Location.get_pos_info start in
+    !^ file_name ^-^ !^ "," ^^ !^ "line" ^^ OCaml.int line
+
 let of_location (l : Location.t) : t =
   Known (l.Location.loc_start, l.Location.loc_end)
