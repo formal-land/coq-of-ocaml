@@ -438,10 +438,23 @@
 (Value
   (non_rec, @.,
     [
-      ((char_n, [ ], [ ], Some Type (ascii/1)),
-        Apply
-          (68, Variable (68, OCaml.Pervasives.char_of_int/1),
-            [ Constant (68, Int(23)) ]))
+      ((char_n, [ A ], [ (x, A) ],
+        Some Monad ([ OCaml.Invalid_argument/1 ], Type (ascii/1))),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Any,
+                Apply
+                  (68,
+                    Variable
+                      (68,
+                        OCaml.Pervasives.char_of_int/1),
+                    [
+                      Constant
+                        (68,
+                          Int(23))
+                    ]))
+            ]))
     ]))
 
 71

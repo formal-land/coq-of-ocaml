@@ -421,52 +421,76 @@
 (Value
   (non_rec, @.,
     [
-      ((c, [ ], [ ], Some Type (ascii/1)),
-        Apply
-          ((17, Effect ([ ], .)),
-            Variable
-              ((17, Effect ([ ], .)), OCaml.Pervasives.char_of_int/1),
+      ((c, [ A ], [ (x, A) ], Some Type (ascii/1)),
+        Match
+          ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x/0),
             [
-              Apply
-                ((17, Effect ([ ], .)),
-                  Variable
-                    ((17,
-                      Effect
-                        ([
-                        ],
-                          .)),
-                      Z.add/1),
-                  [
-                    Apply
+              (Any,
+                Apply
+                  ((17,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ],
+                        .)),
+                    Variable
                       ((17,
                         Effect
                           ([
                           ],
-                            .)),
-                        Variable
-                          ((17,
-                            Effect
-                              ([
-                              ],
-                                .)),
-                            OCaml.Pervasives.int_of_char/1),
-                        [
-                          Constant
+                            .
+                              -[
+                                OCaml.Invalid_argument/1
+                              ]->
+                              .)),
+                        OCaml.Pervasives.char_of_int/1),
+                    [
+                      Apply
+                        ((17,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Variable
                             ((17,
                               Effect
                                 ([
                                 ],
                                   .)),
-                              Char("c"))
-                        ]);
-                    Constant
-                      ((17,
-                        Effect
-                          ([
-                          ],
-                            .)),
-                        Int(1))
-                  ])
+                              Z.add/1),
+                          [
+                            Apply
+                              ((17,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Variable
+                                  ((17,
+                                    Effect
+                                      ([
+                                      ],
+                                        .)),
+                                    OCaml.Pervasives.int_of_char/1),
+                                [
+                                  Constant
+                                    ((17,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      Char("c"))
+                                ]);
+                            Constant
+                              ((17,
+                                Effect
+                                  ([
+                                  ],
+                                    .)),
+                                Int(1))
+                          ])
+                    ]))
             ]))
     ]))
 

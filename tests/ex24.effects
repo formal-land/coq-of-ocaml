@@ -635,12 +635,40 @@
 (Value
   (non_rec, @.,
     [
-      ((char_n, [ ], [ ], Some Type (ascii/1)),
-        Apply
-          ((68, Effect ([ ], .)),
-            Variable
-              ((68, Effect ([ ], .)), OCaml.Pervasives.char_of_int/1),
-            [ Constant ((68, Effect ([ ], .)), Int(23)) ]))
+      ((char_n, [ A ], [ (x, A) ], Some Type (ascii/1)),
+        Match
+          ((?, Effect ([ OCaml.Invalid_argument/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x/0),
+            [
+              (Any,
+                Apply
+                  ((68,
+                    Effect
+                      ([
+                        OCaml.Invalid_argument/1
+                      ],
+                        .)),
+                    Variable
+                      ((68,
+                        Effect
+                          ([
+                          ],
+                            .
+                              -[
+                                OCaml.Invalid_argument/1
+                              ]->
+                              .)),
+                        OCaml.Pervasives.char_of_int/1),
+                    [
+                      Constant
+                        ((68,
+                          Effect
+                            ([
+                            ],
+                              .)),
+                          Int(23))
+                    ]))
+            ]))
     ]))
 
 71

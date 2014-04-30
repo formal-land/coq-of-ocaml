@@ -44,7 +44,7 @@
       [ "Var", "n_lsr", [] ],
       [ "Var", "ss", [] ],
       [ "Var", "n_char", [] ],
-      [ "Var", "char_n", [] ],
+      [ "Var", "char_n", [ [ "OCaml.Invalid_argument" ] ] ],
       [ "Var", "i", [] ],
       [ "Var", "s_bool", [] ],
       [ "Var", "bool_s", [] ],

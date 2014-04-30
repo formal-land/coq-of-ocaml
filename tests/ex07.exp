@@ -221,27 +221,38 @@
 (Value
   (non_rec, @.,
     [
-      ((c, [ ], [ ], Some Type (ascii/1)),
-        Apply
-          (17, Variable (17, OCaml.Pervasives.char_of_int/1),
+      ((c, [ A ], [ (x, A) ], Some Type (ascii/1)),
+        Match
+          (?, Variable (?, x/0),
             [
-              Apply
-                (17, Variable (17, Z.add/1),
-                  [
-                    Apply
+              (Any,
+                Apply
+                  (17,
+                    Variable
                       (17,
-                        Variable
-                          (17,
-                            OCaml.Pervasives.int_of_char/1),
-                        [
-                          Constant
+                        OCaml.Pervasives.char_of_int/1),
+                    [
+                      Apply
+                        (17,
+                          Variable
                             (17,
-                              Char("c"))
-                        ]);
-                    Constant
-                      (17,
-                        Int(1))
-                  ])
+                              Z.add/1),
+                          [
+                            Apply
+                              (17,
+                                Variable
+                                  (17,
+                                    OCaml.Pervasives.int_of_char/1),
+                                [
+                                  Constant
+                                    (17,
+                                      Char("c"))
+                                ]);
+                            Constant
+                              (17,
+                                Int(1))
+                          ])
+                    ]))
             ]))
     ]))
 
