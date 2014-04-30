@@ -172,7 +172,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   let l = Loc.of_location e.exp_loc in
   match e.exp_desc with
   | Texp_ident (path, _, _) ->
-    let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.vars in
+    let x = Envi.bound_name (PathName.of_path l path) env.FullEnvi.vars in
     Variable (l, x)
   | Texp_constant constant -> Constant (l, Constant.of_constant l constant)
   | Texp_let (_, [{ vb_pat = p; vb_expr = e1 }], e2)
@@ -205,9 +205,10 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     let (x, e) = open_cases env typ_vars cases in
     Function (l, x, e)
   | Texp_apply (e_f, e_xs) ->
+    let l_f = Loc.of_location e_f.exp_loc in
     (match e_f.exp_desc with
     | Texp_ident (path, _, _)
-      when PathName.of_path path = PathName.of_name ["Pervasives"] "raise" ->
+      when PathName.of_path l_f path = PathName.of_name ["Pervasives"] "raise" ->
       (match e_xs with
       | [(_, Some e_x, _)] ->
         (match e_x.exp_desc with
@@ -222,12 +223,13 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
           Error.raise l "Constructor of an exception expected after a 'raise'.")
       | _ -> Error.raise l "Expected one argument for 'raise'.")
     | Texp_ident (path, _, _)
-      when PathName.of_path path = PathName.of_name ["Pervasives"] "!" ->
+      when PathName.of_path l_f path = PathName.of_name ["Pervasives"] "!" ->
       (match e_xs with
       | [(_, Some e_x, _)] ->
         (match e_x.exp_desc with
         | Texp_ident (path, _, _) ->
-          let read = PathName.of_path path in
+          let l_x = Loc.of_location e_x.exp_loc in
+          let read = PathName.of_path l_x path in
           let read =
             { read with PathName.base = "read_" ^ read.PathName.base } in
           let read = Envi.bound_name read env.FullEnvi.vars in
@@ -235,12 +237,13 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
         | _ -> Error.raise l "Name of a reference expected after '!'.")
       | _ -> Error.raise l "Expected one argument for '!'.")
     | Texp_ident (path, _, _)
-      when PathName.of_path path = PathName.of_name ["Pervasives"] ":=" ->
+      when PathName.of_path l_f path = PathName.of_name ["Pervasives"] ":=" ->
       (match e_xs with
       | [(_, Some e_r, _); (_, Some e_v, _)] ->
         (match e_r.exp_desc with
         | Texp_ident (path, _, _) ->
-          let write = PathName.of_path path in
+          let l_r = Loc.of_location e_r.exp_loc in
+          let write = PathName.of_path l_r path in
           let write =
             { write with PathName.base = "write_" ^ write.PathName.base } in
           let write = Envi.bound_name write env.FullEnvi.vars in
@@ -335,19 +338,19 @@ and import_let_fun (env : unit FullEnvi.t) (loc : Loc.t)
     let loc = Loc.of_location p.pat_loc in
     let p = Pattern.of_pattern env p in
     match p with
-    | Pattern.Variable x -> (x, e)
+    | Pattern.Variable x -> (x, e, loc)
     | _ -> Error.raise loc "A variable name instead of a pattern was expected.") in
   let env_with_let =
-    List.fold_left (fun env (x, _) -> FullEnvi.add_var [] x visibility () env)
+    List.fold_left (fun env (x, _, _) -> FullEnvi.add_var [] x visibility () env)
       env cases in
   let env =
     if Recursivity.to_bool is_rec then
       env_with_let
     else
       env in
-  let cases = cases |> List.map (fun (x, e) ->
+  let cases = cases |> List.map (fun (x, e, loc) ->
     let (e_typ, typ_vars, new_typ_vars) =
-      Type.of_type_expr_new_typ_vars env typ_vars e.exp_type in
+      Type.of_type_expr_new_typ_vars env loc typ_vars e.exp_type in
     let e = of_expression env typ_vars e in
     let (args_names, e_body) = open_function e in
     let (args_typs, e_body_typ) =

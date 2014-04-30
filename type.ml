@@ -21,7 +21,7 @@ let rec pp (typ : t) : SmartPrint.t =
     Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
-let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t)
+let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t) (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (typ : Types.type_expr)
   : t * Name.t Name.Map.t * Name.Set.t =
   match typ.desc with
@@ -39,48 +39,55 @@ let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t)
     let typ = Variable name in
     (typ, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
-    let (typ_x, typ_vars, new_typ_vars_x) = of_type_expr_new_typ_vars env typ_vars typ_x in
-    let (typ_y, typ_vars, new_typ_vars_y) = of_type_expr_new_typ_vars env typ_vars typ_y in
+    let (typ_x, typ_vars, new_typ_vars_x) = of_type_expr_new_typ_vars env loc typ_vars typ_x in
+    let (typ_y, typ_vars, new_typ_vars_y) = of_type_expr_new_typ_vars env loc typ_vars typ_y in
     (Arrow (typ_x, typ_y), typ_vars, Name.Set.union new_typ_vars_x new_typ_vars_y)
   | Ttuple typs ->
-    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env typ_vars typs in
+    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env loc typ_vars typs in
     (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env typ_vars typs in
-    let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.typs in
+    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env loc typ_vars typs in
+    let x = Envi.bound_name (PathName.of_path loc path) env.FullEnvi.typs in
     (Apply (x, typs), typ_vars, new_typ_vars)
-  | Tlink typ -> of_type_expr_new_typ_vars env typ_vars typ
-  | Tpoly (typ, []) -> of_type_expr_new_typ_vars env typ_vars typ
-  | _ -> failwith "Type not handled."
+  | Tlink typ -> of_type_expr_new_typ_vars env loc typ_vars typ
+  | Tpoly (typ, []) -> of_type_expr_new_typ_vars env loc typ_vars typ
+  | _ ->
+    Error.warn loc "Type not handled.";
+    (Variable "unhandled_type", typ_vars, Name.Set.empty)
 
-and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t)
+and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t) (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (typs : Types.type_expr list)
   : t list * Name.t Name.Map.t * Name.Set.t =
   let (typs, typ_vars, new_typ_vars) =
     List.fold_left (fun (typs, typ_vars, new_typ_vars) typ ->
-      let (typ, typ_vars, new_typ_vars') = of_type_expr_new_typ_vars env typ_vars typ in
+      let (typ, typ_vars, new_typ_vars') = of_type_expr_new_typ_vars env loc typ_vars typ in
       (typ :: typs, typ_vars, Name.Set.union new_typ_vars new_typ_vars'))
       ([], typ_vars, Name.Set.empty) typs in
   (List.rev typs, typ_vars, new_typ_vars)
 
-let rec of_type_expr (env : 'a FullEnvi.t) (typ : Types.type_expr) : t =
+let rec of_type_expr (env : 'a FullEnvi.t) (loc : Loc.t) (typ : Types.type_expr)
+  : t =
   match typ.desc with
   | Tvar (Some x) -> Variable x
   | Tarrow (_, typ_x, typ_y, _) ->
-    Arrow (of_type_expr env typ_x, of_type_expr env typ_y)
+    Arrow (of_type_expr env loc typ_x, of_type_expr env loc typ_y)
   | Ttuple typs ->
-    Tuple (List.map (of_type_expr env) typs)
+    Tuple (List.map (of_type_expr env loc) typs)
   | Tconstr (path, typs, _) ->
-    let x = Envi.bound_name (PathName.of_path path) env.FullEnvi.typs in
-    Apply (x, List.map (of_type_expr env) typs)
-  | Tlink typ -> of_type_expr env typ
-  | Tpoly (typ, []) -> of_type_expr env typ
-  | _ -> failwith "Type not handled."
+    let x = Envi.bound_name (PathName.of_path loc path) env.FullEnvi.typs in
+    Apply (x, List.map (of_type_expr env loc) typs)
+  | Tlink typ -> of_type_expr env loc typ
+  | Tpoly (typ, []) -> of_type_expr env loc typ
+  | _ ->
+    Error.warn loc "Type not handled.";
+    Variable "unhandled_type"
 
-let of_type_expr_variable (typ : Types.type_expr) : Name.t =
+let of_type_expr_variable (loc : Loc.t) (typ : Types.type_expr) : Name.t =
   match typ.desc with
   | Tvar (Some x) -> x
-  | _ -> failwith "The type parameter was expected to be a variable."
+  | _ ->
+    Error.warn loc "The type parameter was expected to be a variable.";
+    "expected_a_type_variable"
 
 (** In a function's type extract the body's type (up to [n] arguments). *)
 let rec open_type (typ : t) (n : int) : t list * t =

@@ -146,8 +146,7 @@ let of_name (path : Name.t list) (base : Name.t) : t =
 (** Import an OCaml [Longident.t]. *)
 let of_longident (longident : Longident.t) : t =
   match List.rev (Longident.flatten longident) with
-  | [] ->
-    failwith "TODO"; failwith "Longident.t with an empty list not expected."
+  | [] -> failwith "Longident.t with an empty list not expected."
   | x :: xs -> convert (of_name (List.rev xs) x)
 
 (** Import an OCaml location. *)
@@ -155,14 +154,16 @@ let of_loc (loc : Longident.t loc) : t =
   of_longident loc.txt
 
 (** Import an OCaml [Path.t]. *)
-let of_path (p : Path.t) : t =
+let of_path (loc : Loc.t) (p : Path.t) : t =
   let rec aux p : Name.t list * Name.t =
     match p with
     | Path.Pident x -> ([], Name.of_ident x)
     | Path.Pdot (p, s, _) ->
       let (path, base) = aux p in
       (base :: path, s)
-    | Path.Papply _ -> failwith "TODO" in
+    | Path.Papply _ ->
+      Error.warn loc "Application of paths not handled.";
+      ([], "application_of_paths") in
   let (path, base) = aux p in
   convert (of_name (List.rev path) base)
 
@@ -184,4 +185,4 @@ let of_json (json : json) : t =
   | `String x ->
     let (path, base) = split_at_last @@ Str.split (Str.regexp_string ".") x in
     of_name path base
-  | _ -> failwith "List expected."
+  | _ -> raise (Error.Json "List expected.")

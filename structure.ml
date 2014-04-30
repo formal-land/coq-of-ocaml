@@ -247,10 +247,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       vb_expr = {
         exp_desc = Texp_apply ({exp_desc = Texp_ident (path, _, _)}, [_]);
         exp_type = {Types.desc = Types.Tconstr (_, [typ], _)}}}])
-      when PathName.of_path path = PathName.of_name ["Pervasives"] "ref" ->
+      when PathName.of_path loc path = PathName.of_name ["Pervasives"] "ref" ->
       let r = {
         Reference.name = Name.of_ident x;
-        typ = Type.of_type_expr env typ } in
+        typ = Type.of_type_expr env loc typ } in
       (Reference.update_env r env, Reference (loc, r))
     | Tstr_value (is_rec, cases) ->
       let (env, def) =
@@ -258,14 +258,14 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       (env, Value (loc, def))
     | Tstr_type [{typ_id = name; typ_type = typ}] ->
       let name = Name.of_ident name in
-      let typ_vars = List.map Type.of_type_expr_variable typ.type_params in
+      let typ_vars = List.map (Type.of_type_expr_variable loc) typ.type_params in
       (match typ.type_kind with
       | Type_variant cases ->
         let constructors =
           let env = FullEnvi.add_typ [] name Envi.Visibility.Global env in
           cases |> List.map (fun {cd_id = constr; cd_args = typs} ->
             (Name.of_ident constr, typs |> List.map (fun typ ->
-              Type.of_type_expr env typ))) in
+              Type.of_type_expr env loc typ))) in
         let ind = {
           Inductive.name = name;
           typ_vars = typ_vars;
@@ -273,7 +273,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
         (Inductive.update_env ind env, Inductive (loc, ind))
       | Type_record (fields, _) ->
         let fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
-          (Name.of_ident x, Type.of_type_expr env typ)) in
+          (Name.of_ident x, Type.of_type_expr env loc typ)) in
         let r = {
           Record.name = name;
           fields = fields } in
@@ -284,18 +284,18 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
           let syn = {
             Synonym.name = name;
             typ_vars = typ_vars;
-            value = Type.of_type_expr env typ } in
+            value = Type.of_type_expr env loc typ } in
           (Synonym.update_env syn env, Synonym (loc, syn))
         | None -> Error.raise loc "Type definition not handled."))
     | Tstr_exception { cd_id = name; cd_args = args } ->
       let name = Name.of_ident name in
       let typ =
         Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
-          Type.of_type_expr env typ)) in
+          Type.of_type_expr env loc typ)) in
       let exn = { Exception.name = name; typ = typ} in
       (Exception.update_env exn env, Exception (loc, exn))
     | Tstr_open (_, path, _, _) ->
-      let o = PathName.of_path path in
+      let o = PathName.of_path loc path in
       let o = o.PathName.path @ [o.PathName.base] in
       (Open.update_env o env, Open (loc, o))
     | Tstr_module {mb_id = name;

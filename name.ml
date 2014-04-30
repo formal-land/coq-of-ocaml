@@ -86,4 +86,4 @@ let to_json (x : t) : json =
 let of_json (json : json) : t =
   match json with
   | `String x -> x
-  | _ -> failwith "TODO"(*raise (Error.Json "String expected.")*)
+  | _ -> raise (Error.Json "String expected.")
