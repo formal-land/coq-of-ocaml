@@ -54,7 +54,7 @@ let add_exception_with_effects (path : Name.t list) (base : Name.t)
     Effect.Type.Arrow (
       Effect.Descriptor.singleton
         id
-        (Envi.bound_name (PathName.of_name path base) env.descriptors),
+        (Envi.bound_name Loc.Unknown (PathName.of_name path base) env.descriptors),
       Effect.Type.Pure) in
   add_var path ("raise_" ^ base) visibility effect_typ env
 

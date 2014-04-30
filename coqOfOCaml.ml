@@ -39,8 +39,6 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
     to_stdout 80 2 document;
     print_newline ();
     flush stdout with
-  | Envi.NotFound x ->
-    failwith (to_string 80 2 @@ (PathName.pp x ^^ !^ "not found."))
   | Error.Make x ->
     failwith (to_string 80 2 @@ Error.pp x)
 

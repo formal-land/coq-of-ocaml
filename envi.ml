@@ -62,8 +62,6 @@ type 'a t = 'a Segment.t list
 let pp (env : 'a t) : SmartPrint.t =
   OCaml.list Segment.pp env
 
-exception NotFound of PathName.t
-
 let rec size (env : 'a t) : int =
   match env with
   | [] -> 0
@@ -98,10 +96,12 @@ let rec depth (x : PathName.t) (env : 'a t) : (PathName.t * int) option =
         | Some (x, d) -> Some (x, d + 1))
   | [] -> None
 
-let bound_name (x : PathName.t) (env : 'a t) : BoundName.t =
+let bound_name (loc : Loc.t) (x : PathName.t) (env : 'a t) : BoundName.t =
   match depth x env with
   | Some (x, d) -> { BoundName.path_name = x; depth = d }
-  | None -> raise (NotFound x)
+  | None ->
+    let message = PathName.pp x ^^ !^ "not found." in
+    Error.raise loc (SmartPrint.to_string 80 2 message)
 
 let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
   let segment =

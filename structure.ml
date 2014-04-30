@@ -171,7 +171,7 @@ module Reference = struct
       Effect.Type.Arrow (
         Effect.Descriptor.singleton
           id
-          (Envi.bound_name (PathName.of_name [] r.name) env.FullEnvi.descriptors),
+          (Envi.bound_name Loc.Unknown (PathName.of_name [] r.name) env.FullEnvi.descriptors),
         Effect.Type.Pure) in
     env
     |> FullEnvi.add_var [] ("read_" ^ r.name) Envi.Visibility.Global effect_typ
