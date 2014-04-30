@@ -14,3 +14,5 @@ let warn (location : Loc.t) (message : string) : unit =
 
 let raise (location : Loc.t) (message : string) : 'a =
   raise (Make {location = location; message = message})
+
+exception Json of string

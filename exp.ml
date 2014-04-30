@@ -561,15 +561,12 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
   : (Loc.t * Effect.t) t =
   let compound (es : Loc.t t list) : (Loc.t * Effect.t) t list * Effect.t =
     let es = List.map (effects env) es in
-    let effects = List.map (fun e -> snd (annotation e)) es in
-    let descriptor = Effect.Descriptor.union (
-      List.map (fun effect -> effect.Effect.descriptor) effects) in
-    let have_functional_effect = effects |> List.exists (fun effect ->
-      not (Effect.Type.is_pure effect.Effect.typ)) in
-    if have_functional_effect then
-      failwith "Compounds cannot have functional effects."
-    else
-      (es, { Effect.descriptor = descriptor; typ = Effect.Type.Pure }) in
+    let descriptor = Effect.Descriptor.union (es |> List.map (fun e ->
+      let (loc, effect) = annotation e in
+      if not (Effect.Type.is_pure effect.Effect.typ) then
+        Error.warn loc "Compounds cannot have functional effects; effect ignored.";
+      effect.Effect.descriptor)) in
+    (es, { Effect.descriptor = descriptor; typ = Effect.Type.Pure }) in
   match e with
   | Constant (l, c) ->
     let effect =
@@ -583,7 +580,11 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
           typ = Envi.find x env.FullEnvi.vars Effect.Type.enter_lift } in
       Variable ((l, effect), x)
     with Not_found ->
-      failwith (SmartPrint.to_string 80 2 (BoundName.pp x ^^ !^ "not found.")))
+      let message = BoundName.pp x ^^ !^ "not found: supposed to be pure." in
+      Error.warn l (SmartPrint.to_string 80 2 message);
+      Variable ((l, {
+        Effect.descriptor = Effect.Descriptor.pure;
+        typ = Effect.Type.Pure }), x))
   | Tuple (l, es) ->
     let (es, effect) = compound es in
     Tuple ((l, effect), es)
@@ -864,7 +865,8 @@ let rec monadise (env : unit FullEnvi.t) (e : (Loc.t * Effect.t) t) : Loc.t t =
     bind d1 d2 d e1 None e2
   | Run ((l, _), x, _, e) ->
     Run (l, x, descriptor e, monadise env e)
-  | Return _ | Bind _ | Lift _ -> failwith "Unexpected arguments for 'monadise'."
+  | Return _ | Bind _ | Lift _ ->
+    failwith "Unexpected arguments for 'monadise'."
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)

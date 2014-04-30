@@ -31,7 +31,7 @@ module Shape = struct
     let of_list f json =
       match json with
       | `List jsons -> List.map f jsons
-      | _ -> failwith "List expected." in
+      | _ -> raise (Error.Json "List expected.") in
     of_list (of_list PathName.of_json) json
 end
 
@@ -123,7 +123,8 @@ let rec of_json (json : json) : t =
   | `List [`String "Field"; x] -> Field (Name.of_json x)
   | `List [`String "Interface"; x; `List defs] ->
       Interface (Name.of_json x, List.map of_json defs)
-  | _ -> failwith "Wrong JSON format."
+  | _ -> raise (Error.Json
+    "Expected a Var, Typ, Descriptor, Constructor, Field or Interface field.")
 
 let to_json_string (interface : t) : string =
   let pretty = pretty_format ~std:true (`Assoc [
@@ -141,8 +142,8 @@ let of_json_string (json : string) : t =
   | `Assoc jsons ->
     (match List.assoc "version" jsons with
     | `String "1" -> of_json @@ List.assoc "content" jsons
-    | _ -> failwith "Wrong interface version.")
-  | _ -> failwith "Wrong JSON format."
+    | _ -> raise (Error.Json "Wrong interface version, expected 1."))
+  | _ -> raise (Error.Json "Expected an object.")
 
 let of_file (file_name : string) : t =
   let file = open_in_bin file_name in
