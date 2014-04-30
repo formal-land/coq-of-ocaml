@@ -2,7 +2,12 @@
 open SmartPrint
 
 module Descriptor = struct
-  module Map = Map.Make (struct type t = Loc.t let compare = compare end)
+  module Id = struct
+    type t =
+      | Ether of PathName.t
+      | Loc of Loc.t
+  end
+  module Map = Map.Make (struct type t = Id.t let compare = compare end)
   type t = BoundName.t Map.t
 
   let pp (d : t) : SmartPrint.t =
@@ -16,8 +21,8 @@ module Descriptor = struct
   let eq (d1 : t) (d2 : t) : bool =
     Map.equal (fun _ _ -> true) d1 d2
 
-  let singleton (loc : Loc.t) (x : BoundName.t) : t =
-    Map.singleton loc x
+  let singleton (id : Id.t) (x : BoundName.t) : t =
+    Map.singleton id x
 
   let union (ds : t list) : t =
     List.fold_left (fun d1 d2 -> Map.fold Map.add d1 d2) pure ds

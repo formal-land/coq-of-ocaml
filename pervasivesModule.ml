@@ -7,13 +7,13 @@ open SmartPrint
 let env_with_effects : Effect.Type.t FullEnvi.t =
   let descriptor (path, base) =
     let x = PathName.of_name path base in
-    Effect.Descriptor.singleton (Loc.Ether x)
+    Effect.Descriptor.singleton (Effect.Descriptor.Id.Ether x)
       { BoundName.path_name = x; depth = 0 } in
   let d xs : Effect.Descriptor.t =
     Effect.Descriptor.union (List.map descriptor xs) in
   let add_exn path base =
     add_exception_with_effects path base
-      (Loc.Ether (PathName.of_name path base)) in
+      (Effect.Descriptor.Id.Ether (PathName.of_name path base)) in
   FullEnvi.empty Effect.Type.leave_prefix
   (* Values specific to the translation to Coq *)
   |> add_typ [] "nat" Global

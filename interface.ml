@@ -18,7 +18,7 @@ module Shape = struct
   let to_effect_typ (shape : t) (env : 'a FullEnvi.t) : Effect.Type.t =
     let descriptor ds : Effect.Descriptor.t =
       let ds = ds |> List.map (fun d ->
-        Effect.Descriptor.singleton (Loc.Ether d)
+        Effect.Descriptor.singleton (Effect.Descriptor.Id.Ether d)
           (Envi.bound_name d env.FullEnvi.descriptors)) in
       Effect.Descriptor.union ds in
     List.fold_right (fun ds typ -> Effect.Type.Arrow (descriptor ds, typ))

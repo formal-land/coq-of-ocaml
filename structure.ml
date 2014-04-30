@@ -136,8 +136,8 @@ module Exception = struct
     FullEnvi.add_exception [] exn.name Envi.Visibility.Global env
 
   let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t)
-    (loc : Loc.t) : Effect.Type.t FullEnvi.t =
-    FullEnvi.add_exception_with_effects [] exn.name loc Envi.Visibility.Global env
+    (id : Effect.Descriptor.Id.t) : Effect.Type.t FullEnvi.t =
+    FullEnvi.add_exception_with_effects [] exn.name id Envi.Visibility.Global env
 
   let to_coq (exn : t) : SmartPrint.t =
     !^ "Definition" ^^ Name.to_coq exn.name ^^ !^ ":=" ^^
@@ -164,13 +164,13 @@ module Reference = struct
     |> FullEnvi.add_var [] ("write_" ^ r.name) Envi.Visibility.Global ()
     |> FullEnvi.add_descriptor [] r.name Envi.Visibility.Global
 
-  let update_env_with_effects (r : t) (env : Effect.Type.t FullEnvi.t) (loc : Loc.t)
-    : Effect.Type.t FullEnvi.t =
+  let update_env_with_effects (r : t) (env : Effect.Type.t FullEnvi.t)
+    (id : Effect.Descriptor.Id.t) : Effect.Type.t FullEnvi.t =
     let env = FullEnvi.add_descriptor [] r.name Envi.Visibility.Global env in
     let effect_typ =
       Effect.Type.Arrow (
         Effect.Descriptor.singleton
-          loc
+          id
           (Envi.bound_name (PathName.of_name [] r.name) env.FullEnvi.descriptors),
         Effect.Type.Pure) in
     env
@@ -352,16 +352,18 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
       (if def.Exp.Definition.cases |> List.exists (fun (header, e) ->
         header.Exp.Header.args = [] &&
           not (Effect.Descriptor.is_pure (snd (Exp.annotation e)).Effect.descriptor)) then
-        failwith "Toplevel effects are forbidden.");
+        Error.warn loc "Toplevel effects are forbidden.");
       let env = Exp.env_after_def_with_effects env Envi.Visibility.Global def in
       (env, Value (loc, def))
     | Inductive (loc, ind) -> (Inductive.update_env ind env, Inductive (loc, ind))
     | Record (loc, record) -> (Record.update_env record env, Record (loc, record))
     | Synonym (loc, synonym) -> (Synonym.update_env synonym env, Synonym (loc, synonym))
     | Exception (loc, exn) ->
-      (Exception.update_env_with_effects exn env loc, Exception (loc, exn))
+      let id = Effect.Descriptor.Id.Loc loc in
+      (Exception.update_env_with_effects exn env id, Exception (loc, exn))
     | Reference (loc, r) ->
-      (Reference.update_env_with_effects r env loc, Reference (loc, r))
+      let id = Effect.Descriptor.Id.Loc loc in
+      (Reference.update_env_with_effects r env id, Reference (loc, r))
     | Open (loc, o) -> (Open.update_env o env, Open (loc, o))
     | Module (loc, name, defs) ->
       let env = FullEnvi.enter_module env in
