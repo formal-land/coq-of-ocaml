@@ -1,6 +1,6 @@
 (** A structure represents the contents of a ".ml" file. *)
-open Typedtree
 open Types
+open Typedtree
 open SmartPrint
 
 (** A value is a toplevel definition made with a "let". *)
@@ -35,6 +35,36 @@ module Value = struct
         | None -> empty
         | Some typ -> !^ ": " ^-^ Type.to_coq false typ) ^-^
         !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
+end
+
+(** The declaration of a value in a module type. *)
+module Declaration = struct
+  type 'a t = {
+    annotation : 'a;
+    name : Name.t;
+    typ_args : Name.t list;
+    typ : Type.t }
+
+  let pp (pp_a : 'a -> SmartPrint.t) (declaration : 'a t) : SmartPrint.t =
+    nest (!^ "Declaration" ^^ OCaml.tuple [
+      pp_a declaration.annotation; Name.pp declaration.name;
+      OCaml.list Name.pp declaration.typ_args; Type.pp declaration.typ])
+
+  let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
+    (declaration : value_description) : Loc.t t =
+    let name = Name.of_ident declaration.val_id in
+    let typ = declaration.val_desc.ctyp_type in
+    let (typ, _, typ_args) =
+      Type.of_type_expr_new_typ_vars env loc Name.Map.empty typ in
+    { annotation = loc;
+      name = name;
+      typ_args = Name.Set.elements typ_args;
+      typ = typ }
+
+  let update_env (f : 'a -> 'b) (declaration : 'a t) (env : 'b FullEnvi.t)
+    : 'b FullEnvi.t =
+    FullEnvi.add_var [] declaration.name Envi.Visibility.Global
+      (f declaration.annotation) env
 end
 
 (** A definition of a sum type. *)
@@ -208,6 +238,37 @@ module Open = struct
     nest (!^ "Import" ^^ separate (!^ ".") (List.map Name.pp o) ^-^ !^ ".")
 end
 
+module ModuleType = struct
+  type 'a t =
+    | Declaration of Loc.t * 'a Declaration.t
+    | Inductive of Loc.t * Inductive.t
+    | Record of Loc.t * Record.t
+    | Synonym of Loc.t * Synonym.t
+    | Exception of Loc.t * Exception.t
+    | Reference of Loc.t * Reference.t
+    | Open of Loc.t * Open.t
+    | Module of Loc.t * Name.t * 'a t list
+
+  let rec of_signature (env : unit FullEnvi.t) (signature : signature)
+    : unit FullEnvi.t * Loc.t t list =
+    let (env, mod_typs) =
+      List.fold_left (fun (env, mod_typs) item ->
+        let (env, mod_typ) = of_signature_item env item in
+        (env, mod_typ :: mod_typs))
+      (env, []) signature.sig_items in
+    (env, List.rev mod_typs)
+
+  and of_signature_item (env : unit FullEnvi.t) (item : signature_item)
+    : unit FullEnvi.t * Loc.t t =
+    let loc = Loc.of_location item.sig_loc in
+    match item.sig_desc with
+    | Tsig_value declaration ->
+      let declaration = Declaration.of_ocaml env loc declaration in
+      let env = Declaration.update_env (fun _ -> ()) declaration env in
+      (env, Declaration (loc, declaration))
+    | _ -> Error.raise loc "Module type item not handled."
+end
+
 (** A structure. *)
 type 'a t =
   | Value of Loc.t * 'a Value.t
@@ -218,6 +279,7 @@ type 'a t =
   | Reference of Loc.t * Reference.t
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
+  | ModuleType of Loc.t * Name.t * 'a ModuleType.t
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
   let pp_one (def : 'a t) : SmartPrint.t =
@@ -263,7 +325,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       | Type_variant cases ->
         let constructors =
           let env = FullEnvi.add_typ [] name Envi.Visibility.Global env in
-          cases |> List.map (fun {cd_id = constr; cd_args = typs} ->
+          cases |> List.map (fun { Types.cd_id = constr; cd_args = typs } ->
             (Name.of_ident constr, typs |> List.map (fun typ ->
               Type.of_type_expr env loc typ))) in
         let ind = {
@@ -272,7 +334,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
           constructors = constructors } in
         (Inductive.update_env ind env, Inductive (loc, ind))
       | Type_record (fields, _) ->
-        let fields = fields |> List.map (fun {ld_id = x; ld_type = typ} ->
+        let fields = fields |> List.map (fun { Types.ld_id = x; ld_type = typ } ->
           (Name.of_ident x, Type.of_type_expr env loc typ)) in
         let r = {
           Record.name = name;
@@ -308,6 +370,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, structures))
+    | Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
+      { sig_items = items } } } ->
+      let name = Name.of_ident name in
+      failwith "TODO"
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
