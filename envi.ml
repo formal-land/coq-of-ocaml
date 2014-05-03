@@ -1,28 +1,17 @@
 open SmartPrint
 
-module Visibility = struct
-  type t =
-    | Global
-    | Local
-
-  let pp (visibility : t) : SmartPrint.t =
-    match visibility with
-    | Global -> !^ "Global"
-    | Local -> !^ "Local"
-end
-
 module Segment = struct
   type 'a t = {
     opens : Name.t list list;
-    names : (Visibility.t * 'a) PathName.Map.t }
+    names : 'a PathName.Map.t }
 
   let pp (segment : 'a t) : SmartPrint.t =
-    nest (!^ "open" ^^ OCaml.list (fun path ->
-      double_quotes (separate (!^ ".") (List.map Name.pp path)))
-      segment.opens) ^^
-    OCaml.list (fun (x, (visibility, _)) ->
-      nest (Visibility.pp visibility ^^ PathName.pp x))
-      (PathName.Map.bindings segment.names)
+    nest (
+      nest (!^ "open" ^^ OCaml.list (fun path ->
+        double_quotes (separate (!^ ".") (List.map Name.pp path)))
+        segment.opens) ^^
+      OCaml.list (fun (x, _) -> PathName.pp x)
+        (PathName.Map.bindings segment.names))
 
   let cardinal (segment : 'a t) : int =
     PathName.Map.cardinal segment.names
@@ -31,26 +20,23 @@ module Segment = struct
     opens = [[]]; (** By default we open the empty path. *)
     names = PathName.Map.empty }
 
-  let add (x : PathName.t) (visibility : Visibility.t) (v : 'a)
-    (segment : 'a t) : 'a t =
-    { segment with names = PathName.Map.add x (visibility, v) segment.names }
+  let add (x : PathName.t) (v : 'a) (segment : 'a t) : 'a t =
+    { segment with names = PathName.Map.add x v segment.names }
 
   let mem (x : PathName.t) (segment : 'a t) : bool =
     PathName.Map.mem x segment.names
 
-  let find (x : PathName.t) (segment : 'a t) : Visibility.t * 'a =
+  let find (x : PathName.t) (segment : 'a t) : 'a =
     PathName.Map.find x segment.names
 
   let map (f : 'a -> 'b) (segment : 'a t) : 'b t =
-    { segment with names =
-      PathName.Map.map (fun (visibility, v) -> (visibility, f v))
-        segment.names }
+    { segment with names = PathName.Map.map f segment.names }
 
   let merge (segment1 : 'a t) (segment2 : 'a t) (prefix : Name.t -> 'a -> 'a)
     (module_name : Name.t) : 'a t =
-    PathName.Map.fold (fun x (visibility, v) segment2 ->
+    PathName.Map.fold (fun x v segment2 ->
       let x = { x with PathName.path = module_name :: x.PathName.path } in
-      add x visibility (prefix module_name v) segment2)
+      add x (prefix module_name v) segment2)
       segment1.names segment2
 
   let open_module (segment : 'a t) (module_name : Name.t list) : 'a t =
@@ -69,10 +55,10 @@ let rec size (env : 'a t) : int =
 
 let empty : 'a t = [Segment.empty]
 
-let add (x : PathName.t) (visibility : Visibility.t) (v : 'a) (env : 'a t)
+let add (x : PathName.t) (v : 'a) (env : 'a t)
   : 'a t =
   match env with
-  | segment :: env -> Segment.add x visibility v segment :: env
+  | segment :: env -> Segment.add x v segment :: env
   | [] -> failwith "The environment must be a non-empty list."
 
 let rec find_first (f : 'a -> 'b option) (l : 'a list) : 'b option =
@@ -112,7 +98,7 @@ let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
       v
     else
       iterate_open_lift (open_lift v) (n - 1) in
-  let (_, v) = Segment.find x.BoundName.path_name segment in
+  let v = Segment.find x.BoundName.path_name segment in
   iterate_open_lift v x.BoundName.depth
 
 let mem (x : PathName.t) (env : 'a t) : bool =
@@ -133,7 +119,7 @@ let fresh (prefix : string) (v : 'a) (env : 'a t) : Name.t * 'a t =
     else
       n in
   let x = prefix_n prefix (first_n 0) in
-  (x, add (PathName.of_name [] x) Visibility.Local v env)
+  (x, add (PathName.of_name [] x) v env)
 
 let map (env : 'a t) (f : 'a -> 'b) : 'b t =
   List.map (Segment.map f) env

@@ -90,13 +90,11 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
 let rec to_full_envi (interface : t) (env : Effect.Type.t FullEnvi.t)
   : Effect.Type.t FullEnvi.t =
   match interface with
-  | Var (x, shape) ->
-    FullEnvi.add_var [] x Envi.Visibility.Global (Shape.to_effect_typ shape env)
-      env
-  | Typ x -> FullEnvi.add_typ [] x Envi.Visibility.Global env
-  | Descriptor x -> FullEnvi.add_descriptor [] x Envi.Visibility.Global env
-  | Constructor x -> FullEnvi.add_constructor [] x Envi.Visibility.Global env
-  | Field x -> FullEnvi.add_field [] x Envi.Visibility.Global env
+  | Var (x, shape) -> FullEnvi.add_var [] x (Shape.to_effect_typ shape env) env
+  | Typ x -> FullEnvi.add_typ [] x env
+  | Descriptor x -> FullEnvi.add_descriptor [] x env
+  | Constructor x -> FullEnvi.add_constructor [] x env
+  | Field x -> FullEnvi.add_field [] x env
   | Interface (x, defs) ->
     let env = FullEnvi.enter_module env in
     let env = List.fold_left (fun env def -> to_full_envi def env) env defs in

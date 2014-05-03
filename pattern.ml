@@ -60,7 +60,7 @@ let rec free_variables (p : t) : Name.Set.t =
   | Or (p1, p2) -> Name.Set.inter (free_variables p1) (free_variables p2)
 
 let add_to_env (p : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
-  Name.Set.fold (fun x env -> FullEnvi.add_var [] x Envi.Visibility.Local () env)
+  Name.Set.fold (fun x env -> FullEnvi.add_var [] x () env)
     (free_variables p) env
 
 (** Pretty-print a pattern to Coq (inside parenthesis if the [paren] flag is set). *)
