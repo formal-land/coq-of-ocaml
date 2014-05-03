@@ -251,12 +251,12 @@ module ModuleType = struct
 
   let rec of_signature (env : unit FullEnvi.t) (signature : signature)
     : unit FullEnvi.t * Loc.t t list =
-    let (env, mod_typs) =
-      List.fold_left (fun (env, mod_typs) item ->
-        let (env, mod_typ) = of_signature_item env item in
-        (env, mod_typ :: mod_typs))
+    let (env, decls) =
+      List.fold_left (fun (env, decls) item ->
+        let (env, decl) = of_signature_item env item in
+        (env, decl :: decls))
       (env, []) signature.sig_items in
-    (env, List.rev mod_typs)
+    (env, List.rev decls)
 
   and of_signature_item (env : unit FullEnvi.t) (item : signature_item)
     : unit FullEnvi.t * Loc.t t =
@@ -279,7 +279,7 @@ type 'a t =
   | Reference of Loc.t * Reference.t
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
-  | ModuleType of Loc.t * Name.t * 'a ModuleType.t
+  | ModuleType of Loc.t * Name.t * 'a ModuleType.t list
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
   let pp_one (def : 'a t) : SmartPrint.t =
@@ -371,9 +371,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, structures))
     | Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
-      { sig_items = items } } } ->
+      signature } } ->
       let name = Name.of_ident name in
-      failwith "TODO"
+      let (env, decls) = ModuleType.of_signature env signature in
+      (env, ModuleType (loc, name, decls))
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
@@ -401,7 +402,8 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
       let env = FullEnvi.enter_module env in
       let (env, defs) = monadise_let_rec env defs in
       let env = FullEnvi.leave_module name env in
-      (env, [Module (loc, name, defs)]) in
+      (env, [Module (loc, name, defs)])
+    | ModuleType _ -> failwith "TODO" in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))
