@@ -37,35 +37,6 @@ module Value = struct
         !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
 end
 
-(** The declaration of a value in a module type. *)
-module Declaration = struct
-  type 'a t = {
-    annotation : 'a;
-    name : Name.t;
-    typ_args : Name.t list;
-    typ : Type.t }
-
-  let pp (pp_a : 'a -> SmartPrint.t) (declaration : 'a t) : SmartPrint.t =
-    nest (!^ "Declaration" ^^ OCaml.tuple [
-      pp_a declaration.annotation; Name.pp declaration.name;
-      OCaml.list Name.pp declaration.typ_args; Type.pp declaration.typ])
-
-  let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
-    (declaration : value_description) : Loc.t t =
-    let name = Name.of_ident declaration.val_id in
-    let typ = declaration.val_desc.ctyp_type in
-    let (typ, _, typ_args) =
-      Type.of_type_expr_new_typ_vars env loc Name.Map.empty typ in
-    { annotation = loc;
-      name = name;
-      typ_args = Name.Set.elements typ_args;
-      typ = typ }
-
-  let update_env (f : 'a -> 'b) (declaration : 'a t) (env : 'b FullEnvi.t)
-    : 'b FullEnvi.t =
-    FullEnvi.add_var [] declaration.name (f declaration.annotation) env
-end
-
 (** A definition of a sum type. *)
 module Inductive = struct
   type t = {
@@ -237,7 +208,7 @@ end
 
 module ModuleType = struct
   type 'a t =
-    | Declaration of Loc.t * 'a Declaration.t
+    | Declaration of Loc.t * 'a Declaration.Value.t
     | Inductive of Loc.t * Inductive.t
     | Record of Loc.t * Record.t
     | Synonym of Loc.t * Synonym.t
@@ -260,8 +231,8 @@ module ModuleType = struct
     let loc = Loc.of_location item.sig_loc in
     match item.sig_desc with
     | Tsig_value declaration ->
-      let declaration = Declaration.of_ocaml env loc declaration in
-      let env = Declaration.update_env (fun _ -> ()) declaration env in
+      let declaration = Declaration.Value.of_ocaml env loc declaration in
+      let env = Declaration.Value.update_env (fun _ -> ()) declaration env in
       (env, Declaration (loc, declaration))
     | _ -> Error.raise loc "Module type item not handled."
 end
