@@ -208,7 +208,7 @@ end
 
 module ModuleType = struct
   type 'a t =
-    | Declaration of Loc.t * 'a Declaration.Value.t
+    | Declaration of Loc.t * 'a Signature.Value.t
     | Inductive of Loc.t * Inductive.t
     | Record of Loc.t * Record.t
     | Synonym of Loc.t * Synonym.t
@@ -231,8 +231,8 @@ module ModuleType = struct
     let loc = Loc.of_location item.sig_loc in
     match item.sig_desc with
     | Tsig_value declaration ->
-      let declaration = Declaration.Value.of_ocaml env loc declaration in
-      let env = Declaration.Value.update_env (fun _ -> ()) declaration env in
+      let declaration = Signature.Value.of_ocaml env loc declaration in
+      let env = Signature.Value.update_env (fun _ -> ()) declaration env in
       (env, Declaration (loc, declaration))
     | _ -> Error.raise loc "Module type item not handled."
 end
