@@ -54,13 +54,13 @@ let rec pp (interface : t) : SmartPrint.t =
     !^ "Interface" ^^ Name.pp x ^^ !^ "=" ^^ newline ^^ indent
       (separate newline (List.map pp defs))
 
-let of_typ_definition (typ_def : Structure.TypeDefinition.t) : t list =
+let of_typ_definition (typ_def : TypeDefinition.t) : t list =
   match typ_def with
-  | Structure.TypeDefinition.Inductive (name, _, constructors) ->
+  | TypeDefinition.Inductive (name, _, constructors) ->
     Typ name :: List.map (fun (x, _) -> Constructor x) constructors
-  | Structure.TypeDefinition.Record (name, fields) ->
+  | TypeDefinition.Record (name, fields) ->
     Typ name :: List.map (fun (x, _) -> Field x) fields
-  | Structure.TypeDefinition.Synonym (name, _, _) -> [Typ name]
+  | TypeDefinition.Synonym (name, _, _) -> [Typ name]
 
 let rec of_structures (defs : ('a * Effect.t) Structure.t list) : t list =
   List.flatten (List.map of_structure defs)
