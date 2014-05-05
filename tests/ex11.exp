@@ -1,6 +1,6 @@
 3 Module SizedString:
   4 Record t:
-    ([ (name, Type (string/2)); (size, Type (Z/2)) ])
+    [ (name, Type (string/2)); (size, Type (Z/2)) ]
 
 9
 (Value
@@ -67,7 +67,7 @@
 
 21 Module Point:
   22 Record t:
-    ([ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ])
+    [ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ]
   
   27 (Value
     (non_rec, @.,

@@ -53,8 +53,8 @@ module TypeDefinition = struct
             OCaml.tuple [Name.pp x; OCaml.list Type.pp typs])]))
     | Record (name, fields) ->
       nest (!^ "Record" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (OCaml.tuple [fields |> OCaml.list (fun (x, typ) ->
-          OCaml.tuple [Name.pp x; Type.pp typ])]))
+        indent (fields |> OCaml.list (fun (x, typ) ->
+          OCaml.tuple [Name.pp x; Type.pp typ])))
     | Synonym (name, typ_args, value) ->
       nest (!^ "Synonym" ^^ OCaml.tuple [
         Name.pp name; OCaml.list Name.pp typ_args; Type.pp value])
