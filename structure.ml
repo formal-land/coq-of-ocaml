@@ -69,15 +69,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
     : unit FullEnvi.t * Loc.t t =
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
-    | Tstr_value (_, [{vb_pat = {pat_desc = Tpat_var (x, _)};
-      vb_expr = {
-        exp_desc = Texp_apply ({exp_desc = Texp_ident (path, _, _)}, [_]);
-        exp_type = {Types.desc = Types.Tconstr (_, [typ], _)}}}])
-      when PathName.of_path loc path = PathName.of_name ["Pervasives"] "ref" ->
-      let r = {
-        Reference.name = Name.of_ident x;
-        typ = Type.of_type_expr env loc typ } in
-      (Reference.update_env r env, Reference (loc, r))
+    | Tstr_value (_, cases) when Reference.is_reference loc cases ->
+      let r = Reference.of_ocaml env loc cases in
+      let env = Reference.update_env r env in
+      (env, Reference (loc, r))
     | Tstr_value (is_rec, cases) ->
       let (env, def) =
         Exp.import_let_fun env loc Name.Map.empty is_rec cases in
@@ -91,9 +86,9 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let env = Exception.update_env exn env in
       (env, Exception (loc, exn))
     | Tstr_open (_, path, _, _) ->
-      let o = PathName.of_path loc path in
-      let o = o.PathName.path @ [o.PathName.base] in
-      (Open.update_env o env, Open (loc, o))
+      let o = Open.of_ocaml loc path in
+      let env = Open.update_env o env in
+      (env, Open (loc, o))
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }}
     | Tstr_module {mb_id = name;

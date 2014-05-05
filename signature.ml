@@ -35,7 +35,7 @@ type 'a t =
   | TypeDefinition of Loc.t * TypeDefinition.t
   | Exception of Loc.t * Exception.t
   | Reference of Loc.t * Reference.t
-  (* | Open of Loc.t * Open.t *)
+  | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
 
 let rec of_signature (env : unit FullEnvi.t) (signature : signature)
@@ -63,4 +63,8 @@ and of_signature_item (env : unit FullEnvi.t) (item : signature_item)
     let exn = Exception.of_ocaml env loc exn in
     let env = Exception.update_env exn env in
     (env, Exception (loc, exn))
+  | Tsig_open (_, path, _, _) ->
+    let o = Open.of_ocaml loc path in
+    let env = Open.update_env o env in
+    (env, Open (loc, o))
   | _ -> Error.raise loc "Module type item not handled."
