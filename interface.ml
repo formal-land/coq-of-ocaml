@@ -54,6 +54,14 @@ let rec pp (interface : t) : SmartPrint.t =
     !^ "Interface" ^^ Name.pp x ^^ !^ "=" ^^ newline ^^ indent
       (separate newline (List.map pp defs))
 
+let of_typ_definition (typ_def : Structure.TypeDefinition.t) : t list =
+  match typ_def with
+  | Structure.TypeDefinition.Inductive (name, _, constructors) ->
+    Typ name :: List.map (fun (x, _) -> Constructor x) constructors
+  | Structure.TypeDefinition.Record (name, fields) ->
+    Typ name :: List.map (fun (x, _) -> Field x) fields
+  | Structure.TypeDefinition.Synonym (name, _, _) -> [Typ name]
+
 let rec of_structures (defs : ('a * Effect.t) Structure.t list) : t list =
   List.flatten (List.map of_structure defs)
 
@@ -66,15 +74,7 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
         Effect.function_typ header.Exp.Header.args (snd (Exp.annotation e)) in
       (name, Shape.of_effect_typ @@ Effect.Type.compress typ)) in
     values |> List.map (fun (name, typ) -> Var (name, typ))
-  | Structure.Inductive (_, ind) ->
-    let name = ind.Structure.Inductive.name in
-    let constructors = List.map fst ind.Structure.Inductive.constructors in
-    Typ name :: List.map (fun x -> Constructor x) constructors
-  | Structure.Record (_, r) ->
-    let name = r.Structure.Record.name in
-    let fields = List.map fst r.Structure.Record.fields in
-    Typ name :: List.map (fun x -> Field x) fields
-  | Structure.Synonym (_, s) -> [Typ s.Structure.Synonym.name]
+  | Structure.TypeDefinition (_, typ_def) -> of_typ_definition typ_def
   | Structure.Exception (_, exn) ->
     let name = exn.Structure.Exception.name in
     [ Descriptor name; Var (name, [[PathName.of_name [] name]]) ]

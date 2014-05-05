@@ -53,8 +53,8 @@ module TypeDefinition = struct
             OCaml.tuple [Name.pp x; OCaml.list Type.pp typs])]))
     | Record (name, fields) ->
       nest (!^ "Record" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (fields |> OCaml.list (fun (x, typ) ->
-          OCaml.tuple [Name.pp x; Type.pp typ])))
+        indent (OCaml.tuple [fields |> OCaml.list (fun (x, typ) ->
+          OCaml.tuple [Name.pp x; Type.pp typ])]))
     | Synonym (name, typ_args, value) ->
       nest (!^ "Synonym" ^^ OCaml.tuple [
         Name.pp name; OCaml.list Name.pp typ_args; Type.pp value])
@@ -64,93 +64,74 @@ module TypeDefinition = struct
     match typs with
     | [] -> Error.raise loc "Unexpected type definition with no case."
     | [{typ_id = name; typ_type = typ}] ->
-      failwith "TODO"
+      let name = Name.of_ident name in
+      let typ_args =
+        List.map (Type.of_type_expr_variable loc) typ.type_params in
+      (match typ.type_kind with
+      | Type_variant cases ->
+        let constructors =
+          let env = FullEnvi.add_typ [] name env in
+          cases |> List.map (fun { Types.cd_id = constr; cd_args = typs } ->
+            (Name.of_ident constr, typs |> List.map (fun typ ->
+              Type.of_type_expr env loc typ))) in
+        Inductive (name, typ_args, constructors)
+      | Type_record (fields, _) ->
+        let fields =
+          fields |> List.map (fun { Types.ld_id = x; ld_type = typ } ->
+            (Name.of_ident x, Type.of_type_expr env loc typ)) in
+        Record (name, fields)
+      | Type_abstract ->
+        (match typ.type_manifest with
+        | Some typ -> Synonym (name, typ_args, Type.of_type_expr env loc typ)
+        | None -> Error.raise loc "Type definition not handled."))
     | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."
-end
 
-(** A definition of a sum type. *)
-module Inductive = struct
-  type t = {
-    name : Name.t;
-    typ_vars : Name.t list; (** Polymorphic type variables. *)
-    constructors : (Name.t * Type.t list) list
-      (** The list of constructors, each with a name and the list of the types of the arguments. *) }
-  
-  let pp (ind : t) : SmartPrint.t =
-    nest (!^ "Inductive" ^^ Name.pp ind.name ^-^ !^ ":" ^^ newline ^^ indent (OCaml.tuple [
-      OCaml.list Name.pp ind.typ_vars;
-      OCaml.list (fun (x, typs) -> OCaml.tuple [Name.pp x; OCaml.list Type.pp typs]) ind.constructors]))
+  let update_env (def : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+    match def with
+    | Inductive (name, _, constructors) ->
+      let env = FullEnvi.add_typ [] name env in
+      List.fold_left (fun env (x, _) -> FullEnvi.add_constructor [] x env)
+        env constructors
+    | Record (name, fields) ->
+      let env = FullEnvi.add_typ [] name env in
+      List.fold_left (fun env (x, _) -> FullEnvi.add_field [] x env)
+        env fields
+    | Synonym (name, _, _) ->
+      FullEnvi.add_typ [] name env
 
-  let update_env (ind : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    let env = FullEnvi.add_typ [] ind.name env in
-    List.fold_left (fun env (x, _) -> FullEnvi.add_constructor [] x env)
-      env ind.constructors
-
-  (** Pretty-print a sum type definition to Coq. *)
-  let to_coq (ind : t) : SmartPrint.t =
-    nest (
-      !^ "Inductive" ^^ Name.to_coq ind.name ^^
-      (if ind.typ_vars = []
-      then empty
-      else parens @@ nest (
-        separate space (List.map Name.to_coq ind.typ_vars) ^^
-        !^ ":" ^^ !^ "Type")) ^^
-      !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
-      separate newline (ind.constructors |> List.map (fun (constr, args) ->
-        nest (
-          !^ "|" ^^ Name.to_coq constr ^^ !^ ":" ^^
-          separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^ Name.to_coq ind.name ^^
-          separate space (List.map Name.to_coq ind.typ_vars)))) ^-^ !^ "." ^^ newline ^^
-      separate newline (ind.constructors |> List.map (fun (name, args) ->
-        nest (
-          !^ "Arguments" ^^ Name.to_coq name ^^
-          separate space (ind.typ_vars |> List.map (fun x -> braces @@ Name.to_coq x)) ^^
-          separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
-end
-
-(** A definition of a record. *)
-module Record = struct
-  type t = {
-    name : Name.t;
-    fields : (Name.t * Type.t) list (** The names of the fields with their types. *) }
-
-  let pp (r : t) : SmartPrint.t =
-    nest (!^ "Record" ^^ Name.pp r.name ^-^ !^ ":" ^^ newline ^^ indent (OCaml.tuple [
-      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ]) r.fields]))
-
-  let update_env (r : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    let env = FullEnvi.add_typ [] r.name env in
-    List.fold_left (fun env (x, _) -> FullEnvi.add_field [] x env)
-      env r.fields
-
-  (** Pretty-print a record definition to Coq. *)
-  let to_coq (r : t) : SmartPrint.t =
-    nest (
-      !^ "Record" ^^ Name.to_coq r.name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
-      indent (separate (!^ ";" ^^ newline) (r.fields |> List.map (fun (x, typ) ->
-        nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false typ)))) ^^
-      !^ "}.")
-end
-
-(** Definition of a synonym type. *)
-module Synonym = struct
-  type t = {
-    name : Name.t;
-    typ_vars : Name.t list;
-    value : Type.t }
-
-  let pp (s : t) : SmartPrint.t =
-    nest (!^ "Synonym" ^^ OCaml.tuple [
-      Name.pp s.name; OCaml.list Name.pp s.typ_vars; Type.pp s.value])
-
-  let update_env (s : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
-    FullEnvi.add_typ [] s.name env
-
-  let to_coq (s : t) : SmartPrint.t =
-    nest (
-      !^ "Definition" ^^ Name.to_coq s.name ^^
-      separate space (List.map Name.to_coq s.typ_vars) ^^ !^ ":=" ^^
-      Type.to_coq false s.value ^-^ !^ ".")
+  let to_coq (def : t) : SmartPrint.t =
+    match def with
+    | Inductive (name, typ_args, constructors) ->
+      nest (
+        !^ "Inductive" ^^ Name.to_coq name ^^
+        (if typ_args = []
+        then empty
+        else parens @@ nest (
+          separate space (List.map Name.to_coq typ_args) ^^
+          !^ ":" ^^ !^ "Type")) ^^
+        !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
+        separate newline (constructors |> List.map (fun (constr, args) ->
+          nest (
+            !^ "|" ^^ Name.to_coq constr ^^ !^ ":" ^^
+            separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^ Name.to_coq name ^^
+            separate space (List.map Name.to_coq typ_args)))) ^-^ !^ "." ^^ newline ^^
+        separate newline (constructors |> List.map (fun (name, args) ->
+          nest (
+            !^ "Arguments" ^^ Name.to_coq name ^^
+            separate space (typ_args |>
+              List.map (fun x -> braces @@ Name.to_coq x)) ^^
+            separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
+    | Record (name, fields) ->
+      nest (
+        !^ "Record" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
+        indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
+          nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false typ)))) ^^
+        !^ "}.")
+    | Synonym (name, typ_args, value) ->
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^
+        separate space (List.map Name.to_coq typ_args) ^^ !^ ":=" ^^
+        Type.to_coq false value ^-^ !^ ".")
 end
 
 module Exception = struct
@@ -240,9 +221,7 @@ end
 module ModuleType = struct
   type 'a t =
     | Declaration of Loc.t * 'a Signature.Value.t
-    | Inductive of Loc.t * Inductive.t
-    | Record of Loc.t * Record.t
-    | Synonym of Loc.t * Synonym.t
+    | TypeDefinition of Loc.t * TypeDefinition.t
     | Exception of Loc.t * Exception.t
     | Reference of Loc.t * Reference.t
     | Open of Loc.t * Open.t
@@ -271,23 +250,19 @@ end
 (** A structure. *)
 type 'a t =
   | Value of Loc.t * 'a Value.t
-  | Inductive of Loc.t * Inductive.t
-  | Record of Loc.t * Record.t
-  | Synonym of Loc.t * Synonym.t
+  | TypeDefinition of Loc.t * TypeDefinition.t
   | Exception of Loc.t * Exception.t
   | Reference of Loc.t * Reference.t
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
-  | ModuleType of Loc.t * Name.t * 'a ModuleType.t list
+  (* | ModuleType of Loc.t * Name.t * 'a ModuleType.t list *)
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
   let pp_one (def : 'a t) : SmartPrint.t =
     match def with
     | Value (loc, value) ->
       Loc.pp loc ^^ OCaml.tuple [Value.pp pp_a value]
-    | Inductive (loc, ind) -> Loc.pp loc ^^ Inductive.pp ind
-    | Record (loc, record) -> Loc.pp loc ^^ Record.pp record
-    | Synonym (loc, synonym) -> Loc.pp loc ^^ Synonym.pp synonym
+    | TypeDefinition (loc, def) -> Loc.pp loc ^^ TypeDefinition.pp def
     | Exception (loc, exn) -> Loc.pp loc ^^ Exception.pp exn
     | Reference (loc, r) -> Loc.pp loc ^^ Reference.pp r
     | Open (loc, o) -> Loc.pp loc ^^ Open.pp o
@@ -317,37 +292,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let (env, def) =
         Exp.import_let_fun env loc Name.Map.empty is_rec cases in
       (env, Value (loc, def))
-    | Tstr_type [{typ_id = name; typ_type = typ}] ->
-      let name = Name.of_ident name in
-      let typ_vars = List.map (Type.of_type_expr_variable loc) typ.type_params in
-      (match typ.type_kind with
-      | Type_variant cases ->
-        let constructors =
-          let env = FullEnvi.add_typ [] name env in
-          cases |> List.map (fun { Types.cd_id = constr; cd_args = typs } ->
-            (Name.of_ident constr, typs |> List.map (fun typ ->
-              Type.of_type_expr env loc typ))) in
-        let ind = {
-          Inductive.name = name;
-          typ_vars = typ_vars;
-          constructors = constructors } in
-        (Inductive.update_env ind env, Inductive (loc, ind))
-      | Type_record (fields, _) ->
-        let fields = fields |> List.map (fun { Types.ld_id = x; ld_type = typ } ->
-          (Name.of_ident x, Type.of_type_expr env loc typ)) in
-        let r = {
-          Record.name = name;
-          fields = fields } in
-        (Record.update_env r env, Record (loc, r))
-      | Type_abstract ->
-        (match typ.type_manifest with
-        | Some typ ->
-          let syn = {
-            Synonym.name = name;
-            typ_vars = typ_vars;
-            value = Type.of_type_expr env loc typ } in
-          (Synonym.update_env syn env, Synonym (loc, syn))
-        | None -> Error.raise loc "Type definition not handled."))
+    | Tstr_type typs ->
+      let def = TypeDefinition.of_ocaml env loc typs in
+      let env = TypeDefinition.update_env def env in
+      (env, TypeDefinition (loc, def))
     | Tstr_exception { cd_id = name; cd_args = args } ->
       let name = Name.of_ident name in
       let typ =
@@ -369,11 +317,11 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, structures))
-    | Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
+    (*| Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
       signature } } ->
       let name = Name.of_ident name in
       let (env, decls) = ModuleType.of_signature env signature in
-      (env, ModuleType (loc, name, decls))
+      (env, ModuleType (loc, name, decls))*)
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
@@ -390,9 +338,8 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
     | Value (loc, def) ->
       let (env, defs) = Exp.monadise_let_rec_definition env def in
       (env, defs |> List.rev |> List.map (fun def -> Value (loc, def)))
-    | Inductive (loc, ind) -> (Inductive.update_env ind env, [def])
-    | Record (loc, record) -> (Record.update_env record env, [def])
-    | Synonym (loc, synonym) -> (Synonym.update_env synonym env, [def])
+    | TypeDefinition (loc, typ_def) ->
+      (TypeDefinition.update_env typ_def env, [def])
     | Exception (loc, exn) -> (Exception.update_env exn env, [def])
     | Reference (loc, r) -> (Reference.update_env r env, [def])
     | Open (loc, o) -> (Open.update_env o env, [def])
@@ -400,8 +347,7 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
       let env = FullEnvi.enter_module env in
       let (env, defs) = monadise_let_rec env defs in
       let env = FullEnvi.leave_module name env in
-      (env, [Module (loc, name, defs)])
-    | ModuleType _ -> failwith "TODO" in
+      (env, [Module (loc, name, defs)]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))
@@ -421,9 +367,8 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
         Error.warn loc "Toplevel effects are forbidden.");
       let env = Exp.env_after_def_with_effects env def in
       (env, Value (loc, def))
-    | Inductive (loc, ind) -> (Inductive.update_env ind env, Inductive (loc, ind))
-    | Record (loc, record) -> (Record.update_env record env, Record (loc, record))
-    | Synonym (loc, synonym) -> (Synonym.update_env synonym env, Synonym (loc, synonym))
+    | TypeDefinition (loc, typ_def) ->
+      (TypeDefinition.update_env typ_def env, TypeDefinition (loc, typ_def))
     | Exception (loc, exn) ->
       let id = Effect.Descriptor.Id.Loc loc in
       (Exception.update_env_with_effects exn env id, Exception (loc, exn))
@@ -463,9 +408,8 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
         (header, e)) } in
       let env = Exp.Definition.env_after_def def env in
       (env, Value (loc, def))
-    | Inductive (loc, ind) -> (env, Inductive (loc, ind))
-    | Record (loc, record) -> (env, Record (loc, record))
-    | Synonym (loc, synonym) -> (env, Synonym (loc, synonym))
+    | TypeDefinition (loc, typ_def) ->
+      (TypeDefinition.update_env typ_def env, TypeDefinition (loc, typ_def))
     | Exception (loc, exn) ->
       (Exception.update_env exn env, Exception (loc, exn))
     | Reference (loc, r) -> (Reference.update_env r env, Reference (loc, r))
@@ -485,9 +429,7 @@ let rec to_coq (defs : 'a t list) : SmartPrint.t =
   let to_coq_one (def : 'a t) : SmartPrint.t =
     match def with
     | Value (_, value) -> Value.to_coq value
-    | Inductive (_, ind) -> Inductive.to_coq ind
-    | Record (_, record) -> Record.to_coq record
-    | Synonym (_, s) -> Synonym.to_coq s
+    | TypeDefinition (_, typ_def) -> TypeDefinition.to_coq typ_def
     | Exception (_, exn) -> Exception.to_coq exn
     | Reference (_, r) -> Reference.to_coq r
     | Open (_, o) -> Open.to_coq o
