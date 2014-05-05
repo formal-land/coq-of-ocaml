@@ -37,6 +37,37 @@ module Value = struct
         !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
 end
 
+module TypeDefinition = struct
+  type t =
+    | Inductive of Name.t * Name.t list * (Name.t * Type.t list) list
+    | Record of Name.t * (Name.t * Type.t) list
+    | Synonym of Name.t * Name.t list * Type.t
+
+  let pp (def : t) : SmartPrint.t =
+    match def with
+    | Inductive (name, typ_args, constructors) ->
+      nest (!^ "Inductive" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+        indent (OCaml.tuple [
+          OCaml.list Name.pp typ_args;
+          constructors |> OCaml.list (fun (x, typs) ->
+            OCaml.tuple [Name.pp x; OCaml.list Type.pp typs])]))
+    | Record (name, fields) ->
+      nest (!^ "Record" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+        indent (fields |> OCaml.list (fun (x, typ) ->
+          OCaml.tuple [Name.pp x; Type.pp typ])))
+    | Synonym (name, typ_args, value) ->
+      nest (!^ "Synonym" ^^ OCaml.tuple [
+        Name.pp name; OCaml.list Name.pp typ_args; Type.pp value])
+
+  let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
+    (typs : type_declaration list) : t =
+    match typs with
+    | [] -> Error.raise loc "Unexpected type definition with no case."
+    | [{typ_id = name; typ_type = typ}] ->
+      failwith "TODO"
+    | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."
+end
+
 (** A definition of a sum type. *)
 module Inductive = struct
   type t = {
