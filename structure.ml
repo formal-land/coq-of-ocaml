@@ -86,13 +86,10 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let def = TypeDefinition.of_ocaml env loc typs in
       let env = TypeDefinition.update_env def env in
       (env, TypeDefinition (loc, def))
-    | Tstr_exception { cd_id = name; cd_args = args } ->
-      let name = Name.of_ident name in
-      let typ =
-        Type.Tuple (args |> List.map (fun { ctyp_type = typ } ->
-          Type.of_type_expr env loc typ)) in
-      let exn = { Exception.name = name; typ = typ} in
-      (Exception.update_env exn env, Exception (loc, exn))
+    | Tstr_exception exn ->
+      let exn = Exception.of_ocaml env loc exn in
+      let env = Exception.update_env exn env in
+      (env, Exception (loc, exn))
     | Tstr_open (_, path, _, _) ->
       let o = PathName.of_path loc path in
       let o = o.PathName.path @ [o.PathName.base] in

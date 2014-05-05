@@ -1,3 +1,4 @@
+open Typedtree
 open SmartPrint
 
 type t = {
@@ -6,6 +7,14 @@ type t = {
 
 let pp (exn : t) : SmartPrint.t =
   nest (!^ "Exception" ^^ OCaml.tuple [Name.pp exn.name; Type.pp exn.typ])
+
+let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
+  (exn : constructor_declaration) : t =
+  let name = Name.of_ident exn.cd_id in
+  let typ =
+    Type.Tuple (exn.cd_args |> List.map (fun { ctyp_type = typ } ->
+      Type.of_type_expr env loc typ)) in
+  { name = name; typ = typ}
 
 let update_env (exn : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
   FullEnvi.add_exception [] exn.name env
