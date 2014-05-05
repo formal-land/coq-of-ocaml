@@ -121,35 +121,6 @@ module Open = struct
     nest (!^ "Import" ^^ separate (!^ ".") (List.map Name.pp o) ^-^ !^ ".")
 end
 
-module ModuleType = struct
-  type 'a t =
-    | Declaration of Loc.t * 'a Signature.Value.t
-    | TypeDefinition of Loc.t * TypeDefinition.t
-    | Exception of Loc.t * Exception.t
-    | Reference of Loc.t * Reference.t
-    | Open of Loc.t * Open.t
-    | Module of Loc.t * Name.t * 'a t list
-
-  let rec of_signature (env : unit FullEnvi.t) (signature : signature)
-    : unit FullEnvi.t * Loc.t t list =
-    let (env, decls) =
-      List.fold_left (fun (env, decls) item ->
-        let (env, decl) = of_signature_item env item in
-        (env, decl :: decls))
-      (env, []) signature.sig_items in
-    (env, List.rev decls)
-
-  and of_signature_item (env : unit FullEnvi.t) (item : signature_item)
-    : unit FullEnvi.t * Loc.t t =
-    let loc = Loc.of_location item.sig_loc in
-    match item.sig_desc with
-    | Tsig_value declaration ->
-      let declaration = Signature.Value.of_ocaml env loc declaration in
-      let env = Signature.Value.update_env (fun _ -> ()) declaration env in
-      (env, Declaration (loc, declaration))
-    | _ -> Error.raise loc "Module type item not handled."
-end
-
 (** A structure. *)
 type 'a t =
   | Value of Loc.t * 'a Value.t
