@@ -76,10 +76,10 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
     values |> List.map (fun (name, typ) -> Var (name, typ))
   | Structure.TypeDefinition (_, typ_def) -> of_typ_definition typ_def
   | Structure.Exception (_, exn) ->
-    let name = exn.Structure.Exception.name in
+    let name = exn.Exception.name in
     [ Descriptor name; Var (name, [[PathName.of_name [] name]]) ]
   | Structure.Reference (_, r) ->
-    let name = r.Structure.Reference.name in
+    let name = r.Reference.name in
     let shape = [[PathName.of_name [] name]] in
     [ Descriptor name;
       Var ("read_" ^ name, shape);
