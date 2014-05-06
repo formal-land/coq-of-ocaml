@@ -38,6 +38,23 @@ type 'a t =
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
 
+let rec pps (pp_a : 'a -> SmartPrint.t) (decls : 'a t list) : SmartPrint.t =
+  separate (newline ^^ newline) (List.map (pp pp_a) decls)
+
+and pp (pp_a : 'a -> SmartPrint.t) (decl : 'a t) : SmartPrint.t =
+  match decl with
+  | Declaration (loc, value) ->
+    nest (Loc.pp loc ^^ OCaml.tuple [Value.pp pp_a value])
+  | TypeDefinition (loc, typ_def) ->
+    nest (Loc.pp loc ^^ TypeDefinition.pp typ_def)
+  | Exception (loc, exn) -> nest (Loc.pp loc ^^ Exception.pp exn)
+  | Reference (loc, r) -> nest (Loc.pp loc ^^ Reference.pp r)
+  | Open (loc, o) -> nest (Loc.pp loc ^^ Open.pp o)
+  | Module (loc, name, decls) ->
+    nest (
+      Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+      indent (pps pp_a decls))
+
 let rec of_signature (env : unit FullEnvi.t) (signature : signature)
   : unit FullEnvi.t * Loc.t t list =
   let (env, decls) =
@@ -67,4 +84,14 @@ and of_signature_item (env : unit FullEnvi.t) (item : signature_item)
     let o = Open.of_ocaml loc path in
     let env = Open.update_env o env in
     (env, Open (loc, o))
+  (*| Tsig_module { md_id = name; md_type = } ->
+    let name = Name.of_ident name in
+    let env = FullEnvi.enter_module env in
+    let (env, structures) = of_structure env structure in
+    let env = FullEnvi.leave_module name env in
+    (env, Module (loc, name, structures))*)
   | _ -> Error.raise loc "Module type item not handled."
+
+let update_env (env : 'a FullEnvi.t) (name : Name.t) (defs : 'b t list)
+  : 'a FullEnvi.t =
+  env

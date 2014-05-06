@@ -45,7 +45,7 @@ type 'a t =
   | Reference of Loc.t * Reference.t
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
-  (* | ModuleType of Loc.t * Name.t * 'a ModuleType.t list *)
+  | Signature of Loc.t * Name.t * 'a Signature.t list
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
   let pp_one (def : 'a t) : SmartPrint.t =
@@ -59,7 +59,11 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
     | Module (loc, name, defs) ->
       nest (
         Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (pp pp_a defs)) in
+        indent (pp pp_a defs))
+    | Signature (loc, name, decls) ->
+      nest (
+        Loc.pp loc ^^ !^ "Signature" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+        indent (Signature.pps pp_a decls)) in
   separate (newline ^^ newline) (List.map pp_one defs)
 
 (** Import an OCaml structure. *)
@@ -99,11 +103,12 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, structures))
-    (*| Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
+    | Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
       signature } } ->
       let name = Name.of_ident name in
-      let (env, decls) = ModuleType.of_signature env signature in
-      (env, ModuleType (loc, name, decls))*)
+      let (_, decls) = Signature.of_signature env signature in
+      let env = Signature.update_env env name decls in
+      (env, Signature (loc, name, decls))
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
@@ -129,7 +134,10 @@ let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
       let env = FullEnvi.enter_module env in
       let (env, defs) = monadise_let_rec env defs in
       let env = FullEnvi.leave_module name env in
-      (env, [Module (loc, name, defs)]) in
+      (env, [Module (loc, name, defs)])
+    | Signature (loc, name, decls) ->
+      let env = Signature.update_env env name decls in
+      (env, [Signature (loc, name, decls)]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))

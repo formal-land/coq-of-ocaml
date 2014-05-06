@@ -1,6 +1,10 @@
 (** Module type *)
 
 module type M = sig
+  val n : int
+end
+
+(*module type M = sig
   type t
   val m : int
   module N : sig
@@ -20,4 +24,4 @@ module M : M = struct
     type t = bool
     let n = 14
   end
-end
+end*)
