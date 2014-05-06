@@ -4,7 +4,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Module Type M.
+Module Type IM1.
   Parameter n : Z.
   
   Parameter f : forall {a b : Type}, a -> a * b.
@@ -29,4 +29,36 @@ Module Type M.
   
   Definition raise_E {A : Type} (x : string) : M [ E ] A :=
     fun s => (inr (inl x), s).
-End M.
+End IM1.
+
+Module Type IM2.
+  Parameter t : Type.
+  
+  Parameter m : Z.
+  
+  Module N.
+    Parameter n : t.
+    
+    Parameter t : Type.
+  End N.
+  
+  Import N.
+  
+  Parameter b : N.t.
+End IM2.
+
+Module M2.
+  Definition null : Z * bool := (0, false).
+  
+  Definition t := Z.
+  
+  Definition m : Z := 12.
+  
+  Definition b : bool := false.
+  
+  Module N.
+    Definition t := bool.
+    
+    Definition n : Z := 14.
+  End N.
+End M2.

@@ -100,12 +100,13 @@ and of_signature_item (env : unit FullEnvi.t) (item : signature_item)
     let o = Open.of_ocaml loc path in
     let env = Open.update_env o env in
     (env, Open (loc, o))
-  (*| Tsig_module { md_id = name; md_type = } ->
+  | Tsig_module { md_id = name; md_type = { mty_desc = Tmty_signature
+    signature } } ->
     let name = Name.of_ident name in
     let env = FullEnvi.enter_module env in
-    let (env, structures) = of_structure env structure in
+    let (env, decls) = of_signature env signature in
     let env = FullEnvi.leave_module name env in
-    (env, Module (loc, name, structures))*)
+    (env, Module (loc, name, decls))
   | _ -> Error.raise loc "Module type item not handled."
 
 let update_env (env : 'a FullEnvi.t) (name : Name.t) (defs : 'b t list)
