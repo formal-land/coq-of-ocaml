@@ -1,6 +1,7 @@
 Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
+Local Open Scope type_scope.
 Import ListNotations.
 
 Fixpoint map_rec {A B : Type} (counter : nat) (f : A -> B) (l : list A)

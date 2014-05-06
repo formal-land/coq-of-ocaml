@@ -65,8 +65,8 @@ and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t) (loc : Loc.t)
       ([], typ_vars, Name.Set.empty) typs in
   (List.rev typs, typ_vars, new_typ_vars)
 
-let rec of_type_expr (env : 'a FullEnvi.t) (loc : Loc.t) (typ : Types.type_expr)
-  : t =
+let rec of_type_expr (env : 'a FullEnvi.t) (loc : Loc.t)
+  (typ : Types.type_expr) : t =
   match typ.desc with
   | Tvar (Some x) -> Variable x
   | Tarrow (_, typ_x, typ_y, _) ->
@@ -88,6 +88,17 @@ let of_type_expr_variable (loc : Loc.t) (typ : Types.type_expr) : Name.t =
   | _ ->
     Error.warn loc "The type parameter was expected to be a variable.";
     "expected_a_type_variable"
+
+let rec typ_args (typ : t) : Name.Set.t =
+  match typ with
+  | Variable x -> Name.Set.singleton x
+  | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
+  | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
+  | Monad (_, typ) -> typ_args typ
+
+and typ_args_of_typs (typs : t list) : Name.Set.t =
+  List.fold_left (fun args typ -> Name.Set.union args (typ_args typ))
+    Name.Set.empty typs
 
 (** In a function's type extract the body's type (up to [n] arguments). *)
 let rec open_type (typ : t) (n : int) : t list * t =

@@ -2,6 +2,7 @@
 
 module type M = sig
   val n : int
+  val f : 'a -> 'a * 'b
 
   type 'a t1 =
     | C1 of int

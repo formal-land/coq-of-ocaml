@@ -158,6 +158,10 @@ let function_typ (args : 'a list) (body_effect : t) : Type.t =
           (body_effect.descriptor, body_effect.typ))
       args
 
+let pure : t = {
+  descriptor = Descriptor.pure;
+  typ = Type.Pure }
+
 let union (effects : t list) : t =
   { descriptor =
       Descriptor.union @@ List.map (fun effect -> effect.descriptor) effects;

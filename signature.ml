@@ -9,25 +9,41 @@ module Value = struct
     typ_args : Name.t list;
     typ : Type.t }
 
-  let pp (pp_a : 'a -> SmartPrint.t) (declaration : 'a t) : SmartPrint.t =
+  let pp (pp_a : 'a -> SmartPrint.t) (value : 'a t) : SmartPrint.t =
     nest (!^ "Value" ^^ OCaml.tuple [
-      pp_a declaration.annotation; Name.pp declaration.name;
-      OCaml.list Name.pp declaration.typ_args; Type.pp declaration.typ])
+      pp_a value.annotation; Name.pp value.name;
+      OCaml.list Name.pp value.typ_args; Type.pp value.typ])
 
   let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
-    (declaration : value_description) : Loc.t t =
-    let name = Name.of_ident declaration.val_id in
-    let typ = declaration.val_desc.ctyp_type in
-    let (typ, _, typ_args) =
-      Type.of_type_expr_new_typ_vars env loc Name.Map.empty typ in
+    (value : value_description) : Loc.t t =
+    let name = Name.of_ident value.val_id in
+    let typ = Type.of_type_expr env loc value.val_desc.ctyp_type in
+    let typ_args = Type.typ_args typ in
     { annotation = loc;
       name = name;
       typ_args = Name.Set.elements typ_args;
       typ = typ }
 
-  let update_env (f : 'a -> 'b) (declaration : 'a t) (env : 'b FullEnvi.t)
+  let update_env (f : 'a -> 'b) (value : 'a t) (env : 'b FullEnvi.t)
     : 'b FullEnvi.t =
-    FullEnvi.add_var [] declaration.name (f declaration.annotation) env
+    FullEnvi.add_var [] value.name (f value.annotation) env
+
+  let effects (value : Loc.t t) : (Loc.t * Effect.t) t =
+    { value with annotation = (value.annotation, Effect.pure) }
+
+  let monadise (value : (Loc.t * Effect.t) t) : Loc.t t =
+    { value with annotation = fst value.annotation }
+
+  let to_coq (value : 'a t) : SmartPrint.t =
+    nest (
+      !^ "Parameter" ^^ Name.to_coq value.name ^^ !^ ":" ^^
+      (match value.typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        !^ "forall" ^^ braces (group (
+          separate space (List.map Name.to_coq value.typ_args) ^^
+          !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
+      Type.to_coq false value.typ ^-^ !^ ".")
 end
 
 type 'a t =
@@ -95,3 +111,42 @@ and of_signature_item (env : unit FullEnvi.t) (item : signature_item)
 let update_env (env : 'a FullEnvi.t) (name : Name.t) (defs : 'b t list)
   : 'a FullEnvi.t =
   env
+
+let rec effects (decls : Loc.t t list) : (Loc.t * Effect.t) t list =
+  List.map effects_one decls
+
+and effects_one (decl : Loc.t t) : (Loc.t * Effect.t) t =
+  match decl with
+  | Declaration (loc, value) -> Declaration (loc, Value.effects value)
+  | TypeDefinition (loc, typ_def) -> TypeDefinition (loc, typ_def)
+  | Exception (loc, exn) -> Exception (loc, exn)
+  | Reference (loc, r) -> Reference (loc, r)
+  | Open (loc, o) -> Open (loc, o)
+  | Module (loc, name, decls) -> Module (loc, name, effects decls)
+
+let rec monadise (decls : (Loc.t * Effect.t) t list) : Loc.t t list =
+  List.map monadise_one decls
+
+and monadise_one (decl : (Loc.t * Effect.t) t) : Loc.t t =
+  match decl with
+  | Declaration (loc, value) -> Declaration (loc, Value.monadise value)
+  | TypeDefinition (loc, typ_def) -> TypeDefinition (loc, typ_def)
+  | Exception (loc, exn) -> Exception (loc, exn)
+  | Reference (loc, r) -> Reference (loc, r)
+  | Open (loc, o) -> Open (loc, o)
+  | Module (loc, name, decls) -> Module (loc, name, monadise decls)
+
+let rec to_coq (decls : 'a t list) : SmartPrint.t =
+  let to_coq_one (decl : 'a t) : SmartPrint.t =
+    match decl with
+    | Declaration (_, value) -> Value.to_coq value
+    | TypeDefinition (_, typ_def) -> TypeDefinition.to_coq typ_def
+    | Exception (_, exn) -> Exception.to_coq exn
+    | Reference (_, r) -> Reference.to_coq r
+    | Open (_, o) -> Open.to_coq o
+    | Module (_, name, decls) ->
+      nest (
+        !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+        indent (to_coq decls) ^^ newline ^^
+        !^ "End" ^^ Name.to_coq name ^-^ !^ ".") in
+  separate (newline ^^ newline) (List.map to_coq_one decls)

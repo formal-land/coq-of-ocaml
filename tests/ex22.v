@@ -1,6 +1,7 @@
 Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
+Local Open Scope type_scope.
 Import ListNotations.
 
 Definition op_plus_plus_plus (x : Z) (y : Z) : Z := Z.add x y.

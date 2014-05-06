@@ -564,11 +564,7 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (e : Loc.t t)
       effect.Effect.descriptor)) in
     (es, { Effect.descriptor = descriptor; typ = Effect.Type.Pure }) in
   match e with
-  | Constant (l, c) ->
-    let effect =
-      { Effect.descriptor = Effect.Descriptor.pure;
-        typ = Effect.Type.Pure } in
-    Constant ((l, effect), c)
+  | Constant (l, c) -> Constant ((l, Effect.pure), c)
   | Variable (l, x) ->
     (try
       let effect =

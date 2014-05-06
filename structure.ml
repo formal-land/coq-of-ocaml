@@ -47,25 +47,26 @@ type 'a t =
   | Module of Loc.t * Name.t * 'a t list
   | Signature of Loc.t * Name.t * 'a Signature.t list
 
-let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
-  let pp_one (def : 'a t) : SmartPrint.t =
-    match def with
-    | Value (loc, value) ->
-      group (Loc.pp loc ^^ Value.pp pp_a value)
-    | TypeDefinition (loc, typ_def) ->
-      group (Loc.pp loc ^^ TypeDefinition.pp typ_def)
-    | Exception (loc, exn) -> group (Loc.pp loc ^^ Exception.pp exn)
-    | Reference (loc, r) -> group (Loc.pp loc ^^ Reference.pp r)
-    | Open (loc, o) -> group (Loc.pp loc ^^ Open.pp o)
-    | Module (loc, name, defs) ->
-      nest (
-        Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (pp pp_a defs))
-    | Signature (loc, name, decls) ->
-      nest (
-        Loc.pp loc ^^ !^ "Signature" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (Signature.pps pp_a decls)) in
-  separate (newline ^^ newline) (List.map pp_one defs)
+let rec pps (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
+  separate (newline ^^ newline) (List.map (pp pp_a) defs)
+
+and pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
+  match def with
+  | Value (loc, value) ->
+    group (Loc.pp loc ^^ Value.pp pp_a value)
+  | TypeDefinition (loc, typ_def) ->
+    group (Loc.pp loc ^^ TypeDefinition.pp typ_def)
+  | Exception (loc, exn) -> group (Loc.pp loc ^^ Exception.pp exn)
+  | Reference (loc, r) -> group (Loc.pp loc ^^ Reference.pp r)
+  | Open (loc, o) -> group (Loc.pp loc ^^ Open.pp o)
+  | Module (loc, name, defs) ->
+    nest (
+      Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+      indent (pps pp_a defs))
+  | Signature (loc, name, decls) ->
+    nest (
+      Loc.pp loc ^^ !^ "Signature" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+      indent (Signature.pps pp_a decls))
 
 (** Import an OCaml structure. *)
 let rec of_structure (env : unit FullEnvi.t) (structure : structure)
@@ -171,7 +172,11 @@ let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
       let env = FullEnvi.enter_module env in
       let (env, defs) = effects env defs in
       let env = FullEnvi.leave_module name env in
-      (env, Module (loc, name, defs)) in
+      (env, Module (loc, name, defs))
+    | Signature (loc, name, decls) ->
+      let decls = Signature.effects decls in
+      let env = Signature.update_env env name decls in
+      (env, Signature (loc, name, decls)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env, def) =
@@ -207,7 +212,11 @@ let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
     | Open (loc, o) -> (Open.update_env o env, Open (loc, o))
     | Module (loc, name, defs) ->
       let (env, defs) = monadise (FullEnvi.enter_module env) defs in
-      (FullEnvi.leave_module name env, Module (loc, name, defs)) in
+      (FullEnvi.leave_module name env, Module (loc, name, defs))
+    | Signature (loc, name, decls) ->
+      let decls = Signature.monadise decls in
+      let env = Signature.update_env env name decls in
+      (env, Signature (loc, name, decls)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env_units, def) = monadise_one env def in
@@ -228,5 +237,10 @@ let rec to_coq (defs : 'a t list) : SmartPrint.t =
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
+        !^ "End" ^^ Name.to_coq name ^-^ !^ ".")
+    | Signature (_, name, decls) ->
+      nest (
+        !^ "Module Type" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+        indent (Signature.to_coq decls) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ ".") in
   separate (newline ^^ newline) (List.map to_coq_one defs)

@@ -1,0 +1,16 @@
+3 Signature M:
+  4 (Value ((4, Effect ([ ], .)), n, [ ], Type (Z/1)))
+  
+  5 (Value ((5, Effect ([ ], .)), f, [ a; b ], (a -> (a * b))))
+  
+  7
+  Inductive t1:
+    ([ a ], [ (C1, [ Type (Z/1) ]); (C2, [ a; Type (bool/1) ]) ])
+  
+  11
+  Record t2:
+    [ (f1, Type (Z/1)); (f2, Type (bool/1)) ]
+  
+  15 Synonym (t3, [ a ], (Type (Z/1) * a))
+  
+  17 Exception (E, (Type (string/1)))
