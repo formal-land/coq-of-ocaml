@@ -14,6 +14,10 @@ module type M = sig
 
   type 'a t3 = int * 'a
 
+  type t4
+
+  type ('a, 'b) t5
+
   exception E of string
 end
 

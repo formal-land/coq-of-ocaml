@@ -269,3 +269,11 @@ Value
                         ])))
             ]))
     ])
+
+30 Abstract (t3, [ ])
+
+31 Abstract (t4, [ a ])
+
+32
+Inductive t5:
+  ([ ], [ (C, [ ]) ])

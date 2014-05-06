@@ -8,7 +8,7 @@ Module List2.
   Inductive t (a : Type) : Type :=
   | Nil : t a
   | Cons : a -> (t a) -> t a.
-  Arguments Nil {a} .
+  Arguments Nil {a}.
   Arguments Cons {a} _ _.
   
   Fixpoint sum_rec (counter : nat) (l : t Z) : M [ NonTermination ] Z :=

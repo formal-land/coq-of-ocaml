@@ -13,4 +13,8 @@
   
   15 Synonym (t3, [ a ], (Type (Z/1) * a))
   
-  17 Exception (E, (Type (string/1)))
+  17 Abstract (t4, [ ])
+  
+  19 Abstract (t5, [ a; b ])
+  
+  21 Exception (E, (Type (string/1)))

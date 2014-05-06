@@ -7,10 +7,7 @@ Import ListNotations.
 Inductive t1 : Type :=
 | C1 : Z -> t1
 | C2 : bool -> Z -> t1
-| C3 : t1 .
-Arguments C1 _.
-Arguments C2 _ _.
-Arguments C3 .
+| C3 : t1.
 
 Definition n : t1 := C2 false 3.
 
@@ -23,7 +20,7 @@ Definition m : bool :=
 Inductive t2 (a : Type) : Type :=
 | D1 : t2 a
 | D2 : a -> (t2 a) -> t2 a.
-Arguments D1 {a} .
+Arguments D1 {a}.
 Arguments D2 {a} _ _.
 
 Fixpoint of_list_rec {A : Type} (counter : nat) (l : list A)
@@ -66,3 +63,10 @@ Definition s {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
     let! x_1 := of_list (cons 5 (cons 7 (cons 3 []))) in
     sum x_1
   end.
+
+Parameter t3 : Type.
+
+Parameter t4 : forall {a : Type}, Type.
+
+Inductive t5 : Type :=
+| C : t5.

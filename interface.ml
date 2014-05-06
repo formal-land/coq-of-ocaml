@@ -60,7 +60,8 @@ let of_typ_definition (typ_def : TypeDefinition.t) : t list =
     Typ name :: List.map (fun (x, _) -> Constructor x) constructors
   | TypeDefinition.Record (name, fields) ->
     Typ name :: List.map (fun (x, _) -> Field x) fields
-  | TypeDefinition.Synonym (name, _, _) -> [Typ name]
+  | TypeDefinition.Synonym (name, _, _) | TypeDefinition.Abstract (name, _) ->
+    [Typ name]
 
 let rec of_structures (defs : ('a * Effect.t) Structure.t list) : t list =
   List.flatten (List.map of_structure defs)

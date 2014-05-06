@@ -17,7 +17,11 @@
       [ "Var", "of_list", [ [ "Counter", "NonTermination" ] ] ],
       [ "Var", "sum_rec", [ [], [ "NonTermination" ] ] ],
       [ "Var", "sum", [ [ "Counter", "NonTermination" ] ] ],
-      [ "Var", "s", [ [ "Counter", "NonTermination" ] ] ]
+      [ "Var", "s", [ [ "Counter", "NonTermination" ] ] ],
+      [ "Typ", "t3" ],
+      [ "Typ", "t4" ],
+      [ "Typ", "t5" ],
+      [ "Constructor", "C" ]
     ]
   ]
 }

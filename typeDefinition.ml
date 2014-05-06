@@ -6,6 +6,7 @@ type t =
   | Inductive of Name.t * Name.t list * (Name.t * Type.t list) list
   | Record of Name.t * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
+  | Abstract of Name.t * Name.t list
 
 let pp (def : t) : SmartPrint.t =
   match def with
@@ -22,6 +23,9 @@ let pp (def : t) : SmartPrint.t =
   | Synonym (name, typ_args, value) ->
     nest (!^ "Synonym" ^^ OCaml.tuple [
       Name.pp name; OCaml.list Name.pp typ_args; Type.pp value])
+  | Abstract (name, typ_args) ->
+    nest (!^ "Abstract" ^^ OCaml.tuple [
+      Name.pp name; OCaml.list Name.pp typ_args])
 
 let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
   (typs : type_declaration list) : t =
@@ -47,7 +51,7 @@ let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
     | Type_abstract ->
       (match typ.type_manifest with
       | Some typ -> Synonym (name, typ_args, Type.of_type_expr env loc typ)
-      | None -> Error.raise loc "Type definition not handled."))
+      | None -> Abstract (name, typ_args)))
   | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."
 
 let update_env (def : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
@@ -60,8 +64,7 @@ let update_env (def : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
     let env = FullEnvi.add_typ [] name env in
     List.fold_left (fun env (x, _) -> FullEnvi.add_field [] x env)
       env fields
-  | Synonym (name, _, _) ->
-    FullEnvi.add_typ [] name env
+  | Synonym (name, _, _) | Abstract (name, _) -> FullEnvi.add_typ [] name env
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
@@ -73,18 +76,19 @@ let to_coq (def : t) : SmartPrint.t =
       else parens @@ nest (
         separate space (List.map Name.to_coq typ_args) ^^
         !^ ":" ^^ !^ "Type")) ^^
-      !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^^ newline ^^
-      separate newline (constructors |> List.map (fun (constr, args) ->
-        nest (
+      !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^-^
+      separate empty (constructors |> List.map (fun (constr, args) ->
+        newline ^^ nest (
           !^ "|" ^^ Name.to_coq constr ^^ !^ ":" ^^
-          separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^ Name.to_coq name ^^
-          separate space (List.map Name.to_coq typ_args)))) ^-^ !^ "." ^^ newline ^^
-      separate newline (constructors |> List.map (fun (name, args) ->
-        nest (
-          !^ "Arguments" ^^ Name.to_coq name ^^
-          separate space (typ_args |>
-            List.map (fun x -> braces @@ Name.to_coq x)) ^^
-          separate space (List.map (fun _ -> !^ "_") args) ^-^ !^ "."))))
+          separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^ separate space (List.map Name.to_coq (name :: typ_args))))) ^-^ !^ "." ^^
+      separate empty (constructors |> List.map (fun (name, args) ->
+        if typ_args = [] then
+          empty
+        else
+          newline ^^ nest (separate space (
+            !^ "Arguments" :: Name.to_coq name ::
+            (List.map (fun x -> braces @@ Name.to_coq x) typ_args) @
+            (List.map (fun _ -> !^ "_") args)) ^-^ !^ "."))))
   | Record (name, fields) ->
     nest (
       !^ "Record" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
@@ -96,3 +100,13 @@ let to_coq (def : t) : SmartPrint.t =
       !^ "Definition" ^^ Name.to_coq name ^^
       separate space (List.map Name.to_coq typ_args) ^^ !^ ":=" ^^
       Type.to_coq false value ^-^ !^ ".")
+  | Abstract (name, typ_args) ->
+    nest (
+      !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
+      (match typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        !^ "forall" ^^ braces (group (
+          separate space (List.map Name.to_coq typ_args) ^^
+          !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
+      !^ "Type" ^-^ !^ ".")

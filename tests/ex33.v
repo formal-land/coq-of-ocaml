@@ -21,6 +21,10 @@ Module Type M.
   
   Definition t3 a := Z * a.
   
+  Parameter t4 : Type.
+  
+  Parameter t5 : forall {a b : Type}, Type.
+  
   Definition E := Effect.make unit (string).
   
   Definition raise_E {A : Type} (x : string) : M [ E ] A :=

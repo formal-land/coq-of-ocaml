@@ -6,9 +6,7 @@ Import ListNotations.
 
 Inductive set : Type :=
 | Empty : set
-| Node : set -> Z -> set -> set .
-Arguments Empty .
-Arguments Node _ _ _.
+| Node : set -> Z -> set -> set.
 
 Definition empty : set := Empty.
 
