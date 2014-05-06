@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((b, [ ], [ ], Some Type (bool/1)),
@@ -44,10 +44,10 @@
                         ])
                   ])
             ]))
-    ]))
+    ])
 
 5
-(Value
+Value
   (non_rec, @.,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
@@ -66,10 +66,10 @@
                         Int(3))
                   ])
             ]))
-    ]))
+    ])
 
 7
-(Value
+Value
   (non_rec, @.,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
@@ -124,10 +124,10 @@
                         Int(3))
                   ])
             ]))
-    ]))
+    ])
 
 9
-(Value
+Value
   (non_rec, @.,
     [
       ((n3, [ ], [ ], Some Type (Z/1)),
@@ -142,10 +142,10 @@
                         Int(12))
                   ])
             ]))
-    ]))
+    ])
 
 11
-(Value
+Value
   (non_rec, @.,
     [
       ((n4, [ ], [ ], Some Type (Z/1)),
@@ -174,10 +174,10 @@
                   ]);
               Constant (11, Int(9))
             ]))
-    ]))
+    ])
 
 13
-(Value
+Value
   (non_rec, @.,
     [
       ((n5, [ ], [ ], Some Type (Z/1)),
@@ -205,20 +205,20 @@
                         Int(1))
                   ])
             ]))
-    ]))
+    ])
 
 15
-(Value
+Value
   (non_rec, @.,
     [
       ((s, [ ], [ ], Some Type (string/1)),
         Apply
           (15, Variable (15, String.append/1),
             [ Constant (15, String("ghj")); Constant (15, String("klm")) ]))
-    ]))
+    ])
 
 17
-(Value
+Value
   (non_rec, @.,
     [
       ((c, [ A ], [ (x, A) ],
@@ -255,20 +255,20 @@
                           ])
                     ]))
             ]))
-    ]))
+    ])
 
 19
-(Value
+Value
   (non_rec, @.,
     [
       ((x, [ ], [ ], Some Type (unit/1)),
         Apply
           (19, Variable (19, OCaml.Pervasives.ignore/1),
             [ Constant (19, Int(23)) ]))
-    ]))
+    ])
 
 21
-(Value
+Value
   (non_rec, @.,
     [
       ((p, [ ], [ ], Some Type (Z/1)),
@@ -300,10 +300,10 @@
                             Int(4)))
                   ])
             ]))
-    ]))
+    ])
 
 23
-(Value
+Value
   (non_rec, @.,
     [
       ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
@@ -325,10 +325,10 @@
                 (23, cons/1, Constant (23, Int(3)),
                   Constructor (23, []/1))
             ]))
-    ]))
+    ])
 
 25
-(Value
+Value
   (non_rec, @.,
     [
       ((y, [ ], [ ], Some Type (Z/1)),
@@ -352,4 +352,4 @@
                       ]));
               Constant (25, Int(12))
             ]))
-    ]))
+    ])

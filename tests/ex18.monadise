@@ -1,7 +1,7 @@
 1 Reference (r, Type (Z/1))
 
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((plus_one, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (Z/1))),
@@ -38,12 +38,12 @@
                                   Int(1))
                             ]))))
             ]))
-    ]))
+    ])
 
 6 Reference (s, Type (string/1))
 
 8
-(Value
+Value
   (non_rec, @.,
     [
       ((fail, [ A; B ], [ (x, A) ], Some Monad ([ OCaml.Failure/1; s/0 ], B)),
@@ -93,10 +93,10 @@
                                   x_1/0)
                             ]))))
             ]))
-    ]))
+    ])
 
 10
-(Value
+Value
   (non_rec, @.,
     [
       ((reset, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1))),
@@ -115,10 +115,10 @@
                           Int(0))
                     ]))
             ]))
-    ]))
+    ])
 
 13
-(Value
+Value
   (non_rec, @.,
     [
       ((incr, [ A ], [ (x, A) ], Some Monad ([ r/0 ], Type (unit/1))),
@@ -169,4 +169,4 @@
                               x_1/0)
                         ])))
             ]))
-    ]))
+    ])

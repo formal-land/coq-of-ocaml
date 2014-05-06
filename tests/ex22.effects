@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((op_plus_plus_plus, [ ], [ (x, Type (Z/1)); (y, Type (Z/1)) ],
@@ -10,20 +10,20 @@
               Variable ((3, Effect ([ ], .)), x/0);
               Variable ((3, Effect ([ ], .)), y/0)
             ]))
-    ]))
+    ])
 
 4
-(Value
+Value
   (non_rec, @.,
     [
       ((op_tilde_tilde, [ ], [ (x, Type (Z/1)) ], Some Type (Z/1)),
         Apply
           ((4, Effect ([ ], .)), Variable ((4, Effect ([ ], .)), Z.opp/1),
             [ Variable ((4, Effect ([ ], .)), x/0) ]))
-    ]))
+    ])
 
 6
-(Value
+Value
   (non_rec, @.,
     [
       ((z, [ ], [ ], Some Type (Z/1)),
@@ -53,4 +53,4 @@
                   ]);
               Constant ((6, Effect ([ ], .)), Int(14))
             ]))
-    ]))
+    ])

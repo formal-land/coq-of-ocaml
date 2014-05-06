@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((n, [ ], [ ], Some Type (Z/1)),
@@ -40,4 +40,4 @@
                 Variable ((5, Effect ([ ], .)), y/0));
               (Any, Constant ((6, Effect ([ ], .)), Int(0)))
             ]))
-    ]))
+    ])

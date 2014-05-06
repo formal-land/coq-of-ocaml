@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((f, [ ], [ (n, Type (Z/1)); (b, Type (bool/1)) ], Some Type (Z/1)),
@@ -11,4 +11,4 @@
             Apply
               (7, Variable (7, Z.sub/1),
                 [ Variable (7, n/0); Constant (7, Int(1)) ])))
-    ]))
+    ])

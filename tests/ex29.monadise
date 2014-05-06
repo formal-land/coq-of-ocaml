@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (rec, @coq_rec,
     [
       ((odd_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
@@ -50,10 +50,10 @@
                           ])
                     ]))
             ]))
-    ]))
+    ])
 
 14
-(Value
+Value
   (rec, @coq_rec,
     [
       ((odd_length_with_print, [ A ], [ (l, Type (list/1, A)) ],
@@ -142,10 +142,10 @@
                                   x/0)
                             ]))))
             ]))
-    ]))
+    ])
 
 25
-(Value
+Value
   (rec, @.,
     [
       ((odd_length_free_rec, [ A ],
@@ -286,10 +286,10 @@
                                     ]))))
                     ]))
             ]))
-    ]))
+    ])
 
 25
-(Value
+Value
   (non_rec, @.,
     [
       ((odd_length_free, [ A ], [ (l, Type (list/1, A)) ],
@@ -305,10 +305,10 @@
                 Apply
                   (?, Variable (?, odd_length_free_rec/0),
                     [ Variable (?, x/0); Variable (?, l/0) ]))))
-    ]))
+    ])
 
 25
-(Value
+Value
   (non_rec, @.,
     [
       ((even_length_free, [ A ], [ (l, Type (list/1, A)) ],
@@ -324,4 +324,4 @@
                 Apply
                   (?, Variable (?, even_length_free_rec/0),
                     [ Variable (?, x/0); Variable (?, l/0) ]))))
-    ]))
+    ])

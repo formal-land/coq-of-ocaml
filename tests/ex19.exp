@@ -1,7 +1,7 @@
 3 Exception (Error, ())
 
 5
-(Value
+Value
   (non_rec, @.,
     [
       ((x1, [ ], [ ], Some Type (Z/1)),
@@ -14,10 +14,10 @@
               (Constructor (inl/1, x), Variable (?, x/0));
               (Constructor (inr/1, Tuple ()), Constant (7, Int(12)))
             ]))
-    ]))
+    ])
 
 9
-(Value
+Value
   (non_rec, @.,
     [
       ((x2, [ A; B ], [ (x, A) ], Some B),
@@ -64,10 +64,10 @@
                             ]))
                     ]))
             ]))
-    ]))
+    ])
 
 13
-(Value
+Value
   (non_rec, @.,
     [
       ((x3, [ ], [ (b, Type (bool/1)) ], Some Type (Z/1)),
@@ -89,4 +89,4 @@
               (Constructor (inl/1, x), Variable (?, x/0));
               (Constructor (inr/1, Tuple ()), Constant (15, Int(12)))
             ]))
-    ]))
+    ])

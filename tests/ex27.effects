@@ -1,5 +1,5 @@
 16
-(Value
+Value
   (rec, @coq_rec,
     [
       ((length_aux, [ A ], [ (len, Type (Z/1)); (x, Type (list/1, A)) ],
@@ -62,10 +62,10 @@
                           l/0)
                     ]))
             ]))
-    ]))
+    ])
 
 21
-(Value
+Value
   (non_rec, @.,
     [
       ((length, [ A ], [ (l, Type (list/1, A)) ], Some Type (Z/1)),
@@ -76,10 +76,10 @@
               Constant ((21, Effect ([ ], .)), Int(0));
               Variable ((21, Effect ([ ], .)), l/0)
             ]))
-    ]))
+    ])
 
 23
-(Value
+Value
   (non_rec, @.,
     [
       ((hd, [ A ], [ (x, Type (list/1, A)) ], Some A),
@@ -118,10 +118,10 @@
               (Constructor (cons/1, a, l),
                 Variable ((25, Effect ([ ], .)), a/0))
             ]))
-    ]))
+    ])
 
 27
-(Value
+Value
   (non_rec, @.,
     [
       ((tl, [ A ], [ (x, Type (list/1, A)) ], Some Type (list/1, A)),
@@ -160,10 +160,10 @@
               (Constructor (cons/1, a, l),
                 Variable ((29, Effect ([ ], .)), l/0))
             ]))
-    ]))
+    ])
 
 31
-(Value
+Value
   (non_rec, @.,
     [
       ((nth, [ A ], [ (l, Type (list/1, A)); (n, Type (Z/1)) ], Some A),
@@ -363,19 +363,19 @@
                   Variable ((38, Effect ([ ], .)), l/0);
                   Variable ((38, Effect ([ ], .)), n/0)
                 ])))
-    ]))
+    ])
 
 40
-(Value
+Value
   (non_rec, @.,
     [
       ((append, [ A ], [ ],
         Some (Type (list/1, A) -> (Type (list/1, A) -> Type (list/1, A)))),
         Variable ((40, Effect ([ ], .)), OCaml.Pervasives.app/1))
-    ]))
+    ])
 
 42
-(Value
+Value
   (rec, @coq_rec,
     [
       ((rev_append, [ A ], [ (l1, Type (list/1, A)); (l2, Type (list/1, A)) ],
@@ -430,10 +430,10 @@
                               l2/0))
                     ]))
             ]))
-    ]))
+    ])
 
 48
-(Value
+Value
   (non_rec, @.,
     [
       ((rev, [ A ], [ (l, Type (list/1, A)) ], Some Type (list/1, A)),
@@ -444,10 +444,10 @@
               Variable ((48, Effect ([ ], .)), l/0);
               Constructor ((48, Effect ([ ], .)), []/1)
             ]))
-    ]))
+    ])
 
 50
-(Value
+Value
   (rec, @coq_rec,
     [
       ((flatten, [ A ], [ (x, Type (list/1, Type (list/1, A))) ],
@@ -503,19 +503,19 @@
                           ])
                     ]))
             ]))
-    ]))
+    ])
 
 55
-(Value
+Value
   (non_rec, @.,
     [
       ((concat, [ A ], [ ],
         Some (Type (list/1, Type (list/1, A)) -> Type (list/1, A))),
         Variable ((55, Effect ([ ], . -> .)), flatten/0))
-    ]))
+    ])
 
 57
-(Value
+Value
   (rec, @coq_rec,
     [
       ((map, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
@@ -596,10 +596,10 @@
                               l/0)
                         ])))
             ]))
-    ]))
+    ])
 
 62
-(Value
+Value
   (rec, @coq_rec,
     [
       ((mapi_aux, [ A; B ],
@@ -722,10 +722,10 @@
                               l/0)
                         ])))
             ]))
-    ]))
+    ])
 
 67
-(Value
+Value
   (non_rec, @.,
     [
       ((mapi, [ A; B ],
@@ -739,10 +739,10 @@
               Variable ((67, Effect ([ ], .)), f/0);
               Variable ((67, Effect ([ ], .)), l/0)
             ]))
-    ]))
+    ])
 
 69
-(Value
+Value
   (non_rec, @.,
     [
       ((rev_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
@@ -852,10 +852,10 @@
               Constructor ((74, Effect ([ ], .)), []/1);
               Variable ((74, Effect ([ ], .)), l/0)
             ]))
-    ]))
+    ])
 
 76
-(Value
+Value
   (rec, @coq_rec,
     [
       ((iter, [ A; B ], [ (f, (A -> B)); (x, Type (list/1, A)) ],
@@ -926,10 +926,10 @@
                               l/0)
                         ])))
             ]))
-    ]))
+    ])
 
 81
-(Value
+Value
   (rec, @coq_rec,
     [
       ((iteri_aux, [ A; B ],
@@ -1042,10 +1042,10 @@
                               l/0)
                         ])))
             ]))
-    ]))
+    ])
 
 86
-(Value
+Value
   (non_rec, @.,
     [
       ((iteri, [ A; B ],
@@ -1059,10 +1059,10 @@
               Variable ((86, Effect ([ ], .)), f/0);
               Variable ((86, Effect ([ ], .)), l/0)
             ]))
-    ]))
+    ])
 
 88
-(Value
+Value
   (rec, @coq_rec,
     [
       ((fold_left, [ A; B ],
@@ -1134,10 +1134,10 @@
                           l/0)
                     ]))
             ]))
-    ]))
+    ])
 
 94
-(Value
+Value
   (rec, @coq_rec,
     [
       ((fold_right, [ A; B ],
@@ -1209,10 +1209,10 @@
                           ])
                     ]))
             ]))
-    ]))
+    ])
 
 100
-(Value
+Value
   (rec, @coq_rec,
     [
       ((map2, [ A; B; C ],
@@ -1365,10 +1365,10 @@
                           String("List.map2"))
                     ]))
             ]))
-    ]))
+    ])
 
 107
-(Value
+Value
   (non_rec, @.,
     [
       ((rev_map2, [ A; B; C ],
@@ -1564,10 +1564,10 @@
               Variable ((114, Effect ([ ], .)), l1/0);
               Variable ((114, Effect ([ ], .)), l2/0)
             ]))
-    ]))
+    ])
 
 116
-(Value
+Value
   (rec, @coq_rec,
     [
       ((iter2, [ A; B; C ],
@@ -1703,10 +1703,10 @@
                           String("List.iter2"))
                     ]))
             ]))
-    ]))
+    ])
 
 123
-(Value
+Value
   (rec, @coq_rec,
     [
       ((fold_left2, [ A; B; C ],
@@ -1845,10 +1845,10 @@
                           String("List.fold_left2"))
                     ]))
             ]))
-    ]))
+    ])
 
 130
-(Value
+Value
   (rec, @coq_rec,
     [
       ((fold_right2, [ A; B; C ],
@@ -1988,10 +1988,10 @@
                           String("List.fold_right2"))
                     ]))
             ]))
-    ]))
+    ])
 
 137
-(Value
+Value
   (rec, @coq_rec,
     [
       ((for_all, [ A ], [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ],
@@ -2071,10 +2071,10 @@
                           ])
                     ]))
             ]))
-    ]))
+    ])
 
 142
-(Value
+Value
   (rec, @coq_rec,
     [
       ((_exists, [ A ], [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ],
@@ -2154,10 +2154,10 @@
                           ])
                     ]))
             ]))
-    ]))
+    ])
 
 147
-(Value
+Value
   (rec, @coq_rec,
     [
       ((for_all2, [ A; B ],
@@ -2302,10 +2302,10 @@
                           String("List.for_all2"))
                     ]))
             ]))
-    ]))
+    ])
 
 154
-(Value
+Value
   (rec, @coq_rec,
     [
       ((_exists2, [ A; B ],
@@ -2450,10 +2450,10 @@
                           String("List.exists2"))
                     ]))
             ]))
-    ]))
+    ])
 
 194
-(Value
+Value
   (rec, @coq_rec,
     [
       ((find, [ A ], [ (p, (A -> Type (bool/1))); (x, Type (list/1, A)) ],
@@ -2563,10 +2563,10 @@
                               l/0)
                         ])))
             ]))
-    ]))
+    ])
 
 199
-(Value
+Value
   (non_rec, @.,
     [
       ((find_all, [ A ], [ (p, (A -> Type (bool/1))) ],
@@ -2736,19 +2736,19 @@
           ((204, Effect ([ ], . -> .)),
             Variable ((204, Effect ([ ], . -> . -> .)), find/0),
             [ Constructor ((204, Effect ([ ], .)), []/1) ]))
-    ]))
+    ])
 
 206
-(Value
+Value
   (non_rec, @.,
     [
       ((filter, [ A ], [ ],
         Some ((A -> Type (bool/1)) -> (Type (list/1, A) -> Type (list/1, A)))),
         Variable ((206, Effect ([ ], . -> . -> .)), find_all/0))
-    ]))
+    ])
 
 208
-(Value
+Value
   (non_rec, @.,
     [
       ((partition, [ A ], [ (p, (A -> Type (bool/1))); (l, Type (list/1, A)) ],
@@ -2987,10 +2987,10 @@
               Constructor ((213, Effect ([ ], .)), []/1);
               Variable ((213, Effect ([ ], .)), l/0)
             ]))
-    ]))
+    ])
 
 215
-(Value
+Value
   (rec, @coq_rec,
     [
       ((split, [ A; B ], [ (x, Type (list/1, (A * B))) ],
@@ -3096,10 +3096,10 @@
                                     ry/0))))
                     ]))
             ]))
-    ]))
+    ])
 
 221
-(Value
+Value
   (rec, @coq_rec,
     [
       ((combine, [ A; B ], [ (l1, Type (list/1, A)); (l2, Type (list/1, B)) ],
@@ -3214,10 +3214,10 @@
                           String("List.combine"))
                     ]))
             ]))
-    ]))
+    ])
 
 229
-(Value
+Value
   (rec, @coq_rec,
     [
       ((merge, [ A ],
@@ -3442,10 +3442,10 @@
           ((239, Effect ([ ], .)),
             Variable ((239, Effect ([ ], . -> .)), merge_aux/0),
             [ Variable ((239, Effect ([ ], .)), l2/0) ]))
-    ]))
+    ])
 
 242
-(Value
+Value
   (rec, @coq_rec,
     [
       ((chop, [ A ], [ (k, Type (Z/1)); (l, Type (list/1, A)) ],
@@ -3551,10 +3551,11 @@
                               false/1)
                         ]))
                 ])))
-    ]))
+    ])
 
 250 Module StableSort:
-  251 (Value
+  251
+  Value
     (rec, @coq_rec,
       [
         ((rev_merge, [ A ],
@@ -3869,9 +3870,10 @@
                 Variable ((261, Effect ([ ], .)), l2/0);
                 Variable ((261, Effect ([ ], .)), accu/0)
               ]))
-      ]))
+      ])
   
-  264 (Value
+  264
+  Value
     (rec, @coq_rec,
       [
         ((rev_merge_rev, [ A ],
@@ -4186,9 +4188,10 @@
                 Variable ((274, Effect ([ ], .)), l2/0);
                 Variable ((274, Effect ([ ], .)), accu/0)
               ]))
-      ]))
+      ])
   
-  277 (Value
+  277
+  Value
     (rec, @.,
       [
         ((sort_rec, [ A ],
@@ -6487,9 +6490,10 @@
                               ]))
                       ]))
               ]))
-      ]))
+      ])
   
-  277 (Value
+  277
+  Value
     (non_rec, @.,
       [
         ((sort, [ A ],
@@ -6550,9 +6554,10 @@
                 Variable ((?, Effect ([ ], .)), n/0);
                 Variable ((?, Effect ([ ], .)), l/0)
               ]))
-      ]))
+      ])
   
-  277 (Value
+  277
+  Value
     (non_rec, @.,
       [
         ((rev_sort, [ A ],
@@ -6613,10 +6618,10 @@
                 Variable ((?, Effect ([ ], .)), n/0);
                 Variable ((?, Effect ([ ], .)), l/0)
               ]))
-      ]))
+      ])
 
 322
-(Value
+Value
   (non_rec, @.,
     [
       ((stable_sort, [ A ],
@@ -6669,10 +6674,10 @@
                   Variable ((324, Effect ([ ], .)), len/0);
                   Variable ((324, Effect ([ ], .)), l/0)
                 ])))
-    ]))
+    ])
 
 326
-(Value
+Value
   (non_rec, @.,
     [
       ((sort, [ A ], [ ],
@@ -6690,10 +6695,10 @@
                       NonTermination/1;
                       OCaml.Assert_failure/1
                     ]-> .)), stable_sort/0))
-    ]))
+    ])
 
 327
-(Value
+Value
   (non_rec, @.,
     [
       ((fast_sort, [ A ], [ ],
@@ -6711,10 +6716,11 @@
                       NonTermination/1;
                       OCaml.Assert_failure/1
                     ]-> .)), stable_sort/0))
-    ]))
+    ])
 
 329 Module SortUniq:
-  331 (Value
+  331
+  Value
     (rec, @coq_rec,
       [
         ((rev_merge, [ A ],
@@ -7145,9 +7151,10 @@
                 Variable ((343, Effect ([ ], .)), l2/0);
                 Variable ((343, Effect ([ ], .)), accu/0)
               ]))
-      ]))
+      ])
   
-  346 (Value
+  346
+  Value
     (rec, @coq_rec,
       [
         ((rev_merge_rev, [ A ],
@@ -7578,9 +7585,10 @@
                 Variable ((358, Effect ([ ], .)), l2/0);
                 Variable ((358, Effect ([ ], .)), accu/0)
               ]))
-      ]))
+      ])
   
-  361 (Value
+  361
+  Value
     (rec, @.,
       [
         ((sort_rec, [ A ],
@@ -11211,9 +11219,10 @@
                               ]))
                       ]))
               ]))
-      ]))
+      ])
   
-  361 (Value
+  361
+  Value
     (non_rec, @.,
       [
         ((sort, [ A ],
@@ -11274,9 +11283,10 @@
                 Variable ((?, Effect ([ ], .)), n/0);
                 Variable ((?, Effect ([ ], .)), l/0)
               ]))
-      ]))
+      ])
   
-  361 (Value
+  361
+  Value
     (non_rec, @.,
       [
         ((rev_sort, [ A ],
@@ -11337,10 +11347,10 @@
                 Variable ((?, Effect ([ ], .)), n/0);
                 Variable ((?, Effect ([ ], .)), l/0)
               ]))
-      ]))
+      ])
 
 436
-(Value
+Value
   (non_rec, @.,
     [
       ((sort_uniq, [ A ],
@@ -11393,4 +11403,4 @@
                   Variable ((438, Effect ([ ], .)), len/0);
                   Variable ((438, Effect ([ ], .)), l/0)
                 ])))
-    ]))
+    ])

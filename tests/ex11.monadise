@@ -1,29 +1,30 @@
 3 Module SizedString:
-  4 Record t:
+  4
+  Record t:
     [ (name, Type (string/2)); (size, Type (Z/2)) ]
 
 9
-(Value
+Value
   (non_rec, @.,
     [
       ((r, [ ], [ ], Some Type (SizedString.t/0)),
         Record
           (9, (SizedString.name/0, Constant (9, String("gre"))),
             (SizedString.size/0, Constant (9, Int(3)))))
-    ]))
+    ])
 
 10
-(Value
+Value
   (non_rec, @.,
     [
       ((r', [ ], [ ], Some Type (SizedString.t/0)),
         Record
           (10, (SizedString.name/0, Constant (10, String("haha"))),
             (SizedString.size/0, Constant (10, Int(4)))))
-    ]))
+    ])
 
 12
-(Value
+Value
   (non_rec, @.,
     [
       ((s, [ ], [ ], Some Type (Z/1)),
@@ -33,10 +34,10 @@
               Field (12, Variable (12, r/0), SizedString.size/0);
               Field (12, Variable (12, r'/0), SizedString.size/0)
             ]))
-    ]))
+    ])
 
 14
-(Value
+Value
   (non_rec, @.,
     [
       ((f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)),
@@ -47,29 +48,31 @@
                 Constructor (15, true/1));
               (Any, Constructor (16, false/1))
             ]))
-    ]))
+    ])
 
 18
-(Value
+Value
   (non_rec, @.,
     [
       ((b, [ ], [ ], Some Type (bool/1)),
         Apply (18, Variable (18, f/0), [ Variable (18, r/0) ]))
-    ]))
+    ])
 
 19
-(Value
+Value
   (non_rec, @.,
     [
       ((b', [ ], [ ], Some Type (bool/1)),
         Apply (19, Variable (19, f/0), [ Variable (19, r'/0) ]))
-    ]))
+    ])
 
 21 Module Point:
-  22 Record t:
+  22
+  Record t:
     [ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ]
   
-  27 (Value
+  27
+  Value
     (non_rec, @.,
       [
         ((p, [ ], [ ], Some Type (t/0)),
@@ -77,9 +80,10 @@
             (27, (x/0, Constant (27, Int(5))),
               (y/0, Constant (27, Int(-3))),
               (z/0, Constant (27, Int(1)))))
-      ]))
+      ])
   
-  29 (Value
+  29
+  Value
     (non_rec, @.,
       [
         ((b, [ ], [ ], Some Type (bool/2)),
@@ -92,4 +96,4 @@
                       true/2));
                 (Any, Constructor (31, false/2))
               ]))
-      ]))
+      ])

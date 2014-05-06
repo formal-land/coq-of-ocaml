@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((l, [ A ], [ (x, A) ], Some Type (list/1, Type (Z/1))),
@@ -271,4 +271,4 @@
                                       []/1))))
                     ]))
             ]))
-    ]))
+    ])

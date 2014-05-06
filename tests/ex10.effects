@@ -1,8 +1,10 @@
 3 Module List2:
-  4 Inductive t:
+  4
+  Inductive t:
     ([ a ], [ (Nil, [ ]); (Cons, [ a; Type (t/0, a) ]) ])
   
-  8 (Value
+  8
+  Value
     (rec, @.,
       [
         ((sum_rec, [ ],
@@ -141,9 +143,10 @@
                               ]))
                       ]))
               ]))
-      ]))
+      ])
   
-  8 (Value
+  8
+  Value
     (non_rec, @.,
       [
         ((sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2)),
@@ -187,9 +190,10 @@
                     ]);
                 Variable ((?, Effect ([ ], .)), l/0)
               ]))
-      ]))
+      ])
   
-  13 (Value
+  13
+  Value
     (rec, @.,
       [
         ((of_list_rec, [ A ],
@@ -320,9 +324,10 @@
                                   ])))
                       ]))
               ]))
-      ]))
+      ])
   
-  13 (Value
+  13
+  Value
     (non_rec, @.,
       [
         ((of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)),
@@ -367,18 +372,19 @@
                     ]);
                 Variable ((?, Effect ([ ], .)), x/0)
               ]))
-      ]))
+      ])
   
   17 Module Inside:
-    18 (Value
+    18
+    Value
       (non_rec, @.,
         [
           ((x, [ ], [ ], Some Type (Z/3)),
             Constant ((18, Effect ([ ], .)), Int(12)))
-        ]))
+        ])
 
 22
-(Value
+Value
   (non_rec, @.,
     [
       ((n, [ A ], [ (x, A) ], Some Type (Z/1)),
@@ -495,4 +501,4 @@
                           ])
                     ]))
             ]))
-    ]))
+    ])

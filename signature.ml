@@ -44,12 +44,12 @@ let rec pps (pp_a : 'a -> SmartPrint.t) (decls : 'a t list) : SmartPrint.t =
 and pp (pp_a : 'a -> SmartPrint.t) (decl : 'a t) : SmartPrint.t =
   match decl with
   | Declaration (loc, value) ->
-    nest (Loc.pp loc ^^ OCaml.tuple [Value.pp pp_a value])
+    group (Loc.pp loc ^^ OCaml.tuple [Value.pp pp_a value])
   | TypeDefinition (loc, typ_def) ->
-    nest (Loc.pp loc ^^ TypeDefinition.pp typ_def)
-  | Exception (loc, exn) -> nest (Loc.pp loc ^^ Exception.pp exn)
-  | Reference (loc, r) -> nest (Loc.pp loc ^^ Reference.pp r)
-  | Open (loc, o) -> nest (Loc.pp loc ^^ Open.pp o)
+    group (Loc.pp loc ^^ TypeDefinition.pp typ_def)
+  | Exception (loc, exn) -> group (Loc.pp loc ^^ Exception.pp exn)
+  | Reference (loc, r) -> group (Loc.pp loc ^^ Reference.pp r)
+  | Open (loc, o) -> group (Loc.pp loc ^^ Open.pp o)
   | Module (loc, name, decls) ->
     nest (
       Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^

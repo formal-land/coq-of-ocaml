@@ -1,17 +1,19 @@
 3 Module M:
-  6 (Value
+  6
+  Value
     (non_rec, @.,
-      [ ((b, [ ], [ ], Some Type (bool/2)), Constructor (6, false/2)) ]))
+      [ ((b, [ ], [ ], Some Type (bool/2)), Constructor (6, false/2)) ])
   
-  7 (Value
-    (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/2)), Constant (7, Int(12))) ]))
+  7
+  Value
+    (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/2)), Constant (7, Int(12))) ])
 
 10
-(Value
+Value
   (non_rec, @.,
     [
       ((n, [ ], [ ], Some Type (Z/1)),
         Apply
           (10, Variable (10, Z.add/1),
             [ Variable (10, M.n/0); Constant (10, Int(2)) ]))
-    ]))
+    ])

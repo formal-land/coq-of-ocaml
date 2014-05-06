@@ -51,11 +51,12 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
   let pp_one (def : 'a t) : SmartPrint.t =
     match def with
     | Value (loc, value) ->
-      Loc.pp loc ^^ OCaml.tuple [Value.pp pp_a value]
-    | TypeDefinition (loc, def) -> Loc.pp loc ^^ TypeDefinition.pp def
-    | Exception (loc, exn) -> Loc.pp loc ^^ Exception.pp exn
-    | Reference (loc, r) -> Loc.pp loc ^^ Reference.pp r
-    | Open (loc, o) -> Loc.pp loc ^^ Open.pp o
+      group (Loc.pp loc ^^ Value.pp pp_a value)
+    | TypeDefinition (loc, typ_def) ->
+      group (Loc.pp loc ^^ TypeDefinition.pp typ_def)
+    | Exception (loc, exn) -> group (Loc.pp loc ^^ Exception.pp exn)
+    | Reference (loc, r) -> group (Loc.pp loc ^^ Reference.pp r)
+    | Open (loc, o) -> group (Loc.pp loc ^^ Open.pp o)
     | Module (loc, name, defs) ->
       nest (
         Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^

@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (rec, @.,
     [
       ((sums_rec, [ ],
@@ -259,10 +259,10 @@
                                 ])))
                     ]))
             ]))
-    ]))
+    ])
 
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((sums, [ ], [ (ls, Type (list/1, Type (list/1, Type (Z/1)))) ],
@@ -273,4 +273,4 @@
               Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
               Variable (?, ls/0)
             ]))
-    ]))
+    ])
