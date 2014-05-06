@@ -2,6 +2,18 @@
 
 module type M = sig
   val n : int
+
+  type 'a t1 =
+    | C1 of int
+    | C2 of 'a * bool
+
+  type t2 = {
+    f1 : int;
+    f2 : bool }
+
+  type 'a t3 = int * 'a
+
+  exception E of string
 end
 
 (*module type M = sig
