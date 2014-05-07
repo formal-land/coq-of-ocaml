@@ -1,6 +1,6 @@
 # CoqOfOCaml
 
-Compiler of OCaml to Coq. Still experimental.
+Compiler of OCaml to Coq. Still experimental. For more information look at the [Wiki](https://github.com/clarus/coq-of-ocaml/wiki).
 
 ## Dependencies
 This compiler needs a working installation of OCaml plus the following packages:
