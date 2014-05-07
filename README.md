@@ -2,6 +2,14 @@
 
 Compiler of OCaml to Coq. Still experimental.
 
+## Dependencies
+This compiler needs a working installation of OCaml plus the following packages:
+* [Coq](http://coq.inria.fr/)
+* [SmartPrint](https://github.com/clarus/smart-print)
+* [YoJson](http://mjambon.com/yojson.html)
+
+These can be easily installed with [OPAM](http://opam.ocaml.org/).
+
 ## Compile
 You have two parts to compile in order.
 
