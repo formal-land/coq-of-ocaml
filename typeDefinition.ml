@@ -23,7 +23,7 @@ let pp (def : t) : SmartPrint.t =
     nest (!^ "Synonym" ^^ OCaml.tuple [
       Name.pp name; OCaml.list Name.pp typ_args; Type.pp value])
 
-let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
+let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t)
   (typs : type_declaration list) : t =
   match typs with
   | [] -> Error.raise loc "Unexpected type definition with no case."
@@ -50,7 +50,7 @@ let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
       | None -> Error.raise loc "Type definition not handled."))
   | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."
 
-let update_env (def : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+let update_env (def : t) (env : ('a, 's) FullEnvi.t) : ('a, 's) FullEnvi.t =
   match def with
   | Inductive (name, _, constructors) ->
     let env = FullEnvi.add_typ [] name env in

@@ -3,7 +3,7 @@ open FullEnvi
 open Effect.Type
 open SmartPrint
 
-let env_with_effects : Effect.Type.t FullEnvi.t =
+let env_with_effects : (Effect.Type.t, 's) FullEnvi.t =
   let descriptor (path, base) =
     let x = PathName.of_name path base in
     Effect.Descriptor.singleton (Effect.Descriptor.Id.Ether x)
@@ -146,7 +146,7 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   |> open_module ["OCaml"]
   (* |> fun env -> SmartPrint.to_stdout 80 2 (FullEnvi.pp env); env *)
 
-let env : unit FullEnvi.t =
+let env : (unit, 's) FullEnvi.t =
   { env_with_effects with
     vars = Envi.map env_with_effects.vars (fun _ -> ());
     leave_prefix_vars = (fun _ () -> ()) }
