@@ -1,7 +1,7 @@
 3 Signature IM1:
-  4 (Value (4, n, [ ], Type (Z/1)))
+  4 (Value (n, [ ], Type (Z/1), .))
   
-  5 (Value (5, f, [ a; b ], (a -> (a * b))))
+  5 (Value (f, [ a; b ], (a -> (a * b)), .))
   
   7
   Inductive t1:
@@ -22,16 +22,16 @@
 24 Signature IM2:
   25 Abstract (t, [ ])
   
-  26 (Value (26, m, [ ], Type (Z/1)))
+  26 (Value (m, [ ], Type (Z/1), .))
   
   27 Module N:
-    28 (Value (28, n, [ ], Type (t/1)))
+    28 (Value (n, [ ], Type (t/1), .))
     
     29 Abstract (t, [ ])
   
   31 Open N
   
-  32 (Value (32, b, [ ], Type (N.t/0)))
+  32 (Value (b, [ ], Type (N.t/0), .))
 
 35 Module M2:
   36
