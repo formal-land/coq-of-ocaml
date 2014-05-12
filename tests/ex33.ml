@@ -17,8 +17,6 @@ module type IM1 = sig
   type t4
 
   type ('a, 'b) t5
-
-  exception E of string
 end
 
 module type IM2 = sig

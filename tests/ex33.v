@@ -24,11 +24,6 @@ Module Type IM1.
   Parameter t4 : Type.
   
   Parameter t5 : forall {a b : Type}, Type.
-  
-  Definition E := Effect.make unit (string).
-  
-  Definition raise_E {A : Type} (x : string) : M [ E ] A :=
-    fun s => (inr (inl x), s).
 End IM1.
 
 Module Type IM2.

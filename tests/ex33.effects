@@ -16,60 +16,58 @@
   17 Abstract (t4, [ ])
   
   19 Abstract (t5, [ a; b ])
-  
-  21 Exception (E, (Type (string/1)))
 
-24 Signature IM2:
-  25 Abstract (t, [ ])
+22 Signature IM2:
+  23 Abstract (t, [ ])
   
-  26 (Value (m, [ ], Type (Z/1)))
+  24 (Value (m, [ ], Type (Z/1)))
   
-  27 Module N:
-    28 (Value (n, [ ], Type (t/1)))
+  25 Module N:
+    26 (Value (n, [ ], Type (t/1)))
     
-    29 Abstract (t, [ ])
+    27 Abstract (t, [ ])
   
-  31 Open N
+  29 Open N
   
-  32 (Value (b, [ ], Type (N.t/0)))
+  30 (Value (b, [ ], Type (N.t/0)))
 
-35 Module M2:
-  36
+33 Module M2:
+  34
   Value
     (non_rec, @.,
       [
         ((null, [ ], [ ], Some (Type (Z/2) * Type (bool/2))),
           Tuple
-            ((36, Effect ([ ], .)),
-              Constant ((36, Effect ([ ], .)), Int(0)),
-              Constructor ((36, Effect ([ ], .)), false/2)))
+            ((34, Effect ([ ], .)),
+              Constant ((34, Effect ([ ], .)), Int(0)),
+              Constructor ((34, Effect ([ ], .)), false/2)))
       ])
   
-  37 Synonym (t, [ ], Type (Z/2))
+  35 Synonym (t, [ ], Type (Z/2))
   
-  38
+  36
   Value
     (non_rec, @.,
       [
         ((m, [ ], [ ], Some Type (Z/2)),
-          Constant ((38, Effect ([ ], .)), Int(12)))
+          Constant ((36, Effect ([ ], .)), Int(12)))
       ])
   
-  39
+  37
   Value
     (non_rec, @.,
       [
         ((b, [ ], [ ], Some Type (bool/2)),
-          Constructor ((39, Effect ([ ], .)), false/2))
+          Constructor ((37, Effect ([ ], .)), false/2))
       ])
   
-  40 Module N:
-    41 Synonym (t, [ ], Type (bool/3))
+  38 Module N:
+    39 Synonym (t, [ ], Type (bool/3))
     
-    42
+    40
     Value
       (non_rec, @.,
         [
           ((n, [ ], [ ], Some Type (Z/3)),
-            Constant ((42, Effect ([ ], .)), Int(14)))
+            Constant ((40, Effect ([ ], .)), Int(14)))
         ])

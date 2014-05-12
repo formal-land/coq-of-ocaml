@@ -43,8 +43,6 @@ end
 type t =
   | Declaration of Loc.t * Value.t
   | TypeDefinition of Loc.t * TypeDefinition.t
-  | Exception of Loc.t * Exception.t
-  | Reference of Loc.t * Reference.t
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * t list
 
@@ -57,8 +55,6 @@ and pp_one (decl : t) : SmartPrint.t =
     group (Loc.pp loc ^^ OCaml.tuple [Value.pp value])
   | TypeDefinition (loc, typ_def) ->
     group (Loc.pp loc ^^ TypeDefinition.pp typ_def)
-  | Exception (loc, exn) -> group (Loc.pp loc ^^ Exception.pp exn)
-  | Reference (loc, r) -> group (Loc.pp loc ^^ Reference.pp r)
   | Open (loc, o) -> group (Loc.pp loc ^^ Open.pp o)
   | Module (loc, name, decls) ->
     nest (
@@ -102,10 +98,6 @@ and of_signature_item (env : (unit, 's) FullEnvi.t) (item : signature_item)
     let typ_def = TypeDefinition.of_ocaml env loc typs in
     let env = TypeDefinition.update_env typ_def env in
     (env, TypeDefinition (loc, typ_def))
-  | Tsig_exception exn ->
-    let exn = Exception.of_ocaml env loc exn in
-    let env = Exception.update_env exn env in
-    (env, Exception (loc, exn))
   | Tsig_open (_, path, _, _) ->
     let o = Open.of_ocaml loc path in
     let env = Open.update_env o env in
@@ -154,8 +146,6 @@ and to_coq_one (decl : t) : SmartPrint.t =
   match decl with
   | Declaration (_, value) -> Value.to_coq value
   | TypeDefinition (_, typ_def) -> TypeDefinition.to_coq typ_def
-  | Exception (_, exn) -> Exception.to_coq exn
-  | Reference (_, r) -> Reference.to_coq r
   | Open (_, o) -> Open.to_coq o
   | Module (_, name, decls) ->
     nest (
