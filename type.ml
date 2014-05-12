@@ -20,6 +20,16 @@ let rec pp (typ : t) : SmartPrint.t =
   | Monad (d, typ) -> nest (!^ "Monad" ^^ OCaml.tuple [
     Effect.Descriptor.pp d; pp typ])
 
+let rec leave_prefix (name : Name.t) (typ : t) : t =
+  match typ with
+  | Variable _ -> typ
+  | Arrow (typ1, typ2) -> Arrow (leave_prefix name typ1, leave_prefix name typ2)
+  | Tuple typs -> Tuple (List.map (leave_prefix name) typs)
+  | Apply (x, typs) ->
+    Apply (BoundName.leave_prefix name x, List.map (leave_prefix name) typs)
+  | Monad (d, typ) ->
+    Monad (Effect.Descriptor.leave_prefix name d, leave_prefix name typ)
+
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_type_expr_new_typ_vars (env : ('a, 's) FullEnvi.t) (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (typ : Types.type_expr)

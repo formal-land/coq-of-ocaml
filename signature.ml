@@ -12,8 +12,8 @@ module Value = struct
     nest (!^ "Value" ^^ OCaml.tuple [
       Name.pp value.name; OCaml.list Name.pp value.typ_args; Type.pp value.typ])
 
-  (*let leave_prefix (value : t) : t =
-    { value with effect_typ }*)
+  let leave_prefix (x : Name.t) (value : t) : t =
+    { value with typ = Type.leave_prefix x value.typ }
 
   let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t)
     (value : value_description) : t =
@@ -68,14 +68,14 @@ and depth_lift_one (decl : Effect.Type.t t) : Effect.Type.t t =
   match decl with
   | Declaration (loc, value) -> *)
 
-(*let rec leave_prefix (x : Name.t) (decls : t list) : t list =
+let rec leave_prefix (x : Name.t) (decls : t list) : t list =
   List.map (leave_prefix_one x) decls
 
 and leave_prefix_one (x : Name.t) (decl : t) : t =
   match decl with
-  | Declaration (loc, value) -> Declaration (loc, Value.leave_prefix name value)
-  | Module (loc, name, decls) -> Module (loc, name, leave_prefix decls)
-  | _ -> decl*)
+  | Declaration (loc, value) -> Declaration (loc, Value.leave_prefix x value)
+  | Module (loc, name, decls) -> Module (loc, name, leave_prefix x decls)
+  | _ -> decl
 
 let rec of_signature (env : (unit, 's) FullEnvi.t) (signature : signature)
   : (unit, 's) FullEnvi.t * t list =
