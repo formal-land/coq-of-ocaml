@@ -12,6 +12,9 @@ module Value = struct
     nest (!^ "Value" ^^ OCaml.tuple [
       Name.pp value.name; OCaml.list Name.pp value.typ_args; Type.pp value.typ])
 
+  let depth_lift (value : t) : t =
+    { value with typ = Type.depth_lift value.typ }
+
   let leave_prefix (x : Name.t) (value : t) : t =
     { value with typ = Type.leave_prefix x value.typ }
 
@@ -61,12 +64,13 @@ and pp_one (decl : t) : SmartPrint.t =
       Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
       indent (pp decls))
 
-(*let rec depth_lift (decls : Effect.Type.t t list) : Effect.Type.t t list =
+let rec depth_lift (decls : t list) : t list =
   List.map depth_lift_one decls
 
-and depth_lift_one (decl : Effect.Type.t t) : Effect.Type.t t =
+and depth_lift_one (decl : t) : t =
   match decl with
-  | Declaration (loc, value) -> *)
+  | Declaration (loc, value) -> Declaration (loc, Value.depth_lift value)
+  | Module (loc, name, decls) -> Module (loc, name, depth_lift decls)
 
 let rec leave_prefix (x : Name.t) (decls : t list) : t list =
   List.map (leave_prefix_one x) decls
