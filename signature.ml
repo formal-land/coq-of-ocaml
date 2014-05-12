@@ -6,13 +6,14 @@ module Value = struct
   type t = {
     name : Name.t;
     typ_args : Name.t list;
-    typ : Type.t;
-    effect_typ : Effect.Type.t }
+    typ : Type.t }
 
   let pp (value : t) : SmartPrint.t =
     nest (!^ "Value" ^^ OCaml.tuple [
-      Name.pp value.name; OCaml.list Name.pp value.typ_args; Type.pp value.typ;
-      Effect.Type.pp value.effect_typ])
+      Name.pp value.name; OCaml.list Name.pp value.typ_args; Type.pp value.typ])
+
+  (*let leave_prefix (value : t) : t =
+    { value with effect_typ }*)
 
   let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t)
     (value : value_description) : t =
@@ -21,12 +22,11 @@ module Value = struct
     let typ_args = Type.typ_args typ in
     { name = name;
       typ_args = Name.Set.elements typ_args;
-      typ = typ;
-      effect_typ = Effect.Type.Pure }
+      typ = typ }
 
-  let update_env (f : Effect.Type.t -> 'a) (value : t) (env : ('a, 's) FullEnvi.t)
+  let update_env (value : t) (v : 'a) (env : ('a, 's) FullEnvi.t)
     : ('a, 's) FullEnvi.t =
-    FullEnvi.add_var [] value.name (f value.effect_typ) env
+    FullEnvi.add_var [] value.name v env
 
   let to_coq (value : t) : SmartPrint.t =
     nest (
@@ -72,6 +72,15 @@ and depth_lift_one (decl : Effect.Type.t t) : Effect.Type.t t =
   match decl with
   | Declaration (loc, value) -> *)
 
+(*let rec leave_prefix (x : Name.t) (decls : t list) : t list =
+  List.map (leave_prefix_one x) decls
+
+and leave_prefix_one (x : Name.t) (decl : t) : t =
+  match decl with
+  | Declaration (loc, value) -> Declaration (loc, Value.leave_prefix name value)
+  | Module (loc, name, decls) -> Module (loc, name, leave_prefix decls)
+  | _ -> decl*)
+
 let rec of_signature (env : (unit, 's) FullEnvi.t) (signature : signature)
   : (unit, 's) FullEnvi.t * t list =
   let (env, decls) =
@@ -87,7 +96,7 @@ and of_signature_item (env : (unit, 's) FullEnvi.t) (item : signature_item)
   match item.sig_desc with
   | Tsig_value declaration ->
     let declaration = Value.of_ocaml env loc declaration in
-    let env = Value.update_env (fun _ -> ()) declaration env in
+    let env = Value.update_env declaration () env in
     (env, Declaration (loc, declaration))
   | Tsig_type typs ->
     let typ_def = TypeDefinition.of_ocaml env loc typs in
