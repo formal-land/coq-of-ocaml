@@ -73,40 +73,6 @@ type 'a t =
     (** Monadic lift. *)
   | Run of 'a * BoundName.t * Effect.Descriptor.t * 'a t
 
-let annotation (e : 'a t) : 'a =
-  match e with
-  | Constant (a, _) | Variable (a, _) | Tuple (a, _) | Constructor (a, _, _)
-  | Apply (a, _, _) | Function (a, _, _) | LetVar (a, _, _, _)
-  | LetFun (a, _, _) | Match (a, _, _) | Record (a, _) | Field (a, _, _)
-  | IfThenElse (a, _, _, _) | Sequence (a, _, _) | Return (a, _)
-  | Bind (a, _, _, _) | Lift (a, _, _, _) | Run (a, _, _, _) -> a
-
-let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
-  match e with
-  | Constant (a, c) -> Constant (f a, c)
-  | Variable (a, x) -> Variable (f a, x)
-  | Tuple (a, es) -> Tuple (f a, List.map (map f) es)
-  | Constructor (a, x, es) -> Constructor (f a, x, List.map (map f) es)
-  | Apply (a, e_f, e_xs) -> Apply (f a, map f e_f, List.map (map f) e_xs)
-  | Function (a, x, e) -> Function (f a, x, map f e)
-  | LetVar (a, x, e1, e2) -> LetVar (f a, x, map f e1, map f e2)
-  | LetFun (a, def, e2) ->
-    let cases = def.Definition.cases |> List.map (fun (header, e) ->
-      (header, map f e)) in
-    LetFun (f a, { def with Definition.cases = cases }, map f e2)
-  | Match (a, e, cases) ->
-    Match (f a, map f e, List.map (fun (p, e) -> (p, map f e)) cases)
-  | Record (a, fields) ->
-    Record (f a, List.map (fun (x, e) -> (x, map f e)) fields)
-  | Field (a, e, x) -> Field (f a, map f e, x)
-  | IfThenElse (a, e1, e2, e3) ->
-    IfThenElse (f a, map f e1, map f e2, map f e3)
-  | Sequence (a, e1, e2) -> Sequence (f a, map f e1, map f e2)
-  | Return (a, e) -> Return (f a, map f e)
-  | Bind (a, e1, x, e2) -> Bind (f a, map f e1, x, map f e2)
-  | Lift (a, d1, d2, e) -> Lift (f a, d1, d2, map f e)
-  | Run (a, x, d, e) -> Run (f a, x, d, map f e)
-
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in
   match e with
@@ -153,6 +119,40 @@ let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   | Run (a, x, d, e) ->
     nest (!^ "Run" ^^ OCaml.tuple [
       pp_a a; BoundName.pp x; Effect.Descriptor.pp d; pp e])
+
+let annotation (e : 'a t) : 'a =
+  match e with
+  | Constant (a, _) | Variable (a, _) | Tuple (a, _) | Constructor (a, _, _)
+  | Apply (a, _, _) | Function (a, _, _) | LetVar (a, _, _, _)
+  | LetFun (a, _, _) | Match (a, _, _) | Record (a, _) | Field (a, _, _)
+  | IfThenElse (a, _, _, _) | Sequence (a, _, _) | Return (a, _)
+  | Bind (a, _, _, _) | Lift (a, _, _, _) | Run (a, _, _, _) -> a
+
+let rec map (f : 'a -> 'b) (e : 'a t) : 'b t =
+  match e with
+  | Constant (a, c) -> Constant (f a, c)
+  | Variable (a, x) -> Variable (f a, x)
+  | Tuple (a, es) -> Tuple (f a, List.map (map f) es)
+  | Constructor (a, x, es) -> Constructor (f a, x, List.map (map f) es)
+  | Apply (a, e_f, e_xs) -> Apply (f a, map f e_f, List.map (map f) e_xs)
+  | Function (a, x, e) -> Function (f a, x, map f e)
+  | LetVar (a, x, e1, e2) -> LetVar (f a, x, map f e1, map f e2)
+  | LetFun (a, def, e2) ->
+    let cases = def.Definition.cases |> List.map (fun (header, e) ->
+      (header, map f e)) in
+    LetFun (f a, { def with Definition.cases = cases }, map f e2)
+  | Match (a, e, cases) ->
+    Match (f a, map f e, List.map (fun (p, e) -> (p, map f e)) cases)
+  | Record (a, fields) ->
+    Record (f a, List.map (fun (x, e) -> (x, map f e)) fields)
+  | Field (a, e, x) -> Field (f a, map f e, x)
+  | IfThenElse (a, e1, e2, e3) ->
+    IfThenElse (f a, map f e1, map f e2, map f e3)
+  | Sequence (a, e1, e2) -> Sequence (f a, map f e1, map f e2)
+  | Return (a, e) -> Return (f a, map f e)
+  | Bind (a, e1, x, e2) -> Bind (f a, map f e1, x, map f e2)
+  | Lift (a, d1, d2, e) -> Lift (f a, d1, d2, map f e)
+  | Run (a, x, d, e) -> Run (f a, x, d, map f e)
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -569,7 +569,7 @@ let rec effects (env : (Effect.Type.t, 's) FullEnvi.t) (e : Loc.t t)
     (try
       let effect =
         { Effect.descriptor = Effect.Descriptor.pure;
-          typ = Envi.find x env.FullEnvi.vars Effect.Type.enter_lift } in
+          typ = Envi.find x env.FullEnvi.vars Effect.Type.depth_lift } in
       Variable ((l, effect), x)
     with Not_found ->
       let message = BoundName.pp x ^^ !^ "not found: supposed to be pure." in

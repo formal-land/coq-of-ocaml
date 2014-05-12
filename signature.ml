@@ -14,6 +14,9 @@ module Value = struct
       pp_a value.annotation; Name.pp value.name;
       OCaml.list Name.pp value.typ_args; Type.pp value.typ])
 
+  let map (f : 'a -> 'b) (value : 'a t) : 'b t =
+    { value with annotation = f value.annotation }
+
   let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t)
     (value : value_description) : Loc.t t =
     let name = Name.of_ident value.val_id in
@@ -71,6 +74,25 @@ and pp (pp_a : 'a -> SmartPrint.t) (decl : 'a t) : SmartPrint.t =
       Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
       indent (pps pp_a decls))
 
+let rec map (f : 'a -> 'b) (decls : 'a t list) : 'b t list =
+  List.map (map_one f) decls
+
+and map_one (f : 'a -> 'b) (decl : 'a t) : 'b t =
+  match decl with
+  | Declaration (loc, value) -> Declaration (loc, Value.map f value)
+  | TypeDefinition (loc, typ_ref) -> TypeDefinition (loc, typ_ref)
+  | Exception (loc, exn) -> Exception (loc, exn)
+  | Reference (loc, r) -> Reference (loc, r)
+  | Open (loc, o) -> Open (loc, o)
+  | Module (loc, name, decls) -> Module (loc, name, map f decls)
+
+(*let rec depth_lift (decls : Effect.Type.t t list) : Effect.Type.t t list =
+  List.map depth_lift_one decls
+
+and depth_lift_one (decl : Effect.Type.t t) : Effect.Type.t t =
+  match decl with
+  | Declaration (loc, value) -> *)
+
 let rec of_signature (env : (unit, 's) FullEnvi.t) (signature : signature)
   : (unit, 's) FullEnvi.t * Loc.t t list =
   let (env, decls) =
@@ -109,11 +131,14 @@ and of_signature_item (env : (unit, 's) FullEnvi.t) (item : signature_item)
     (env, Module (loc, name, decls))
   | _ -> Error.raise loc "Module type item not handled."
 
-let update_env (env : ('a, 's) FullEnvi.t) (name : Name.t) (defs : 'b t list)
+let update_env (env : ('a, 's) FullEnvi.t) (name : Name.t) (decls : 'b t list)
   : ('a, 's) FullEnvi.t =
-  env
+  FullEnvi.add_signature [] name decls env
 
-let rec effects (decls : Loc.t t list) : (Loc.t * Effect.t) t list =
+let effects (decls : Loc.t t list) : (Loc.t * Effect.Type.t) t list =
+  map (fun loc -> (loc, Effect.Type.Pure)) decls
+
+(*let rec effects (decls : Loc.t t list) : (Loc.t * Effect.t) t list =
   List.map effects_one decls
 
 and effects_one (decl : Loc.t t) : (Loc.t * Effect.t) t =
@@ -123,7 +148,7 @@ and effects_one (decl : Loc.t t) : (Loc.t * Effect.t) t =
   | Exception (loc, exn) -> Exception (loc, exn)
   | Reference (loc, r) -> Reference (loc, r)
   | Open (loc, o) -> Open (loc, o)
-  | Module (loc, name, decls) -> Module (loc, name, effects decls)
+  | Module (loc, name, decls) -> Module (loc, name, effects decls)*)
 
 let rec monadise (decls : (Loc.t * Effect.t) t list) : Loc.t t list =
   List.map monadise_one decls

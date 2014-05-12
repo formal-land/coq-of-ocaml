@@ -69,8 +69,8 @@ and pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
       indent (Signature.pps pp_a decls))
 
 (** Import an OCaml structure. *)
-let rec of_structure (env : (unit, 's) FullEnvi.t) (structure : structure)
-  : (unit, 's) FullEnvi.t * Loc.t t list =
+let rec of_structure (env : (unit, unit Signature.t) FullEnvi.t)
+  (structure : structure) : (unit, unit Signature.t) FullEnvi.t * Loc.t t list =
   let of_structure_item (env : (unit, 's) FullEnvi.t) (item : structure_item)
     : (unit, 's) FullEnvi.t * Loc.t t =
     let loc = Loc.of_location item.str_loc in
@@ -109,8 +109,14 @@ let rec of_structure (env : (unit, 's) FullEnvi.t) (structure : structure)
       signature } } ->
       let name = Name.of_ident name in
       let (_, decls) = Signature.of_signature env signature in
-      let env = Signature.update_env env name decls in
+      let unit_decls = Signature.map (fun _ -> ()) decls in
+      let env = Signature.update_env env name unit_decls in
       (env, Signature (loc, name, decls))
+    | Tstr_module {mb_id = name;
+      mb_expr = { mod_desc = Tmod_functor (_, _,
+      { mty_desc = Tmty_ident (signature_name, _) },
+      { mod_desc = Tmod_structure structure }) }} ->
+      Error.raise loc "Functors not handled."
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
@@ -119,8 +125,8 @@ let rec of_structure (env : (unit, 's) FullEnvi.t) (structure : structure)
     (env, []) structure.str_items in
   (env, List.rev defs)
 
-let rec monadise_let_rec (env : (unit, 's) FullEnvi.t) (defs : Loc.t t list)
-  : (unit, 's) FullEnvi.t * Loc.t t list =
+let rec monadise_let_rec (env : (unit, unit Signature.t) FullEnvi.t)
+  (defs : Loc.t t list) : (unit, unit Signature.t) FullEnvi.t * Loc.t t list =
   let rec monadise_let_rec_one (env : (unit, 's) FullEnvi.t) (def : Loc.t t)
     : (unit, 's) FullEnvi.t * Loc.t t list =
     match def with
@@ -138,7 +144,8 @@ let rec monadise_let_rec (env : (unit, 's) FullEnvi.t) (defs : Loc.t t list)
       let env = FullEnvi.leave_module name env in
       (env, [Module (loc, name, defs)])
     | Signature (loc, name, decls) ->
-      let env = Signature.update_env env name decls in
+      let unit_decls = Signature.map (fun _ -> ()) decls in
+      let env = Signature.update_env env name unit_decls in
       (env, [Signature (loc, name, decls)]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
@@ -146,8 +153,10 @@ let rec monadise_let_rec (env : (unit, 's) FullEnvi.t) (defs : Loc.t t list)
     (env, []) defs in
   (env, List.rev defs)
 
-let rec effects (env : (Effect.Type.t, 's) FullEnvi.t) (defs : 'a t list)
-  : (Effect.Type.t, 's) FullEnvi.t * ('a * Effect.t) t list =
+let rec effects (env : (Effect.Type.t, Effect.Type.t Signature.t) FullEnvi.t)
+  (defs : 'a t list)
+  : (Effect.Type.t, Effect.Type.t Signature.t) FullEnvi.t *
+    ('a * Effect.t) t list =
   let rec effects_one (env : (Effect.Type.t, 's) FullEnvi.t) (def : 'a t)
     : (Effect.Type.t, 's) FullEnvi.t * ('a * Effect.t) t =
     match def with
@@ -175,7 +184,8 @@ let rec effects (env : (Effect.Type.t, 's) FullEnvi.t) (defs : 'a t list)
       (env, Module (loc, name, defs))
     | Signature (loc, name, decls) ->
       let decls = Signature.effects decls in
-      let env = Signature.update_env env name decls in
+      let effects_decls = Signature.map snd decls in
+      let env = Signature.update_env env name effects_decls in
       (env, Signature (loc, name, decls)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->

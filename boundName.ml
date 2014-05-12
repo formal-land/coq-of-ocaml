@@ -7,7 +7,7 @@ type t = {
 let pp (x : t) : SmartPrint.t =
   PathName.pp x.path_name ^-^ !^ "/" ^-^ OCaml.int x.depth
 
-let enter_lift (x : t) : t =
+let depth_lift (x : t) : t =
   { x with depth = x.depth + 1 }
 
 let leave_prefix (name : Name.t) (x : t) : t =
