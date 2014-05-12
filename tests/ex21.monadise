@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((f, [ A; B; C ], [ (x, A) ],
@@ -18,10 +18,10 @@
                         Variable
                           (5, OCaml.Pervasives.failwith/1),
                         [ Constant (5, String("Bye")) ])))))
-    ]))
+    ])
 
 7
-(Value
+Value
   (non_rec, @.,
     [
       ((r, [ A; B ], [ (x, A) ], Some Monad ([ IO/1; OCaml.Failure/1 ], B)),
@@ -72,4 +72,4 @@
                                   Int(2))
                             ]))))
             ]))
-    ]))
+    ])

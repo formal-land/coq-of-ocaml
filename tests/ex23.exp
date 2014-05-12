@@ -1,53 +1,52 @@
 4
-(Value
-  (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/1)), Constant (4, Int(12))) ]))
+Value (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/1)), Constant (4, Int(12))) ])
 
 5
-(Value
+Value
   (non_rec, @.,
-    [ ((c1, [ ], [ ], Some Type (ascii/1)), Constant (5, Char("a"))) ]))
+    [ ((c1, [ ], [ ], Some Type (ascii/1)), Constant (5, Char("a"))) ])
 
 6
-(Value
+Value
   (non_rec, @.,
-    [ ((c2, [ ], [ ], Some Type (ascii/1)), Constant (6, Char("\\n"))) ]))
+    [ ((c2, [ ], [ ], Some Type (ascii/1)), Constant (6, Char("\\n"))) ])
 
 7
-(Value
+Value
   (non_rec, @.,
-    [ ((c3, [ ], [ ], Some Type (ascii/1)), Constant (7, Char("\\t"))) ]))
+    [ ((c3, [ ], [ ], Some Type (ascii/1)), Constant (7, Char("\\t"))) ])
 
 8
-(Value
+Value
   (non_rec, @.,
-    [ ((c4, [ ], [ ], Some Type (ascii/1)), Constant (8, Char("\""))) ]))
+    [ ((c4, [ ], [ ], Some Type (ascii/1)), Constant (8, Char("\""))) ])
 
 9
-(Value
+Value
   (non_rec, @.,
-    [ ((s, [ ], [ ], Some Type (string/1)), Constant (9, String("hi\n\t:)\""))) ]))
+    [ ((s, [ ], [ ], Some Type (string/1)), Constant (9, String("hi\n\t:)\""))) ])
 
 11
-(Value
+Value
   (non_rec, @.,
-    [ ((b1, [ ], [ ], Some Type (bool/1)), Constructor (11, false/1)) ]))
+    [ ((b1, [ ], [ ], Some Type (bool/1)), Constructor (11, false/1)) ])
 
 12
-(Value
+Value
   (non_rec, @.,
-    [ ((b2, [ ], [ ], Some Type (bool/1)), Constructor (12, true/1)) ]))
+    [ ((b2, [ ], [ ], Some Type (bool/1)), Constructor (12, true/1)) ])
 
 13
-(Value
-  (non_rec, @., [ ((u, [ ], [ ], Some Type (unit/1)), Constructor (13, tt/1)) ]))
+Value
+  (non_rec, @., [ ((u, [ ], [ ], Some Type (unit/1)), Constructor (13, tt/1)) ])
 
 16
-(Value
+Value
   (non_rec, @.,
-    [ ((l1, [ A ], [ ], Some Type (list/1, A)), Constructor (16, []/1)) ]))
+    [ ((l1, [ A ], [ ], Some Type (list/1, A)), Constructor (16, []/1)) ])
 
 17
-(Value
+Value
   (non_rec, @.,
     [
       ((l2, [ ], [ ], Some Type (list/1, Type (Z/1))),
@@ -60,20 +59,20 @@
                     Constructor
                       (17, cons/1, Constant (17, Int(3)),
                         Constructor (17, []/1))))))
-    ]))
+    ])
 
 18
-(Value
+Value
   (non_rec, @.,
     [
       ((o, [ ], [ ], Some Type (option/1, Type (Z/1))),
         IfThenElse
           (18, Variable (18, b1/0), Constructor (18, None/1),
             Constructor (18, Some/1, Variable (18, n/0))))
-    ]))
+    ])
 
 26
-(Value
+Value
   (non_rec, @.,
     [
       ((e_match, [ A; B ], [ (x, A) ], Some B),
@@ -102,10 +101,10 @@
                                   Int(2))))
                     ]))
             ]))
-    ]))
+    ])
 
 27
-(Value
+Value
   (non_rec, @.,
     [
       ((e_assert, [ A; B ], [ (x, A) ], Some B),
@@ -134,10 +133,10 @@
                                   Int(2))))
                     ]))
             ]))
-    ]))
+    ])
 
 28
-(Value
+Value
   (non_rec, @.,
     [
       ((e_invalid, [ A; B ], [ (x, A) ], Some B),
@@ -158,10 +157,10 @@
                               String("error")))
                     ]))
             ]))
-    ]))
+    ])
 
 29
-(Value
+Value
   (non_rec, @.,
     [
       ((e_failure, [ A; B ], [ (x, A) ], Some B),
@@ -182,10 +181,10 @@
                               String("error")))
                     ]))
             ]))
-    ]))
+    ])
 
 30
-(Value
+Value
   (non_rec, @.,
     [
       ((e_not_found, [ A; B ], [ (x, A) ], Some B),
@@ -203,10 +202,10 @@
                         (?)
                     ]))
             ]))
-    ]))
+    ])
 
 31
-(Value
+Value
   (non_rec, @.,
     [
       ((e_out_of_mem, [ A; B ], [ (x, A) ], Some B),
@@ -224,10 +223,10 @@
                         (?)
                     ]))
             ]))
-    ]))
+    ])
 
 32
-(Value
+Value
   (non_rec, @.,
     [
       ((e_overflow, [ A; B ], [ (x, A) ], Some B),
@@ -245,10 +244,10 @@
                         (?)
                     ]))
             ]))
-    ]))
+    ])
 
 33
-(Value
+Value
   (non_rec, @.,
     [
       ((e_sys_err, [ A; B ], [ (x, A) ], Some B),
@@ -269,10 +268,10 @@
                               String("error")))
                     ]))
             ]))
-    ]))
+    ])
 
 34
-(Value
+Value
   (non_rec, @.,
     [
       ((e_EOF, [ A; B ], [ (x, A) ], Some B),
@@ -290,10 +289,10 @@
                         (?)
                     ]))
             ]))
-    ]))
+    ])
 
 35
-(Value
+Value
   (non_rec, @.,
     [
       ((e_div, [ A; B ], [ (x, A) ], Some B),
@@ -311,10 +310,10 @@
                         (?)
                     ]))
             ]))
-    ]))
+    ])
 
 36
-(Value
+Value
   (non_rec, @.,
     [
       ((e_sys_blocked, [ A; B ], [ (x, A) ], Some B),
@@ -332,10 +331,10 @@
                         (?)
                     ]))
             ]))
-    ]))
+    ])
 
 37
-(Value
+Value
   (non_rec, @.,
     [
       ((e_rec_module, [ A; B ], [ (x, A) ], Some B),
@@ -364,4 +363,4 @@
                                   Int(2))))
                     ]))
             ]))
-    ]))
+    ])

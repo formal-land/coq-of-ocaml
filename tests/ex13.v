@@ -1,6 +1,7 @@
 Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
+Local Open Scope type_scope.
 Import ListNotations.
 
 Definition tail {A : Type} (l : list A) : M [ OCaml.Failure ] (list A) :=

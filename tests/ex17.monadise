@@ -1,17 +1,18 @@
 3 Exception (Outside, ())
 
 5
-(Value
+Value
   (non_rec, @.,
     [
       ((f, [ A; B ], [ (x, A) ], Some Monad ([ Outside/0 ], B)),
         Apply (5, Variable (5, raise_Outside/0), [ Tuple (?) ]))
-    ]))
+    ])
 
 7 Module G:
   8 Exception (Inside, (Type (Z/2) * Type (string/2)))
   
-  10 (Value
+  10
+  Value
     (non_rec, @.,
       [
         ((g, [ A ], [ (b, Type (bool/2)) ],
@@ -37,10 +38,10 @@
                   Apply
                     (14, Variable (14, raise_Outside/1),
                       [ Tuple (?) ]))))
-      ]))
+      ])
 
 17
-(Value
+Value
   (rec, @.,
     [
       ((h_rec, [ A; B ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
@@ -189,10 +190,10 @@
                             ]))
                     ]))
             ]))
-    ]))
+    ])
 
 17
-(Value
+Value
   (non_rec, @.,
     [
       ((h, [ A; B ], [ (l, Type (list/1, A)) ],
@@ -225,4 +226,4 @@
                 Apply
                   (?, Variable (?, h_rec/0),
                     [ Variable (?, x/0); Variable (?, l/0) ]))))
-    ]))
+    ])

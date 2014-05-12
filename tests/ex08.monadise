@@ -3,15 +3,15 @@ Inductive t1:
   ([ ], [ (C1, [ Type (Z/1) ]); (C2, [ Type (bool/1); Type (Z/1) ]); (C3, [ ]) ])
 
 8
-(Value
+Value
   (non_rec, @.,
     [
       ((n, [ ], [ ], Some Type (t1/0)),
         Constructor (8, C2/0, Constructor (8, false/1), Constant (8, Int(3))))
-    ]))
+    ])
 
 10
-(Value
+Value
   (non_rec, @.,
     [
       ((m, [ ], [ ], Some Type (bool/1)),
@@ -21,14 +21,14 @@ Inductive t1:
               (Constructor (C2/0, b, Any), Variable (11, b/0));
               (Any, Constructor (12, true/1))
             ]))
-    ]))
+    ])
 
 14
 Inductive t2:
   ([ a ], [ (D1, [ ]); (D2, [ a; Type (t2/0, a) ]) ])
 
 18
-(Value
+Value
   (rec, @.,
     [
       ((of_list_rec, [ A ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
@@ -98,10 +98,10 @@ Inductive t2:
                                         x_1/0)))))
                     ]))
             ]))
-    ]))
+    ])
 
 18
-(Value
+Value
   (non_rec, @.,
     [
       ((of_list, [ A ], [ (l, Type (list/1, A)) ],
@@ -117,10 +117,10 @@ Inductive t2:
                 Apply
                   (?, Variable (?, of_list_rec/0),
                     [ Variable (?, x/0); Variable (?, l/0) ]))))
-    ]))
+    ])
 
 23
-(Value
+Value
   (rec, @.,
     [
       ((sum_rec, [ ], [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ],
@@ -194,10 +194,10 @@ Inductive t2:
                                     ]))))
                     ]))
             ]))
-    ]))
+    ])
 
 23
-(Value
+Value
   (non_rec, @.,
     [
       ((sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ],
@@ -213,10 +213,10 @@ Inductive t2:
                 Apply
                   (?, Variable (?, sum_rec/0),
                     [ Variable (?, x/0); Variable (?, l/0) ]))))
-    ]))
+    ])
 
 28
-(Value
+Value
   (non_rec, @.,
     [
       ((s, [ A ], [ (x, A) ],
@@ -268,4 +268,12 @@ Inductive t2:
                               x_1/0)
                         ])))
             ]))
-    ]))
+    ])
+
+30 Abstract (t3, [ ])
+
+31 Abstract (t4, [ a ])
+
+32
+Inductive t5:
+  ([ ], [ (C, [ ]) ])

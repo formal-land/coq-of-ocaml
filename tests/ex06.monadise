@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (rec, @.,
     [
       ((map_rec, [ A; B ],
@@ -77,10 +77,10 @@
                                         x_1/0)))))
                     ]))
             ]))
-    ]))
+    ])
 
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
@@ -100,10 +100,10 @@
                       Variable (?, f/0);
                       Variable (?, l/0)
                     ]))))
-    ]))
+    ])
 
 8
-(Value
+Value
   (rec, @.,
     [
       ((fold_rec, [ A; B ],
@@ -176,10 +176,10 @@
                             ]))
                     ]))
             ]))
-    ]))
+    ])
 
 8
-(Value
+Value
   (non_rec, @.,
     [
       ((fold, [ A; B ], [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ],
@@ -200,10 +200,10 @@
                       Variable (?, a/0);
                       Variable (?, l/0)
                     ]))))
-    ]))
+    ])
 
 13
-(Value
+Value
   (non_rec, @.,
     [
       ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
@@ -216,10 +216,10 @@
                     Constructor
                       (13, cons/1, Constant (13, Int(2)),
                         Constructor (13, []/1))))))
-    ]))
+    ])
 
 15
-(Value
+Value
   (non_rec, @.,
     [
       ((n, [ A ],
@@ -257,4 +257,4 @@
                   Constant (16, Int(0));
                   Variable (?, x/0)
                 ])))
-    ]))
+    ])

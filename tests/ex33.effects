@@ -1,0 +1,75 @@
+3 Signature IM1:
+  4 (Value ((4, Effect ([ ], .)), n, [ ], Type (Z/1)))
+  
+  5 (Value ((5, Effect ([ ], .)), f, [ a; b ], (a -> (a * b))))
+  
+  7
+  Inductive t1:
+    ([ a ], [ (C1, [ Type (Z/1) ]); (C2, [ a; Type (bool/1) ]) ])
+  
+  11
+  Record t2:
+    [ (f1, Type (Z/1)); (f2, Type (bool/1)) ]
+  
+  15 Synonym (t3, [ a ], (Type (Z/1) * a))
+  
+  17 Abstract (t4, [ ])
+  
+  19 Abstract (t5, [ a; b ])
+  
+  21 Exception (E, (Type (string/1)))
+
+24 Signature IM2:
+  25 Abstract (t, [ ])
+  
+  26 (Value ((26, Effect ([ ], .)), m, [ ], Type (Z/1)))
+  
+  27 Module N:
+    28 (Value ((28, Effect ([ ], .)), n, [ ], Type (t/1)))
+    
+    29 Abstract (t, [ ])
+  
+  31 Open N
+  
+  32 (Value ((32, Effect ([ ], .)), b, [ ], Type (N.t/0)))
+
+35 Module M2:
+  36
+  Value
+    (non_rec, @.,
+      [
+        ((null, [ ], [ ], Some (Type (Z/2) * Type (bool/2))),
+          Tuple
+            ((36, Effect ([ ], .)),
+              Constant ((36, Effect ([ ], .)), Int(0)),
+              Constructor ((36, Effect ([ ], .)), false/2)))
+      ])
+  
+  37 Synonym (t, [ ], Type (Z/2))
+  
+  38
+  Value
+    (non_rec, @.,
+      [
+        ((m, [ ], [ ], Some Type (Z/2)),
+          Constant ((38, Effect ([ ], .)), Int(12)))
+      ])
+  
+  39
+  Value
+    (non_rec, @.,
+      [
+        ((b, [ ], [ ], Some Type (bool/2)),
+          Constructor ((39, Effect ([ ], .)), false/2))
+      ])
+  
+  40 Module N:
+    41 Synonym (t, [ ], Type (bool/3))
+    
+    42
+    Value
+      (non_rec, @.,
+        [
+          ((n, [ ], [ ], Some Type (Z/3)),
+            Constant ((42, Effect ([ ], .)), Int(14)))
+        ])

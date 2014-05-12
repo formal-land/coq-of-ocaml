@@ -1,6 +1,7 @@
 Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
+Local Open Scope type_scope.
 Import ListNotations.
 
 Definition f {A B C : Type} (x : A) : M [ IO ] (B -> M [ OCaml.Failure ] C) :=

@@ -1,9 +1,10 @@
 3 Module SizedString:
-  4 Record t:
+  4
+  Record t:
     [ (name, Type (string/2)); (size, Type (Z/2)) ]
 
 9
-(Value
+Value
   (non_rec, @.,
     [
       ((r, [ ], [ ], Some Type (SizedString.t/0)),
@@ -12,10 +13,10 @@
             (SizedString.name/0,
               Constant ((9, Effect ([ ], .)), String("gre"))),
             (SizedString.size/0, Constant ((9, Effect ([ ], .)), Int(3)))))
-    ]))
+    ])
 
 10
-(Value
+Value
   (non_rec, @.,
     [
       ((r', [ ], [ ], Some Type (SizedString.t/0)),
@@ -24,10 +25,10 @@
             (SizedString.name/0,
               Constant ((10, Effect ([ ], .)), String("haha"))),
             (SizedString.size/0, Constant ((10, Effect ([ ], .)), Int(4)))))
-    ]))
+    ])
 
 12
-(Value
+Value
   (non_rec, @.,
     [
       ((s, [ ], [ ], Some Type (Z/1)),
@@ -55,10 +56,10 @@
                       r'/0),
                   SizedString.size/0)
             ]))
-    ]))
+    ])
 
 14
-(Value
+Value
   (non_rec, @.,
     [
       ((f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)),
@@ -71,10 +72,10 @@
                     true/1));
               (Any, Constructor ((16, Effect ([ ], .)), false/1))
             ]))
-    ]))
+    ])
 
 18
-(Value
+Value
   (non_rec, @.,
     [
       ((b, [ ], [ ], Some Type (bool/1)),
@@ -82,10 +83,10 @@
           ((18, Effect ([ ], .)),
             Variable ((18, Effect ([ ], . -> .)), f/0),
             [ Variable ((18, Effect ([ ], .)), r/0) ]))
-    ]))
+    ])
 
 19
-(Value
+Value
   (non_rec, @.,
     [
       ((b', [ ], [ ], Some Type (bool/1)),
@@ -93,13 +94,15 @@
           ((19, Effect ([ ], .)),
             Variable ((19, Effect ([ ], . -> .)), f/0),
             [ Variable ((19, Effect ([ ], .)), r'/0) ]))
-    ]))
+    ])
 
 21 Module Point:
-  22 Record t:
+  22
+  Record t:
     [ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ]
   
-  27 (Value
+  27
+  Value
     (non_rec, @.,
       [
         ((p, [ ], [ ], Some Type (t/0)),
@@ -108,9 +111,10 @@
               (x/0, Constant ((27, Effect ([ ], .)), Int(5))),
               (y/0, Constant ((27, Effect ([ ], .)), Int(-3))),
               (z/0, Constant ((27, Effect ([ ], .)), Int(1)))))
-      ]))
+      ])
   
-  29 (Value
+  29
+  Value
     (non_rec, @.,
       [
         ((b, [ ], [ ], Some Type (bool/2)),
@@ -135,4 +139,4 @@
                           .)),
                       false/2))
               ]))
-      ]))
+      ])

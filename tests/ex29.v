@@ -1,6 +1,7 @@
 Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
+Local Open Scope type_scope.
 Import ListNotations.
 
 Fixpoint odd_length {A : Type} (l : list A) : bool :=

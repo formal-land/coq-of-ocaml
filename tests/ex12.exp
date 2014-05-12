@@ -3,7 +3,7 @@ Inductive tree:
   ([ ], [ (Leaf, [ ]); (Node, [ Type (tree/0); Type (Z/1); Type (tree/0) ]) ])
 
 7
-(Value
+Value
   (rec, @.,
     [
       ((find_rec, [ ],
@@ -111,10 +111,10 @@ Inductive tree:
                                     true/1))))
                     ]))
             ]))
-    ]))
+    ])
 
 7
-(Value
+Value
   (non_rec, @.,
     [
       ((find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ], Some Type (bool/1)),
@@ -125,4 +125,4 @@ Inductive tree:
               Variable (?, x/0);
               Variable (?, t/0)
             ]))
-    ]))
+    ])

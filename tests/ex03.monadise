@@ -1,15 +1,15 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
         LetVar ? m = Constant (4, Int(12)) in
         LetVar ? n1 = Variable (5, m/0) in
         Variable (6, n1/0))
-    ]))
+    ])
 
 8
-(Value
+Value
   (non_rec, @.,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
@@ -51,4 +51,4 @@
                     ]))
             ]) in
         Apply (11, Variable (11, p1/0), [ Variable (11, c/0) ]))
-    ]))
+    ])

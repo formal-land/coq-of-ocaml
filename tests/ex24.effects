@@ -1,5 +1,5 @@
 5
-(Value
+Value
   (non_rec, @.,
     [
       ((e_invalid, [ A; B ], [ (x, A) ], Some B),
@@ -36,10 +36,10 @@
                           String("error"))
                     ]))
             ]))
-    ]))
+    ])
 
 6
-(Value
+Value
   (non_rec, @.,
     [
       ((e_failure, [ A; B ], [ (x, A) ], Some B),
@@ -76,10 +76,10 @@
                           String("error"))
                     ]))
             ]))
-    ]))
+    ])
 
 7
-(Value
+Value
   (non_rec, @.,
     [
       ((e_exit1, [ A; B ], [ (x, A) ], Some B),
@@ -115,10 +115,10 @@
                               .)))
                     ]))
             ]))
-    ]))
+    ])
 
 8
-(Value
+Value
   (non_rec, @.,
     [
       ((e_exit2, [ A; B ], [ (x, A) ], Some B),
@@ -154,10 +154,10 @@
                               .)))
                     ]))
             ]))
-    ]))
+    ])
 
 11
-(Value
+Value
   (non_rec, @.,
     [
       ((b_eq, [ ], [ ], Some Type (bool/1)),
@@ -168,10 +168,10 @@
               Constant ((11, Effect ([ ], .)), Int(1));
               Constant ((11, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 12
-(Value
+Value
   (non_rec, @.,
     [
       ((b_neq1, [ ], [ ], Some Type (bool/1)),
@@ -182,10 +182,10 @@
               Constructor ((12, Effect ([ ], .)), true/1);
               Constructor ((12, Effect ([ ], .)), false/1)
             ]))
-    ]))
+    ])
 
 13
-(Value
+Value
   (non_rec, @.,
     [
       ((b_neq2, [ ], [ ], Some Type (bool/1)),
@@ -196,10 +196,10 @@
               Constructor ((13, Effect ([ ], .)), tt/1);
               Constructor ((13, Effect ([ ], .)), tt/1)
             ]))
-    ]))
+    ])
 
 14
-(Value
+Value
   (non_rec, @.,
     [
       ((b_lt, [ ], [ ], Some Type (bool/1)),
@@ -210,10 +210,10 @@
               Constant ((14, Effect ([ ], .)), Int(1));
               Constant ((14, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 15
-(Value
+Value
   (non_rec, @.,
     [
       ((b_gt, [ ], [ ], Some Type (bool/1)),
@@ -224,10 +224,10 @@
               Constant ((15, Effect ([ ], .)), Int(1));
               Constant ((15, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 16
-(Value
+Value
   (non_rec, @.,
     [
       ((b_le, [ ], [ ], Some Type (bool/1)),
@@ -238,10 +238,10 @@
               Constructor ((16, Effect ([ ], .)), true/1);
               Constructor ((16, Effect ([ ], .)), false/1)
             ]))
-    ]))
+    ])
 
 17
-(Value
+Value
   (non_rec, @.,
     [
       ((b_ge, [ ], [ ], Some Type (bool/1)),
@@ -252,10 +252,10 @@
               Constructor ((17, Effect ([ ], .)), tt/1);
               Constructor ((17, Effect ([ ], .)), tt/1)
             ]))
-    ]))
+    ])
 
 18
-(Value
+Value
   (non_rec, @.,
     [
       ((comp, [ ], [ ], Some Type (Z/1)),
@@ -266,10 +266,10 @@
               Constant ((18, Effect ([ ], .)), Int(1));
               Constant ((18, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 19
-(Value
+Value
   (non_rec, @.,
     [
       ((n_min, [ ], [ ], Some Type (Z/1)),
@@ -280,10 +280,10 @@
               Constant ((19, Effect ([ ], .)), Int(1));
               Constant ((19, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 20
-(Value
+Value
   (non_rec, @.,
     [
       ((n_max, [ ], [ ], Some Type (Z/1)),
@@ -294,20 +294,20 @@
               Constant ((20, Effect ([ ], .)), Int(1));
               Constant ((20, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 25
-(Value
+Value
   (non_rec, @.,
     [
       ((b_not, [ ], [ ], Some Type (bool/1)),
         Apply
           ((25, Effect ([ ], .)), Variable ((25, Effect ([ ], .)), negb/1),
             [ Constructor ((25, Effect ([ ], .)), false/1) ]))
-    ]))
+    ])
 
 26
-(Value
+Value
   (non_rec, @.,
     [
       ((b_and, [ ], [ ], Some Type (bool/1)),
@@ -317,10 +317,10 @@
               Constructor ((26, Effect ([ ], .)), true/1);
               Constructor ((26, Effect ([ ], .)), false/1)
             ]))
-    ]))
+    ])
 
 27
-(Value
+Value
   (non_rec, @.,
     [
       ((b_and_old, [ ], [ ], Some Type (bool/1)),
@@ -330,10 +330,10 @@
               Constructor ((27, Effect ([ ], .)), true/1);
               Constructor ((27, Effect ([ ], .)), false/1)
             ]))
-    ]))
+    ])
 
 28
-(Value
+Value
   (non_rec, @.,
     [
       ((b_or, [ ], [ ], Some Type (bool/1)),
@@ -343,10 +343,10 @@
               Constructor ((28, Effect ([ ], .)), true/1);
               Constructor ((28, Effect ([ ], .)), false/1)
             ]))
-    ]))
+    ])
 
 29
-(Value
+Value
   (non_rec, @.,
     [
       ((b_or_old, [ ], [ ], Some Type (bool/1)),
@@ -356,10 +356,10 @@
               Constructor ((29, Effect ([ ], .)), true/1);
               Constructor ((29, Effect ([ ], .)), false/1)
             ]))
-    ]))
+    ])
 
 32
-(Value
+Value
   (non_rec, @.,
     [
       ((app1, [ ], [ ], Some Type (Z/1)),
@@ -379,10 +379,10 @@
                           .)),
                       x/0))
             ]))
-    ]))
+    ])
 
 33
-(Value
+Value
   (non_rec, @.,
     [
       ((app2, [ ], [ ], Some Type (Z/1)),
@@ -400,46 +400,46 @@
                       x/0));
               Constant ((33, Effect ([ ], .)), Int(12))
             ]))
-    ]))
+    ])
 
 36
-(Value
+Value
   (non_rec, @.,
     [
       ((n_neg1, [ ], [ ], Some Type (Z/1)),
         Apply
           ((36, Effect ([ ], .)), Variable ((36, Effect ([ ], .)), Z.opp/1),
             [ Constant ((36, Effect ([ ], .)), Int(12)) ]))
-    ]))
+    ])
 
 37
-(Value
+Value
   (non_rec, @.,
     [
       ((n_neg2, [ ], [ ], Some Type (Z/1)),
         Constant ((37, Effect ([ ], .)), Int(-12)))
-    ]))
+    ])
 
 38
-(Value
+Value
   (non_rec, @.,
     [
       ((n_pos1, [ ], [ ], Some Type (Z/1)),
         Apply
           ((38, Effect ([ ], .)), Variable ((38, Effect ([ ], .)), /1),
             [ Constant ((38, Effect ([ ], .)), Int(12)) ]))
-    ]))
+    ])
 
 39
-(Value
+Value
   (non_rec, @.,
     [
       ((n_pos2, [ ], [ ], Some Type (Z/1)),
         Constant ((39, Effect ([ ], .)), Int(12)))
-    ]))
+    ])
 
 40
-(Value
+Value
   (non_rec, @.,
     [
       ((n_succ, [ ], [ ], Some Type (Z/1)),
@@ -447,10 +447,10 @@
           ((40, Effect ([ ], .)),
             Variable ((40, Effect ([ ], .)), Z.succ/1),
             [ Constant ((40, Effect ([ ], .)), Int(1)) ]))
-    ]))
+    ])
 
 41
-(Value
+Value
   (non_rec, @.,
     [
       ((n_pred, [ ], [ ], Some Type (Z/1)),
@@ -458,10 +458,10 @@
           ((41, Effect ([ ], .)),
             Variable ((41, Effect ([ ], .)), Z.pred/1),
             [ Constant ((41, Effect ([ ], .)), Int(1)) ]))
-    ]))
+    ])
 
 42
-(Value
+Value
   (non_rec, @.,
     [
       ((n_plus, [ ], [ ], Some Type (Z/1)),
@@ -471,10 +471,10 @@
               Constant ((42, Effect ([ ], .)), Int(1));
               Constant ((42, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 43
-(Value
+Value
   (non_rec, @.,
     [
       ((n_minus, [ ], [ ], Some Type (Z/1)),
@@ -484,10 +484,10 @@
               Constant ((43, Effect ([ ], .)), Int(1));
               Constant ((43, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 44
-(Value
+Value
   (non_rec, @.,
     [
       ((n_times, [ ], [ ], Some Type (Z/1)),
@@ -497,10 +497,10 @@
               Constant ((44, Effect ([ ], .)), Int(1));
               Constant ((44, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 45
-(Value
+Value
   (non_rec, @.,
     [
       ((n_div, [ ], [ ], Some Type (Z/1)),
@@ -510,10 +510,10 @@
               Constant ((45, Effect ([ ], .)), Int(1));
               Constant ((45, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 46
-(Value
+Value
   (non_rec, @.,
     [
       ((n_mod, [ ], [ ], Some Type (Z/1)),
@@ -524,20 +524,20 @@
               Constant ((46, Effect ([ ], .)), Int(1));
               Constant ((46, Effect ([ ], .)), Int(2))
             ]))
-    ]))
+    ])
 
 47
-(Value
+Value
   (non_rec, @.,
     [
       ((n_abs, [ ], [ ], Some Type (Z/1)),
         Apply
           ((47, Effect ([ ], .)), Variable ((47, Effect ([ ], .)), Z.abs/1),
             [ Constant ((47, Effect ([ ], .)), Int(1)) ]))
-    ]))
+    ])
 
 52
-(Value
+Value
   (non_rec, @.,
     [
       ((n_land, [ ], [ ], Some Type (Z/1)),
@@ -548,10 +548,10 @@
               Constant ((52, Effect ([ ], .)), Int(12));
               Constant ((52, Effect ([ ], .)), Int(13))
             ]))
-    ]))
+    ])
 
 53
-(Value
+Value
   (non_rec, @.,
     [
       ((n_lor, [ ], [ ], Some Type (Z/1)),
@@ -561,10 +561,10 @@
               Constant ((53, Effect ([ ], .)), Int(12));
               Constant ((53, Effect ([ ], .)), Int(13))
             ]))
-    ]))
+    ])
 
 54
-(Value
+Value
   (non_rec, @.,
     [
       ((n_lxor, [ ], [ ], Some Type (Z/1)),
@@ -575,10 +575,10 @@
               Constant ((54, Effect ([ ], .)), Int(12));
               Constant ((54, Effect ([ ], .)), Int(13))
             ]))
-    ]))
+    ])
 
 56
-(Value
+Value
   (non_rec, @.,
     [
       ((n_lsl, [ ], [ ], Some Type (Z/1)),
@@ -589,10 +589,10 @@
               Constant ((56, Effect ([ ], .)), Int(12));
               Constant ((56, Effect ([ ], .)), Int(13))
             ]))
-    ]))
+    ])
 
 57
-(Value
+Value
   (non_rec, @.,
     [
       ((n_lsr, [ ], [ ], Some Type (Z/1)),
@@ -603,10 +603,10 @@
               Constant ((57, Effect ([ ], .)), Int(12));
               Constant ((57, Effect ([ ], .)), Int(13))
             ]))
-    ]))
+    ])
 
 64
-(Value
+Value
   (non_rec, @.,
     [
       ((ss, [ ], [ ], Some Type (string/1)),
@@ -617,10 +617,10 @@
               Constant ((64, Effect ([ ], .)), String("begin"));
               Constant ((64, Effect ([ ], .)), String("end"))
             ]))
-    ]))
+    ])
 
 67
-(Value
+Value
   (non_rec, @.,
     [
       ((n_char, [ ], [ ], Some Type (Z/1)),
@@ -629,10 +629,10 @@
             Variable
               ((67, Effect ([ ], .)), OCaml.Pervasives.int_of_char/1),
             [ Constant ((67, Effect ([ ], .)), Char("c")) ]))
-    ]))
+    ])
 
 68
-(Value
+Value
   (non_rec, @.,
     [
       ((char_n, [ A ], [ (x, A) ], Some Type (ascii/1)),
@@ -669,10 +669,10 @@
                           Int(23))
                     ]))
             ]))
-    ]))
+    ])
 
 71
-(Value
+Value
   (non_rec, @.,
     [
       ((i, [ ], [ ], Some Type (unit/1)),
@@ -680,10 +680,10 @@
           ((71, Effect ([ ], .)),
             Variable ((71, Effect ([ ], .)), OCaml.Pervasives.ignore/1),
             [ Constant ((71, Effect ([ ], .)), Int(12)) ]))
-    ]))
+    ])
 
 74
-(Value
+Value
   (non_rec, @.,
     [
       ((s_bool, [ ], [ ], Some Type (string/1)),
@@ -692,10 +692,10 @@
             Variable
               ((74, Effect ([ ], .)), OCaml.Pervasives.string_of_bool/1),
             [ Constructor ((74, Effect ([ ], .)), false/1) ]))
-    ]))
+    ])
 
 75
-(Value
+Value
   (non_rec, @.,
     [
       ((bool_s, [ ], [ ], Some Type (bool/1)),
@@ -704,10 +704,10 @@
             Variable
               ((75, Effect ([ ], .)), OCaml.Pervasives.bool_of_string/1),
             [ Constant ((75, Effect ([ ], .)), String("false")) ]))
-    ]))
+    ])
 
 76
-(Value
+Value
   (non_rec, @.,
     [
       ((s_n, [ ], [ ], Some Type (string/1)),
@@ -716,10 +716,10 @@
             Variable
               ((76, Effect ([ ], .)), OCaml.Pervasives.string_of_int/1),
             [ Constant ((76, Effect ([ ], .)), Int(12)) ]))
-    ]))
+    ])
 
 77
-(Value
+Value
   (non_rec, @.,
     [
       ((n_s, [ ], [ ], Some Type (Z/1)),
@@ -728,10 +728,10 @@
             Variable
               ((77, Effect ([ ], .)), OCaml.Pervasives.int_of_string/1),
             [ Constant ((77, Effect ([ ], .)), String("12")) ]))
-    ]))
+    ])
 
 82
-(Value
+Value
   (non_rec, @.,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
@@ -755,10 +755,10 @@
                           .)),
                       Int(13)))
             ]))
-    ]))
+    ])
 
 83
-(Value
+Value
   (non_rec, @.,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
@@ -782,10 +782,10 @@
                           .)),
                       Int(13)))
             ]))
-    ]))
+    ])
 
 86
-(Value
+Value
   (non_rec, @.,
     [
       ((ll, [ ], [ ], Some Type (list/1, Type (Z/1))),
@@ -854,10 +854,10 @@
                               .)),
                           []/1)))
             ]))
-    ]))
+    ])
 
 94
-(Value
+Value
   (non_rec, @.,
     [
       ((p_c, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -893,10 +893,10 @@
                           Char("c"))
                     ]))
             ]))
-    ]))
+    ])
 
 95
-(Value
+Value
   (non_rec, @.,
     [
       ((p_s, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -932,10 +932,10 @@
                           String("str"))
                     ]))
             ]))
-    ]))
+    ])
 
 96
-(Value
+Value
   (non_rec, @.,
     [
       ((p_n, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -971,10 +971,10 @@
                           Int(12))
                     ]))
             ]))
-    ]))
+    ])
 
 98
-(Value
+Value
   (non_rec, @.,
     [
       ((p_endline, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -1010,10 +1010,10 @@
                           String("str"))
                     ]))
             ]))
-    ]))
+    ])
 
 99
-(Value
+Value
   (non_rec, @.,
     [
       ((p_newline, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -1049,10 +1049,10 @@
                           tt/1)
                     ]))
             ]))
-    ]))
+    ])
 
 102
-(Value
+Value
   (non_rec, @.,
     [
       ((perr_c, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -1088,10 +1088,10 @@
                           Char("c"))
                     ]))
             ]))
-    ]))
+    ])
 
 103
-(Value
+Value
   (non_rec, @.,
     [
       ((perr_s, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -1127,10 +1127,10 @@
                           String("str"))
                     ]))
             ]))
-    ]))
+    ])
 
 104
-(Value
+Value
   (non_rec, @.,
     [
       ((perr_n, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -1166,10 +1166,10 @@
                           Int(12))
                     ]))
             ]))
-    ]))
+    ])
 
 106
-(Value
+Value
   (non_rec, @.,
     [
       ((perr_endline, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -1205,10 +1205,10 @@
                           String("str"))
                     ]))
             ]))
-    ]))
+    ])
 
 107
-(Value
+Value
   (non_rec, @.,
     [
       ((perr_newline, [ A ], [ (x, A) ], Some Type (unit/1)),
@@ -1244,10 +1244,10 @@
                           tt/1)
                     ]))
             ]))
-    ]))
+    ])
 
 110
-(Value
+Value
   (non_rec, @.,
     [
       ((r_s, [ A ], [ (x, A) ], Some Type (string/1)),
@@ -1283,10 +1283,10 @@
                           tt/1)
                     ]))
             ]))
-    ]))
+    ])
 
 111
-(Value
+Value
   (non_rec, @.,
     [
       ((r_n, [ A ], [ (x, A) ], Some Type (Z/1)),
@@ -1322,4 +1322,4 @@
                           tt/1)
                     ]))
             ]))
-    ]))
+    ])

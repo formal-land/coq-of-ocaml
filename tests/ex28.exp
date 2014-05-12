@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
@@ -47,10 +47,10 @@
                     ]))
             ]) in
         Apply (9, Variable (9, map/0), [ Variable (9, l/0) ]))
-    ]))
+    ])
 
 11
-(Value
+Value
   (non_rec, @.,
     [
       ((map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
@@ -107,4 +107,4 @@
         Apply
           (17, Variable (17, map2/0),
             [ Variable (17, f/0); Variable (17, l/0) ]))
-    ]))
+    ])

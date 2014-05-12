@@ -1,13 +1,12 @@
 Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
+Local Open Scope type_scope.
 Import ListNotations.
 
 Inductive tree : Type :=
 | Leaf : tree
-| Node : tree -> Z -> tree -> tree .
-Arguments Leaf .
-Arguments Node _ _ _.
+| Node : tree -> Z -> tree -> tree.
 
 Fixpoint find_rec (counter : nat) (x : Z) (t : tree)
   : M [ NonTermination ] bool :=

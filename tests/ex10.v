@@ -1,13 +1,14 @@
 Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
+Local Open Scope type_scope.
 Import ListNotations.
 
 Module List2.
   Inductive t (a : Type) : Type :=
   | Nil : t a
   | Cons : a -> (t a) -> t a.
-  Arguments Nil {a} .
+  Arguments Nil {a}.
   Arguments Cons {a} _ _.
   
   Fixpoint sum_rec (counter : nat) (l : t Z) : M [ NonTermination ] Z :=

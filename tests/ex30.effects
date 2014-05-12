@@ -1,5 +1,6 @@
 3 Module M:
-  4 (Value
+  4
+  Value
     (non_rec, @.,
       [
         ((f, [ A; B ], [ (x, A) ], Some B),
@@ -36,10 +37,11 @@
                             String("failure"))
                       ]))
               ]))
-      ]))
+      ])
 
 7 Module N:
-  8 (Value
+  8
+  Value
     (non_rec, @.,
       [
         ((f, [ A; B ], [ (x, A) ], Some B),
@@ -76,9 +78,10 @@
                             false/2)
                       ]))
               ]))
-      ]))
+      ])
   
-  9 (Value
+  9
+  Value
     (non_rec, @.,
       [
         ((x, [ ], [ ], Some Type (unit/2)),
@@ -130,11 +133,12 @@
                           .)),
                       tt/2))
               ]))
-      ]))
+      ])
   
   10 Open M
   
-  11 (Value
+  11
+  Value
     (non_rec, @.,
       [
         ((y, [ ], [ ], Some Type (unit/2)),
@@ -183,10 +187,10 @@
                           .)),
                       tt/2))
               ]))
-      ]))
+      ])
 
 14
-(Value
+Value
   (non_rec, @.,
     [
       ((b, [ ], [ ], Some Type (unit/1)),
@@ -212,12 +216,12 @@
                   ((14, Effect ([ ], .)),
                     tt/1))
             ]))
-    ]))
+    ])
 
 15 Open N
 
 16
-(Value
+Value
   (non_rec, @.,
     [
       ((b', [ ], [ ], Some Type (unit/1)),
@@ -243,4 +247,4 @@
                   ((16, Effect ([ ], .)),
                     tt/1))
             ]))
-    ]))
+    ])

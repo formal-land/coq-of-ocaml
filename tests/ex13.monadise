@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((tail, [ A ], [ (l, Type (list/1, A)) ],
@@ -21,10 +21,10 @@
                           String("Cannot take the tail of an empty list."))
                     ]))
             ]))
-    ]))
+    ])
 
 8
-(Value
+Value
   (rec, @.,
     [
       ((print_list_rec, [ ],
@@ -108,10 +108,10 @@
                                 ])))
                     ]))
             ]))
-    ]))
+    ])
 
 8
-(Value
+Value
   (non_rec, @.,
     [
       ((print_list, [ ], [ (x, Type (list/1, Type (string/1))) ],
@@ -128,10 +128,10 @@
                 Apply
                   (?, Variable (?, print_list_rec/0),
                     [ Variable (?, x_1/0); Variable (?, x/0) ]))))
-    ]))
+    ])
 
 14
-(Value
+Value
   (non_rec, @.,
     [
       ((f, [ ], [ ],
@@ -139,10 +139,10 @@
           (Type (list/1, Type (string/1)) ->
             Monad ([ Counter/1; IO/1; NonTermination/1 ], Type (unit/1)))),
         Variable (14, print_list/0))
-    ]))
+    ])
 
 16
-(Value
+Value
   (non_rec, @.,
     [
       ((x, [ A ], [ (z, A) ],
@@ -190,4 +190,4 @@
               (?, [ Counter/1; IO/1; NonTermination/1 ],
                 [ Counter/1; IO/1; NonTermination/1; OCaml.Failure/1 ],
                 Apply (16, Variable (16, f/0), [ Variable (?, x/0) ]))))
-    ]))
+    ])

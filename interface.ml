@@ -60,7 +60,8 @@ let of_typ_definition (typ_def : TypeDefinition.t) : t list =
     Typ name :: List.map (fun (x, _) -> Constructor x) constructors
   | TypeDefinition.Record (name, fields) ->
     Typ name :: List.map (fun (x, _) -> Field x) fields
-  | TypeDefinition.Synonym (name, _, _) -> [Typ name]
+  | TypeDefinition.Synonym (name, _, _) | TypeDefinition.Abstract (name, _) ->
+    [Typ name]
 
 let rec of_structures (defs : ('a * Effect.t) Structure.t list) : t list =
   List.flatten (List.map of_structure defs)
@@ -86,6 +87,7 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
       Var ("write_" ^ name, shape) ]
   | Structure.Open _ -> []
   | Structure.Module (_, name, defs) -> [Interface (name, of_structures defs)]
+  | Structure.Signature (_, name, decls) -> failwith "TODO"
 
 let rec to_full_envi (interface : t) (env : (Effect.Type.t, 's) FullEnvi.t)
   : (Effect.Type.t, 's) FullEnvi.t =

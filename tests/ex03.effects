@@ -1,5 +1,5 @@
 3
-(Value
+Value
   (non_rec, @.,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
@@ -8,10 +8,10 @@
         LetVar (5, Effect ([ ], .)) n1 = Variable ((5, Effect ([ ], .)), m/0)
           in
         Variable ((6, Effect ([ ], .)), n1/0))
-    ]))
+    ])
 
 8
-(Value
+Value
   (non_rec, @.,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
@@ -93,4 +93,4 @@
           ((11, Effect ([ ], .)),
             Variable ((11, Effect ([ ], . -> .)), p1/0),
             [ Variable ((11, Effect ([ ], . -> .)), c/0) ]))
-    ]))
+    ])

@@ -21,16 +21,17 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
   try
     let document =
       match mode with
-      | "exp" -> Structure.pp Loc.pp @@ exp structure
+      | "exp" -> Structure.pps Loc.pp @@ exp structure
       | "effects" ->
         let pp_annotation (l, effect) =
           OCaml.tuple [Loc.pp l; Effect.pp effect] in
-        Structure.pp pp_annotation @@ effects structure
-      | "monadise" -> Structure.pp Loc.pp @@ monadise structure
+        Structure.pps pp_annotation @@ effects structure
+      | "monadise" -> Structure.pps Loc.pp @@ monadise structure
       | "v" ->
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import OCaml.OCaml." ^^ newline;
           !^ "Local Open Scope Z_scope.";
+          !^ "Local Open Scope type_scope.";
           !^ "Import ListNotations."]) ^^ newline ^^
         Structure.to_coq (monadise structure)
       | "interface" ->

@@ -45,22 +45,28 @@ type 'a t =
   | Reference of Loc.t * Reference.t
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
-  (* | ModuleType of Loc.t * Name.t * 'a ModuleType.t list *)
+  | Signature of Loc.t * Name.t * 'a Signature.t list
 
-let rec pp (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
-  let pp_one (def : 'a t) : SmartPrint.t =
-    match def with
-    | Value (loc, value) ->
-      Loc.pp loc ^^ OCaml.tuple [Value.pp pp_a value]
-    | TypeDefinition (loc, def) -> Loc.pp loc ^^ TypeDefinition.pp def
-    | Exception (loc, exn) -> Loc.pp loc ^^ Exception.pp exn
-    | Reference (loc, r) -> Loc.pp loc ^^ Reference.pp r
-    | Open (loc, o) -> Loc.pp loc ^^ Open.pp o
-    | Module (loc, name, defs) ->
-      nest (
-        Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-        indent (pp pp_a defs)) in
-  separate (newline ^^ newline) (List.map pp_one defs)
+let rec pps (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
+  separate (newline ^^ newline) (List.map (pp pp_a) defs)
+
+and pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
+  match def with
+  | Value (loc, value) ->
+    group (Loc.pp loc ^^ Value.pp pp_a value)
+  | TypeDefinition (loc, typ_def) ->
+    group (Loc.pp loc ^^ TypeDefinition.pp typ_def)
+  | Exception (loc, exn) -> group (Loc.pp loc ^^ Exception.pp exn)
+  | Reference (loc, r) -> group (Loc.pp loc ^^ Reference.pp r)
+  | Open (loc, o) -> group (Loc.pp loc ^^ Open.pp o)
+  | Module (loc, name, defs) ->
+    nest (
+      Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+      indent (pps pp_a defs))
+  | Signature (loc, name, decls) ->
+    nest (
+      Loc.pp loc ^^ !^ "Signature" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+      indent (Signature.pps pp_a decls))
 
 (** Import an OCaml structure. *)
 let rec of_structure (env : (unit, 's) FullEnvi.t) (structure : structure)
@@ -99,11 +105,12 @@ let rec of_structure (env : (unit, 's) FullEnvi.t) (structure : structure)
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, structures))
-    (*| Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
+    | Tstr_modtype { mtd_id = name; mtd_type = Some { mty_desc = Tmty_signature
       signature } } ->
       let name = Name.of_ident name in
-      let (env, decls) = ModuleType.of_signature env signature in
-      (env, ModuleType (loc, name, decls))*)
+      let (_, decls) = Signature.of_signature env signature in
+      let env = Signature.update_env env name decls in
+      (env, Signature (loc, name, decls))
     | _ -> Error.raise loc "Structure item not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
@@ -129,7 +136,10 @@ let rec monadise_let_rec (env : (unit, 's) FullEnvi.t) (defs : Loc.t t list)
       let env = FullEnvi.enter_module env in
       let (env, defs) = monadise_let_rec env defs in
       let env = FullEnvi.leave_module name env in
-      (env, [Module (loc, name, defs)]) in
+      (env, [Module (loc, name, defs)])
+    | Signature (loc, name, decls) ->
+      let env = Signature.update_env env name decls in
+      (env, [Signature (loc, name, decls)]) in
   let (env, defs) = List.fold_left (fun (env, defs) def ->
     let (env, defs') = monadise_let_rec_one env def in
     (env, defs' @ defs))
@@ -162,7 +172,11 @@ let rec effects (env : (Effect.Type.t, 's) FullEnvi.t) (defs : 'a t list)
       let env = FullEnvi.enter_module env in
       let (env, defs) = effects env defs in
       let env = FullEnvi.leave_module name env in
-      (env, Module (loc, name, defs)) in
+      (env, Module (loc, name, defs))
+    | Signature (loc, name, decls) ->
+      let decls = Signature.effects decls in
+      let env = Signature.update_env env name decls in
+      (env, Signature (loc, name, decls)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env, def) =
@@ -198,7 +212,11 @@ let rec monadise (env : (unit, 's) FullEnvi.t) (defs : (Loc.t * Effect.t) t list
     | Open (loc, o) -> (Open.update_env o env, Open (loc, o))
     | Module (loc, name, defs) ->
       let (env, defs) = monadise (FullEnvi.enter_module env) defs in
-      (FullEnvi.leave_module name env, Module (loc, name, defs)) in
+      (FullEnvi.leave_module name env, Module (loc, name, defs))
+    | Signature (loc, name, decls) ->
+      let decls = Signature.monadise decls in
+      let env = Signature.update_env env name decls in
+      (env, Signature (loc, name, decls)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env_units, def) = monadise_one env def in
@@ -219,5 +237,10 @@ let rec to_coq (defs : 'a t list) : SmartPrint.t =
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
+        !^ "End" ^^ Name.to_coq name ^-^ !^ ".")
+    | Signature (_, name, decls) ->
+      nest (
+        !^ "Module Type" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+        indent (Signature.to_coq decls) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ ".") in
   separate (newline ^^ newline) (List.map to_coq_one defs)
