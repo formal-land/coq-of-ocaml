@@ -28,7 +28,7 @@ let rec pp (p : t) : SmartPrint.t =
   | Or (p1, p2) -> nest (!^ "Or" ^^ OCaml.tuple [pp p1; pp p2])
 
 (** Import an OCaml pattern. *)
-let rec of_pattern (env : ('a, 's) FullEnvi.t) (p : pattern) : t =
+let rec of_pattern (env : 'a FullEnvi.t) (p : pattern) : t =
   let l = Loc.of_location p.pat_loc in
   match p.pat_desc with
   | Tpat_any -> Any
@@ -59,7 +59,7 @@ let rec free_variables (p : t) : Name.Set.t =
   | Record fields -> aux (List.map snd fields)
   | Or (p1, p2) -> Name.Set.inter (free_variables p1) (free_variables p2)
 
-let add_to_env (p : t) (env : (unit, 's) FullEnvi.t) : (unit, 's) FullEnvi.t =
+let add_to_env (p : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
   Name.Set.fold (fun x env -> FullEnvi.add_var [] x () env)
     (free_variables p) env
 

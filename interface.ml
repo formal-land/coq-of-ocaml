@@ -15,7 +15,7 @@ module Shape = struct
         x.BoundName.path_name) in
       ds :: of_effect_typ typ
 
-  let to_effect_typ (shape : t) (env : ('a, 's) FullEnvi.t) : Effect.Type.t =
+  let to_effect_typ (shape : t) (env : 'a FullEnvi.t) : Effect.Type.t =
     let descriptor ds : Effect.Descriptor.t =
       let ds = ds |> List.map (fun d ->
         Effect.Descriptor.singleton (Effect.Descriptor.Id.Ether d)
@@ -88,8 +88,8 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
   | Structure.Open _ -> []
   | Structure.Module (_, name, defs) -> [Interface (name, of_structures defs)]
 
-let rec to_full_envi (interface : t) (env : (Effect.Type.t, 's) FullEnvi.t)
-  : (Effect.Type.t, 's) FullEnvi.t =
+let rec to_full_envi (interface : t) (env : Effect.Type.t FullEnvi.t)
+  : Effect.Type.t FullEnvi.t =
   match interface with
   | Var (x, shape) -> FullEnvi.add_var [] x (Shape.to_effect_typ shape env) env
   | Typ x -> FullEnvi.add_typ [] x env

@@ -8,7 +8,7 @@ type t = {
 let pp (exn : t) : SmartPrint.t =
   nest (!^ "Exception" ^^ OCaml.tuple [Name.pp exn.name; Type.pp exn.typ])
 
-let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t)
+let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
   (exn : constructor_declaration) : t =
   let name = Name.of_ident exn.cd_id in
   let typ =
@@ -16,11 +16,11 @@ let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t)
       Type.of_type_expr env loc typ)) in
   { name = name; typ = typ}
 
-let update_env (exn : t) (env : (unit, 's) FullEnvi.t) : (unit, 's) FullEnvi.t =
+let update_env (exn : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
   FullEnvi.add_exception [] exn.name env
 
-let update_env_with_effects (exn : t) (env : (Effect.Type.t, 's) FullEnvi.t)
-  (id : Effect.Descriptor.Id.t) : (Effect.Type.t, 's) FullEnvi.t =
+let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t)
+  (id : Effect.Descriptor.Id.t) : Effect.Type.t FullEnvi.t =
   FullEnvi.add_exception_with_effects [] exn.name id env
 
 let to_coq (exn : t) : SmartPrint.t =

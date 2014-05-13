@@ -64,10 +64,10 @@ and pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
       indent (pps pp_a defs))
 
 (** Import an OCaml structure. *)
-let rec of_structure (env : (unit, 's) FullEnvi.t)
-  (structure : structure) : (unit, 's) FullEnvi.t * Loc.t t list =
-  let of_structure_item (env : (unit, 's) FullEnvi.t) (item : structure_item)
-    : (unit, 's) FullEnvi.t * Loc.t t =
+let rec of_structure (env : unit FullEnvi.t) (structure : structure)
+  : unit FullEnvi.t * Loc.t t list =
+  let of_structure_item (env : unit FullEnvi.t) (item : structure_item)
+    : unit FullEnvi.t * Loc.t t =
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
     | Tstr_value (_, cases) when Reference.is_reference loc cases ->
@@ -111,10 +111,10 @@ let rec of_structure (env : (unit, 's) FullEnvi.t)
     (env, []) structure.str_items in
   (env, List.rev defs)
 
-let rec monadise_let_rec (env : (unit, 's) FullEnvi.t)
-  (defs : Loc.t t list) : (unit, 's) FullEnvi.t * Loc.t t list =
-  let rec monadise_let_rec_one (env : (unit, 's) FullEnvi.t) (def : Loc.t t)
-    : (unit, 's) FullEnvi.t * Loc.t t list =
+let rec monadise_let_rec (env : unit FullEnvi.t) (defs : Loc.t t list)
+  : unit FullEnvi.t * Loc.t t list =
+  let rec monadise_let_rec_one (env : unit FullEnvi.t) (def : Loc.t t)
+    : unit FullEnvi.t * Loc.t t list =
     match def with
     | Value (loc, def) ->
       let (env, defs) = Exp.monadise_let_rec_definition env def in
@@ -135,11 +135,10 @@ let rec monadise_let_rec (env : (unit, 's) FullEnvi.t)
     (env, []) defs in
   (env, List.rev defs)
 
-let rec effects (env : (Effect.Type.t, 's) FullEnvi.t)
-  (defs : 'a t list)
-  : (Effect.Type.t, 's) FullEnvi.t * ('a * Effect.t) t list =
-  let rec effects_one (env : (Effect.Type.t, 's) FullEnvi.t) (def : 'a t)
-    : (Effect.Type.t, 's) FullEnvi.t * ('a * Effect.t) t =
+let rec effects (env : Effect.Type.t FullEnvi.t) (defs : 'a t list)
+  : Effect.Type.t FullEnvi.t * ('a * Effect.t) t list =
+  let rec effects_one (env : Effect.Type.t FullEnvi.t) (def : 'a t)
+    : Effect.Type.t FullEnvi.t * ('a * Effect.t) t =
     match def with
     | Value (loc, def) ->
       let def = Exp.effects_of_def env def in
@@ -171,10 +170,10 @@ let rec effects (env : (Effect.Type.t, 's) FullEnvi.t)
       (env, []) defs in
   (env, List.rev defs)
 
-let rec monadise (env : (unit, 's) FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
-  : (unit, 's) FullEnvi.t * Loc.t t list =
-  let rec monadise_one (env : (unit, 's) FullEnvi.t) (def : (Loc.t * Effect.t) t)
-    : (unit, 's) FullEnvi.t * Loc.t t =
+let rec monadise (env : unit FullEnvi.t) (defs : (Loc.t * Effect.t) t list)
+  : unit FullEnvi.t * Loc.t t list =
+  let rec monadise_one (env : unit FullEnvi.t) (def : (Loc.t * Effect.t) t)
+    : unit FullEnvi.t * Loc.t t =
     match def with
     | Value (loc, def) ->
       let env_in_def = Exp.Definition.env_in_def def env in

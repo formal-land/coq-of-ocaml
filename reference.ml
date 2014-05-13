@@ -16,7 +16,7 @@ let is_reference (loc : Loc.t) (cases : value_binding list) : bool =
     true
   | _ -> false
 
-let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t) (cases : value_binding list)
+let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t) (cases : value_binding list)
   : t =
   match cases with
   | [{ vb_pat = { pat_desc = Tpat_var (x, _) };
@@ -25,14 +25,14 @@ let of_ocaml (env : (unit, 's) FullEnvi.t) (loc : Loc.t) (cases : value_binding 
       typ = Type.of_type_expr env loc typ }
   | _ -> Error.raise loc "This kind of reference definition is not handled."
 
-let update_env (r : t) (env : (unit, 's) FullEnvi.t) : (unit, 's) FullEnvi.t =
+let update_env (r : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
   env
   |> FullEnvi.add_var [] ("read_" ^ r.name) ()
   |> FullEnvi.add_var [] ("write_" ^ r.name) ()
   |> FullEnvi.add_descriptor [] r.name
 
-let update_env_with_effects (r : t) (env : (Effect.Type.t, 's) FullEnvi.t)
-  (id : Effect.Descriptor.Id.t) : (Effect.Type.t, 's) FullEnvi.t =
+let update_env_with_effects (r : t) (env : Effect.Type.t FullEnvi.t)
+  (id : Effect.Descriptor.Id.t) : Effect.Type.t FullEnvi.t =
   let env = FullEnvi.add_descriptor [] r.name env in
   let effect_typ =
     Effect.Type.Arrow (
