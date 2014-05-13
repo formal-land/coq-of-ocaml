@@ -256,7 +256,8 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
       Apply (l, e_f, e_xs))
   | Texp_match (e, cases, _) ->
     let e = of_expression env typ_vars e in
-    let cases = cases |> List.map (fun {c_lhs = p; c_rhs = e} ->
+    let cases = cases |> List.map (fun {c_lhs = p; c_guard = g; c_rhs = e} ->
+      if g <> None then Error.warn l "Guard on pattern ignored.";
       let p = Pattern.of_pattern env p in
       let env = Pattern.add_to_env p env in
       (p, of_expression env typ_vars e)) in
