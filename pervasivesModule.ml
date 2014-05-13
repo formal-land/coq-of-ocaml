@@ -3,7 +3,7 @@ open FullEnvi
 open Effect.Type
 open SmartPrint
 
-let env_with_effects : (Effect.Type.t, Signature.t) FullEnvi.t =
+let env_with_effects : (Effect.Type.t, unit) FullEnvi.t =
   let descriptor (path, base) =
     let x = PathName.of_name path base in
     Effect.Descriptor.singleton (Effect.Descriptor.Id.Ether x)
@@ -13,7 +13,7 @@ let env_with_effects : (Effect.Type.t, Signature.t) FullEnvi.t =
   let add_exn path base =
     add_exception_with_effects path base
       (Effect.Descriptor.Id.Ether (PathName.of_name path base)) in
-  FullEnvi.empty Effect.Type.leave_prefix Signature.leave_prefix
+  FullEnvi.empty Effect.Type.leave_prefix (fun _ decls -> decls)
   (* Values specific to the translation to Coq *)
   |> add_typ [] "nat"
   |> add_constructor [] "O"
@@ -146,7 +146,7 @@ let env_with_effects : (Effect.Type.t, Signature.t) FullEnvi.t =
   |> open_module ["OCaml"]
   (* |> fun env -> SmartPrint.to_stdout 80 2 (FullEnvi.pp env); env *)
 
-let env : (unit, Signature.t) FullEnvi.t =
+let env : (unit, 's) FullEnvi.t =
   { env_with_effects with
     vars = Envi.map env_with_effects.vars (fun _ -> ());
     leave_prefix_vars = (fun _ () -> ()) }

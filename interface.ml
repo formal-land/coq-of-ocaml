@@ -87,7 +87,6 @@ and of_structure (def : ('a * Effect.t) Structure.t) : t list =
       Var ("write_" ^ name, shape) ]
   | Structure.Open _ -> []
   | Structure.Module (_, name, defs) -> [Interface (name, of_structures defs)]
-  | Structure.Signature (_, name, decls) -> failwith "TODO"
 
 let rec to_full_envi (interface : t) (env : (Effect.Type.t, 's) FullEnvi.t)
   : (Effect.Type.t, 's) FullEnvi.t =

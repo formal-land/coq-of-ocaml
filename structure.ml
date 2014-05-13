@@ -198,10 +198,7 @@ let rec monadise (env : (unit, 's) FullEnvi.t) (defs : (Loc.t * Effect.t) t list
     | Open (loc, o) -> (Open.update_env o env, Open (loc, o))
     | Module (loc, name, defs) ->
       let (env, defs) = monadise (FullEnvi.enter_module env) defs in
-      (FullEnvi.leave_module name env, Module (loc, name, defs))
-    | Signature (loc, name, decls) ->
-      let env = Signature.update_env env name decls in
-      (env, Signature (loc, name, decls)) in
+      (FullEnvi.leave_module name env, Module (loc, name, defs)) in
   let (env, defs) =
     List.fold_left (fun (env, defs) def ->
       let (env_units, def) = monadise_one env def in
@@ -222,10 +219,5 @@ let rec to_coq (defs : 'a t list) : SmartPrint.t =
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
-        !^ "End" ^^ Name.to_coq name ^-^ !^ ".")
-    | Signature (_, name, decls) ->
-      nest (
-        !^ "Module Type" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
-        indent (Signature.to_coq decls) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ ".") in
   separate (newline ^^ newline) (List.map to_coq_one defs)
