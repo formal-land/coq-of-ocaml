@@ -16,8 +16,7 @@ let pp (env : 'a t) : SmartPrint.t =
     !^ "constructors:" ^^ nest (Envi.pp env.constructors) ^^ newline ^^
     !^ "fields:" ^^ nest (Envi.pp env.fields))
 
-let empty (leave_prefix_vars : Name.t -> 'a -> 'a)
-  (leave_prefix_signatures : Name.t -> 's list -> 's list): 'a t = {
+let empty (leave_prefix_vars : Name.t -> 'a -> 'a) : 'a t = {
   vars = Envi.empty;
   leave_prefix_vars = leave_prefix_vars;
   typs = Envi.empty;

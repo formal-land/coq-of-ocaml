@@ -1,0 +1,3662 @@
+3 Module Ord:
+  4 Abstract (t, [ ])
+  
+  5
+  Value
+    (non_rec, @.,
+      [
+        ((compare, [ ], [ (x, Type (t/0)) ], Some (Type (t/0) -> Type (Z/2))),
+          Match
+            (?, Variable (?, x/0),
+              [
+                (Any,
+                  Function
+                    (5,
+                      x_1,
+                      Match
+                        (?,
+                          Variable
+                            (?,
+                              x_1/0),
+                          [
+                            (Any,
+                              Constant
+                                (5,
+                                  Int(0)))
+                          ])))
+              ]))
+      ])
+
+8 Synonym (elt, [ ], Type (Ord.t/0))
+
+9
+Inductive t:
+  ([ ],
+    [
+      (Empty, [ ]);
+      (Node, [ Type (t/0); Type (elt/0); Type (t/0); Type (Z/1) ])
+    ])
+
+14
+Value
+  (non_rec, @.,
+    [
+      ((height, [ ], [ (x, Type (t/0)) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Constant (15, Int(0)));
+              (Constructor (Node/0, Any, Any, Any, h),
+                Variable (16, h/0))
+            ]))
+    ])
+
+23
+Value
+  (non_rec, @.,
+    [
+      ((create, [ ], [ (l, Type (t/0)); (v, Type (elt/0)); (r, Type (t/0)) ],
+        Some Type (t/0)),
+        LetVar 24 hl =
+          Match
+            (24, Variable (24, l/0),
+              [
+                (Constructor (Empty/0), Constant (24, Int(0)));
+                (Constructor (Node/0, Any, Any, Any, h),
+                  Variable (24, h/0))
+              ]) in
+        LetVar 25 hr =
+          Match
+            (25, Variable (25, r/0),
+              [
+                (Constructor (Empty/0), Constant (25, Int(0)));
+                (Constructor (Node/0, Any, Any, Any, h),
+                  Variable (25, h/0))
+              ]) in
+        Constructor
+          (26, Node/0, Variable (26, l/0), Variable (26, v/0),
+            Variable (26, r/0),
+            IfThenElse
+              (26,
+                Apply
+                  (26, Variable (26, OCaml.Pervasives.ge/1),
+                    [ Variable (26, hl/0); Variable (26, hr/0) ]),
+                Apply
+                  (26, Variable (26, Z.add/1),
+                    [ Variable (26, hl/0); Constant (26, Int(1)) ]),
+                Apply
+                  (26, Variable (26, Z.add/1),
+                    [ Variable (26, hr/0); Constant (26, Int(1)) ]))))
+    ])
+
+33
+Value
+  (non_rec, @.,
+    [
+      ((bal, [ ], [ (l, Type (t/0)); (v, Type (elt/0)); (r, Type (t/0)) ],
+        Some Type (t/0)),
+        LetVar 34 hl =
+          Match
+            (34, Variable (34, l/0),
+              [
+                (Constructor (Empty/0), Constant (34, Int(0)));
+                (Constructor (Node/0, Any, Any, Any, h),
+                  Variable (34, h/0))
+              ]) in
+        LetVar 35 hr =
+          Match
+            (35, Variable (35, r/0),
+              [
+                (Constructor (Empty/0), Constant (35, Int(0)));
+                (Constructor (Node/0, Any, Any, Any, h),
+                  Variable (35, h/0))
+              ]) in
+        IfThenElse
+          (36,
+            Apply
+              (36, Variable (36, OCaml.Pervasives.gt/1),
+                [
+                  Variable (36, hl/0);
+                  Apply
+                    (36,
+                      Variable
+                        (36,
+                          Z.add/1),
+                      [
+                        Variable
+                          (36,
+                            hr/0);
+                        Constant
+                          (36,
+                            Int(2))
+                      ])
+                ]),
+            Match
+              (36, Variable (37, l/0),
+                [
+                  (Constructor (Empty/0),
+                    Apply
+                      (38,
+                        Variable
+                          (38,
+                            OCaml.Pervasives.invalid_arg/1),
+                        [
+                          Constant
+                            (38,
+                              String("Set.bal"))
+                        ]));
+                  (Constructor (Node/0, ll, lv, lr, Any),
+                    IfThenElse
+                      (40,
+                        Apply
+                          (40,
+                            Variable
+                              (40,
+                                OCaml.Pervasives.ge/1),
+                            [
+                              Apply
+                                (40,
+                                  Variable
+                                    (40,
+                                      height/0),
+                                  [
+                                    Variable
+                                      (40,
+                                        ll/0)
+                                  ]);
+                              Apply
+                                (40,
+                                  Variable
+                                    (40,
+                                      height/0),
+                                  [
+                                    Variable
+                                      (40,
+                                        lr/0)
+                                  ])
+                            ]),
+                        Apply
+                          (41,
+                            Variable
+                              (41,
+                                create/0),
+                            [
+                              Variable
+                                (41,
+                                  ll/0);
+                              Variable
+                                (41,
+                                  lv/0);
+                              Apply
+                                (41,
+                                  Variable
+                                    (41,
+                                      create/0),
+                                  [
+                                    Variable
+                                      (41,
+                                        lr/0);
+                                    Variable
+                                      (41,
+                                        v/0);
+                                    Variable
+                                      (41,
+                                        r/0)
+                                  ])
+                            ]),
+                        Match
+                          (42,
+                            Variable
+                              (43,
+                                lr/0),
+                            [
+                              (Constructor
+                                (Empty/0),
+                                Apply
+                                  (44,
+                                    Variable
+                                      (44,
+                                        OCaml.Pervasives.invalid_arg/1),
+                                    [
+                                      Constant
+                                        (44,
+                                          String("Set.bal"))
+                                    ]));
+                              (Constructor
+                                (Node/0,
+                                  lrl,
+                                  lrv,
+                                  lrr,
+                                  Any),
+                                Apply
+                                  (46,
+                                    Variable
+                                      (46,
+                                        create/0),
+                                    [
+                                      Apply
+                                        (46,
+                                          Variable
+                                            (46,
+                                              create/0),
+                                          [
+                                            Variable
+                                              (46,
+                                                ll/0);
+                                            Variable
+                                              (46,
+                                                lv/0);
+                                            Variable
+                                              (46,
+                                                lrl/0)
+                                          ]);
+                                      Variable
+                                        (46,
+                                          lrv/0);
+                                      Apply
+                                        (46,
+                                          Variable
+                                            (46,
+                                              create/0),
+                                          [
+                                            Variable
+                                              (46,
+                                                lrr/0);
+                                            Variable
+                                              (46,
+                                                v/0);
+                                            Variable
+                                              (46,
+                                                r/0)
+                                          ])
+                                    ]))
+                            ])))
+                ]),
+            IfThenElse
+              (48,
+                Apply
+                  (48, Variable (48, OCaml.Pervasives.gt/1),
+                    [
+                      Variable (48, hr/0);
+                      Apply
+                        (48,
+                          Variable
+                            (48,
+                              Z.add/1),
+                          [
+                            Variable
+                              (48,
+                                hl/0);
+                            Constant
+                              (48,
+                                Int(2))
+                          ])
+                    ]),
+                Match
+                  (48, Variable (49, r/0),
+                    [
+                      (Constructor (Empty/0),
+                        Apply
+                          (50,
+                            Variable
+                              (50,
+                                OCaml.Pervasives.invalid_arg/1),
+                            [
+                              Constant
+                                (50,
+                                  String("Set.bal"))
+                            ]));
+                      (Constructor (Node/0, rl, rv, rr, Any),
+                        IfThenElse
+                          (52,
+                            Apply
+                              (52,
+                                Variable
+                                  (52,
+                                    OCaml.Pervasives.ge/1),
+                                [
+                                  Apply
+                                    (52,
+                                      Variable
+                                        (52,
+                                          height/0),
+                                      [
+                                        Variable
+                                          (52,
+                                            rr/0)
+                                      ]);
+                                  Apply
+                                    (52,
+                                      Variable
+                                        (52,
+                                          height/0),
+                                      [
+                                        Variable
+                                          (52,
+                                            rl/0)
+                                      ])
+                                ]),
+                            Apply
+                              (53,
+                                Variable
+                                  (53,
+                                    create/0),
+                                [
+                                  Apply
+                                    (53,
+                                      Variable
+                                        (53,
+                                          create/0),
+                                      [
+                                        Variable
+                                          (53,
+                                            l/0);
+                                        Variable
+                                          (53,
+                                            v/0);
+                                        Variable
+                                          (53,
+                                            rl/0)
+                                      ]);
+                                  Variable
+                                    (53,
+                                      rv/0);
+                                  Variable
+                                    (53,
+                                      rr/0)
+                                ]),
+                            Match
+                              (54,
+                                Variable
+                                  (55,
+                                    rl/0),
+                                [
+                                  (Constructor
+                                    (Empty/0),
+                                    Apply
+                                      (56,
+                                        Variable
+                                          (56,
+                                            OCaml.Pervasives.invalid_arg/1),
+                                        [
+                                          Constant
+                                            (56,
+                                              String("Set.bal"))
+                                        ]));
+                                  (Constructor
+                                    (Node/0,
+                                      rll,
+                                      rlv,
+                                      rlr,
+                                      Any),
+                                    Apply
+                                      (58,
+                                        Variable
+                                          (58,
+                                            create/0),
+                                        [
+                                          Apply
+                                            (58,
+                                              Variable
+                                                (58,
+                                                  create/0),
+                                              [
+                                                Variable
+                                                  (58,
+                                                    l/0);
+                                                Variable
+                                                  (58,
+                                                    v/0);
+                                                Variable
+                                                  (58,
+                                                    rll/0)
+                                              ]);
+                                          Variable
+                                            (58,
+                                              rlv/0);
+                                          Apply
+                                            (58,
+                                              Variable
+                                                (58,
+                                                  create/0),
+                                              [
+                                                Variable
+                                                  (58,
+                                                    rlr/0);
+                                                Variable
+                                                  (58,
+                                                    rv/0);
+                                                Variable
+                                                  (58,
+                                                    rr/0)
+                                              ])
+                                        ]))
+                                ])))
+                    ]),
+                Constructor
+                  (61, Node/0, Variable (61, l/0),
+                    Variable (61, v/0), Variable (61, r/0),
+                    IfThenElse
+                      (61,
+                        Apply
+                          (61,
+                            Variable
+                              (61, OCaml.Pervasives.ge/1),
+                            [
+                              Variable (61, hl/0);
+                              Variable (61, hr/0)
+                            ]),
+                        Apply
+                          (61, Variable (61, Z.add/1),
+                            [
+                              Variable (61, hl/0);
+                              Constant (61, Int(1))
+                            ]),
+                        Apply
+                          (61, Variable (61, Z.add/1),
+                            [
+                              Variable (61, hr/0);
+                              Constant (61, Int(1))
+                            ]))))))
+    ])
+
+65
+Value
+  (rec, @coq_rec,
+    [
+      ((add, [ ], [ (x, Type (elt/0)); (x_1, Type (t/0)) ], Some Type (t/0)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Constructor (Empty/0),
+                Constructor
+                  (66, Node/0,
+                    Constructor
+                      (66,
+                        Empty/0),
+                    Variable
+                      (66,
+                        x/0),
+                    Constructor
+                      (66,
+                        Empty/0),
+                    Constant
+                      (66,
+                        Int(1))));
+              (Alias (Constructor (Node/0, l, v, r, Any), t),
+                LetVar 68 c =
+                  Apply
+                    (68,
+                      Variable
+                        (68,
+                          Ord.compare/0),
+                      [
+                        Variable
+                          (68,
+                            x/0);
+                        Variable
+                          (68,
+                            v/0)
+                      ])
+                  in
+                IfThenElse
+                  (69,
+                    Apply
+                      (69,
+                        Variable
+                          (69,
+                            equiv_decb/1),
+                        [
+                          Variable
+                            (69,
+                              c/0);
+                          Constant
+                            (69,
+                              Int(0))
+                        ]),
+                    Variable
+                      (69,
+                        t/0),
+                    IfThenElse
+                      (70,
+                        Apply
+                          (70,
+                            Variable
+                              (70,
+                                OCaml.Pervasives.lt/1),
+                            [
+                              Variable
+                                (70,
+                                  c/0);
+                              Constant
+                                (70,
+                                  Int(0))
+                            ]),
+                        Apply
+                          (70,
+                            Variable
+                              (70,
+                                bal/0),
+                            [
+                              Apply
+                                (70,
+                                  Variable
+                                    (70,
+                                      add/0),
+                                  [
+                                    Variable
+                                      (70,
+                                        x/0);
+                                    Variable
+                                      (70,
+                                        l/0)
+                                  ]);
+                              Variable
+                                (70,
+                                  v/0);
+                              Variable
+                                (70,
+                                  r/0)
+                            ]),
+                        Apply
+                          (70,
+                            Variable
+                              (70,
+                                bal/0),
+                            [
+                              Variable
+                                (70,
+                                  l/0);
+                              Variable
+                                (70,
+                                  v/0);
+                              Apply
+                                (70,
+                                  Variable
+                                    (70,
+                                      add/0),
+                                  [
+                                    Variable
+                                      (70,
+                                        x/0);
+                                    Variable
+                                      (70,
+                                        r/0)
+                                  ])
+                            ]))))
+            ]))
+    ])
+
+73
+Value
+  (non_rec, @.,
+    [
+      ((singleton, [ ], [ (x, Type (elt/0)) ], Some Type (t/0)),
+        Constructor
+          (73, Node/0, Constructor (73, Empty/0), Variable (73, x/0),
+            Constructor (73, Empty/0), Constant (73, Int(1))))
+    ])
+
+82
+Value
+  (rec, @coq_rec,
+    [
+      ((add_min_element, [ ], [ (v, Type (elt/0)); (x, Type (t/0)) ],
+        Some Type (t/0)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0),
+                Apply
+                  (83,
+                    Variable
+                      (83,
+                        singleton/0),
+                    [
+                      Variable
+                        (83,
+                          v/0)
+                    ]));
+              (Constructor (Node/0, l, x, r, h),
+                Apply
+                  (85,
+                    Variable
+                      (85,
+                        bal/0),
+                    [
+                      Apply
+                        (85,
+                          Variable
+                            (85,
+                              add_min_element/0),
+                          [
+                            Variable
+                              (85,
+                                v/0);
+                            Variable
+                              (85,
+                                l/0)
+                          ]);
+                      Variable
+                        (85,
+                          x/0);
+                      Variable
+                        (85,
+                          r/0)
+                    ]))
+            ]))
+    ])
+
+88
+Value
+  (rec, @coq_rec,
+    [
+      ((add_max_element, [ ], [ (v, Type (elt/0)); (x, Type (t/0)) ],
+        Some Type (t/0)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0),
+                Apply
+                  (89,
+                    Variable
+                      (89,
+                        singleton/0),
+                    [
+                      Variable
+                        (89,
+                          v/0)
+                    ]));
+              (Constructor (Node/0, l, x, r, h),
+                Apply
+                  (91,
+                    Variable
+                      (91,
+                        bal/0),
+                    [
+                      Variable
+                        (91,
+                          l/0);
+                      Variable
+                        (91,
+                          x/0);
+                      Apply
+                        (91,
+                          Variable
+                            (91,
+                              add_max_element/0),
+                          [
+                            Variable
+                              (91,
+                                v/0);
+                            Variable
+                              (91,
+                                r/0)
+                          ])
+                    ]))
+            ]))
+    ])
+
+97
+Value
+  (rec, @.,
+    [
+      ((join_rec, [ ],
+        [
+          (counter, Type (nat/1));
+          (l, Type (t/0));
+          (v, Type (elt/0));
+          (r, Type (t/0))
+        ], Some Type (t/0)),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (98,
+                    Tuple
+                      (98,
+                        Variable
+                          (98,
+                            l/0),
+                        Variable
+                          (98,
+                            r/0)),
+                    [
+                      (Tuple
+                        (Constructor
+                          (Empty/0),
+                          Any),
+                        Apply
+                          (99,
+                            Variable
+                              (99,
+                                add_min_element/0),
+                            [
+                              Variable
+                                (99,
+                                  v/0);
+                              Variable
+                                (99,
+                                  r/0)
+                            ]));
+                      (Tuple
+                        (Any,
+                          Constructor
+                            (Empty/0)),
+                        Apply
+                          (100,
+                            Variable
+                              (100,
+                                add_max_element/0),
+                            [
+                              Variable
+                                (100,
+                                  v/0);
+                              Variable
+                                (100,
+                                  l/0)
+                            ]));
+                      (Tuple
+                        (Constructor
+                          (Node/0,
+                            ll,
+                            lv,
+                            lr,
+                            lh),
+                          Constructor
+                            (Node/0,
+                              rl,
+                              rv,
+                              rr,
+                              rh)),
+                        IfThenElse
+                          (102,
+                            Apply
+                              (102,
+                                Variable
+                                  (102,
+                                    OCaml.Pervasives.gt/1),
+                                [
+                                  Variable
+                                    (102,
+                                      lh/0);
+                                  Apply
+                                    (102,
+                                      Variable
+                                        (102,
+                                          Z.add/1),
+                                      [
+                                        Variable
+                                          (102,
+                                            rh/0);
+                                        Constant
+                                          (102,
+                                            Int(2))
+                                      ])
+                                ]),
+                            Apply
+                              (102,
+                                Variable
+                                  (102,
+                                    bal/0),
+                                [
+                                  Variable
+                                    (102,
+                                      ll/0);
+                                  Variable
+                                    (102,
+                                      lv/0);
+                                  Apply
+                                    (102,
+                                      Apply
+                                        (?,
+                                          Variable
+                                            (?,
+                                              join_rec/0),
+                                          [
+                                            Variable
+                                              (?,
+                                                counter/0)
+                                          ]),
+                                      [
+                                        Variable
+                                          (102,
+                                            lr/0);
+                                        Variable
+                                          (102,
+                                            v/0);
+                                        Variable
+                                          (102,
+                                            r/0)
+                                      ])
+                                ]),
+                            IfThenElse
+                              (103,
+                                Apply
+                                  (103,
+                                    Variable
+                                      (103,
+                                        OCaml.Pervasives.gt/1),
+                                    [
+                                      Variable
+                                        (103,
+                                          rh/0);
+                                      Apply
+                                        (103,
+                                          Variable
+                                            (103,
+                                              Z.add/1),
+                                          [
+                                            Variable
+                                              (103,
+                                                lh/0);
+                                            Constant
+                                              (103,
+                                                Int(2))
+                                          ])
+                                    ]),
+                                Apply
+                                  (103,
+                                    Variable
+                                      (103,
+                                        bal/0),
+                                    [
+                                      Apply
+                                        (103,
+                                          Apply
+                                            (?,
+                                              Variable
+                                                (?,
+                                                  join_rec/0),
+                                              [
+                                                Variable
+                                                  (?,
+                                                    counter/0)
+                                              ]),
+                                          [
+                                            Variable
+                                              (103,
+                                                l/0);
+                                            Variable
+                                              (103,
+                                                v/0);
+                                            Variable
+                                              (103,
+                                                rl/0)
+                                          ]);
+                                      Variable
+                                        (103,
+                                          rv/0);
+                                      Variable
+                                        (103,
+                                          rr/0)
+                                    ]),
+                                Apply
+                                  (104,
+                                    Variable
+                                      (104,
+                                        create/0),
+                                    [
+                                      Variable
+                                        (104,
+                                          l/0);
+                                      Variable
+                                        (104,
+                                          v/0);
+                                      Variable
+                                        (104,
+                                          r/0)
+                                    ]))))
+                    ]))
+            ]))
+    ])
+
+97
+Value
+  (non_rec, @.,
+    [
+      ((join, [ ], [ (l, Type (t/0)); (v, Type (elt/0)); (r, Type (t/0)) ],
+        Some Type (t/0)),
+        Apply
+          (?, Variable (?, join_rec/0),
+            [
+              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Variable (?, l/0);
+              Variable (?, v/0);
+              Variable (?, r/0)
+            ]))
+    ])
+
+108
+Value
+  (rec, @coq_rec,
+    [
+      ((min_elt, [ ], [ (x, Type (t/0)) ], Some Type (elt/0)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0),
+                Apply
+                  (109,
+                    Variable
+                      (109,
+                        OCaml.raise_Not_found/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (Node/0, Constructor (Empty/0), v, r, Any),
+                Variable (110, v/0));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (111,
+                    Variable
+                      (111,
+                        min_elt/0),
+                    [
+                      Variable
+                        (111,
+                          l/0)
+                    ]))
+            ]))
+    ])
+
+114
+Value
+  (rec, @coq_rec,
+    [
+      ((max_elt, [ ], [ (x, Type (t/0)) ], Some Type (elt/0)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0),
+                Apply
+                  (115,
+                    Variable
+                      (115,
+                        OCaml.raise_Not_found/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (Node/0, l, v, Constructor (Empty/0), Any),
+                Variable (116, v/0));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (117,
+                    Variable
+                      (117,
+                        max_elt/0),
+                    [
+                      Variable
+                        (117,
+                          r/0)
+                    ]))
+            ]))
+    ])
+
+122
+Value
+  (rec, @coq_rec,
+    [
+      ((remove_min_elt, [ ], [ (x, Type (t/0)) ], Some Type (t/0)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0),
+                Apply
+                  (123,
+                    Variable
+                      (123,
+                        OCaml.Pervasives.invalid_arg/1),
+                    [
+                      Constant
+                        (123,
+                          String("Set.remove_min_elt"))
+                    ]));
+              (Constructor (Node/0, Constructor (Empty/0), v, r, Any),
+                Variable (124, r/0));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (125,
+                    Variable
+                      (125,
+                        bal/0),
+                    [
+                      Apply
+                        (125,
+                          Variable
+                            (125,
+                              remove_min_elt/0),
+                          [
+                            Variable
+                              (125,
+                                l/0)
+                          ]);
+                      Variable
+                        (125,
+                          v/0);
+                      Variable
+                        (125,
+                          r/0)
+                    ]))
+            ]))
+    ])
+
+132
+Value
+  (non_rec, @.,
+    [
+      ((merge, [ ], [ (t1, Type (t/0)); (t2, Type (t/0)) ], Some Type (t/0)),
+        Match
+          (133, Tuple (133, Variable (133, t1/0), Variable (133, t2/0)),
+            [
+              (Tuple (Constructor (Empty/0), t), Variable (134, t/0));
+              (Tuple (t, Constructor (Empty/0)), Variable (135, t/0));
+              (Tuple (Any, Any),
+                Apply
+                  (136,
+                    Variable
+                      (136,
+                        bal/0),
+                    [
+                      Variable
+                        (136,
+                          t1/0);
+                      Apply
+                        (136,
+                          Variable
+                            (136,
+                              min_elt/0),
+                          [
+                            Variable
+                              (136,
+                                t2/0)
+                          ]);
+                      Apply
+                        (136,
+                          Variable
+                            (136,
+                              remove_min_elt/0),
+                          [
+                            Variable
+                              (136,
+                                t2/0)
+                          ])
+                    ]))
+            ]))
+    ])
+
+142
+Value
+  (non_rec, @.,
+    [
+      ((concat, [ ], [ (t1, Type (t/0)); (t2, Type (t/0)) ], Some Type (t/0)),
+        Match
+          (143, Tuple (143, Variable (143, t1/0), Variable (143, t2/0)),
+            [
+              (Tuple (Constructor (Empty/0), t), Variable (144, t/0));
+              (Tuple (t, Constructor (Empty/0)), Variable (145, t/0));
+              (Tuple (Any, Any),
+                Apply
+                  (146,
+                    Variable
+                      (146,
+                        join/0),
+                    [
+                      Variable
+                        (146,
+                          t1/0);
+                      Apply
+                        (146,
+                          Variable
+                            (146,
+                              min_elt/0),
+                          [
+                            Variable
+                              (146,
+                                t2/0)
+                          ]);
+                      Apply
+                        (146,
+                          Variable
+                            (146,
+                              remove_min_elt/0),
+                          [
+                            Variable
+                              (146,
+                                t2/0)
+                          ])
+                    ]))
+            ]))
+    ])
+
+154
+Value
+  (rec, @coq_rec,
+    [
+      ((split, [ ], [ (x, Type (Ord.t/0)); (x_1, Type (t/0)) ],
+        Some (Type (t/0) * Type (bool/1) * Type (t/0))),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Constructor (Empty/0),
+                Tuple
+                  (156,
+                    Constructor
+                      (156,
+                        Empty/0),
+                    Constructor
+                      (156,
+                        false/1),
+                    Constructor
+                      (156,
+                        Empty/0)));
+              (Constructor (Node/0, l, v, r, Any),
+                LetVar 158 c =
+                  Apply
+                    (158,
+                      Variable
+                        (158,
+                          Ord.compare/0),
+                      [
+                        Variable
+                          (158,
+                            x/0);
+                        Variable
+                          (158,
+                            v/0)
+                      ])
+                  in
+                IfThenElse
+                  (159,
+                    Apply
+                      (159,
+                        Variable
+                          (159,
+                            equiv_decb/1),
+                        [
+                          Variable
+                            (159,
+                              c/0);
+                          Constant
+                            (159,
+                              Int(0))
+                        ]),
+                    Tuple
+                      (159,
+                        Variable
+                          (159,
+                            l/0),
+                        Constructor
+                          (159,
+                            true/1),
+                        Variable
+                          (159,
+                            r/0)),
+                    IfThenElse
+                      (160,
+                        Apply
+                          (160,
+                            Variable
+                              (160,
+                                OCaml.Pervasives.lt/1),
+                            [
+                              Variable
+                                (160,
+                                  c/0);
+                              Constant
+                                (160,
+                                  Int(0))
+                            ]),
+                        Match
+                          (161,
+                            Apply
+                              (161,
+                                Variable
+                                  (161,
+                                    split/0),
+                                [
+                                  Variable
+                                    (161,
+                                      x/0);
+                                  Variable
+                                    (161,
+                                      l/0)
+                                ]),
+                            [
+                              (Tuple
+                                (ll,
+                                  pres,
+                                  rl),
+                                Tuple
+                                  (161,
+                                    Variable
+                                      (161,
+                                        ll/0),
+                                    Variable
+                                      (161,
+                                        pres/0),
+                                    Apply
+                                      (161,
+                                        Variable
+                                          (161,
+                                            join/0),
+                                        [
+                                          Variable
+                                            (161,
+                                              rl/0);
+                                          Variable
+                                            (161,
+                                              v/0);
+                                          Variable
+                                            (161,
+                                              r/0)
+                                        ])))
+                            ]),
+                        Match
+                          (163,
+                            Apply
+                              (163,
+                                Variable
+                                  (163,
+                                    split/0),
+                                [
+                                  Variable
+                                    (163,
+                                      x/0);
+                                  Variable
+                                    (163,
+                                      r/0)
+                                ]),
+                            [
+                              (Tuple
+                                (lr,
+                                  pres,
+                                  rr),
+                                Tuple
+                                  (163,
+                                    Apply
+                                      (163,
+                                        Variable
+                                          (163,
+                                            join/0),
+                                        [
+                                          Variable
+                                            (163,
+                                              l/0);
+                                          Variable
+                                            (163,
+                                              v/0);
+                                          Variable
+                                            (163,
+                                              lr/0)
+                                        ]),
+                                    Variable
+                                      (163,
+                                        pres/0),
+                                    Variable
+                                      (163,
+                                        rr/0)))
+                            ]))))
+            ]))
+    ])
+
+168
+Value
+  (non_rec, @.,
+    [ ((empty, [ ], [ ], Some Type (t/0)), Constructor (168, Empty/0)) ])
+
+170
+Value
+  (non_rec, @.,
+    [
+      ((is_empty, [ ], [ (x, Type (t/0)) ], Some Type (bool/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Constructor (170, true/1));
+              (Any, Constructor (170, false/1))
+            ]))
+    ])
+
+172
+Value
+  (rec, @coq_rec,
+    [
+      ((mem, [ ], [ (x, Type (Ord.t/0)); (x_1, Type (t/0)) ], Some Type (bool/1)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Constructor (Empty/0), Constructor (173, false/1));
+              (Constructor (Node/0, l, v, r, Any),
+                LetVar 175 c =
+                  Apply
+                    (175,
+                      Variable
+                        (175,
+                          Ord.compare/0),
+                      [
+                        Variable
+                          (175,
+                            x/0);
+                        Variable
+                          (175,
+                            v/0)
+                      ])
+                  in
+                Apply
+                  (176,
+                    Variable
+                      (176,
+                        orb/1),
+                    [
+                      Apply
+                        (176,
+                          Variable
+                            (176,
+                              equiv_decb/1),
+                          [
+                            Variable
+                              (176,
+                                c/0);
+                            Constant
+                              (176,
+                                Int(0))
+                          ]);
+                      Apply
+                        (176,
+                          Variable
+                            (176,
+                              mem/0),
+                          [
+                            Variable
+                              (176,
+                                x/0);
+                            IfThenElse
+                              (176,
+                                Apply
+                                  (176,
+                                    Variable
+                                      (176,
+                                        OCaml.Pervasives.lt/1),
+                                    [
+                                      Variable
+                                        (176,
+                                          c/0);
+                                      Constant
+                                        (176,
+                                          Int(0))
+                                    ]),
+                                Variable
+                                  (176,
+                                    l/0),
+                                Variable
+                                  (176,
+                                    r/0))
+                          ])
+                    ]))
+            ]))
+    ])
+
+179
+Value
+  (rec, @coq_rec,
+    [
+      ((remove, [ ], [ (x, Type (Ord.t/0)); (x_1, Type (t/0)) ], Some Type (t/0)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Constructor (Empty/0), Constructor (180, Empty/0));
+              (Constructor (Node/0, l, v, r, Any),
+                LetVar 182 c =
+                  Apply
+                    (182,
+                      Variable
+                        (182,
+                          Ord.compare/0),
+                      [
+                        Variable
+                          (182,
+                            x/0);
+                        Variable
+                          (182,
+                            v/0)
+                      ])
+                  in
+                IfThenElse
+                  (183,
+                    Apply
+                      (183,
+                        Variable
+                          (183,
+                            equiv_decb/1),
+                        [
+                          Variable
+                            (183,
+                              c/0);
+                          Constant
+                            (183,
+                              Int(0))
+                        ]),
+                    Apply
+                      (183,
+                        Variable
+                          (183,
+                            merge/0),
+                        [
+                          Variable
+                            (183,
+                              l/0);
+                          Variable
+                            (183,
+                              r/0)
+                        ]),
+                    IfThenElse
+                      (184,
+                        Apply
+                          (184,
+                            Variable
+                              (184,
+                                OCaml.Pervasives.lt/1),
+                            [
+                              Variable
+                                (184,
+                                  c/0);
+                              Constant
+                                (184,
+                                  Int(0))
+                            ]),
+                        Apply
+                          (184,
+                            Variable
+                              (184,
+                                bal/0),
+                            [
+                              Apply
+                                (184,
+                                  Variable
+                                    (184,
+                                      remove/0),
+                                  [
+                                    Variable
+                                      (184,
+                                        x/0);
+                                    Variable
+                                      (184,
+                                        l/0)
+                                  ]);
+                              Variable
+                                (184,
+                                  v/0);
+                              Variable
+                                (184,
+                                  r/0)
+                            ]),
+                        Apply
+                          (184,
+                            Variable
+                              (184,
+                                bal/0),
+                            [
+                              Variable
+                                (184,
+                                  l/0);
+                              Variable
+                                (184,
+                                  v/0);
+                              Apply
+                                (184,
+                                  Variable
+                                    (184,
+                                      remove/0),
+                                  [
+                                    Variable
+                                      (184,
+                                        x/0);
+                                    Variable
+                                      (184,
+                                        r/0)
+                                  ])
+                            ]))))
+            ]))
+    ])
+
+187
+Value
+  (rec, @.,
+    [
+      ((union_rec, [ ],
+        [ (counter, Type (nat/1)); (s1, Type (t/0)); (s2, Type (t/0)) ],
+        Some Type (t/0)),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (188,
+                    Tuple
+                      (188,
+                        Variable
+                          (188,
+                            s1/0),
+                        Variable
+                          (188,
+                            s2/0)),
+                    [
+                      (Tuple
+                        (Constructor
+                          (Empty/0),
+                          t2),
+                        Variable
+                          (189,
+                            t2/0));
+                      (Tuple
+                        (t1,
+                          Constructor
+                            (Empty/0)),
+                        Variable
+                          (190,
+                            t1/0));
+                      (Tuple
+                        (Constructor
+                          (Node/0,
+                            l1,
+                            v1,
+                            r1,
+                            h1),
+                          Constructor
+                            (Node/0,
+                              l2,
+                              v2,
+                              r2,
+                              h2)),
+                        IfThenElse
+                          (192,
+                            Apply
+                              (192,
+                                Variable
+                                  (192,
+                                    OCaml.Pervasives.ge/1),
+                                [
+                                  Variable
+                                    (192,
+                                      h1/0);
+                                  Variable
+                                    (192,
+                                      h2/0)
+                                ]),
+                            IfThenElse
+                              (193,
+                                Apply
+                                  (193,
+                                    Variable
+                                      (193,
+                                        equiv_decb/1),
+                                    [
+                                      Variable
+                                        (193,
+                                          h2/0);
+                                      Constant
+                                        (193,
+                                          Int(1))
+                                    ]),
+                                Apply
+                                  (193,
+                                    Variable
+                                      (193,
+                                        add/0),
+                                    [
+                                      Variable
+                                        (193,
+                                          v2/0);
+                                      Variable
+                                        (193,
+                                          s1/0)
+                                    ]),
+                                Match
+                                  (193,
+                                    Apply
+                                      (194,
+                                        Variable
+                                          (194,
+                                            split/0),
+                                        [
+                                          Variable
+                                            (194,
+                                              v1/0);
+                                          Variable
+                                            (194,
+                                              s2/0)
+                                        ]),
+                                    [
+                                      (Tuple
+                                        (l2,
+                                          Any,
+                                          r2),
+                                        Apply
+                                          (195,
+                                            Variable
+                                              (195,
+                                                join/0),
+                                            [
+                                              Apply
+                                                (195,
+                                                  Apply
+                                                    (?,
+                                                      Variable
+                                                        (?,
+                                                          union_rec/0),
+                                                      [
+                                                        Variable
+                                                          (?,
+                                                            counter/0)
+                                                      ]),
+                                                  [
+                                                    Variable
+                                                      (195,
+                                                        l1/0);
+                                                    Variable
+                                                      (195,
+                                                        l2/0)
+                                                  ]);
+                                              Variable
+                                                (195,
+                                                  v1/0);
+                                              Apply
+                                                (195,
+                                                  Apply
+                                                    (?,
+                                                      Variable
+                                                        (?,
+                                                          union_rec/0),
+                                                      [
+                                                        Variable
+                                                          (?,
+                                                            counter/0)
+                                                      ]),
+                                                  [
+                                                    Variable
+                                                      (195,
+                                                        r1/0);
+                                                    Variable
+                                                      (195,
+                                                        r2/0)
+                                                  ])
+                                            ]))
+                                    ])),
+                            IfThenElse
+                              (198,
+                                Apply
+                                  (198,
+                                    Variable
+                                      (198,
+                                        equiv_decb/1),
+                                    [
+                                      Variable
+                                        (198,
+                                          h1/0);
+                                      Constant
+                                        (198,
+                                          Int(1))
+                                    ]),
+                                Apply
+                                  (198,
+                                    Variable
+                                      (198,
+                                        add/0),
+                                    [
+                                      Variable
+                                        (198,
+                                          v1/0);
+                                      Variable
+                                        (198,
+                                          s2/0)
+                                    ]),
+                                Match
+                                  (198,
+                                    Apply
+                                      (199,
+                                        Variable
+                                          (199,
+                                            split/0),
+                                        [
+                                          Variable
+                                            (199,
+                                              v2/0);
+                                          Variable
+                                            (199,
+                                              s1/0)
+                                        ]),
+                                    [
+                                      (Tuple
+                                        (l1,
+                                          Any,
+                                          r1),
+                                        Apply
+                                          (200,
+                                            Variable
+                                              (200,
+                                                join/0),
+                                            [
+                                              Apply
+                                                (200,
+                                                  Apply
+                                                    (?,
+                                                      Variable
+                                                        (?,
+                                                          union_rec/0),
+                                                      [
+                                                        Variable
+                                                          (?,
+                                                            counter/0)
+                                                      ]),
+                                                  [
+                                                    Variable
+                                                      (200,
+                                                        l1/0);
+                                                    Variable
+                                                      (200,
+                                                        l2/0)
+                                                  ]);
+                                              Variable
+                                                (200,
+                                                  v2/0);
+                                              Apply
+                                                (200,
+                                                  Apply
+                                                    (?,
+                                                      Variable
+                                                        (?,
+                                                          union_rec/0),
+                                                      [
+                                                        Variable
+                                                          (?,
+                                                            counter/0)
+                                                      ]),
+                                                  [
+                                                    Variable
+                                                      (200,
+                                                        r1/0);
+                                                    Variable
+                                                      (200,
+                                                        r2/0)
+                                                  ])
+                                            ]))
+                                    ]))))
+                    ]))
+            ]))
+    ])
+
+187
+Value
+  (non_rec, @.,
+    [
+      ((union, [ ], [ (s1, Type (t/0)); (s2, Type (t/0)) ], Some Type (t/0)),
+        Apply
+          (?, Variable (?, union_rec/0),
+            [
+              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Variable (?, s1/0);
+              Variable (?, s2/0)
+            ]))
+    ])
+
+203
+Value
+  (rec, @coq_rec,
+    [
+      ((inter, [ ], [ (s1, Type (t/0)); (s2, Type (t/0)) ], Some Type (t/0)),
+        Match
+          (204, Tuple (204, Variable (204, s1/0), Variable (204, s2/0)),
+            [
+              (Tuple (Constructor (Empty/0), t2),
+                Constructor (205, Empty/0));
+              (Tuple (t1, Constructor (Empty/0)),
+                Constructor (206, Empty/0));
+              (Tuple (Constructor (Node/0, l1, v1, r1, Any), t2),
+                Match
+                  (208,
+                    Apply
+                      (208,
+                        Variable
+                          (208,
+                            split/0),
+                        [
+                          Variable
+                            (208,
+                              v1/0);
+                          Variable
+                            (208,
+                              t2/0)
+                        ]),
+                    [
+                      (Tuple
+                        (l2,
+                          Constructor
+                            (false/1),
+                          r2),
+                        Apply
+                          (210,
+                            Variable
+                              (210,
+                                concat/0),
+                            [
+                              Apply
+                                (210,
+                                  Variable
+                                    (210,
+                                      inter/0),
+                                  [
+                                    Variable
+                                      (210,
+                                        l1/0);
+                                    Variable
+                                      (210,
+                                        l2/0)
+                                  ]);
+                              Apply
+                                (210,
+                                  Variable
+                                    (210,
+                                      inter/0),
+                                  [
+                                    Variable
+                                      (210,
+                                        r1/0);
+                                    Variable
+                                      (210,
+                                        r2/0)
+                                  ])
+                            ]));
+                      (Tuple
+                        (l2,
+                          Constructor
+                            (true/1),
+                          r2),
+                        Apply
+                          (212,
+                            Variable
+                              (212,
+                                join/0),
+                            [
+                              Apply
+                                (212,
+                                  Variable
+                                    (212,
+                                      inter/0),
+                                  [
+                                    Variable
+                                      (212,
+                                        l1/0);
+                                    Variable
+                                      (212,
+                                        l2/0)
+                                  ]);
+                              Variable
+                                (212,
+                                  v1/0);
+                              Apply
+                                (212,
+                                  Variable
+                                    (212,
+                                      inter/0),
+                                  [
+                                    Variable
+                                      (212,
+                                        r1/0);
+                                    Variable
+                                      (212,
+                                        r2/0)
+                                  ])
+                            ]))
+                    ]))
+            ]))
+    ])
+
+215
+Value
+  (rec, @coq_rec,
+    [
+      ((diff, [ ], [ (s1, Type (t/0)); (s2, Type (t/0)) ], Some Type (t/0)),
+        Match
+          (216, Tuple (216, Variable (216, s1/0), Variable (216, s2/0)),
+            [
+              (Tuple (Constructor (Empty/0), t2),
+                Constructor (217, Empty/0));
+              (Tuple (t1, Constructor (Empty/0)), Variable (218, t1/0));
+              (Tuple (Constructor (Node/0, l1, v1, r1, Any), t2),
+                Match
+                  (220,
+                    Apply
+                      (220,
+                        Variable
+                          (220,
+                            split/0),
+                        [
+                          Variable
+                            (220,
+                              v1/0);
+                          Variable
+                            (220,
+                              t2/0)
+                        ]),
+                    [
+                      (Tuple
+                        (l2,
+                          Constructor
+                            (false/1),
+                          r2),
+                        Apply
+                          (222,
+                            Variable
+                              (222,
+                                join/0),
+                            [
+                              Apply
+                                (222,
+                                  Variable
+                                    (222,
+                                      diff/0),
+                                  [
+                                    Variable
+                                      (222,
+                                        l1/0);
+                                    Variable
+                                      (222,
+                                        l2/0)
+                                  ]);
+                              Variable
+                                (222,
+                                  v1/0);
+                              Apply
+                                (222,
+                                  Variable
+                                    (222,
+                                      diff/0),
+                                  [
+                                    Variable
+                                      (222,
+                                        r1/0);
+                                    Variable
+                                      (222,
+                                        r2/0)
+                                  ])
+                            ]));
+                      (Tuple
+                        (l2,
+                          Constructor
+                            (true/1),
+                          r2),
+                        Apply
+                          (224,
+                            Variable
+                              (224,
+                                concat/0),
+                            [
+                              Apply
+                                (224,
+                                  Variable
+                                    (224,
+                                      diff/0),
+                                  [
+                                    Variable
+                                      (224,
+                                        l1/0);
+                                    Variable
+                                      (224,
+                                        l2/0)
+                                  ]);
+                              Apply
+                                (224,
+                                  Variable
+                                    (224,
+                                      diff/0),
+                                  [
+                                    Variable
+                                      (224,
+                                        r1/0);
+                                    Variable
+                                      (224,
+                                        r2/0)
+                                  ])
+                            ]))
+                    ]))
+            ]))
+    ])
+
+227
+Inductive enumeration:
+  ([ ],
+    [ (End, [ ]); (More, [ Type (elt/0); Type (t/0); Type (enumeration/0) ]) ])
+
+229
+Value
+  (rec, @coq_rec,
+    [
+      ((cons_enum, [ ], [ (s, Type (t/0)); (e, Type (enumeration/0)) ],
+        Some Type (enumeration/0)),
+        Match
+          (230, Variable (230, s/0),
+            [
+              (Constructor (Empty/0), Variable (231, e/0));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (232,
+                    Variable
+                      (232,
+                        cons_enum/0),
+                    [
+                      Variable
+                        (232,
+                          l/0);
+                      Constructor
+                        (232,
+                          More/0,
+                          Variable
+                            (232,
+                              v/0),
+                          Variable
+                            (232,
+                              r/0),
+                          Variable
+                            (232,
+                              e/0))
+                    ]))
+            ]))
+    ])
+
+235
+Value
+  (rec, @.,
+    [
+      ((compare_aux_rec, [ ],
+        [
+          (counter, Type (nat/1));
+          (e1, Type (enumeration/0));
+          (e2, Type (enumeration/0))
+        ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (236,
+                    Tuple
+                      (236,
+                        Variable
+                          (236,
+                            e1/0),
+                        Variable
+                          (236,
+                            e2/0)),
+                    [
+                      (Tuple
+                        (Constructor
+                          (End/0),
+                          Constructor
+                            (End/0)),
+                        Constant
+                          (237,
+                            Int(0)));
+                      (Tuple
+                        (Constructor
+                          (End/0),
+                          Any),
+                        Constant
+                          (238,
+                            Int(-1)));
+                      (Tuple
+                        (Any,
+                          Constructor
+                            (End/0)),
+                        Constant
+                          (239,
+                            Int(1)));
+                      (Tuple
+                        (Constructor
+                          (More/0,
+                            v1,
+                            r1,
+                            e1),
+                          Constructor
+                            (More/0,
+                              v2,
+                              r2,
+                              e2)),
+                        LetVar
+                          241
+                          c
+                          =
+                          Apply
+                            (241,
+                              Variable
+                                (241,
+                                  Ord.compare/0),
+                              [
+                                Variable
+                                  (241,
+                                    v1/0);
+                                Variable
+                                  (241,
+                                    v2/0)
+                              ])
+                          in
+                        IfThenElse
+                          (242,
+                            Apply
+                              (242,
+                                Variable
+                                  (242,
+                                    nequiv_decb/1),
+                                [
+                                  Variable
+                                    (242,
+                                      c/0);
+                                  Constant
+                                    (242,
+                                      Int(0))
+                                ]),
+                            Variable
+                              (243,
+                                c/0),
+                            Apply
+                              (244,
+                                Apply
+                                  (?,
+                                    Variable
+                                      (?,
+                                        compare_aux_rec/0),
+                                    [
+                                      Variable
+                                        (?,
+                                          counter/0)
+                                    ]),
+                                [
+                                  Apply
+                                    (244,
+                                      Variable
+                                        (244,
+                                          cons_enum/0),
+                                      [
+                                        Variable
+                                          (244,
+                                            r1/0);
+                                        Variable
+                                          (244,
+                                            e1/0)
+                                      ]);
+                                  Apply
+                                    (244,
+                                      Variable
+                                        (244,
+                                          cons_enum/0),
+                                      [
+                                        Variable
+                                          (244,
+                                            r2/0);
+                                        Variable
+                                          (244,
+                                            e2/0)
+                                      ])
+                                ])))
+                    ]))
+            ]))
+    ])
+
+235
+Value
+  (non_rec, @.,
+    [
+      ((compare_aux, [ ],
+        [ (e1, Type (enumeration/0)); (e2, Type (enumeration/0)) ],
+        Some Type (Z/1)),
+        Apply
+          (?, Variable (?, compare_aux_rec/0),
+            [
+              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Variable (?, e1/0);
+              Variable (?, e2/0)
+            ]))
+    ])
+
+246
+Value
+  (non_rec, @.,
+    [
+      ((compare, [ ], [ (s1, Type (t/0)); (s2, Type (t/0)) ], Some Type (Z/1)),
+        Apply
+          (247, Variable (247, compare_aux/0),
+            [
+              Apply
+                (247, Variable (247, cons_enum/0),
+                  [
+                    Variable
+                      (247,
+                        s1/0);
+                    Constructor
+                      (247,
+                        End/0)
+                  ]);
+              Apply
+                (247, Variable (247, cons_enum/0),
+                  [
+                    Variable
+                      (247,
+                        s2/0);
+                    Constructor
+                      (247,
+                        End/0)
+                  ])
+            ]))
+    ])
+
+249
+Value
+  (non_rec, @.,
+    [
+      ((equal, [ ], [ (s1, Type (t/0)); (s2, Type (t/0)) ], Some Type (bool/1)),
+        Apply
+          (250, Variable (250, equiv_decb/1),
+            [
+              Apply
+                (250, Variable (250, compare/0),
+                  [
+                    Variable
+                      (250,
+                        s1/0);
+                    Variable
+                      (250,
+                        s2/0)
+                  ]);
+              Constant (250, Int(0))
+            ]))
+    ])
+
+252
+Value
+  (rec, @.,
+    [
+      ((subset_rec, [ ],
+        [ (counter, Type (nat/1)); (s1, Type (t/0)); (s2, Type (t/0)) ],
+        Some Type (bool/1)),
+        Match
+          (?, Variable (?, counter/0),
+            [
+              (Constructor (O/1),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        not_terminated/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (S/1, counter),
+                Match
+                  (253,
+                    Tuple
+                      (253,
+                        Variable
+                          (253,
+                            s1/0),
+                        Variable
+                          (253,
+                            s2/0)),
+                    [
+                      (Tuple
+                        (Constructor
+                          (Empty/0),
+                          Any),
+                        Constructor
+                          (255,
+                            true/1));
+                      (Tuple
+                        (Any,
+                          Constructor
+                            (Empty/0)),
+                        Constructor
+                          (257,
+                            false/1));
+                      (Tuple
+                        (Constructor
+                          (Node/0,
+                            l1,
+                            v1,
+                            r1,
+                            Any),
+                          Alias
+                            (Constructor
+                              (Node/0,
+                                l2,
+                                v2,
+                                r2,
+                                Any),
+                              t2)),
+                        LetVar
+                          259
+                          c
+                          =
+                          Apply
+                            (259,
+                              Variable
+                                (259,
+                                  Ord.compare/0),
+                              [
+                                Variable
+                                  (259,
+                                    v1/0);
+                                Variable
+                                  (259,
+                                    v2/0)
+                              ])
+                          in
+                        IfThenElse
+                          (260,
+                            Apply
+                              (260,
+                                Variable
+                                  (260,
+                                    equiv_decb/1),
+                                [
+                                  Variable
+                                    (260,
+                                      c/0);
+                                  Constant
+                                    (260,
+                                      Int(0))
+                                ]),
+                            Apply
+                              (261,
+                                Variable
+                                  (261,
+                                    andb/1),
+                                [
+                                  Apply
+                                    (261,
+                                      Apply
+                                        (?,
+                                          Variable
+                                            (?,
+                                              subset_rec/0),
+                                          [
+                                            Variable
+                                              (?,
+                                                counter/0)
+                                          ]),
+                                      [
+                                        Variable
+                                          (261,
+                                            l1/0);
+                                        Variable
+                                          (261,
+                                            l2/0)
+                                      ]);
+                                  Apply
+                                    (261,
+                                      Apply
+                                        (?,
+                                          Variable
+                                            (?,
+                                              subset_rec/0),
+                                          [
+                                            Variable
+                                              (?,
+                                                counter/0)
+                                          ]),
+                                      [
+                                        Variable
+                                          (261,
+                                            r1/0);
+                                        Variable
+                                          (261,
+                                            r2/0)
+                                      ])
+                                ]),
+                            IfThenElse
+                              (262,
+                                Apply
+                                  (262,
+                                    Variable
+                                      (262,
+                                        OCaml.Pervasives.lt/1),
+                                    [
+                                      Variable
+                                        (262,
+                                          c/0);
+                                      Constant
+                                        (262,
+                                          Int(0))
+                                    ]),
+                                Apply
+                                  (263,
+                                    Variable
+                                      (263,
+                                        andb/1),
+                                    [
+                                      Apply
+                                        (263,
+                                          Apply
+                                            (?,
+                                              Variable
+                                                (?,
+                                                  subset_rec/0),
+                                              [
+                                                Variable
+                                                  (?,
+                                                    counter/0)
+                                              ]),
+                                          [
+                                            Constructor
+                                              (263,
+                                                Node/0,
+                                                Variable
+                                                  (263,
+                                                    l1/0),
+                                                Variable
+                                                  (263,
+                                                    v1/0),
+                                                Constructor
+                                                  (263,
+                                                    Empty/0),
+                                                Constant
+                                                  (263,
+                                                    Int(0)));
+                                            Variable
+                                              (263,
+                                                l2/0)
+                                          ]);
+                                      Apply
+                                        (263,
+                                          Apply
+                                            (?,
+                                              Variable
+                                                (?,
+                                                  subset_rec/0),
+                                              [
+                                                Variable
+                                                  (?,
+                                                    counter/0)
+                                              ]),
+                                          [
+                                            Variable
+                                              (263,
+                                                r1/0);
+                                            Variable
+                                              (263,
+                                                t2/0)
+                                          ])
+                                    ]),
+                                Apply
+                                  (265,
+                                    Variable
+                                      (265,
+                                        andb/1),
+                                    [
+                                      Apply
+                                        (265,
+                                          Apply
+                                            (?,
+                                              Variable
+                                                (?,
+                                                  subset_rec/0),
+                                              [
+                                                Variable
+                                                  (?,
+                                                    counter/0)
+                                              ]),
+                                          [
+                                            Constructor
+                                              (265,
+                                                Node/0,
+                                                Constructor
+                                                  (265,
+                                                    Empty/0),
+                                                Variable
+                                                  (265,
+                                                    v1/0),
+                                                Variable
+                                                  (265,
+                                                    r1/0),
+                                                Constant
+                                                  (265,
+                                                    Int(0)));
+                                            Variable
+                                              (265,
+                                                r2/0)
+                                          ]);
+                                      Apply
+                                        (265,
+                                          Apply
+                                            (?,
+                                              Variable
+                                                (?,
+                                                  subset_rec/0),
+                                              [
+                                                Variable
+                                                  (?,
+                                                    counter/0)
+                                              ]),
+                                          [
+                                            Variable
+                                              (265,
+                                                l1/0);
+                                            Variable
+                                              (265,
+                                                t2/0)
+                                          ])
+                                    ]))))
+                    ]))
+            ]))
+    ])
+
+252
+Value
+  (non_rec, @.,
+    [
+      ((subset, [ ], [ (s1, Type (t/0)); (s2, Type (t/0)) ], Some Type (bool/1)),
+        Apply
+          (?, Variable (?, subset_rec/0),
+            [
+              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
+              Variable (?, s1/0);
+              Variable (?, s2/0)
+            ]))
+    ])
+
+267
+Value
+  (rec, @coq_rec,
+    [
+      ((iter, [ A ], [ (f, (Type (elt/0) -> A)); (x, Type (t/0)) ],
+        Some Type (unit/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Constructor (268, tt/1));
+              (Constructor (Node/0, l, v, r, Any),
+                Sequence
+                  (269,
+                    Apply
+                      (269,
+                        Variable
+                          (269,
+                            iter/0),
+                        [
+                          Variable
+                            (269,
+                              f/0);
+                          Variable
+                            (269,
+                              l/0)
+                        ]),
+                    Sequence
+                      (269,
+                        Apply
+                          (269,
+                            Variable
+                              (269,
+                                f/0),
+                            [
+                              Variable
+                                (269,
+                                  v/0)
+                            ]),
+                        Apply
+                          (269,
+                            Variable
+                              (269,
+                                iter/0),
+                            [
+                              Variable
+                                (269,
+                                  f/0);
+                              Variable
+                                (269,
+                                  r/0)
+                            ]))))
+            ]))
+    ])
+
+272
+Value
+  (rec, @coq_rec,
+    [
+      ((fold, [ A ],
+        [ (f, (Type (elt/0) -> (A -> A))); (s, Type (t/0)); (accu, A) ],
+        Some A),
+        Match
+          (273, Variable (273, s/0),
+            [
+              (Constructor (Empty/0), Variable (274, accu/0));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (275,
+                    Variable
+                      (275,
+                        fold/0),
+                    [
+                      Variable
+                        (275,
+                          f/0);
+                      Variable
+                        (275,
+                          r/0);
+                      Apply
+                        (275,
+                          Variable
+                            (275,
+                              f/0),
+                          [
+                            Variable
+                              (275,
+                                v/0);
+                            Apply
+                              (275,
+                                Variable
+                                  (275,
+                                    fold/0),
+                                [
+                                  Variable
+                                    (275,
+                                      f/0);
+                                  Variable
+                                    (275,
+                                      l/0);
+                                  Variable
+                                    (275,
+                                      accu/0)
+                                ])
+                          ])
+                    ]))
+            ]))
+    ])
+
+278
+Value
+  (rec, @coq_rec,
+    [
+      ((for_all, [ ], [ (p, (Type (elt/0) -> Type (bool/1))); (x, Type (t/0)) ],
+        Some Type (bool/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Constructor (279, true/1));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (280,
+                    Variable
+                      (280,
+                        andb/1),
+                    [
+                      Apply
+                        (280,
+                          Variable
+                            (280,
+                              p/0),
+                          [
+                            Variable
+                              (280,
+                                v/0)
+                          ]);
+                      Apply
+                        (280,
+                          Variable
+                            (280,
+                              andb/1),
+                          [
+                            Apply
+                              (280,
+                                Variable
+                                  (280,
+                                    for_all/0),
+                                [
+                                  Variable
+                                    (280,
+                                      p/0);
+                                  Variable
+                                    (280,
+                                      l/0)
+                                ]);
+                            Apply
+                              (280,
+                                Variable
+                                  (280,
+                                    for_all/0),
+                                [
+                                  Variable
+                                    (280,
+                                      p/0);
+                                  Variable
+                                    (280,
+                                      r/0)
+                                ])
+                          ])
+                    ]))
+            ]))
+    ])
+
+283
+Value
+  (rec, @coq_rec,
+    [
+      ((exists_, [ ], [ (p, (Type (elt/0) -> Type (bool/1))); (x, Type (t/0)) ],
+        Some Type (bool/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Constructor (284, false/1));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (285,
+                    Variable
+                      (285,
+                        orb/1),
+                    [
+                      Apply
+                        (285,
+                          Variable
+                            (285,
+                              p/0),
+                          [
+                            Variable
+                              (285,
+                                v/0)
+                          ]);
+                      Apply
+                        (285,
+                          Variable
+                            (285,
+                              orb/1),
+                          [
+                            Apply
+                              (285,
+                                Variable
+                                  (285,
+                                    exists_/0),
+                                [
+                                  Variable
+                                    (285,
+                                      p/0);
+                                  Variable
+                                    (285,
+                                      l/0)
+                                ]);
+                            Apply
+                              (285,
+                                Variable
+                                  (285,
+                                    exists_/0),
+                                [
+                                  Variable
+                                    (285,
+                                      p/0);
+                                  Variable
+                                    (285,
+                                      r/0)
+                                ])
+                          ])
+                    ]))
+            ]))
+    ])
+
+288
+Value
+  (rec, @coq_rec,
+    [
+      ((filter, [ ], [ (p, (Type (elt/0) -> Type (bool/1))); (x, Type (t/0)) ],
+        Some Type (t/0)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Constructor (289, Empty/0));
+              (Constructor (Node/0, l, v, r, Any),
+                LetVar 292 l' =
+                  Apply
+                    (292,
+                      Variable
+                        (292,
+                          filter/0),
+                      [
+                        Variable
+                          (292,
+                            p/0);
+                        Variable
+                          (292,
+                            l/0)
+                      ])
+                  in
+                LetVar 293 pv =
+                  Apply
+                    (293,
+                      Variable
+                        (293,
+                          p/0),
+                      [
+                        Variable
+                          (293,
+                            v/0)
+                      ])
+                  in
+                LetVar 294 r' =
+                  Apply
+                    (294,
+                      Variable
+                        (294,
+                          filter/0),
+                      [
+                        Variable
+                          (294,
+                            p/0);
+                        Variable
+                          (294,
+                            r/0)
+                      ])
+                  in
+                IfThenElse
+                  (295,
+                    Variable
+                      (295,
+                        pv/0),
+                    Apply
+                      (295,
+                        Variable
+                          (295,
+                            join/0),
+                        [
+                          Variable
+                            (295,
+                              l'/0);
+                          Variable
+                            (295,
+                              v/0);
+                          Variable
+                            (295,
+                              r'/0)
+                        ]),
+                    Apply
+                      (295,
+                        Variable
+                          (295,
+                            concat/0),
+                        [
+                          Variable
+                            (295,
+                              l'/0);
+                          Variable
+                            (295,
+                              r'/0)
+                        ])))
+            ]))
+    ])
+
+298
+Value
+  (rec, @coq_rec,
+    [
+      ((partition, [ ],
+        [ (p, (Type (elt/0) -> Type (bool/1))); (x, Type (t/0)) ],
+        Some (Type (t/0) * Type (t/0))),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0),
+                Tuple
+                  (299,
+                    Constructor
+                      (299,
+                        Empty/0),
+                    Constructor
+                      (299,
+                        Empty/0)));
+              (Constructor (Node/0, l, v, r, Any),
+                Match
+                  (302,
+                    Apply
+                      (302,
+                        Variable
+                          (302,
+                            partition/0),
+                        [
+                          Variable
+                            (302,
+                              p/0);
+                          Variable
+                            (302,
+                              l/0)
+                        ]),
+                    [
+                      (Tuple
+                        (lt,
+                          lf),
+                        LetVar
+                          303
+                          pv
+                          =
+                          Apply
+                            (303,
+                              Variable
+                                (303,
+                                  p/0),
+                              [
+                                Variable
+                                  (303,
+                                    v/0)
+                              ])
+                          in
+                        Match
+                          (304,
+                            Apply
+                              (304,
+                                Variable
+                                  (304,
+                                    partition/0),
+                                [
+                                  Variable
+                                    (304,
+                                      p/0);
+                                  Variable
+                                    (304,
+                                      r/0)
+                                ]),
+                            [
+                              (Tuple
+                                (rt,
+                                  rf),
+                                IfThenElse
+                                  (305,
+                                    Variable
+                                      (305,
+                                        pv/0),
+                                    Tuple
+                                      (306,
+                                        Apply
+                                          (306,
+                                            Variable
+                                              (306,
+                                                join/0),
+                                            [
+                                              Variable
+                                                (306,
+                                                  lt/0);
+                                              Variable
+                                                (306,
+                                                  v/0);
+                                              Variable
+                                                (306,
+                                                  rt/0)
+                                            ]),
+                                        Apply
+                                          (306,
+                                            Variable
+                                              (306,
+                                                concat/0),
+                                            [
+                                              Variable
+                                                (306,
+                                                  lf/0);
+                                              Variable
+                                                (306,
+                                                  rf/0)
+                                            ])),
+                                    Tuple
+                                      (307,
+                                        Apply
+                                          (307,
+                                            Variable
+                                              (307,
+                                                concat/0),
+                                            [
+                                              Variable
+                                                (307,
+                                                  lt/0);
+                                              Variable
+                                                (307,
+                                                  rt/0)
+                                            ]),
+                                        Apply
+                                          (307,
+                                            Variable
+                                              (307,
+                                                join/0),
+                                            [
+                                              Variable
+                                                (307,
+                                                  lf/0);
+                                              Variable
+                                                (307,
+                                                  v/0);
+                                              Variable
+                                                (307,
+                                                  rf/0)
+                                            ]))))
+                            ]))
+                    ]))
+            ]))
+    ])
+
+310
+Value
+  (rec, @coq_rec,
+    [
+      ((cardinal, [ ], [ (x, Type (t/0)) ], Some Type (Z/1)),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Constant (311, Int(0)));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (312,
+                    Variable
+                      (312,
+                        Z.add/1),
+                    [
+                      Apply
+                        (312,
+                          Variable
+                            (312,
+                              Z.add/1),
+                          [
+                            Apply
+                              (312,
+                                Variable
+                                  (312,
+                                    cardinal/0),
+                                [
+                                  Variable
+                                    (312,
+                                      l/0)
+                                ]);
+                            Constant
+                              (312,
+                                Int(1))
+                          ]);
+                      Apply
+                        (312,
+                          Variable
+                            (312,
+                              cardinal/0),
+                          [
+                            Variable
+                              (312,
+                                r/0)
+                          ])
+                    ]))
+            ]))
+    ])
+
+315
+Value
+  (rec, @coq_rec,
+    [
+      ((elements_aux, [ ],
+        [ (accu, Type (list/1, Type (elt/0))); (x, Type (t/0)) ],
+        Some Type (list/1, Type (elt/0))),
+        Match
+          (?, Variable (?, x/0),
+            [
+              (Constructor (Empty/0), Variable (316, accu/0));
+              (Constructor (Node/0, l, v, r, Any),
+                Apply
+                  (317,
+                    Variable
+                      (317,
+                        elements_aux/0),
+                    [
+                      Constructor
+                        (317,
+                          cons/1,
+                          Variable
+                            (317,
+                              v/0),
+                          Apply
+                            (317,
+                              Variable
+                                (317,
+                                  elements_aux/0),
+                              [
+                                Variable
+                                  (317,
+                                    accu/0);
+                                Variable
+                                  (317,
+                                    r/0)
+                              ]));
+                      Variable
+                        (317,
+                          l/0)
+                    ]))
+            ]))
+    ])
+
+320
+Value
+  (non_rec, @.,
+    [
+      ((elements, [ ], [ (s, Type (t/0)) ], Some Type (list/1, Type (elt/0))),
+        Apply
+          (321, Variable (321, elements_aux/0),
+            [ Constructor (321, []/1); Variable (321, s/0) ]))
+    ])
+
+323
+Value
+  (non_rec, @.,
+    [
+      ((choose, [ ], [ ], Some (Type (t/0) -> Type (elt/0))),
+        Variable (323, min_elt/0))
+    ])
+
+325
+Value
+  (rec, @coq_rec,
+    [
+      ((find, [ ], [ (x, Type (Ord.t/0)); (x_1, Type (t/0)) ], Some Type (elt/0)),
+        Match
+          (?, Variable (?, x_1/0),
+            [
+              (Constructor (Empty/0),
+                Apply
+                  (326,
+                    Variable
+                      (326,
+                        OCaml.raise_Not_found/1),
+                    [
+                      Tuple
+                        (?)
+                    ]));
+              (Constructor (Node/0, l, v, r, Any),
+                LetVar 328 c =
+                  Apply
+                    (328,
+                      Variable
+                        (328,
+                          Ord.compare/0),
+                      [
+                        Variable
+                          (328,
+                            x/0);
+                        Variable
+                          (328,
+                            v/0)
+                      ])
+                  in
+                IfThenElse
+                  (329,
+                    Apply
+                      (329,
+                        Variable
+                          (329,
+                            equiv_decb/1),
+                        [
+                          Variable
+                            (329,
+                              c/0);
+                          Constant
+                            (329,
+                              Int(0))
+                        ]),
+                    Variable
+                      (329,
+                        v/0),
+                    Apply
+                      (330,
+                        Variable
+                          (330,
+                            find/0),
+                        [
+                          Variable
+                            (330,
+                              x/0);
+                          IfThenElse
+                            (330,
+                              Apply
+                                (330,
+                                  Variable
+                                    (330,
+                                      OCaml.Pervasives.lt/1),
+                                  [
+                                    Variable
+                                      (330,
+                                        c/0);
+                                    Constant
+                                      (330,
+                                        Int(0))
+                                  ]),
+                              Variable
+                                (330,
+                                  l/0),
+                              Variable
+                                (330,
+                                  r/0))
+                        ])))
+            ]))
+    ])
+
+333
+Value
+  (non_rec, @.,
+    [
+      ((of_sorted_list, [ ], [ (l, Type (list/1, Type (elt/0))) ],
+        Some Type (t/0)),
+        LetFun 334
+          (rec, @.,
+            [
+              ((sub_rec, [ ],
+                [
+                  (counter, Type (nat/1));
+                  (n, Type (Z/1));
+                  (l,
+                    Type
+                      (list/1,
+                        Type
+                          (elt/0)))
+                ],
+                Some
+                  (Type (t/0) *
+                    Type
+                      (list/1,
+                        Type
+                          (elt/0)))),
+                Match
+                  (?,
+                    Variable
+                      (?,
+                        counter/0),
+                    [
+                      (Constructor
+                        (O/1),
+                        Apply
+                          (?,
+                            Variable
+                              (?,
+                                not_terminated/1),
+                            [
+                              Tuple
+                                (?)
+                            ]));
+                      (Constructor
+                        (S/1,
+                          counter),
+                        Match
+                          (335,
+                            Tuple
+                              (335,
+                                Variable
+                                  (335,
+                                    n/0),
+                                Variable
+                                  (335,
+                                    l/0)),
+                            [
+                              (Tuple
+                                (Int(0),
+                                  l),
+                                Tuple
+                                  (336,
+                                    Constructor
+                                      (336,
+                                        Empty/0),
+                                    Variable
+                                      (336,
+                                        l/0)));
+                              (Tuple
+                                (Int(1),
+                                  Constructor
+                                    (cons/1,
+                                      x0,
+                                      l)),
+                                Tuple
+                                  (337,
+                                    Constructor
+                                      (337,
+                                        Node/0,
+                                        Constructor
+                                          (337,
+                                            Empty/0),
+                                        Variable
+                                          (337,
+                                            x0/0),
+                                        Constructor
+                                          (337,
+                                            Empty/0),
+                                        Constant
+                                          (337,
+                                            Int(1))),
+                                    Variable
+                                      (337,
+                                        l/0)));
+                              (Tuple
+                                (Int(2),
+                                  Constructor
+                                    (cons/1,
+                                      x0,
+                                      Constructor
+                                        (cons/1,
+                                          x1,
+                                          l))),
+                                Tuple
+                                  (338,
+                                    Constructor
+                                      (338,
+                                        Node/0,
+                                        Constructor
+                                          (338,
+                                            Node/0,
+                                            Constructor
+                                              (338,
+                                                Empty/0),
+                                            Variable
+                                              (338,
+                                                x0/0),
+                                            Constructor
+                                              (338,
+                                                Empty/0),
+                                            Constant
+                                              (338,
+                                                Int(1))),
+                                        Variable
+                                          (338,
+                                            x1/0),
+                                        Constructor
+                                          (338,
+                                            Empty/0),
+                                        Constant
+                                          (338,
+                                            Int(2))),
+                                    Variable
+                                      (338,
+                                        l/0)));
+                              (Tuple
+                                (Int(3),
+                                  Constructor
+                                    (cons/1,
+                                      x0,
+                                      Constructor
+                                        (cons/1,
+                                          x1,
+                                          Constructor
+                                            (cons/1,
+                                              x2,
+                                              l)))),
+                                Tuple
+                                  (339,
+                                    Constructor
+                                      (339,
+                                        Node/0,
+                                        Constructor
+                                          (339,
+                                            Node/0,
+                                            Constructor
+                                              (339,
+                                                Empty/0),
+                                            Variable
+                                              (339,
+                                                x0/0),
+                                            Constructor
+                                              (339,
+                                                Empty/0),
+                                            Constant
+                                              (339,
+                                                Int(1))),
+                                        Variable
+                                          (339,
+                                            x1/0),
+                                        Constructor
+                                          (339,
+                                            Node/0,
+                                            Constructor
+                                              (339,
+                                                Empty/0),
+                                            Variable
+                                              (339,
+                                                x2/0),
+                                            Constructor
+                                              (339,
+                                                Empty/0),
+                                            Constant
+                                              (339,
+                                                Int(1))),
+                                        Constant
+                                          (339,
+                                            Int(2))),
+                                    Variable
+                                      (339,
+                                        l/0)));
+                              (Tuple
+                                (n,
+                                  l),
+                                LetVar
+                                  341
+                                  nl
+                                  =
+                                  Apply
+                                    (341,
+                                      Variable
+                                        (341,
+                                          Z.div/1),
+                                      [
+                                        Variable
+                                          (341,
+                                            n/0);
+                                        Constant
+                                          (341,
+                                            Int(2))
+                                      ])
+                                  in
+                                Match
+                                  (342,
+                                    Apply
+                                      (342,
+                                        Apply
+                                          (?,
+                                            Variable
+                                              (?,
+                                                sub_rec/0),
+                                            [
+                                              Variable
+                                                (?,
+                                                  counter/0)
+                                            ]),
+                                        [
+                                          Variable
+                                            (342,
+                                              nl/0);
+                                          Variable
+                                            (342,
+                                              l/0)
+                                        ]),
+                                    [
+                                      (Tuple
+                                        (left_,
+                                          l),
+                                        Match
+                                          (343,
+                                            Variable
+                                              (343,
+                                                l/0),
+                                            [
+                                              (Constructor
+                                                ([]/1),
+                                                Apply
+                                                  (344,
+                                                    Variable
+                                                      (344,
+                                                        OCaml.assert/1),
+                                                    [
+                                                      Constructor
+                                                        (344,
+                                                          false/1)
+                                                    ]));
+                                              (Constructor
+                                                (cons/1,
+                                                  mid,
+                                                  l),
+                                                Match
+                                                  (346,
+                                                    Apply
+                                                      (346,
+                                                        Apply
+                                                          (?,
+                                                            Variable
+                                                              (?,
+                                                                sub_rec/0),
+                                                            [
+                                                              Variable
+                                                                (?,
+                                                                  counter/0)
+                                                            ]),
+                                                        [
+                                                          Apply
+                                                            (346,
+                                                              Variable
+                                                                (346,
+                                                                  Z.sub/1),
+                                                              [
+                                                                Apply
+                                                                  (346,
+                                                                    Variable
+                                                                      (346,
+                                                                        Z.sub/1),
+                                                                    [
+                                                                      Variable
+                                                                        (346,
+                                                                          n/0);
+                                                                      Variable
+                                                                        (346,
+                                                                          nl/0)
+                                                                    ]);
+                                                                Constant
+                                                                  (346,
+                                                                    Int(1))
+                                                              ]);
+                                                          Variable
+                                                            (346,
+                                                              l/0)
+                                                        ]),
+                                                    [
+                                                      (Tuple
+                                                        (right_,
+                                                          l),
+                                                        Tuple
+                                                          (347,
+                                                            Apply
+                                                              (347,
+                                                                Variable
+                                                                  (347,
+                                                                    create/0),
+                                                                [
+                                                                  Variable
+                                                                    (347,
+                                                                      left_/0);
+                                                                  Variable
+                                                                    (347,
+                                                                      mid/0);
+                                                                  Variable
+                                                                    (347,
+                                                                      right_/0)
+                                                                ]),
+                                                            Variable
+                                                              (347,
+                                                                l/0)))
+                                                    ]))
+                                            ]))
+                                    ]))
+                            ]))
+                    ]))
+            ]) in
+        LetFun 334
+          (non_rec, @.,
+            [
+              ((sub, [ ],
+                [
+                  (n, Type (Z/1));
+                  (l,
+                    Type
+                      (list/1,
+                        Type
+                          (elt/0)))
+                ],
+                Some
+                  (Type (t/0) *
+                    Type
+                      (list/1,
+                        Type
+                          (elt/0)))),
+                Apply
+                  (?,
+                    Variable
+                      (?,
+                        sub_rec/0),
+                    [
+                      Apply
+                        (?,
+                          Variable
+                            (?,
+                              read_counter/1),
+                          [
+                            Tuple
+                              (?)
+                          ]);
+                      Variable
+                        (?,
+                          n/0);
+                      Variable
+                        (?,
+                          l/0)
+                    ]))
+            ]) in
+        Apply
+          (349, Variable (349, fst/1),
+            [
+              Apply
+                (349, Variable (349, sub/0),
+                  [
+                    Apply
+                      (349,
+                        Variable
+                          (349,
+                            OCaml.List.length/1),
+                        [
+                          Variable
+                            (349,
+                              l/0)
+                        ]);
+                    Variable
+                      (349,
+                        l/0)
+                  ])
+            ]))
+    ])

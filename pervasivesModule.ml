@@ -13,7 +13,7 @@ let env_with_effects : Effect.Type.t FullEnvi.t =
   let add_exn path base =
     add_exception_with_effects path base
       (Effect.Descriptor.Id.Ether (PathName.of_name path base)) in
-  FullEnvi.empty Effect.Type.leave_prefix (fun _ decls -> decls)
+  FullEnvi.empty Effect.Type.leave_prefix
   (* Values specific to the translation to Coq *)
   |> add_typ [] "nat"
   |> add_constructor [] "O"
