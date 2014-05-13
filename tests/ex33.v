@@ -31,29 +31,15 @@ Module Type IM2.
   
   Parameter m : Z.
   
-  Module N.
-    Parameter n : t.
-    
-    Parameter t : Type.
-  End N.
-  
-  Import N.
-  
-  Parameter b : N.t.
+  Parameter b : t.
 End IM2.
 
 Module M2.
   Definition null : Z * bool := (0, false).
   
-  Definition t := Z.
+  Definition t := bool.
   
   Definition m : Z := 12.
   
   Definition b : bool := false.
-  
-  Module N.
-    Definition t := bool.
-    
-    Definition n : Z := 14.
-  End N.
 End M2.
