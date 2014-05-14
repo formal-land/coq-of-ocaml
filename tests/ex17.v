@@ -5,6 +5,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Definition Outside := Effect.make unit unit.
+Extract Constant Outside => "Effect.Effect.Coq_make
+exception Outside of Obj.t".
 
 Definition raise_Outside {A : Type} (x : unit) : M [ Outside ] A :=
   fun s => (inr (inl x), s).
@@ -13,6 +15,8 @@ Definition f {A B : Type} (x : A) : M [ Outside ] B := raise_Outside tt.
 
 Module G.
   Definition Inside := Effect.make unit (Z * string).
+  Extract Constant Inside => "Effect.Effect.Coq_make
+  exception Inside of Obj.t".
   
   Definition raise_Inside {A : Type} (x : Z * string) : M [ Inside ] A :=
     fun s => (inr (inl x), s).

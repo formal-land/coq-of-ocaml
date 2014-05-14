@@ -9,8 +9,12 @@ class Test
     @source_file = source_file
   end
 
+  def base_name
+    File.basename(@source_file, '.ml')
+  end
+
   def extension(ext)
-    File.join(File.dirname(@source_file), File.basename(@source_file, '.ml') + ext)
+    File.join(File.dirname(@source_file), base_name + ext)
   end
 
   def compile
@@ -38,12 +42,30 @@ class Test
   end
 
   def coq_cmd
-    "coqc #{extension('.v')}"
+    "coqc #{extension('.v')} -R tests Tests"
   end
 
   def coq
     system("#{coq_cmd} 2>/dev/null")
-    $?.exitstatus == 0
+    return $?.exitstatus == 0
+  end
+
+  def extraction_cmd
+    "cd tests/extraction && coqc extract.v -R ../../OCaml OCaml -R .. Tests && ocamlbuild #{base_name}.byte && ./#{base_name}.byte"
+  end
+
+  def extraction
+    FileUtils.rm_rf(["tests/extraction"])
+    FileUtils.mkdir_p("tests/extraction")
+    File.open("tests/extraction/extract.v", "w") do |f|
+      f << <<-EOF
+Require Import Tests.#{base_name}.
+
+Recursive Extraction Library #{base_name}.
+      EOF
+    end
+    system("(#{extraction_cmd}) >/dev/null")
+    return $?.exitstatus == 0
   end
 end
 
@@ -83,6 +105,18 @@ class Tests
       puts test.coq_cmd
     end
   end
+
+  def extraction
+    puts "\e[1mCompiling and running the extracted programs:\e[0m"
+    for test in @tests do
+      if test.extraction
+        print " \e[1;32m✓\e[0m "
+      else
+        print " \e[31m✗\e[0m "
+      end
+      puts test.extraction_cmd
+    end
+  end
 end
 
 tests = Tests.new(Dir.glob('tests/ex*.ml'))
@@ -99,3 +133,5 @@ puts
 tests.check('v')
 puts
 tests.coq
+puts
+tests.extraction

@@ -21,3 +21,4 @@ smartPrint/*.monadise
 *.sublime-project
 *.sublime-workspace
 OCaml/Makefile
+tests/extraction

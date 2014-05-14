@@ -26,6 +26,10 @@ let update_env_with_effects (exn : t) (env : Effect.Type.t FullEnvi.t)
 let to_coq (exn : t) : SmartPrint.t =
   !^ "Definition" ^^ Name.to_coq exn.name ^^ !^ ":=" ^^
     !^ "Effect.make" ^^ !^ "unit" ^^ Type.to_coq true exn.typ ^-^ !^ "." ^^
+  newline ^^
+  !^ "Extract Constant" ^^ Name.to_coq exn.name ^^ !^ "=>" ^^ double_quotes (
+    !^ "Effect.Effect.Coq_make" ^^ newline ^^ !^ "exception" ^^
+    Name.to_coq exn.name ^^ !^ "of" ^^ !^ "Obj.t") ^-^ !^ "." ^^
   newline ^^ newline ^^
   !^ "Definition" ^^ Name.to_coq ("raise_" ^ exn.name) ^^ !^ "{A : Type}" ^^
     nest (parens (!^ "x" ^^ !^ ":" ^^ Type.to_coq false exn.typ)) ^^ !^ ":" ^^
