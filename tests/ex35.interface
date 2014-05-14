@@ -1,0 +1,8 @@
+{
+  "version": "1",
+  "content": [
+    "Interface",
+    "Ex35",
+    [ [ "Descriptor", "Fail" ], [ "Var", "Fail", [ [ "Fail" ] ] ], [ "Var", "div", [ [ "Fail" ] ] ] ]
+  ]
+}

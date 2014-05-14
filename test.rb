@@ -82,14 +82,18 @@ class Tests
     end
   end
 
+  def print_result(result)
+    if result
+      print " \e[1;32m✓\e[0m "
+    else
+      print " \e[31m✗\e[0m "
+    end
+  end
+
   def check(mode)
     puts "\e[1mChecking '-#{mode}':\e[0m"
     for test in @tests do
-      if test.check(mode)
-        print " \e[1;32m✓\e[0m "
-      else
-        print " \e[31m✗\e[0m "
-      end
+      print_result(test.check(mode))
       puts test.coq_of_ocaml_cmd(mode).join(" ")
     end
   end
@@ -97,11 +101,7 @@ class Tests
   def coq
     puts "\e[1mRunning coqc (compiles the reference files):\e[0m"
     for test in @tests do
-      if test.coq
-        print " \e[1;32m✓\e[0m "
-      else
-        print " \e[31m✗\e[0m "
-      end
+      print_result(test.coq)
       puts test.coq_cmd
     end
   end
@@ -109,11 +109,7 @@ class Tests
   def extraction
     puts "\e[1mCompiling and running the extracted programs:\e[0m"
     for test in @tests do
-      if test.extraction
-        print " \e[1;32m✓\e[0m "
-      else
-        print " \e[31m✗\e[0m "
-      end
+      print_result(test.extraction)
       puts test.extraction_cmd
     end
   end
