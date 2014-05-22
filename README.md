@@ -21,7 +21,7 @@ Go to `OCaml/` and run:
     make install
 
 ### The compiler
-Run:
+Go to the root folder and run:
 
     make
     make test
