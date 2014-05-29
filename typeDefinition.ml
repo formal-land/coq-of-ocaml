@@ -51,7 +51,8 @@ let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
     | Type_abstract ->
       (match typ.type_manifest with
       | Some typ -> Synonym (name, typ_args, Type.of_type_expr env loc typ)
-      | None -> Abstract (name, typ_args)))
+      | None -> Abstract (name, typ_args))
+      | Type_open -> Error.raise loc "Open type definition not handled.")
   | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."
 
 let update_env (def : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =

@@ -254,7 +254,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
         | Some e_x -> of_expression env typ_vars e_x
         | None -> Error.raise l "expected an argument") e_xs in
       Apply (l, e_f, e_xs))
-  | Texp_match (e, cases, _) ->
+  | Texp_match (e, cases, _, _) ->
     let e = of_expression env typ_vars e in
     let cases = cases |> List.map (fun {c_lhs = p; c_guard = g; c_rhs = e} ->
       if g <> None then Error.warn l "Guard on pattern ignored.";

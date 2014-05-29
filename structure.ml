@@ -86,7 +86,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let exn = Exception.of_ocaml env loc exn in
       let env = Exception.update_env exn env in
       (env, Exception (loc, exn))
-    | Tstr_open (_, path, _, _) ->
+    | Tstr_open { open_path = path } ->
       let o = Open.of_ocaml loc path in
       let env = Open.update_env o env in
       (env, Open (loc, o))
