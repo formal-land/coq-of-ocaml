@@ -3,7 +3,7 @@
 Compiler of OCaml to Coq. Still experimental. For more information look at the [Wiki](https://github.com/clarus/coq-of-ocaml/wiki).
 
 ## Dependencies
-This compiler needs a working installation of OCaml and Coq, both in the **trunk** version, plus the following packages:
+This compiler needs a working installation of OCaml 4.02 and Coq trunk, plus the following packages:
 * [SmartPrint](https://github.com/clarus/smart-print)
 * [YoJson](http://mjambon.com/yojson.html)
 
