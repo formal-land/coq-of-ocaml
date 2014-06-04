@@ -2,24 +2,31 @@
 
 Compiler of OCaml to Coq. Still experimental. For more information look at the [Wiki](https://github.com/clarus/coq-of-ocaml/wiki).
 
-## Dependencies
+## Install
+### Inside Docker
+Just run the `Dockerfile` with:
+
+    docker build .
+
+It will install all dependencies (can take time), compile CoqOfOCaml and run the tests. The resulting files will be in `/root/coq-of-ocaml/`.
+
+### Manually
 This compiler needs a working installation of OCaml 4.02 and Coq trunk, plus the following packages:
 * [SmartPrint](https://github.com/clarus/smart-print)
 * [YoJson](http://mjambon.com/yojson.html)
 
 These can be easily installed with [OPAM](http://opam.ocaml.org/).
 
-## Compile
 You have two parts to compile in order.
 
-### The Coq library
+#### The Coq library
 Go to `OCaml/` and run:
 
     ./configure.sh
     make
     make install
 
-### The compiler
+#### The compiler
 Go to the root folder and run:
 
     make
