@@ -242,7 +242,7 @@ Module Pervasives.
   
   (* TODO *)
   Definition string_of_int (n : Z) : string :=
-    "0".
+    "0" % string.
   
   (* TODO *)
   Definition int_of_string (s : string) : Z :=
@@ -302,7 +302,7 @@ Module Pervasives.
       match s with
       | ((stream_i, stream_o), _) =>
         match stream_i with
-        | FiniteStream.nil _ => (inl "" % string, s) (* We could raise an [End_of_file] exception. *)
+        | FiniteStream.nil => (inl "" % string, s) (* We could raise an [End_of_file] exception. *)
         | FiniteStream.cons message stream_i => (inl message, ((stream_i, stream_o), tt))
         end
       end.

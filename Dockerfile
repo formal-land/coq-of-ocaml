@@ -22,11 +22,13 @@ RUN ./configure
 RUN make all
 RUN make install
 
-# Coq trunk
+# Coq 8.4
 WORKDIR /root
 RUN git clone https://github.com/coq/coq.git
 WORKDIR /root/coq
-RUN yes "" |./configure -no-native-compiler
+RUN git checkout v8.4
+RUN sed -i 229d kernel/univ.ml
+RUN yes "" |./configure
 RUN make -j2
 RUN make install
 
