@@ -1,5 +1,5 @@
 FROM ubuntu
-MAINTAINER Guillaume Claret <dev@clarus.me>
+MAINTAINER Guillaume Claret
 
 RUN apt-get update
 RUN apt-get install -y gcc make git
@@ -27,7 +27,6 @@ WORKDIR /root
 RUN git clone https://github.com/coq/coq.git
 WORKDIR /root/coq
 RUN git checkout v8.4
-RUN sed -i 229d kernel/univ.ml
 RUN yes "" |./configure
 RUN make -j2
 RUN make install
