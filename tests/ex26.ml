@@ -13,17 +13,15 @@ let rec f_map2 f l =
 [@@free_rec]
 
 let n =
-  let rec sum l =
+  let rec sum_coq_rec l =
     match l with
     | [] -> 0
-    | x :: l -> x + sum l
-  [@@coq_rec] in
-  sum [1; 2; 3]
+    | x :: l -> x + sum_coq_rec l in
+  sum_coq_rec [1; 2; 3]
 
 let n2 _ =
   let rec sum l =
     match l with
     | [] -> 0
-    | x :: l -> x + sum l
-  [@@free_rec] in
+    | x :: l -> x + sum l in
   sum [1; 2; 3]

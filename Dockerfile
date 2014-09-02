@@ -48,7 +48,7 @@ RUN opam install -y yojson smart-print
 
 # Coq of OCaml
 WORKDIR /root
-#RUN git clone https://github.com/clarus/coq-of-ocaml.git
+RUN apt-get install -y ruby
 ADD . /root/coq-of-ocaml
 WORKDIR /root/coq-of-ocaml/OCaml
 RUN ./configure.sh
@@ -56,5 +56,4 @@ RUN make
 RUN make install
 WORKDIR /root/coq-of-ocaml
 RUN eval `opam config env`; make
-RUN apt-get install -y ruby
 RUN make test

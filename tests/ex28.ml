@@ -1,17 +1,15 @@
 (** Free type variables *)
 
 let map f l =
-  let rec map l =
+  let rec map_coq_rec l =
     match l with
     | [] -> []
-    | x :: l -> f x :: map l
-  [@@coq_rec] in
-  map l
+    | x :: l -> f x :: map_coq_rec l in
+  map_coq_rec l
 
 let map2 f l =
-  let rec map2 f l =
+  let rec map2_coq_rec f l =
     match l with
     | [] -> []
-    | x :: l -> f x :: map2 f l
-  [@@coq_rec] in
-  map2 f l
+    | x :: l -> f x :: map2_coq_rec f l in
+  map2_coq_rec f l

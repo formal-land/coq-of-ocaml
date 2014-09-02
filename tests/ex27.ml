@@ -329,7 +329,7 @@ let fast_sort = stable_sort
 module SortUniq = struct
   (** sorting + removing duplicates *)
   let rec rev_merge cmp l1 l2 accu =
-    let rec rev_merge_aux l2 accu =
+    let rec rev_merge_aux_coq_rec l2 accu =
       match l1, l2 with
       | [], l2 -> rev_append l2 accu
       | l1, [] -> rev_append l1 accu
@@ -338,9 +338,8 @@ module SortUniq = struct
           if c = 0 then rev_merge cmp t1 t2 (h1::accu)
           else if c < 0
           then rev_merge cmp t1 l2 (h1::accu)
-          else rev_merge_aux t2 (h2::accu)
-    [@@coq_rec] in
-    rev_merge_aux l2 accu
+          else rev_merge_aux_coq_rec t2 (h2::accu) in
+    rev_merge_aux_coq_rec l2 accu
   [@@coq_rec]
 
   let rec rev_merge_rev cmp l1 l2 accu =
