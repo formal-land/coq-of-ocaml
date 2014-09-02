@@ -48,7 +48,8 @@ RUN opam install -y yojson smart-print
 
 # Coq of OCaml
 WORKDIR /root
-RUN git clone https://github.com/clarus/coq-of-ocaml.git
+#RUN git clone https://github.com/clarus/coq-of-ocaml.git
+ADD . /root/coq-of-ocaml
 WORKDIR /root/coq-of-ocaml/OCaml
 RUN ./configure.sh
 RUN make
