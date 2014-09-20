@@ -327,9 +327,18 @@ and import_let_fun (env : unit FullEnvi.t) (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (is_rec : Asttypes.rec_flag)
   (cases : value_binding list) : unit FullEnvi.t * Loc.t t Definition.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
-  let attrs = cases |> List.map (fun { vb_attributes = attrs; vb_expr = e } ->
+  let attrs = cases |> List.map (fun { vb_attributes = attrs; vb_expr = e; vb_pat = p } ->
     let { exp_loc = loc } = e in
-    Attribute.of_attributes (Loc.of_location loc) attrs) in
+    let l = Loc.of_location loc in
+    Attribute.of_attributes l attrs) in
+    (*(* The attribute @coq_rec is added if the name finishes by "_coq_rec": *)
+    match Pattern.of_pattern env p with
+    | Pattern.Variable x ->
+      if Str.string_match (Str.regexp "_coq_rec$") x 0 then
+        Attribute.combine l attr Attribute.CoqRec
+      else
+        attr
+    | _ -> attr (* This branch should not be reached. *) in*)
   let attr = List.fold_left (Attribute.combine loc) Attribute.None attrs in
   let cases = cases |> List.map (fun { vb_pat = p; vb_expr = e } ->
     let loc = Loc.of_location p.pat_loc in

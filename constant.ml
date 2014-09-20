@@ -2,16 +2,16 @@
 open Asttypes
 open SmartPrint
 
+(** A constant can be an integer, a natural number (used for the non-termination monad) *)
 type t =
   | Int of int
-  | Nat of int
   | Char of char
   | String of string
 
+(** Pretty-print a constant. *)
 let pp (c : t) : SmartPrint.t =
   match c with
   | Int n -> !^ "Int" ^-^ parens (OCaml.int n)
-  | Nat n -> !^ "Nat" ^-^ parens (OCaml.int n)
   | Char c -> !^ "Char" ^-^ parens (OCaml.string (Char.escaped c))
   | String s -> !^ "String" ^-^ parens (OCaml.string s)
 
@@ -43,7 +43,6 @@ let rec to_coq (c : t) : SmartPrint.t =
       OCaml.int n
     else
       parens @@ OCaml.int n
-  | Nat n -> nest (to_coq (Int n) ^^ !^ "%" ^^ !^ "nat")
   | Char c ->
     let s =
       if Char.code c < 10 then

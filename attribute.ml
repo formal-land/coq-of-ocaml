@@ -1,5 +1,9 @@
+(** The attribute an OCaml programmer can use as hints for the compiler. *)
 open SmartPrint
 
+(** The attributes are:
+  - @coq_rec: to use the Coq's Fixpoint operator in recursions
+  - @free_rec: to use the non-termination monad in recursions (default behavior) *)
 type t =
   | None
   | CoqRec
@@ -14,6 +18,7 @@ let pp (attr : t) : SmartPrint.t =
 let warn_incompatible_attributes (loc : Loc.t) : unit =
   Error.warn loc "There cannot be both \"@coq_rec\" and \"@free_rec\" attributes."
 
+(** Import attributes from OCaml. *)
 let of_attributes (loc : Loc.t) (attrs : Typedtree.attributes) : t =
   let attrs : string list = List.map (fun attr -> (fst attr).Asttypes.txt) attrs in
   if List.mem "coq_rec" attrs && List.mem "free_rec" attrs then
@@ -25,6 +30,7 @@ let of_attributes (loc : Loc.t) (attrs : Typedtree.attributes) : t =
   else
     None
 
+(** Unify attributes. *)
 let combine (loc : Loc.t) (attr1 : t) (attr2 : t) : t =
   match (attr1, attr2) with
   | (None, _) -> attr2
