@@ -1,59 +1,45 @@
-FROM ubuntu
+FROM ubuntu:14.10
 MAINTAINER Guillaume Claret
 
 RUN apt-get update
 RUN apt-get install -y gcc make git
+RUN apt-get install -y curl m4 ruby
 
-# OCaml 4.02
+# OCaml
 WORKDIR /root
-RUN git clone https://github.com/ocaml/ocaml.git
-WORKDIR /root/ocaml
-RUN git checkout 4.02
+RUN curl -L https://github.com/ocaml/ocaml/archive/4.02.1.tar.gz |tar -xz
+WORKDIR ocaml-4.02.1
 RUN ./configure
 RUN make world.opt
 RUN make install
 
-# Camlp4 4.02
+# OPAM
 WORKDIR /root
-RUN git clone https://github.com/ocaml/camlp4.git
-WORKDIR /root/camlp4
-RUN git checkout 4.02
-RUN ./configure
-RUN make all
-RUN make install
-
-# Coq 8.4
-WORKDIR /root
-RUN git clone https://github.com/coq/coq.git
-WORKDIR /root/coq
-RUN git checkout v8.4
-RUN yes "" |./configure
-RUN make -j2
-RUN make install
-
-# Opam trunk
-WORKDIR /root
-RUN git clone https://github.com/ocaml/opam.git
-WORKDIR /root/opam
-RUN apt-get install -y wget
+RUN curl -L https://github.com/ocaml/opam/archive/1.2.0.tar.gz |tar -xz
+WORKDIR opam-1.2.0
 RUN ./configure
 RUN make lib-ext
 RUN make
 RUN make install
+
+# Initialize OPAM
 RUN opam init
+ENV OPAMJOBS 4
+
+# Coq
+RUN opam install -y coq
 
 # YoJson and SmartPrint
-RUN apt-get install -y m4
 RUN opam install -y yojson smart-print
 
-# Coq of OCaml
-WORKDIR /root
-RUN apt-get install -y ruby
+# CoqOfOCaml
 ADD . /root/coq-of-ocaml
-WORKDIR /root/coq-of-ocaml/OCaml
-RUN ./configure.sh
-RUN make
-RUN make install
 WORKDIR /root/coq-of-ocaml
+# Coq code
+WORKDIR OCaml
+RUN eval `opam config env`; ./configure.sh && make && make install
+# OCaml code
+WORKDIR ..
 RUN eval `opam config env`; make
-RUN make test
+# Tests
+RUN eval `opam config env`; make test
