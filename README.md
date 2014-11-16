@@ -1,5 +1,4 @@
-# CoqOfOCaml
-
+# ![Logo](https://raw.githubusercontent.com/clarus/coq-of-ocaml/master/logo.png) CoqOfOCaml
 Compiler of OCaml to Coq. Still experimental. For more information look at the [Wiki](https://github.com/clarus/coq-of-ocaml/wiki).
 
 ## Install
