@@ -1,4 +1,4 @@
-Require Import OCaml.OCaml.
+Require Import CoqOfOCaml.OCaml.
 
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
