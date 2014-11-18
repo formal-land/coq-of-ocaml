@@ -2,6 +2,15 @@
 Compiler of OCaml to Coq. Still experimental. For more information look at the [Wiki](https://github.com/clarus/coq-of-ocaml/wiki).
 
 ## Install
+### With OPAM
+Add the Coq's [unstable repository](https://github.com/coq/repo-unstable):
+
+    opam repo add coq-unstable https://github.com/coq/repo-unstable.git
+
+and run:
+
+    opam install coq:coq-of-ocaml
+
 ### With Docker
 Run the `Dockerfile` with:
 
