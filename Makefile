@@ -1,9 +1,9 @@
-OUTPUT = src/coqOfOCaml.native
+OUTPUT = coqOfOCaml.native
 TESTS_INPUT = $(wildcard tests/ex*.ml)
 TESTS_OUTPUT = $(TESTS_INPUT:.ml=.vo)
 
 default:
-	ocamlbuild $(OUTPUT) -lflags -I,+compiler-libs,ocamlcommon.cmxa -use-ocamlfind -package smart_print,compiler-libs,yojson,str
+	ocamlbuild src/$(OUTPUT) -lflags -I,+compiler-libs,ocamlcommon.cmxa -use-ocamlfind -package smart_print,compiler-libs,yojson,str
 
 clean:
 	ocamlbuild -clean

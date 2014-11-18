@@ -41,5 +41,3 @@ RUN eval `opam config env`; ./configure.sh && make && make install
 # OCaml code
 WORKDIR ..
 RUN eval `opam config env`; make
-# Tests
-RUN eval `opam config env`; make test
