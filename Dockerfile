@@ -36,7 +36,7 @@ RUN opam install -y yojson smart-print
 ADD . /root/coq-of-ocaml
 WORKDIR /root/coq-of-ocaml
 # Coq code
-WORKDIR OCaml
+WORKDIR CoqOfOCaml
 RUN eval `opam config env`; ./configure.sh && make && make install
 # OCaml code
 WORKDIR ..

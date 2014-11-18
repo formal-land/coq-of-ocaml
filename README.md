@@ -24,7 +24,7 @@ This compiler needs a working installation of OCaml 4.02 and Coq 8.4, plus the f
 You have two parts to compile in order:
 
 #### The Coq library
-Go to `OCaml/` and run:
+Go to `CoqOfOCaml/` and run:
 
     ./configure.sh
     make

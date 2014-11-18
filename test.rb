@@ -51,7 +51,7 @@ class Test
   end
 
   def extraction_cmd
-    "cd tests/extraction && coqc extract.v -R ../../OCaml OCaml -R .. Tests && ocamlbuild #{base_name}.byte && ./#{base_name}.byte"
+    "cd tests/extraction && coqc extract.v -R ../../CoqOfOCaml CoqOfOCaml -R .. Tests && ocamlbuild #{base_name}.byte && ./#{base_name}.byte"
   end
 
   def extraction

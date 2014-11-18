@@ -1,4 +1,5 @@
--R . OCaml
+-R . CoqOfOCaml
+
 Basics.v
 Effect.v
 Libraries.v
