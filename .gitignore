@@ -20,4 +20,5 @@ smartPrint/*.v
 smartPrint/*.monadise
 \#*\#
 CoqOfOCaml/Makefile
+CoqOfOCaml/Basics.v
 tests/extraction
