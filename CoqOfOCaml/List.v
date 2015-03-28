@@ -521,8 +521,7 @@ Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A) : list A.
     | inl l => l
     | inr _ => False_rect _ _
     end).
-  admit.
-Defined.
+Admitted.
 
 Definition sort {A : Type} : (A -> A -> Z) -> list A -> list A :=
   stable_sort.
