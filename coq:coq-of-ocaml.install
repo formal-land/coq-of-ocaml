@@ -3,5 +3,5 @@ bin: [
 ]
 
 share: [
-  "interfaces/list.interface"
+  "interfaces/list.interface" {"interfaces/list.interface"}
 ]
