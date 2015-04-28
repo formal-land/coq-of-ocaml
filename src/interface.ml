@@ -147,7 +147,9 @@ let of_json_string (json : string) : t =
 let of_file (file_name : string) : t =
   let file =
     try open_in_bin file_name with
-    | Sys_error _ -> open_in_bin (Sys.executable_name ^ "/../../share/coq:coq-of-ocaml/" ^ file_name) in
+    | Sys_error _ ->
+      open_in_bin (Filename.dirname Sys.executable_name ^
+        "/../../share/coq:coq-of-ocaml/" ^ file_name) in
   let size = in_channel_length file in
   let content = String.make size ' ' in
   really_input file content 0 size;
