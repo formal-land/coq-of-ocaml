@@ -145,7 +145,9 @@ let of_json_string (json : string) : t =
   | _ -> raise (Error.Json "Expected an object.")
 
 let of_file (file_name : string) : t =
-  let file = open_in_bin file_name in
+  let file =
+    try open_in_bin file_name with
+    | Sys_error _ -> open_in_bin ("../share/coq:coq-of-ocaml/" ^ file_name) in
   let size = in_channel_length file in
   let content = String.make size ' ' in
   really_input file content 0 size;
