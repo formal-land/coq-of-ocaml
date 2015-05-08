@@ -1,4 +1,6 @@
 # ![Logo](https://raw.githubusercontent.com/clarus/icons/master/abc-48.png) CoqOfOCaml
+
+[![Join the chat at https://gitter.im/clarus/coq-of-ocaml](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/clarus/coq-of-ocaml?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Compiler of OCaml to Coq. Still experimental. For more information look at the [Wiki](https://github.com/clarus/coq-of-ocaml/wiki).
 
 ## Install
