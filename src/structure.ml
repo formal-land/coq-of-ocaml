@@ -103,11 +103,23 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
     | Tstr_modtype _ -> Error.raise loc "Signatures not handled."
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
       Error.raise loc "Functors not handled."
-    | _ -> Error.raise loc "Structure item not handled." in
+    | Tstr_module _ -> Error.raise loc "This kind of module is not handled."
+    | Tstr_eval _ -> Error.raise loc "Structure item `eval` not handled."
+    | Tstr_primitive _ -> Error.raise loc "Structure item `primitive` not handled."
+    | Tstr_typext _ -> Error.raise loc "Structure item `typext` not handled."
+    | Tstr_recmodule _ -> Error.raise loc "Structure item `recmodule` not handled."
+    | Tstr_class _ -> Error.raise loc "Structure item `class` not handled."
+    | Tstr_class_type _ -> Error.raise loc "Structure item `class_type` not handled."
+    | Tstr_include _ -> Error.raise loc "Structure item `include` not handled."
+    | Tstr_attribute _ -> Error.raise loc "Structure item `attribute` not handled." in
   let (env, defs) =
     List.fold_left (fun (env, defs) item ->
-      let (env, def) = of_structure_item env item in
-      (env, def :: defs))
+      (* We ignore attribute items. *)
+      match item.str_desc with
+      | Tstr_attribute _ -> (env, defs)
+      | _ ->
+        let (env, def) = of_structure_item env item in
+        (env, def :: defs))
     (env, []) structure.str_items in
   (env, List.rev defs)
 
