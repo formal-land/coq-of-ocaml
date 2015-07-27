@@ -5,7 +5,7 @@ Compiler of OCaml to Coq. Still experimental. For more information look at the [
 
 ## Install
 ### With OPAM
-Add the Coq's reposiytory:
+Add the [Coq repository](http://coq.io/opam/):
 
     opam repo add coq-released https://coq.inria.fr/opam/released
 
