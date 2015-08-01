@@ -12,13 +12,12 @@ let rec f_map2 f l =
   | x :: l -> f x :: f_map2 f l
 [@@free_rec]
 
-(* TODO: support coq recursion attribute inside lets *)
-(*let n =
+let n =
   let rec sum_coq_rec l =
     match l with
     | [] -> 0
     | x :: l -> x + sum_coq_rec l in
-  sum_coq_rec [1; 2; 3]*)
+  sum_coq_rec [1; 2; 3]
 
 let n2 _ =
   let rec sum l =

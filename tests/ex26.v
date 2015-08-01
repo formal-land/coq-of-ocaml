@@ -29,12 +29,12 @@ Definition f_map2 {A B : Type} (f : A -> B) (l : list A)
   lift [_;_] "01" (f_map2_rec x f l).
 
 Definition n : Z :=
-  let fix sum (l : list Z) : Z :=
+  let fix sum_coq_rec (l : list Z) : Z :=
     match l with
     | [] => 0
-    | cons x l => Z.add x (sum l)
+    | cons x l => Z.add x (sum_coq_rec l)
     end in
-  sum (cons 1 (cons 2 (cons 3 []))).
+  sum_coq_rec (cons 1 (cons 2 (cons 3 []))).
 
 Definition n2 {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
   match x with

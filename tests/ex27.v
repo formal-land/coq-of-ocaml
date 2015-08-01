@@ -30,7 +30,7 @@ Definition nth {A : Type} (l : list A) (n : Z)
     lift [_;_] "01" (OCaml.Pervasives.invalid_arg "List.nth" % string)
   else
     lift [_;_] "10"
-      (let fix nth_aux {B : Type} (l : list B) (n : Z)
+      (let fix nth_aux_coq_rec {B : Type} (l : list B) (n : Z)
         : M [ OCaml.Failure ] B :=
         match l with
         | [] => OCaml.Pervasives.failwith "nth" % string
@@ -38,9 +38,9 @@ Definition nth {A : Type} (l : list A) (n : Z)
           if equiv_decb n 0 then
             ret a
           else
-            nth_aux l (Z.sub n 1)
+            nth_aux_coq_rec l (Z.sub n 1)
         end in
-      nth_aux l n).
+      nth_aux_coq_rec l n).
 
 Definition append {A : Type} : (list A) -> (list A) -> list A :=
   OCaml.Pervasives.app.
@@ -82,12 +82,12 @@ Definition mapi {A B : Type} (f : Z -> A -> B) (l : list A) : list B :=
   mapi_aux 0 f l.
 
 Definition rev_map {A B : Type} (f : A -> B) (l : list A) : list B :=
-  let fix rmap_f (accu : list B) (x : list A) : list B :=
+  let fix rmap_f_coq_rec (accu : list B) (x : list A) : list B :=
     match x with
     | [] => accu
-    | cons a l => rmap_f (cons (f a) accu) l
+    | cons a l => rmap_f_coq_rec (cons (f a) accu) l
     end in
-  rmap_f [] l.
+  rmap_f_coq_rec [] l.
 
 Fixpoint iter {A B : Type} (f : A -> B) (x : list A) : unit :=
   match x with
@@ -130,14 +130,14 @@ Fixpoint map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
 
 Definition rev_map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
   : M [ OCaml.Invalid_argument ] (list C) :=
-  let fix rmap2_f (accu : list C) (l1 : list A) (l2 : list B)
+  let fix rmap2_f_coq_rec (accu : list C) (l1 : list A) (l2 : list B)
     : M [ OCaml.Invalid_argument ] (list C) :=
     match (l1, l2) with
     | ([], []) => ret accu
-    | (cons a1 l1, cons a2 l2) => rmap2_f (cons (f a1 a2) accu) l1 l2
+    | (cons a1 l1, cons a2 l2) => rmap2_f_coq_rec (cons (f a1 a2) accu) l1 l2
     | (_, _) => OCaml.Pervasives.invalid_arg "List.rev_map2" % string
     end in
-  rmap2_f [] l1 l2.
+  rmap2_f_coq_rec [] l1 l2.
 
 Fixpoint iter2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
   : M [ OCaml.Invalid_argument ] unit :=
@@ -211,32 +211,32 @@ Fixpoint find {A : Type} (p : A -> bool) (x : list A)
   end.
 
 Definition find_all {A : Type} (p : A -> bool) : (list A) -> list A :=
-  let fix find (accu : list A) (x : list A) : list A :=
+  let fix find_coq_rec (accu : list A) (x : list A) : list A :=
     match x with
     | [] => rev accu
     | cons x l =>
       if p x then
-        find (cons x accu) l
+        find_coq_rec (cons x accu) l
       else
-        find accu l
+        find_coq_rec accu l
     end in
-  find [].
+  find_coq_rec [].
 
 Definition filter {A : Type} : (A -> bool) -> (list A) -> list A := find_all.
 
 Definition partition {A : Type} (p : A -> bool) (l : list A)
   : (list A) * (list A) :=
-  let fix part (yes : list A) (no : list A) (x : list A)
+  let fix part_coq_rec (yes : list A) (no : list A) (x : list A)
     : (list A) * (list A) :=
     match x with
     | [] => ((rev yes), (rev no))
     | cons x l =>
       if p x then
-        part (cons x yes) no l
+        part_coq_rec (cons x yes) no l
       else
-        part yes (cons x no) l
+        part_coq_rec yes (cons x no) l
     end in
-  part [] [] l.
+  part_coq_rec [] [] l.
 
 Fixpoint split {A B : Type} (x : list (A * B)) : (list A) * (list B) :=
   match x with
@@ -259,7 +259,7 @@ Fixpoint combine {A B : Type} (l1 : list A) (l2 : list B)
 
 Fixpoint merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
   : list A :=
-  let fix merge_aux (l2 : list A) : list A :=
+  let fix rev_merge_aux_coq_rec (l2 : list A) : list A :=
     match (l1, l2) with
     | ([], l2) => l2
     | (l1, []) => l1
@@ -267,9 +267,9 @@ Fixpoint merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
       if OCaml.Pervasives.le (cmp h1 h2) 0 then
         cons h1 (merge cmp t1 l2)
       else
-        cons h2 (merge_aux t2)
+        cons h2 (rev_merge_aux_coq_rec t2)
     end in
-  merge_aux l2.
+  rev_merge_aux_coq_rec l2.
 
 Fixpoint chop {A : Type} (k : Z) (l : list A)
   : M [ OCaml.Assert_failure ] (list A) :=
@@ -284,7 +284,7 @@ Fixpoint chop {A : Type} (k : Z) (l : list A)
 Module StableSort.
   Fixpoint rev_merge {A : Type}
     (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
-    let fix rev_merge_aux (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_aux_coq_rec (l2 : list A) (accu : list A) : list A :=
       match (l1, l2) with
       | ([], l2) => rev_append l2 accu
       | (l1, []) => rev_append l1 accu
@@ -292,13 +292,13 @@ Module StableSort.
         if OCaml.Pervasives.le (cmp h1 h2) 0 then
           rev_merge cmp t1 l2 (cons h1 accu)
         else
-          rev_merge_aux t2 (cons h2 accu)
+          rev_merge_aux_coq_rec t2 (cons h2 accu)
       end in
-    rev_merge_aux l2 accu.
+    rev_merge_aux_coq_rec l2 accu.
   
   Fixpoint rev_merge_rev {A : Type}
     (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
-    let fix rev_merge_rev_aux (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_rev_aux_coq_rec (l2 : list A) (accu : list A) : list A :=
       match (l1, l2) with
       | ([], l2) => rev_append l2 accu
       | (l1, []) => rev_append l1 accu
@@ -306,9 +306,9 @@ Module StableSort.
         if OCaml.Pervasives.gt (cmp h1 h2) 0 then
           rev_merge_rev cmp t1 l2 (cons h1 accu)
         else
-          rev_merge_rev_aux t2 (cons h2 accu)
+          rev_merge_rev_aux_coq_rec t2 (cons h2 accu)
       end in
-    rev_merge_rev_aux l2 accu.
+    rev_merge_rev_aux_coq_rec l2 accu.
   
   Fixpoint sort_rec {A : Type}
     (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
@@ -424,7 +424,7 @@ Definition fast_sort {A : Type}
 Module SortUniq.
   Fixpoint rev_merge {A : Type}
     (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
-    let fix rev_merge_aux (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_aux_coq_rec (l2 : list A) (accu : list A) : list A :=
       match (l1, l2) with
       | ([], l2) => rev_append l2 accu
       | (l1, []) => rev_append l1 accu
@@ -436,13 +436,13 @@ Module SortUniq.
           if OCaml.Pervasives.lt c 0 then
             rev_merge cmp t1 l2 (cons h1 accu)
           else
-            rev_merge_aux t2 (cons h2 accu)
+            rev_merge_aux_coq_rec t2 (cons h2 accu)
       end in
-    rev_merge_aux l2 accu.
+    rev_merge_aux_coq_rec l2 accu.
   
   Fixpoint rev_merge_rev {A : Type}
     (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
-    let fix rev_merge_rev_aux (l2 : list A) (accu : list A) : list A :=
+    let fix rev_merge_rev_aux_coq_rec (l2 : list A) (accu : list A) : list A :=
       match (l1, l2) with
       | ([], l2) => rev_append l2 accu
       | (l1, []) => rev_append l1 accu
@@ -454,9 +454,9 @@ Module SortUniq.
           if OCaml.Pervasives.gt c 0 then
             rev_merge_rev cmp t1 l2 (cons h1 accu)
           else
-            rev_merge_rev_aux t2 (cons h2 accu)
+            rev_merge_rev_aux_coq_rec t2 (cons h2 accu)
       end in
-    rev_merge_rev_aux l2 accu.
+    rev_merge_rev_aux_coq_rec l2 accu.
   
   Fixpoint sort_rec {A : Type}
     (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)

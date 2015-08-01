@@ -30,12 +30,11 @@ let tl = function
 
 let nth l n =
   if n < 0 then invalid_arg "List.nth" else
-  let rec nth_aux l n =
+  let rec nth_aux_coq_rec l n =
     match l with
     | [] -> failwith "nth"
-    | a::l -> if n = 0 then a else nth_aux l (n-1)
-  [@@coq_rec]
-  in nth_aux l n
+    | a::l -> if n = 0 then a else nth_aux_coq_rec l (n-1)
+  in nth_aux_coq_rec l n
 
 let append = (@)
 
@@ -67,11 +66,10 @@ let rec mapi_aux i f = function
 let mapi f l = mapi_aux 0 f l
 
 let rev_map f l =
-  let rec rmap_f accu = function
+  let rec rmap_f_coq_rec accu = function
     | [] -> accu
-    | a::l -> rmap_f (f a :: accu) l
-  [@@coq_rec] in
-  rmap_f [] l
+    | a::l -> rmap_f_coq_rec (f a :: accu) l in
+  rmap_f_coq_rec [] l
 
 let rec iter f = function
     [] -> ()
@@ -105,13 +103,12 @@ let rec map2 f l1 l2 =
 [@@coq_rec]
 
 let rev_map2 f l1 l2 =
-  let rec rmap2_f accu l1 l2 =
+  let rec rmap2_f_coq_rec accu l1 l2 =
     match (l1, l2) with
     | ([], []) -> accu
-    | (a1::l1, a2::l2) -> rmap2_f (f a1 a2 :: accu) l1 l2
-    | (_, _) -> invalid_arg "List.rev_map2"
-  [@@coq_rec] in
-  rmap2_f [] l1 l2
+    | (a1::l1, a2::l2) -> rmap2_f_coq_rec (f a1 a2 :: accu) l1 l2
+    | (_, _) -> invalid_arg "List.rev_map2" in
+  rmap2_f_coq_rec [] l1 l2
 
 let rec iter2 f l1 l2 =
   match (l1, l2) with
@@ -197,20 +194,22 @@ let rec find p = function
 [@@coq_rec]
 
 let find_all p =
-  let rec find accu = function
+  let rec find_coq_rec accu = function
   | [] -> rev accu
-  | x :: l -> if p x then find (x :: accu) l else find accu l
-  [@@coq_rec] in
-  find []
+  | x :: l -> if p x then find_coq_rec (x :: accu) l else find_coq_rec accu l in
+  find_coq_rec []
 
 let filter = find_all
 
 let partition p l =
-  let rec part yes no = function
+  let rec part_coq_rec yes no = function
   | [] -> (rev yes, rev no)
-  | x :: l -> if p x then part (x :: yes) no l else part yes (x :: no) l
-  [@@coq_rec] in
-  part [] [] l
+  | x :: l ->
+    if p x then
+      part_coq_rec (x :: yes) no l
+    else
+      part_coq_rec yes (x :: no) l in
+  part_coq_rec [] [] l
 
 let rec split = function
     [] -> ([], [])
@@ -227,16 +226,15 @@ let rec combine l1 l2 =
 
 (** sorting *)
 let rec merge cmp l1 l2 =
-  let rec merge_aux l2 =
+  let rec rev_merge_aux_coq_rec l2 =
     match l1, l2 with
     | [], l2 -> l2
     | l1, [] -> l1
     | h1 :: t1, h2 :: t2 ->
         if cmp h1 h2 <= 0
         then h1 :: merge cmp t1 l2
-        else h2 :: merge_aux t2
-  [@@coq_rec] in
-  merge_aux l2
+        else h2 :: rev_merge_aux_coq_rec t2 in
+  rev_merge_aux_coq_rec l2
 [@@coq_rec]
 
 let rec chop k l =
@@ -249,29 +247,27 @@ let rec chop k l =
 
 module StableSort = struct
   let rec rev_merge cmp l1 l2 accu =
-    let rec rev_merge_aux l2 accu =
+    let rec rev_merge_aux_coq_rec l2 accu =
       match l1, l2 with
       | [], l2 -> rev_append l2 accu
       | l1, [] -> rev_append l1 accu
       | h1::t1, h2::t2 ->
           if cmp h1 h2 <= 0
           then rev_merge cmp t1 l2 (h1::accu)
-          else rev_merge_aux t2 (h2::accu)
-    [@@coq_rec] in
-    rev_merge_aux l2 accu
+          else rev_merge_aux_coq_rec t2 (h2::accu) in
+    rev_merge_aux_coq_rec l2 accu
   [@@coq_rec]
 
   let rec rev_merge_rev cmp l1 l2 accu =
-    let rec rev_merge_rev_aux l2 accu =
+    let rec rev_merge_rev_aux_coq_rec l2 accu =
       match l1, l2 with
       | [], l2 -> rev_append l2 accu
       | l1, [] -> rev_append l1 accu
       | h1::t1, h2::t2 ->
           if cmp h1 h2 > 0
           then rev_merge_rev cmp t1 l2 (h1::accu)
-          else rev_merge_rev_aux t2 (h2::accu)
-    [@@coq_rec] in
-    rev_merge_rev_aux l2 accu
+          else rev_merge_rev_aux_coq_rec t2 (h2::accu) in
+    rev_merge_rev_aux_coq_rec l2 accu
   [@@coq_rec]
 
   let rec sort cmp n l =
@@ -343,7 +339,7 @@ module SortUniq = struct
   [@@coq_rec]
 
   let rec rev_merge_rev cmp l1 l2 accu =
-    let rec rev_merge_rev_aux l2 accu =
+    let rec rev_merge_rev_aux_coq_rec l2 accu =
       match l1, l2 with
       | [], l2 -> rev_append l2 accu
       | l1, [] -> rev_append l1 accu
@@ -352,9 +348,8 @@ module SortUniq = struct
           if c = 0 then rev_merge_rev cmp t1 t2 (h1::accu)
           else if c > 0
           then rev_merge_rev cmp t1 l2 (h1::accu)
-          else rev_merge_rev_aux t2 (h2::accu)
-    [@@coq_rec] in
-    rev_merge_rev_aux l2 accu
+          else rev_merge_rev_aux_coq_rec t2 (h2::accu) in
+    rev_merge_rev_aux_coq_rec l2 accu
   [@@coq_rec]
 
   let rec sort cmp n l =
