@@ -19,6 +19,6 @@ _build/
 smartPrint/*.v
 smartPrint/*.monadise
 \#*\#
-CoqOfOCaml/Makefile
-CoqOfOCaml/Basics.v
+OCaml/Makefile
+OCaml/Basics.v
 tests/extraction
