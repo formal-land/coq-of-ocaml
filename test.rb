@@ -72,6 +72,8 @@ end
 class Tests
   def initialize(source_files)
     @tests = source_files.sort.map {|source_file| Test.new(source_file) }
+    @valid_tests = 0
+    @invalid_tests = 0
   end
 
   def compile
@@ -84,8 +86,10 @@ class Tests
 
   def print_result(result)
     if result
+      @valid_tests += 1
       print " \e[1;32m✓\e[0m "
     else
+      @invalid_tests += 1
       print " \e[31m✗\e[0m "
     end
   end
@@ -113,6 +117,11 @@ class Tests
       puts test.extraction_cmd
     end
   end
+
+  def print_summary
+    puts
+    puts "Total: #{@valid_tests} / #{@valid_tests + @invalid_tests}."
+  end
 end
 
 tests = Tests.new(Dir.glob('tests/ex*.ml'))
@@ -131,3 +140,4 @@ puts
 tests.coq
 puts
 tests.extraction
+tests.print_summary
