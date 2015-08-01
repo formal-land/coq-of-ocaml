@@ -7,7 +7,7 @@ Value
         LetFun 4
           (rec, @coq_rec,
             [
-              ((map, [ ], [ (l, Type (list/1, A)) ],
+              ((map_coq_rec, [ ], [ (l, Type (list/1, A)) ],
                 Some Type (list/1, B)),
                 Match
                   (5, Variable (5, l/0),
@@ -38,7 +38,7 @@ Value
                               (7,
                                 Variable
                                   (7,
-                                    map/0),
+                                    map_coq_rec/0),
                                 [
                                   Variable
                                     (7,
@@ -46,65 +46,65 @@ Value
                                 ])))
                     ]))
             ]) in
-        Apply (9, Variable (9, map/0), [ Variable (9, l/0) ]))
+        Apply (8, Variable (8, map_coq_rec/0), [ Variable (8, l/0) ]))
     ])
 
-11
+10
 Value
   (non_rec, @.,
     [
       ((map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
         Some Type (list/1, B)),
-        LetFun 12
+        LetFun 11
           (rec, @coq_rec,
             [
-              ((map2, [ C; D ],
+              ((map2_coq_rec, [ C; D ],
                 [ (f, (C -> D)); (l, Type (list/1, C)) ],
                 Some Type (list/1, D)),
                 Match
-                  (13,
+                  (12,
                     Variable
-                      (13,
+                      (12,
                         l/0),
                     [
                       (Constructor
                         ([]/1),
                         Constructor
-                          (14,
+                          (13,
                             []/1));
                       (Constructor
                         (cons/1,
                           x,
                           l),
                         Constructor
-                          (15,
+                          (14,
                             cons/1,
                             Apply
-                              (15,
+                              (14,
                                 Variable
-                                  (15,
+                                  (14,
                                     f/0),
                                 [
                                   Variable
-                                    (15,
+                                    (14,
                                       x/0)
                                 ]),
                             Apply
-                              (15,
+                              (14,
                                 Variable
-                                  (15,
-                                    map2/0),
+                                  (14,
+                                    map2_coq_rec/0),
                                 [
                                   Variable
-                                    (15,
+                                    (14,
                                       f/0);
                                   Variable
-                                    (15,
+                                    (14,
                                       l/0)
                                 ])))
                     ]))
             ]) in
         Apply
-          (17, Variable (17, map2/0),
-            [ Variable (17, f/0); Variable (17, l/0) ]))
+          (15, Variable (15, map2_coq_rec/0),
+            [ Variable (15, f/0); Variable (15, l/0) ]))
     ])

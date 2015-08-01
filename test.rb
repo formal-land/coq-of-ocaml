@@ -118,16 +118,16 @@ end
 tests = Tests.new(Dir.glob('tests/ex*.ml'))
 tests.compile
 puts
-# tests.check('exp')
-# puts
-# tests.check('effects')
-# puts
-# tests.check('monadise')
-# puts
-# tests.check('interface')
-# puts
+tests.check('exp')
+puts
+tests.check('effects')
+puts
+tests.check('monadise')
+puts
+tests.check('interface')
+puts
 tests.check('v')
-# puts
-# tests.coq
-# puts
-# tests.extraction
+puts
+tests.coq
+puts
+tests.extraction

@@ -277,7 +277,7 @@ Value
         LetFun (16, Effect ([ ], .))
           (rec, @coq_rec,
             [
-              ((sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
+              ((sum_coq_rec, [ ], [ (l, Type (list/1, Type (Z/1))) ],
                 Some Type (Z/1)),
                 Match
                   ((17, Effect ([ ], .)),
@@ -337,7 +337,7 @@ Value
                                           .
                                             ->
                                             .)),
-                                      sum/0),
+                                      sum_coq_rec/0),
                                   [
                                     Variable
                                       ((19,
@@ -351,48 +351,48 @@ Value
                     ]))
             ]) in
         Apply
-          ((21, Effect ([ ], .)),
-            Variable ((21, Effect ([ ], . -> .)), sum/0),
+          ((20, Effect ([ ], .)),
+            Variable ((20, Effect ([ ], . -> .)), sum_coq_rec/0),
             [
               Constructor
-                ((21, Effect ([ ], .)), cons/1,
+                ((20, Effect ([ ], .)), cons/1,
                   Constant
-                    ((21,
+                    ((20,
                       Effect
                         ([
                         ],
                           .)),
                       Int(1)),
                   Constructor
-                    ((21,
+                    ((20,
                       Effect
                         ([
                         ],
                           .)),
                       cons/1,
                       Constant
-                        ((21,
+                        ((20,
                           Effect
                             ([
                             ],
                               .)),
                           Int(2)),
                       Constructor
-                        ((21,
+                        ((20,
                           Effect
                             ([
                             ],
                               .)),
                           cons/1,
                           Constant
-                            ((21,
+                            ((20,
                               Effect
                                 ([
                                 ],
                                   .)),
                               Int(3)),
                           Constructor
-                            ((21,
+                            ((20,
                               Effect
                                 ([
                                 ],
@@ -401,7 +401,7 @@ Value
             ]))
     ])
 
-23
+22
 Value
   (non_rec, @.,
     [
@@ -412,14 +412,14 @@ Value
             [
               (Any,
                 LetFun
-                  (24,
+                  (23,
                     Effect
                       ([
                         Counter/1;
                         NonTermination/1
                       ],
                         .))
-                  (rec, @free_rec,
+                  (rec, @.,
                     [
                       ((sum_rec,
                         [
@@ -484,14 +484,14 @@ Value
                                 (S/1,
                                   counter),
                                 Match
-                                  ((25,
+                                  ((24,
                                     Effect
                                       ([
                                         NonTermination/1
                                       ],
                                         .)),
                                     Variable
-                                      ((25,
+                                      ((24,
                                         Effect
                                           ([
                                           ],
@@ -501,7 +501,7 @@ Value
                                       (Constructor
                                         ([]/1),
                                         Constant
-                                          ((26,
+                                          ((25,
                                             Effect
                                               ([
                                               ],
@@ -512,14 +512,14 @@ Value
                                           x,
                                           l),
                                         Apply
-                                          ((27,
+                                          ((26,
                                             Effect
                                               ([
                                                 NonTermination/1
                                               ],
                                                 .)),
                                             Variable
-                                              ((27,
+                                              ((26,
                                                 Effect
                                                   ([
                                                   ],
@@ -527,14 +527,14 @@ Value
                                                 Z.add/1),
                                             [
                                               Variable
-                                                ((27,
+                                                ((26,
                                                   Effect
                                                     ([
                                                     ],
                                                       .)),
                                                   x/0);
                                               Apply
-                                                ((27,
+                                                ((26,
                                                   Effect
                                                     ([
                                                       NonTermination/1
@@ -574,7 +574,7 @@ Value
                                                       ]),
                                                   [
                                                     Variable
-                                                      ((27,
+                                                      ((26,
                                                         Effect
                                                           ([
                                                           ],
@@ -587,7 +587,7 @@ Value
                     ])
                   in
                 LetFun
-                  (24,
+                  (23,
                     Effect
                       ([
                         Counter/1;
@@ -668,7 +668,7 @@ Value
                     ])
                   in
                 Apply
-                  ((29,
+                  ((27,
                     Effect
                       ([
                         Counter/1;
@@ -676,7 +676,7 @@ Value
                       ],
                         .)),
                     Variable
-                      ((29,
+                      ((27,
                         Effect
                           ([
                           ],
@@ -689,49 +689,49 @@ Value
                         sum/0),
                     [
                       Constructor
-                        ((29,
+                        ((27,
                           Effect
                             ([
                             ],
                               .)),
                           cons/1,
                           Constant
-                            ((29,
+                            ((27,
                               Effect
                                 ([
                                 ],
                                   .)),
                               Int(1)),
                           Constructor
-                            ((29,
+                            ((27,
                               Effect
                                 ([
                                 ],
                                   .)),
                               cons/1,
                               Constant
-                                ((29,
+                                ((27,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   Int(2)),
                               Constructor
-                                ((29,
+                                ((27,
                                   Effect
                                     ([
                                     ],
                                       .)),
                                   cons/1,
                                   Constant
-                                    ((29,
+                                    ((27,
                                       Effect
                                         ([
                                         ],
                                           .)),
                                       Int(3)),
                                   Constructor
-                                    ((29,
+                                    ((27,
                                       Effect
                                         ([
                                         ],

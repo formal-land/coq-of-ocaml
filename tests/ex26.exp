@@ -133,7 +133,7 @@ Value
         LetFun 16
           (rec, @coq_rec,
             [
-              ((sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
+              ((sum_coq_rec, [ ], [ (l, Type (list/1, Type (Z/1))) ],
                 Some Type (Z/1)),
                 Match
                   (17,
@@ -163,7 +163,7 @@ Value
                                 (19,
                                   Variable
                                     (19,
-                                      sum/0),
+                                      sum_coq_rec/0),
                                   [
                                     Variable
                                       (19,
@@ -173,29 +173,29 @@ Value
                     ]))
             ]) in
         Apply
-          (21, Variable (21, sum/0),
+          (20, Variable (20, sum_coq_rec/0),
             [
               Constructor
-                (21, cons/1, Constant (21, Int(1)),
+                (20, cons/1, Constant (20, Int(1)),
                   Constructor
-                    (21,
+                    (20,
                       cons/1,
                       Constant
-                        (21,
+                        (20,
                           Int(2)),
                       Constructor
-                        (21,
+                        (20,
                           cons/1,
                           Constant
-                            (21,
+                            (20,
                               Int(3)),
                           Constructor
-                            (21,
+                            (20,
                               []/1))))
             ]))
     ])
 
-23
+22
 Value
   (non_rec, @.,
     [
@@ -204,8 +204,8 @@ Value
           (?, Variable (?, x/0),
             [
               (Any,
-                LetFun 24
-                  (rec, @free_rec,
+                LetFun 23
+                  (rec, @.,
                     [
                       ((sum_rec,
                         [
@@ -244,31 +244,31 @@ Value
                                 (S/1,
                                   counter),
                                 Match
-                                  (25,
+                                  (24,
                                     Variable
-                                      (25,
+                                      (24,
                                         l/0),
                                     [
                                       (Constructor
                                         ([]/1),
                                         Constant
-                                          (26,
+                                          (25,
                                             Int(0)));
                                       (Constructor
                                         (cons/1,
                                           x,
                                           l),
                                         Apply
-                                          (27,
+                                          (26,
                                             Variable
-                                              (27,
+                                              (26,
                                                 Z.add/1),
                                             [
                                               Variable
-                                                (27,
+                                                (26,
                                                   x/0);
                                               Apply
-                                                (27,
+                                                (26,
                                                   Apply
                                                     (?,
                                                       Variable
@@ -281,7 +281,7 @@ Value
                                                       ]),
                                                   [
                                                     Variable
-                                                      (27,
+                                                      (26,
                                                         l/0)
                                                   ])
                                             ]))
@@ -289,7 +289,7 @@ Value
                             ]))
                     ])
                   in
-                LetFun 24
+                LetFun 23
                   (non_rec, @.,
                     [
                       ((sum,
@@ -327,31 +327,31 @@ Value
                     ])
                   in
                 Apply
-                  (29,
+                  (27,
                     Variable
-                      (29,
+                      (27,
                         sum/0),
                     [
                       Constructor
-                        (29,
+                        (27,
                           cons/1,
                           Constant
-                            (29,
+                            (27,
                               Int(1)),
                           Constructor
-                            (29,
+                            (27,
                               cons/1,
                               Constant
-                                (29,
+                                (27,
                                   Int(2)),
                               Constructor
-                                (29,
+                                (27,
                                   cons/1,
                                   Constant
-                                    (29,
+                                    (27,
                                       Int(3)),
                                   Constructor
-                                    (29,
+                                    (27,
                                       []/1))))
                     ]))
             ]))
