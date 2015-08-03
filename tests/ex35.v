@@ -5,8 +5,6 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Definition Fail := Effect.make unit (string).
-Extract Constant Fail => "Effect.Effect.Coq_make
-exception Fail of Obj.t".
 
 Definition raise_Fail {A : Type} (x : string) : M [ Fail ] A :=
   fun s => (inr (inl x), s).

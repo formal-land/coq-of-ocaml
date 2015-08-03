@@ -5,8 +5,6 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Definition Error := Effect.make unit unit.
-Extract Constant Error => "Effect.Effect.Coq_make
-exception Error of Obj.t".
 
 Definition raise_Error {A : Type} (x : unit) : M [ Error ] A :=
   fun s => (inr (inl x), s).
