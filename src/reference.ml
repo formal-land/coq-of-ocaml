@@ -46,7 +46,7 @@ let update_env_with_effects (r : t) (env : Effect.Type.t FullEnvi.t)
 
 let to_coq (r : t) : SmartPrint.t =
   !^ "Definition" ^^ Name.to_coq r.name ^^ !^ ":=" ^^
-    !^ "Effect.make" ^^ Type.to_coq true r.typ ^^ !^ "unit" ^-^ !^ "." ^^
+    !^ "Effect.make" ^^ Type.to_coq true r.typ ^^ !^ "Empty_set" ^-^ !^ "." ^^
   newline ^^ newline ^^
   !^ "Definition" ^^ Name.to_coq ("read_" ^ r.name) ^^ !^ "(_ : unit)" ^^ !^ ":" ^^
     !^ "M" ^^ !^ "[" ^^ Name.to_coq r.name ^^ !^ "]" ^^ Type.to_coq true r.typ ^^ !^ ":=" ^^

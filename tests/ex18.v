@@ -4,7 +4,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Definition r := Effect.make Z unit.
+Definition r := Effect.make Z Empty_set.
 
 Definition read_r (_ : unit) : M [ r ] Z :=
   fun s => (inl (fst s), s).
@@ -19,7 +19,7 @@ Definition plus_one {A : Type} (x : A) : M [ r ] Z :=
     ret (Z.add x_1 1)
   end.
 
-Definition s := Effect.make string unit.
+Definition s := Effect.make string Empty_set.
 
 Definition read_s (_ : unit) : M [ s ] string :=
   fun s => (inl (fst s), s).
