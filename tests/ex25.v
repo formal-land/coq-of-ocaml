@@ -130,12 +130,20 @@ Definition com {A : Type} (x_1 : A)
   | _ => OCaml.List.combine l2 l2
   end.
 
-Definition so : list Z := OCaml.List.sort (fun x => fun y => Z.sub y x) l2.
+Definition so {A : Type} (x_1 : A) : M [ Counter; NonTermination ] (list Z) :=
+  match x_1 with
+  | _ => OCaml.List.sort (fun x => fun y => Z.sub y x) l2
+  end.
 
-Definition sso : list Z :=
-  OCaml.List.stable_sort (fun x => fun y => Z.sub y x) l2.
+Definition sso {A : Type} (x_1 : A) : M [ Counter; NonTermination ] (list Z) :=
+  match x_1 with
+  | _ => OCaml.List.stable_sort (fun x => fun y => Z.sub y x) l2
+  end.
 
-Definition fso : list Z := OCaml.List.fast_sort (fun x => fun y => Z.sub y x) l2.
+Definition fso {A : Type} (x_1 : A) : M [ Counter; NonTermination ] (list Z) :=
+  match x_1 with
+  | _ => OCaml.List.fast_sort (fun x => fun y => Z.sub y x) l2
+  end.
 
 Definition mer : list Z :=
   OCaml.List.merge (fun x => fun y => Z.sub y x) l2

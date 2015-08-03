@@ -58,7 +58,7 @@ let sp = List.split l3
 let com _ = List.combine l2 l2
 
 (* Sorting *)
-let so = List.sort (fun x y -> y - x) l2
-let sso = List.stable_sort (fun x y -> y - x) l2
-let fso = List.fast_sort (fun x y -> y - x) l2
+let so _ = List.sort (fun x y -> y - x) l2
+let sso _ = List.stable_sort (fun x y -> y - x) l2
+let fso _ = List.fast_sort (fun x y -> y - x) l2
 let mer = List.merge (fun x y -> y - x) l2 [2; -1; 5]

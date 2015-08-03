@@ -40,9 +40,9 @@
       [ "Var", "rasso", [] ],
       [ "Var", "sp", [] ],
       [ "Var", "com", [ [ "OCaml.Invalid_argument" ] ] ],
-      [ "Var", "so", [] ],
-      [ "Var", "sso", [] ],
-      [ "Var", "fso", [] ],
+      [ "Var", "so", [ [ "Counter", "NonTermination" ] ] ],
+      [ "Var", "sso", [ [ "Counter", "NonTermination" ] ] ],
+      [ "Var", "fso", [ [ "Counter", "NonTermination" ] ] ],
       [ "Var", "mer", [] ]
     ]
   ]

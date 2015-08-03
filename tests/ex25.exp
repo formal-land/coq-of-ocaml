@@ -956,29 +956,40 @@ Value
 Value
   (non_rec, @.,
     [
-      ((so, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Apply
-          (61, Variable (61, OCaml.List.sort/1),
+      ((so, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          (?, Variable (?, x_1/0),
             [
-              Function
-                (61, x,
-                  Function
-                    (61,
-                      y,
-                      Apply
+              (Any,
+                Apply
+                  (61,
+                    Variable
+                      (61,
+                        OCaml.List.sort/1),
+                    [
+                      Function
                         (61,
-                          Variable
+                          x,
+                          Function
                             (61,
-                              Z.sub/1),
-                          [
-                            Variable
-                              (61,
-                                y/0);
-                            Variable
-                              (61,
-                                x/0)
-                          ])));
-              Variable (61, l2/0)
+                              y,
+                              Apply
+                                (61,
+                                  Variable
+                                    (61,
+                                      Z.sub/1),
+                                  [
+                                    Variable
+                                      (61,
+                                        y/0);
+                                    Variable
+                                      (61,
+                                        x/0)
+                                  ])));
+                      Variable
+                        (61,
+                          l2/0)
+                    ]))
             ]))
     ])
 
@@ -986,29 +997,40 @@ Value
 Value
   (non_rec, @.,
     [
-      ((sso, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Apply
-          (62, Variable (62, OCaml.List.stable_sort/1),
+      ((sso, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          (?, Variable (?, x_1/0),
             [
-              Function
-                (62, x,
-                  Function
-                    (62,
-                      y,
-                      Apply
+              (Any,
+                Apply
+                  (62,
+                    Variable
+                      (62,
+                        OCaml.List.stable_sort/1),
+                    [
+                      Function
                         (62,
-                          Variable
+                          x,
+                          Function
                             (62,
-                              Z.sub/1),
-                          [
-                            Variable
-                              (62,
-                                y/0);
-                            Variable
-                              (62,
-                                x/0)
-                          ])));
-              Variable (62, l2/0)
+                              y,
+                              Apply
+                                (62,
+                                  Variable
+                                    (62,
+                                      Z.sub/1),
+                                  [
+                                    Variable
+                                      (62,
+                                        y/0);
+                                    Variable
+                                      (62,
+                                        x/0)
+                                  ])));
+                      Variable
+                        (62,
+                          l2/0)
+                    ]))
             ]))
     ])
 
@@ -1016,29 +1038,40 @@ Value
 Value
   (non_rec, @.,
     [
-      ((fso, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Apply
-          (63, Variable (63, OCaml.List.fast_sort/1),
+      ((fso, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          (?, Variable (?, x_1/0),
             [
-              Function
-                (63, x,
-                  Function
-                    (63,
-                      y,
-                      Apply
+              (Any,
+                Apply
+                  (63,
+                    Variable
+                      (63,
+                        OCaml.List.fast_sort/1),
+                    [
+                      Function
                         (63,
-                          Variable
+                          x,
+                          Function
                             (63,
-                              Z.sub/1),
-                          [
-                            Variable
-                              (63,
-                                y/0);
-                            Variable
-                              (63,
-                                x/0)
-                          ])));
-              Variable (63, l2/0)
+                              y,
+                              Apply
+                                (63,
+                                  Variable
+                                    (63,
+                                      Z.sub/1),
+                                  [
+                                    Variable
+                                      (63,
+                                        y/0);
+                                    Variable
+                                      (63,
+                                        x/0)
+                                  ])));
+                      Variable
+                        (63,
+                          l2/0)
+                    ]))
             ]))
     ])
 

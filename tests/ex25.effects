@@ -1821,52 +1821,92 @@ Value
 Value
   (non_rec, @.,
     [
-      ((so, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Apply
-          ((61, Effect ([ ], .)),
-            Variable ((61, Effect ([ ], .)), OCaml.List.sort/1),
+      ((so, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
             [
-              Function
-                ((61, Effect ([ ], . -> . -> .)), x,
-                  Function
-                    ((61,
-                      Effect
-                        ([
-                        ],
-                          .
-                            ->
-                            .)),
-                      y,
-                      Apply
+              (Any,
+                Apply
+                  ((61,
+                    Effect
+                      ([
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((61,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                -[
+                                  Counter/1;
+                                  NonTermination/1
+                                ]->
+                                .)),
+                        OCaml.List.sort/1),
+                    [
+                      Function
+                        ((61,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .)),
+                          x,
+                          Function
+                            ((61,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    ->
+                                    .)),
+                              y,
+                              Apply
+                                ((61,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Variable
+                                    ((61,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      Z.sub/1),
+                                  [
+                                    Variable
+                                      ((61,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        y/0);
+                                    Variable
+                                      ((61,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        x/0)
+                                  ])));
+                      Variable
                         ((61,
                           Effect
                             ([
                             ],
                               .)),
-                          Variable
-                            ((61,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              Z.sub/1),
-                          [
-                            Variable
-                              ((61,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                y/0);
-                            Variable
-                              ((61,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                x/0)
-                          ])));
-              Variable ((61, Effect ([ ], .)), l2/0)
+                          l2/0)
+                    ]))
             ]))
     ])
 
@@ -1874,52 +1914,92 @@ Value
 Value
   (non_rec, @.,
     [
-      ((sso, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Apply
-          ((62, Effect ([ ], .)),
-            Variable ((62, Effect ([ ], .)), OCaml.List.stable_sort/1),
+      ((sso, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
             [
-              Function
-                ((62, Effect ([ ], . -> . -> .)), x,
-                  Function
-                    ((62,
-                      Effect
-                        ([
-                        ],
-                          .
-                            ->
-                            .)),
-                      y,
-                      Apply
+              (Any,
+                Apply
+                  ((62,
+                    Effect
+                      ([
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((62,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                -[
+                                  Counter/1;
+                                  NonTermination/1
+                                ]->
+                                .)),
+                        OCaml.List.stable_sort/1),
+                    [
+                      Function
+                        ((62,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .)),
+                          x,
+                          Function
+                            ((62,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    ->
+                                    .)),
+                              y,
+                              Apply
+                                ((62,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Variable
+                                    ((62,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      Z.sub/1),
+                                  [
+                                    Variable
+                                      ((62,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        y/0);
+                                    Variable
+                                      ((62,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        x/0)
+                                  ])));
+                      Variable
                         ((62,
                           Effect
                             ([
                             ],
                               .)),
-                          Variable
-                            ((62,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              Z.sub/1),
-                          [
-                            Variable
-                              ((62,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                y/0);
-                            Variable
-                              ((62,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                x/0)
-                          ])));
-              Variable ((62, Effect ([ ], .)), l2/0)
+                          l2/0)
+                    ]))
             ]))
     ])
 
@@ -1927,52 +2007,92 @@ Value
 Value
   (non_rec, @.,
     [
-      ((fso, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Apply
-          ((63, Effect ([ ], .)),
-            Variable ((63, Effect ([ ], .)), OCaml.List.fast_sort/1),
+      ((fso, [ A ], [ (x_1, A) ], Some Type (list/1, Type (Z/1))),
+        Match
+          ((?, Effect ([ Counter/1; NonTermination/1 ], .)),
+            Variable ((?, Effect ([ ], .)), x_1/0),
             [
-              Function
-                ((63, Effect ([ ], . -> . -> .)), x,
-                  Function
-                    ((63,
-                      Effect
-                        ([
-                        ],
-                          .
-                            ->
-                            .)),
-                      y,
-                      Apply
+              (Any,
+                Apply
+                  ((63,
+                    Effect
+                      ([
+                        Counter/1;
+                        NonTermination/1
+                      ],
+                        .)),
+                    Variable
+                      ((63,
+                        Effect
+                          ([
+                          ],
+                            .
+                              ->
+                              .
+                                -[
+                                  Counter/1;
+                                  NonTermination/1
+                                ]->
+                                .)),
+                        OCaml.List.fast_sort/1),
+                    [
+                      Function
+                        ((63,
+                          Effect
+                            ([
+                            ],
+                              .
+                                ->
+                                .
+                                  ->
+                                  .)),
+                          x,
+                          Function
+                            ((63,
+                              Effect
+                                ([
+                                ],
+                                  .
+                                    ->
+                                    .)),
+                              y,
+                              Apply
+                                ((63,
+                                  Effect
+                                    ([
+                                    ],
+                                      .)),
+                                  Variable
+                                    ((63,
+                                      Effect
+                                        ([
+                                        ],
+                                          .)),
+                                      Z.sub/1),
+                                  [
+                                    Variable
+                                      ((63,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        y/0);
+                                    Variable
+                                      ((63,
+                                        Effect
+                                          ([
+                                          ],
+                                            .)),
+                                        x/0)
+                                  ])));
+                      Variable
                         ((63,
                           Effect
                             ([
                             ],
                               .)),
-                          Variable
-                            ((63,
-                              Effect
-                                ([
-                                ],
-                                  .)),
-                              Z.sub/1),
-                          [
-                            Variable
-                              ((63,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                y/0);
-                            Variable
-                              ((63,
-                                Effect
-                                  ([
-                                  ],
-                                    .)),
-                                x/0)
-                          ])));
-              Variable ((63, Effect ([ ], .)), l2/0)
+                          l2/0)
+                    ]))
             ]))
     ])
 

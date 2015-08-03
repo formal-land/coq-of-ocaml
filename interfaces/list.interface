@@ -42,9 +42,9 @@
       [ "Var", "remove_assoc", [] ],
       [ "Var", "split", [] ],
       [ "Var", "combine", [ [], [ "OCaml.Invalid_argument" ] ] ],
-      [ "Var", "sort", [] ],
-      [ "Var", "stable_sort", [] ],
-      [ "Var", "fast_sort", [] ],
+      [ "Var", "sort", [ [], [ "Counter", "NonTermination" ] ] ],
+      [ "Var", "stable_sort", [ [], [ "Counter", "NonTermination" ] ] ],
+      [ "Var", "fast_sort", [ [], [ "Counter", "NonTermination" ] ] ],
       [ "Var", "merge", [] ]
     ]
   ]

@@ -500,7 +500,7 @@ Module StableSort.
     lift [_;_] "01" (rev_sort_rec x cmp n l Hn_pos Hn_le_length).
 End StableSort.
 
-Definition _stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
+Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
   : M [ Counter; NonTermination ] (list A).
   refine (
     let len := length l in
@@ -512,19 +512,10 @@ Definition _stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A)
   - unfold len; omega.
 Defined.
 
-Definition stable_sort {A : Type} (cmp : A -> A -> Z) (l : list A) : list A.
-  refine (
-    let n := Lists.List.length l in
-    let l := _stable_sort cmp l in
-    let l := Run.reader (0 % nat) l (fun err => match err with end) n in
-    match Run.exception (0 % nat) l tt with
-    | inl l => l
-    | inr _ => False_rect _ _
-    end).
-Admitted.
-
-Definition sort {A : Type} : (A -> A -> Z) -> list A -> list A :=
+Definition sort {A : Type} : (A -> A -> Z) -> list A ->
+  M [ Counter; NonTermination ] (list A) :=
   stable_sort.
 
-Definition fast_sort {A : Type} : (A -> A -> Z) -> list A -> list A :=
+Definition fast_sort {A : Type} : (A -> A -> Z) -> list A ->
+  M [ Counter; NonTermination ] (list A) :=
   stable_sort.
