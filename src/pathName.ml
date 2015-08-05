@@ -150,7 +150,7 @@ let of_longident (longident : Longident.t) : t =
   | x :: xs -> convert (of_name (List.rev xs) x)
 
 (** Import an OCaml location. *)
-let of_loc (loc : Longident.t loc) : t = 
+let of_loc (loc : Longident.t loc) : t =
   of_longident loc.txt
 
 (** Import an OCaml [Path.t]. *)

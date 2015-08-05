@@ -9,7 +9,7 @@ module Value = struct
 
   let pp (pp_a : 'a -> SmartPrint.t) (value : 'a t) : SmartPrint.t =
     nest (!^ "Value" ^^ Exp.Definition.pp (Exp.pp pp_a) value)
-  
+
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : 'a t) : SmartPrint.t =
     let firt_case = ref true in

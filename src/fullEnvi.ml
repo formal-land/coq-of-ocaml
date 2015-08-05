@@ -72,7 +72,7 @@ let enter_module (env : 'a t) : 'a t =
     constructors = Envi.enter_module env.constructors;
     fields = Envi.enter_module env.fields }
 
-let leave_module (module_name : Name.t) (env : 'a t) : 'a t = 
+let leave_module (module_name : Name.t) (env : 'a t) : 'a t =
   let leave_prefix_unit = fun _ () -> () in
   { vars = Envi.leave_module env.vars env.leave_prefix_vars module_name;
     leave_prefix_vars = env.leave_prefix_vars;

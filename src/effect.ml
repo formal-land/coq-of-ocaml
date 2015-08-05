@@ -165,4 +165,4 @@ let pure : t = {
 let union (effects : t list) : t =
   { descriptor =
       Descriptor.union @@ List.map (fun effect -> effect.descriptor) effects;
-    typ = Type.union (List.map (fun effect -> effect.typ) effects) }  
+    typ = Type.union (List.map (fun effect -> effect.typ) effects) }

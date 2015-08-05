@@ -27,7 +27,7 @@ module Atom = struct
 
   (* If we overflow a line. *)
   exception Overflow
-  
+
   (* Print "at best" an atom [a] for a line width [width] and tabulation width [tab].
      [i] is the indentation level, [p] the current column position (in number
      of spaces), [last_break] the last break printed if any (so we can collapse
@@ -165,7 +165,7 @@ module Atom = struct
   let render (width : int) (tab : int) (_as : t list) : t =
     let (a, _, _) = eval width tab 0 (GroupOne (false, _as)) 0 (Some Break.Newline) in
     a
-  
+
   (*(* A buffer eating trailing spaces. *)
   module NonTrailingBuffer = struct
     module Config = struct

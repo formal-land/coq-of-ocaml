@@ -15,41 +15,41 @@ Module Effect.
   Record t := make {
     S : Type;
     E : Type }.
-  
+
   Definition nil : t := {|
     S := unit;
     E := Empty_set |}.
-  
+
   Definition add (e1 e2 : t) : t := {|
     S := S e1 * S e2;
     E := E e1 + E e2 |}.
-  
+
   Fixpoint of_list (es : list t) : t :=
     match es with
     | [] => nil
     | e :: es => add e (of_list es)
     end.
-  
+
   Definition state (es : list t) : Type :=
     S (of_list es).
-  
+
   Definition error (es : list t) : Type :=
     E (of_list es).
-  
+
   Module Ebs.
     Fixpoint domain (ebs : list (t * bool)) : list t :=
       match ebs with
       | [] => []
       | (e, _) :: ebs => e :: domain ebs
       end.
-    
+
     Fixpoint sub (ebs : list (t * bool)) : list t :=
       match ebs with
       | [] => []
       | (_, false) :: ebs => sub ebs
       | (e, true) :: ebs => e :: sub ebs
       end.
-    
+
     Fixpoint filter_state (ebs : list (t * bool)) (s : state (domain ebs))
       {struct ebs} : state (sub ebs).
       destruct ebs as [|[e b] ebs].
@@ -58,7 +58,7 @@ Module Effect.
         + exact (fst s, filter_state ebs (snd s)).
         + exact (filter_state ebs (snd s)).
     Defined.
-    
+
     Fixpoint expand_exception (ebs : list (t * bool))
       (err : error (sub ebs)) {struct ebs}
       : error (domain ebs).
@@ -71,7 +71,7 @@ Module Effect.
           end).
         + exact (inr (expand_exception ebs err)).
     Defined.
-    
+
     Fixpoint expand_state (ebs : list (t * bool))
       (s1 : state (sub ebs)) (s2 : state (domain ebs))
       {struct ebs} : state (domain ebs).
@@ -172,7 +172,7 @@ Module Exception.
     | Some e => Effect.S e
     | None => unit
     end.
-  
+
   Fixpoint input (es : list Effect.t) (n : nat) (tt' : nth_is_stateless es n)
     (s : Effect.state (remove_nth es n)) {struct es} : Effect.state es.
     destruct es as [|e es].
@@ -181,7 +181,7 @@ Module Exception.
       + exact (tt', s).
       + refine (fst s, input es n tt' (snd s)).
   Defined.
-  
+
   Fixpoint output (es : list Effect.t) (n : nat) (s : Effect.state es)
     {struct es} : Effect.state (remove_nth es n).
     destruct es as [|e es].
@@ -190,7 +190,7 @@ Module Exception.
       + exact (snd s).
       + exact (fst s, output _ _ (snd s)).
   Defined.
-  
+
   Fixpoint error (es : list Effect.t) (n : nat) (err : Effect.error es)
     {struct es}
     : Effect.E (nth n es Effect.nil) + Effect.error (remove_nth es n).
@@ -208,7 +208,7 @@ Module Exception.
             end
           end).
   Defined.
-  
+
   Definition run {A : Type} {es : list Effect.t} (n : nat)
     (x : M es A) (tt' : nth_is_stateless es n)
     : M (remove_nth es n) (A + Effect.E (List.nth n es Effect.nil)) :=
@@ -230,7 +230,7 @@ Module Run.
       | S n => e :: remove_nth es n
       end
     end.
-  
+
   Fixpoint input (es : list Effect.t) (n : nat)
     (s : Effect.S (List.nth n es Effect.nil))
     (ss : Effect.state (remove_nth es n)) {struct es} : Effect.state es.
@@ -240,7 +240,7 @@ Module Run.
       + exact (s, ss).
       + refine (fst ss, input es n s (snd ss)).
   Defined.
-  
+
   Fixpoint output (es : list Effect.t) (n : nat) (ss : Effect.state es)
     {struct es}
     : Effect.S (List.nth n es Effect.nil) * Effect.state (remove_nth es n).
@@ -252,7 +252,7 @@ Module Run.
         let (s, ss') := output _ _ (snd ss) in
         (s, (fst ss, ss'))).
   Defined.
-  
+
   Fixpoint error (es : list Effect.t) (n : nat) (err : Effect.error es)
     {struct es}
     : Effect.E (nth n es Effect.nil) + Effect.error (remove_nth es n).
@@ -270,7 +270,7 @@ Module Run.
             end
           end).
   Defined.
-  
+
   Definition run {A : Type} {es : list Effect.t} (n : nat) (x : M es A)
     : let S := Effect.S (List.nth n es Effect.nil) in
       let E := Effect.E (List.nth n es Effect.nil) in
@@ -286,14 +286,14 @@ Module Run.
         | inr ee => inr ee
         end
       end, ss)).
-  
+
   (** Expected value for [tt']: [tt]. *)
   Definition exception {A : Type} {es : list Effect.t} (n : nat) (x : M es A)
     (tt' : Effect.S (List.nth n es Effect.nil))
     : M (remove_nth es n) (A + Effect.E (List.nth n es Effect.nil)) :=
     let! x := run n x tt' in
     ret (fst x).
-  
+
   (** Expected value for [error_is_empty]: [fun err => match err with end]. *)
   Definition reader {A : Type} {es : list Effect.t} (n : nat) (x : M es A)
     (error_is_empty : Effect.E (List.nth n es Effect.nil) -> False)

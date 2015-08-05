@@ -357,7 +357,7 @@ Module StableSort.
           rev_merge_aux t2 (cons h2 accu)
       end in
     rev_merge_aux l2 accu.
-  
+
   Fixpoint rev_merge_rev {A : Type}
     (cmp : A -> A -> Z) (l1 : list A) (l2 : list A) (accu : list A) : list A :=
     let fix rev_merge_rev_aux (l2 : list A) (accu : list A) : list A :=
@@ -371,7 +371,7 @@ Module StableSort.
           rev_merge_rev_aux t2 (cons h2 accu)
       end in
     rev_merge_rev_aux l2 accu.
-  
+
   Ltac sort_rec_tactic n n1 n2 Pl2 :=
     try (apply Z_div_pos; omega);
     try (
@@ -400,7 +400,7 @@ Module StableSort.
       assert (0 <= n / 2); [
         apply Z_div_pos; omega|];
       unfold n2, n1; omega).
-  
+
   Fixpoint sort_rec {A : Type}
     (counter : nat) (cmp : A -> A -> Z) (n : Z) (l : list A)
     : 0 <= n -> n <= length l ->
@@ -486,13 +486,13 @@ Module StableSort.
       end
     end); sort_rec_tactic n n1 n2 Pl2.
   Defined.
-  
+
   Definition sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
     (Hn_pos : 0 <= n) (Hn_le_length : n <= length l)
     : M [ Counter; NonTermination ] (list A) :=
     let! x := lift [_;_] "10" (read_counter tt) in
     lift [_;_] "01" (sort_rec x cmp n l Hn_pos Hn_le_length).
-  
+
   Definition rev_sort {A : Type} (cmp : A -> A -> Z) (n : Z) (l : list A)
     (Hn_pos : 0 <= n) (Hn_le_length : n <= length l)
     : M [ Counter; NonTermination ] (list A) :=
