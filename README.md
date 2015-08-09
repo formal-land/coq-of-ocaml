@@ -25,7 +25,7 @@ Get:
 
     Definition head {A : Type} (l : list A) : M [ OCaml.Failure ] A :=
       match l with
-      | [] => OCaml.Pervasives.failwith "Empty list." % string
+      | [] => OCaml.Pervasives.failwith "empty list" % string
       | cons x _ => ret x
       end.
 
