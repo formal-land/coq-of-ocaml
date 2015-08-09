@@ -1,7 +1,33 @@
 # ![Logo](https://raw.githubusercontent.com/clarus/icons/master/abc-48.png) CoqOfOCaml
 [![Join the chat at https://gitter.im/clarus/coq-of-ocaml](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/clarus/coq-of-ocaml?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Compiler of OCaml to Coq. Still experimental. For more information look at the [Wiki](https://github.com/clarus/coq-of-ocaml/wiki).
+Compile OCaml to Coq.
+
+Start with the file `main.ml`:
+
+    let head l =
+      match l with
+      | [] -> failwith "empty list"
+      | x :: _ -> x
+
+Run:
+
+    ocamlc -bin-annot main.ml
+    coqOfOCaml.native -mode v main.cmt
+
+Get:
+
+    Require Import OCaml.OCaml.
+
+    Local Open Scope Z_scope.
+    Local Open Scope type_scope.
+    Import ListNotations.
+
+    Definition head {A : Type} (l : list A) : M [ OCaml.Failure ] A :=
+      match l with
+      | [] => OCaml.Pervasives.failwith "Empty list." % string
+      | cons x _ => ret x
+      end.
 
 ## Install
 ### With OPAM
