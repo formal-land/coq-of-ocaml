@@ -35,7 +35,7 @@ Add the [Coq repository](http://coq.io/opam/):
 
 and run:
 
-    opam install -j4 coq:coq-of-ocaml
+    opam install coq-of-ocaml
 
 ### With Docker
 Run the `Dockerfile` with:
