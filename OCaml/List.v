@@ -340,7 +340,7 @@ Fixpoint chop {A : Type} (k : Z) (l : list A) {struct l}
     omega.
   - omega.
   - rewrite length_cons in Hk_le_length; omega.
-  - rewrite length_cons; omega.
+  - rewrite length_cons; simpl in *; omega.
 Defined.
 
 Module StableSort.
