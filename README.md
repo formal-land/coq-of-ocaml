@@ -1,6 +1,8 @@
 # ![Logo](https://raw.githubusercontent.com/clarus/icons/master/abc-48.png) CoqOfOCaml
 > Compile OCaml to Coq.
 
+[![travis status](https://img.shields.io/travis/clarus/coq-of-ocaml/master.svg?label=travis-ci)](https://travis-ci.org/clarus/coq-of-ocaml)
+
 Start with the file `main.ml`:
 
     let head l =
