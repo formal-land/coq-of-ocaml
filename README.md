@@ -54,7 +54,7 @@ and make the tests:
     make test
 
 ### Manually
-This compiler needs a working installation of OCaml 4.02 and Coq 8.4, plus the following packages (can be installed using [OPAM](http://opam.ocaml.org/)):
+This compiler needs a working installation of OCaml and Coq, plus the following packages (can be installed using [OPAM](http://opam.ocaml.org/)):
 * [SmartPrint](https://github.com/clarus/smart-print)
 * [YoJson](http://mjambon.com/yojson.html)
 
