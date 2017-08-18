@@ -51,7 +51,8 @@ class Test
   end
 
   def extraction_cmd
-    "cd tests/extraction && coqc extract.v -R .. Tests -R ../../OCaml OCaml && ocamlbuild #{base_name}.byte && ./#{base_name}.byte"
+    disable_fatal_warnings = "-lflags '-warn-error -a'"
+    "cd tests/extraction && coqc extract.v -R .. Tests -R ../../OCaml OCaml && ocamlbuild #{disable_fatal_warnings} #{base_name}.byte && ./#{base_name}.byte"
   end
 
   def extraction

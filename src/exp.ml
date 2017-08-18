@@ -191,13 +191,13 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     let (env, def) = import_let_fun env l typ_vars is_rec cases in
     let e = of_expression env typ_vars e in
     LetFun (l, def, e)
-  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
-  | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
-    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->
+  | Texp_function { cases = [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}] }
+  | Texp_function { cases = [{c_lhs = { pat_desc = Tpat_alias
+    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}] } ->
     let x = Name.of_ident x in
     let env = FullEnvi.add_var [] x () env in
     Function (l, x, of_expression env typ_vars e)
-  | Texp_function (_, cases, _) ->
+  | Texp_function { cases = cases } ->
     let (x, e) = open_cases env typ_vars cases in
     Function (l, x, e)
   | Texp_apply (e_f, e_xs) ->
@@ -206,7 +206,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     | Texp_ident (path, _, _)
       when PathName.of_path l_f path = PathName.of_name ["Pervasives"] "raise" ->
       (match e_xs with
-      | [(_, Some e_x, _)] ->
+      | [(_, Some e_x)] ->
         (match e_x.exp_desc with
         | Texp_construct (x, _, es) ->
           let l_exn = Loc.of_location e_x.exp_loc in
@@ -221,7 +221,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     | Texp_ident (path, _, _)
       when PathName.of_path l_f path = PathName.of_name ["Pervasives"] "!" ->
       (match e_xs with
-      | [(_, Some e_x, _)] ->
+      | [(_, Some e_x)] ->
         (match e_x.exp_desc with
         | Texp_ident (path, _, _) ->
           let l_x = Loc.of_location e_x.exp_loc in
@@ -235,7 +235,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     | Texp_ident (path, _, _)
       when PathName.of_path l_f path = PathName.of_name ["Pervasives"] ":=" ->
       (match e_xs with
-      | [(_, Some e_r, _); (_, Some e_v, _)] ->
+      | [(_, Some e_r); (_, Some e_v)] ->
         (match e_r.exp_desc with
         | Texp_ident (path, _, _) ->
           let l_r = Loc.of_location e_r.exp_loc in
@@ -249,7 +249,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
       | _ -> Error.raise l "Expected two arguments for ':='.")
     | _ ->
       let e_f = of_expression env typ_vars e_f in
-      let e_xs = List.map (fun (_, e_x, _) ->
+      let e_xs = List.map (fun (_, e_x) ->
         match e_x with
         | Some e_x -> of_expression env typ_vars e_x
         | None -> Error.raise l "expected an argument") e_xs in
@@ -266,8 +266,12 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   | Texp_construct (x, _, es) ->
     let x = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.constructors in
     Constructor (l, x, List.map (of_expression env typ_vars) es)
-  | Texp_record (fields, _) ->
-    Record (l, fields |> List.map (fun (x, label, e) ->
+  | Texp_record { fields = fields; extended_expression = None } ->
+    Record (l, Array.to_list fields |> List.map (fun (label, definition) ->
+      let (x, e) =
+        match definition with
+        | Kept _ -> Error.raise l "Records with overwriting not handled."
+        | Overridden (loc, e) -> (loc, e) in
       let loc = Loc.of_location label.lbl_loc in
       let x = Envi.bound_name loc (PathName.of_loc x) env.FullEnvi.fields in
       (x, of_expression env typ_vars e)))

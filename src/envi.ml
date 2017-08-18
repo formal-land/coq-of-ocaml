@@ -92,7 +92,7 @@ let bound_name (loc : Loc.t) (x : PathName.t) (env : 'a t) : BoundName.t =
 let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
   let segment =
     try List.nth env x.BoundName.depth with
-    | Failure "nth" -> raise Not_found in
+    | Failure _ -> raise Not_found in
   let rec iterate_open_lift v n =
     if n = 0 then
       v
