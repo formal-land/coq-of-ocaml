@@ -123,6 +123,10 @@ class Tests
     puts
     puts "Total: #{@valid_tests} / #{@valid_tests + @invalid_tests}."
   end
+
+  def invalid?
+    @invalid_tests != 0
+  end
 end
 
 tests = Tests.new(Dir.glob('tests/ex*.ml'))
@@ -142,3 +146,5 @@ tests.coq
 puts
 tests.extraction
 tests.print_summary
+
+exit(1) if tests.invalid?
