@@ -266,8 +266,12 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   | Texp_construct (x, _, es) ->
     let x = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.constructors in
     Constructor (l, x, List.map (of_expression env typ_vars) es)
-  | Texp_record (fields, _) ->
-    Record (l, fields |> List.map (fun (x, label, e) ->
+  | Texp_record { fields = fields; extended_expression = None } ->
+    Record (l, Array.to_list fields |> List.map (fun (label, definition) ->
+      let (x, e) =
+        match definition with
+        | Kept _ -> Error.raise l "Records with overwriting not handled."
+        | Overridden (loc, e) -> (loc, e) in
       let loc = Loc.of_location label.lbl_loc in
       let x = Envi.bound_name loc (PathName.of_loc x) env.FullEnvi.fields in
       (x, of_expression env typ_vars e)))
