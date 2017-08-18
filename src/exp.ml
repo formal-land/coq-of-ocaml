@@ -191,13 +191,13 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     let (env, def) = import_let_fun env l typ_vars is_rec cases in
     let e = of_expression env typ_vars e in
     LetFun (l, def, e)
-  | Texp_function (_, [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}], _)
-  | Texp_function (_, [{c_lhs = { pat_desc = Tpat_alias
-    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}], _) ->
+  | Texp_function { cases = [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}] }
+  | Texp_function { cases = [{c_lhs = { pat_desc = Tpat_alias
+    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}] } ->
     let x = Name.of_ident x in
     let env = FullEnvi.add_var [] x () env in
     Function (l, x, of_expression env typ_vars e)
-  | Texp_function (_, cases, _) ->
+  | Texp_function { cases = cases } ->
     let (x, e) = open_cases env typ_vars cases in
     Function (l, x, e)
   | Texp_apply (e_f, e_xs) ->
