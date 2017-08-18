@@ -52,7 +52,7 @@ let parse_cmt (file_name : string) : Typedtree.structure =
   | _ -> failwith "Cannot extract cmt data."
 
 let module_name (file_name : string) : string =
-  String.capitalize @@ Filename.chop_extension @@ Filename.basename file_name
+  String.capitalize_ascii @@ Filename.chop_extension @@ Filename.basename file_name
 
 (** The main function. *)
 let main () =

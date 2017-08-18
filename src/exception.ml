@@ -11,9 +11,11 @@ let pp (exn : t) : SmartPrint.t =
 let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
   (exn : extension_constructor) : t =
   let name = Name.of_ident exn.ext_id in
-  let typ =
-    Type.Tuple (exn.ext_type.Types.ext_args |> List.map (fun typ ->
-      Type.of_type_expr env loc typ)) in
+  let typs =
+    match exn.ext_type.Types.ext_args with
+    | Types.Cstr_tuple typs -> typs
+    | Types.Cstr_record _ -> Error.raise loc "Unhandled named constructor parameters." in
+  let typ = Type.Tuple (typs |> List.map (fun typ -> Type.of_type_expr env loc typ)) in
   { name = name; typ = typ}
 
 let update_env (exn : t) (env : unit FullEnvi.t) : unit FullEnvi.t =

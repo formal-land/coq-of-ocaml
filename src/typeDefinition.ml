@@ -39,7 +39,11 @@ let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
     | Type_variant cases ->
       let constructors =
         let env = FullEnvi.add_typ [] name env in
-        cases |> List.map (fun { Types.cd_id = constr; cd_args = typs } ->
+        cases |> List.map (fun { Types.cd_id = constr; cd_args = args } ->
+          let typs =
+            match args with
+            | Cstr_tuple typs -> typs
+            | Cstr_record _ -> Error.raise loc "Unhandled named constructor parameters." in
           (Name.of_ident constr, typs |> List.map (fun typ ->
             Type.of_type_expr env loc typ))) in
       Inductive (name, typ_args, constructors)

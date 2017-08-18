@@ -78,7 +78,7 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let (env, def) =
         Exp.import_let_fun env loc Name.Map.empty is_rec cases in
       (env, Value (loc, def))
-    | Tstr_type typs ->
+    | Tstr_type (_, typs) ->
       let def = TypeDefinition.of_ocaml env loc typs in
       let env = TypeDefinition.update_env def env in
       (env, TypeDefinition (loc, def))

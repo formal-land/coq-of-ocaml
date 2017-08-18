@@ -206,7 +206,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     | Texp_ident (path, _, _)
       when PathName.of_path l_f path = PathName.of_name ["Pervasives"] "raise" ->
       (match e_xs with
-      | [(_, Some e_x, _)] ->
+      | [(_, Some e_x)] ->
         (match e_x.exp_desc with
         | Texp_construct (x, _, es) ->
           let l_exn = Loc.of_location e_x.exp_loc in
@@ -221,7 +221,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     | Texp_ident (path, _, _)
       when PathName.of_path l_f path = PathName.of_name ["Pervasives"] "!" ->
       (match e_xs with
-      | [(_, Some e_x, _)] ->
+      | [(_, Some e_x)] ->
         (match e_x.exp_desc with
         | Texp_ident (path, _, _) ->
           let l_x = Loc.of_location e_x.exp_loc in
@@ -235,7 +235,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     | Texp_ident (path, _, _)
       when PathName.of_path l_f path = PathName.of_name ["Pervasives"] ":=" ->
       (match e_xs with
-      | [(_, Some e_r, _); (_, Some e_v, _)] ->
+      | [(_, Some e_r); (_, Some e_v)] ->
         (match e_r.exp_desc with
         | Texp_ident (path, _, _) ->
           let l_r = Loc.of_location e_r.exp_loc in
@@ -249,7 +249,7 @@ let rec of_expression (env : unit FullEnvi.t) (typ_vars : Name.t Name.Map.t)
       | _ -> Error.raise l "Expected two arguments for ':='.")
     | _ ->
       let e_f = of_expression env typ_vars e_f in
-      let e_xs = List.map (fun (_, e_x, _) ->
+      let e_xs = List.map (fun (_, e_x) ->
         match e_x with
         | Some e_x -> of_expression env typ_vars e_x
         | None -> Error.raise l "expected an argument") e_xs in
