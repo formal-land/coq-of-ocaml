@@ -20,5 +20,4 @@ smartPrint/*.v
 smartPrint/*.monadise
 \#*\#
 OCaml/Makefile
-OCaml/Basics.v
 tests/extraction

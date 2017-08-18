@@ -302,7 +302,7 @@ Module Pervasives.
       match s with
       | ((stream_i, stream_o), _) =>
         match stream_i with
-        | FiniteStream.nil <%= "_" unless version[0..2] == "8.4" %> =>
+        | FiniteStream.nil _ =>
           (inl "" % string, s) (* We could raise an [End_of_file] exception. *)
         | FiniteStream.cons message stream_i =>
           (inl message, ((stream_i, stream_o), tt))
