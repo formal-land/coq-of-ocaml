@@ -11,7 +11,7 @@ Add the [Coq repository](http://coq.io/opam/):
 
 and run:
 
-    opam install -j4 coq:coq-of-ocaml
+    opam install -j4 coq-of-ocaml
 
 ### With Docker
 Run the `Dockerfile` with:
@@ -35,7 +35,7 @@ This compiler needs a working installation of OCaml 4.02 and Coq 8.4, plus the f
 You have two parts to compile in order:
 
 #### The Coq library
-Go to `CoqOfOCaml/` and run:
+Go to `OCaml/` and run:
 
     ./configure.sh
     make

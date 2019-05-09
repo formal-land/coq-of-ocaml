@@ -1,7 +1,0 @@
-bin: [
-  "coqOfOCaml.native"
-]
-
-share: [
-  "interfaces/list.interface" {"interfaces/list.interface"}
-]
