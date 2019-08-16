@@ -7,87 +7,32 @@
   Value
     (rec, @.,
       [
-        ((sum_rec, [ ],
-          [ (counter, Type (nat/2)); (l, Type (t/0, Type (Z/2))) ],
-          Some Type (Z/2)),
+        ((sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2)),
           Match
-            (?, Variable (?, counter/0),
+            (9, Variable (9, l/0),
               [
-                (Constructor (O/2),
+                (Constructor (Nil/0), Constant (10, Int(0)));
+                (Constructor (Cons/0, x, xs),
                   Apply
-                    (?,
+                    (11,
                       Variable
-                        (?,
-                          not_terminated/2),
+                        (11,
+                          Z.add/2),
                       [
-                        Tuple
-                          (?)
-                      ]));
-                (Constructor (S/2, counter),
-                  Match
-                    (9,
-                      Variable
-                        (9,
-                          l/0),
-                      [
-                        (Constructor
-                          (Nil/0),
-                          Constant
-                            (10,
-                              Int(0)));
-                        (Constructor
-                          (Cons/0,
-                            x,
-                            xs),
-                          Apply
-                            (11,
+                        Variable
+                          (11,
+                            x/0);
+                        Apply
+                          (11,
+                            Variable
+                              (11,
+                                sum/0),
+                            [
                               Variable
                                 (11,
-                                  Z.add/2),
-                              [
-                                Variable
-                                  (11,
-                                    x/0);
-                                Apply
-                                  (11,
-                                    Apply
-                                      (?,
-                                        Variable
-                                          (?,
-                                            sum_rec/0),
-                                        [
-                                          Variable
-                                            (?,
-                                              counter/0)
-                                        ]),
-                                    [
-                                      Variable
-                                        (11,
-                                          xs/0)
-                                    ])
-                              ]))
+                                  xs/0)
+                            ])
                       ]))
-              ]))
-      ])
-  
-  8
-  Value
-    (non_rec, @.,
-      [
-        ((sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2)),
-          Apply
-            (?, Variable (?, sum_rec/0),
-              [
-                Apply
-                  (?,
-                    Variable
-                      (?,
-                        read_counter/2),
-                    [
-                      Tuple
-                        (?)
-                    ]);
-                Variable (?, l/0)
               ]))
       ])
   
@@ -95,83 +40,28 @@
   Value
     (rec, @.,
       [
-        ((of_list_rec, [ A ],
-          [ (counter, Type (nat/2)); (x, Type (list/2, A)) ],
-          Some Type (t/0, A)),
-          Match
-            (?, Variable (?, counter/0),
-              [
-                (Constructor (O/2),
-                  Apply
-                    (?,
-                      Variable
-                        (?,
-                          not_terminated/2),
-                      [
-                        Tuple
-                          (?)
-                      ]));
-                (Constructor (S/2, counter),
-                  Match
-                    (?,
-                      Variable
-                        (?,
-                          x/0),
-                      [
-                        (Constructor
-                          ([]/2),
-                          Constructor
-                            (14,
-                              Nil/0));
-                        (Constructor
-                          (cons/2,
-                            x,
-                            xs),
-                          Constructor
-                            (15,
-                              Cons/0,
-                              Variable
-                                (15,
-                                  x/0),
-                              Apply
-                                (15,
-                                  Apply
-                                    (?,
-                                      Variable
-                                        (?,
-                                          of_list_rec/0),
-                                      [
-                                        Variable
-                                          (?,
-                                            counter/0)
-                                      ]),
-                                  [
-                                    Variable
-                                      (15,
-                                        xs/0)
-                                  ])))
-                      ]))
-              ]))
-      ])
-  
-  13
-  Value
-    (non_rec, @.,
-      [
         ((of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)),
-          Apply
-            (?, Variable (?, of_list_rec/0),
+          Match
+            (?, Variable (?, x/0),
               [
-                Apply
-                  (?,
-                    Variable
-                      (?,
-                        read_counter/2),
-                    [
-                      Tuple
-                        (?)
-                    ]);
-                Variable (?, x/0)
+                (Constructor ([]/2), Constructor (14, Nil/0));
+                (Constructor (cons/2, x, xs),
+                  Constructor
+                    (15,
+                      Cons/0,
+                      Variable
+                        (15,
+                          x/0),
+                      Apply
+                        (15,
+                          Variable
+                            (15,
+                              of_list/0),
+                          [
+                            Variable
+                              (15,
+                                xs/0)
+                          ])))
               ]))
       ])
   

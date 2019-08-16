@@ -108,6 +108,10 @@ let env_with_effects : unit FullEnvi.t =
   (* Operations on format strings *)
   (* Program termination *)
 
+  (* List *)
+  |> enter_module
+  |> Interface.to_full_envi (Interface.of_file "interfaces/list.interface")
+  |> leave_module "OCaml"
   |> enter_module
   |> open_module ["OCaml"]
   (* |> fun env -> SmartPrint.to_stdout 80 2 (FullEnvi.pp env); env *)

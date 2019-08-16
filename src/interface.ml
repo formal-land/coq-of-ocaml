@@ -21,7 +21,6 @@ end
 type t =
   | Var of Name.t * Shape.t
   | Typ of Name.t
-  | Descriptor of Name.t
   | Constructor of Name.t
   | Field of Name.t
   | Interface of Name.t * t list
@@ -30,7 +29,6 @@ let rec pp (interface : t) : SmartPrint.t =
   match interface with
   | Var (x, shape) -> !^ "Var" ^^ OCaml.tuple [Name.pp x; Shape.pp shape]
   | Typ x -> !^ "Typ" ^^ Name.pp x
-  | Descriptor x -> !^ "Descriptor" ^^ Name.pp x
   | Constructor x -> !^ "Constructor" ^^ Name.pp x
   | Field x -> !^ "Field" ^^ Name.pp x
   | Interface (x, defs) ->
@@ -46,12 +44,23 @@ let of_typ_definition (typ_def : TypeDefinition.t) : t list =
   | TypeDefinition.Synonym (name, _, _) | TypeDefinition.Abstract (name, _) ->
     [Typ name]
 
+
+let rec to_full_envi (interface : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
+  match interface with
+  | Var (x, shape) -> FullEnvi.add_var [] x () env
+  | Typ x -> FullEnvi.add_typ [] x env
+  | Constructor x -> FullEnvi.add_constructor [] x env
+  | Field x -> FullEnvi.add_field [] x env
+  | Interface (x, defs) ->
+    let env = FullEnvi.enter_module env in
+    let env = List.fold_left (fun env def -> to_full_envi def env) env defs in
+    FullEnvi.leave_module x env
+
 let rec to_json (interface : t) : json =
   match interface with
   | Var (x, shape) ->
     `List [`String "Var"; Name.to_json x; Shape.to_json shape]
   | Typ x -> `List [`String "Typ"; Name.to_json x]
-  | Descriptor x -> `List [`String "Descriptor"; Name.to_json x]
   | Constructor x -> `List [`String "Constructor"; Name.to_json x]
   | Field x -> `List [`String "Field"; Name.to_json x]
   | Interface (x, defs) ->
@@ -62,7 +71,6 @@ let rec of_json (json : json) : t =
   | `List [`String "Var"; x; shape] ->
     Var (Name.of_json x, Shape.of_json shape)
   | `List [`String "Typ"; x] -> Typ (Name.of_json x)
-  | `List [`String "Descriptor"; x] -> Descriptor (Name.of_json x)
   | `List [`String "Constructor"; x] -> Constructor (Name.of_json x)
   | `List [`String "Field"; x] -> Field (Name.of_json x)
   | `List [`String "Interface"; x; `List defs] ->

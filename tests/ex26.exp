@@ -1,6 +1,6 @@
 3
 Value
-  (rec, @coq_rec,
+  (rec, @.,
     [
       ((f_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
         Some Type (list/1, B)),
@@ -37,27 +37,16 @@ Value
             ]))
     ])
 
-9
+8
 Value
-  (rec, @free_rec,
+  (non_rec, @.,
     [
-      ((f_map2_rec, [ A; B ],
-        [ (counter, Type (nat/1)); (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Type (list/1, B)),
-        Match
-          (?, Variable (?, counter/0),
+      ((n, [ ], [ ], Some Type (Z/1)),
+        LetFun 9
+          (rec, @.,
             [
-              (Constructor (O/1),
-                Apply
-                  (?,
-                    Variable
-                      (?,
-                        not_terminated/1),
-                    [
-                      Tuple
-                        (?)
-                    ]));
-              (Constructor (S/1, counter),
+              ((sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
+                Some Type (Z/1)),
                 Match
                   (10,
                     Variable
@@ -66,293 +55,54 @@ Value
                     [
                       (Constructor
                         ([]/1),
-                        Constructor
-                          (11,
-                            []/1));
-                      (Constructor
-                        (cons/1,
-                          x,
-                          l),
-                        Constructor
-                          (12,
-                            cons/1,
-                            Apply
-                              (12,
-                                Variable
-                                  (12,
-                                    f/0),
-                                [
-                                  Variable
-                                    (12,
-                                      x/0)
-                                ]),
-                            Apply
-                              (12,
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        f_map2_rec/0),
-                                    [
-                                      Variable
-                                        (?,
-                                          counter/0)
-                                    ]),
-                                [
-                                  Variable
-                                    (12,
-                                      f/0);
-                                  Variable
-                                    (12,
-                                      l/0)
-                                ])))
-                    ]))
-            ]))
-    ])
-
-9
-Value
-  (non_rec, @.,
-    [
-      ((f_map2, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Type (list/1, B)),
-        Apply
-          (?, Variable (?, f_map2_rec/0),
-            [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
-              Variable (?, f/0);
-              Variable (?, l/0)
-            ]))
-    ])
-
-15
-Value
-  (non_rec, @.,
-    [
-      ((n, [ ], [ ], Some Type (Z/1)),
-        LetFun 16
-          (rec, @coq_rec,
-            [
-              ((sum_coq_rec, [ ], [ (l, Type (list/1, Type (Z/1))) ],
-                Some Type (Z/1)),
-                Match
-                  (17,
-                    Variable
-                      (17,
-                        l/0),
-                    [
-                      (Constructor
-                        ([]/1),
                         Constant
-                          (18,
+                          (11,
                             Int(0)));
                       (Constructor
                         (cons/1,
                           x,
                           l),
                         Apply
-                          (19,
+                          (12,
                             Variable
-                              (19,
+                              (12,
                                 Z.add/1),
                             [
                               Variable
-                                (19,
+                                (12,
                                   x/0);
                               Apply
-                                (19,
+                                (12,
                                   Variable
-                                    (19,
-                                      sum_coq_rec/0),
+                                    (12,
+                                      sum/0),
                                   [
                                     Variable
-                                      (19,
+                                      (12,
                                         l/0)
                                   ])
                             ]))
                     ]))
             ]) in
         Apply
-          (20, Variable (20, sum_coq_rec/0),
+          (13, Variable (13, sum/0),
             [
               Constructor
-                (20, cons/1, Constant (20, Int(1)),
+                (13, cons/1, Constant (13, Int(1)),
                   Constructor
-                    (20,
+                    (13,
                       cons/1,
                       Constant
-                        (20,
+                        (13,
                           Int(2)),
                       Constructor
-                        (20,
+                        (13,
                           cons/1,
                           Constant
-                            (20,
+                            (13,
                               Int(3)),
                           Constructor
-                            (20,
+                            (13,
                               []/1))))
-            ]))
-    ])
-
-22
-Value
-  (non_rec, @.,
-    [
-      ((n2, [ A ], [ (x, A) ], Some Type (Z/1)),
-        Match
-          (?, Variable (?, x/0),
-            [
-              (Any,
-                LetFun 23
-                  (rec, @.,
-                    [
-                      ((sum_rec,
-                        [
-                        ],
-                        [
-                          (counter,
-                            Type
-                              (nat/1));
-                          (l,
-                            Type
-                              (list/1,
-                                Type
-                                  (Z/1)))
-                        ],
-                        Some
-                          Type
-                            (Z/1)),
-                        Match
-                          (?,
-                            Variable
-                              (?,
-                                counter/0),
-                            [
-                              (Constructor
-                                (O/1),
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        not_terminated/1),
-                                    [
-                                      Tuple
-                                        (?)
-                                    ]));
-                              (Constructor
-                                (S/1,
-                                  counter),
-                                Match
-                                  (24,
-                                    Variable
-                                      (24,
-                                        l/0),
-                                    [
-                                      (Constructor
-                                        ([]/1),
-                                        Constant
-                                          (25,
-                                            Int(0)));
-                                      (Constructor
-                                        (cons/1,
-                                          x,
-                                          l),
-                                        Apply
-                                          (26,
-                                            Variable
-                                              (26,
-                                                Z.add/1),
-                                            [
-                                              Variable
-                                                (26,
-                                                  x/0);
-                                              Apply
-                                                (26,
-                                                  Apply
-                                                    (?,
-                                                      Variable
-                                                        (?,
-                                                          sum_rec/0),
-                                                      [
-                                                        Variable
-                                                          (?,
-                                                            counter/0)
-                                                      ]),
-                                                  [
-                                                    Variable
-                                                      (26,
-                                                        l/0)
-                                                  ])
-                                            ]))
-                                    ]))
-                            ]))
-                    ])
-                  in
-                LetFun 23
-                  (non_rec, @.,
-                    [
-                      ((sum,
-                        [
-                        ],
-                        [
-                          (l,
-                            Type
-                              (list/1,
-                                Type
-                                  (Z/1)))
-                        ],
-                        Some
-                          Type
-                            (Z/1)),
-                        Apply
-                          (?,
-                            Variable
-                              (?,
-                                sum_rec/0),
-                            [
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      read_counter/1),
-                                  [
-                                    Tuple
-                                      (?)
-                                  ]);
-                              Variable
-                                (?,
-                                  l/0)
-                            ]))
-                    ])
-                  in
-                Apply
-                  (27,
-                    Variable
-                      (27,
-                        sum/0),
-                    [
-                      Constructor
-                        (27,
-                          cons/1,
-                          Constant
-                            (27,
-                              Int(1)),
-                          Constructor
-                            (27,
-                              cons/1,
-                              Constant
-                                (27,
-                                  Int(2)),
-                              Constructor
-                                (27,
-                                  cons/1,
-                                  Constant
-                                    (27,
-                                      Int(3)),
-                                  Constructor
-                                    (27,
-                                      []/1))))
-                    ]))
             ]))
     ])

@@ -10,103 +10,6 @@ Value
                 LetFun 4
                   (rec, @.,
                     [
-                      ((map_rec,
-                        [
-                          B;
-                          C
-                        ],
-                        [
-                          (counter,
-                            Type
-                              (nat/1));
-                          (f,
-                            (B
-                              ->
-                              C));
-                          (x_1,
-                            Type
-                              (list/1,
-                                B))
-                        ],
-                        Some
-                          Type
-                            (list/1,
-                              C)),
-                        Match
-                          (?,
-                            Variable
-                              (?,
-                                counter/0),
-                            [
-                              (Constructor
-                                (O/1),
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        not_terminated/1),
-                                    [
-                                      Tuple
-                                        (?)
-                                    ]));
-                              (Constructor
-                                (S/1,
-                                  counter),
-                                Match
-                                  (?,
-                                    Variable
-                                      (?,
-                                        x_1/0),
-                                    [
-                                      (Constructor
-                                        ([]/1),
-                                        Constructor
-                                          (5,
-                                            []/1));
-                                      (Constructor
-                                        (cons/1,
-                                          x,
-                                          xs),
-                                        Constructor
-                                          (6,
-                                            cons/1,
-                                            Apply
-                                              (6,
-                                                Variable
-                                                  (6,
-                                                    f/0),
-                                                [
-                                                  Variable
-                                                    (6,
-                                                      x/0)
-                                                ]),
-                                            Apply
-                                              (6,
-                                                Apply
-                                                  (?,
-                                                    Variable
-                                                      (?,
-                                                        map_rec/0),
-                                                    [
-                                                      Variable
-                                                        (?,
-                                                          counter/0)
-                                                    ]),
-                                                [
-                                                  Variable
-                                                    (6,
-                                                      f/0);
-                                                  Variable
-                                                    (6,
-                                                      xs/0)
-                                                ])))
-                                    ]))
-                            ]))
-                    ])
-                  in
-                LetFun 4
-                  (non_rec, @.,
-                    [
                       ((map,
                         [
                           B;
@@ -126,74 +29,52 @@ Value
                           Type
                             (list/1,
                               C)),
-                        Apply
+                        Match
                           (?,
                             Variable
                               (?,
-                                map_rec/0),
+                                x_1/0),
                             [
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      read_counter/1),
-                                  [
-                                    Tuple
-                                      (?)
-                                  ]);
-                              Variable
-                                (?,
-                                  f/0);
-                              Variable
-                                (?,
-                                  x_1/0)
+                              (Constructor
+                                ([]/1),
+                                Constructor
+                                  (5,
+                                    []/1));
+                              (Constructor
+                                (cons/1,
+                                  x,
+                                  xs),
+                                Constructor
+                                  (6,
+                                    cons/1,
+                                    Apply
+                                      (6,
+                                        Variable
+                                          (6,
+                                            f/0),
+                                        [
+                                          Variable
+                                            (6,
+                                              x/0)
+                                        ]),
+                                    Apply
+                                      (6,
+                                        Variable
+                                          (6,
+                                            map/0),
+                                        [
+                                          Variable
+                                            (6,
+                                              f/0);
+                                          Variable
+                                            (6,
+                                              xs/0)
+                                        ])))
                             ]))
                     ])
                   in
                 LetFun 7
                   (rec, @.,
-                    [
-                      ((loop_rec,
-                        [
-                          B
-                        ],
-                        [
-                          (counter,
-                            Type
-                              (nat/1));
-                          (x,
-                            B)
-                        ],
-                        Some
-                          B),
-                        Match
-                          (?,
-                            Variable
-                              (?,
-                                counter/0),
-                            [
-                              (Constructor
-                                (O/1),
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        not_terminated/1),
-                                    [
-                                      Tuple
-                                        (?)
-                                    ]));
-                              (Constructor
-                                (S/1,
-                                  counter),
-                                Variable
-                                  (7,
-                                    x/0))
-                            ]))
-                    ])
-                  in
-                LetFun 7
-                  (non_rec, @.,
                     [
                       ((loop,
                         [
@@ -205,25 +86,9 @@ Value
                         ],
                         Some
                           B),
-                        Apply
-                          (?,
-                            Variable
-                              (?,
-                                loop_rec/0),
-                            [
-                              Apply
-                                (?,
-                                  Variable
-                                    (?,
-                                      read_counter/1),
-                                  [
-                                    Tuple
-                                      (?)
-                                  ]);
-                              Variable
-                                (?,
-                                  x/0)
-                            ]))
+                        Variable
+                          (7,
+                            x/0))
                     ])
                   in
                 Apply

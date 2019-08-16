@@ -67,7 +67,6 @@ let rec add x data = function
         bal (add x data l) v d r
       else
         bal l v d (add x data r)
-[@@coq_rec]
 
 let rec find x = function
     Empty ->
@@ -76,7 +75,6 @@ let rec find x = function
       let c = Ord.compare x v in
       if c = 0 then d
       else find x (if c < 0 then l else r)
-[@@coq_rec]
 
 let rec mem x = function
     Empty ->
@@ -84,25 +82,21 @@ let rec mem x = function
   | Node(l, v, d, r, _) ->
       let c = Ord.compare x v in
       c = 0 || mem x (if c < 0 then l else r)
-[@@coq_rec]
 
 let rec min_binding = function
     Empty -> raise Not_found
   | Node(Empty, x, d, r, _) -> (x, d)
   | Node(l, x, d, r, _) -> min_binding l
-[@@coq_rec]
 
 let rec max_binding = function
     Empty -> raise Not_found
   | Node(l, x, d, Empty, _) -> (x, d)
   | Node(l, x, d, r, _) -> max_binding r
-[@@coq_rec]
 
 let rec remove_min_binding = function
     Empty -> invalid_arg "Map.remove_min_elt"
   | Node(Empty, x, d, r, _) -> r
   | Node(l, x, d, r, _) -> bal (remove_min_binding l) x d r
-[@@coq_rec]
 
 let remove_merge t1 t2 =
   match (t1, t2) with
@@ -123,13 +117,11 @@ let rec remove x = function
         bal (remove x l) v d r
       else
         bal l v d (remove x r)
-[@@coq_rec]
 
 let rec iter f = function
     Empty -> ()
   | Node(l, v, d, r, _) ->
       iter f l; f v d; iter f r
-[@@coq_rec]
 
 let rec map f = function
     Empty ->
@@ -139,7 +131,6 @@ let rec map f = function
       let d' = f d in
       let r' = map f r in
       Node(l', v, d', r', h)
-[@@coq_rec]
 
 let rec mapi f = function
     Empty ->
@@ -149,24 +140,20 @@ let rec mapi f = function
       let d' = f v d in
       let r' = mapi f r in
       Node(l', v, d', r', h)
-[@@coq_rec]
 
 let rec fold f m accu =
   match m with
     Empty -> accu
   | Node(l, v, d, r, _) ->
       fold f r (f v d (fold f l accu))
-[@@coq_rec]
 
 let rec for_all p = function
     Empty -> true
   | Node(l, v, d, r, _) -> p v d && for_all p l && for_all p r
-[@@coq_rec]
 
 let rec exists_ p = function
     Empty -> false
   | Node(l, v, d, r, _) -> p v d || exists_ p l || exists_ p r
-[@@coq_rec]
 
 (* Beware: those two functions assume that the added k is *strictly*
    smaller (or bigger) than all the present keys in the tree; it
@@ -180,13 +167,11 @@ let rec add_min_binding k v = function
   | Empty -> singleton k v
   | Node (l, x, d, r, h) ->
     bal (add_min_binding k v l) x d r
-[@@coq_rec]
 
 let rec add_max_binding k v = function
   | Empty -> singleton k v
   | Node (l, x, d, r, h) ->
     bal l x d (add_max_binding k v r)
-[@@coq_rec]
 
 (* Same as create and bal, but no assumptions are made on the
    relative heights of l and r. *)
@@ -227,7 +212,6 @@ let rec split x = function
         let (ll, pres, rl) = split x l in (ll, pres, join rl v d r)
       else
         let (lr, pres, rr) = split x r in (join l v d lr, pres, rr)
-[@@coq_rec]
 
 let rec merge f s1 s2 =
   match (s1, s2) with
@@ -247,7 +231,6 @@ let rec filter p = function
       let pvd = p v d in
       let r' = filter p r in
       if pvd then join l' v d r' else concat l' r'
-[@@coq_rec]
 
 let rec partition p = function
     Empty -> (Empty, Empty)
@@ -259,7 +242,6 @@ let rec partition p = function
       if pvd
       then (join lt v d rt, concat lf rf)
       else (concat lt rt, join lf v d rf)
-[@@coq_rec]
 
 type 'a enumeration = End | More of key * 'a * 'a t * 'a enumeration
 
@@ -267,7 +249,6 @@ let rec cons_enum m e =
   match m with
     Empty -> e
   | Node(l, v, d, r, _) -> cons_enum l (More(v, d, r, e))
-[@@coq_rec]
 
 let compare cmp m1 m2 =
   let rec compare_aux e1 e2 =
@@ -297,12 +278,10 @@ let equal cmp m1 m2 =
 let rec cardinal = function
     Empty -> 0
   | Node(l, _, _, r, _) -> cardinal l + 1 + cardinal r
-[@@coq_rec]
 
 let rec bindings_aux accu = function
     Empty -> accu
   | Node(l, v, d, r, _) -> bindings_aux ((v, d) :: bindings_aux accu r) l
-[@@coq_rec]
 
 let bindings s =
   bindings_aux [] s

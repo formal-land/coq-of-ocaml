@@ -16,25 +16,8 @@
 let rec length_aux len = function
     [] -> len
   | a::l -> length_aux (len + 1) l
-[@@coq_rec]
 
 let length l = length_aux 0 l
-
-let hd = function
-    [] -> failwith "hd"
-  | a::l -> a
-
-let tl = function
-    [] -> failwith "tl"
-  | a::l -> l
-
-let nth l n =
-  if n < 0 then invalid_arg "List.nth" else
-  let rec nth_aux_coq_rec l n =
-    match l with
-    | [] -> failwith "nth"
-    | a::l -> if n = 0 then a else nth_aux_coq_rec l (n-1)
-  in nth_aux_coq_rec l n
 
 let append = (@)
 
@@ -42,26 +25,22 @@ let rec rev_append l1 l2 =
   match l1 with
     [] -> l2
   | a :: l -> rev_append l (a :: l2)
-[@@coq_rec]
 
 let rev l = rev_append l []
 
 let rec flatten = function
     [] -> []
   | l::r -> l @ flatten r
-[@@coq_rec]
 
 let concat = flatten
 
 let rec map f = function
     [] -> []
   | a::l -> let r = f a in r :: map f l
-[@@coq_rec]
 
 let rec mapi_aux i f = function
     [] -> []
   | a::l -> let r = f i a in r :: mapi_aux (i + 1) f l
-[@@coq_rec]
 
 let mapi f l = mapi_aux 0 f l
 
@@ -71,127 +50,23 @@ let rev_map f l =
     | a::l -> rmap_f_coq_rec (f a :: accu) l in
   rmap_f_coq_rec [] l
 
-let rec iter f = function
-    [] -> ()
-  | a::l -> f a; iter f l
-[@@coq_rec]
-
-let rec iteri_aux i f = function
-    [] -> ()
-  | a::l -> f i a; iteri_aux (i + 1) f l
-[@@coq_rec]
-
-let iteri f l = iteri_aux 0 f l
-
 let rec fold_left f accu l =
   match l with
     [] -> accu
   | a::l -> fold_left f (f accu a) l
-[@@coq_rec]
 
 let rec fold_right f l accu =
   match l with
     [] -> accu
   | a::l -> f a (fold_right f l accu)
-[@@coq_rec]
-
-let rec map2 f l1 l2 =
-  match (l1, l2) with
-    ([], []) -> []
-  | (a1::l1, a2::l2) -> let r = f a1 a2 in r :: map2 f l1 l2
-  | (_, _) -> invalid_arg "List.map2"
-[@@coq_rec]
-
-let rev_map2 f l1 l2 =
-  let rec rmap2_f_coq_rec accu l1 l2 =
-    match (l1, l2) with
-    | ([], []) -> accu
-    | (a1::l1, a2::l2) -> rmap2_f_coq_rec (f a1 a2 :: accu) l1 l2
-    | (_, _) -> invalid_arg "List.rev_map2" in
-  rmap2_f_coq_rec [] l1 l2
-
-let rec iter2 f l1 l2 =
-  match (l1, l2) with
-    ([], []) -> ()
-  | (a1::l1, a2::l2) -> f a1 a2; iter2 f l1 l2
-  | (_, _) -> invalid_arg "List.iter2"
-[@@coq_rec]
-
-let rec fold_left2 f accu l1 l2 =
-  match (l1, l2) with
-    ([], []) -> accu
-  | (a1::l1, a2::l2) -> fold_left2 f (f accu a1 a2) l1 l2
-  | (_, _) -> invalid_arg "List.fold_left2"
-[@@coq_rec]
-
-let rec fold_right2 f l1 l2 accu =
-  match (l1, l2) with
-    ([], []) -> accu
-  | (a1::l1, a2::l2) -> f a1 a2 (fold_right2 f l1 l2 accu)
-  | (_, _) -> invalid_arg "List.fold_right2"
-[@@coq_rec]
 
 let rec for_all p = function
     [] -> true
   | a::l -> p a && for_all p l
-[@@coq_rec]
 
 let rec _exists p = function
     [] -> false
   | a::l -> p a || _exists p l
-[@@coq_rec]
-
-let rec for_all2 p l1 l2 =
-  match (l1, l2) with
-    ([], []) -> true
-  | (a1::l1, a2::l2) -> p a1 a2 && for_all2 p l1 l2
-  | (_, _) -> invalid_arg "List.for_all2"
-[@@coq_rec]
-
-let rec _exists2 p l1 l2 =
-  match (l1, l2) with
-    ([], []) -> false
-  | (a1::l1, a2::l2) -> p a1 a2 || _exists2 p l1 l2
-  | (_, _) -> invalid_arg "List.exists2"
-[@@coq_rec]
-
-(*let rec mem x = function
-    [] -> false
-  | a::l -> compare a x = 0 || mem x l
-
-let rec memq x = function
-    [] -> false
-  | a::l -> a == x || memq x l
-
-let rec assoc x = function
-    [] -> raise Not_found
-  | (a,b)::l -> if compare a x = 0 then b else assoc x l
-
-let rec assq x = function
-    [] -> raise Not_found
-  | (a,b)::l -> if a == x then b else assq x l
-
-let rec mem_assoc x = function
-  | [] -> false
-  | (a, b) :: l -> compare a x = 0 || mem_assoc x l
-
-let rec mem_assq x = function
-  | [] -> false
-  | (a, b) :: l -> a == x || mem_assq x l
-
-let rec remove_assoc x = function
-  | [] -> []
-  | (a, b as pair) :: l ->
-      if compare a x = 0 then l else pair :: remove_assoc x l
-
-let rec remove_assq x = function
-  | [] -> []
-  | (a, b as pair) :: l -> if a == x then l else pair :: remove_assq x l*)
-
-let rec find p = function
-  | [] -> raise Not_found
-  | x :: l -> if p x then x else find p l
-[@@coq_rec]
 
 let find_all p =
   let rec find_coq_rec accu = function
@@ -215,14 +90,6 @@ let rec split = function
     [] -> ([], [])
   | (x,y)::l ->
       let (rx, ry) = split l in (x::rx, y::ry)
-[@@coq_rec]
-
-let rec combine l1 l2 =
-  match (l1, l2) with
-    ([], []) -> []
-  | (a1::l1, a2::l2) -> (a1, a2) :: combine l1 l2
-  | (_, _) -> invalid_arg "List.combine"
-[@@coq_rec]
 
 (** sorting *)
 let rec merge cmp l1 l2 =
@@ -235,7 +102,6 @@ let rec merge cmp l1 l2 =
         then h1 :: merge cmp t1 l2
         else h2 :: rev_merge_aux_coq_rec t2 in
   rev_merge_aux_coq_rec l2
-[@@coq_rec]
 
 let rec chop k l =
   if k = 0 then l else begin
@@ -243,7 +109,6 @@ let rec chop k l =
     | x::t -> chop (k-1) t
     | _ -> assert false
   end
-[@@coq_rec]
 
 module StableSort = struct
   let rec rev_merge cmp l1 l2 accu =
@@ -256,7 +121,7 @@ module StableSort = struct
           then rev_merge cmp t1 l2 (h1::accu)
           else rev_merge_aux_coq_rec t2 (h2::accu) in
     rev_merge_aux_coq_rec l2 accu
-  [@@coq_rec]
+
 
   let rec rev_merge_rev cmp l1 l2 accu =
     let rec rev_merge_rev_aux_coq_rec l2 accu =
@@ -268,7 +133,7 @@ module StableSort = struct
           then rev_merge_rev cmp t1 l2 (h1::accu)
           else rev_merge_rev_aux_coq_rec t2 (h2::accu) in
     rev_merge_rev_aux_coq_rec l2 accu
-  [@@coq_rec]
+
 
   let rec sort cmp n l =
     match n, l with
@@ -336,7 +201,7 @@ module SortUniq = struct
           then rev_merge cmp t1 l2 (h1::accu)
           else rev_merge_aux_coq_rec t2 (h2::accu) in
     rev_merge_aux_coq_rec l2 accu
-  [@@coq_rec]
+
 
   let rec rev_merge_rev cmp l1 l2 accu =
     let rec rev_merge_rev_aux_coq_rec l2 accu =
@@ -350,7 +215,7 @@ module SortUniq = struct
           then rev_merge_rev cmp t1 l2 (h1::accu)
           else rev_merge_rev_aux_coq_rec t2 (h2::accu) in
     rev_merge_rev_aux_coq_rec l2 accu
-  [@@coq_rec]
+
 
   let rec sort cmp n l =
     match n, l with

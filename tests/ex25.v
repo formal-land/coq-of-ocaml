@@ -15,18 +15,17 @@ Definition s1 : Z := OCaml.List.length l1.
 
 Definition s2 : Z := OCaml.List.length l2.
 
-Definition h {A : Type} (x : A) : M [ OCaml.Failure ] Z :=
+Definition h {A : Type} (x : A) : Z :=
   match x with
   | _ => OCaml.List.hd l2
   end.
 
-Definition t {A : Type} (x : A) : M [ OCaml.Failure ] (list Z) :=
+Definition t {A : Type} (x : A) : list Z :=
   match x with
   | _ => OCaml.List.tl l2
   end.
 
-Definition x {A : Type} (x : A)
-  : M [ OCaml.Failure; OCaml.Invalid_argument ] Z :=
+Definition x {A : Type} (x : A) : Z :=
   match x with
   | _ => OCaml.List.nth l2 1
   end.
@@ -53,47 +52,11 @@ Definition fl : Z := OCaml.List.fold_left (fun s => fun x => Z.add s x) 0 l2.
 
 Definition fr : Z := OCaml.List.fold_right (fun x => fun s => Z.add s x) l2 0.
 
-Definition m2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] (list Z) :=
-  match x_1 with
-  | _ => OCaml.List.map2 (fun x => fun y => Z.add x y) l2 l2
-  end.
-
-Definition rm2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] (list Z) :=
-  match x_1 with
-  | _ => OCaml.List.rev_map2 (fun x => fun y => Z.add x y) l2 l2
-  end.
-
-Definition fl2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
-  match x_1 with
-  | _ =>
-    OCaml.List.fold_left2 (fun s => fun x => fun y => Z.add (Z.add s x) y) 0 l2
-      l2
-  end.
-
-Definition fr2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] Z :=
-  match x_1 with
-  | _ =>
-    OCaml.List.fold_right2 (fun s => fun x => fun y => Z.add (Z.add s x) y) l2
-      l2 0
-  end.
-
 Definition all : bool := OCaml.List.for_all (fun x => equiv_decb x 2) l2.
 
 Definition ex : bool := OCaml.List._exists (fun x => equiv_decb x 2) l2.
 
-Definition all2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
-  match x_1 with
-  | _ => OCaml.List.for_all2 (fun x => fun y => equiv_decb x y) l2 l2
-  end.
-
-Definition ex2 {A : Type} (x_1 : A) : M [ OCaml.Invalid_argument ] bool :=
-  match x_1 with
-  | _ => OCaml.List._exists2 (fun x => fun y => equiv_decb x y) l2 l2
-  end.
-
-Definition me : bool := OCaml.List.mem 2 l2.
-
-Definition fin {A : Type} (x_1 : A) : M [ OCaml.Not_found ] Z :=
+Definition fin {A : Type} (x_1 : A) : Z :=
   match x_1 with
   | _ => OCaml.List.find (fun x => equiv_decb x 1) l2
   end.
@@ -107,7 +70,7 @@ Definition fina : list Z :=
 Definition par : (list Z) * (list Z) :=
   OCaml.List.partition (fun x => OCaml.Pervasives.gt x 2) l2.
 
-Definition asso {A : Type} (x_1 : A) : M [ OCaml.Not_found ] string :=
+Definition asso {A : Type} (x_1 : A) : string :=
   match x_1 with
   | _ => OCaml.List.assoc 2 l3
   end.
@@ -124,23 +87,22 @@ Definition rasso {A : Type} (x_1 : A) : list (Z * string) :=
 
 Definition sp : (list Z) * (list string) := OCaml.List.split l3.
 
-Definition com {A : Type} (x_1 : A)
-  : M [ OCaml.Invalid_argument ] (list (Z * Z)) :=
+Definition com {A : Type} (x_1 : A) : list (Z * Z) :=
   match x_1 with
   | _ => OCaml.List.combine l2 l2
   end.
 
-Definition so {A : Type} (x_1 : A) : M [ Counter; NonTermination ] (list Z) :=
+Definition so {A : Type} (x_1 : A) : list Z :=
   match x_1 with
   | _ => OCaml.List.sort (fun x => fun y => Z.sub y x) l2
   end.
 
-Definition sso {A : Type} (x_1 : A) : M [ Counter; NonTermination ] (list Z) :=
+Definition sso {A : Type} (x_1 : A) : list Z :=
   match x_1 with
   | _ => OCaml.List.stable_sort (fun x => fun y => Z.sub y x) l2
   end.
 
-Definition fso {A : Type} (x_1 : A) : M [ Counter; NonTermination ] (list Z) :=
+Definition fso {A : Type} (x_1 : A) : list Z :=
   match x_1 with
   | _ => OCaml.List.fast_sort (fun x => fun y => Z.sub y x) l2
   end.

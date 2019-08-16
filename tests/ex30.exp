@@ -1,123 +1,30 @@
 3 Module M:
   4
   Value
-    (non_rec, @.,
-      [
-        ((f, [ A; B ], [ (x, A) ], Some B),
-          Match
-            (?, Variable (?, x/0),
-              [
-                (Any,
-                  Apply
-                    (4,
-                      Variable
-                        (4,
-                          OCaml.Pervasives.failwith/2),
-                      [
-                        Constant
-                          (4,
-                            String("failure"))
-                      ]))
-              ]))
-      ])
+    (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/2)), Constant (4, Int(12))) ])
 
 7 Module N:
   8
   Value
     (non_rec, @.,
-      [
-        ((f, [ A; B ], [ (x, A) ], Some B),
-          Match
-            (?, Variable (?, x/0),
-              [
-                (Any,
-                  Apply
-                    (8,
-                      Variable
-                        (8,
-                          OCaml.assert/2),
-                      [
-                        Constructor
-                          (8,
-                            false/2)
-                      ]))
-              ]))
-      ])
+      [ ((n, [ ], [ ], Some Type (bool/2)), Constructor (8, true/2)) ])
   
   9
   Value
-    (non_rec, @.,
-      [
-        ((x, [ ], [ ], Some Type (unit/2)),
-          Match
-            (9,
-              Run
-                (?, OCaml.Assert_failure/2, [ ],
-                  Apply
-                    (9, Variable (9, f/0),
-                      [ Constructor (9, tt/2) ])),
-              [
-                (Constructor (inl/2, x), Variable (?, x/0));
-                (Constructor (inr/2, Tuple (Any)),
-                  Constructor (9, tt/2))
-              ]))
-      ])
+    (non_rec, @., [ ((x, [ ], [ ], Some Type (bool/2)), Variable (9, n/0)) ])
   
   10 Open M
   
   11
   Value
-    (non_rec, @.,
-      [
-        ((y, [ ], [ ], Some Type (unit/2)),
-          Match
-            (11,
-              Run
-                (?, OCaml.Failure/2, [ ],
-                  Apply
-                    (11, Variable (11, M.f/1),
-                      [ Constructor (11, tt/2) ])),
-              [
-                (Constructor (inl/2, x), Variable (?, x/0));
-                (Constructor (inr/2, Tuple (Any)),
-                  Constructor (11, tt/2))
-              ]))
-      ])
+    (non_rec, @., [ ((y, [ ], [ ], Some Type (Z/2)), Variable (11, M.n/1)) ])
 
 14
 Value
-  (non_rec, @.,
-    [
-      ((b, [ ], [ ], Some Type (unit/1)),
-        Match
-          (14,
-            Run
-              (?, OCaml.Assert_failure/1, [ ],
-                Apply
-                  (14, Variable (14, N.f/0),
-                    [ Constructor (14, tt/1) ])),
-            [
-              (Constructor (inl/1, x), Variable (?, x/0));
-              (Constructor (inr/1, Tuple (Any)), Constructor (14, tt/1))
-            ]))
-    ])
+  (non_rec, @., [ ((b, [ ], [ ], Some Type (bool/1)), Variable (14, N.n/0)) ])
 
 15 Open N
 
 16
 Value
-  (non_rec, @.,
-    [
-      ((b', [ ], [ ], Some Type (unit/1)),
-        Match
-          (16,
-            Run
-              (?, OCaml.Assert_failure/1, [ ],
-                Apply
-                  (16, Variable (16, N.f/0),
-                    [ Constructor (16, tt/1) ])),
-            [
-              (Constructor (inl/1, x), Variable (?, x/0));
-              (Constructor (inr/1, Tuple (Any)), Constructor (16, tt/1))
-            ]))
-    ])
+  (non_rec, @., [ ((b', [ ], [ ], Some Type (bool/1)), Variable (16, N.n/0)) ])

@@ -8,24 +8,15 @@ Inductive tree : Type :=
 | Leaf : tree
 | Node : tree -> Z -> tree -> tree.
 
-Fixpoint find_rec (counter : nat) (x : Z) (t : tree)
-  : M [ NonTermination ] bool :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
-    match t with
-    | Leaf => ret false
-    | Node t1 x' t2 =>
-      if OCaml.Pervasives.lt x x' then
-        (find_rec counter) x t1
+Fixpoint find (x : Z) (t : tree) : bool :=
+  match t with
+  | Leaf => false
+  | Node t1 x' t2 =>
+    if OCaml.Pervasives.lt x x' then
+      find x t1
+    else
+      if OCaml.Pervasives.lt x' x then
+        find x t2
       else
-        if OCaml.Pervasives.lt x' x then
-          (find_rec counter) x t2
-        else
-          ret true
-    end
+        true
   end.
-
-Definition find (x : Z) (t : tree) : M [ Counter; NonTermination ] bool :=
-  let! x_1 := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (find_rec x_1 x t).

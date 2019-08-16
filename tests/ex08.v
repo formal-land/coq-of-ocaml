@@ -23,45 +23,21 @@ Inductive t2 (a : Type) : Type :=
 Arguments D1 {a}.
 Arguments D2 {a} _ _.
 
-Fixpoint of_list_rec {A : Type} (counter : nat) (l : list A)
-  : M [ NonTermination ] (t2 A) :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
-    match l with
-    | [] => ret D1
-    | cons x xs =>
-      let! x_1 := (of_list_rec counter) xs in
-      ret (D2 x x_1)
-    end
+Fixpoint of_list {A : Type} (l : list A) : t2 A :=
+  match l with
+  | [] => D1
+  | cons x xs => D2 x (of_list xs)
   end.
 
-Definition of_list {A : Type} (l : list A)
-  : M [ Counter; NonTermination ] (t2 A) :=
-  let! x := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (of_list_rec x l).
-
-Fixpoint sum_rec (counter : nat) (l : t2 Z) : M [ NonTermination ] Z :=
-  match counter with
-  | O => not_terminated tt
-  | S counter =>
-    match l with
-    | D1 => ret 0
-    | D2 x xs =>
-      let! x_1 := (sum_rec counter) xs in
-      ret (Z.add x x_1)
-    end
+Fixpoint sum (l : t2 Z) : Z :=
+  match l with
+  | D1 => 0
+  | D2 x xs => Z.add x (sum xs)
   end.
 
-Definition sum (l : t2 Z) : M [ Counter; NonTermination ] Z :=
-  let! x := lift [_;_] "10" (read_counter tt) in
-  lift [_;_] "01" (sum_rec x l).
-
-Definition s {A : Type} (x : A) : M [ Counter; NonTermination ] Z :=
+Definition s {A : Type} (x : A) : Z :=
   match x with
-  | _ =>
-    let! x_1 := of_list (cons 5 (cons 7 (cons 3 []))) in
-    sum x_1
+  | _ => sum (of_list (cons 5 (cons 7 (cons 3 []))))
   end.
 
 Parameter t3 : Type.

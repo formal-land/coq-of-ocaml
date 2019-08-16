@@ -31,74 +31,27 @@ Inductive t2:
 Value
   (rec, @.,
     [
-      ((of_list_rec, [ A ], [ (counter, Type (nat/1)); (l, Type (list/1, A)) ],
-        Some Type (t2/0, A)),
-        Match
-          (?, Variable (?, counter/0),
-            [
-              (Constructor (O/1),
-                Apply
-                  (?,
-                    Variable
-                      (?,
-                        not_terminated/1),
-                    [
-                      Tuple
-                        (?)
-                    ]));
-              (Constructor (S/1, counter),
-                Match
-                  (19,
-                    Variable
-                      (19,
-                        l/0),
-                    [
-                      (Constructor
-                        ([]/1),
-                        Constructor
-                          (20,
-                            D1/0));
-                      (Constructor
-                        (cons/1,
-                          x,
-                          xs),
-                        Constructor
-                          (21,
-                            D2/0,
-                            Variable
-                              (21,
-                                x/0),
-                            Apply
-                              (21,
-                                Apply
-                                  (?,
-                                    Variable
-                                      (?,
-                                        of_list_rec/0),
-                                    [
-                                      Variable
-                                        (?,
-                                          counter/0)
-                                    ]),
-                                [
-                                  Variable
-                                    (21,
-                                      xs/0)
-                                ])))
-                    ]))
-            ]))
-    ])
-
-18
-Value
-  (non_rec, @.,
-    [
       ((of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)),
-        Apply
-          (?, Variable (?, of_list_rec/0),
+        Match
+          (19, Variable (19, l/0),
             [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
-              Variable (?, l/0)
+              (Constructor ([]/1), Constructor (20, D1/0));
+              (Constructor (cons/1, x, xs),
+                Constructor
+                  (21, D2/0,
+                    Variable
+                      (21,
+                        x/0),
+                    Apply
+                      (21,
+                        Variable
+                          (21,
+                            of_list/0),
+                        [
+                          Variable
+                            (21,
+                              xs/0)
+                        ])))
             ]))
     ])
 
@@ -106,78 +59,32 @@ Value
 Value
   (rec, @.,
     [
-      ((sum_rec, [ ], [ (counter, Type (nat/1)); (l, Type (t2/0, Type (Z/1))) ],
-        Some Type (Z/1)),
+      ((sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)),
         Match
-          (?, Variable (?, counter/0),
+          (24, Variable (24, l/0),
             [
-              (Constructor (O/1),
+              (Constructor (D1/0), Constant (25, Int(0)));
+              (Constructor (D2/0, x, xs),
                 Apply
-                  (?,
+                  (26,
                     Variable
-                      (?,
-                        not_terminated/1),
+                      (26,
+                        Z.add/1),
                     [
-                      Tuple
-                        (?)
-                    ]));
-              (Constructor (S/1, counter),
-                Match
-                  (24,
-                    Variable
-                      (24,
-                        l/0),
-                    [
-                      (Constructor
-                        (D1/0),
-                        Constant
-                          (25,
-                            Int(0)));
-                      (Constructor
-                        (D2/0,
-                          x,
-                          xs),
-                        Apply
-                          (26,
+                      Variable
+                        (26,
+                          x/0);
+                      Apply
+                        (26,
+                          Variable
+                            (26,
+                              sum/0),
+                          [
                             Variable
                               (26,
-                                Z.add/1),
-                            [
-                              Variable
-                                (26,
-                                  x/0);
-                              Apply
-                                (26,
-                                  Apply
-                                    (?,
-                                      Variable
-                                        (?,
-                                          sum_rec/0),
-                                      [
-                                        Variable
-                                          (?,
-                                            counter/0)
-                                      ]),
-                                  [
-                                    Variable
-                                      (26,
-                                        xs/0)
-                                  ])
-                            ]))
+                                xs/0)
+                          ])
                     ]))
-            ]))
-    ])
-
-23
-Value
-  (non_rec, @.,
-    [
-      ((sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)),
-        Apply
-          (?, Variable (?, sum_rec/0),
-            [
-              Apply (?, Variable (?, read_counter/1), [ Tuple (?) ]);
-              Variable (?, l/0)
             ]))
     ])
 

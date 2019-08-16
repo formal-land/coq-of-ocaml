@@ -37,6 +37,13 @@ class Test
     File.read(file_name)
   end
 
+  # Update the reference snapshot file.
+  def update(mode)
+    output = coq_of_ocaml(mode)
+    file_name = extension('.' + mode)
+    File.write(file_name, output)
+  end
+
   def check(mode)
     coq_of_ocaml(mode) == reference(mode)
   end
@@ -129,7 +136,18 @@ class Tests
   end
 end
 
-tests = Tests.new(Dir.glob('tests/ex*.ml'))
+black_list = [
+  "ex09",
+  "ex20",
+  "ex25",
+  "ex27",
+  "ex33"
+]
+
+test_files = Dir.glob('tests/ex*.ml').select do |file_name|
+  not black_list.any? {|black_listed_test| "tests/#{black_listed_test}.ml" == file_name}
+end
+tests = Tests.new(test_files)
 tests.compile
 puts
 tests.check('exp')
