@@ -9,6 +9,7 @@ build: [
   ["sh" "-c" "cd OCaml && ./configure.sh"]
   [make "-C" "OCaml" "-j%{jobs}%"]
   [make "-j%{jobs}%"]
+  [make "test"] {with-test}
 ]
 install: [
   [make "-C" "OCaml" "install"]

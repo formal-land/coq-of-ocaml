@@ -45,7 +45,7 @@ script:
       opam install ${PACKAGE_NAME} --deps-only -y
       opam list
       # Then install the package itself in verbose mode
-      opam install ${PACKAGE_NAME} -v
+      opam install ${PACKAGE_NAME} -v --with-test
     fi;
     " script
 - docker stop COQ  # optional
