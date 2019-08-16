@@ -61,7 +61,7 @@ This compiler needs a working installation of OCaml and Coq, plus the following 
 You have two parts to compile in order:
 
 #### The Coq library
-Go to `CoqOfOCaml/` and run:
+Go to `OCaml/` and run:
 
     ./configure.sh
     make
