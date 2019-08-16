@@ -1,6 +1,6 @@
 3
 Value
-  (rec, @.,
+  (rec,
     [
       ((map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
         Some Type (list/1, B)),
@@ -39,7 +39,7 @@ Value
 
 8
 Value
-  (rec, @.,
+  (rec,
     [
       ((fold, [ A; B ], [ (f, (A -> (B -> A))); (a, A); (l, Type (list/1, B)) ],
         Some A),
@@ -79,7 +79,7 @@ Value
 
 13
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Constructor
@@ -95,7 +95,7 @@ Value
 
 15
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n, [ A ],
         [

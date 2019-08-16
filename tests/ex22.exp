@@ -1,6 +1,6 @@
 3
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((op_plus_plus_plus, [ ], [ (x, Type (Z/1)); (y, Type (Z/1)) ],
         Some Type (Z/1)),
@@ -11,7 +11,7 @@ Value
 
 4
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((op_tilde_tilde, [ ], [ (x, Type (Z/1)) ], Some Type (Z/1)),
         Apply (4, Variable (4, Z.opp/1), [ Variable (4, x/0) ]))
@@ -19,7 +19,7 @@ Value
 
 6
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((z, [ ], [ ], Some Type (Z/1)),
         Apply

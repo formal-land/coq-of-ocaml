@@ -4,12 +4,11 @@ Inductive set:
 
 7
 Value
-  (non_rec, @.,
-    [ ((empty, [ ], [ ], Some Type (set/0)), Constructor (7, Empty/0)) ])
+  (non_rec, [ ((empty, [ ], [ ], Some Type (set/0)), Constructor (7, Empty/0)) ])
 
 9
 Value
-  (rec, @.,
+  (rec,
     [
       ((member, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ], Some Type (bool/1)),
         Match
@@ -81,7 +80,7 @@ Value
 
 20
 Value
-  (rec, @.,
+  (rec,
     [
       ((insert, [ ], [ (x, Type (Z/1)); (s, Type (set/0)) ], Some Type (set/0)),
         Match

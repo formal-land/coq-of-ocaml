@@ -4,7 +4,7 @@ Inductive tree:
 
 7
 Value
-  (rec, @.,
+  (rec,
     [
       ((find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ], Some Type (bool/1)),
         Match

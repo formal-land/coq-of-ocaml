@@ -1,6 +1,6 @@
 4
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_eq, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -10,7 +10,7 @@ Value
 
 5
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_neq1, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -20,7 +20,7 @@ Value
 
 6
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_neq2, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -30,7 +30,7 @@ Value
 
 7
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_lt, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -40,7 +40,7 @@ Value
 
 8
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_gt, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -50,7 +50,7 @@ Value
 
 9
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_le, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -60,7 +60,7 @@ Value
 
 10
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_ge, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -70,7 +70,7 @@ Value
 
 11
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((comp, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -80,7 +80,7 @@ Value
 
 12
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_min, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -90,7 +90,7 @@ Value
 
 13
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_max, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -100,7 +100,7 @@ Value
 
 18
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_not, [ ], [ ], Some Type (bool/1)),
         Apply (18, Variable (18, negb/1), [ Constructor (18, false/1) ]))
@@ -108,7 +108,7 @@ Value
 
 19
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_and, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -118,7 +118,7 @@ Value
 
 20
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_and_old, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -128,7 +128,7 @@ Value
 
 21
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_or, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -138,7 +138,7 @@ Value
 
 22
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b_or_old, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -148,7 +148,7 @@ Value
 
 25
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((app1, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -161,7 +161,7 @@ Value
 
 26
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((app2, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -174,7 +174,7 @@ Value
 
 29
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_neg1, [ ], [ ], Some Type (Z/1)),
         Apply (29, Variable (29, Z.opp/1), [ Constant (29, Int(12)) ]))
@@ -182,12 +182,11 @@ Value
 
 30
 Value
-  (non_rec, @.,
-    [ ((n_neg2, [ ], [ ], Some Type (Z/1)), Constant (30, Int(-12))) ])
+  (non_rec, [ ((n_neg2, [ ], [ ], Some Type (Z/1)), Constant (30, Int(-12))) ])
 
 31
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_pos1, [ ], [ ], Some Type (Z/1)),
         Apply (31, Variable (31, /1), [ Constant (31, Int(12)) ]))
@@ -195,12 +194,11 @@ Value
 
 32
 Value
-  (non_rec, @.,
-    [ ((n_pos2, [ ], [ ], Some Type (Z/1)), Constant (32, Int(12))) ])
+  (non_rec, [ ((n_pos2, [ ], [ ], Some Type (Z/1)), Constant (32, Int(12))) ])
 
 33
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_succ, [ ], [ ], Some Type (Z/1)),
         Apply (33, Variable (33, Z.succ/1), [ Constant (33, Int(1)) ]))
@@ -208,7 +206,7 @@ Value
 
 34
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_pred, [ ], [ ], Some Type (Z/1)),
         Apply (34, Variable (34, Z.pred/1), [ Constant (34, Int(1)) ]))
@@ -216,7 +214,7 @@ Value
 
 35
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_plus, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -226,7 +224,7 @@ Value
 
 36
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_minus, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -236,7 +234,7 @@ Value
 
 37
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_times, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -246,7 +244,7 @@ Value
 
 38
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_div, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -256,7 +254,7 @@ Value
 
 39
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_mod, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -266,7 +264,7 @@ Value
 
 40
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_abs, [ ], [ ], Some Type (Z/1)),
         Apply (40, Variable (40, Z.abs/1), [ Constant (40, Int(1)) ]))
@@ -274,7 +272,7 @@ Value
 
 45
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_land, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -284,7 +282,7 @@ Value
 
 46
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_lor, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -294,7 +292,7 @@ Value
 
 47
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_lxor, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -304,7 +302,7 @@ Value
 
 49
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_lsl, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -314,7 +312,7 @@ Value
 
 50
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_lsr, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -324,7 +322,7 @@ Value
 
 57
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((ss, [ ], [ ], Some Type (string/1)),
         Apply
@@ -337,7 +335,7 @@ Value
 
 60
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_char, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -347,7 +345,7 @@ Value
 
 63
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((i, [ ], [ ], Some Type (unit/1)),
         Apply
@@ -357,7 +355,7 @@ Value
 
 66
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((s_bool, [ ], [ ], Some Type (string/1)),
         Apply
@@ -367,7 +365,7 @@ Value
 
 67
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((bool_s, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -377,7 +375,7 @@ Value
 
 68
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((s_n, [ ], [ ], Some Type (string/1)),
         Apply
@@ -387,7 +385,7 @@ Value
 
 69
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n_s, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -397,7 +395,7 @@ Value
 
 74
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -407,7 +405,7 @@ Value
 
 75
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -417,7 +415,7 @@ Value
 
 78
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((ll, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Apply

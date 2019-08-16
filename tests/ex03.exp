@@ -1,6 +1,6 @@
 3
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
         LetVar 4 m = Constant (4, Int(12)) in
@@ -10,11 +10,11 @@ Value
 
 8
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
         LetFun 9
-          (non_rec, @.,
+          (non_rec,
             [
               ((p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C),
                 Apply
@@ -32,7 +32,7 @@ Value
                     ]))
             ]) in
         LetFun 10
-          (non_rec, @.,
+          (non_rec,
             [
               ((c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ],
                 Some A),

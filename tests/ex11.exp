@@ -5,7 +5,7 @@
 
 9
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((r, [ ], [ ], Some Type (SizedString.t/0)),
         Record
@@ -15,7 +15,7 @@ Value
 
 10
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((r', [ ], [ ], Some Type (SizedString.t/0)),
         Record
@@ -25,7 +25,7 @@ Value
 
 12
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((s, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -38,7 +38,7 @@ Value
 
 14
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)),
         Match
@@ -52,7 +52,7 @@ Value
 
 18
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b, [ ], [ ], Some Type (bool/1)),
         Apply (18, Variable (18, f/0), [ Variable (18, r/0) ]))
@@ -60,7 +60,7 @@ Value
 
 19
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b', [ ], [ ], Some Type (bool/1)),
         Apply (19, Variable (19, f/0), [ Variable (19, r'/0) ]))
@@ -73,7 +73,7 @@ Value
   
   27
   Value
-    (non_rec, @.,
+    (non_rec,
       [
         ((p, [ ], [ ], Some Type (t/0)),
           Record
@@ -84,7 +84,7 @@ Value
   
   29
   Value
-    (non_rec, @.,
+    (non_rec,
       [
         ((b, [ ], [ ], Some Type (bool/2)),
           Match

@@ -1,30 +1,21 @@
 3 Module M:
-  4
-  Value
-    (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/2)), Constant (4, Int(12))) ])
+  4 Value (non_rec, [ ((n, [ ], [ ], Some Type (Z/2)), Constant (4, Int(12))) ])
 
 7 Module N:
   8
   Value
-    (non_rec, @.,
-      [ ((n, [ ], [ ], Some Type (bool/2)), Constructor (8, true/2)) ])
+    (non_rec, [ ((n, [ ], [ ], Some Type (bool/2)), Constructor (8, true/2)) ])
   
-  9
-  Value
-    (non_rec, @., [ ((x, [ ], [ ], Some Type (bool/2)), Variable (9, n/0)) ])
+  9 Value (non_rec, [ ((x, [ ], [ ], Some Type (bool/2)), Variable (9, n/0)) ])
   
   10 Open M
   
-  11
-  Value
-    (non_rec, @., [ ((y, [ ], [ ], Some Type (Z/2)), Variable (11, M.n/1)) ])
+  11 Value (non_rec, [ ((y, [ ], [ ], Some Type (Z/2)), Variable (11, M.n/1)) ])
 
 14
-Value
-  (non_rec, @., [ ((b, [ ], [ ], Some Type (bool/1)), Variable (14, N.n/0)) ])
+Value (non_rec, [ ((b, [ ], [ ], Some Type (bool/1)), Variable (14, N.n/0)) ])
 
 15 Open N
 
 16
-Value
-  (non_rec, @., [ ((b', [ ], [ ], Some Type (bool/1)), Variable (16, N.n/0)) ])
+Value (non_rec, [ ((b', [ ], [ ], Some Type (bool/1)), Variable (16, N.n/0)) ])

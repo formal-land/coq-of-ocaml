@@ -4,7 +4,7 @@ Inductive t1:
 
 8
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n, [ ], [ ], Some Type (t1/0)),
         Constructor (8, C2/0, Constructor (8, false/1), Constant (8, Int(3))))
@@ -12,7 +12,7 @@ Value
 
 10
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((m, [ ], [ ], Some Type (bool/1)),
         Match
@@ -29,7 +29,7 @@ Inductive t2:
 
 18
 Value
-  (rec, @.,
+  (rec,
     [
       ((of_list, [ A ], [ (l, Type (list/1, A)) ], Some Type (t2/0, A)),
         Match
@@ -57,7 +57,7 @@ Value
 
 23
 Value
-  (rec, @.,
+  (rec,
     [
       ((sum, [ ], [ (l, Type (t2/0, Type (Z/1))) ], Some Type (Z/1)),
         Match
@@ -90,7 +90,7 @@ Value
 
 28
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((s, [ A ], [ (x, A) ], Some Type (Z/1)),
         Match

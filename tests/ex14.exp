@@ -1,6 +1,6 @@
 3
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((f, [ ], [ (n, Type (Z/1)); (b, Type (bool/1)) ], Some Type (Z/1)),
         IfThenElse

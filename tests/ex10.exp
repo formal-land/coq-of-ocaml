@@ -5,7 +5,7 @@
   
   8
   Value
-    (rec, @.,
+    (rec,
       [
         ((sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2)),
           Match
@@ -38,7 +38,7 @@
   
   13
   Value
-    (rec, @.,
+    (rec,
       [
         ((of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)),
           Match
@@ -68,11 +68,11 @@
   17 Module Inside:
     18
     Value
-      (non_rec, @., [ ((x, [ ], [ ], Some Type (Z/3)), Constant (18, Int(12))) ])
+      (non_rec, [ ((x, [ ], [ ], Some Type (Z/3)), Constant (18, Int(12))) ])
 
 22
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n, [ A ], [ (x, A) ], Some Type (Z/1)),
         Match

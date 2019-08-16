@@ -1,53 +1,45 @@
-4
-Value (non_rec, @., [ ((n, [ ], [ ], Some Type (Z/1)), Constant (4, Int(12))) ])
+4 Value (non_rec, [ ((n, [ ], [ ], Some Type (Z/1)), Constant (4, Int(12))) ])
 
 5
 Value
-  (non_rec, @.,
-    [ ((c1, [ ], [ ], Some Type (ascii/1)), Constant (5, Char("a"))) ])
+  (non_rec, [ ((c1, [ ], [ ], Some Type (ascii/1)), Constant (5, Char("a"))) ])
 
 6
 Value
-  (non_rec, @.,
-    [ ((c2, [ ], [ ], Some Type (ascii/1)), Constant (6, Char("\\n"))) ])
+  (non_rec, [ ((c2, [ ], [ ], Some Type (ascii/1)), Constant (6, Char("\\n"))) ])
 
 7
 Value
-  (non_rec, @.,
-    [ ((c3, [ ], [ ], Some Type (ascii/1)), Constant (7, Char("\\t"))) ])
+  (non_rec, [ ((c3, [ ], [ ], Some Type (ascii/1)), Constant (7, Char("\\t"))) ])
 
 8
 Value
-  (non_rec, @.,
-    [ ((c4, [ ], [ ], Some Type (ascii/1)), Constant (8, Char("\""))) ])
+  (non_rec, [ ((c4, [ ], [ ], Some Type (ascii/1)), Constant (8, Char("\""))) ])
 
 9
 Value
-  (non_rec, @.,
+  (non_rec,
     [ ((s, [ ], [ ], Some Type (string/1)), Constant (9, String("hi\n\t:)\""))) ])
 
 11
 Value
-  (non_rec, @.,
-    [ ((b1, [ ], [ ], Some Type (bool/1)), Constructor (11, false/1)) ])
+  (non_rec, [ ((b1, [ ], [ ], Some Type (bool/1)), Constructor (11, false/1)) ])
 
 12
 Value
-  (non_rec, @.,
-    [ ((b2, [ ], [ ], Some Type (bool/1)), Constructor (12, true/1)) ])
+  (non_rec, [ ((b2, [ ], [ ], Some Type (bool/1)), Constructor (12, true/1)) ])
 
 13
-Value
-  (non_rec, @., [ ((u, [ ], [ ], Some Type (unit/1)), Constructor (13, tt/1)) ])
+Value (non_rec, [ ((u, [ ], [ ], Some Type (unit/1)), Constructor (13, tt/1)) ])
 
 16
 Value
-  (non_rec, @.,
+  (non_rec,
     [ ((l1, [ A ], [ ], Some Type (list/1, A)), Constructor (16, []/1)) ])
 
 17
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((l2, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Constructor
@@ -63,7 +55,7 @@ Value
 
 18
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((o, [ ], [ ], Some Type (option/1, Type (Z/1))),
         IfThenElse

@@ -1,6 +1,6 @@
 3
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((b, [ ], [ ], Some Type (bool/1)),
         Apply
@@ -48,7 +48,7 @@ Value
 
 5
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n1, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -70,7 +70,7 @@ Value
 
 7
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n2, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -128,7 +128,7 @@ Value
 
 9
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n3, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -146,7 +146,7 @@ Value
 
 11
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n4, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -178,7 +178,7 @@ Value
 
 13
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((n5, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -209,7 +209,7 @@ Value
 
 15
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((s, [ ], [ ], Some Type (string/1)),
         Apply
@@ -219,7 +219,7 @@ Value
 
 17
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((c, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -229,7 +229,7 @@ Value
 
 19
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((x, [ ], [ ], Some Type (unit/1)),
         Apply
@@ -239,7 +239,7 @@ Value
 
 21
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((p, [ ], [ ], Some Type (Z/1)),
         Apply
@@ -274,7 +274,7 @@ Value
 
 23
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((l, [ ], [ ], Some Type (list/1, Type (Z/1))),
         Apply
@@ -299,7 +299,7 @@ Value
 
 25
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((y, [ ], [ ], Some Type (Z/1)),
         Apply

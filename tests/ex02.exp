@@ -1,10 +1,9 @@
 3
-Value
-  (non_rec, @., [ ((t0, [ ], [ ], Some Type (unit/1)), Constructor (3, tt/1)) ])
+Value (non_rec, [ ((t0, [ ], [ ], Some Type (unit/1)), Constructor (3, tt/1)) ])
 
 5
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((t1, [ ], [ ], Some (Type (ascii/1) * Type (string/1))),
         Tuple (5, Constant (5, Char("c")), Constant (5, String("one"))))
@@ -12,7 +11,7 @@ Value
 
 7
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((t2, [ ], [ ],
         Some
@@ -26,7 +25,7 @@ Value
 
 9
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((f, [ A ], [ (x, A) ], Some (A * A)),
         Tuple (9, Variable (9, x/0), Variable (9, x/0)))
@@ -34,7 +33,7 @@ Value
 
 11
 Value
-  (non_rec, @.,
+  (non_rec,
     [
       ((t3, [ ], [ ], Some (Type (Z/1) * Type (Z/1))),
         Apply (11, Variable (11, f/0), [ Constant (11, Int(12)) ]))

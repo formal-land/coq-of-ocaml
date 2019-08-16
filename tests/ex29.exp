@@ -1,6 +1,6 @@
 3
 Value
-  (rec, @.,
+  (rec,
     [
       ((odd_length, [ A ], [ (l, Type (list/1, A)) ], Some Type (bool/1)),
         Match
