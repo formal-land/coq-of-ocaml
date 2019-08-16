@@ -1,3 +1,0 @@
-3 Synonym (t1, [ ], Type (string/1))
-
-5 Synonym (t2, [ a; b ], (a * b))

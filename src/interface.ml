@@ -7,23 +7,6 @@ module Shape = struct
   let rec pp (shape : t) : SmartPrint.t =
     OCaml.list (OCaml.list PathName.pp) shape
 
-  let rec of_effect_typ (typ : Effect.Type.t) : t =
-    match typ with
-    | Effect.Type.Pure -> []
-    | Effect.Type.Arrow (d, typ) ->
-      let ds = Effect.Descriptor.elements d |> List.map (fun x ->
-        x.BoundName.path_name) in
-      ds :: of_effect_typ typ
-
-  let to_effect_typ (shape : t) (env : 'a FullEnvi.t) : Effect.Type.t =
-    let descriptor ds : Effect.Descriptor.t =
-      let ds = ds |> List.map (fun d ->
-        Effect.Descriptor.singleton (Effect.Descriptor.Id.Ether d)
-          (Envi.bound_name Loc.Unknown d env.FullEnvi.descriptors)) in
-      Effect.Descriptor.union ds in
-    List.fold_right (fun ds typ -> Effect.Type.Arrow (descriptor ds, typ))
-      shape Effect.Type.Pure
-
   let to_json (shape : t) : json =
     `List (List.map (fun ds -> `List (List.map PathName.to_json ds)) shape)
 
@@ -62,44 +45,6 @@ let of_typ_definition (typ_def : TypeDefinition.t) : t list =
     Typ name :: List.map (fun (x, _) -> Field x) fields
   | TypeDefinition.Synonym (name, _, _) | TypeDefinition.Abstract (name, _) ->
     [Typ name]
-
-let rec of_structures (defs : ('a * Effect.t) Structure.t list) : t list =
-  List.flatten (List.map of_structure defs)
-
-and of_structure (def : ('a * Effect.t) Structure.t) : t list =
-  match def with
-  | Structure.Value (_, value) ->
-    let values = value.Exp.Definition.cases |> List.map (fun (header, e) ->
-      let name = header.Exp.Header.name in
-      let typ =
-        Effect.function_typ header.Exp.Header.args (snd (Exp.annotation e)) in
-      (name, Shape.of_effect_typ @@ Effect.Type.compress typ)) in
-    values |> List.map (fun (name, typ) -> Var (name, typ))
-  | Structure.TypeDefinition (_, typ_def) -> of_typ_definition typ_def
-  | Structure.Exception (_, exn) ->
-    let name = exn.Exception.name in
-    [ Descriptor name; Var (name, [[PathName.of_name [] name]]) ]
-  | Structure.Reference (_, r) ->
-    let name = r.Reference.name in
-    let shape = [[PathName.of_name [] name]] in
-    [ Descriptor name;
-      Var ("read_" ^ name, shape);
-      Var ("write_" ^ name, shape) ]
-  | Structure.Open _ -> []
-  | Structure.Module (_, name, defs) -> [Interface (name, of_structures defs)]
-
-let rec to_full_envi (interface : t) (env : Effect.Type.t FullEnvi.t)
-  : Effect.Type.t FullEnvi.t =
-  match interface with
-  | Var (x, shape) -> FullEnvi.add_var [] x (Shape.to_effect_typ shape env) env
-  | Typ x -> FullEnvi.add_typ [] x env
-  | Descriptor x -> FullEnvi.add_descriptor [] x env
-  | Constructor x -> FullEnvi.add_constructor [] x env
-  | Field x -> FullEnvi.add_field [] x env
-  | Interface (x, defs) ->
-    let env = FullEnvi.enter_module env in
-    let env = List.fold_left (fun env def -> to_full_envi def env) env defs in
-    FullEnvi.leave_module x env
 
 let rec to_json (interface : t) : json =
   match interface with

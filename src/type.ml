@@ -7,7 +7,6 @@ type t =
   | Arrow of t * t
   | Tuple of t list
   | Apply of BoundName.t * t list
-  | Monad of Effect.Descriptor.t * t
 
 let rec pp (typ : t) : SmartPrint.t =
   match typ with
@@ -17,8 +16,6 @@ let rec pp (typ : t) : SmartPrint.t =
   | Apply (x, typs) ->
     nest (!^ "Type" ^^ nest (parens (
       separate (!^ "," ^^ space) (BoundName.pp x :: List.map pp typs))))
-  | Monad (d, typ) -> nest (!^ "Monad" ^^ OCaml.tuple [
-    Effect.Descriptor.pp d; pp typ])
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t) (loc : Loc.t)
@@ -94,7 +91,6 @@ let rec typ_args (typ : t) : Name.Set.t =
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
-  | Monad (_, typ) -> typ_args typ
 
 and typ_args_of_typs (typs : t list) : Name.Set.t =
   List.fold_left (fun args typ -> Name.Set.union args (typ_args typ))
@@ -111,26 +107,6 @@ let rec open_type (typ : t) (n : int) : t list * t =
       (typ1 :: typs, typ)
     | _ -> failwith "Expected an arrow type."
 
-let monadise (typ : t) (effect : Effect.t) : t =
-  let rec aux (typ : t) (effect_typ : Effect.Type.t) : t =
-    match (typ, effect_typ) with
-    | (Variable _, Effect.Type.Pure) | (Tuple _, Effect.Type.Pure)
-      | (Apply _, Effect.Type.Pure) | (Arrow _, Effect.Type.Pure) -> typ
-    | (Arrow (typ1, typ2), Effect.Type.Arrow (d, effect_typ2)) ->
-      let typ2 = aux typ2 effect_typ2 in
-      Arrow (typ1,
-        if Effect.Descriptor.is_pure d then
-          typ2
-        else
-          Monad (d, typ2))
-    | (Monad _, _) -> failwith "This type is already monadic."
-    | _ -> failwith "Type and effect type are not compatible." in
-  let typ = aux typ effect.Effect.typ in
-  if Effect.Descriptor.is_pure effect.Effect.descriptor then
-    typ
-  else
-    Monad (effect.Effect.descriptor, typ)
-
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
   match typ with
@@ -146,6 +122,3 @@ let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
   | Apply (path, typs) ->
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
       (BoundName.to_coq path :: List.map (to_coq true) typs)
-  | Monad (d, typ) ->
-    Pp.parens paren @@ nest (
-      !^ "M" ^^ Effect.Descriptor.to_coq d ^^ to_coq true typ)
