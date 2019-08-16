@@ -1,5 +1,4 @@
 Require Import Libraries.
-Require Import Effect.
 
 Local Open Scope Z_scope.
 Import ListNotations.
