@@ -5,14 +5,6 @@ module Segment = struct
     opens : Name.t list list;
     names : 'a PathName.Map.t }
 
-  let pp (segment : 'a t) : SmartPrint.t =
-    nest (
-      nest (!^ "open" ^^ OCaml.list (fun path ->
-        double_quotes (separate (!^ ".") (List.map Name.pp path)))
-        segment.opens) ^^
-      OCaml.list (fun (x, _) -> PathName.pp x)
-        (PathName.Map.bindings segment.names))
-
   let cardinal (segment : 'a t) : int =
     PathName.Map.cardinal segment.names
 
@@ -44,9 +36,6 @@ module Segment = struct
 end
 
 type 'a t = 'a Segment.t list
-
-let pp (env : 'a t) : SmartPrint.t =
-  OCaml.list Segment.pp env
 
 let rec size (env : 'a t) : int =
   match env with
@@ -86,8 +75,8 @@ let bound_name (loc : Loc.t) (x : PathName.t) (env : 'a t) : BoundName.t =
   match depth x env with
   | Some (x, d) -> { BoundName.path_name = x; depth = d }
   | None ->
-    let message = PathName.pp x ^^ !^ "not found." in
-    Error.raise loc (SmartPrint.to_string 80 2 message)
+    let message = Sexplib.Sexp.to_string (PathName.sexp_of_t x) ^ " not found." in
+    Error.raise loc message
 
 let rec find (x : BoundName.t) (env : 'a t) (open_lift : 'a -> 'a) : 'a =
   let segment =

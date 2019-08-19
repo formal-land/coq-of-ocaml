@@ -10,25 +10,6 @@ type t =
   | Abstract of Name.t * Name.t list
   [@@deriving sexp]
 
-let pp (def : t) : SmartPrint.t =
-  match def with
-  | Inductive (name, typ_args, constructors) ->
-    nest (!^ "Inductive" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-      indent (OCaml.tuple [
-        OCaml.list Name.pp typ_args;
-        constructors |> OCaml.list (fun (x, typs) ->
-          OCaml.tuple [Name.pp x; OCaml.list Type.pp typs])]))
-  | Record (name, fields) ->
-    nest (!^ "Record" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-      indent (fields |> OCaml.list (fun (x, typ) ->
-        OCaml.tuple [Name.pp x; Type.pp typ])))
-  | Synonym (name, typ_args, value) ->
-    nest (!^ "Synonym" ^^ OCaml.tuple [
-      Name.pp name; OCaml.list Name.pp typ_args; Type.pp value])
-  | Abstract (name, typ_args) ->
-    nest (!^ "Abstract" ^^ OCaml.tuple [
-      Name.pp name; OCaml.list Name.pp typ_args])
-
 let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
   (typs : type_declaration list) : t =
   match typs with

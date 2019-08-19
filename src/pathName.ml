@@ -137,10 +137,6 @@ let convert (x : t) : t =
 
   | { path = path; base = base } -> { path = path; base = Name.convert base }
 
-(** Pretty-print a global name. *)
-let pp (x : t) : SmartPrint.t =
-  separate (!^ ".") (List.map (fun s -> !^ s) (x.path @ [x.base]))
-
 (** Lift a local name to a global name. *)
 let of_name (path : Name.t list) (base : Name.t) : t =
   { path = path; base = base }

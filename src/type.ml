@@ -10,15 +10,6 @@ type t =
   | Apply of BoundName.t * t list
   [@@deriving sexp]
 
-let rec pp (typ : t) : SmartPrint.t =
-  match typ with
-  | Variable x -> Name.pp x
-  | Arrow (typ1, typ2) -> nest @@ parens (pp typ1 ^^ !^ "->" ^^ pp typ2)
-  | Tuple typs -> nest @@ parens (separate (space ^^ !^ "*" ^^ space) (List.map pp typs))
-  | Apply (x, typs) ->
-    nest (!^ "Type" ^^ nest (parens (
-      separate (!^ "," ^^ space) (BoundName.pp x :: List.map pp typs))))
-
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t) (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (typ : Types.type_expr)

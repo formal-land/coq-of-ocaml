@@ -7,13 +7,6 @@ type 'a t = {
   constructors : unit Envi.t;
   fields : unit Envi.t }
 
-let pp (env : 'a t) : SmartPrint.t =
-  group (
-    !^ "vars:" ^^ nest (Envi.pp env.vars) ^^ newline ^^
-    !^ "typs:" ^^ nest (Envi.pp env.typs) ^^ newline ^^
-    !^ "constructors:" ^^ nest (Envi.pp env.constructors) ^^ newline ^^
-    !^ "fields:" ^^ nest (Envi.pp env.fields))
-
 let empty (leave_prefix_vars : Name.t -> 'a -> 'a) : 'a t = {
   vars = Envi.empty;
   leave_prefix_vars = leave_prefix_vars;

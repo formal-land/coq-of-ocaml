@@ -12,9 +12,6 @@ type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
 
-let pp (x : t) : SmartPrint.t =
-  !^ x
-
 let is_operator (s : string) : bool =
   if s = "" then
     failwith "Unexpected empty argument."

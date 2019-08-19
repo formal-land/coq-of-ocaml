@@ -6,9 +6,6 @@ type t = {
   depth : int }
   [@@deriving sexp]
 
-let pp (x : t) : SmartPrint.t =
-  PathName.pp x.path_name ^-^ !^ "/" ^-^ OCaml.int x.depth
-
 let depth_lift (x : t) : t =
   { x with depth = x.depth + 1 }
 

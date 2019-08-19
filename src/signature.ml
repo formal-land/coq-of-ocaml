@@ -11,16 +11,6 @@ type item =
 type t = item list
   [@@deriving sexp]
 
-let pp_item (signature_item : item) : SmartPrint.t =
-  match signature_item with
-  | Typ (typ_args, name) ->
-    group (!^ "Type" ^^ OCaml.tuple [OCaml.list Name.pp typ_args; Name.pp name])
-  | Value (name, typ) ->
-    group (!^ "Value" ^^ OCaml.tuple [Name.pp name; Type.pp typ])
-
-let pp (signature : t) : SmartPrint.t =
-  separate newline (List.map pp_item signature)
-
 let of_signature (env : unit FullEnvi.t) (signature : signature) : t =
   let of_signature_item (env : unit FullEnvi.t) (signature_item : signature_item) : unit FullEnvi.t * item =
     let loc = Loc.of_location signature_item.sig_loc in

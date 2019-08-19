@@ -16,12 +16,6 @@ type t =
   | Known of Position.t * Position.t
   [@@deriving sexp]
 
-let pp (l : t) : SmartPrint.t =
-  match l with
-  | Unknown -> !^ "?"
-  | Known (start, _) ->
-    OCaml.int start.line
-
 let to_user (l : t) : SmartPrint.t =
   match l with
   | Unknown -> !^ "?"

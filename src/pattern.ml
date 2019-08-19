@@ -15,20 +15,6 @@ type t =
   | Or of t * t
   [@@deriving sexp]
 
-let rec pp (p : t) : SmartPrint.t =
-  match p with
-  | Any -> !^ "Any"
-  | Constant c -> Constant.pp c
-  | Variable x -> Name.pp x
-  | Tuple ps -> nest (!^ "Tuple" ^^ OCaml.tuple (List.map pp ps))
-  | Constructor (x, ps) ->
-    nest (!^ "Constructor" ^^ OCaml.tuple (BoundName.pp x :: List.map pp ps))
-  | Alias (p, x) -> nest (!^ "Alias" ^^ OCaml.tuple [pp p; Name.pp x])
-  | Record fields ->
-    nest (!^ "Record" ^^ OCaml.tuple (fields |> List.map (fun (x, p) ->
-      nest @@ parens (BoundName.pp x ^-^ !^ "," ^^ pp p))))
-  | Or (p1, p2) -> nest (!^ "Or" ^^ OCaml.tuple [pp p1; pp p2])
-
 (** Import an OCaml pattern. *)
 let rec of_pattern (env : 'a FullEnvi.t) (p : pattern) : t =
   let l = Loc.of_location p.pat_loc in
