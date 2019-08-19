@@ -1,3 +1,9 @@
-3 Synonym (t1, [ ], Type (string/1))
-
-5 Synonym (t2, [ a; b ], (a * b))
+((TypeDefinition
+  (Known ((file_name tests/ex16.ml) (line 3))
+   ((file_name tests/ex16.ml) (line 3)))
+  (Synonym t1 ()
+   (Apply ((path_name ((path ()) (base string))) (depth 1)) ())))
+ (TypeDefinition
+  (Known ((file_name tests/ex16.ml) (line 5))
+   ((file_name tests/ex16.ml) (line 5)))
+  (Synonym t2 (a b) (Tuple ((Variable a) (Variable b))))))

@@ -1,124 +1,176 @@
-3 Module List2:
-  4
-  Inductive t:
-    ([ a ], [ (Nil, [ ]); (Cons, [ a; Type (t/0, a) ]) ])
-  
-  8
-  Value
-    (rec,
-      [
-        ((sum, [ ], [ (l, Type (t/0, Type (Z/2))) ], Some Type (Z/2)),
-          Match
-            (9, Variable (9, l/0),
-              [
-                (Constructor (Nil/0), Constant (10, Int(0)));
-                (Constructor (Cons/0, x, xs),
-                  Apply
-                    (11,
-                      Variable
-                        (11,
-                          Z.add/2),
-                      [
-                        Variable
-                          (11,
-                            x/0);
-                        Apply
-                          (11,
-                            Variable
-                              (11,
-                                sum/0),
-                            [
-                              Variable
-                                (11,
-                                  xs/0)
-                            ])
-                      ]))
-              ]))
-      ])
-  
-  13
-  Value
-    (rec,
-      [
-        ((of_list, [ A ], [ (x, Type (list/2, A)) ], Some Type (t/0, A)),
-          Match
-            (?, Variable (?, x/0),
-              [
-                (Constructor ([]/2), Constructor (14, Nil/0));
-                (Constructor (cons/2, x, xs),
-                  Constructor
-                    (15,
-                      Cons/0,
-                      Variable
-                        (15,
-                          x/0),
-                      Apply
-                        (15,
-                          Variable
-                            (15,
-                              of_list/0),
-                          [
-                            Variable
-                              (15,
-                                xs/0)
-                          ])))
-              ]))
-      ])
-  
-  17 Module Inside:
-    18
-    Value
-      (non_rec, [ ((x, [ ], [ ], Some Type (Z/3)), Constant (18, Int(12))) ])
-
-22
-Value
-  (non_rec,
-    [
-      ((n, [ A ], [ (x, A) ], Some Type (Z/1)),
-        Match
-          (?, Variable (?, x/0),
-            [
-              (Any,
-                Apply
-                  (22,
-                    Variable
-                      (22,
-                        List2.sum/0),
-                    [
-                      Apply
-                        (22,
-                          Variable
-                            (22,
-                              List2.of_list/0),
-                          [
-                            Constructor
-                              (22,
-                                cons/1,
-                                Constant
-                                  (22,
-                                    Int(5)),
-                                Constructor
-                                  (22,
-                                    cons/1,
-                                    Constant
-                                      (22,
-                                        Int(7)),
-                                    Constructor
-                                      (22,
-                                        cons/1,
-                                        Constant
-                                          (22,
-                                            Int(6)),
-                                        Constructor
-                                          (22,
-                                            cons/1,
-                                            Variable
-                                              (22,
-                                                List2.Inside.x/0),
-                                            Constructor
-                                              (22,
-                                                []/1)))))
-                          ])
-                    ]))
-            ]))
-    ])
+((Module
+  (Known ((file_name tests/ex10.ml) (line 3))
+   ((file_name tests/ex10.ml) (line 20)))
+  List2
+  ((TypeDefinition
+    (Known ((file_name tests/ex10.ml) (line 4))
+     ((file_name tests/ex10.ml) (line 6)))
+    (Inductive t (a)
+     ((Nil ())
+      (Cons
+       ((Variable a)
+        (Apply ((path_name ((path ()) (base t))) (depth 0)) ((Variable a))))))))
+   (Value
+    (Known ((file_name tests/ex10.ml) (line 8))
+     ((file_name tests/ex10.ml) (line 11)))
+    ((is_rec (New true))
+     (cases
+      ((((name sum) (typ_vars ())
+         (args
+          ((l
+            (Apply ((path_name ((path ()) (base t))) (depth 0))
+             ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))))
+         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
+        (Match
+         (Known ((file_name tests/ex10.ml) (line 9))
+          ((file_name tests/ex10.ml) (line 11)))
+         (Variable
+          (Known ((file_name tests/ex10.ml) (line 9))
+           ((file_name tests/ex10.ml) (line 9)))
+          ((path_name ((path ()) (base l))) (depth 0)))
+         (((Constructor ((path_name ((path ()) (base Nil))) (depth 0)) ())
+           (Constant
+            (Known ((file_name tests/ex10.ml) (line 10))
+             ((file_name tests/ex10.ml) (line 10)))
+            (Int 0)))
+          ((Constructor ((path_name ((path ()) (base Cons))) (depth 0))
+            ((Variable x) (Variable xs)))
+           (Apply
+            (Known ((file_name tests/ex10.ml) (line 11))
+             ((file_name tests/ex10.ml) (line 11)))
+            (Variable
+             (Known ((file_name tests/ex10.ml) (line 11))
+              ((file_name tests/ex10.ml) (line 11)))
+             ((path_name ((path (Z)) (base add))) (depth 2)))
+            ((Variable
+              (Known ((file_name tests/ex10.ml) (line 11))
+               ((file_name tests/ex10.ml) (line 11)))
+              ((path_name ((path ()) (base x))) (depth 0)))
+             (Apply
+              (Known ((file_name tests/ex10.ml) (line 11))
+               ((file_name tests/ex10.ml) (line 11)))
+              (Variable
+               (Known ((file_name tests/ex10.ml) (line 11))
+                ((file_name tests/ex10.ml) (line 11)))
+               ((path_name ((path ()) (base sum))) (depth 0)))
+              ((Variable
+                (Known ((file_name tests/ex10.ml) (line 11))
+                 ((file_name tests/ex10.ml) (line 11)))
+                ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+   (Value
+    (Known ((file_name tests/ex10.ml) (line 13))
+     ((file_name tests/ex10.ml) (line 15)))
+    ((is_rec (New true))
+     (cases
+      ((((name of_list) (typ_vars (A))
+         (args
+          ((x
+            (Apply ((path_name ((path ()) (base list))) (depth 2))
+             ((Variable A))))))
+         (typ
+          ((Apply ((path_name ((path ()) (base t))) (depth 0))
+            ((Variable A))))))
+        (Match Unknown
+         (Variable Unknown ((path_name ((path ()) (base x))) (depth 0)))
+         (((Constructor ((path_name ((path ()) (base []))) (depth 2)) ())
+           (Constructor
+            (Known ((file_name tests/ex10.ml) (line 14))
+             ((file_name tests/ex10.ml) (line 14)))
+            ((path_name ((path ()) (base Nil))) (depth 0)) ()))
+          ((Constructor ((path_name ((path ()) (base cons))) (depth 2))
+            ((Variable x) (Variable xs)))
+           (Constructor
+            (Known ((file_name tests/ex10.ml) (line 15))
+             ((file_name tests/ex10.ml) (line 15)))
+            ((path_name ((path ()) (base Cons))) (depth 0))
+            ((Variable
+              (Known ((file_name tests/ex10.ml) (line 15))
+               ((file_name tests/ex10.ml) (line 15)))
+              ((path_name ((path ()) (base x))) (depth 0)))
+             (Apply
+              (Known ((file_name tests/ex10.ml) (line 15))
+               ((file_name tests/ex10.ml) (line 15)))
+              (Variable
+               (Known ((file_name tests/ex10.ml) (line 15))
+                ((file_name tests/ex10.ml) (line 15)))
+               ((path_name ((path ()) (base of_list))) (depth 0)))
+              ((Variable
+                (Known ((file_name tests/ex10.ml) (line 15))
+                 ((file_name tests/ex10.ml) (line 15)))
+                ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+   (Module
+    (Known ((file_name tests/ex10.ml) (line 17))
+     ((file_name tests/ex10.ml) (line 19)))
+    Inside
+    ((Value
+      (Known ((file_name tests/ex10.ml) (line 18))
+       ((file_name tests/ex10.ml) (line 18)))
+      ((is_rec (New false))
+       (cases
+        ((((name x) (typ_vars ()) (args ())
+           (typ ((Apply ((path_name ((path ()) (base Z))) (depth 3)) ()))))
+          (Constant
+           (Known ((file_name tests/ex10.ml) (line 18))
+            ((file_name tests/ex10.ml) (line 18)))
+           (Int 12)))))))))))
+ (Value
+  (Known ((file_name tests/ex10.ml) (line 22))
+   ((file_name tests/ex10.ml) (line 22)))
+  ((is_rec (New false))
+   (cases
+    ((((name n) (typ_vars (A)) (args ((x (Variable A))))
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (Match Unknown
+       (Variable Unknown ((path_name ((path ()) (base x))) (depth 0)))
+       ((Any
+         (Apply
+          (Known ((file_name tests/ex10.ml) (line 22))
+           ((file_name tests/ex10.ml) (line 22)))
+          (Variable
+           (Known ((file_name tests/ex10.ml) (line 22))
+            ((file_name tests/ex10.ml) (line 22)))
+           ((path_name ((path (List2)) (base sum))) (depth 0)))
+          ((Apply
+            (Known ((file_name tests/ex10.ml) (line 22))
+             ((file_name tests/ex10.ml) (line 22)))
+            (Variable
+             (Known ((file_name tests/ex10.ml) (line 22))
+              ((file_name tests/ex10.ml) (line 22)))
+             ((path_name ((path (List2)) (base of_list))) (depth 0)))
+            ((Constructor
+              (Known ((file_name tests/ex10.ml) (line 22))
+               ((file_name tests/ex10.ml) (line 22)))
+              ((path_name ((path ()) (base cons))) (depth 1))
+              ((Constant
+                (Known ((file_name tests/ex10.ml) (line 22))
+                 ((file_name tests/ex10.ml) (line 22)))
+                (Int 5))
+               (Constructor
+                (Known ((file_name tests/ex10.ml) (line 22))
+                 ((file_name tests/ex10.ml) (line 22)))
+                ((path_name ((path ()) (base cons))) (depth 1))
+                ((Constant
+                  (Known ((file_name tests/ex10.ml) (line 22))
+                   ((file_name tests/ex10.ml) (line 22)))
+                  (Int 7))
+                 (Constructor
+                  (Known ((file_name tests/ex10.ml) (line 22))
+                   ((file_name tests/ex10.ml) (line 22)))
+                  ((path_name ((path ()) (base cons))) (depth 1))
+                  ((Constant
+                    (Known ((file_name tests/ex10.ml) (line 22))
+                     ((file_name tests/ex10.ml) (line 22)))
+                    (Int 6))
+                   (Constructor
+                    (Known ((file_name tests/ex10.ml) (line 22))
+                     ((file_name tests/ex10.ml) (line 22)))
+                    ((path_name ((path ()) (base cons))) (depth 1))
+                    ((Variable
+                      (Known ((file_name tests/ex10.ml) (line 22))
+                       ((file_name tests/ex10.ml) (line 22)))
+                      ((path_name ((path (List2 Inside)) (base x)))
+                       (depth 0)))
+                     (Constructor
+                      (Known ((file_name tests/ex10.ml) (line 22))
+                       ((file_name tests/ex10.ml) (line 22)))
+                      ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))))))))))

@@ -1,5 +1,6 @@
 (** Constants. *)
 open Asttypes
+open Sexplib.Std
 open SmartPrint
 
 (** A constant can be an integer, a natural number (used for the non-termination monad) *)
@@ -7,13 +8,7 @@ type t =
   | Int of int
   | Char of char
   | String of string
-
-(** Pretty-print a constant. *)
-let pp (c : t) : SmartPrint.t =
-  match c with
-  | Int n -> !^ "Int" ^-^ parens (OCaml.int n)
-  | Char c -> !^ "Char" ^-^ parens (OCaml.string (Char.escaped c))
-  | String s -> !^ "String" ^-^ parens (OCaml.string s)
+  [@@deriving sexp]
 
 (** Import an OCaml constant. *)
 let of_constant (loc : Loc.t) (c : constant) : t =

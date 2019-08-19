@@ -1,14 +1,13 @@
 (** A structure represents the contents of a ".ml" file. *)
 open Types
 open Typedtree
+open Sexplib.Std
 open SmartPrint
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
   type 'a t = 'a Exp.t Exp.Definition.t
-
-  let pp (pp_a : 'a -> SmartPrint.t) (value : 'a t) : SmartPrint.t =
-    nest (!^ "Value" ^^ Exp.Definition.pp (Exp.pp pp_a) value)
+    [@@deriving sexp]
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : 'a t) : SmartPrint.t =
@@ -44,25 +43,7 @@ type 'a t =
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
   | Signature of Loc.t * Name.t * Signature.t
-
-let rec pps (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
-  separate (newline ^^ newline) (List.map (pp pp_a) defs)
-
-and pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
-  match def with
-  | Value (loc, value) ->
-    group (Loc.pp loc ^^ Value.pp pp_a value)
-  | TypeDefinition (loc, typ_def) ->
-    group (Loc.pp loc ^^ TypeDefinition.pp typ_def)
-  | Open (loc, o) -> group (Loc.pp loc ^^ Open.pp o)
-  | Module (loc, name, defs) ->
-    nest (
-      Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-      indent (pps pp_a defs))
-  | Signature (loc, name, signature) ->
-    nest (
-      Loc.pp loc ^^ !^ "Signature" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
-      indent (Signature.pp signature))
+  [@@deriving sexp]
 
 (** Import an OCaml structure. *)
 let rec of_structure (env : unit FullEnvi.t) (structure : structure)

@@ -1,6 +1,7 @@
 (** Patterns used for the "match". *)
 open Typedtree
 open Types
+open Sexplib.Std
 open SmartPrint
 
 type t =
@@ -12,20 +13,7 @@ type t =
   | Alias of t * Name.t
   | Record of (BoundName.t * t) list (** A list of fields from a record with their expected patterns. *)
   | Or of t * t
-
-let rec pp (p : t) : SmartPrint.t =
-  match p with
-  | Any -> !^ "Any"
-  | Constant c -> Constant.pp c
-  | Variable x -> Name.pp x
-  | Tuple ps -> nest (!^ "Tuple" ^^ OCaml.tuple (List.map pp ps))
-  | Constructor (x, ps) ->
-    nest (!^ "Constructor" ^^ OCaml.tuple (BoundName.pp x :: List.map pp ps))
-  | Alias (p, x) -> nest (!^ "Alias" ^^ OCaml.tuple [pp p; Name.pp x])
-  | Record fields ->
-    nest (!^ "Record" ^^ OCaml.tuple (fields |> List.map (fun (x, p) ->
-      nest @@ parens (BoundName.pp x ^-^ !^ "," ^^ pp p))))
-  | Or (p1, p2) -> nest (!^ "Or" ^^ OCaml.tuple [pp p1; pp p2])
+  [@@deriving sexp]
 
 (** Import an OCaml pattern. *)
 let rec of_pattern (env : 'a FullEnvi.t) (p : pattern) : t =

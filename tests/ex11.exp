@@ -1,99 +1,206 @@
-3 Module SizedString:
-  4
-  Record t:
-    [ (name, Type (string/2)); (size, Type (Z/2)) ]
-
-9
-Value
-  (non_rec,
-    [
-      ((r, [ ], [ ], Some Type (SizedString.t/0)),
-        Record
-          (9, (SizedString.name/0, Constant (9, String("gre"))),
-            (SizedString.size/0, Constant (9, Int(3)))))
-    ])
-
-10
-Value
-  (non_rec,
-    [
-      ((r', [ ], [ ], Some Type (SizedString.t/0)),
-        Record
-          (10, (SizedString.name/0, Constant (10, String("haha"))),
-            (SizedString.size/0, Constant (10, Int(4)))))
-    ])
-
-12
-Value
-  (non_rec,
-    [
-      ((s, [ ], [ ], Some Type (Z/1)),
-        Apply
-          (12, Variable (12, Z.add/1),
-            [
-              Field (12, Variable (12, r/0), SizedString.size/0);
-              Field (12, Variable (12, r'/0), SizedString.size/0)
-            ]))
-    ])
-
-14
-Value
-  (non_rec,
-    [
-      ((f, [ ], [ (x, Type (SizedString.t/0)) ], Some Type (bool/1)),
-        Match
-          (?, Variable (?, x/0),
-            [
-              (Record ((SizedString.size/0, Int(3))),
-                Constructor (15, true/1));
-              (Any, Constructor (16, false/1))
-            ]))
-    ])
-
-18
-Value
-  (non_rec,
-    [
-      ((b, [ ], [ ], Some Type (bool/1)),
-        Apply (18, Variable (18, f/0), [ Variable (18, r/0) ]))
-    ])
-
-19
-Value
-  (non_rec,
-    [
-      ((b', [ ], [ ], Some Type (bool/1)),
-        Apply (19, Variable (19, f/0), [ Variable (19, r'/0) ]))
-    ])
-
-21 Module Point:
-  22
-  Record t:
-    [ (x, Type (Z/2)); (y, Type (Z/2)); (z, Type (Z/2)) ]
-  
-  27
-  Value
-    (non_rec,
-      [
-        ((p, [ ], [ ], Some Type (t/0)),
-          Record
-            (27, (x/0, Constant (27, Int(5))),
-              (y/0, Constant (27, Int(-3))),
-              (z/0, Constant (27, Int(1)))))
-      ])
-  
-  29
-  Value
-    (non_rec,
-      [
-        ((b, [ ], [ ], Some Type (bool/2)),
-          Match
-            (29, Variable (29, p/0),
-              [
-                (Record ((x/0, Int(5)), (z/0, Int(1))),
-                  Constructor
-                    (30,
-                      true/2));
-                (Any, Constructor (31, false/2))
-              ]))
-      ])
+((Module
+  (Known ((file_name tests/ex11.ml) (line 3))
+   ((file_name tests/ex11.ml) (line 7)))
+  SizedString
+  ((TypeDefinition
+    (Known ((file_name tests/ex11.ml) (line 4))
+     ((file_name tests/ex11.ml) (line 6)))
+    (Record t
+     ((name (Apply ((path_name ((path ()) (base string))) (depth 2)) ()))
+      (size (Apply ((path_name ((path ()) (base Z))) (depth 2)) ())))))))
+ (Value
+  (Known ((file_name tests/ex11.ml) (line 9))
+   ((file_name tests/ex11.ml) (line 9)))
+  ((is_rec (New false))
+   (cases
+    ((((name r) (typ_vars ()) (args ())
+       (typ
+        ((Apply ((path_name ((path (SizedString)) (base t))) (depth 0)) ()))))
+      (Record
+       (Known ((file_name tests/ex11.ml) (line 9))
+        ((file_name tests/ex11.ml) (line 9)))
+       ((((path_name ((path (SizedString)) (base name))) (depth 0))
+         (Constant
+          (Known ((file_name tests/ex11.ml) (line 9))
+           ((file_name tests/ex11.ml) (line 9)))
+          (String gre)))
+        (((path_name ((path (SizedString)) (base size))) (depth 0))
+         (Constant
+          (Known ((file_name tests/ex11.ml) (line 9))
+           ((file_name tests/ex11.ml) (line 9)))
+          (Int 3))))))))))
+ (Value
+  (Known ((file_name tests/ex11.ml) (line 10))
+   ((file_name tests/ex11.ml) (line 10)))
+  ((is_rec (New false))
+   (cases
+    ((((name r') (typ_vars ()) (args ())
+       (typ
+        ((Apply ((path_name ((path (SizedString)) (base t))) (depth 0)) ()))))
+      (Record
+       (Known ((file_name tests/ex11.ml) (line 10))
+        ((file_name tests/ex11.ml) (line 10)))
+       ((((path_name ((path (SizedString)) (base name))) (depth 0))
+         (Constant
+          (Known ((file_name tests/ex11.ml) (line 10))
+           ((file_name tests/ex11.ml) (line 10)))
+          (String haha)))
+        (((path_name ((path (SizedString)) (base size))) (depth 0))
+         (Constant
+          (Known ((file_name tests/ex11.ml) (line 10))
+           ((file_name tests/ex11.ml) (line 10)))
+          (Int 4))))))))))
+ (Value
+  (Known ((file_name tests/ex11.ml) (line 12))
+   ((file_name tests/ex11.ml) (line 12)))
+  ((is_rec (New false))
+   (cases
+    ((((name s) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (Apply
+       (Known ((file_name tests/ex11.ml) (line 12))
+        ((file_name tests/ex11.ml) (line 12)))
+       (Variable
+        (Known ((file_name tests/ex11.ml) (line 12))
+         ((file_name tests/ex11.ml) (line 12)))
+        ((path_name ((path (Z)) (base add))) (depth 1)))
+       ((Field
+         (Known ((file_name tests/ex11.ml) (line 12))
+          ((file_name tests/ex11.ml) (line 12)))
+         (Variable
+          (Known ((file_name tests/ex11.ml) (line 12))
+           ((file_name tests/ex11.ml) (line 12)))
+          ((path_name ((path ()) (base r))) (depth 0)))
+         ((path_name ((path (SizedString)) (base size))) (depth 0)))
+        (Field
+         (Known ((file_name tests/ex11.ml) (line 12))
+          ((file_name tests/ex11.ml) (line 12)))
+         (Variable
+          (Known ((file_name tests/ex11.ml) (line 12))
+           ((file_name tests/ex11.ml) (line 12)))
+          ((path_name ((path ()) (base r'))) (depth 0)))
+         ((path_name ((path (SizedString)) (base size))) (depth 0))))))))))
+ (Value
+  (Known ((file_name tests/ex11.ml) (line 14))
+   ((file_name tests/ex11.ml) (line 16)))
+  ((is_rec (New false))
+   (cases
+    ((((name f) (typ_vars ())
+       (args
+        ((x
+          (Apply ((path_name ((path (SizedString)) (base t))) (depth 0)) ()))))
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Match Unknown
+       (Variable Unknown ((path_name ((path ()) (base x))) (depth 0)))
+       (((Record
+          ((((path_name ((path (SizedString)) (base size))) (depth 0))
+            (Constant (Int 3)))))
+         (Constructor
+          (Known ((file_name tests/ex11.ml) (line 15))
+           ((file_name tests/ex11.ml) (line 15)))
+          ((path_name ((path ()) (base true))) (depth 1)) ()))
+        (Any
+         (Constructor
+          (Known ((file_name tests/ex11.ml) (line 16))
+           ((file_name tests/ex11.ml) (line 16)))
+          ((path_name ((path ()) (base false))) (depth 1)) ())))))))))
+ (Value
+  (Known ((file_name tests/ex11.ml) (line 18))
+   ((file_name tests/ex11.ml) (line 18)))
+  ((is_rec (New false))
+   (cases
+    ((((name b) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Apply
+       (Known ((file_name tests/ex11.ml) (line 18))
+        ((file_name tests/ex11.ml) (line 18)))
+       (Variable
+        (Known ((file_name tests/ex11.ml) (line 18))
+         ((file_name tests/ex11.ml) (line 18)))
+        ((path_name ((path ()) (base f))) (depth 0)))
+       ((Variable
+         (Known ((file_name tests/ex11.ml) (line 18))
+          ((file_name tests/ex11.ml) (line 18)))
+         ((path_name ((path ()) (base r))) (depth 0))))))))))
+ (Value
+  (Known ((file_name tests/ex11.ml) (line 19))
+   ((file_name tests/ex11.ml) (line 19)))
+  ((is_rec (New false))
+   (cases
+    ((((name b') (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Apply
+       (Known ((file_name tests/ex11.ml) (line 19))
+        ((file_name tests/ex11.ml) (line 19)))
+       (Variable
+        (Known ((file_name tests/ex11.ml) (line 19))
+         ((file_name tests/ex11.ml) (line 19)))
+        ((path_name ((path ()) (base f))) (depth 0)))
+       ((Variable
+         (Known ((file_name tests/ex11.ml) (line 19))
+          ((file_name tests/ex11.ml) (line 19)))
+         ((path_name ((path ()) (base r'))) (depth 0))))))))))
+ (Module
+  (Known ((file_name tests/ex11.ml) (line 21))
+   ((file_name tests/ex11.ml) (line 32)))
+  Point
+  ((TypeDefinition
+    (Known ((file_name tests/ex11.ml) (line 22))
+     ((file_name tests/ex11.ml) (line 25)))
+    (Record t
+     ((x (Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))
+      (y (Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))
+      (z (Apply ((path_name ((path ()) (base Z))) (depth 2)) ())))))
+   (Value
+    (Known ((file_name tests/ex11.ml) (line 27))
+     ((file_name tests/ex11.ml) (line 27)))
+    ((is_rec (New false))
+     (cases
+      ((((name p) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base t))) (depth 0)) ()))))
+        (Record
+         (Known ((file_name tests/ex11.ml) (line 27))
+          ((file_name tests/ex11.ml) (line 27)))
+         ((((path_name ((path ()) (base x))) (depth 0))
+           (Constant
+            (Known ((file_name tests/ex11.ml) (line 27))
+             ((file_name tests/ex11.ml) (line 27)))
+            (Int 5)))
+          (((path_name ((path ()) (base y))) (depth 0))
+           (Constant
+            (Known ((file_name tests/ex11.ml) (line 27))
+             ((file_name tests/ex11.ml) (line 27)))
+            (Int -3)))
+          (((path_name ((path ()) (base z))) (depth 0))
+           (Constant
+            (Known ((file_name tests/ex11.ml) (line 27))
+             ((file_name tests/ex11.ml) (line 27)))
+            (Int 1))))))))))
+   (Value
+    (Known ((file_name tests/ex11.ml) (line 29))
+     ((file_name tests/ex11.ml) (line 31)))
+    ((is_rec (New false))
+     (cases
+      ((((name b) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
+        (Match
+         (Known ((file_name tests/ex11.ml) (line 29))
+          ((file_name tests/ex11.ml) (line 31)))
+         (Variable
+          (Known ((file_name tests/ex11.ml) (line 29))
+           ((file_name tests/ex11.ml) (line 29)))
+          ((path_name ((path ()) (base p))) (depth 0)))
+         (((Record
+            ((((path_name ((path ()) (base x))) (depth 0))
+              (Constant (Int 5)))
+             (((path_name ((path ()) (base z))) (depth 0))
+              (Constant (Int 1)))))
+           (Constructor
+            (Known ((file_name tests/ex11.ml) (line 30))
+             ((file_name tests/ex11.ml) (line 30)))
+            ((path_name ((path ()) (base true))) (depth 2)) ()))
+          (Any
+           (Constructor
+            (Known ((file_name tests/ex11.ml) (line 31))
+             ((file_name tests/ex11.ml) (line 31)))
+            ((path_name ((path ()) (base false))) (depth 2)) ()))))))))))))

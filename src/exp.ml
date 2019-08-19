@@ -1,6 +1,7 @@
 (** An expression. *)
 open Typedtree
 open Types
+open Sexplib.Std
 open SmartPrint
 
 module Header = struct
@@ -9,13 +10,7 @@ module Header = struct
     typ_vars : Name.t list;
     args : (Name.t * Type.t) list;
     typ : Type.t option }
-
-  let pp (header : t) : SmartPrint.t =
-    OCaml.tuple [
-      Name.pp header.name; OCaml.list Name.pp header.typ_vars;
-      OCaml.list (fun (x, typ) -> OCaml.tuple [Name.pp x; Type.pp typ])
-        header.args;
-      OCaml.option Type.pp header.typ]
+    [@@deriving sexp]
 
   let env_in_header (header : t) (env : 'a FullEnvi.t) (v : 'a)
     : 'a FullEnvi.t =
@@ -27,11 +22,7 @@ module Definition = struct
   type 'a t = {
     is_rec : Recursivity.t;
     cases : (Header.t * 'a) list }
-
-  let pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
-    OCaml.tuple [Recursivity.pp def.is_rec;
-      def.cases |> OCaml.list (fun (header, e) ->
-        OCaml.tuple [Header.pp header; pp_a e])]
+    [@@deriving sexp]
 
   let names (def : 'a t) : Name.t list =
     List.map (fun (header, _) -> header.Header.name) def.cases
@@ -65,42 +56,7 @@ type 'a t =
     (** Construct a record giving an expression for each field. *)
   | Field of 'a * 'a t * BoundName.t (** Access to a field of a record. *)
   | IfThenElse of 'a * 'a t * 'a t * 'a t (** The "else" part may be unit. *)
-
-let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
-  let pp = pp pp_a in
-  match e with
-  | Constant (a, c) ->
-    nest (!^ "Constant" ^^ OCaml.tuple [pp_a a; Constant.pp c])
-  | Variable (a, x) ->
-    nest (!^ "Variable" ^^ OCaml.tuple [pp_a a; BoundName.pp x])
-  | Tuple (a, es) ->
-    nest (!^ "Tuple" ^^ OCaml.tuple (pp_a a :: List.map pp es))
-  | Constructor (a, x, es) ->
-    nest (!^ "Constructor" ^^
-      OCaml.tuple (pp_a a :: BoundName.pp x :: List.map pp es))
-  | Apply (a, e_f, e_xs) ->
-    nest (!^ "Apply" ^^ OCaml.tuple [pp_a a; pp e_f; OCaml.list pp e_xs])
-  | Function (a, x, e) ->
-    nest (!^ "Function" ^^ OCaml.tuple [pp_a a; Name.pp x; pp e])
-  | LetVar (a, x, e1, e2) ->
-    nest (!^ "LetVar" ^^
-      pp_a a ^^ Name.pp x ^^ !^ "=" ^^ pp e1 ^^ !^ "in" ^^ newline ^^
-      pp e2)
-  | LetFun (a, def, e2) ->
-    nest (!^ "LetFun" ^^ pp_a a ^^ newline ^^ indent (Definition.pp pp def) ^^
-      !^ "in" ^^ newline ^^ pp e2)
-  | Match (a, e, cases) ->
-    nest (!^ "Match" ^^ OCaml.tuple [pp_a a; pp e;
-      cases |> OCaml.list (fun (p, e) ->
-        nest @@ parens (Pattern.pp p ^-^ !^ "," ^^ pp e))])
-  | Record (a, fields) ->
-    nest (!^ "Record" ^^
-      OCaml.tuple (pp_a a :: (fields |> List.map (fun (x, e) ->
-        nest @@ parens (BoundName.pp x ^-^ !^ "," ^^ pp e)))))
-  | Field (a, e, x) ->
-    nest (!^ "Field" ^^ OCaml.tuple [pp_a a; pp e; BoundName.pp x])
-  | IfThenElse (a, e1, e2, e3) ->
-    nest (!^ "IfThenElse" ^^ OCaml.tuple [pp_a a; pp e1; pp e2; pp e3])
+  [@@deriving sexp]
 
 let annotation (e : 'a t) : 'a =
   match e with

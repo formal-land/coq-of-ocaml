@@ -1,54 +1,104 @@
-3
-Value
-  (non_rec,
-    [
-      ((n1, [ ], [ ], Some Type (Z/1)),
-        LetVar 4 m = Constant (4, Int(12)) in
-        LetVar 5 n1 = Variable (5, m/0) in
-        Variable (6, n1/0))
-    ])
-
-8
-Value
-  (non_rec,
-    [
-      ((n2, [ ], [ ], Some Type (Z/1)),
-        LetFun 9
-          (non_rec,
-            [
-              ((p1, [ A; B; C ], [ (c, ((A -> (B -> A)) -> C)) ], Some C),
-                Apply
-                  (9, Variable (9, c/0),
-                    [
-                      Function
-                        (9,
-                          x,
-                          Function
-                            (9,
-                              y,
-                              Variable
-                                (9,
-                                  x/0)))
-                    ]))
-            ]) in
-        LetFun 10
-          (non_rec,
-            [
-              ((c, [ A ], [ (f, (Type (Z/1) -> (Type (Z/1) -> A))) ],
-                Some A),
-                Apply
-                  (10,
-                    Variable
-                      (10,
-                        f/0),
-                    [
-                      Constant
-                        (10,
-                          Int(12));
-                      Constant
-                        (10,
-                          Int(23))
-                    ]))
-            ]) in
-        Apply (11, Variable (11, p1/0), [ Variable (11, c/0) ]))
-    ])
+((Value
+  (Known ((file_name tests/ex03.ml) (line 3))
+   ((file_name tests/ex03.ml) (line 6)))
+  ((is_rec (New false))
+   (cases
+    ((((name n1) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (LetVar
+       (Known ((file_name tests/ex03.ml) (line 4))
+        ((file_name tests/ex03.ml) (line 6)))
+       m
+       (Constant
+        (Known ((file_name tests/ex03.ml) (line 4))
+         ((file_name tests/ex03.ml) (line 4)))
+        (Int 12))
+       (LetVar
+        (Known ((file_name tests/ex03.ml) (line 5))
+         ((file_name tests/ex03.ml) (line 6)))
+        n1
+        (Variable
+         (Known ((file_name tests/ex03.ml) (line 5))
+          ((file_name tests/ex03.ml) (line 5)))
+         ((path_name ((path ()) (base m))) (depth 0)))
+        (Variable
+         (Known ((file_name tests/ex03.ml) (line 6))
+          ((file_name tests/ex03.ml) (line 6)))
+         ((path_name ((path ()) (base n1))) (depth 0))))))))))
+ (Value
+  (Known ((file_name tests/ex03.ml) (line 8))
+   ((file_name tests/ex03.ml) (line 11)))
+  ((is_rec (New false))
+   (cases
+    ((((name n2) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (LetFun
+       (Known ((file_name tests/ex03.ml) (line 9))
+        ((file_name tests/ex03.ml) (line 11)))
+       ((is_rec (New false))
+        (cases
+         ((((name p1) (typ_vars (A B C))
+            (args
+             ((c
+               (Arrow (Arrow (Variable A) (Arrow (Variable B) (Variable A)))
+                (Variable C)))))
+            (typ ((Variable C))))
+           (Apply
+            (Known ((file_name tests/ex03.ml) (line 9))
+             ((file_name tests/ex03.ml) (line 9)))
+            (Variable
+             (Known ((file_name tests/ex03.ml) (line 9))
+              ((file_name tests/ex03.ml) (line 9)))
+             ((path_name ((path ()) (base c))) (depth 0)))
+            ((Function
+              (Known ((file_name tests/ex03.ml) (line 9))
+               ((file_name tests/ex03.ml) (line 9)))
+              x
+              (Function
+               (Known ((file_name tests/ex03.ml) (line 9))
+                ((file_name tests/ex03.ml) (line 9)))
+               y
+               (Variable
+                (Known ((file_name tests/ex03.ml) (line 9))
+                 ((file_name tests/ex03.ml) (line 9)))
+                ((path_name ((path ()) (base x))) (depth 0)))))))))))
+       (LetFun
+        (Known ((file_name tests/ex03.ml) (line 10))
+         ((file_name tests/ex03.ml) (line 11)))
+        ((is_rec (New false))
+         (cases
+          ((((name c) (typ_vars (A))
+             (args
+              ((f
+                (Arrow
+                 (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
+                 (Arrow
+                  (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
+                  (Variable A))))))
+             (typ ((Variable A))))
+            (Apply
+             (Known ((file_name tests/ex03.ml) (line 10))
+              ((file_name tests/ex03.ml) (line 10)))
+             (Variable
+              (Known ((file_name tests/ex03.ml) (line 10))
+               ((file_name tests/ex03.ml) (line 10)))
+              ((path_name ((path ()) (base f))) (depth 0)))
+             ((Constant
+               (Known ((file_name tests/ex03.ml) (line 10))
+                ((file_name tests/ex03.ml) (line 10)))
+               (Int 12))
+              (Constant
+               (Known ((file_name tests/ex03.ml) (line 10))
+                ((file_name tests/ex03.ml) (line 10)))
+               (Int 23))))))))
+        (Apply
+         (Known ((file_name tests/ex03.ml) (line 11))
+          ((file_name tests/ex03.ml) (line 11)))
+         (Variable
+          (Known ((file_name tests/ex03.ml) (line 11))
+           ((file_name tests/ex03.ml) (line 11)))
+          ((path_name ((path ()) (base p1))) (depth 0)))
+         ((Variable
+           (Known ((file_name tests/ex03.ml) (line 11))
+            ((file_name tests/ex03.ml) (line 11)))
+           ((path_name ((path ()) (base c))) (depth 0)))))))))))))

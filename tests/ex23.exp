@@ -1,64 +1,186 @@
-4 Value (non_rec, [ ((n, [ ], [ ], Some Type (Z/1)), Constant (4, Int(12))) ])
-
-5
-Value
-  (non_rec, [ ((c1, [ ], [ ], Some Type (ascii/1)), Constant (5, Char("a"))) ])
-
-6
-Value
-  (non_rec, [ ((c2, [ ], [ ], Some Type (ascii/1)), Constant (6, Char("\\n"))) ])
-
-7
-Value
-  (non_rec, [ ((c3, [ ], [ ], Some Type (ascii/1)), Constant (7, Char("\\t"))) ])
-
-8
-Value
-  (non_rec, [ ((c4, [ ], [ ], Some Type (ascii/1)), Constant (8, Char("\""))) ])
-
-9
-Value
-  (non_rec,
-    [ ((s, [ ], [ ], Some Type (string/1)), Constant (9, String("hi\n\t:)\""))) ])
-
-11
-Value
-  (non_rec, [ ((b1, [ ], [ ], Some Type (bool/1)), Constructor (11, false/1)) ])
-
-12
-Value
-  (non_rec, [ ((b2, [ ], [ ], Some Type (bool/1)), Constructor (12, true/1)) ])
-
-13
-Value (non_rec, [ ((u, [ ], [ ], Some Type (unit/1)), Constructor (13, tt/1)) ])
-
-16
-Value
-  (non_rec,
-    [ ((l1, [ A ], [ ], Some Type (list/1, A)), Constructor (16, []/1)) ])
-
-17
-Value
-  (non_rec,
-    [
-      ((l2, [ ], [ ], Some Type (list/1, Type (Z/1))),
-        Constructor
-          (17, cons/1, Constant (17, Int(0)),
-            Constructor
-              (17, cons/1, Constant (17, Int(1)),
-                Constructor
-                  (17, cons/1, Constant (17, Int(2)),
-                    Constructor
-                      (17, cons/1, Constant (17, Int(3)),
-                        Constructor (17, []/1))))))
-    ])
-
-18
-Value
-  (non_rec,
-    [
-      ((o, [ ], [ ], Some Type (option/1, Type (Z/1))),
-        IfThenElse
-          (18, Variable (18, b1/0), Constructor (18, None/1),
-            Constructor (18, Some/1, Variable (18, n/0))))
-    ])
+((Value
+  (Known ((file_name tests/ex23.ml) (line 4))
+   ((file_name tests/ex23.ml) (line 4)))
+  ((is_rec (New false))
+   (cases
+    ((((name n) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (Constant
+       (Known ((file_name tests/ex23.ml) (line 4))
+        ((file_name tests/ex23.ml) (line 4)))
+       (Int 12)))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 5))
+   ((file_name tests/ex23.ml) (line 5)))
+  ((is_rec (New false))
+   (cases
+    ((((name c1) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base ascii))) (depth 1)) ()))))
+      (Constant
+       (Known ((file_name tests/ex23.ml) (line 5))
+        ((file_name tests/ex23.ml) (line 5)))
+       (Char a)))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 6))
+   ((file_name tests/ex23.ml) (line 6)))
+  ((is_rec (New false))
+   (cases
+    ((((name c2) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base ascii))) (depth 1)) ()))))
+      (Constant
+       (Known ((file_name tests/ex23.ml) (line 6))
+        ((file_name tests/ex23.ml) (line 6)))
+       (Char "\n")))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 7))
+   ((file_name tests/ex23.ml) (line 7)))
+  ((is_rec (New false))
+   (cases
+    ((((name c3) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base ascii))) (depth 1)) ()))))
+      (Constant
+       (Known ((file_name tests/ex23.ml) (line 7))
+        ((file_name tests/ex23.ml) (line 7)))
+       (Char "\t")))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 8))
+   ((file_name tests/ex23.ml) (line 8)))
+  ((is_rec (New false))
+   (cases
+    ((((name c4) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base ascii))) (depth 1)) ()))))
+      (Constant
+       (Known ((file_name tests/ex23.ml) (line 8))
+        ((file_name tests/ex23.ml) (line 8)))
+       (Char "\"")))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 9))
+   ((file_name tests/ex23.ml) (line 9)))
+  ((is_rec (New false))
+   (cases
+    ((((name s) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))
+      (Constant
+       (Known ((file_name tests/ex23.ml) (line 9))
+        ((file_name tests/ex23.ml) (line 9)))
+       (String  "hi\
+               \n\t:)\"")))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 11))
+   ((file_name tests/ex23.ml) (line 11)))
+  ((is_rec (New false))
+   (cases
+    ((((name b1) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Constructor
+       (Known ((file_name tests/ex23.ml) (line 11))
+        ((file_name tests/ex23.ml) (line 11)))
+       ((path_name ((path ()) (base false))) (depth 1)) ()))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 12))
+   ((file_name tests/ex23.ml) (line 12)))
+  ((is_rec (New false))
+   (cases
+    ((((name b2) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Constructor
+       (Known ((file_name tests/ex23.ml) (line 12))
+        ((file_name tests/ex23.ml) (line 12)))
+       ((path_name ((path ()) (base true))) (depth 1)) ()))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 13))
+   ((file_name tests/ex23.ml) (line 13)))
+  ((is_rec (New false))
+   (cases
+    ((((name u) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base unit))) (depth 1)) ()))))
+      (Constructor
+       (Known ((file_name tests/ex23.ml) (line 13))
+        ((file_name tests/ex23.ml) (line 13)))
+       ((path_name ((path ()) (base tt))) (depth 1)) ()))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 16))
+   ((file_name tests/ex23.ml) (line 16)))
+  ((is_rec (New false))
+   (cases
+    ((((name l1) (typ_vars (A)) (args ())
+       (typ
+        ((Apply ((path_name ((path ()) (base list))) (depth 1))
+          ((Variable A))))))
+      (Constructor
+       (Known ((file_name tests/ex23.ml) (line 16))
+        ((file_name tests/ex23.ml) (line 16)))
+       ((path_name ((path ()) (base []))) (depth 1)) ()))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 17))
+   ((file_name tests/ex23.ml) (line 17)))
+  ((is_rec (New false))
+   (cases
+    ((((name l2) (typ_vars ()) (args ())
+       (typ
+        ((Apply ((path_name ((path ()) (base list))) (depth 1))
+          ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
+      (Constructor
+       (Known ((file_name tests/ex23.ml) (line 17))
+        ((file_name tests/ex23.ml) (line 17)))
+       ((path_name ((path ()) (base cons))) (depth 1))
+       ((Constant
+         (Known ((file_name tests/ex23.ml) (line 17))
+          ((file_name tests/ex23.ml) (line 17)))
+         (Int 0))
+        (Constructor
+         (Known ((file_name tests/ex23.ml) (line 17))
+          ((file_name tests/ex23.ml) (line 17)))
+         ((path_name ((path ()) (base cons))) (depth 1))
+         ((Constant
+           (Known ((file_name tests/ex23.ml) (line 17))
+            ((file_name tests/ex23.ml) (line 17)))
+           (Int 1))
+          (Constructor
+           (Known ((file_name tests/ex23.ml) (line 17))
+            ((file_name tests/ex23.ml) (line 17)))
+           ((path_name ((path ()) (base cons))) (depth 1))
+           ((Constant
+             (Known ((file_name tests/ex23.ml) (line 17))
+              ((file_name tests/ex23.ml) (line 17)))
+             (Int 2))
+            (Constructor
+             (Known ((file_name tests/ex23.ml) (line 17))
+              ((file_name tests/ex23.ml) (line 17)))
+             ((path_name ((path ()) (base cons))) (depth 1))
+             ((Constant
+               (Known ((file_name tests/ex23.ml) (line 17))
+                ((file_name tests/ex23.ml) (line 17)))
+               (Int 3))
+              (Constructor
+               (Known ((file_name tests/ex23.ml) (line 17))
+                ((file_name tests/ex23.ml) (line 17)))
+               ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))
+ (Value
+  (Known ((file_name tests/ex23.ml) (line 18))
+   ((file_name tests/ex23.ml) (line 18)))
+  ((is_rec (New false))
+   (cases
+    ((((name o) (typ_vars ()) (args ())
+       (typ
+        ((Apply ((path_name ((path ()) (base option))) (depth 1))
+          ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
+      (IfThenElse
+       (Known ((file_name tests/ex23.ml) (line 18))
+        ((file_name tests/ex23.ml) (line 18)))
+       (Variable
+        (Known ((file_name tests/ex23.ml) (line 18))
+         ((file_name tests/ex23.ml) (line 18)))
+        ((path_name ((path ()) (base b1))) (depth 0)))
+       (Constructor
+        (Known ((file_name tests/ex23.ml) (line 18))
+         ((file_name tests/ex23.ml) (line 18)))
+        ((path_name ((path ()) (base None))) (depth 1)) ())
+       (Constructor
+        (Known ((file_name tests/ex23.ml) (line 18))
+         ((file_name tests/ex23.ml) (line 18)))
+        ((path_name ((path ()) (base Some))) (depth 1))
+        ((Variable
+          (Known ((file_name tests/ex23.ml) (line 18))
+           ((file_name tests/ex23.ml) (line 18)))
+          ((path_name ((path ()) (base n))) (depth 0))))))))))))

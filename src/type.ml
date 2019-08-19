@@ -1,5 +1,6 @@
 (** A type, with free type variables for polymorphic arguments. *)
 open Types
+open Sexplib.Std
 open SmartPrint
 
 type t =
@@ -7,15 +8,7 @@ type t =
   | Arrow of t * t
   | Tuple of t list
   | Apply of BoundName.t * t list
-
-let rec pp (typ : t) : SmartPrint.t =
-  match typ with
-  | Variable x -> Name.pp x
-  | Arrow (typ1, typ2) -> nest @@ parens (pp typ1 ^^ !^ "->" ^^ pp typ2)
-  | Tuple typs -> nest @@ parens (separate (space ^^ !^ "*" ^^ space) (List.map pp typs))
-  | Apply (x, typs) ->
-    nest (!^ "Type" ^^ nest (parens (
-      separate (!^ "," ^^ space) (BoundName.pp x :: List.map pp typs))))
+  [@@deriving sexp]
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t) (loc : Loc.t)

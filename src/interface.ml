@@ -4,9 +4,6 @@ open Yojson.Basic
 module Shape = struct
   type t = PathName.t list list
 
-  let rec pp (shape : t) : SmartPrint.t =
-    OCaml.list (OCaml.list PathName.pp) shape
-
   let to_json (shape : t) : json =
     `List (List.map (fun ds -> `List (List.map PathName.to_json ds)) shape)
 
@@ -24,16 +21,6 @@ type t =
   | Constructor of Name.t
   | Field of Name.t
   | Interface of Name.t * t list
-
-let rec pp (interface : t) : SmartPrint.t =
-  match interface with
-  | Var (x, shape) -> !^ "Var" ^^ OCaml.tuple [Name.pp x; Shape.pp shape]
-  | Typ x -> !^ "Typ" ^^ Name.pp x
-  | Constructor x -> !^ "Constructor" ^^ Name.pp x
-  | Field x -> !^ "Field" ^^ Name.pp x
-  | Interface (x, defs) ->
-    !^ "Interface" ^^ Name.pp x ^^ !^ "=" ^^ newline ^^ indent
-      (separate newline (List.map pp defs))
 
 let of_typ_definition (typ_def : TypeDefinition.t) : t list =
   match typ_def with

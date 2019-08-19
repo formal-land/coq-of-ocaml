@@ -1,6 +1,10 @@
+open Sexplib.Std
 open SmartPrint
 
-let exp (structure : Typedtree.structure) : Loc.t Structure.t list =
+type ast = Loc.t Structure.t list
+  [@@deriving sexp]
+
+let exp (structure : Typedtree.structure) : ast =
   snd @@ Structure.of_structure PervasivesModule.env structure
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
@@ -9,7 +13,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
   try
     let document =
       match mode with
-      | "exp" -> Structure.pps Loc.pp @@ exp structure
+      | "exp" -> !^ (Sexplib.Sexp.to_string_hum (sexp_of_ast (exp structure)))
       | "v" ->
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import OCaml.OCaml." ^^ newline;

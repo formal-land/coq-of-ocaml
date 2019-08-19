@@ -1,11 +1,13 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open Asttypes
+open Sexplib.Std
 open SmartPrint
 open Yojson.Basic
 
 type t = {
   path : Name.t list;
   base : Name.t }
+  [@@deriving sexp]
 
 type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
@@ -134,10 +136,6 @@ let convert (x : t) : t =
   | { path = ["List"]; base = "exists2" } -> { path = ["OCaml"; "List"]; base = "_exists2" }
 
   | { path = path; base = base } -> { path = path; base = Name.convert base }
-
-(** Pretty-print a global name. *)
-let pp (x : t) : SmartPrint.t =
-  separate (!^ ".") (List.map (fun s -> !^ s) (x.path @ [x.base]))
 
 (** Lift a local name to a global name. *)
 let of_name (path : Name.t list) (base : Name.t) : t =

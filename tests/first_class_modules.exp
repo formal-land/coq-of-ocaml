@@ -1,19 +1,60 @@
-3 Signature SET:
-  Type ([ ], elt)
-  Type ([ ], t)
-  Type ([ a ], poly)
-  Value (empty, Type (t/0))
-  Value (is_empty, (Type (t/0) -> Type (bool/1)))
-  Value (mem, (Type (elt/0) -> (Type (t/0) -> Type (bool/1))))
-  Value (add, (Type (elt/0) -> (Type (t/0) -> Type (t/0))))
-  Value (singleton, (Type (elt/0) -> Type (t/0)))
-  Value (remove, (Type (elt/0) -> (Type (t/0) -> Type (t/0))))
-  Value (union, (Type (t/0) -> (Type (t/0) -> Type (t/0))))
-  Value (inter, (Type (t/0) -> (Type (t/0) -> Type (t/0))))
-  Value (diff, (Type (t/0) -> (Type (t/0) -> Type (t/0))))
-  Value (compare, (Type (t/0) -> (Type (t/0) -> Type (Z/1))))
-  Value (equal, (Type (t/0) -> (Type (t/0) -> Type (bool/1))))
-  Value (subset, (Type (t/0) -> (Type (t/0) -> Type (bool/1))))
-  Value
-  (iter, ((Type (elt/0) -> Type (unit/1)) -> (Type (t/0) -> Type (unit/1))))
-  Value (map, ((Type (elt/0) -> Type (elt/0)) -> (Type (t/0) -> Type (t/0))))
+((Signature
+  (Known ((file_name tests/first_class_modules.ml) (line 3))
+   ((file_name tests/first_class_modules.ml) (line 21)))
+  SET
+  ((Typ () elt) (Typ () t) (Typ (a) poly)
+   (Value empty (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))
+   (Value is_empty
+    (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+     (Apply ((path_name ((path ()) (base bool))) (depth 1)) ())))
+   (Value mem
+    (Arrow (Apply ((path_name ((path ()) (base elt))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+   (Value add
+    (Arrow (Apply ((path_name ((path ()) (base elt))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))))
+   (Value singleton
+    (Arrow (Apply ((path_name ((path ()) (base elt))) (depth 0)) ())
+     (Apply ((path_name ((path ()) (base t))) (depth 0)) ())))
+   (Value remove
+    (Arrow (Apply ((path_name ((path ()) (base elt))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))))
+   (Value union
+    (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))))
+   (Value inter
+    (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))))
+   (Value diff
+    (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))))
+   (Value compare
+    (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+   (Value equal
+    (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+   (Value subset
+    (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+   (Value iter
+    (Arrow
+     (Arrow (Apply ((path_name ((path ()) (base elt))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base unit))) (depth 1)) ()))
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base unit))) (depth 1)) ()))))
+   (Value map
+    (Arrow
+     (Arrow (Apply ((path_name ((path ()) (base elt))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base elt))) (depth 0)) ()))
+     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base t))) (depth 0)) ())))))))

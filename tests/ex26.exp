@@ -1,108 +1,147 @@
-3
-Value
-  (rec,
-    [
-      ((f_map, [ A; B ], [ (f, (A -> B)); (l, Type (list/1, A)) ],
-        Some Type (list/1, B)),
-        Match
-          (4, Variable (4, l/0),
-            [
-              (Constructor ([]/1), Constructor (5, []/1));
-              (Constructor (cons/1, x, l),
-                Constructor
-                  (6, cons/1,
-                    Apply
-                      (6,
-                        Variable
-                          (6,
-                            f/0),
-                        [
-                          Variable
-                            (6,
-                              x/0)
-                        ]),
-                    Apply
-                      (6,
-                        Variable
-                          (6,
-                            f_map/0),
-                        [
-                          Variable
-                            (6,
-                              f/0);
-                          Variable
-                            (6,
-                              l/0)
-                        ])))
-            ]))
-    ])
-
-8
-Value
-  (non_rec,
-    [
-      ((n, [ ], [ ], Some Type (Z/1)),
-        LetFun 9
-          (rec,
-            [
-              ((sum, [ ], [ (l, Type (list/1, Type (Z/1))) ],
-                Some Type (Z/1)),
-                Match
-                  (10,
-                    Variable
-                      (10,
-                        l/0),
-                    [
-                      (Constructor
-                        ([]/1),
-                        Constant
-                          (11,
-                            Int(0)));
-                      (Constructor
-                        (cons/1,
-                          x,
-                          l),
-                        Apply
-                          (12,
-                            Variable
-                              (12,
-                                Z.add/1),
-                            [
-                              Variable
-                                (12,
-                                  x/0);
-                              Apply
-                                (12,
-                                  Variable
-                                    (12,
-                                      sum/0),
-                                  [
-                                    Variable
-                                      (12,
-                                        l/0)
-                                  ])
-                            ]))
-                    ]))
-            ]) in
-        Apply
-          (13, Variable (13, sum/0),
-            [
-              Constructor
-                (13, cons/1, Constant (13, Int(1)),
-                  Constructor
-                    (13,
-                      cons/1,
-                      Constant
-                        (13,
-                          Int(2)),
-                      Constructor
-                        (13,
-                          cons/1,
-                          Constant
-                            (13,
-                              Int(3)),
-                          Constructor
-                            (13,
-                              []/1))))
-            ]))
-    ])
+((Value
+  (Known ((file_name tests/ex26.ml) (line 3))
+   ((file_name tests/ex26.ml) (line 6)))
+  ((is_rec (New true))
+   (cases
+    ((((name f_map) (typ_vars (A B))
+       (args
+        ((f (Arrow (Variable A) (Variable B)))
+         (l
+          (Apply ((path_name ((path ()) (base list))) (depth 1))
+           ((Variable A))))))
+       (typ
+        ((Apply ((path_name ((path ()) (base list))) (depth 1))
+          ((Variable B))))))
+      (Match
+       (Known ((file_name tests/ex26.ml) (line 4))
+        ((file_name tests/ex26.ml) (line 6)))
+       (Variable
+        (Known ((file_name tests/ex26.ml) (line 4))
+         ((file_name tests/ex26.ml) (line 4)))
+        ((path_name ((path ()) (base l))) (depth 0)))
+       (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
+         (Constructor
+          (Known ((file_name tests/ex26.ml) (line 5))
+           ((file_name tests/ex26.ml) (line 5)))
+          ((path_name ((path ()) (base []))) (depth 1)) ()))
+        ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+          ((Variable x) (Variable l)))
+         (Constructor
+          (Known ((file_name tests/ex26.ml) (line 6))
+           ((file_name tests/ex26.ml) (line 6)))
+          ((path_name ((path ()) (base cons))) (depth 1))
+          ((Apply
+            (Known ((file_name tests/ex26.ml) (line 6))
+             ((file_name tests/ex26.ml) (line 6)))
+            (Variable
+             (Known ((file_name tests/ex26.ml) (line 6))
+              ((file_name tests/ex26.ml) (line 6)))
+             ((path_name ((path ()) (base f))) (depth 0)))
+            ((Variable
+              (Known ((file_name tests/ex26.ml) (line 6))
+               ((file_name tests/ex26.ml) (line 6)))
+              ((path_name ((path ()) (base x))) (depth 0)))))
+           (Apply
+            (Known ((file_name tests/ex26.ml) (line 6))
+             ((file_name tests/ex26.ml) (line 6)))
+            (Variable
+             (Known ((file_name tests/ex26.ml) (line 6))
+              ((file_name tests/ex26.ml) (line 6)))
+             ((path_name ((path ()) (base f_map))) (depth 0)))
+            ((Variable
+              (Known ((file_name tests/ex26.ml) (line 6))
+               ((file_name tests/ex26.ml) (line 6)))
+              ((path_name ((path ()) (base f))) (depth 0)))
+             (Variable
+              (Known ((file_name tests/ex26.ml) (line 6))
+               ((file_name tests/ex26.ml) (line 6)))
+              ((path_name ((path ()) (base l))) (depth 0)))))))))))))))
+ (Value
+  (Known ((file_name tests/ex26.ml) (line 8))
+   ((file_name tests/ex26.ml) (line 13)))
+  ((is_rec (New false))
+   (cases
+    ((((name n) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (LetFun
+       (Known ((file_name tests/ex26.ml) (line 9))
+        ((file_name tests/ex26.ml) (line 13)))
+       ((is_rec (New true))
+        (cases
+         ((((name sum) (typ_vars ())
+            (args
+             ((l
+               (Apply ((path_name ((path ()) (base list))) (depth 1))
+                ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
+            (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+           (Match
+            (Known ((file_name tests/ex26.ml) (line 10))
+             ((file_name tests/ex26.ml) (line 12)))
+            (Variable
+             (Known ((file_name tests/ex26.ml) (line 10))
+              ((file_name tests/ex26.ml) (line 10)))
+             ((path_name ((path ()) (base l))) (depth 0)))
+            (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
+              (Constant
+               (Known ((file_name tests/ex26.ml) (line 11))
+                ((file_name tests/ex26.ml) (line 11)))
+               (Int 0)))
+             ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+               ((Variable x) (Variable l)))
+              (Apply
+               (Known ((file_name tests/ex26.ml) (line 12))
+                ((file_name tests/ex26.ml) (line 12)))
+               (Variable
+                (Known ((file_name tests/ex26.ml) (line 12))
+                 ((file_name tests/ex26.ml) (line 12)))
+                ((path_name ((path (Z)) (base add))) (depth 1)))
+               ((Variable
+                 (Known ((file_name tests/ex26.ml) (line 12))
+                  ((file_name tests/ex26.ml) (line 12)))
+                 ((path_name ((path ()) (base x))) (depth 0)))
+                (Apply
+                 (Known ((file_name tests/ex26.ml) (line 12))
+                  ((file_name tests/ex26.ml) (line 12)))
+                 (Variable
+                  (Known ((file_name tests/ex26.ml) (line 12))
+                   ((file_name tests/ex26.ml) (line 12)))
+                  ((path_name ((path ()) (base sum))) (depth 0)))
+                 ((Variable
+                   (Known ((file_name tests/ex26.ml) (line 12))
+                    ((file_name tests/ex26.ml) (line 12)))
+                   ((path_name ((path ()) (base l))) (depth 0))))))))))))))
+       (Apply
+        (Known ((file_name tests/ex26.ml) (line 13))
+         ((file_name tests/ex26.ml) (line 13)))
+        (Variable
+         (Known ((file_name tests/ex26.ml) (line 13))
+          ((file_name tests/ex26.ml) (line 13)))
+         ((path_name ((path ()) (base sum))) (depth 0)))
+        ((Constructor
+          (Known ((file_name tests/ex26.ml) (line 13))
+           ((file_name tests/ex26.ml) (line 13)))
+          ((path_name ((path ()) (base cons))) (depth 1))
+          ((Constant
+            (Known ((file_name tests/ex26.ml) (line 13))
+             ((file_name tests/ex26.ml) (line 13)))
+            (Int 1))
+           (Constructor
+            (Known ((file_name tests/ex26.ml) (line 13))
+             ((file_name tests/ex26.ml) (line 13)))
+            ((path_name ((path ()) (base cons))) (depth 1))
+            ((Constant
+              (Known ((file_name tests/ex26.ml) (line 13))
+               ((file_name tests/ex26.ml) (line 13)))
+              (Int 2))
+             (Constructor
+              (Known ((file_name tests/ex26.ml) (line 13))
+               ((file_name tests/ex26.ml) (line 13)))
+              ((path_name ((path ()) (base cons))) (depth 1))
+              ((Constant
+                (Known ((file_name tests/ex26.ml) (line 13))
+                 ((file_name tests/ex26.ml) (line 13)))
+                (Int 3))
+               (Constructor
+                (Known ((file_name tests/ex26.ml) (line 13))
+                 ((file_name tests/ex26.ml) (line 13)))
+                ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))))
