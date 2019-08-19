@@ -5,7 +5,7 @@ open Typedtree
 
 type item =
   | Typ of Name.t list * Name.t
-  | Value of Name.t * Type.t
+  | Value of Name.t * Name.t list * Type.t
   [@@deriving sexp]
 
 type t = item list
@@ -33,10 +33,12 @@ let of_signature (env : unit FullEnvi.t) (signature : signature) : t =
       (env, Typ (typ_args, name))
     | Tsig_type (_, _) -> Error.raise loc "Mutual type definitions in signatures not handled."
     | Tsig_typext _ -> Error.raise loc "Structure item `typext` not handled."
-    | Tsig_value { val_id; val_desc = { ctyp_type } } ->
+    | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
       let env = FullEnvi.add_var [] name () env in
-      (env, Value (name, Type.of_type_expr env loc ctyp_type)) in
+      let typ = Type.of_type_expr env loc ctyp_type in
+      let typ_args = Name.Set.elements (Type.typ_args typ) in
+      (env, Value (name, typ_args, typ)) in
   let (_, items) =
     List.fold_left (fun (env, items) signature_item ->
       let (env, item) = of_signature_item env signature_item in
@@ -55,7 +57,15 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
         separate space (List.map Name.to_coq typ_args) ^^
         !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
     !^ "Type" ^-^ !^ ";"
-  | Value (name, typ) -> Name.to_coq name ^^ !^ ":" ^^ Type.to_coq false typ ^-^ !^ ";"
+  | Value (name, typ_args, typ) ->
+    Name.to_coq name ^^ !^ ":" ^^
+    (match typ_args with
+    | [] -> empty
+    | _ :: _ ->
+      !^ "forall" ^^ braces (group (
+        separate space (List.map Name.to_coq typ_args) ^^
+        !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
+    Type.to_coq false typ ^-^ !^ ";"
 
 let to_coq (signature : t) : SmartPrint.t =
   group (separate newline (List.map to_coq_item signature))

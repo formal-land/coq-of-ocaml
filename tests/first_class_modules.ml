@@ -18,6 +18,7 @@ module type SET = sig
   val subset: t -> t -> bool
   val iter: (elt -> unit) -> t -> unit
   val map: (elt -> elt) -> t -> t
+  val fold: (elt -> 'a -> 'a) -> t -> 'a -> 'a
   val for_all: (elt -> bool) -> t -> bool
   val exists: (elt -> bool) -> t -> bool
   val filter: (elt -> bool) -> t -> t

@@ -22,6 +22,7 @@ Record SET := {
   subset : t -> t -> bool;
   iter : (elt -> unit) -> t -> unit;
   map : (elt -> elt) -> t -> t;
+  fold : forall {a : Type}, (elt -> a -> a) -> t -> a -> a;
   for_all : (elt -> bool) -> t -> bool;
   _exists : (elt -> bool) -> t -> bool;
   filter : (elt -> bool) -> t -> t;
