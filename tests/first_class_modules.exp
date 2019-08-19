@@ -1,0 +1,17 @@
+3 Signature SET:
+  Type elt
+  Type t
+  Value empty Type (t/0)
+  Value is_empty (Type (t/0) -> Type (bool/1))
+  Value mem (Type (elt/0) -> (Type (t/0) -> Type (bool/1)))
+  Value add (Type (elt/0) -> (Type (t/0) -> Type (t/0)))
+  Value singleton (Type (elt/0) -> Type (t/0))
+  Value remove (Type (elt/0) -> (Type (t/0) -> Type (t/0)))
+  Value union (Type (t/0) -> (Type (t/0) -> Type (t/0)))
+  Value inter (Type (t/0) -> (Type (t/0) -> Type (t/0)))
+  Value diff (Type (t/0) -> (Type (t/0) -> Type (t/0)))
+  Value compare (Type (t/0) -> (Type (t/0) -> Type (Z/1)))
+  Value equal (Type (t/0) -> (Type (t/0) -> Type (bool/1)))
+  Value subset (Type (t/0) -> (Type (t/0) -> Type (bool/1)))
+  Value iter ((Type (elt/0) -> Type (unit/1)) -> (Type (t/0) -> Type (unit/1)))
+  Value map ((Type (elt/0) -> Type (elt/0)) -> (Type (t/0) -> Type (t/0)))

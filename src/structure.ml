@@ -43,6 +43,7 @@ type 'a t =
   | TypeDefinition of Loc.t * TypeDefinition.t
   | Open of Loc.t * Open.t
   | Module of Loc.t * Name.t * 'a t list
+  | Signature of Loc.t * Name.t * Signature.t
 
 let rec pps (pp_a : 'a -> SmartPrint.t) (defs : 'a t list) : SmartPrint.t =
   separate (newline ^^ newline) (List.map (pp pp_a) defs)
@@ -58,6 +59,10 @@ and pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
     nest (
       Loc.pp loc ^^ !^ "Module" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
       indent (pps pp_a defs))
+  | Signature (loc, name, signature) ->
+    nest (
+      Loc.pp loc ^^ !^ "Signature" ^^ Name.pp name ^-^ !^ ":" ^^ newline ^^
+      indent (Signature.pp signature))
 
 (** Import an OCaml structure. *)
 let rec of_structure (env : unit FullEnvi.t) (structure : structure)
@@ -94,7 +99,14 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.leave_module name env in
       (env, Module (loc, name, structures))
-    | Tstr_modtype _ -> Error.raise loc "Signatures not handled."
+    | Tstr_modtype { mtd_type = None } -> Error.raise loc "Abstract module types not handled."
+    | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->
+      let name = Name.of_ident mtd_id in
+      begin
+        match mty_desc with
+        | Tmty_signature signature -> (env, Signature (loc, name, Signature.of_signature env signature))
+        | _ -> Error.raise loc "This kind of signature is not handled."
+      end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
       Error.raise loc "Functors not handled."
     | Tstr_module _ -> Error.raise loc "This kind of module is not handled."
@@ -128,5 +140,10 @@ let rec to_coq (defs : 'a t list) : SmartPrint.t =
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
-        !^ "End" ^^ Name.to_coq name ^-^ !^ ".") in
+        !^ "End" ^^ Name.to_coq name ^-^ !^ ".")
+    | Signature (_, name, signature) ->
+      nest (
+        !^ "Record" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
+        indent (Signature.to_coq signature) ^^ newline ^^
+        !^ "}" ^-^ !^ ".") in
   separate (newline ^^ newline) (List.map to_coq_one defs)
