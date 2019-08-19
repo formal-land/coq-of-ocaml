@@ -17,7 +17,7 @@ install: [
   ["install" "interfaces/list.interface" "%{lib}%/coq-of-ocaml"]
 ]
 depends: [
-  "conf-ruby" {build}
+  "conf-ruby" {with-test}
   "coq" {>= "8.5"}
   "ocaml" {>= "4.07.0" & < "4.08.0"}
   "smart-print"

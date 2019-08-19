@@ -37,6 +37,7 @@ script:
     export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
     set -ex
     sudo chown -R coq:coq /home/project
+    export OPAMWITHTEST=true
     # Check if the package is compatible with the current environment
     if [ ${SHOULD_SUPPORT} ] || opam install ${PACKAGE_NAME} --show-action; then
       # First install the dependencies
@@ -45,7 +46,7 @@ script:
       opam install ${PACKAGE_NAME} --deps-only -y
       opam list
       # Then install the package itself in verbose mode
-      opam install ${PACKAGE_NAME} -v --with-test
+      opam install ${PACKAGE_NAME} -v
     fi;
     " script
 - docker stop COQ  # optional
