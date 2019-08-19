@@ -22,4 +22,18 @@ Record SET := {
   subset : t -> t -> bool;
   iter : (elt -> unit) -> t -> unit;
   map : (elt -> elt) -> t -> t;
+  for_all : (elt -> bool) -> t -> bool;
+  _exists : (elt -> bool) -> t -> bool;
+  filter : (elt -> bool) -> t -> t;
+  partition : (elt -> bool) -> t -> t * t;
+  cardinal : t -> Z;
+  elements : t -> list elt;
+  min_elt_opt : t -> option elt;
+  max_elt_opt : t -> option elt;
+  choose_opt : t -> option elt;
+  split : elt -> t -> t * bool * t;
+  find_opt : elt -> t -> option elt;
+  find_first_opt : (elt -> bool) -> t -> option elt;
+  find_last_opt : (elt -> bool) -> t -> option elt;
+  of_list : (list elt) -> t;
 }.
