@@ -1,6 +1,7 @@
 (** Patterns used for the "match". *)
 open Typedtree
 open Types
+open Sexplib.Std
 open SmartPrint
 
 type t =
@@ -12,6 +13,7 @@ type t =
   | Alias of t * Name.t
   | Record of (BoundName.t * t) list (** A list of fields from a record with their expected patterns. *)
   | Or of t * t
+  [@@deriving sexp]
 
 let rec pp (p : t) : SmartPrint.t =
   match p with

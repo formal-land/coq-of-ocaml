@@ -1,7 +1,9 @@
 open Typedtree
+open Sexplib.Std
 open SmartPrint
 
 type t = Name.t list
+  [@@deriving sexp]
 
 let pp (o : t) : SmartPrint.t =
   nest (!^ "Open" ^^ separate (!^ ".") (List.map Name.pp o))

@@ -1,21 +1,82 @@
-3 Module M:
-  4 Value (non_rec, [ ((n, [ ], [ ], Some Type (Z/2)), Constant (4, Int(12))) ])
-
-7 Module N:
-  8
-  Value
-    (non_rec, [ ((n, [ ], [ ], Some Type (bool/2)), Constructor (8, true/2)) ])
-  
-  9 Value (non_rec, [ ((x, [ ], [ ], Some Type (bool/2)), Variable (9, n/0)) ])
-  
-  10 Open M
-  
-  11 Value (non_rec, [ ((y, [ ], [ ], Some Type (Z/2)), Variable (11, M.n/1)) ])
-
-14
-Value (non_rec, [ ((b, [ ], [ ], Some Type (bool/1)), Variable (14, N.n/0)) ])
-
-15 Open N
-
-16
-Value (non_rec, [ ((b', [ ], [ ], Some Type (bool/1)), Variable (16, N.n/0)) ])
+((Module
+  (Known ((file_name tests/ex30.ml) (line 3))
+   ((file_name tests/ex30.ml) (line 5)))
+  M
+  ((Value
+    (Known ((file_name tests/ex30.ml) (line 4))
+     ((file_name tests/ex30.ml) (line 4)))
+    ((is_rec (New false))
+     (cases
+      ((((name n) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
+        (Constant
+         (Known ((file_name tests/ex30.ml) (line 4))
+          ((file_name tests/ex30.ml) (line 4)))
+         (Int 12)))))))))
+ (Module
+  (Known ((file_name tests/ex30.ml) (line 7))
+   ((file_name tests/ex30.ml) (line 12)))
+  N
+  ((Value
+    (Known ((file_name tests/ex30.ml) (line 8))
+     ((file_name tests/ex30.ml) (line 8)))
+    ((is_rec (New false))
+     (cases
+      ((((name n) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
+        (Constructor
+         (Known ((file_name tests/ex30.ml) (line 8))
+          ((file_name tests/ex30.ml) (line 8)))
+         ((path_name ((path ()) (base true))) (depth 2)) ()))))))
+   (Value
+    (Known ((file_name tests/ex30.ml) (line 9))
+     ((file_name tests/ex30.ml) (line 9)))
+    ((is_rec (New false))
+     (cases
+      ((((name x) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
+        (Variable
+         (Known ((file_name tests/ex30.ml) (line 9))
+          ((file_name tests/ex30.ml) (line 9)))
+         ((path_name ((path ()) (base n))) (depth 0))))))))
+   (Open
+    (Known ((file_name tests/ex30.ml) (line 10))
+     ((file_name tests/ex30.ml) (line 10)))
+    (M))
+   (Value
+    (Known ((file_name tests/ex30.ml) (line 11))
+     ((file_name tests/ex30.ml) (line 11)))
+    ((is_rec (New false))
+     (cases
+      ((((name y) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
+        (Variable
+         (Known ((file_name tests/ex30.ml) (line 11))
+          ((file_name tests/ex30.ml) (line 11)))
+         ((path_name ((path (M)) (base n))) (depth 1))))))))))
+ (Value
+  (Known ((file_name tests/ex30.ml) (line 14))
+   ((file_name tests/ex30.ml) (line 14)))
+  ((is_rec (New false))
+   (cases
+    ((((name b) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Variable
+       (Known ((file_name tests/ex30.ml) (line 14))
+        ((file_name tests/ex30.ml) (line 14)))
+       ((path_name ((path (N)) (base n))) (depth 0))))))))
+ (Open
+  (Known ((file_name tests/ex30.ml) (line 15))
+   ((file_name tests/ex30.ml) (line 15)))
+  (N))
+ (Value
+  (Known ((file_name tests/ex30.ml) (line 16))
+   ((file_name tests/ex30.ml) (line 16)))
+  ((is_rec (New false))
+   (cases
+    ((((name b') (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Variable
+       (Known ((file_name tests/ex30.ml) (line 16))
+        ((file_name tests/ex30.ml) (line 16)))
+       ((path_name ((path (N)) (base n))) (depth 0)))))))))

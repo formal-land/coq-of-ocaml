@@ -1,5 +1,6 @@
 open Types
 open Typedtree
+open Sexplib.Std
 open SmartPrint
 
 type t =
@@ -7,6 +8,7 @@ type t =
   | Record of Name.t * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
+  [@@deriving sexp]
 
 let pp (def : t) : SmartPrint.t =
   match def with

@@ -1,12 +1,15 @@
 (** An OCaml signature which will by transformed into a dependent record. *)
+open Sexplib.Std
 open SmartPrint
 open Typedtree
 
 type item =
   | Typ of Name.t list * Name.t
   | Value of Name.t * Type.t
+  [@@deriving sexp]
 
 type t = item list
+  [@@deriving sexp]
 
 let pp_item (signature_item : item) : SmartPrint.t =
   match signature_item with

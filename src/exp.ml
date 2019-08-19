@@ -1,6 +1,7 @@
 (** An expression. *)
 open Typedtree
 open Types
+open Sexplib.Std
 open SmartPrint
 
 module Header = struct
@@ -9,6 +10,7 @@ module Header = struct
     typ_vars : Name.t list;
     args : (Name.t * Type.t) list;
     typ : Type.t option }
+    [@@deriving sexp]
 
   let pp (header : t) : SmartPrint.t =
     OCaml.tuple [
@@ -27,6 +29,7 @@ module Definition = struct
   type 'a t = {
     is_rec : Recursivity.t;
     cases : (Header.t * 'a) list }
+    [@@deriving sexp]
 
   let pp (pp_a : 'a -> SmartPrint.t) (def : 'a t) : SmartPrint.t =
     OCaml.tuple [Recursivity.pp def.is_rec;
@@ -65,6 +68,7 @@ type 'a t =
     (** Construct a record giving an expression for each field. *)
   | Field of 'a * 'a t * BoundName.t (** Access to a field of a record. *)
   | IfThenElse of 'a * 'a t * 'a t * 'a t (** The "else" part may be unit. *)
+  [@@deriving sexp]
 
 let rec pp (pp_a : 'a -> SmartPrint.t) (e : 'a t) : SmartPrint.t =
   let pp = pp pp_a in

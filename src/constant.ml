@@ -1,5 +1,6 @@
 (** Constants. *)
 open Asttypes
+open Sexplib.Std
 open SmartPrint
 
 (** A constant can be an integer, a natural number (used for the non-termination monad) *)
@@ -7,6 +8,7 @@ type t =
   | Int of int
   | Char of char
   | String of string
+  [@@deriving sexp]
 
 (** Pretty-print a constant. *)
 let pp (c : t) : SmartPrint.t =

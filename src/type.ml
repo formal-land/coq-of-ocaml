@@ -1,5 +1,6 @@
 (** A type, with free type variables for polymorphic arguments. *)
 open Types
+open Sexplib.Std
 open SmartPrint
 
 type t =
@@ -7,6 +8,7 @@ type t =
   | Arrow of t * t
   | Tuple of t list
   | Apply of BoundName.t * t list
+  [@@deriving sexp]
 
 let rec pp (typ : t) : SmartPrint.t =
   match typ with

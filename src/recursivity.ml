@@ -1,7 +1,9 @@
 (** Recursivity flag. *)
+open Sexplib.Std
 open SmartPrint
 
 type t = New of bool
+  [@@deriving sexp]
 
 let pp (r : t) : SmartPrint.t =
   match r with

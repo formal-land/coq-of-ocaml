@@ -1,16 +1,48 @@
-3 Module M:
-  6
-  Value
-    (non_rec, [ ((b, [ ], [ ], Some Type (bool/2)), Constructor (6, false/2)) ])
-  
-  7 Value (non_rec, [ ((n, [ ], [ ], Some Type (Z/2)), Constant (7, Int(12))) ])
-
-10
-Value
-  (non_rec,
-    [
-      ((n, [ ], [ ], Some Type (Z/1)),
-        Apply
-          (10, Variable (10, Z.add/1),
-            [ Variable (10, M.n/0); Constant (10, Int(2)) ]))
-    ])
+((Module
+  (Known ((file_name tests/ex31.ml) (line 3))
+   ((file_name tests/ex31.ml) (line 8)))
+  M
+  ((Value
+    (Known ((file_name tests/ex31.ml) (line 6))
+     ((file_name tests/ex31.ml) (line 6)))
+    ((is_rec (New false))
+     (cases
+      ((((name b) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
+        (Constructor
+         (Known ((file_name tests/ex31.ml) (line 6))
+          ((file_name tests/ex31.ml) (line 6)))
+         ((path_name ((path ()) (base false))) (depth 2)) ()))))))
+   (Value
+    (Known ((file_name tests/ex31.ml) (line 7))
+     ((file_name tests/ex31.ml) (line 7)))
+    ((is_rec (New false))
+     (cases
+      ((((name n) (typ_vars ()) (args ())
+         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
+        (Constant
+         (Known ((file_name tests/ex31.ml) (line 7))
+          ((file_name tests/ex31.ml) (line 7)))
+         (Int 12)))))))))
+ (Value
+  (Known ((file_name tests/ex31.ml) (line 10))
+   ((file_name tests/ex31.ml) (line 10)))
+  ((is_rec (New false))
+   (cases
+    ((((name n) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (Apply
+       (Known ((file_name tests/ex31.ml) (line 10))
+        ((file_name tests/ex31.ml) (line 10)))
+       (Variable
+        (Known ((file_name tests/ex31.ml) (line 10))
+         ((file_name tests/ex31.ml) (line 10)))
+        ((path_name ((path (Z)) (base add))) (depth 1)))
+       ((Variable
+         (Known ((file_name tests/ex31.ml) (line 10))
+          ((file_name tests/ex31.ml) (line 10)))
+         ((path_name ((path (M)) (base n))) (depth 0)))
+        (Constant
+         (Known ((file_name tests/ex31.ml) (line 10))
+          ((file_name tests/ex31.ml) (line 10)))
+         (Int 2))))))))))

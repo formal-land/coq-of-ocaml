@@ -1,13 +1,33 @@
-3
-Value
-  (non_rec, [ ((f, [ A; B ], [ (x, A); (y, B) ], Some A), Variable (3, x/0)) ])
-
-5
-Value
-  (non_rec,
-    [
-      ((n, [ ], [ ], Some Type (Z/1)),
-        Apply
-          (5, Variable (5, f/0),
-            [ Constant (5, Int(12)); Constant (5, Int(3)) ]))
-    ])
+((Value
+  (Known ((file_name tests/ex01.ml) (line 3))
+   ((file_name tests/ex01.ml) (line 3)))
+  ((is_rec (New false))
+   (cases
+    ((((name f) (typ_vars (A B)) (args ((x (Variable A)) (y (Variable B))))
+       (typ ((Variable A))))
+      (Variable
+       (Known ((file_name tests/ex01.ml) (line 3))
+        ((file_name tests/ex01.ml) (line 3)))
+       ((path_name ((path ()) (base x))) (depth 0))))))))
+ (Value
+  (Known ((file_name tests/ex01.ml) (line 5))
+   ((file_name tests/ex01.ml) (line 5)))
+  ((is_rec (New false))
+   (cases
+    ((((name n) (typ_vars ()) (args ())
+       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+      (Apply
+       (Known ((file_name tests/ex01.ml) (line 5))
+        ((file_name tests/ex01.ml) (line 5)))
+       (Variable
+        (Known ((file_name tests/ex01.ml) (line 5))
+         ((file_name tests/ex01.ml) (line 5)))
+        ((path_name ((path ()) (base f))) (depth 0)))
+       ((Constant
+         (Known ((file_name tests/ex01.ml) (line 5))
+          ((file_name tests/ex01.ml) (line 5)))
+         (Int 12))
+        (Constant
+         (Known ((file_name tests/ex01.ml) (line 5))
+          ((file_name tests/ex01.ml) (line 5)))
+         (Int 3))))))))))

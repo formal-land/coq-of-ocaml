@@ -1,8 +1,10 @@
+open Sexplib.Std
 open SmartPrint
 
 type t = {
   path_name : PathName.t;
   depth : int }
+  [@@deriving sexp]
 
 let pp (x : t) : SmartPrint.t =
   PathName.pp x.path_name ^-^ !^ "/" ^-^ OCaml.int x.depth

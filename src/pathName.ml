@@ -1,11 +1,13 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open Asttypes
+open Sexplib.Std
 open SmartPrint
 open Yojson.Basic
 
 type t = {
   path : Name.t list;
   base : Name.t }
+  [@@deriving sexp]
 
 type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)

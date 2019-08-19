@@ -1,75 +1,103 @@
-3
-Inductive tree:
-  ([ ], [ (Leaf, [ ]); (Node, [ Type (tree/0); Type (Z/1); Type (tree/0) ]) ])
-
-7
-Value
-  (rec,
-    [
-      ((find, [ ], [ (x, Type (Z/1)); (t, Type (tree/0)) ], Some Type (bool/1)),
-        Match
-          (8, Variable (8, t/0),
-            [
-              (Constructor (Leaf/0), Constructor (9, false/1));
-              (Constructor (Node/0, t1, x', t2),
-                IfThenElse
-                  (11,
-                    Apply
-                      (11,
-                        Variable
-                          (11,
-                            OCaml.Pervasives.lt/1),
-                        [
-                          Variable
-                            (11,
-                              x/0);
-                          Variable
-                            (11,
-                              x'/0)
-                        ]),
-                    Apply
-                      (12,
-                        Variable
-                          (12,
-                            find/0),
-                        [
-                          Variable
-                            (12,
-                              x/0);
-                          Variable
-                            (12,
-                              t1/0)
-                        ]),
-                    IfThenElse
-                      (13,
-                        Apply
-                          (13,
-                            Variable
-                              (13,
-                                OCaml.Pervasives.lt/1),
-                            [
-                              Variable
-                                (13,
-                                  x'/0);
-                              Variable
-                                (13,
-                                  x/0)
-                            ]),
-                        Apply
-                          (14,
-                            Variable
-                              (14,
-                                find/0),
-                            [
-                              Variable
-                                (14,
-                                  x/0);
-                              Variable
-                                (14,
-                                  t2/0)
-                            ]),
-                        Constructor
-                          (16,
-                            true/1))))
-            ]))
-    ])
+((TypeDefinition
+  (Known ((file_name tests/ex12.ml) (line 3))
+   ((file_name tests/ex12.ml) (line 5)))
+  (Inductive tree ()
+   ((Leaf ())
+    (Node
+     ((Apply ((path_name ((path ()) (base tree))) (depth 0)) ())
+      (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
+      (Apply ((path_name ((path ()) (base tree))) (depth 0)) ()))))))
+ (Value
+  (Known ((file_name tests/ex12.ml) (line 7))
+   ((file_name tests/ex12.ml) (line 16)))
+  ((is_rec (New true))
+   (cases
+    ((((name find) (typ_vars ())
+       (args
+        ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
+         (t (Apply ((path_name ((path ()) (base tree))) (depth 0)) ()))))
+       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
+      (Match
+       (Known ((file_name tests/ex12.ml) (line 8))
+        ((file_name tests/ex12.ml) (line 16)))
+       (Variable
+        (Known ((file_name tests/ex12.ml) (line 8))
+         ((file_name tests/ex12.ml) (line 8)))
+        ((path_name ((path ()) (base t))) (depth 0)))
+       (((Constructor ((path_name ((path ()) (base Leaf))) (depth 0)) ())
+         (Constructor
+          (Known ((file_name tests/ex12.ml) (line 9))
+           ((file_name tests/ex12.ml) (line 9)))
+          ((path_name ((path ()) (base false))) (depth 1)) ()))
+        ((Constructor ((path_name ((path ()) (base Node))) (depth 0))
+          ((Variable t1) (Variable x') (Variable t2)))
+         (IfThenElse
+          (Known ((file_name tests/ex12.ml) (line 11))
+           ((file_name tests/ex12.ml) (line 16)))
+          (Apply
+           (Known ((file_name tests/ex12.ml) (line 11))
+            ((file_name tests/ex12.ml) (line 11)))
+           (Variable
+            (Known ((file_name tests/ex12.ml) (line 11))
+             ((file_name tests/ex12.ml) (line 11)))
+            ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
+           ((Variable
+             (Known ((file_name tests/ex12.ml) (line 11))
+              ((file_name tests/ex12.ml) (line 11)))
+             ((path_name ((path ()) (base x))) (depth 0)))
+            (Variable
+             (Known ((file_name tests/ex12.ml) (line 11))
+              ((file_name tests/ex12.ml) (line 11)))
+             ((path_name ((path ()) (base x'))) (depth 0)))))
+          (Apply
+           (Known ((file_name tests/ex12.ml) (line 12))
+            ((file_name tests/ex12.ml) (line 12)))
+           (Variable
+            (Known ((file_name tests/ex12.ml) (line 12))
+             ((file_name tests/ex12.ml) (line 12)))
+            ((path_name ((path ()) (base find))) (depth 0)))
+           ((Variable
+             (Known ((file_name tests/ex12.ml) (line 12))
+              ((file_name tests/ex12.ml) (line 12)))
+             ((path_name ((path ()) (base x))) (depth 0)))
+            (Variable
+             (Known ((file_name tests/ex12.ml) (line 12))
+              ((file_name tests/ex12.ml) (line 12)))
+             ((path_name ((path ()) (base t1))) (depth 0)))))
+          (IfThenElse
+           (Known ((file_name tests/ex12.ml) (line 13))
+            ((file_name tests/ex12.ml) (line 16)))
+           (Apply
+            (Known ((file_name tests/ex12.ml) (line 13))
+             ((file_name tests/ex12.ml) (line 13)))
+            (Variable
+             (Known ((file_name tests/ex12.ml) (line 13))
+              ((file_name tests/ex12.ml) (line 13)))
+             ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
+            ((Variable
+              (Known ((file_name tests/ex12.ml) (line 13))
+               ((file_name tests/ex12.ml) (line 13)))
+              ((path_name ((path ()) (base x'))) (depth 0)))
+             (Variable
+              (Known ((file_name tests/ex12.ml) (line 13))
+               ((file_name tests/ex12.ml) (line 13)))
+              ((path_name ((path ()) (base x))) (depth 0)))))
+           (Apply
+            (Known ((file_name tests/ex12.ml) (line 14))
+             ((file_name tests/ex12.ml) (line 14)))
+            (Variable
+             (Known ((file_name tests/ex12.ml) (line 14))
+              ((file_name tests/ex12.ml) (line 14)))
+             ((path_name ((path ()) (base find))) (depth 0)))
+            ((Variable
+              (Known ((file_name tests/ex12.ml) (line 14))
+               ((file_name tests/ex12.ml) (line 14)))
+              ((path_name ((path ()) (base x))) (depth 0)))
+             (Variable
+              (Known ((file_name tests/ex12.ml) (line 14))
+               ((file_name tests/ex12.ml) (line 14)))
+              ((path_name ((path ()) (base t2))) (depth 0)))))
+           (Constructor
+            (Known ((file_name tests/ex12.ml) (line 16))
+             ((file_name tests/ex12.ml) (line 16)))
+            ((path_name ((path ()) (base true))) (depth 1)) ()))))))))))))

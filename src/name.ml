@@ -1,10 +1,12 @@
 (** Local identifiers, used for variable names in patterns for example. *)
 open Typedtree
+open Sexplib.Std
 open SmartPrint
 open Yojson.Basic
 
 (** Just a [string] (no freshness counter for now). *)
 type t = string
+  [@@deriving sexp]
 
 type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
