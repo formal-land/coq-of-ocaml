@@ -60,7 +60,7 @@ let convert (x : t) : t =
 
 (** Import an OCaml identifier. *)
 let of_ident (i : Ident.t) : t =
-  convert i.Ident.name
+  convert (Ident.name i)
 
 (** Lift a [string] to an identifier. *)
 let of_string (s : string) : t =

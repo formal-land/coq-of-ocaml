@@ -22,7 +22,7 @@ install: |
     echo \"Build triggered by ${TRAVIS_EVENT_TYPE}\"
     export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
     set -ex  # -e = exit on failure; -x = trace for debug
-    opam switch 4.05.0
+    opam switch 4.07.1+flambda
     opam update
     opam pin add ${PACKAGE_NAME}.opam . --kind=path --no-action
     opam config list

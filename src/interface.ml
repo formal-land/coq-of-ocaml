@@ -104,6 +104,5 @@ let of_file (file_name : string) : t =
       open_in_bin (Filename.dirname Sys.executable_name ^
         "/../lib/coq-of-ocaml/" ^ file_name) in
   let size = in_channel_length file in
-  let content = String.make size ' ' in
-  really_input file content 0 size;
+  let content = really_input_string file size in
   of_json_string content

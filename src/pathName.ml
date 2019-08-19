@@ -14,8 +14,8 @@ module Map = Map.Make (struct type t = t' let compare = compare end)
 (* Convert an identifier from OCaml to its Coq's equivalent. *)
 let convert (x : t) : t =
   match x with
-  | { path = ["Pervasives"]; base = "!" } -> { path = ["Pervasives"]; base = "!" }
-  | { path = ["Pervasives"]; base = ":=" } -> { path = ["Pervasives"]; base = ":=" }
+  | { path = ["Stdlib"]; base = "!" } -> { path = ["Pervasives"]; base = "!" }
+  | { path = ["Stdlib"]; base = ":=" } -> { path = ["Pervasives"]; base = ":=" }
   (* The core library *)
   (* Built-in types *)
   | { path = []; base = "int" } -> { path = []; base = "Z" }
@@ -48,80 +48,80 @@ let convert (x : t) : t =
 
   (* Pervasives *)
   (* Exceptions *)
-  | { path = ["Pervasives"]; base = "invalid_arg" } -> { path = ["OCaml"; "Pervasives"]; base = "invalid_arg" }
-  | { path = ["Pervasives"]; base = "failwith" } -> { path = ["OCaml"; "Pervasives"]; base = "failwith" }
-  | { path = []; base = "Exit" } | { path = ["Pervasives"]; base = "Exit" } ->
+  | { path = ["Stdlib"]; base = "invalid_arg" } -> { path = ["OCaml"; "Pervasives"]; base = "invalid_arg" }
+  | { path = ["Stdlib"]; base = "failwith" } -> { path = ["OCaml"; "Pervasives"]; base = "failwith" }
+  | { path = []; base = "Exit" } | { path = ["Stdlib"]; base = "Exit" } ->
     { path = ["OCaml"; "Pervasives"]; base = "Exit" }
   (* Comparisons *)
-  | { path = ["Pervasives"]; base = "=" } -> { path = []; base = "equiv_decb" }
-  | { path = ["Pervasives"]; base = "<>" } -> { path = []; base = "nequiv_decb" }
-  | { path = ["Pervasives"]; base = "<" } -> { path = ["OCaml"; "Pervasives"]; base = "lt" }
-  | { path = ["Pervasives"]; base = ">" } -> { path = ["OCaml"; "Pervasives"]; base = "gt" }
-  | { path = ["Pervasives"]; base = "<=" } -> { path = ["OCaml"; "Pervasives"]; base = "le" }
-  | { path = ["Pervasives"]; base = ">=" } -> { path = ["OCaml"; "Pervasives"]; base = "ge" }
-  | { path = ["Pervasives"]; base = "compare" } -> { path = ["OCaml"; "Pervasives"]; base = "compare" }
-  | { path = ["Pervasives"]; base = "min" } -> { path = ["OCaml"; "Pervasives"]; base = "min" }
-  | { path = ["Pervasives"]; base = "max" } -> { path = ["OCaml"; "Pervasives"]; base = "max" }
+  | { path = ["Stdlib"]; base = "=" } -> { path = []; base = "equiv_decb" }
+  | { path = ["Stdlib"]; base = "<>" } -> { path = []; base = "nequiv_decb" }
+  | { path = ["Stdlib"]; base = "<" } -> { path = ["OCaml"; "Pervasives"]; base = "lt" }
+  | { path = ["Stdlib"]; base = ">" } -> { path = ["OCaml"; "Pervasives"]; base = "gt" }
+  | { path = ["Stdlib"]; base = "<=" } -> { path = ["OCaml"; "Pervasives"]; base = "le" }
+  | { path = ["Stdlib"]; base = ">=" } -> { path = ["OCaml"; "Pervasives"]; base = "ge" }
+  | { path = ["Stdlib"]; base = "compare" } -> { path = ["OCaml"; "Pervasives"]; base = "compare" }
+  | { path = ["Stdlib"]; base = "min" } -> { path = ["OCaml"; "Pervasives"]; base = "min" }
+  | { path = ["Stdlib"]; base = "max" } -> { path = ["OCaml"; "Pervasives"]; base = "max" }
   (* Boolean operations *)
-  | { path = ["Pervasives"]; base = "not" } -> { path = []; base = "negb" }
-  | { path = ["Pervasives"]; base = "&&" } -> { path = []; base = "andb" }
-  | { path = ["Pervasives"]; base = "&" } -> { path = []; base = "andb" }
-  | { path = ["Pervasives"]; base = "||" } -> { path = []; base = "orb" }
-  | { path = ["Pervasives"]; base = "or" } -> { path = []; base = "orb" }
+  | { path = ["Stdlib"]; base = "not" } -> { path = []; base = "negb" }
+  | { path = ["Stdlib"]; base = "&&" } -> { path = []; base = "andb" }
+  | { path = ["Stdlib"]; base = "&" } -> { path = []; base = "andb" }
+  | { path = ["Stdlib"]; base = "||" } -> { path = []; base = "orb" }
+  | { path = ["Stdlib"]; base = "or" } -> { path = []; base = "orb" }
   (* Composition operators *)
-  | { path = ["Pervasives"]; base = "|>" } -> { path = ["OCaml"; "Pervasives"]; base = "reverse_apply" }
-  | { path = ["Pervasives"]; base = "@@" } -> { path = []; base = "apply" }
+  | { path = ["Stdlib"]; base = "|>" } -> { path = ["OCaml"; "Pervasives"]; base = "reverse_apply" }
+  | { path = ["Stdlib"]; base = "@@" } -> { path = []; base = "apply" }
   (* Integer arithmetic *)
-  | { path = ["Pervasives"]; base = "~-" } -> { path = ["Z"]; base = "opp" }
-  | { path = ["Pervasives"]; base = "~+" } -> { path = []; base = "" }
-  | { path = ["Pervasives"]; base = "succ" } -> { path = ["Z"]; base = "succ" }
-  | { path = ["Pervasives"]; base = "pred" } -> { path = ["Z"]; base = "pred" }
-  | { path = ["Pervasives"]; base = "+" } -> { path = ["Z"]; base = "add" }
-  | { path = ["Pervasives"]; base = "-" } -> { path = ["Z"]; base = "sub" }
-  | { path = ["Pervasives"]; base = "*" } -> { path = ["Z"]; base = "mul" }
-  | { path = ["Pervasives"]; base = "/" } -> { path = ["Z"]; base = "div" }
-  | { path = ["Pervasives"]; base = "mod" } -> { path = ["Z"]; base = "modulo" }
-  | { path = ["Pervasives"]; base = "abs" } -> { path = ["Z"]; base = "abs" }
+  | { path = ["Stdlib"]; base = "~-" } -> { path = ["Z"]; base = "opp" }
+  | { path = ["Stdlib"]; base = "~+" } -> { path = []; base = "" }
+  | { path = ["Stdlib"]; base = "succ" } -> { path = ["Z"]; base = "succ" }
+  | { path = ["Stdlib"]; base = "pred" } -> { path = ["Z"]; base = "pred" }
+  | { path = ["Stdlib"]; base = "+" } -> { path = ["Z"]; base = "add" }
+  | { path = ["Stdlib"]; base = "-" } -> { path = ["Z"]; base = "sub" }
+  | { path = ["Stdlib"]; base = "*" } -> { path = ["Z"]; base = "mul" }
+  | { path = ["Stdlib"]; base = "/" } -> { path = ["Z"]; base = "div" }
+  | { path = ["Stdlib"]; base = "mod" } -> { path = ["Z"]; base = "modulo" }
+  | { path = ["Stdlib"]; base = "abs" } -> { path = ["Z"]; base = "abs" }
   (* Bitwise operations *)
-  | { path = ["Pervasives"]; base = "land" } -> { path = ["Z"]; base = "land" }
-  | { path = ["Pervasives"]; base = "lor" } -> { path = ["Z"]; base = "lor" }
-  | { path = ["Pervasives"]; base = "lxor" } -> { path = ["Z"]; base = "lxor" }
-  | { path = ["Pervasives"]; base = "lsl" } -> { path = ["Z"]; base = "shiftl" }
-  | { path = ["Pervasives"]; base = "lsr" } -> { path = ["Z"]; base = "shiftr" }
+  | { path = ["Stdlib"]; base = "land" } -> { path = ["Z"]; base = "land" }
+  | { path = ["Stdlib"]; base = "lor" } -> { path = ["Z"]; base = "lor" }
+  | { path = ["Stdlib"]; base = "lxor" } -> { path = ["Z"]; base = "lxor" }
+  | { path = ["Stdlib"]; base = "lsl" } -> { path = ["Z"]; base = "shiftl" }
+  | { path = ["Stdlib"]; base = "lsr" } -> { path = ["Z"]; base = "shiftr" }
   (* Floating-point arithmetic *)
   (* String operations *)
-  | { path = ["Pervasives"]; base = "^" } -> { path = ["String"]; base = "append" }
+  | { path = ["Stdlib"]; base = "^" } -> { path = ["String"]; base = "append" }
   (* Character operations *)
-  | { path = ["Pervasives"]; base = "int_of_char" } -> { path = ["OCaml"; "Pervasives"]; base = "int_of_char" }
-  | { path = ["Pervasives"]; base = "char_of_int" } -> { path = ["OCaml"; "Pervasives"]; base = "char_of_int" }
+  | { path = ["Stdlib"]; base = "int_of_char" } -> { path = ["OCaml"; "Pervasives"]; base = "int_of_char" }
+  | { path = ["Stdlib"]; base = "char_of_int" } -> { path = ["OCaml"; "Pervasives"]; base = "char_of_int" }
   (* Unit operations *)
-  | { path = ["Pervasives"]; base = "ignore" } -> { path = ["OCaml"; "Pervasives"]; base = "ignore" }
+  | { path = ["Stdlib"]; base = "ignore" } -> { path = ["OCaml"; "Pervasives"]; base = "ignore" }
   (* String conversion functions *)
-  | { path = ["Pervasives"]; base = "string_of_bool" } -> { path = ["OCaml"; "Pervasives"]; base = "string_of_bool" }
-  | { path = ["Pervasives"]; base = "bool_of_string" } -> { path = ["OCaml"; "Pervasives"]; base = "bool_of_string" }
-  | { path = ["Pervasives"]; base = "string_of_int" } -> { path = ["OCaml"; "Pervasives"]; base = "string_of_int" }
-  | { path = ["Pervasives"]; base = "int_of_string" } -> { path = ["OCaml"; "Pervasives"]; base = "int_of_string" }
+  | { path = ["Stdlib"]; base = "string_of_bool" } -> { path = ["OCaml"; "Pervasives"]; base = "string_of_bool" }
+  | { path = ["Stdlib"]; base = "bool_of_string" } -> { path = ["OCaml"; "Pervasives"]; base = "bool_of_string" }
+  | { path = ["Stdlib"]; base = "string_of_int" } -> { path = ["OCaml"; "Pervasives"]; base = "string_of_int" }
+  | { path = ["Stdlib"]; base = "int_of_string" } -> { path = ["OCaml"; "Pervasives"]; base = "int_of_string" }
   (* Pair operations *)
-  | { path = ["Pervasives"]; base = "fst" } -> { path = []; base = "fst" }
-  | { path = ["Pervasives"]; base = "snd" } -> { path = []; base = "snd" }
+  | { path = ["Stdlib"]; base = "fst" } -> { path = []; base = "fst" }
+  | { path = ["Stdlib"]; base = "snd" } -> { path = []; base = "snd" }
   (* List operations *)
-  | { path = ["Pervasives"]; base = "@" } -> { path = ["OCaml"; "Pervasives"]; base = "app" }
+  | { path = ["Stdlib"]; base = "@" } -> { path = ["OCaml"; "Pervasives"]; base = "app" }
   (* Input/output *)
   (* Output functions on standard output *)
-  | { path = ["Pervasives"]; base = "print_char" } -> { path = ["OCaml"; "Pervasives"]; base = "print_char" }
-  | { path = ["Pervasives"]; base = "print_string" } -> { path = ["OCaml"; "Pervasives"]; base = "print_string" }
-  | { path = ["Pervasives"]; base = "print_int" } -> { path = ["OCaml"; "Pervasives"]; base = "print_int" }
-  | { path = ["Pervasives"]; base = "print_endline" } -> { path = ["OCaml"; "Pervasives"]; base = "print_endline" }
-  | { path = ["Pervasives"]; base = "print_newline" } -> { path = ["OCaml"; "Pervasives"]; base = "print_newline" }
+  | { path = ["Stdlib"]; base = "print_char" } -> { path = ["OCaml"; "Pervasives"]; base = "print_char" }
+  | { path = ["Stdlib"]; base = "print_string" } -> { path = ["OCaml"; "Pervasives"]; base = "print_string" }
+  | { path = ["Stdlib"]; base = "print_int" } -> { path = ["OCaml"; "Pervasives"]; base = "print_int" }
+  | { path = ["Stdlib"]; base = "print_endline" } -> { path = ["OCaml"; "Pervasives"]; base = "print_endline" }
+  | { path = ["Stdlib"]; base = "print_newline" } -> { path = ["OCaml"; "Pervasives"]; base = "print_newline" }
   (* Output functions on standard error *)
-  | { path = ["Pervasives"]; base = "prerr_char" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_char" }
-  | { path = ["Pervasives"]; base = "prerr_string" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_string" }
-  | { path = ["Pervasives"]; base = "prerr_int" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_int" }
-  | { path = ["Pervasives"]; base = "prerr_endline" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_endline" }
-  | { path = ["Pervasives"]; base = "prerr_newline" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_newline" }
+  | { path = ["Stdlib"]; base = "prerr_char" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_char" }
+  | { path = ["Stdlib"]; base = "prerr_string" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_string" }
+  | { path = ["Stdlib"]; base = "prerr_int" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_int" }
+  | { path = ["Stdlib"]; base = "prerr_endline" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_endline" }
+  | { path = ["Stdlib"]; base = "prerr_newline" } -> { path = ["OCaml"; "Pervasives"]; base = "prerr_newline" }
   (* Input functions on standard input *)
-  | { path = ["Pervasives"]; base = "read_line" } -> { path = ["OCaml"; "Pervasives"]; base = "read_line" }
-  | { path = ["Pervasives"]; base = "read_int" } -> { path = ["OCaml"; "Pervasives"]; base = "read_int" }
+  | { path = ["Stdlib"]; base = "read_line" } -> { path = ["OCaml"; "Pervasives"]; base = "read_line" }
+  | { path = ["Stdlib"]; base = "read_int" } -> { path = ["OCaml"; "Pervasives"]; base = "read_int" }
   (* General output functions *)
   (* General input functions *)
   (* Operations on large files *)

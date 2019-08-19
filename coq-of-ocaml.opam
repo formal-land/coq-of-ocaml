@@ -19,7 +19,7 @@ install: [
 depends: [
   "conf-ruby" {build}
   "coq" {>= "8.5"}
-  "ocaml" {>= "4.05.0" & < "4.06.0"}
+  "ocaml" {>= "4.07.0" & < "4.08.0"}
   "smart-print"
   "yojson"
 ]
