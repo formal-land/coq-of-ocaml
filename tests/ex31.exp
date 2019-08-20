@@ -1,17 +1,17 @@
-((Module (Known tests/ex31.ml ((line 3)) ((line 8))) M
-  ((Value (Known tests/ex31.ml ((line 6)) ((line 6)))
+((Module M
+  ((Value
     ((is_rec (New false))
      (cases
       ((((name b) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
         (Constructor ((path_name ((path ()) (base false))) (depth 2)) ()))))))
-   (Value (Known tests/ex31.ml ((line 7)) ((line 7)))
+   (Value
     ((is_rec (New false))
      (cases
       ((((name n) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
         (Constant (Int 12)))))))))
- (Value (Known tests/ex31.ml ((line 10)) ((line 10)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())

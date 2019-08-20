@@ -1,4 +1,4 @@
-((Signature (Known tests/first_class_modules.ml ((line 3)) ((line 35))) SET
+((Signature SET
   ((items
     ((Value empty () (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))
      (Value is_empty ()

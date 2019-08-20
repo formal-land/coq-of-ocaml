@@ -1,10 +1,10 @@
-((Value (Known tests/ex01.ml ((line 3)) ((line 3)))
+((Value
   ((is_rec (New false))
    (cases
     ((((name f) (typ_vars (A B)) (args ((x (Variable A)) (y (Variable B))))
        (typ ((Variable A))))
       (Variable ((path_name ((path ()) (base x))) (depth 0))))))))
- (Value (Known tests/ex01.ml ((line 5)) ((line 5)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())

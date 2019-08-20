@@ -38,11 +38,11 @@ end
 
 (** A structure. *)
 type t =
-  | Value of Loc.t * Value.t
-  | TypeDefinition of Loc.t * TypeDefinition.t
-  | Open of Loc.t * Open.t
-  | Module of Loc.t * Name.t * t list
-  | Signature of Loc.t * Name.t * Signature.t
+  | Value of Value.t
+  | TypeDefinition of TypeDefinition.t
+  | Open of Open.t
+  | Module of Name.t * t list
+  | Signature of Name.t * Signature.t
   [@@deriving sexp]
 
 (** Import an OCaml structure. *)
@@ -55,11 +55,11 @@ let rec of_structure (env : FullEnvi.t) (structure : structure)
     | Tstr_value (is_rec, cases) ->
       let (env, def) =
         Exp.import_let_fun env loc Name.Map.empty is_rec cases in
-      (env, Value (loc, def))
+      (env, Value def)
     | Tstr_type (_, typs) ->
       let def = TypeDefinition.of_ocaml env loc typs in
       let env = TypeDefinition.update_env def env in
-      (env, TypeDefinition (loc, def))
+      (env, TypeDefinition def)
     | Tstr_exception _ ->
       Error.raise loc (
         "The definition of exception is not handled.\n\n" ^
@@ -69,7 +69,7 @@ let rec of_structure (env : FullEnvi.t) (structure : structure)
     | Tstr_open { open_path = path } ->
       let o = Open.of_ocaml loc path in
       let env = Open.update_env o env in
-      (env, Open (loc, o))
+      (env, Open o)
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }}
     | Tstr_module {mb_id = name;
@@ -79,13 +79,13 @@ let rec of_structure (env : FullEnvi.t) (structure : structure)
       let env = FullEnvi.enter_module env in
       let (env, structures) = of_structure env structure in
       let env = FullEnvi.leave_module name env in
-      (env, Module (loc, name, structures))
+      (env, Module (name, structures))
     | Tstr_modtype { mtd_type = None } -> Error.raise loc "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->
       let name = Name.of_ident mtd_id in
       begin
         match mty_desc with
-        | Tmty_signature signature -> (env, Signature (loc, name, Signature.of_signature env signature))
+        | Tmty_signature signature -> (env, Signature (name, Signature.of_signature env signature))
         | _ -> Error.raise loc "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
@@ -114,13 +114,13 @@ let rec of_structure (env : FullEnvi.t) (structure : structure)
 let rec to_coq (defs : t list) : SmartPrint.t =
   let to_coq_one (def : t) : SmartPrint.t =
     match def with
-    | Value (_, value) -> Value.to_coq value
-    | TypeDefinition (_, typ_def) -> TypeDefinition.to_coq typ_def
-    | Open (_, o) -> Open.to_coq o
-    | Module (_, name, defs) ->
+    | Value value -> Value.to_coq value
+    | TypeDefinition typ_def -> TypeDefinition.to_coq typ_def
+    | Open o -> Open.to_coq o
+    | Module (name, defs) ->
       nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ ".")
-    | Signature (_, name, signature) -> Signature.to_coq_definition name signature in
+    | Signature (name, signature) -> Signature.to_coq_definition name signature in
   separate (newline ^^ newline) (List.map to_coq_one defs)

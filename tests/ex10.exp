@@ -1,11 +1,11 @@
-((Module (Known tests/ex10.ml ((line 3)) ((line 20))) List2
-  ((TypeDefinition (Known tests/ex10.ml ((line 4)) ((line 6)))
+((Module List2
+  ((TypeDefinition
     (Inductive t (a)
      ((Nil ())
       (Cons
        ((Variable a)
         (Apply ((path_name ((path ()) (base t))) (depth 0)) ((Variable a))))))))
-   (Value (Known tests/ex10.ml ((line 8)) ((line 11)))
+   (Value
     ((is_rec (New true))
      (cases
       ((((name sum) (typ_vars ())
@@ -23,7 +23,7 @@
             ((Variable ((path_name ((path ()) (base x))) (depth 0)))
              (Apply (Variable ((path_name ((path ()) (base sum))) (depth 0)))
               ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
-   (Value (Known tests/ex10.ml ((line 13)) ((line 15)))
+   (Value
     ((is_rec (New true))
      (cases
       ((((name of_list) (typ_vars (A))
@@ -44,14 +44,14 @@
              (Apply
               (Variable ((path_name ((path ()) (base of_list))) (depth 0)))
               ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
-   (Module (Known tests/ex10.ml ((line 17)) ((line 19))) Inside
-    ((Value (Known tests/ex10.ml ((line 18)) ((line 18)))
+   (Module Inside
+    ((Value
       ((is_rec (New false))
        (cases
         ((((name x) (typ_vars ()) (args ())
            (typ ((Apply ((path_name ((path ()) (base Z))) (depth 3)) ()))))
           (Constant (Int 12)))))))))))
- (Value (Known tests/ex10.ml ((line 22)) ((line 22)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars (A)) (args ((x (Variable A))))
