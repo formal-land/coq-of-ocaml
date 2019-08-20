@@ -7,7 +7,6 @@ Import ListNotations.
 Record SET := {
   elt : Type;
   t : Type;
-  poly : forall {a : Type}, Type;
   empty : t;
   is_empty : t -> bool;
   mem : elt -> t -> bool;

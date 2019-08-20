@@ -1,5 +1,5 @@
-((Signature (Known tests/first_class_modules.ml ((line 3)) ((line 36))) SET
-  ((Typ () elt) (Typ () t) (Typ (a) poly)
+((Signature (Known tests/first_class_modules.ml ((line 3)) ((line 35))) SET
+  ((Typ elt) (Typ t)
    (Value empty () (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))
    (Value is_empty ()
     (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())

@@ -4,7 +4,7 @@ open SmartPrint
 open Typedtree
 
 type item =
-  | Typ of Name.t list * Name.t
+  | Typ of Name.t
   | Value of Name.t * Name.t list * Type.t
   [@@deriving sexp]
 
@@ -24,13 +24,12 @@ let of_signature (env : FullEnvi.t) (signature : signature) : t =
     | Tsig_module _ -> Error.raise loc "Structure item `module` not handled."
     | Tsig_open _ -> Error.raise loc "Structure item `open` not handled."
     | Tsig_recmodule _ -> Error.raise loc "Structure item `recmodule` not handled."
-    | Tsig_type (_, [{ typ_id; typ_params }]) ->
+    | Tsig_type (_, [{ typ_id; typ_params = [] }]) ->
       let name = Name.of_ident typ_id in
       let env = FullEnvi.add_typ [] name env in
-      let typ_args = typ_params |> List.map (fun ({ ctyp_type; ctyp_loc }, _) ->
-        Type.of_type_expr_variable (Loc.of_location ctyp_loc) ctyp_type
-      ) in
-      (env, Typ (typ_args, name))
+      (env, Typ name)
+    | Tsig_type (_, [{ typ_params = _ :: _ }]) ->
+      Error.raise loc "Polymorphic types not handled in signatures."
     | Tsig_type (_, _) -> Error.raise loc "Mutual type definitions in signatures not handled."
     | Tsig_typext _ -> Error.raise loc "Structure item `typext` not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
@@ -48,15 +47,8 @@ let of_signature (env : FullEnvi.t) (signature : signature) : t =
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
-  | Typ (typ_args, name) ->
-    Name.to_coq name ^^ !^ ":" ^^
-    (match typ_args with
-    | [] -> empty
-    | _ :: _ ->
-      !^ "forall" ^^ braces (group (
-        separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
-    !^ "Type" ^-^ !^ ";"
+  | Typ name ->
+    Name.to_coq name ^^ !^ ":" ^^ !^ "Type" ^-^ !^ ";"
   | Value (name, typ_args, typ) ->
     Name.to_coq name ^^ !^ ":" ^^
     (match typ_args with
