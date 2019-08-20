@@ -1,15 +1,11 @@
-((Value
-  (Known ((file_name tests/ex24.ml) (line 4))
-   ((file_name tests/ex24.ml) (line 4)))
+((Value (Known tests/ex24.ml ((line 4)) ((line 4)))
   ((is_rec (New false))
    (cases
     ((((name b_eq) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path ()) (base equiv_decb))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 5))
-   ((file_name tests/ex24.ml) (line 5)))
+ (Value (Known tests/ex24.ml ((line 5)) ((line 5)))
   ((is_rec (New false))
    (cases
     ((((name b_neq1) (typ_vars ()) (args ())
@@ -18,9 +14,7 @@
        (Variable ((path_name ((path ()) (base nequiv_decb))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 6))
-   ((file_name tests/ex24.ml) (line 6)))
+ (Value (Known tests/ex24.ml ((line 6)) ((line 6)))
   ((is_rec (New false))
    (cases
     ((((name b_neq2) (typ_vars ()) (args ())
@@ -29,9 +23,7 @@
        (Variable ((path_name ((path ()) (base nequiv_decb))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base tt))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 7))
-   ((file_name tests/ex24.ml) (line 7)))
+ (Value (Known tests/ex24.ml ((line 7)) ((line 7)))
   ((is_rec (New false))
    (cases
     ((((name b_lt) (typ_vars ()) (args ())
@@ -40,9 +32,7 @@
        (Variable
         ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 8))
-   ((file_name tests/ex24.ml) (line 8)))
+ (Value (Known tests/ex24.ml ((line 8)) ((line 8)))
   ((is_rec (New false))
    (cases
     ((((name b_gt) (typ_vars ()) (args ())
@@ -51,9 +41,7 @@
        (Variable
         ((path_name ((path (OCaml Pervasives)) (base gt))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 9))
-   ((file_name tests/ex24.ml) (line 9)))
+ (Value (Known tests/ex24.ml ((line 9)) ((line 9)))
   ((is_rec (New false))
    (cases
     ((((name b_le) (typ_vars ()) (args ())
@@ -63,9 +51,7 @@
         ((path_name ((path (OCaml Pervasives)) (base le))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 10))
-   ((file_name tests/ex24.ml) (line 10)))
+ (Value (Known tests/ex24.ml ((line 10)) ((line 10)))
   ((is_rec (New false))
    (cases
     ((((name b_ge) (typ_vars ()) (args ())
@@ -75,9 +61,7 @@
         ((path_name ((path (OCaml Pervasives)) (base ge))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base tt))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 11))
-   ((file_name tests/ex24.ml) (line 11)))
+ (Value (Known tests/ex24.ml ((line 11)) ((line 11)))
   ((is_rec (New false))
    (cases
     ((((name comp) (typ_vars ()) (args ())
@@ -86,9 +70,7 @@
        (Variable
         ((path_name ((path (OCaml Pervasives)) (base compare))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 12))
-   ((file_name tests/ex24.ml) (line 12)))
+ (Value (Known tests/ex24.ml ((line 12)) ((line 12)))
   ((is_rec (New false))
    (cases
     ((((name n_min) (typ_vars ()) (args ())
@@ -97,9 +79,7 @@
        (Variable
         ((path_name ((path (OCaml Pervasives)) (base min))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 13))
-   ((file_name tests/ex24.ml) (line 13)))
+ (Value (Known tests/ex24.ml ((line 13)) ((line 13)))
   ((is_rec (New false))
    (cases
     ((((name n_max) (typ_vars ()) (args ())
@@ -108,18 +88,14 @@
        (Variable
         ((path_name ((path (OCaml Pervasives)) (base max))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 18))
-   ((file_name tests/ex24.ml) (line 18)))
+ (Value (Known tests/ex24.ml ((line 18)) ((line 18)))
   ((is_rec (New false))
    (cases
     ((((name b_not) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path ()) (base negb))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 19))
-   ((file_name tests/ex24.ml) (line 19)))
+ (Value (Known tests/ex24.ml ((line 19)) ((line 19)))
   ((is_rec (New false))
    (cases
     ((((name b_and) (typ_vars ()) (args ())
@@ -127,9 +103,7 @@
       (Apply (Variable ((path_name ((path ()) (base andb))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 20))
-   ((file_name tests/ex24.ml) (line 20)))
+ (Value (Known tests/ex24.ml ((line 20)) ((line 20)))
   ((is_rec (New false))
    (cases
     ((((name b_and_old) (typ_vars ()) (args ())
@@ -137,9 +111,7 @@
       (Apply (Variable ((path_name ((path ()) (base andb))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 21))
-   ((file_name tests/ex24.ml) (line 21)))
+ (Value (Known tests/ex24.ml ((line 21)) ((line 21)))
   ((is_rec (New false))
    (cases
     ((((name b_or) (typ_vars ()) (args ())
@@ -147,9 +119,7 @@
       (Apply (Variable ((path_name ((path ()) (base orb))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 22))
-   ((file_name tests/ex24.ml) (line 22)))
+ (Value (Known tests/ex24.ml ((line 22)) ((line 22)))
   ((is_rec (New false))
    (cases
     ((((name b_or_old) (typ_vars ()) (args ())
@@ -157,9 +127,7 @@
       (Apply (Variable ((path_name ((path ()) (base orb))) (depth 1)))
        ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 25))
-   ((file_name tests/ex24.ml) (line 25)))
+ (Value (Known tests/ex24.ml ((line 25)) ((line 25)))
   ((is_rec (New false))
    (cases
     ((((name app1) (typ_vars ()) (args ())
@@ -170,9 +138,7 @@
          (depth 1)))
        ((Constant (Int 12))
         (Function x (Variable ((path_name ((path ()) (base x))) (depth 0)))))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 26))
-   ((file_name tests/ex24.ml) (line 26)))
+ (Value (Known tests/ex24.ml ((line 26)) ((line 26)))
   ((is_rec (New false))
    (cases
     ((((name app2) (typ_vars ()) (args ())
@@ -180,160 +146,124 @@
       (Apply (Variable ((path_name ((path ()) (base apply))) (depth 1)))
        ((Function x (Variable ((path_name ((path ()) (base x))) (depth 0))))
         (Constant (Int 12)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 29))
-   ((file_name tests/ex24.ml) (line 29)))
+ (Value (Known tests/ex24.ml ((line 29)) ((line 29)))
   ((is_rec (New false))
    (cases
     ((((name n_neg1) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base opp))) (depth 1)))
        ((Constant (Int 12)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 30))
-   ((file_name tests/ex24.ml) (line 30)))
+ (Value (Known tests/ex24.ml ((line 30)) ((line 30)))
   ((is_rec (New false))
    (cases
     ((((name n_neg2) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Constant (Int -12)))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 31))
-   ((file_name tests/ex24.ml) (line 31)))
+ (Value (Known tests/ex24.ml ((line 31)) ((line 31)))
   ((is_rec (New false))
    (cases
     ((((name n_pos1) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path ()) (base ""))) (depth 1)))
        ((Constant (Int 12)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 32))
-   ((file_name tests/ex24.ml) (line 32)))
+ (Value (Known tests/ex24.ml ((line 32)) ((line 32)))
   ((is_rec (New false))
    (cases
     ((((name n_pos2) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Constant (Int 12)))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 33))
-   ((file_name tests/ex24.ml) (line 33)))
+ (Value (Known tests/ex24.ml ((line 33)) ((line 33)))
   ((is_rec (New false))
    (cases
     ((((name n_succ) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base succ))) (depth 1)))
        ((Constant (Int 1)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 34))
-   ((file_name tests/ex24.ml) (line 34)))
+ (Value (Known tests/ex24.ml ((line 34)) ((line 34)))
   ((is_rec (New false))
    (cases
     ((((name n_pred) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base pred))) (depth 1)))
        ((Constant (Int 1)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 35))
-   ((file_name tests/ex24.ml) (line 35)))
+ (Value (Known tests/ex24.ml ((line 35)) ((line 35)))
   ((is_rec (New false))
    (cases
     ((((name n_plus) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 36))
-   ((file_name tests/ex24.ml) (line 36)))
+ (Value (Known tests/ex24.ml ((line 36)) ((line 36)))
   ((is_rec (New false))
    (cases
     ((((name n_minus) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base sub))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 37))
-   ((file_name tests/ex24.ml) (line 37)))
+ (Value (Known tests/ex24.ml ((line 37)) ((line 37)))
   ((is_rec (New false))
    (cases
     ((((name n_times) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base mul))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 38))
-   ((file_name tests/ex24.ml) (line 38)))
+ (Value (Known tests/ex24.ml ((line 38)) ((line 38)))
   ((is_rec (New false))
    (cases
     ((((name n_div) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base div))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 39))
-   ((file_name tests/ex24.ml) (line 39)))
+ (Value (Known tests/ex24.ml ((line 39)) ((line 39)))
   ((is_rec (New false))
    (cases
     ((((name n_mod) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base modulo))) (depth 1)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 40))
-   ((file_name tests/ex24.ml) (line 40)))
+ (Value (Known tests/ex24.ml ((line 40)) ((line 40)))
   ((is_rec (New false))
    (cases
     ((((name n_abs) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base abs))) (depth 1)))
        ((Constant (Int 1)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 45))
-   ((file_name tests/ex24.ml) (line 45)))
+ (Value (Known tests/ex24.ml ((line 45)) ((line 45)))
   ((is_rec (New false))
    (cases
     ((((name n_land) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base land))) (depth 1)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 46))
-   ((file_name tests/ex24.ml) (line 46)))
+ (Value (Known tests/ex24.ml ((line 46)) ((line 46)))
   ((is_rec (New false))
    (cases
     ((((name n_lor) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base lor))) (depth 1)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 47))
-   ((file_name tests/ex24.ml) (line 47)))
+ (Value (Known tests/ex24.ml ((line 47)) ((line 47)))
   ((is_rec (New false))
    (cases
     ((((name n_lxor) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base lxor))) (depth 1)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 49))
-   ((file_name tests/ex24.ml) (line 49)))
+ (Value (Known tests/ex24.ml ((line 49)) ((line 49)))
   ((is_rec (New false))
    (cases
     ((((name n_lsl) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base shiftl))) (depth 1)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 50))
-   ((file_name tests/ex24.ml) (line 50)))
+ (Value (Known tests/ex24.ml ((line 50)) ((line 50)))
   ((is_rec (New false))
    (cases
     ((((name n_lsr) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base shiftr))) (depth 1)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 57))
-   ((file_name tests/ex24.ml) (line 57)))
+ (Value (Known tests/ex24.ml ((line 57)) ((line 57)))
   ((is_rec (New false))
    (cases
     ((((name ss) (typ_vars ()) (args ())
@@ -341,9 +271,7 @@
       (Apply
        (Variable ((path_name ((path (String)) (base append))) (depth 1)))
        ((Constant (String begin)) (Constant (String end)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 60))
-   ((file_name tests/ex24.ml) (line 60)))
+ (Value (Known tests/ex24.ml ((line 60)) ((line 60)))
   ((is_rec (New false))
    (cases
     ((((name n_char) (typ_vars ()) (args ())
@@ -353,9 +281,7 @@
         ((path_name ((path (OCaml Pervasives)) (base int_of_char)))
          (depth 1)))
        ((Constant (Char c)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 63))
-   ((file_name tests/ex24.ml) (line 63)))
+ (Value (Known tests/ex24.ml ((line 63)) ((line 63)))
   ((is_rec (New false))
    (cases
     ((((name i) (typ_vars ()) (args ())
@@ -364,9 +290,7 @@
        (Variable
         ((path_name ((path (OCaml Pervasives)) (base ignore))) (depth 1)))
        ((Constant (Int 12)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 66))
-   ((file_name tests/ex24.ml) (line 66)))
+ (Value (Known tests/ex24.ml ((line 66)) ((line 66)))
   ((is_rec (New false))
    (cases
     ((((name s_bool) (typ_vars ()) (args ())
@@ -376,9 +300,7 @@
         ((path_name ((path (OCaml Pervasives)) (base string_of_bool)))
          (depth 1)))
        ((Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 67))
-   ((file_name tests/ex24.ml) (line 67)))
+ (Value (Known tests/ex24.ml ((line 67)) ((line 67)))
   ((is_rec (New false))
    (cases
     ((((name bool_s) (typ_vars ()) (args ())
@@ -388,9 +310,7 @@
         ((path_name ((path (OCaml Pervasives)) (base bool_of_string)))
          (depth 1)))
        ((Constant (String false)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 68))
-   ((file_name tests/ex24.ml) (line 68)))
+ (Value (Known tests/ex24.ml ((line 68)) ((line 68)))
   ((is_rec (New false))
    (cases
     ((((name s_n) (typ_vars ()) (args ())
@@ -400,9 +320,7 @@
         ((path_name ((path (OCaml Pervasives)) (base string_of_int)))
          (depth 1)))
        ((Constant (Int 12)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 69))
-   ((file_name tests/ex24.ml) (line 69)))
+ (Value (Known tests/ex24.ml ((line 69)) ((line 69)))
   ((is_rec (New false))
    (cases
     ((((name n_s) (typ_vars ()) (args ())
@@ -412,27 +330,21 @@
         ((path_name ((path (OCaml Pervasives)) (base int_of_string)))
          (depth 1)))
        ((Constant (String 12)))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 74))
-   ((file_name tests/ex24.ml) (line 74)))
+ (Value (Known tests/ex24.ml ((line 74)) ((line 74)))
   ((is_rec (New false))
    (cases
     ((((name n1) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path ()) (base fst))) (depth 1)))
        ((Tuple ((Constant (Int 12)) (Constant (Int 13)))))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 75))
-   ((file_name tests/ex24.ml) (line 75)))
+ (Value (Known tests/ex24.ml ((line 75)) ((line 75)))
   ((is_rec (New false))
    (cases
     ((((name n2) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path ()) (base snd))) (depth 1)))
        ((Tuple ((Constant (Int 12)) (Constant (Int 13)))))))))))
- (Value
-  (Known ((file_name tests/ex24.ml) (line 78))
-   ((file_name tests/ex24.ml) (line 78)))
+ (Value (Known tests/ex24.ml ((line 78)) ((line 78)))
   ((is_rec (New false))
    (cases
     ((((name ll) (typ_vars ()) (args ())

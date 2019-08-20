@@ -1,6 +1,4 @@
-((Value
-  (Known ((file_name tests/ex06.ml) (line 3))
-   ((file_name tests/ex06.ml) (line 6)))
+((Value (Known tests/ex06.ml ((line 3)) ((line 6)))
   ((is_rec (New true))
    (cases
     ((((name map) (typ_vars (A B))
@@ -23,9 +21,7 @@
            (Apply (Variable ((path_name ((path ()) (base map))) (depth 0)))
             ((Variable ((path_name ((path ()) (base f))) (depth 0)))
              (Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
- (Value
-  (Known ((file_name tests/ex06.ml) (line 8))
-   ((file_name tests/ex06.ml) (line 11)))
+ (Value (Known tests/ex06.ml ((line 8)) ((line 11)))
   ((is_rec (New true))
    (cases
     ((((name fold) (typ_vars (A B))
@@ -47,9 +43,7 @@
             ((Variable ((path_name ((path ()) (base a))) (depth 0)))
              (Variable ((path_name ((path ()) (base x))) (depth 0)))))
            (Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))
- (Value
-  (Known ((file_name tests/ex06.ml) (line 13))
-   ((file_name tests/ex06.ml) (line 13)))
+ (Value (Known tests/ex06.ml ((line 13)) ((line 13)))
   ((is_rec (New false))
    (cases
     ((((name l) (typ_vars ()) (args ())
@@ -65,9 +59,7 @@
             (Constructor ((path_name ((path ()) (base cons))) (depth 1))
              ((Constant (Int 2))
               (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))
- (Value
-  (Known ((file_name tests/ex06.ml) (line 15))
-   ((file_name tests/ex06.ml) (line 16)))
+ (Value (Known tests/ex06.ml ((line 15)) ((line 16)))
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars (A))

@@ -1,6 +1,4 @@
-((Value
-  (Known ((file_name tests/ex26.ml) (line 3))
-   ((file_name tests/ex26.ml) (line 6)))
+((Value (Known tests/ex26.ml ((line 3)) ((line 6)))
   ((is_rec (New true))
    (cases
     ((((name f_map) (typ_vars (A B))
@@ -23,9 +21,7 @@
            (Apply (Variable ((path_name ((path ()) (base f_map))) (depth 0)))
             ((Variable ((path_name ((path ()) (base f))) (depth 0)))
              (Variable ((path_name ((path ()) (base l))) (depth 0)))))))))))))))
- (Value
-  (Known ((file_name tests/ex26.ml) (line 8))
-   ((file_name tests/ex26.ml) (line 13)))
+ (Value (Known tests/ex26.ml ((line 8)) ((line 13)))
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())

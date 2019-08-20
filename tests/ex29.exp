@@ -1,6 +1,4 @@
-((Value
-  (Known ((file_name tests/ex29.ml) (line 3))
-   ((file_name tests/ex29.ml) (line 11)))
+((Value (Known tests/ex29.ml ((line 3)) ((line 11)))
   ((is_rec (New true))
    (cases
     ((((name odd_length) (typ_vars (A))

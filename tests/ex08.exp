@@ -1,15 +1,11 @@
-((TypeDefinition
-  (Known ((file_name tests/ex08.ml) (line 3))
-   ((file_name tests/ex08.ml) (line 6)))
+((TypeDefinition (Known tests/ex08.ml ((line 3)) ((line 6)))
   (Inductive t1 ()
    ((C1 ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ())))
     (C2
      ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ())
       (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())))
     (C3 ()))))
- (Value
-  (Known ((file_name tests/ex08.ml) (line 8))
-   ((file_name tests/ex08.ml) (line 8)))
+ (Value (Known tests/ex08.ml ((line 8)) ((line 8)))
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())
@@ -17,9 +13,7 @@
       (Constructor ((path_name ((path ()) (base C2))) (depth 0))
        ((Constructor ((path_name ((path ()) (base false))) (depth 1)) ())
         (Constant (Int 3)))))))))
- (Value
-  (Known ((file_name tests/ex08.ml) (line 10))
-   ((file_name tests/ex08.ml) (line 12)))
+ (Value (Known tests/ex08.ml ((line 10)) ((line 12)))
   ((is_rec (New false))
    (cases
     ((((name m) (typ_vars ()) (args ())
@@ -30,17 +24,13 @@
          (Variable ((path_name ((path ()) (base b))) (depth 0))))
         (Any
          (Constructor ((path_name ((path ()) (base true))) (depth 1)) ())))))))))
- (TypeDefinition
-  (Known ((file_name tests/ex08.ml) (line 14))
-   ((file_name tests/ex08.ml) (line 16)))
+ (TypeDefinition (Known tests/ex08.ml ((line 14)) ((line 16)))
   (Inductive t2 (a)
    ((D1 ())
     (D2
      ((Variable a)
       (Apply ((path_name ((path ()) (base t2))) (depth 0)) ((Variable a))))))))
- (Value
-  (Known ((file_name tests/ex08.ml) (line 18))
-   ((file_name tests/ex08.ml) (line 21)))
+ (Value (Known tests/ex08.ml ((line 18)) ((line 21)))
   ((is_rec (New true))
    (cases
     ((((name of_list) (typ_vars (A))
@@ -60,9 +50,7 @@
            (Apply
             (Variable ((path_name ((path ()) (base of_list))) (depth 0)))
             ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
- (Value
-  (Known ((file_name tests/ex08.ml) (line 23))
-   ((file_name tests/ex08.ml) (line 26)))
+ (Value (Known tests/ex08.ml ((line 23)) ((line 26)))
   ((is_rec (New true))
    (cases
     ((((name sum) (typ_vars ())
@@ -80,9 +68,7 @@
           ((Variable ((path_name ((path ()) (base x))) (depth 0)))
            (Apply (Variable ((path_name ((path ()) (base sum))) (depth 0)))
             ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
- (Value
-  (Known ((file_name tests/ex08.ml) (line 28))
-   ((file_name tests/ex08.ml) (line 28)))
+ (Value (Known tests/ex08.ml ((line 28)) ((line 28)))
   ((is_rec (New false))
    (cases
     ((((name s) (typ_vars (A)) (args ((x (Variable A))))
@@ -100,15 +86,9 @@
                   ((Constant (Int 3))
                    (Constructor ((path_name ((path ()) (base []))) (depth 1))
                     ())))))))))))))))))))
- (TypeDefinition
-  (Known ((file_name tests/ex08.ml) (line 30))
-   ((file_name tests/ex08.ml) (line 30)))
+ (TypeDefinition (Known tests/ex08.ml ((line 30)) ((line 30)))
   (Abstract t3 ()))
- (TypeDefinition
-  (Known ((file_name tests/ex08.ml) (line 31))
-   ((file_name tests/ex08.ml) (line 31)))
+ (TypeDefinition (Known tests/ex08.ml ((line 31)) ((line 31)))
   (Abstract t4 (a)))
- (TypeDefinition
-  (Known ((file_name tests/ex08.ml) (line 32))
-   ((file_name tests/ex08.ml) (line 32)))
+ (TypeDefinition (Known tests/ex08.ml ((line 32)) ((line 32)))
   (Inductive t5 () ((C ())))))

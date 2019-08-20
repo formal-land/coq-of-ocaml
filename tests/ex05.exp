@@ -1,6 +1,4 @@
-((Value
-  (Known ((file_name tests/ex05.ml) (line 3))
-   ((file_name tests/ex05.ml) (line 6)))
+((Value (Known tests/ex05.ml ((line 3)) ((line 6)))
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())

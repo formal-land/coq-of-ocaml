@@ -1,7 +1,4 @@
-((Signature
-  (Known ((file_name tests/first_class_modules.ml) (line 3))
-   ((file_name tests/first_class_modules.ml) (line 36)))
-  SET
+((Signature (Known tests/first_class_modules.ml ((line 3)) ((line 36))) SET
   ((Typ () elt) (Typ () t) (Typ (a) poly)
    (Value empty () (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))
    (Value is_empty ()

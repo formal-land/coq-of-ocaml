@@ -1,6 +1,4 @@
-((Value
-  (Known ((file_name tests/ex07.ml) (line 3))
-   ((file_name tests/ex07.ml) (line 3)))
+((Value (Known tests/ex07.ml ((line 3)) ((line 3)))
   ((is_rec (New false))
    (cases
     ((((name b) (typ_vars ()) (args ())
@@ -17,9 +15,7 @@
             (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ())))
           (Apply (Variable ((path_name ((path ()) (base negb))) (depth 1)))
            ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ()))))))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 5))
-   ((file_name tests/ex07.ml) (line 5)))
+ (Value (Known tests/ex07.ml ((line 5)) ((line 5)))
   ((is_rec (New false))
    (cases
     ((((name n1) (typ_vars ()) (args ())
@@ -28,9 +24,7 @@
        ((Constant (Int 1))
         (Apply (Variable ((path_name ((path (Z)) (base mul))) (depth 1)))
          ((Constant (Int 2)) (Constant (Int 3)))))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 7))
-   ((file_name tests/ex07.ml) (line 7)))
+ (Value (Known tests/ex07.ml ((line 7)) ((line 7)))
   ((is_rec (New false))
    (cases
     ((((name n2) (typ_vars ()) (args ())
@@ -47,9 +41,7 @@
              ((Constant (Int 5)) (Constant (Int 23))))
             (Constant (Int 4))))
           (Constant (Int 3)))))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 9))
-   ((file_name tests/ex07.ml) (line 9)))
+ (Value (Known tests/ex07.ml ((line 9)) ((line 9)))
   ((is_rec (New false))
    (cases
     ((((name n3) (typ_vars ()) (args ())
@@ -57,9 +49,7 @@
       (Apply (Variable ((path_name ((path (Z)) (base pred))) (depth 1)))
        ((Apply (Variable ((path_name ((path (Z)) (base succ))) (depth 1)))
          ((Constant (Int 12)))))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 11))
-   ((file_name tests/ex07.ml) (line 11)))
+ (Value (Known tests/ex07.ml ((line 11)) ((line 11)))
   ((is_rec (New false))
    (cases
     ((((name n4) (typ_vars ()) (args ())
@@ -70,9 +60,7 @@
            ((Constant (Int 5)) (Constant (Int 7))))
           (Constant (Int 3))))
         (Constant (Int 9)))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 13))
-   ((file_name tests/ex07.ml) (line 13)))
+ (Value (Known tests/ex07.ml ((line 13)) ((line 13)))
   ((is_rec (New false))
    (cases
     ((((name n5) (typ_vars ()) (args ())
@@ -82,9 +70,7 @@
          ((Constant (Int 156)) (Constant (Int 4))))
         (Apply (Variable ((path_name ((path (Z)) (base shiftr))) (depth 1)))
          ((Constant (Int 12)) (Constant (Int 1)))))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 15))
-   ((file_name tests/ex07.ml) (line 15)))
+ (Value (Known tests/ex07.ml ((line 15)) ((line 15)))
   ((is_rec (New false))
    (cases
     ((((name s) (typ_vars ()) (args ())
@@ -92,9 +78,7 @@
       (Apply
        (Variable ((path_name ((path (String)) (base append))) (depth 1)))
        ((Constant (String ghj)) (Constant (String klm)))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 17))
-   ((file_name tests/ex07.ml) (line 17)))
+ (Value (Known tests/ex07.ml ((line 17)) ((line 17)))
   ((is_rec (New false))
    (cases
     ((((name c) (typ_vars ()) (args ())
@@ -104,9 +88,7 @@
         ((path_name ((path (OCaml Pervasives)) (base int_of_char)))
          (depth 1)))
        ((Constant (Char c)))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 19))
-   ((file_name tests/ex07.ml) (line 19)))
+ (Value (Known tests/ex07.ml ((line 19)) ((line 19)))
   ((is_rec (New false))
    (cases
     ((((name x) (typ_vars ()) (args ())
@@ -115,9 +97,7 @@
        (Variable
         ((path_name ((path (OCaml Pervasives)) (base ignore))) (depth 1)))
        ((Constant (Int 23)))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 21))
-   ((file_name tests/ex07.ml) (line 21)))
+ (Value (Known tests/ex07.ml ((line 21)) ((line 21)))
   ((is_rec (New false))
    (cases
     ((((name p) (typ_vars ()) (args ())
@@ -127,9 +107,7 @@
          ((Tuple ((Constant (Int 1)) (Constant (Int 2))))))
         (Apply (Variable ((path_name ((path ()) (base snd))) (depth 1)))
          ((Tuple ((Constant (Int 3)) (Constant (Int 4)))))))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 23))
-   ((file_name tests/ex07.ml) (line 23)))
+ (Value (Known tests/ex07.ml ((line 23)) ((line 23)))
   ((is_rec (New false))
    (cases
     ((((name l) (typ_vars ()) (args ())
@@ -147,9 +125,7 @@
         (Constructor ((path_name ((path ()) (base cons))) (depth 1))
          ((Constant (Int 3))
           (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))
- (Value
-  (Known ((file_name tests/ex07.ml) (line 25))
-   ((file_name tests/ex07.ml) (line 25)))
+ (Value (Known tests/ex07.ml ((line 25)) ((line 25)))
   ((is_rec (New false))
    (cases
     ((((name y) (typ_vars ()) (args ())
