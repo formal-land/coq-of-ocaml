@@ -13,3 +13,10 @@ Inductive foo : forall (a b : Type), Type :=
 | Other : forall (a b : Type), Z -> foo a b.
 Arguments Bar {a b c} _ _ _ _.
 Arguments Other {a b} _.
+
+Inductive expr : forall (a : Type), Type :=
+| Int : expr Z
+| String : expr string
+| Sum : (expr Z) -> (expr Z) -> expr Z
+| Pair : forall (a b : Type), (expr a) -> (expr b) -> expr (a * b).
+Arguments Pair {a b} _ _.
