@@ -1,4 +1,4 @@
-((Value (Known tests/ex22.ml ((line 3)) ((line 3)))
+((Value
   ((is_rec (New false))
    (cases
     ((((name op_plus_plus_plus) (typ_vars ())
@@ -9,7 +9,7 @@
       (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
        ((Variable ((path_name ((path ()) (base x))) (depth 0)))
         (Variable ((path_name ((path ()) (base y))) (depth 0))))))))))
- (Value (Known tests/ex22.ml ((line 4)) ((line 4)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name op_tilde_tilde) (typ_vars ())
@@ -17,7 +17,7 @@
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply (Variable ((path_name ((path (Z)) (base opp))) (depth 1)))
        ((Variable ((path_name ((path ()) (base x))) (depth 0))))))))))
- (Value (Known tests/ex22.ml ((line 6)) ((line 6)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name z) (typ_vars ()) (args ())

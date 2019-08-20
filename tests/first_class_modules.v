@@ -4,10 +4,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Record SET := {
-  elt : Type;
-  t : Type;
-  poly : forall {a : Type}, Type;
+Record SET (elt t : Type) := {
   empty : t;
   is_empty : t -> bool;
   mem : elt -> t -> bool;

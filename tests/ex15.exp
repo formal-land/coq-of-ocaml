@@ -1,17 +1,17 @@
-((TypeDefinition (Known tests/ex15.ml ((line 3)) ((line 5)))
+((TypeDefinition
   (Inductive set ()
    ((Empty ())
     (Node
      ((Apply ((path_name ((path ()) (base set))) (depth 0)) ())
       (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
       (Apply ((path_name ((path ()) (base set))) (depth 0)) ()))))))
- (Value (Known tests/ex15.ml ((line 7)) ((line 7)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name empty) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base set))) (depth 0)) ()))))
       (Constructor ((path_name ((path ()) (base Empty))) (depth 0)) ()))))))
- (Value (Known tests/ex15.ml ((line 9)) ((line 18)))
+ (Value
   ((is_rec (New true))
    (cases
     ((((name member) (typ_vars ())
@@ -44,7 +44,7 @@
             ((Variable ((path_name ((path ()) (base x))) (depth 0)))
              (Variable ((path_name ((path ()) (base s2))) (depth 0)))))
            (Constructor ((path_name ((path ()) (base true))) (depth 1)) ())))))))))))
- (Value (Known tests/ex15.ml ((line 20)) ((line 28)))
+ (Value
   ((is_rec (New true))
    (cases
     ((((name insert) (typ_vars ())

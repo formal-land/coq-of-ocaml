@@ -3,7 +3,6 @@
 module type SET = sig
   type elt
   type t
-  type 'a poly
   val empty: t
   val is_empty: t -> bool
   val mem: elt -> t -> bool

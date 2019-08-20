@@ -1,4 +1,4 @@
-((Value (Known tests/ex14.ml ((line 3)) ((line 7)))
+((Value
   ((is_rec (New false))
    (cases
     ((((name f) (typ_vars ())

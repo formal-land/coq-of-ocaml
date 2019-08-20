@@ -1,4 +1,4 @@
-((Value (Known tests/ex28.ml ((line 3)) ((line 8)))
+((Value
   ((is_rec (New false))
    (cases
     ((((name map) (typ_vars (A B))
@@ -37,7 +37,7 @@
        (Apply
         (Variable ((path_name ((path ()) (base map_coq_rec))) (depth 0)))
         ((Variable ((path_name ((path ()) (base l))) (depth 0)))))))))))
- (Value (Known tests/ex28.ml ((line 10)) ((line 15)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name map2) (typ_vars (A B))

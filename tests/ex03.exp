@@ -1,4 +1,4 @@
-((Value (Known tests/ex03.ml ((line 3)) ((line 6)))
+((Value
   ((is_rec (New false))
    (cases
     ((((name n1) (typ_vars ()) (args ())
@@ -6,7 +6,7 @@
       (LetVar m (Constant (Int 12))
        (LetVar n1 (Variable ((path_name ((path ()) (base m))) (depth 0)))
         (Variable ((path_name ((path ()) (base n1))) (depth 0))))))))))
- (Value (Known tests/ex03.ml ((line 8)) ((line 11)))
+ (Value
   ((is_rec (New false))
    (cases
     ((((name n2) (typ_vars ()) (args ())
