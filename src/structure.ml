@@ -122,9 +122,5 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ ".")
-    | Signature (_, name, signature) ->
-      nest (
-        !^ "Record" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
-        indent (Signature.to_coq signature) ^^ newline ^^
-        !^ "}" ^-^ !^ ".") in
+    | Signature (_, name, signature) -> Signature.to_coq_definition name signature in
   separate (newline ^^ newline) (List.map to_coq_one defs)
