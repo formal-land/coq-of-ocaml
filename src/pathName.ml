@@ -168,10 +168,10 @@ let of_path (loc : Loc.t) (p : Path.t) : t =
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
 
-let to_json (x : t) : json =
+let to_json (x : t) : Yojson.Basic.t =
   `String (String.concat "." (x.path @ [x.base]))
 
-let of_json (json : json) : t =
+let of_json (json : Yojson.Basic.t) : t =
   let rec split_at_last l =
     match l with
     | [] -> assert false
