@@ -1,0 +1,13 @@
+((TypeDefinition (Inductive gre (a) (NonGadt ((Arg ((Variable a)))))))
+ (TypeDefinition
+  (Inductive foo (a b)
+   (Gadt
+    ((Bar (a b c)
+      ((Variable a) (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
+       (Variable b) (Variable c))
+      (Apply ((path_name ((path ()) (base foo))) (depth 0))
+       ((Variable b)
+        (Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))
+     (Other (a b) ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
+      (Apply ((path_name ((path ()) (base foo))) (depth 0))
+       ((Variable a) (Variable b)))))))))

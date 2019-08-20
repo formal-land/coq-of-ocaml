@@ -57,6 +57,8 @@ and of_typs_exprs_new_free_vars (env : FullEnvi.t) (loc : Loc.t)
 
 let rec of_type_expr (env : FullEnvi.t) (loc : Loc.t) (typ : Types.type_expr) : t =
   match typ.desc with
+  | Tvar None ->
+    Error.raise loc "The placeholders `_` in types are not handled."
   | Tvar (Some x) -> Variable x
   | Tarrow (_, typ_x, typ_y, _) ->
     Arrow (of_type_expr env loc typ_x, of_type_expr env loc typ_y)
