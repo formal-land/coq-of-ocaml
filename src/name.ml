@@ -51,11 +51,16 @@ let escape_operator (s : string) : string =
     Buffer.add_string b (escape_operator_character c));
   Buffer.contents b
 
+let escape_reserved_word (s : string) : string =
+  match s with
+  | "exists" -> "_exists"
+  | _ -> s
+
 let convert (x : t) : t =
   if is_operator x then
     "op" ^ escape_operator x
   else
-    x
+    escape_reserved_word x
 
 (** Import an OCaml identifier. *)
 let of_ident (i : Ident.t) : t =
