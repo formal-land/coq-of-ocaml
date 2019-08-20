@@ -10,8 +10,7 @@ type t =
   | Abstract of Name.t * Name.t list
   [@@deriving sexp]
 
-let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
-  (typs : type_declaration list) : t =
+let of_ocaml (env : FullEnvi.t) (loc : Loc.t) (typs : type_declaration list) : t =
   match typs with
   | [] -> Error.raise loc "Unexpected type definition with no case."
   | [{typ_id = name; typ_type = typ}] ->
@@ -42,7 +41,7 @@ let of_ocaml (env : unit FullEnvi.t) (loc : Loc.t)
       | Type_open -> Error.raise loc "Open type definition not handled.")
   | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."
 
-let update_env (def : t) (env : 'a FullEnvi.t) : 'a FullEnvi.t =
+let update_env (def : t) (env : FullEnvi.t) : FullEnvi.t =
   match def with
   | Inductive (name, _, constructors) ->
     let env = FullEnvi.add_typ [] name env in

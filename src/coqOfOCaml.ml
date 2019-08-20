@@ -1,7 +1,7 @@
 open Sexplib.Std
 open SmartPrint
 
-type ast = Loc.t Structure.t list
+type ast = Structure.t list
   [@@deriving sexp]
 
 let exp (structure : Typedtree.structure) : ast =

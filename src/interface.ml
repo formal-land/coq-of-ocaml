@@ -4,10 +4,10 @@ open Yojson.Basic
 module Shape = struct
   type t = PathName.t list list
 
-  let to_json (shape : t) : json =
+  let to_json (shape : t) : Yojson.Basic.t =
     `List (List.map (fun ds -> `List (List.map PathName.to_json ds)) shape)
 
-  let of_json (json : json) : t =
+  let of_json (json : Yojson.Basic.t) : t =
     let of_list f json =
       match json with
       | `List jsons -> List.map f jsons
@@ -32,9 +32,9 @@ let of_typ_definition (typ_def : TypeDefinition.t) : t list =
     [Typ name]
 
 
-let rec to_full_envi (interface : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
+let rec to_full_envi (interface : t) (env : FullEnvi.t) : FullEnvi.t =
   match interface with
-  | Var (x, shape) -> FullEnvi.add_var [] x () env
+  | Var (x, shape) -> FullEnvi.add_var [] x env
   | Typ x -> FullEnvi.add_typ [] x env
   | Constructor x -> FullEnvi.add_constructor [] x env
   | Field x -> FullEnvi.add_field [] x env
@@ -43,7 +43,7 @@ let rec to_full_envi (interface : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
     let env = List.fold_left (fun env def -> to_full_envi def env) env defs in
     FullEnvi.leave_module x env
 
-let rec to_json (interface : t) : json =
+let rec to_json (interface : t) : Yojson.Basic.t =
   match interface with
   | Var (x, shape) ->
     `List [`String "Var"; Name.to_json x; Shape.to_json shape]
@@ -53,7 +53,7 @@ let rec to_json (interface : t) : json =
   | Interface (x, defs) ->
     `List [`String "Interface"; Name.to_json x; `List (List.map to_json defs)]
 
-let rec of_json (json : json) : t =
+let rec of_json (json : Yojson.Basic.t) : t =
   match json with
   | `List [`String "Var"; x; shape] ->
     Var (Name.of_json x, Shape.of_json shape)

@@ -1,17 +1,10 @@
-((Value
-  (Known ((file_name tests/ex02.ml) (line 3))
-   ((file_name tests/ex02.ml) (line 3)))
+((Value (Known tests/ex02.ml ((line 3)) ((line 3)))
   ((is_rec (New false))
    (cases
     ((((name t0) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base unit))) (depth 1)) ()))))
-      (Constructor
-       (Known ((file_name tests/ex02.ml) (line 3))
-        ((file_name tests/ex02.ml) (line 3)))
-       ((path_name ((path ()) (base tt))) (depth 1)) ()))))))
- (Value
-  (Known ((file_name tests/ex02.ml) (line 5))
-   ((file_name tests/ex02.ml) (line 5)))
+      (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ()))))))
+ (Value (Known tests/ex02.ml ((line 5)) ((line 5)))
   ((is_rec (New false))
    (cases
     ((((name t1) (typ_vars ()) (args ())
@@ -19,20 +12,8 @@
         ((Tuple
           ((Apply ((path_name ((path ()) (base ascii))) (depth 1)) ())
            (Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))))
-      (Tuple
-       (Known ((file_name tests/ex02.ml) (line 5))
-        ((file_name tests/ex02.ml) (line 5)))
-       ((Constant
-         (Known ((file_name tests/ex02.ml) (line 5))
-          ((file_name tests/ex02.ml) (line 5)))
-         (Char c))
-        (Constant
-         (Known ((file_name tests/ex02.ml) (line 5))
-          ((file_name tests/ex02.ml) (line 5)))
-         (String one)))))))))
- (Value
-  (Known ((file_name tests/ex02.ml) (line 7))
-   ((file_name tests/ex02.ml) (line 7)))
+      (Tuple ((Constant (Char c)) (Constant (String one)))))))))
+ (Value (Known tests/ex02.ml ((line 7)) ((line 7)))
   ((is_rec (New false))
    (cases
     ((((name t2) (typ_vars ()) (args ())
@@ -44,49 +25,18 @@
            (Apply ((path_name ((path ()) (base bool))) (depth 1)) ())
            (Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))))
       (Tuple
-       (Known ((file_name tests/ex02.ml) (line 7))
-        ((file_name tests/ex02.ml) (line 7)))
-       ((Constant
-         (Known ((file_name tests/ex02.ml) (line 7))
-          ((file_name tests/ex02.ml) (line 7)))
-         (Int 1))
-        (Constant
-         (Known ((file_name tests/ex02.ml) (line 7))
-          ((file_name tests/ex02.ml) (line 7)))
-         (Int 2))
-        (Constant
-         (Known ((file_name tests/ex02.ml) (line 7))
-          ((file_name tests/ex02.ml) (line 7)))
-         (Int 3))
-        (Constructor
-         (Known ((file_name tests/ex02.ml) (line 7))
-          ((file_name tests/ex02.ml) (line 7)))
-         ((path_name ((path ()) (base false))) (depth 1)) ())
-        (Constructor
-         (Known ((file_name tests/ex02.ml) (line 7))
-          ((file_name tests/ex02.ml) (line 7)))
-         ((path_name ((path ()) (base true))) (depth 1)) ()))))))))
- (Value
-  (Known ((file_name tests/ex02.ml) (line 9))
-   ((file_name tests/ex02.ml) (line 9)))
+       ((Constant (Int 1)) (Constant (Int 2)) (Constant (Int 3))
+        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ())
+        (Constructor ((path_name ((path ()) (base true))) (depth 1)) ()))))))))
+ (Value (Known tests/ex02.ml ((line 9)) ((line 9)))
   ((is_rec (New false))
    (cases
     ((((name f) (typ_vars (A)) (args ((x (Variable A))))
        (typ ((Tuple ((Variable A) (Variable A))))))
       (Tuple
-       (Known ((file_name tests/ex02.ml) (line 9))
-        ((file_name tests/ex02.ml) (line 9)))
-       ((Variable
-         (Known ((file_name tests/ex02.ml) (line 9))
-          ((file_name tests/ex02.ml) (line 9)))
-         ((path_name ((path ()) (base x))) (depth 0)))
-        (Variable
-         (Known ((file_name tests/ex02.ml) (line 9))
-          ((file_name tests/ex02.ml) (line 9)))
-         ((path_name ((path ()) (base x))) (depth 0))))))))))
- (Value
-  (Known ((file_name tests/ex02.ml) (line 11))
-   ((file_name tests/ex02.ml) (line 11)))
+       ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+        (Variable ((path_name ((path ()) (base x))) (depth 0))))))))))
+ (Value (Known tests/ex02.ml ((line 11)) ((line 11)))
   ((is_rec (New false))
    (cases
     ((((name t3) (typ_vars ()) (args ())
@@ -94,14 +44,5 @@
         ((Tuple
           ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
            (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-      (Apply
-       (Known ((file_name tests/ex02.ml) (line 11))
-        ((file_name tests/ex02.ml) (line 11)))
-       (Variable
-        (Known ((file_name tests/ex02.ml) (line 11))
-         ((file_name tests/ex02.ml) (line 11)))
-        ((path_name ((path ()) (base f))) (depth 0)))
-       ((Constant
-         (Known ((file_name tests/ex02.ml) (line 11))
-          ((file_name tests/ex02.ml) (line 11)))
-         (Int 12))))))))))
+      (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
+       ((Constant (Int 12))))))))))

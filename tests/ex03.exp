@@ -1,40 +1,17 @@
-((Value
-  (Known ((file_name tests/ex03.ml) (line 3))
-   ((file_name tests/ex03.ml) (line 6)))
+((Value (Known tests/ex03.ml ((line 3)) ((line 6)))
   ((is_rec (New false))
    (cases
     ((((name n1) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (LetVar
-       (Known ((file_name tests/ex03.ml) (line 4))
-        ((file_name tests/ex03.ml) (line 6)))
-       m
-       (Constant
-        (Known ((file_name tests/ex03.ml) (line 4))
-         ((file_name tests/ex03.ml) (line 4)))
-        (Int 12))
-       (LetVar
-        (Known ((file_name tests/ex03.ml) (line 5))
-         ((file_name tests/ex03.ml) (line 6)))
-        n1
-        (Variable
-         (Known ((file_name tests/ex03.ml) (line 5))
-          ((file_name tests/ex03.ml) (line 5)))
-         ((path_name ((path ()) (base m))) (depth 0)))
-        (Variable
-         (Known ((file_name tests/ex03.ml) (line 6))
-          ((file_name tests/ex03.ml) (line 6)))
-         ((path_name ((path ()) (base n1))) (depth 0))))))))))
- (Value
-  (Known ((file_name tests/ex03.ml) (line 8))
-   ((file_name tests/ex03.ml) (line 11)))
+      (LetVar m (Constant (Int 12))
+       (LetVar n1 (Variable ((path_name ((path ()) (base m))) (depth 0)))
+        (Variable ((path_name ((path ()) (base n1))) (depth 0))))))))))
+ (Value (Known tests/ex03.ml ((line 8)) ((line 11)))
   ((is_rec (New false))
    (cases
     ((((name n2) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (LetFun
-       (Known ((file_name tests/ex03.ml) (line 9))
-        ((file_name tests/ex03.ml) (line 11)))
        ((is_rec (New false))
         (cases
          ((((name p1) (typ_vars (A B C))
@@ -43,28 +20,11 @@
                (Arrow (Arrow (Variable A) (Arrow (Variable B) (Variable A)))
                 (Variable C)))))
             (typ ((Variable C))))
-           (Apply
-            (Known ((file_name tests/ex03.ml) (line 9))
-             ((file_name tests/ex03.ml) (line 9)))
-            (Variable
-             (Known ((file_name tests/ex03.ml) (line 9))
-              ((file_name tests/ex03.ml) (line 9)))
-             ((path_name ((path ()) (base c))) (depth 0)))
-            ((Function
-              (Known ((file_name tests/ex03.ml) (line 9))
-               ((file_name tests/ex03.ml) (line 9)))
-              x
-              (Function
-               (Known ((file_name tests/ex03.ml) (line 9))
-                ((file_name tests/ex03.ml) (line 9)))
-               y
-               (Variable
-                (Known ((file_name tests/ex03.ml) (line 9))
-                 ((file_name tests/ex03.ml) (line 9)))
-                ((path_name ((path ()) (base x))) (depth 0)))))))))))
+           (Apply (Variable ((path_name ((path ()) (base c))) (depth 0)))
+            ((Function x
+              (Function y
+               (Variable ((path_name ((path ()) (base x))) (depth 0)))))))))))
        (LetFun
-        (Known ((file_name tests/ex03.ml) (line 10))
-         ((file_name tests/ex03.ml) (line 11)))
         ((is_rec (New false))
          (cases
           ((((name c) (typ_vars (A))
@@ -76,29 +36,7 @@
                   (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
                   (Variable A))))))
              (typ ((Variable A))))
-            (Apply
-             (Known ((file_name tests/ex03.ml) (line 10))
-              ((file_name tests/ex03.ml) (line 10)))
-             (Variable
-              (Known ((file_name tests/ex03.ml) (line 10))
-               ((file_name tests/ex03.ml) (line 10)))
-              ((path_name ((path ()) (base f))) (depth 0)))
-             ((Constant
-               (Known ((file_name tests/ex03.ml) (line 10))
-                ((file_name tests/ex03.ml) (line 10)))
-               (Int 12))
-              (Constant
-               (Known ((file_name tests/ex03.ml) (line 10))
-                ((file_name tests/ex03.ml) (line 10)))
-               (Int 23))))))))
-        (Apply
-         (Known ((file_name tests/ex03.ml) (line 11))
-          ((file_name tests/ex03.ml) (line 11)))
-         (Variable
-          (Known ((file_name tests/ex03.ml) (line 11))
-           ((file_name tests/ex03.ml) (line 11)))
-          ((path_name ((path ()) (base p1))) (depth 0)))
-         ((Variable
-           (Known ((file_name tests/ex03.ml) (line 11))
-            ((file_name tests/ex03.ml) (line 11)))
-           ((path_name ((path ()) (base c))) (depth 0)))))))))))))
+            (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
+             ((Constant (Int 12)) (Constant (Int 23))))))))
+        (Apply (Variable ((path_name ((path ()) (base p1))) (depth 0)))
+         ((Variable ((path_name ((path ()) (base c))) (depth 0)))))))))))))

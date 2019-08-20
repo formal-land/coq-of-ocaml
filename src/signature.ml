@@ -11,8 +11,8 @@ type item =
 type t = item list
   [@@deriving sexp]
 
-let of_signature (env : unit FullEnvi.t) (signature : signature) : t =
-  let of_signature_item (env : unit FullEnvi.t) (signature_item : signature_item) : unit FullEnvi.t * item =
+let of_signature (env : FullEnvi.t) (signature : signature) : t =
+  let of_signature_item (env : FullEnvi.t) (signature_item : signature_item) : FullEnvi.t * item =
     let loc = Loc.of_location signature_item.sig_loc in
     match signature_item.sig_desc with
     | Tsig_attribute _ -> Error.raise loc "Structure item `attribute` not handled."
@@ -35,7 +35,7 @@ let of_signature (env : unit FullEnvi.t) (signature : signature) : t =
     | Tsig_typext _ -> Error.raise loc "Structure item `typext` not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
-      let env = FullEnvi.add_var [] name () env in
+      let env = FullEnvi.add_var [] name env in
       let typ = Type.of_type_expr env loc ctyp_type in
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       (env, Value (name, typ_args, typ)) in

@@ -1,26 +1,17 @@
-((TypeDefinition
-  (Known ((file_name tests/ex15.ml) (line 3))
-   ((file_name tests/ex15.ml) (line 5)))
+((TypeDefinition (Known tests/ex15.ml ((line 3)) ((line 5)))
   (Inductive set ()
    ((Empty ())
     (Node
      ((Apply ((path_name ((path ()) (base set))) (depth 0)) ())
       (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
       (Apply ((path_name ((path ()) (base set))) (depth 0)) ()))))))
- (Value
-  (Known ((file_name tests/ex15.ml) (line 7))
-   ((file_name tests/ex15.ml) (line 7)))
+ (Value (Known tests/ex15.ml ((line 7)) ((line 7)))
   ((is_rec (New false))
    (cases
     ((((name empty) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base set))) (depth 0)) ()))))
-      (Constructor
-       (Known ((file_name tests/ex15.ml) (line 7))
-        ((file_name tests/ex15.ml) (line 7)))
-       ((path_name ((path ()) (base Empty))) (depth 0)) ()))))))
- (Value
-  (Known ((file_name tests/ex15.ml) (line 9))
-   ((file_name tests/ex15.ml) (line 18)))
+      (Constructor ((path_name ((path ()) (base Empty))) (depth 0)) ()))))))
+ (Value (Known tests/ex15.ml ((line 9)) ((line 18)))
   ((is_rec (New true))
    (cases
     ((((name member) (typ_vars ())
@@ -28,93 +19,32 @@
         ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
          (s (Apply ((path_name ((path ()) (base set))) (depth 0)) ()))))
        (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Match
-       (Known ((file_name tests/ex15.ml) (line 10))
-        ((file_name tests/ex15.ml) (line 18)))
-       (Variable
-        (Known ((file_name tests/ex15.ml) (line 10))
-         ((file_name tests/ex15.ml) (line 10)))
-        ((path_name ((path ()) (base s))) (depth 0)))
+      (Match (Variable ((path_name ((path ()) (base s))) (depth 0)))
        (((Constructor ((path_name ((path ()) (base Empty))) (depth 0)) ())
-         (Constructor
-          (Known ((file_name tests/ex15.ml) (line 11))
-           ((file_name tests/ex15.ml) (line 11)))
-          ((path_name ((path ()) (base false))) (depth 1)) ()))
+         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))
         ((Constructor ((path_name ((path ()) (base Node))) (depth 0))
           ((Variable s1) (Variable y) (Variable s2)))
          (IfThenElse
-          (Known ((file_name tests/ex15.ml) (line 13))
-           ((file_name tests/ex15.ml) (line 18)))
           (Apply
-           (Known ((file_name tests/ex15.ml) (line 13))
-            ((file_name tests/ex15.ml) (line 13)))
            (Variable
-            (Known ((file_name tests/ex15.ml) (line 13))
-             ((file_name tests/ex15.ml) (line 13)))
             ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
-           ((Variable
-             (Known ((file_name tests/ex15.ml) (line 13))
-              ((file_name tests/ex15.ml) (line 13)))
-             ((path_name ((path ()) (base x))) (depth 0)))
-            (Variable
-             (Known ((file_name tests/ex15.ml) (line 13))
-              ((file_name tests/ex15.ml) (line 13)))
-             ((path_name ((path ()) (base y))) (depth 0)))))
-          (Apply
-           (Known ((file_name tests/ex15.ml) (line 14))
-            ((file_name tests/ex15.ml) (line 14)))
-           (Variable
-            (Known ((file_name tests/ex15.ml) (line 14))
-             ((file_name tests/ex15.ml) (line 14)))
-            ((path_name ((path ()) (base member))) (depth 0)))
-           ((Variable
-             (Known ((file_name tests/ex15.ml) (line 14))
-              ((file_name tests/ex15.ml) (line 14)))
-             ((path_name ((path ()) (base x))) (depth 0)))
-            (Variable
-             (Known ((file_name tests/ex15.ml) (line 14))
-              ((file_name tests/ex15.ml) (line 14)))
-             ((path_name ((path ()) (base s1))) (depth 0)))))
+           ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+            (Variable ((path_name ((path ()) (base y))) (depth 0)))))
+          (Apply (Variable ((path_name ((path ()) (base member))) (depth 0)))
+           ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+            (Variable ((path_name ((path ()) (base s1))) (depth 0)))))
           (IfThenElse
-           (Known ((file_name tests/ex15.ml) (line 15))
-            ((file_name tests/ex15.ml) (line 18)))
            (Apply
-            (Known ((file_name tests/ex15.ml) (line 15))
-             ((file_name tests/ex15.ml) (line 15)))
             (Variable
-             (Known ((file_name tests/ex15.ml) (line 15))
-              ((file_name tests/ex15.ml) (line 15)))
              ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
-            ((Variable
-              (Known ((file_name tests/ex15.ml) (line 15))
-               ((file_name tests/ex15.ml) (line 15)))
-              ((path_name ((path ()) (base y))) (depth 0)))
-             (Variable
-              (Known ((file_name tests/ex15.ml) (line 15))
-               ((file_name tests/ex15.ml) (line 15)))
-              ((path_name ((path ()) (base x))) (depth 0)))))
+            ((Variable ((path_name ((path ()) (base y))) (depth 0)))
+             (Variable ((path_name ((path ()) (base x))) (depth 0)))))
            (Apply
-            (Known ((file_name tests/ex15.ml) (line 16))
-             ((file_name tests/ex15.ml) (line 16)))
-            (Variable
-             (Known ((file_name tests/ex15.ml) (line 16))
-              ((file_name tests/ex15.ml) (line 16)))
-             ((path_name ((path ()) (base member))) (depth 0)))
-            ((Variable
-              (Known ((file_name tests/ex15.ml) (line 16))
-               ((file_name tests/ex15.ml) (line 16)))
-              ((path_name ((path ()) (base x))) (depth 0)))
-             (Variable
-              (Known ((file_name tests/ex15.ml) (line 16))
-               ((file_name tests/ex15.ml) (line 16)))
-              ((path_name ((path ()) (base s2))) (depth 0)))))
-           (Constructor
-            (Known ((file_name tests/ex15.ml) (line 18))
-             ((file_name tests/ex15.ml) (line 18)))
-            ((path_name ((path ()) (base true))) (depth 1)) ())))))))))))
- (Value
-  (Known ((file_name tests/ex15.ml) (line 20))
-   ((file_name tests/ex15.ml) (line 28)))
+            (Variable ((path_name ((path ()) (base member))) (depth 0)))
+            ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+             (Variable ((path_name ((path ()) (base s2))) (depth 0)))))
+           (Constructor ((path_name ((path ()) (base true))) (depth 1)) ())))))))))))
+ (Value (Known tests/ex15.ml ((line 20)) ((line 28)))
   ((is_rec (New true))
    (cases
     ((((name insert) (typ_vars ())
@@ -122,123 +52,38 @@
         ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
          (s (Apply ((path_name ((path ()) (base set))) (depth 0)) ()))))
        (typ ((Apply ((path_name ((path ()) (base set))) (depth 0)) ()))))
-      (Match
-       (Known ((file_name tests/ex15.ml) (line 21))
-        ((file_name tests/ex15.ml) (line 28)))
-       (Variable
-        (Known ((file_name tests/ex15.ml) (line 21))
-         ((file_name tests/ex15.ml) (line 21)))
-        ((path_name ((path ()) (base s))) (depth 0)))
+      (Match (Variable ((path_name ((path ()) (base s))) (depth 0)))
        (((Constructor ((path_name ((path ()) (base Empty))) (depth 0)) ())
-         (Constructor
-          (Known ((file_name tests/ex15.ml) (line 22))
-           ((file_name tests/ex15.ml) (line 22)))
-          ((path_name ((path ()) (base Node))) (depth 0))
-          ((Constructor
-            (Known ((file_name tests/ex15.ml) (line 22))
-             ((file_name tests/ex15.ml) (line 22)))
-            ((path_name ((path ()) (base Empty))) (depth 0)) ())
-           (Variable
-            (Known ((file_name tests/ex15.ml) (line 22))
-             ((file_name tests/ex15.ml) (line 22)))
-            ((path_name ((path ()) (base x))) (depth 0)))
-           (Constructor
-            (Known ((file_name tests/ex15.ml) (line 22))
-             ((file_name tests/ex15.ml) (line 22)))
-            ((path_name ((path ()) (base Empty))) (depth 0)) ()))))
+         (Constructor ((path_name ((path ()) (base Node))) (depth 0))
+          ((Constructor ((path_name ((path ()) (base Empty))) (depth 0)) ())
+           (Variable ((path_name ((path ()) (base x))) (depth 0)))
+           (Constructor ((path_name ((path ()) (base Empty))) (depth 0)) ()))))
         ((Constructor ((path_name ((path ()) (base Node))) (depth 0))
           ((Variable s1) (Variable y) (Variable s2)))
          (IfThenElse
-          (Known ((file_name tests/ex15.ml) (line 24))
-           ((file_name tests/ex15.ml) (line 28)))
           (Apply
-           (Known ((file_name tests/ex15.ml) (line 24))
-            ((file_name tests/ex15.ml) (line 24)))
            (Variable
-            (Known ((file_name tests/ex15.ml) (line 24))
-             ((file_name tests/ex15.ml) (line 24)))
             ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
-           ((Variable
-             (Known ((file_name tests/ex15.ml) (line 24))
-              ((file_name tests/ex15.ml) (line 24)))
-             ((path_name ((path ()) (base x))) (depth 0)))
-            (Variable
-             (Known ((file_name tests/ex15.ml) (line 24))
-              ((file_name tests/ex15.ml) (line 24)))
-             ((path_name ((path ()) (base y))) (depth 0)))))
-          (Constructor
-           (Known ((file_name tests/ex15.ml) (line 25))
-            ((file_name tests/ex15.ml) (line 25)))
-           ((path_name ((path ()) (base Node))) (depth 0))
+           ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+            (Variable ((path_name ((path ()) (base y))) (depth 0)))))
+          (Constructor ((path_name ((path ()) (base Node))) (depth 0))
            ((Apply
-             (Known ((file_name tests/ex15.ml) (line 25))
-              ((file_name tests/ex15.ml) (line 25)))
-             (Variable
-              (Known ((file_name tests/ex15.ml) (line 25))
-               ((file_name tests/ex15.ml) (line 25)))
-              ((path_name ((path ()) (base insert))) (depth 0)))
-             ((Variable
-               (Known ((file_name tests/ex15.ml) (line 25))
-                ((file_name tests/ex15.ml) (line 25)))
-               ((path_name ((path ()) (base x))) (depth 0)))
-              (Variable
-               (Known ((file_name tests/ex15.ml) (line 25))
-                ((file_name tests/ex15.ml) (line 25)))
-               ((path_name ((path ()) (base s1))) (depth 0)))))
-            (Variable
-             (Known ((file_name tests/ex15.ml) (line 25))
-              ((file_name tests/ex15.ml) (line 25)))
-             ((path_name ((path ()) (base y))) (depth 0)))
-            (Variable
-             (Known ((file_name tests/ex15.ml) (line 25))
-              ((file_name tests/ex15.ml) (line 25)))
-             ((path_name ((path ()) (base s2))) (depth 0)))))
+             (Variable ((path_name ((path ()) (base insert))) (depth 0)))
+             ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+              (Variable ((path_name ((path ()) (base s1))) (depth 0)))))
+            (Variable ((path_name ((path ()) (base y))) (depth 0)))
+            (Variable ((path_name ((path ()) (base s2))) (depth 0)))))
           (IfThenElse
-           (Known ((file_name tests/ex15.ml) (line 26))
-            ((file_name tests/ex15.ml) (line 28)))
            (Apply
-            (Known ((file_name tests/ex15.ml) (line 26))
-             ((file_name tests/ex15.ml) (line 26)))
             (Variable
-             (Known ((file_name tests/ex15.ml) (line 26))
-              ((file_name tests/ex15.ml) (line 26)))
              ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
-            ((Variable
-              (Known ((file_name tests/ex15.ml) (line 26))
-               ((file_name tests/ex15.ml) (line 26)))
-              ((path_name ((path ()) (base y))) (depth 0)))
-             (Variable
-              (Known ((file_name tests/ex15.ml) (line 26))
-               ((file_name tests/ex15.ml) (line 26)))
-              ((path_name ((path ()) (base x))) (depth 0)))))
-           (Constructor
-            (Known ((file_name tests/ex15.ml) (line 27))
-             ((file_name tests/ex15.ml) (line 27)))
-            ((path_name ((path ()) (base Node))) (depth 0))
-            ((Variable
-              (Known ((file_name tests/ex15.ml) (line 27))
-               ((file_name tests/ex15.ml) (line 27)))
-              ((path_name ((path ()) (base s1))) (depth 0)))
-             (Variable
-              (Known ((file_name tests/ex15.ml) (line 27))
-               ((file_name tests/ex15.ml) (line 27)))
-              ((path_name ((path ()) (base y))) (depth 0)))
+            ((Variable ((path_name ((path ()) (base y))) (depth 0)))
+             (Variable ((path_name ((path ()) (base x))) (depth 0)))))
+           (Constructor ((path_name ((path ()) (base Node))) (depth 0))
+            ((Variable ((path_name ((path ()) (base s1))) (depth 0)))
+             (Variable ((path_name ((path ()) (base y))) (depth 0)))
              (Apply
-              (Known ((file_name tests/ex15.ml) (line 27))
-               ((file_name tests/ex15.ml) (line 27)))
-              (Variable
-               (Known ((file_name tests/ex15.ml) (line 27))
-                ((file_name tests/ex15.ml) (line 27)))
-               ((path_name ((path ()) (base insert))) (depth 0)))
-              ((Variable
-                (Known ((file_name tests/ex15.ml) (line 27))
-                 ((file_name tests/ex15.ml) (line 27)))
-                ((path_name ((path ()) (base x))) (depth 0)))
-               (Variable
-                (Known ((file_name tests/ex15.ml) (line 27))
-                 ((file_name tests/ex15.ml) (line 27)))
-                ((path_name ((path ()) (base s2))) (depth 0)))))))
-           (Variable
-            (Known ((file_name tests/ex15.ml) (line 28))
-             ((file_name tests/ex15.ml) (line 28)))
-            ((path_name ((path ()) (base s))) (depth 0))))))))))))))
+              (Variable ((path_name ((path ()) (base insert))) (depth 0)))
+              ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+               (Variable ((path_name ((path ()) (base s2))) (depth 0)))))))
+           (Variable ((path_name ((path ()) (base s))) (depth 0))))))))))))))

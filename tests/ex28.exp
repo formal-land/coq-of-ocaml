@@ -1,6 +1,4 @@
-((Value
-  (Known ((file_name tests/ex28.ml) (line 3))
-   ((file_name tests/ex28.ml) (line 8)))
+((Value (Known tests/ex28.ml ((line 3)) ((line 8)))
   ((is_rec (New false))
    (cases
     ((((name map) (typ_vars (A B))
@@ -13,8 +11,6 @@
         ((Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Variable B))))))
       (LetFun
-       (Known ((file_name tests/ex28.ml) (line 4))
-        ((file_name tests/ex28.ml) (line 8)))
        ((is_rec (New true))
         (cases
          ((((name map_coq_rec) (typ_vars ())
@@ -25,60 +21,23 @@
             (typ
              ((Apply ((path_name ((path ()) (base list))) (depth 1))
                ((Variable B))))))
-           (Match
-            (Known ((file_name tests/ex28.ml) (line 5))
-             ((file_name tests/ex28.ml) (line 7)))
-            (Variable
-             (Known ((file_name tests/ex28.ml) (line 5))
-              ((file_name tests/ex28.ml) (line 5)))
-             ((path_name ((path ()) (base l))) (depth 0)))
+           (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
             (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-              (Constructor
-               (Known ((file_name tests/ex28.ml) (line 6))
-                ((file_name tests/ex28.ml) (line 6)))
-               ((path_name ((path ()) (base []))) (depth 1)) ()))
+              (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))
              ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
                ((Variable x) (Variable l)))
-              (Constructor
-               (Known ((file_name tests/ex28.ml) (line 7))
-                ((file_name tests/ex28.ml) (line 7)))
-               ((path_name ((path ()) (base cons))) (depth 1))
+              (Constructor ((path_name ((path ()) (base cons))) (depth 1))
                ((Apply
-                 (Known ((file_name tests/ex28.ml) (line 7))
-                  ((file_name tests/ex28.ml) (line 7)))
-                 (Variable
-                  (Known ((file_name tests/ex28.ml) (line 7))
-                   ((file_name tests/ex28.ml) (line 7)))
-                  ((path_name ((path ()) (base f))) (depth 0)))
-                 ((Variable
-                   (Known ((file_name tests/ex28.ml) (line 7))
-                    ((file_name tests/ex28.ml) (line 7)))
-                   ((path_name ((path ()) (base x))) (depth 0)))))
+                 (Variable ((path_name ((path ()) (base f))) (depth 0)))
+                 ((Variable ((path_name ((path ()) (base x))) (depth 0)))))
                 (Apply
-                 (Known ((file_name tests/ex28.ml) (line 7))
-                  ((file_name tests/ex28.ml) (line 7)))
                  (Variable
-                  (Known ((file_name tests/ex28.ml) (line 7))
-                   ((file_name tests/ex28.ml) (line 7)))
                   ((path_name ((path ()) (base map_coq_rec))) (depth 0)))
-                 ((Variable
-                   (Known ((file_name tests/ex28.ml) (line 7))
-                    ((file_name tests/ex28.ml) (line 7)))
-                   ((path_name ((path ()) (base l))) (depth 0))))))))))))))
+                 ((Variable ((path_name ((path ()) (base l))) (depth 0))))))))))))))
        (Apply
-        (Known ((file_name tests/ex28.ml) (line 8))
-         ((file_name tests/ex28.ml) (line 8)))
-        (Variable
-         (Known ((file_name tests/ex28.ml) (line 8))
-          ((file_name tests/ex28.ml) (line 8)))
-         ((path_name ((path ()) (base map_coq_rec))) (depth 0)))
-        ((Variable
-          (Known ((file_name tests/ex28.ml) (line 8))
-           ((file_name tests/ex28.ml) (line 8)))
-          ((path_name ((path ()) (base l))) (depth 0)))))))))))
- (Value
-  (Known ((file_name tests/ex28.ml) (line 10))
-   ((file_name tests/ex28.ml) (line 15)))
+        (Variable ((path_name ((path ()) (base map_coq_rec))) (depth 0)))
+        ((Variable ((path_name ((path ()) (base l))) (depth 0)))))))))))
+ (Value (Known tests/ex28.ml ((line 10)) ((line 15)))
   ((is_rec (New false))
    (cases
     ((((name map2) (typ_vars (A B))
@@ -91,8 +50,6 @@
         ((Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Variable B))))))
       (LetFun
-       (Known ((file_name tests/ex28.ml) (line 11))
-        ((file_name tests/ex28.ml) (line 15)))
        ((is_rec (New true))
         (cases
          ((((name map2_coq_rec) (typ_vars (C D))
@@ -104,62 +61,21 @@
             (typ
              ((Apply ((path_name ((path ()) (base list))) (depth 1))
                ((Variable D))))))
-           (Match
-            (Known ((file_name tests/ex28.ml) (line 12))
-             ((file_name tests/ex28.ml) (line 14)))
-            (Variable
-             (Known ((file_name tests/ex28.ml) (line 12))
-              ((file_name tests/ex28.ml) (line 12)))
-             ((path_name ((path ()) (base l))) (depth 0)))
+           (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
             (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-              (Constructor
-               (Known ((file_name tests/ex28.ml) (line 13))
-                ((file_name tests/ex28.ml) (line 13)))
-               ((path_name ((path ()) (base []))) (depth 1)) ()))
+              (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))
              ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
                ((Variable x) (Variable l)))
-              (Constructor
-               (Known ((file_name tests/ex28.ml) (line 14))
-                ((file_name tests/ex28.ml) (line 14)))
-               ((path_name ((path ()) (base cons))) (depth 1))
+              (Constructor ((path_name ((path ()) (base cons))) (depth 1))
                ((Apply
-                 (Known ((file_name tests/ex28.ml) (line 14))
-                  ((file_name tests/ex28.ml) (line 14)))
-                 (Variable
-                  (Known ((file_name tests/ex28.ml) (line 14))
-                   ((file_name tests/ex28.ml) (line 14)))
-                  ((path_name ((path ()) (base f))) (depth 0)))
-                 ((Variable
-                   (Known ((file_name tests/ex28.ml) (line 14))
-                    ((file_name tests/ex28.ml) (line 14)))
-                   ((path_name ((path ()) (base x))) (depth 0)))))
+                 (Variable ((path_name ((path ()) (base f))) (depth 0)))
+                 ((Variable ((path_name ((path ()) (base x))) (depth 0)))))
                 (Apply
-                 (Known ((file_name tests/ex28.ml) (line 14))
-                  ((file_name tests/ex28.ml) (line 14)))
                  (Variable
-                  (Known ((file_name tests/ex28.ml) (line 14))
-                   ((file_name tests/ex28.ml) (line 14)))
                   ((path_name ((path ()) (base map2_coq_rec))) (depth 0)))
-                 ((Variable
-                   (Known ((file_name tests/ex28.ml) (line 14))
-                    ((file_name tests/ex28.ml) (line 14)))
-                   ((path_name ((path ()) (base f))) (depth 0)))
-                  (Variable
-                   (Known ((file_name tests/ex28.ml) (line 14))
-                    ((file_name tests/ex28.ml) (line 14)))
-                   ((path_name ((path ()) (base l))) (depth 0))))))))))))))
+                 ((Variable ((path_name ((path ()) (base f))) (depth 0)))
+                  (Variable ((path_name ((path ()) (base l))) (depth 0))))))))))))))
        (Apply
-        (Known ((file_name tests/ex28.ml) (line 15))
-         ((file_name tests/ex28.ml) (line 15)))
-        (Variable
-         (Known ((file_name tests/ex28.ml) (line 15))
-          ((file_name tests/ex28.ml) (line 15)))
-         ((path_name ((path ()) (base map2_coq_rec))) (depth 0)))
-        ((Variable
-          (Known ((file_name tests/ex28.ml) (line 15))
-           ((file_name tests/ex28.ml) (line 15)))
-          ((path_name ((path ()) (base f))) (depth 0)))
-         (Variable
-          (Known ((file_name tests/ex28.ml) (line 15))
-           ((file_name tests/ex28.ml) (line 15)))
-          ((path_name ((path ()) (base l))) (depth 0))))))))))))
+        (Variable ((path_name ((path ()) (base map2_coq_rec))) (depth 0)))
+        ((Variable ((path_name ((path ()) (base f))) (depth 0)))
+         (Variable ((path_name ((path ()) (base l))) (depth 0))))))))))))
