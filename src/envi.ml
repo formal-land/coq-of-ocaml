@@ -24,12 +24,14 @@ module Segment = struct
   let map (f : 'a -> 'b) (segment : 'a t) : 'b t =
     { segment with names = PathName.Map.map f segment.names }
 
-  let merge (segment1 : 'a t) (segment2 : 'a t) (prefix : Name.t -> 'a -> 'a)
-    (module_name : Name.t) : 'a t =
-    PathName.Map.fold (fun x v segment2 ->
-      let x = { x with PathName.path = module_name :: x.PathName.path } in
-      add x (prefix module_name v) segment2)
-      segment1.names segment2
+  let merge (segment1 : 'a t) (segment2 : 'a t) (module_name : Name.t) : 'a t =
+    PathName.Map.fold
+      (fun x v segment2 ->
+        let x = { x with PathName.path = module_name :: x.PathName.path } in
+        add x v segment2
+      )
+      segment1.names
+      segment2
 
   let open_module (segment : 'a t) (module_name : Name.t list) : 'a t =
     { segment with opens = module_name :: segment.opens }
@@ -116,11 +118,10 @@ let map (env : 'a t) (f : 'a -> 'b) : 'b t =
 let enter_module (env : 'a t) : 'a t =
   Segment.empty :: env
 
-let leave_module (env : 'a t) (prefix : Name.t -> 'a -> 'a)
-  (module_name : Name.t) : 'a t =
+let leave_module (env : 'a t) (module_name : Name.t) : 'a t =
   match env with
   | segment1 :: segment2 :: env ->
-    Segment.merge segment1 segment2 prefix module_name :: env
+    Segment.merge segment1 segment2 module_name :: env
   | _ -> failwith "You should have entered in at least one module."
 
 let open_module (env : 'a t) (module_name : Name.t list) : 'a t =

@@ -5,10 +5,7 @@
    (cases
     ((((name f) (typ_vars (A B)) (args ((x (Variable A)) (y (Variable B))))
        (typ ((Variable A))))
-      (Variable
-       (Known ((file_name tests/ex01.ml) (line 3))
-        ((file_name tests/ex01.ml) (line 3)))
-       ((path_name ((path ()) (base x))) (depth 0))))))))
+      (Variable ((path_name ((path ()) (base x))) (depth 0))))))))
  (Value
   (Known ((file_name tests/ex01.ml) (line 5))
    ((file_name tests/ex01.ml) (line 5)))
@@ -16,18 +13,5 @@
    (cases
     ((((name n) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Known ((file_name tests/ex01.ml) (line 5))
-        ((file_name tests/ex01.ml) (line 5)))
-       (Variable
-        (Known ((file_name tests/ex01.ml) (line 5))
-         ((file_name tests/ex01.ml) (line 5)))
-        ((path_name ((path ()) (base f))) (depth 0)))
-       ((Constant
-         (Known ((file_name tests/ex01.ml) (line 5))
-          ((file_name tests/ex01.ml) (line 5)))
-         (Int 12))
-        (Constant
-         (Known ((file_name tests/ex01.ml) (line 5))
-          ((file_name tests/ex01.ml) (line 5)))
-         (Int 3))))))))))
+      (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
+       ((Constant (Int 12)) (Constant (Int 3))))))))))

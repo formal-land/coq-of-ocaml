@@ -11,7 +11,7 @@ type t =
   [@@deriving sexp]
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
-let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t) (loc : Loc.t)
+let rec of_type_expr_new_typ_vars (env : FullEnvi.t) (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (typ : Types.type_expr)
   : t * Name.t Name.Map.t * Name.Set.t =
   match typ.desc with
@@ -45,7 +45,7 @@ let rec of_type_expr_new_typ_vars (env : 'a FullEnvi.t) (loc : Loc.t)
     Error.warn loc "Type not handled.";
     (Variable "unhandled_type", typ_vars, Name.Set.empty)
 
-and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t) (loc : Loc.t)
+and of_typs_exprs_new_free_vars (env : FullEnvi.t) (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (typs : Types.type_expr list)
   : t list * Name.t Name.Map.t * Name.Set.t =
   let (typs, typ_vars, new_typ_vars) =
@@ -55,8 +55,7 @@ and of_typs_exprs_new_free_vars (env : 'a FullEnvi.t) (loc : Loc.t)
       ([], typ_vars, Name.Set.empty) typs in
   (List.rev typs, typ_vars, new_typ_vars)
 
-let rec of_type_expr (env : 'a FullEnvi.t) (loc : Loc.t)
-  (typ : Types.type_expr) : t =
+let rec of_type_expr (env : FullEnvi.t) (loc : Loc.t) (typ : Types.type_expr) : t =
   match typ.desc with
   | Tvar (Some x) -> Variable x
   | Tarrow (_, typ_x, typ_y, _) ->

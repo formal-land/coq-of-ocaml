@@ -5,10 +5,7 @@
    (cases
     ((((name u) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base unit))) (depth 1)) ()))))
-      (Constructor
-       (Known ((file_name tests/ex04.ml) (line 3))
-        ((file_name tests/ex04.ml) (line 3)))
-       ((path_name ((path ()) (base tt))) (depth 1)) ()))))))
+      (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ()))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 5))
    ((file_name tests/ex04.ml) (line 5)))
@@ -18,10 +15,7 @@
        (typ
         ((Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Variable A))))))
-      (Constructor
-       (Known ((file_name tests/ex04.ml) (line 5))
-        ((file_name tests/ex04.ml) (line 5)))
-       ((path_name ((path ()) (base []))) (depth 1)) ()))))))
+      (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 7))
    ((file_name tests/ex04.ml) (line 7)))
@@ -31,18 +25,9 @@
        (typ
         ((Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-      (Constructor
-       (Known ((file_name tests/ex04.ml) (line 7))
-        ((file_name tests/ex04.ml) (line 7)))
-       ((path_name ((path ()) (base cons))) (depth 1))
-       ((Constant
-         (Known ((file_name tests/ex04.ml) (line 7))
-          ((file_name tests/ex04.ml) (line 7)))
-         (Int 1))
-        (Constructor
-         (Known ((file_name tests/ex04.ml) (line 7))
-          ((file_name tests/ex04.ml) (line 7)))
-         ((path_name ((path ()) (base []))) (depth 1)) ()))))))))
+      (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+       ((Constant (Int 1))
+        (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 9))
    ((file_name tests/ex04.ml) (line 9)))
@@ -52,50 +37,18 @@
        (typ
         ((Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-      (Constructor
-       (Known ((file_name tests/ex04.ml) (line 9))
-        ((file_name tests/ex04.ml) (line 9)))
-       ((path_name ((path ()) (base cons))) (depth 1))
-       ((Constant
-         (Known ((file_name tests/ex04.ml) (line 9))
-          ((file_name tests/ex04.ml) (line 9)))
-         (Int 1))
-        (Constructor
-         (Known ((file_name tests/ex04.ml) (line 9))
-          ((file_name tests/ex04.ml) (line 9)))
-         ((path_name ((path ()) (base cons))) (depth 1))
-         ((Constant
-           (Known ((file_name tests/ex04.ml) (line 9))
-            ((file_name tests/ex04.ml) (line 9)))
-           (Int 5))
-          (Constructor
-           (Known ((file_name tests/ex04.ml) (line 9))
-            ((file_name tests/ex04.ml) (line 9)))
-           ((path_name ((path ()) (base cons))) (depth 1))
-           ((Constant
-             (Known ((file_name tests/ex04.ml) (line 9))
-              ((file_name tests/ex04.ml) (line 9)))
-             (Int 7))
-            (Constructor
-             (Known ((file_name tests/ex04.ml) (line 9))
-              ((file_name tests/ex04.ml) (line 9)))
-             ((path_name ((path ()) (base cons))) (depth 1))
-             ((Constant
-               (Known ((file_name tests/ex04.ml) (line 9))
-                ((file_name tests/ex04.ml) (line 9)))
-               (Int 32))
-              (Constructor
-               (Known ((file_name tests/ex04.ml) (line 9))
-                ((file_name tests/ex04.ml) (line 9)))
-               ((path_name ((path ()) (base cons))) (depth 1))
-               ((Constant
-                 (Known ((file_name tests/ex04.ml) (line 9))
-                  ((file_name tests/ex04.ml) (line 9)))
-                 (Int 15))
-                (Constructor
-                 (Known ((file_name tests/ex04.ml) (line 9))
-                  ((file_name tests/ex04.ml) (line 9)))
-                 ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))))
+      (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+       ((Constant (Int 1))
+        (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+         ((Constant (Int 5))
+          (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+           ((Constant (Int 7))
+            (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+             ((Constant (Int 32))
+              (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+               ((Constant (Int 15))
+                (Constructor ((path_name ((path ()) (base []))) (depth 1))
+                 ()))))))))))))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 11))
    ((file_name tests/ex04.ml) (line 11)))
@@ -105,10 +58,7 @@
        (typ
         ((Apply ((path_name ((path ()) (base option))) (depth 1))
           ((Variable A))))))
-      (Constructor
-       (Known ((file_name tests/ex04.ml) (line 11))
-        ((file_name tests/ex04.ml) (line 11)))
-       ((path_name ((path ()) (base None))) (depth 1)) ()))))))
+      (Constructor ((path_name ((path ()) (base None))) (depth 1)) ()))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 13))
    ((file_name tests/ex04.ml) (line 13)))
@@ -118,14 +68,8 @@
        (typ
         ((Apply ((path_name ((path ()) (base option))) (depth 1))
           ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-      (Constructor
-       (Known ((file_name tests/ex04.ml) (line 13))
-        ((file_name tests/ex04.ml) (line 13)))
-       ((path_name ((path ()) (base Some))) (depth 1))
-       ((Constant
-         (Known ((file_name tests/ex04.ml) (line 13))
-          ((file_name tests/ex04.ml) (line 13)))
-         (Int 12)))))))))
+      (Constructor ((path_name ((path ()) (base Some))) (depth 1))
+       ((Constant (Int 12)))))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 15))
    ((file_name tests/ex04.ml) (line 15)))
@@ -133,10 +77,7 @@
    (cases
     ((((name c) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base ascii))) (depth 1)) ()))))
-      (Constant
-       (Known ((file_name tests/ex04.ml) (line 15))
-        ((file_name tests/ex04.ml) (line 15)))
-       (Char g)))))))
+      (Constant (Char g)))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 17))
    ((file_name tests/ex04.ml) (line 17)))
@@ -144,10 +85,7 @@
    (cases
     ((((name s1) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))
-      (Constant
-       (Known ((file_name tests/ex04.ml) (line 17))
-        ((file_name tests/ex04.ml) (line 17)))
-       (String bla)))))))
+      (Constant (String bla)))))))
  (Value
   (Known ((file_name tests/ex04.ml) (line 19))
    ((file_name tests/ex04.ml) (line 19)))
@@ -155,7 +93,4 @@
    (cases
     ((((name s2) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))
-      (Constant
-       (Known ((file_name tests/ex04.ml) (line 19))
-        ((file_name tests/ex04.ml) (line 19)))
-       (String "\""))))))))
+      (Constant (String "\""))))))))

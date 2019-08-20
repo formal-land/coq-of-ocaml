@@ -8,21 +8,9 @@
         ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
          (y (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Known ((file_name tests/ex22.ml) (line 3))
-        ((file_name tests/ex22.ml) (line 3)))
-       (Variable
-        (Known ((file_name tests/ex22.ml) (line 3))
-         ((file_name tests/ex22.ml) (line 3)))
-        ((path_name ((path (Z)) (base add))) (depth 1)))
-       ((Variable
-         (Known ((file_name tests/ex22.ml) (line 3))
-          ((file_name tests/ex22.ml) (line 3)))
-         ((path_name ((path ()) (base x))) (depth 0)))
-        (Variable
-         (Known ((file_name tests/ex22.ml) (line 3))
-          ((file_name tests/ex22.ml) (line 3)))
-         ((path_name ((path ()) (base y))) (depth 0))))))))))
+      (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
+       ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+        (Variable ((path_name ((path ()) (base y))) (depth 0))))))))))
  (Value
   (Known ((file_name tests/ex22.ml) (line 4))
    ((file_name tests/ex22.ml) (line 4)))
@@ -31,17 +19,8 @@
     ((((name op_tilde_tilde) (typ_vars ())
        (args ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Known ((file_name tests/ex22.ml) (line 4))
-        ((file_name tests/ex22.ml) (line 4)))
-       (Variable
-        (Known ((file_name tests/ex22.ml) (line 4))
-         ((file_name tests/ex22.ml) (line 4)))
-        ((path_name ((path (Z)) (base opp))) (depth 1)))
-       ((Variable
-         (Known ((file_name tests/ex22.ml) (line 4))
-          ((file_name tests/ex22.ml) (line 4)))
-         ((path_name ((path ()) (base x))) (depth 0))))))))))
+      (Apply (Variable ((path_name ((path (Z)) (base opp))) (depth 1)))
+       ((Variable ((path_name ((path ()) (base x))) (depth 0))))))))))
  (Value
   (Known ((file_name tests/ex22.ml) (line 6))
    ((file_name tests/ex22.ml) (line 6)))
@@ -50,24 +29,9 @@
     ((((name z) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Apply
-       (Known ((file_name tests/ex22.ml) (line 6))
-        ((file_name tests/ex22.ml) (line 6)))
        (Variable
-        (Known ((file_name tests/ex22.ml) (line 6))
-         ((file_name tests/ex22.ml) (line 6)))
         ((path_name ((path ()) (base op_plus_plus_plus))) (depth 0)))
        ((Apply
-         (Known ((file_name tests/ex22.ml) (line 6))
-          ((file_name tests/ex22.ml) (line 6)))
-         (Variable
-          (Known ((file_name tests/ex22.ml) (line 6))
-           ((file_name tests/ex22.ml) (line 6)))
-          ((path_name ((path ()) (base op_tilde_tilde))) (depth 0)))
-         ((Constant
-           (Known ((file_name tests/ex22.ml) (line 6))
-            ((file_name tests/ex22.ml) (line 6)))
-           (Int 12))))
-        (Constant
-         (Known ((file_name tests/ex22.ml) (line 6))
-          ((file_name tests/ex22.ml) (line 6)))
-         (Int 14))))))))))
+         (Variable ((path_name ((path ()) (base op_tilde_tilde))) (depth 0)))
+         ((Constant (Int 12))))
+        (Constant (Int 14))))))))))

@@ -9,10 +9,7 @@
      (cases
       ((((name b) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
-        (Constructor
-         (Known ((file_name tests/ex31.ml) (line 6))
-          ((file_name tests/ex31.ml) (line 6)))
-         ((path_name ((path ()) (base false))) (depth 2)) ()))))))
+        (Constructor ((path_name ((path ()) (base false))) (depth 2)) ()))))))
    (Value
     (Known ((file_name tests/ex31.ml) (line 7))
      ((file_name tests/ex31.ml) (line 7)))
@@ -20,10 +17,7 @@
      (cases
       ((((name n) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
-        (Constant
-         (Known ((file_name tests/ex31.ml) (line 7))
-          ((file_name tests/ex31.ml) (line 7)))
-         (Int 12)))))))))
+        (Constant (Int 12)))))))))
  (Value
   (Known ((file_name tests/ex31.ml) (line 10))
    ((file_name tests/ex31.ml) (line 10)))
@@ -31,18 +25,6 @@
    (cases
     ((((name n) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Known ((file_name tests/ex31.ml) (line 10))
-        ((file_name tests/ex31.ml) (line 10)))
-       (Variable
-        (Known ((file_name tests/ex31.ml) (line 10))
-         ((file_name tests/ex31.ml) (line 10)))
-        ((path_name ((path (Z)) (base add))) (depth 1)))
-       ((Variable
-         (Known ((file_name tests/ex31.ml) (line 10))
-          ((file_name tests/ex31.ml) (line 10)))
-         ((path_name ((path (M)) (base n))) (depth 0)))
-        (Constant
-         (Known ((file_name tests/ex31.ml) (line 10))
-          ((file_name tests/ex31.ml) (line 10)))
-         (Int 2))))))))))
+      (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
+       ((Variable ((path_name ((path (M)) (base n))) (depth 0)))
+        (Constant (Int 2))))))))))

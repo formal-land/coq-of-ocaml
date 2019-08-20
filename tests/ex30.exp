@@ -9,10 +9,7 @@
      (cases
       ((((name n) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
-        (Constant
-         (Known ((file_name tests/ex30.ml) (line 4))
-          ((file_name tests/ex30.ml) (line 4)))
-         (Int 12)))))))))
+        (Constant (Int 12)))))))))
  (Module
   (Known ((file_name tests/ex30.ml) (line 7))
    ((file_name tests/ex30.ml) (line 12)))
@@ -24,10 +21,7 @@
      (cases
       ((((name n) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
-        (Constructor
-         (Known ((file_name tests/ex30.ml) (line 8))
-          ((file_name tests/ex30.ml) (line 8)))
-         ((path_name ((path ()) (base true))) (depth 2)) ()))))))
+        (Constructor ((path_name ((path ()) (base true))) (depth 2)) ()))))))
    (Value
     (Known ((file_name tests/ex30.ml) (line 9))
      ((file_name tests/ex30.ml) (line 9)))
@@ -35,10 +29,7 @@
      (cases
       ((((name x) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
-        (Variable
-         (Known ((file_name tests/ex30.ml) (line 9))
-          ((file_name tests/ex30.ml) (line 9)))
-         ((path_name ((path ()) (base n))) (depth 0))))))))
+        (Variable ((path_name ((path ()) (base n))) (depth 0))))))))
    (Open
     (Known ((file_name tests/ex30.ml) (line 10))
      ((file_name tests/ex30.ml) (line 10)))
@@ -50,10 +41,7 @@
      (cases
       ((((name y) (typ_vars ()) (args ())
          (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
-        (Variable
-         (Known ((file_name tests/ex30.ml) (line 11))
-          ((file_name tests/ex30.ml) (line 11)))
-         ((path_name ((path (M)) (base n))) (depth 1))))))))))
+        (Variable ((path_name ((path (M)) (base n))) (depth 1))))))))))
  (Value
   (Known ((file_name tests/ex30.ml) (line 14))
    ((file_name tests/ex30.ml) (line 14)))
@@ -61,10 +49,7 @@
    (cases
     ((((name b) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Variable
-       (Known ((file_name tests/ex30.ml) (line 14))
-        ((file_name tests/ex30.ml) (line 14)))
-       ((path_name ((path (N)) (base n))) (depth 0))))))))
+      (Variable ((path_name ((path (N)) (base n))) (depth 0))))))))
  (Open
   (Known ((file_name tests/ex30.ml) (line 15))
    ((file_name tests/ex30.ml) (line 15)))
@@ -76,7 +61,4 @@
    (cases
     ((((name b') (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Variable
-       (Known ((file_name tests/ex30.ml) (line 16))
-        ((file_name tests/ex30.ml) (line 16)))
-       ((path_name ((path (N)) (base n))) (depth 0)))))))))
+      (Variable ((path_name ((path (N)) (base n))) (depth 0)))))))))

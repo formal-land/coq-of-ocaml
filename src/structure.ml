@@ -6,11 +6,11 @@ open SmartPrint
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
-  type 'a t = 'a Exp.t Exp.Definition.t
+  type t = Exp.t Exp.Definition.t
     [@@deriving sexp]
 
   (** Pretty-print a value definition to Coq. *)
-  let to_coq (value : 'a t) : SmartPrint.t =
+  let to_coq (value : t) : SmartPrint.t =
     let firt_case = ref true in
     separate (newline ^^ newline) (value.Exp.Definition.cases |> List.map (fun (header, e) ->
       nest (
@@ -37,19 +37,19 @@ module Value = struct
 end
 
 (** A structure. *)
-type 'a t =
-  | Value of Loc.t * 'a Value.t
+type t =
+  | Value of Loc.t * Value.t
   | TypeDefinition of Loc.t * TypeDefinition.t
   | Open of Loc.t * Open.t
-  | Module of Loc.t * Name.t * 'a t list
+  | Module of Loc.t * Name.t * t list
   | Signature of Loc.t * Name.t * Signature.t
   [@@deriving sexp]
 
 (** Import an OCaml structure. *)
-let rec of_structure (env : unit FullEnvi.t) (structure : structure)
-  : unit FullEnvi.t * Loc.t t list =
-  let of_structure_item (env : unit FullEnvi.t) (item : structure_item)
-    : unit FullEnvi.t * Loc.t t =
+let rec of_structure (env : FullEnvi.t) (structure : structure)
+  : FullEnvi.t * t list =
+  let of_structure_item (env : FullEnvi.t) (item : structure_item)
+    : FullEnvi.t * t =
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
     | Tstr_value (is_rec, cases) ->
@@ -111,8 +111,8 @@ let rec of_structure (env : unit FullEnvi.t) (structure : structure)
   (env, List.rev defs)
 
 (** Pretty-print a structure to Coq. *)
-let rec to_coq (defs : 'a t list) : SmartPrint.t =
-  let to_coq_one (def : 'a t) : SmartPrint.t =
+let rec to_coq (defs : t list) : SmartPrint.t =
+  let to_coq_one (def : t) : SmartPrint.t =
     match def with
     | Value (_, value) -> Value.to_coq value
     | TypeDefinition (_, typ_def) -> TypeDefinition.to_coq typ_def

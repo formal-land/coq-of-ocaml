@@ -32,9 +32,9 @@ let of_typ_definition (typ_def : TypeDefinition.t) : t list =
     [Typ name]
 
 
-let rec to_full_envi (interface : t) (env : unit FullEnvi.t) : unit FullEnvi.t =
+let rec to_full_envi (interface : t) (env : FullEnvi.t) : FullEnvi.t =
   match interface with
-  | Var (x, shape) -> FullEnvi.add_var [] x () env
+  | Var (x, shape) -> FullEnvi.add_var [] x env
   | Typ x -> FullEnvi.add_typ [] x env
   | Constructor x -> FullEnvi.add_constructor [] x env
   | Field x -> FullEnvi.add_field [] x env

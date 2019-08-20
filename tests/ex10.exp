@@ -21,42 +21,15 @@
             (Apply ((path_name ((path ()) (base t))) (depth 0))
              ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))))
          (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
-        (Match
-         (Known ((file_name tests/ex10.ml) (line 9))
-          ((file_name tests/ex10.ml) (line 11)))
-         (Variable
-          (Known ((file_name tests/ex10.ml) (line 9))
-           ((file_name tests/ex10.ml) (line 9)))
-          ((path_name ((path ()) (base l))) (depth 0)))
+        (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
          (((Constructor ((path_name ((path ()) (base Nil))) (depth 0)) ())
-           (Constant
-            (Known ((file_name tests/ex10.ml) (line 10))
-             ((file_name tests/ex10.ml) (line 10)))
-            (Int 0)))
+           (Constant (Int 0)))
           ((Constructor ((path_name ((path ()) (base Cons))) (depth 0))
             ((Variable x) (Variable xs)))
-           (Apply
-            (Known ((file_name tests/ex10.ml) (line 11))
-             ((file_name tests/ex10.ml) (line 11)))
-            (Variable
-             (Known ((file_name tests/ex10.ml) (line 11))
-              ((file_name tests/ex10.ml) (line 11)))
-             ((path_name ((path (Z)) (base add))) (depth 2)))
-            ((Variable
-              (Known ((file_name tests/ex10.ml) (line 11))
-               ((file_name tests/ex10.ml) (line 11)))
-              ((path_name ((path ()) (base x))) (depth 0)))
-             (Apply
-              (Known ((file_name tests/ex10.ml) (line 11))
-               ((file_name tests/ex10.ml) (line 11)))
-              (Variable
-               (Known ((file_name tests/ex10.ml) (line 11))
-                ((file_name tests/ex10.ml) (line 11)))
-               ((path_name ((path ()) (base sum))) (depth 0)))
-              ((Variable
-                (Known ((file_name tests/ex10.ml) (line 11))
-                 ((file_name tests/ex10.ml) (line 11)))
-                ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+           (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 2)))
+            ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+             (Apply (Variable ((path_name ((path ()) (base sum))) (depth 0)))
+              ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
    (Value
     (Known ((file_name tests/ex10.ml) (line 13))
      ((file_name tests/ex10.ml) (line 15)))
@@ -70,34 +43,16 @@
          (typ
           ((Apply ((path_name ((path ()) (base t))) (depth 0))
             ((Variable A))))))
-        (Match Unknown
-         (Variable Unknown ((path_name ((path ()) (base x))) (depth 0)))
+        (Match (Variable ((path_name ((path ()) (base x))) (depth 0)))
          (((Constructor ((path_name ((path ()) (base []))) (depth 2)) ())
-           (Constructor
-            (Known ((file_name tests/ex10.ml) (line 14))
-             ((file_name tests/ex10.ml) (line 14)))
-            ((path_name ((path ()) (base Nil))) (depth 0)) ()))
+           (Constructor ((path_name ((path ()) (base Nil))) (depth 0)) ()))
           ((Constructor ((path_name ((path ()) (base cons))) (depth 2))
             ((Variable x) (Variable xs)))
-           (Constructor
-            (Known ((file_name tests/ex10.ml) (line 15))
-             ((file_name tests/ex10.ml) (line 15)))
-            ((path_name ((path ()) (base Cons))) (depth 0))
-            ((Variable
-              (Known ((file_name tests/ex10.ml) (line 15))
-               ((file_name tests/ex10.ml) (line 15)))
-              ((path_name ((path ()) (base x))) (depth 0)))
+           (Constructor ((path_name ((path ()) (base Cons))) (depth 0))
+            ((Variable ((path_name ((path ()) (base x))) (depth 0)))
              (Apply
-              (Known ((file_name tests/ex10.ml) (line 15))
-               ((file_name tests/ex10.ml) (line 15)))
-              (Variable
-               (Known ((file_name tests/ex10.ml) (line 15))
-                ((file_name tests/ex10.ml) (line 15)))
-               ((path_name ((path ()) (base of_list))) (depth 0)))
-              ((Variable
-                (Known ((file_name tests/ex10.ml) (line 15))
-                 ((file_name tests/ex10.ml) (line 15)))
-                ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+              (Variable ((path_name ((path ()) (base of_list))) (depth 0)))
+              ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
    (Module
     (Known ((file_name tests/ex10.ml) (line 17))
      ((file_name tests/ex10.ml) (line 19)))
@@ -109,10 +64,7 @@
        (cases
         ((((name x) (typ_vars ()) (args ())
            (typ ((Apply ((path_name ((path ()) (base Z))) (depth 3)) ()))))
-          (Constant
-           (Known ((file_name tests/ex10.ml) (line 18))
-            ((file_name tests/ex10.ml) (line 18)))
-           (Int 12)))))))))))
+          (Constant (Int 12)))))))))))
  (Value
   (Known ((file_name tests/ex10.ml) (line 22))
    ((file_name tests/ex10.ml) (line 22)))
@@ -120,57 +72,23 @@
    (cases
     ((((name n) (typ_vars (A)) (args ((x (Variable A))))
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Match Unknown
-       (Variable Unknown ((path_name ((path ()) (base x))) (depth 0)))
+      (Match (Variable ((path_name ((path ()) (base x))) (depth 0)))
        ((Any
          (Apply
-          (Known ((file_name tests/ex10.ml) (line 22))
-           ((file_name tests/ex10.ml) (line 22)))
-          (Variable
-           (Known ((file_name tests/ex10.ml) (line 22))
-            ((file_name tests/ex10.ml) (line 22)))
-           ((path_name ((path (List2)) (base sum))) (depth 0)))
+          (Variable ((path_name ((path (List2)) (base sum))) (depth 0)))
           ((Apply
-            (Known ((file_name tests/ex10.ml) (line 22))
-             ((file_name tests/ex10.ml) (line 22)))
             (Variable
-             (Known ((file_name tests/ex10.ml) (line 22))
-              ((file_name tests/ex10.ml) (line 22)))
              ((path_name ((path (List2)) (base of_list))) (depth 0)))
-            ((Constructor
-              (Known ((file_name tests/ex10.ml) (line 22))
-               ((file_name tests/ex10.ml) (line 22)))
-              ((path_name ((path ()) (base cons))) (depth 1))
-              ((Constant
-                (Known ((file_name tests/ex10.ml) (line 22))
-                 ((file_name tests/ex10.ml) (line 22)))
-                (Int 5))
-               (Constructor
-                (Known ((file_name tests/ex10.ml) (line 22))
-                 ((file_name tests/ex10.ml) (line 22)))
-                ((path_name ((path ()) (base cons))) (depth 1))
-                ((Constant
-                  (Known ((file_name tests/ex10.ml) (line 22))
-                   ((file_name tests/ex10.ml) (line 22)))
-                  (Int 7))
-                 (Constructor
-                  (Known ((file_name tests/ex10.ml) (line 22))
-                   ((file_name tests/ex10.ml) (line 22)))
-                  ((path_name ((path ()) (base cons))) (depth 1))
-                  ((Constant
-                    (Known ((file_name tests/ex10.ml) (line 22))
-                     ((file_name tests/ex10.ml) (line 22)))
-                    (Int 6))
+            ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+              ((Constant (Int 5))
+               (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+                ((Constant (Int 7))
+                 (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+                  ((Constant (Int 6))
                    (Constructor
-                    (Known ((file_name tests/ex10.ml) (line 22))
-                     ((file_name tests/ex10.ml) (line 22)))
                     ((path_name ((path ()) (base cons))) (depth 1))
                     ((Variable
-                      (Known ((file_name tests/ex10.ml) (line 22))
-                       ((file_name tests/ex10.ml) (line 22)))
                       ((path_name ((path (List2 Inside)) (base x)))
                        (depth 0)))
                      (Constructor
-                      (Known ((file_name tests/ex10.ml) (line 22))
-                       ((file_name tests/ex10.ml) (line 22)))
                       ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))))))))))

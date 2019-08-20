@@ -9,73 +9,27 @@
           (Apply ((path_name ((path ()) (base list))) (depth 1))
            ((Variable A))))))
        (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Match
-       (Known ((file_name tests/ex29.ml) (line 4))
-        ((file_name tests/ex29.ml) (line 6)))
-       (Variable
-        (Known ((file_name tests/ex29.ml) (line 4))
-         ((file_name tests/ex29.ml) (line 4)))
-        ((path_name ((path ()) (base l))) (depth 0)))
+      (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
        (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-         (Constructor
-          (Known ((file_name tests/ex29.ml) (line 5))
-           ((file_name tests/ex29.ml) (line 5)))
-          ((path_name ((path ()) (base false))) (depth 1)) ()))
+         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))
         ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
           (Any (Variable l)))
-         (Apply
-          (Known ((file_name tests/ex29.ml) (line 6))
-           ((file_name tests/ex29.ml) (line 6)))
-          (Variable
-           (Known ((file_name tests/ex29.ml) (line 6))
-            ((file_name tests/ex29.ml) (line 6)))
-           ((path_name ((path ()) (base negb))) (depth 1)))
+         (Apply (Variable ((path_name ((path ()) (base negb))) (depth 1)))
           ((Apply
-            (Known ((file_name tests/ex29.ml) (line 6))
-             ((file_name tests/ex29.ml) (line 6)))
-            (Variable
-             (Known ((file_name tests/ex29.ml) (line 6))
-              ((file_name tests/ex29.ml) (line 6)))
-             ((path_name ((path ()) (base even_length))) (depth 0)))
-            ((Variable
-              (Known ((file_name tests/ex29.ml) (line 6))
-               ((file_name tests/ex29.ml) (line 6)))
-              ((path_name ((path ()) (base l))) (depth 0)))))))))))
+            (Variable ((path_name ((path ()) (base even_length))) (depth 0)))
+            ((Variable ((path_name ((path ()) (base l))) (depth 0)))))))))))
      (((name even_length) (typ_vars (A))
        (args
         ((l
           (Apply ((path_name ((path ()) (base list))) (depth 1))
            ((Variable A))))))
        (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Match
-       (Known ((file_name tests/ex29.ml) (line 9))
-        ((file_name tests/ex29.ml) (line 11)))
-       (Variable
-        (Known ((file_name tests/ex29.ml) (line 9))
-         ((file_name tests/ex29.ml) (line 9)))
-        ((path_name ((path ()) (base l))) (depth 0)))
+      (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
        (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-         (Constructor
-          (Known ((file_name tests/ex29.ml) (line 10))
-           ((file_name tests/ex29.ml) (line 10)))
-          ((path_name ((path ()) (base true))) (depth 1)) ()))
+         (Constructor ((path_name ((path ()) (base true))) (depth 1)) ()))
         ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
           (Any (Variable l)))
-         (Apply
-          (Known ((file_name tests/ex29.ml) (line 11))
-           ((file_name tests/ex29.ml) (line 11)))
-          (Variable
-           (Known ((file_name tests/ex29.ml) (line 11))
-            ((file_name tests/ex29.ml) (line 11)))
-           ((path_name ((path ()) (base negb))) (depth 1)))
+         (Apply (Variable ((path_name ((path ()) (base negb))) (depth 1)))
           ((Apply
-            (Known ((file_name tests/ex29.ml) (line 11))
-             ((file_name tests/ex29.ml) (line 11)))
-            (Variable
-             (Known ((file_name tests/ex29.ml) (line 11))
-              ((file_name tests/ex29.ml) (line 11)))
-             ((path_name ((path ()) (base odd_length))) (depth 0)))
-            ((Variable
-              (Known ((file_name tests/ex29.ml) (line 11))
-               ((file_name tests/ex29.ml) (line 11)))
-              ((path_name ((path ()) (base l))) (depth 0))))))))))))))))
+            (Variable ((path_name ((path ()) (base odd_length))) (depth 0)))
+            ((Variable ((path_name ((path ()) (base l))) (depth 0))))))))))))))))

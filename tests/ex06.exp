@@ -12,50 +12,17 @@
        (typ
         ((Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Variable B))))))
-      (Match
-       (Known ((file_name tests/ex06.ml) (line 4))
-        ((file_name tests/ex06.ml) (line 6)))
-       (Variable
-        (Known ((file_name tests/ex06.ml) (line 4))
-         ((file_name tests/ex06.ml) (line 4)))
-        ((path_name ((path ()) (base l))) (depth 0)))
+      (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
        (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-         (Constructor
-          (Known ((file_name tests/ex06.ml) (line 5))
-           ((file_name tests/ex06.ml) (line 5)))
-          ((path_name ((path ()) (base []))) (depth 1)) ()))
+         (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))
         ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
           ((Variable x) (Variable xs)))
-         (Constructor
-          (Known ((file_name tests/ex06.ml) (line 6))
-           ((file_name tests/ex06.ml) (line 6)))
-          ((path_name ((path ()) (base cons))) (depth 1))
-          ((Apply
-            (Known ((file_name tests/ex06.ml) (line 6))
-             ((file_name tests/ex06.ml) (line 6)))
-            (Variable
-             (Known ((file_name tests/ex06.ml) (line 6))
-              ((file_name tests/ex06.ml) (line 6)))
-             ((path_name ((path ()) (base f))) (depth 0)))
-            ((Variable
-              (Known ((file_name tests/ex06.ml) (line 6))
-               ((file_name tests/ex06.ml) (line 6)))
-              ((path_name ((path ()) (base x))) (depth 0)))))
-           (Apply
-            (Known ((file_name tests/ex06.ml) (line 6))
-             ((file_name tests/ex06.ml) (line 6)))
-            (Variable
-             (Known ((file_name tests/ex06.ml) (line 6))
-              ((file_name tests/ex06.ml) (line 6)))
-             ((path_name ((path ()) (base map))) (depth 0)))
-            ((Variable
-              (Known ((file_name tests/ex06.ml) (line 6))
-               ((file_name tests/ex06.ml) (line 6)))
-              ((path_name ((path ()) (base f))) (depth 0)))
-             (Variable
-              (Known ((file_name tests/ex06.ml) (line 6))
-               ((file_name tests/ex06.ml) (line 6)))
-              ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+         (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+          ((Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
+            ((Variable ((path_name ((path ()) (base x))) (depth 0)))))
+           (Apply (Variable ((path_name ((path ()) (base map))) (depth 0)))
+            ((Variable ((path_name ((path ()) (base f))) (depth 0)))
+             (Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
  (Value
   (Known ((file_name tests/ex06.ml) (line 8))
    ((file_name tests/ex06.ml) (line 11)))
@@ -69,50 +36,17 @@
           (Apply ((path_name ((path ()) (base list))) (depth 1))
            ((Variable B))))))
        (typ ((Variable A))))
-      (Match
-       (Known ((file_name tests/ex06.ml) (line 9))
-        ((file_name tests/ex06.ml) (line 11)))
-       (Variable
-        (Known ((file_name tests/ex06.ml) (line 9))
-         ((file_name tests/ex06.ml) (line 9)))
-        ((path_name ((path ()) (base l))) (depth 0)))
+      (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
        (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-         (Variable
-          (Known ((file_name tests/ex06.ml) (line 10))
-           ((file_name tests/ex06.ml) (line 10)))
-          ((path_name ((path ()) (base a))) (depth 0))))
+         (Variable ((path_name ((path ()) (base a))) (depth 0))))
         ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
           ((Variable x) (Variable xs)))
-         (Apply
-          (Known ((file_name tests/ex06.ml) (line 11))
-           ((file_name tests/ex06.ml) (line 11)))
-          (Variable
-           (Known ((file_name tests/ex06.ml) (line 11))
-            ((file_name tests/ex06.ml) (line 11)))
-           ((path_name ((path ()) (base fold))) (depth 0)))
-          ((Variable
-            (Known ((file_name tests/ex06.ml) (line 11))
-             ((file_name tests/ex06.ml) (line 11)))
-            ((path_name ((path ()) (base f))) (depth 0)))
-           (Apply
-            (Known ((file_name tests/ex06.ml) (line 11))
-             ((file_name tests/ex06.ml) (line 11)))
-            (Variable
-             (Known ((file_name tests/ex06.ml) (line 11))
-              ((file_name tests/ex06.ml) (line 11)))
-             ((path_name ((path ()) (base f))) (depth 0)))
-            ((Variable
-              (Known ((file_name tests/ex06.ml) (line 11))
-               ((file_name tests/ex06.ml) (line 11)))
-              ((path_name ((path ()) (base a))) (depth 0)))
-             (Variable
-              (Known ((file_name tests/ex06.ml) (line 11))
-               ((file_name tests/ex06.ml) (line 11)))
-              ((path_name ((path ()) (base x))) (depth 0)))))
-           (Variable
-            (Known ((file_name tests/ex06.ml) (line 11))
-             ((file_name tests/ex06.ml) (line 11)))
-            ((path_name ((path ()) (base xs))) (depth 0)))))))))))))
+         (Apply (Variable ((path_name ((path ()) (base fold))) (depth 0)))
+          ((Variable ((path_name ((path ()) (base f))) (depth 0)))
+           (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
+            ((Variable ((path_name ((path ()) (base a))) (depth 0)))
+             (Variable ((path_name ((path ()) (base x))) (depth 0)))))
+           (Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))
  (Value
   (Known ((file_name tests/ex06.ml) (line 13))
    ((file_name tests/ex06.ml) (line 13)))
@@ -122,42 +56,15 @@
        (typ
         ((Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-      (Constructor
-       (Known ((file_name tests/ex06.ml) (line 13))
-        ((file_name tests/ex06.ml) (line 13)))
-       ((path_name ((path ()) (base cons))) (depth 1))
-       ((Constant
-         (Known ((file_name tests/ex06.ml) (line 13))
-          ((file_name tests/ex06.ml) (line 13)))
-         (Int 5))
-        (Constructor
-         (Known ((file_name tests/ex06.ml) (line 13))
-          ((file_name tests/ex06.ml) (line 13)))
-         ((path_name ((path ()) (base cons))) (depth 1))
-         ((Constant
-           (Known ((file_name tests/ex06.ml) (line 13))
-            ((file_name tests/ex06.ml) (line 13)))
-           (Int 6))
-          (Constructor
-           (Known ((file_name tests/ex06.ml) (line 13))
-            ((file_name tests/ex06.ml) (line 13)))
-           ((path_name ((path ()) (base cons))) (depth 1))
-           ((Constant
-             (Known ((file_name tests/ex06.ml) (line 13))
-              ((file_name tests/ex06.ml) (line 13)))
-             (Int 7))
-            (Constructor
-             (Known ((file_name tests/ex06.ml) (line 13))
-              ((file_name tests/ex06.ml) (line 13)))
-             ((path_name ((path ()) (base cons))) (depth 1))
-             ((Constant
-               (Known ((file_name tests/ex06.ml) (line 13))
-                ((file_name tests/ex06.ml) (line 13)))
-               (Int 2))
-              (Constructor
-               (Known ((file_name tests/ex06.ml) (line 13))
-                ((file_name tests/ex06.ml) (line 13)))
-               ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))
+      (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+       ((Constant (Int 5))
+        (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+         ((Constant (Int 6))
+          (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+           ((Constant (Int 7))
+            (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+             ((Constant (Int 2))
+              (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))
  (Value
   (Known ((file_name tests/ex06.ml) (line 15))
    ((file_name tests/ex06.ml) (line 16)))
@@ -173,52 +80,13 @@
            (Arrow (Variable A)
             (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Known ((file_name tests/ex06.ml) (line 16))
-        ((file_name tests/ex06.ml) (line 16)))
-       (Variable
-        (Known ((file_name tests/ex06.ml) (line 16))
-         ((file_name tests/ex06.ml) (line 16)))
-        ((path_name ((path ()) (base fold))) (depth 0)))
-       ((Function
-         (Known ((file_name tests/ex06.ml) (line 16))
-          ((file_name tests/ex06.ml) (line 16)))
-         x
-         (Function
-          (Known ((file_name tests/ex06.ml) (line 16))
-           ((file_name tests/ex06.ml) (line 16)))
-          y
-          (Apply
-           (Known ((file_name tests/ex06.ml) (line 16))
-            ((file_name tests/ex06.ml) (line 16)))
-           (Variable
-            (Known ((file_name tests/ex06.ml) (line 16))
-             ((file_name tests/ex06.ml) (line 16)))
-            ((path_name ((path ()) (base plus))) (depth 0)))
-           ((Variable
-             (Known ((file_name tests/ex06.ml) (line 16))
-              ((file_name tests/ex06.ml) (line 16)))
-             ((path_name ((path ()) (base x))) (depth 0)))
-            (Variable
-             (Known ((file_name tests/ex06.ml) (line 16))
-              ((file_name tests/ex06.ml) (line 16)))
-             ((path_name ((path ()) (base y))) (depth 0)))))))
-        (Constant
-         (Known ((file_name tests/ex06.ml) (line 16))
-          ((file_name tests/ex06.ml) (line 16)))
-         (Int 0))
-        (Apply
-         (Known ((file_name tests/ex06.ml) (line 16))
-          ((file_name tests/ex06.ml) (line 16)))
-         (Variable
-          (Known ((file_name tests/ex06.ml) (line 16))
-           ((file_name tests/ex06.ml) (line 16)))
-          ((path_name ((path ()) (base map))) (depth 0)))
-         ((Variable
-           (Known ((file_name tests/ex06.ml) (line 16))
-            ((file_name tests/ex06.ml) (line 16)))
-           ((path_name ((path ()) (base incr))) (depth 0)))
-          (Variable
-           (Known ((file_name tests/ex06.ml) (line 16))
-            ((file_name tests/ex06.ml) (line 16)))
-           ((path_name ((path ()) (base l))) (depth 0)))))))))))))
+      (Apply (Variable ((path_name ((path ()) (base fold))) (depth 0)))
+       ((Function x
+         (Function y
+          (Apply (Variable ((path_name ((path ()) (base plus))) (depth 0)))
+           ((Variable ((path_name ((path ()) (base x))) (depth 0)))
+            (Variable ((path_name ((path ()) (base y))) (depth 0)))))))
+        (Constant (Int 0))
+        (Apply (Variable ((path_name ((path ()) (base map))) (depth 0)))
+         ((Variable ((path_name ((path ()) (base incr))) (depth 0)))
+          (Variable ((path_name ((path ()) (base l))) (depth 0)))))))))))))

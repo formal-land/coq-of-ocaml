@@ -6,35 +6,13 @@
     ((((name n) (typ_vars ()) (args ())
        (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
       (Match
-       (Known ((file_name tests/ex05.ml) (line 3))
-        ((file_name tests/ex05.ml) (line 6)))
        (Tuple
-        (Known ((file_name tests/ex05.ml) (line 3))
-         ((file_name tests/ex05.ml) (line 3)))
-        ((Constructor
-          (Known ((file_name tests/ex05.ml) (line 3))
-           ((file_name tests/ex05.ml) (line 3)))
-          ((path_name ((path ()) (base cons))) (depth 1))
-          ((Constant
-            (Known ((file_name tests/ex05.ml) (line 3))
-             ((file_name tests/ex05.ml) (line 3)))
-            (Int 1))
-           (Constructor
-            (Known ((file_name tests/ex05.ml) (line 3))
-             ((file_name tests/ex05.ml) (line 3)))
-            ((path_name ((path ()) (base cons))) (depth 1))
-            ((Constant
-              (Known ((file_name tests/ex05.ml) (line 3))
-               ((file_name tests/ex05.ml) (line 3)))
-              (Int 2))
-             (Constructor
-              (Known ((file_name tests/ex05.ml) (line 3))
-               ((file_name tests/ex05.ml) (line 3)))
-              ((path_name ((path ()) (base []))) (depth 1)) ())))))
-         (Constructor
-          (Known ((file_name tests/ex05.ml) (line 3))
-           ((file_name tests/ex05.ml) (line 3)))
-          ((path_name ((path ()) (base false))) (depth 1)) ())))
+        ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+          ((Constant (Int 1))
+           (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+            ((Constant (Int 2))
+             (Constructor ((path_name ((path ()) (base []))) (depth 1)) ())))))
+         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ())))
        (((Tuple
           ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
             ((Variable x)
@@ -42,10 +20,7 @@
               (Any
                (Constructor ((path_name ((path ()) (base []))) (depth 1)) ())))))
            (Constructor ((path_name ((path ()) (base true))) (depth 1)) ())))
-         (Variable
-          (Known ((file_name tests/ex05.ml) (line 4))
-           ((file_name tests/ex05.ml) (line 4)))
-          ((path_name ((path ()) (base x))) (depth 0))))
+         (Variable ((path_name ((path ()) (base x))) (depth 0))))
         ((Tuple
           ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
             (Any
@@ -53,12 +28,5 @@
               ((Variable y)
                (Constructor ((path_name ((path ()) (base []))) (depth 1)) ())))))
            (Constructor ((path_name ((path ()) (base false))) (depth 1)) ())))
-         (Variable
-          (Known ((file_name tests/ex05.ml) (line 5))
-           ((file_name tests/ex05.ml) (line 5)))
-          ((path_name ((path ()) (base y))) (depth 0))))
-        (Any
-         (Constant
-          (Known ((file_name tests/ex05.ml) (line 6))
-           ((file_name tests/ex05.ml) (line 6)))
-          (Int 0)))))))))))
+         (Variable ((path_name ((path ()) (base y))) (depth 0))))
+        (Any (Constant (Int 0)))))))))))
