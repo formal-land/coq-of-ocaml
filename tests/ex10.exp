@@ -1,10 +1,11 @@
 ((Module List2
   ((TypeDefinition
     (Inductive t (a)
-     ((Nil ())
-      (Cons
-       ((Variable a)
-        (Apply ((path_name ((path ()) (base t))) (depth 0)) ((Variable a))))))))
+     (NonGadt
+      ((Nil ())
+       (Cons
+        ((Variable a)
+         (Apply ((path_name ((path ()) (base t))) (depth 0)) ((Variable a)))))))))
    (Value
     ((is_rec (New true))
      (cases
