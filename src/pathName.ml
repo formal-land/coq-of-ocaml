@@ -142,14 +142,14 @@ let of_name (path : Name.t list) (base : Name.t) : t =
   { path = path; base = base }
 
 (** Import an OCaml [Longident.t]. *)
-let of_longident (longident : Longident.t) : t =
-  match List.rev (Longident.flatten longident) with
+let of_long_ident (long_ident : Longident.t) : t =
+  match List.rev (Longident.flatten long_ident) with
   | [] -> failwith "Longident.t with an empty list not expected."
   | x :: xs -> convert (of_name (List.rev xs) x)
 
 (** Import an OCaml location. *)
 let of_loc (loc : Longident.t loc) : t =
-  of_longident loc.txt
+  of_long_ident loc.txt
 
 (** Import an OCaml [Path.t]. *)
 let of_path (loc : Loc.t) (p : Path.t) : t =

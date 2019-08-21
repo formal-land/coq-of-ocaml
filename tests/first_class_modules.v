@@ -5,6 +5,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Record SET (elt t : Type) := {
+  elt := elt;
+  t := t;
   empty : t;
   is_empty : t -> bool;
   mem : elt -> t -> bool;
@@ -67,3 +69,12 @@ Arguments Bool_key {position} _.
 Arguments Pair_key {a b position} _ _ _.
 
 Definition comparable_ty (a : Type) := comparable_struct a comb.
+
+Record Boxed_set (elt' : Type) := {
+  elt' := elt';
+  elt_ty : comparable_ty elt';
+  OPS : {t : Type & SET elt' t};
+  OPS' : {existential_types : Type * Type & let (t, elt) := existential_types in SET elt t};
+  OPS'' : {_ : unit & SET elt' (list string)};
+  size : Z;
+}.

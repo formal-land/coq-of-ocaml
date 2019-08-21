@@ -1,6 +1,7 @@
 ((Signature SET
   ((items
-    ((Value empty () (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))
+    ((Typ elt) (Typ t)
+     (Value empty () (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))
      (Value is_empty ()
       (Arrow (Apply ((path_name ((path ()) (base t))) (depth 0)) ())
        (Apply ((path_name ((path ()) (base bool))) (depth 1)) ())))
@@ -193,4 +194,25 @@
  (TypeDefinition
   (Synonym comparable_ty (a)
    (Apply ((path_name ((path ()) (base comparable_struct))) (depth 0))
-    ((Variable a) (Apply ((path_name ((path ()) (base comb))) (depth 0)) ()))))))
+    ((Variable a) (Apply ((path_name ((path ()) (base comb))) (depth 0)) ())))))
+ (Signature Boxed_set
+  ((items
+    ((Typ elt')
+     (Value elt_ty ()
+      (Apply ((path_name ((path ()) (base comparable_ty))) (depth 0))
+       ((Apply ((path_name ((path ()) (base elt'))) (depth 0)) ()))))
+     (Module OPS
+      (With ((path_name ((path ()) (base SET))) (depth 0))
+       ((Defined (Apply ((path_name ((path ()) (base elt'))) (depth 0)) ()))
+        (Existential t))))
+     (Module OPS'
+      (With ((path_name ((path ()) (base SET))) (depth 0))
+       ((Existential elt) (Existential t))))
+     (Module OPS''
+      (With ((path_name ((path ()) (base SET))) (depth 0))
+       ((Defined (Apply ((path_name ((path ()) (base elt'))) (depth 0)) ()))
+        (Defined
+         (Apply ((path_name ((path ()) (base list))) (depth 1))
+          ((Apply ((path_name ((path ()) (base string))) (depth 1)) ())))))))
+     (Value size () (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+   (typ_params (elt')))))

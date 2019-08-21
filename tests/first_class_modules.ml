@@ -52,3 +52,13 @@ type (_, _) comparable_struct =
       type_annot option -> (('a, 'b) pair, comb) comparable_struct
 
 type 'a comparable_ty = ('a, comb) comparable_struct
+
+module type Boxed_set = sig
+  (* Rename as [elt] *)
+  type elt'
+  val elt_ty : elt' comparable_ty
+  module OPS : SET with type elt = elt'
+  module OPS' : SET
+  module OPS'' : SET with type elt = elt' and type t = string list
+  val size : int
+end
