@@ -2,6 +2,7 @@ open Typedtree
 open Sexplib.Std
 open SmartPrint
 
+(** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
   type t =
     | Gadt of (Name.t * Name.t list * Type.t list * Type.t) list
@@ -29,8 +30,12 @@ module Constructors = struct
         match res_typ with
         | None -> defined_typ
         | Some res_typ -> res_typ in
+      (* We need to compute the free variables to add `forall` annotations in Coq as
+         polymorphic variables cannot be infered. *)
       let free_typ_vars = Name.Set.elements (Type.typ_args_of_typs (res_typ_or_defined_typ :: typs)) in
       let constructors = of_ocaml env defined_typ cases in
+      (* In case of types mixing GADT and non-GADT constructors, we automatically lift
+         to a GADT type. *)
       match (res_typ, constructors) with
       | (None, NonGadt constructors) ->
         NonGadt ((name, typs) :: constructors)
@@ -68,6 +73,8 @@ let of_ocaml (env : FullEnvi.t) (loc : Loc.t) (typs : type_declaration list) : t
       List.map (Type.of_type_expr_variable loc) typ_type.type_params in
     (match typ_type.type_kind with
     | Type_variant cases ->
+      (* The `defined_typ` is useful to give a default return type for non-GADT
+         constructors in GADT types. *)
       let defined_typ = Type.Apply (
         Envi.bound_name loc (PathName.of_name [] name) env.FullEnvi.typs,
         List.map (fun typ_arg -> Type.Variable typ_arg) typ_args
