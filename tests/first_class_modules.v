@@ -35,3 +35,35 @@ Record SET (elt t : Type) := {
   find_last_opt : (elt -> bool) -> t -> option elt;
   of_list : (list elt) -> t;
 }.
+
+Inductive type_annot : Type :=
+| Type_annot : string -> type_annot.
+
+Inductive field_annot : Type :=
+| Field_annot : string -> field_annot.
+
+Definition pair a b := a * b.
+
+Inductive comb : Type :=
+| Comb : comb.
+
+Inductive leaf : Type :=
+| Leaf : leaf.
+
+Inductive comparable_struct : forall (_ _ : Type), Type :=
+| Int_key : forall (position : Type), (option type_annot) ->
+  comparable_struct Z position
+| String_key : forall (position : Type), (option type_annot) ->
+  comparable_struct string position
+| Bool_key : forall (position : Type), (option type_annot) ->
+  comparable_struct bool position
+| Pair_key : forall (a b position : Type),
+  ((comparable_struct a leaf) * (option field_annot)) ->
+  ((comparable_struct b position) * (option field_annot)) -> (option type_annot)
+  -> comparable_struct (pair a b) comb.
+Arguments Int_key {position} _.
+Arguments String_key {position} _.
+Arguments Bool_key {position} _.
+Arguments Pair_key {a b position} _ _ _.
+
+Definition comparable_ty a := comparable_struct a comb.

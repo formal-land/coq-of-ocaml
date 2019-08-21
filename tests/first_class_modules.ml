@@ -33,3 +33,22 @@ module type SET = sig
   val find_last_opt: (elt -> bool) -> t -> elt option
   val of_list: elt list -> t
 end
+
+type type_annot = Type_annot of string
+type field_annot = Field_annot of string
+
+type ('a, 'b) pair = 'a * 'b
+
+type comb = Comb
+type leaf = Leaf
+
+type (_, _) comparable_struct =
+  | Int_key : type_annot option -> (int, 'position) comparable_struct
+  | String_key : type_annot option -> (string, 'position) comparable_struct
+  | Bool_key : type_annot option -> (bool, 'position) comparable_struct
+  | Pair_key :
+      (('a, leaf) comparable_struct * field_annot option) *
+      (('b, 'position) comparable_struct * field_annot option) *
+      type_annot option -> (('a, 'b) pair, comb) comparable_struct
+
+type 'a comparable_ty = ('a, comb) comparable_struct
