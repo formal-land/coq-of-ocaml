@@ -20,15 +20,15 @@ let of_signature (env : FullEnvi.t) (signature : signature) : t =
   let of_signature_item (env : FullEnvi.t) (signature_item : signature_item) : FullEnvi.t * item_or_typ =
     let loc = Loc.of_location signature_item.sig_loc in
     match signature_item.sig_desc with
-    | Tsig_attribute _ -> Error.raise loc "Structure item `attribute` not handled."
-    | Tsig_class _ -> Error.raise loc "Structure item `class` not handled."
-    | Tsig_class_type _ -> Error.raise loc "Structure item `class_type` not handled."
-    | Tsig_exception _ -> Error.raise loc "Structure item `exception` not handled."
-    | Tsig_include _ -> Error.raise loc "Structure item `include` not handled."
-    | Tsig_modtype _ -> Error.raise loc "Structure item `modtype` not handled."
-    | Tsig_module _ -> Error.raise loc "Structure item `module` not handled."
-    | Tsig_open _ -> Error.raise loc "Structure item `open` not handled."
-    | Tsig_recmodule _ -> Error.raise loc "Structure item `recmodule` not handled."
+    | Tsig_attribute _ -> Error.raise loc "Signature item `attribute` not handled."
+    | Tsig_class _ -> Error.raise loc "Signature item `class` not handled."
+    | Tsig_class_type _ -> Error.raise loc "Signature item `class_type` not handled."
+    | Tsig_exception _ -> Error.raise loc "Signature item `exception` not handled."
+    | Tsig_include _ -> Error.raise loc "Signature item `include` not handled."
+    | Tsig_modtype _ -> Error.raise loc "Signature item `modtype` not handled."
+    | Tsig_module _ -> Error.raise loc "Signature item `module` not handled."
+    | Tsig_open _ -> Error.raise loc "Signature item `open` not handled."
+    | Tsig_recmodule _ -> Error.raise loc "Signature item `recmodule` not handled."
     | Tsig_type (_, [{ typ_id; typ_params = [] }]) ->
       let name = Name.of_ident typ_id in
       let env = FullEnvi.add_typ [] name env in
@@ -36,7 +36,7 @@ let of_signature (env : FullEnvi.t) (signature : signature) : t =
     | Tsig_type (_, [{ typ_params = _ :: _ }]) ->
       Error.raise loc "Polymorphic types not handled in signatures."
     | Tsig_type (_, _) -> Error.raise loc "Mutual type definitions in signatures not handled."
-    | Tsig_typext _ -> Error.raise loc "Structure item `typext` not handled."
+    | Tsig_typext _ -> Error.raise loc "Signature item `typext` not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
       let env = FullEnvi.add_var [] name env in
