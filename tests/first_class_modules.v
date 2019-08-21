@@ -4,39 +4,41 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Record SET (elt t : Type) := {
-  elt := elt;
-  t := t;
-  empty : t;
-  is_empty : t -> bool;
-  mem : elt -> t -> bool;
-  add : elt -> t -> t;
-  singleton : elt -> t;
-  remove : elt -> t -> t;
-  union : t -> t -> t;
-  inter : t -> t -> t;
-  diff : t -> t -> t;
-  compare : t -> t -> Z;
-  equal : t -> t -> bool;
-  subset : t -> t -> bool;
-  iter : (elt -> unit) -> t -> unit;
-  map : (elt -> elt) -> t -> t;
-  fold : forall {a : Type}, (elt -> a -> a) -> t -> a -> a;
-  for_all : (elt -> bool) -> t -> bool;
-  _exists : (elt -> bool) -> t -> bool;
-  filter : (elt -> bool) -> t -> t;
-  partition : (elt -> bool) -> t -> t * t;
-  cardinal : t -> Z;
-  elements : t -> list elt;
-  min_elt_opt : t -> option elt;
-  max_elt_opt : t -> option elt;
-  choose_opt : t -> option elt;
-  split : elt -> t -> t * bool * t;
-  find_opt : elt -> t -> option elt;
-  find_first_opt : (elt -> bool) -> t -> option elt;
-  find_last_opt : (elt -> bool) -> t -> option elt;
-  of_list : (list elt) -> t;
-}.
+Module S.
+  Record SET (elt t : Type) := {
+    elt := elt;
+    t := t;
+    empty : t;
+    is_empty : t -> bool;
+    mem : elt -> t -> bool;
+    add : elt -> t -> t;
+    singleton : elt -> t;
+    remove : elt -> t -> t;
+    union : t -> t -> t;
+    inter : t -> t -> t;
+    diff : t -> t -> t;
+    compare : t -> t -> Z;
+    equal : t -> t -> bool;
+    subset : t -> t -> bool;
+    iter : (elt -> unit) -> t -> unit;
+    map : (elt -> elt) -> t -> t;
+    fold : forall {a : Type}, (elt -> a -> a) -> t -> a -> a;
+    for_all : (elt -> bool) -> t -> bool;
+    _exists : (elt -> bool) -> t -> bool;
+    filter : (elt -> bool) -> t -> t;
+    partition : (elt -> bool) -> t -> t * t;
+    cardinal : t -> Z;
+    elements : t -> list elt;
+    min_elt_opt : t -> option elt;
+    max_elt_opt : t -> option elt;
+    choose_opt : t -> option elt;
+    split : elt -> t -> t * bool * t;
+    find_opt : elt -> t -> option elt;
+    find_first_opt : (elt -> bool) -> t -> option elt;
+    find_last_opt : (elt -> bool) -> t -> option elt;
+    of_list : (list elt) -> t;
+  }.
+End S.
 
 Inductive type_annot : Type :=
 | Type_annot : string -> type_annot.
@@ -70,11 +72,11 @@ Arguments Pair_key {a b position} _ _ _.
 
 Definition comparable_ty (a : Type) := comparable_struct a comb.
 
-Record Boxed_set (elt' : Type) := {
-  elt' := elt';
-  elt_ty : comparable_ty elt';
-  OPS : {t : Type & SET elt' t};
-  OPS' : {existential_types : Type * Type & let (t, elt) := existential_types in SET elt t};
-  OPS'' : {_ : unit & SET elt' (list string)};
+Record Boxed_set (elt : Type) := {
+  elt := elt;
+  elt_ty : comparable_ty elt;
+  OPS : {t : Type & S.SET elt t};
+  OPS' : {existential_types : Type * Type & let (t, elt) := existential_types in S.SET elt t};
+  OPS'' : {_ : unit & S.SET elt (list string)};
   size : Z;
 }.
