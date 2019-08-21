@@ -42,7 +42,7 @@ Inductive type_annot : Type :=
 Inductive field_annot : Type :=
 | Field_annot : string -> field_annot.
 
-Definition pair a b := a * b.
+Definition pair (a b : Type) := a * b.
 
 Inductive comb : Type :=
 | Comb : comb.
@@ -66,4 +66,4 @@ Arguments String_key {position} _.
 Arguments Bool_key {position} _.
 Arguments Pair_key {a b position} _ _ _.
 
-Definition comparable_ty a := comparable_struct a comb.
+Definition comparable_ty (a : Type) := comparable_struct a comb.
