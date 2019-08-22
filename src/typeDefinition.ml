@@ -176,8 +176,11 @@ let to_coq (def : t) : SmartPrint.t =
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
-      separate space (List.map Name.to_coq typ_args) ^^ !^ ":=" ^^
-      Type.to_coq false value ^-^ !^ ".")
+      (match typ_args with
+      | [] -> empty
+      | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")) ^^
+      !^ ":=" ^^ Type.to_coq false value ^-^ !^ "."
+    )
   | Abstract (name, typ_args) ->
     nest (
       !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^

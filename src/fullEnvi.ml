@@ -1,22 +1,20 @@
 open SmartPrint
 
 type t = {
-  vars : unit Envi.t;
-  typs : unit Envi.t;
   constructors : unit Envi.t;
-  fields : unit Envi.t }
+  fields : unit Envi.t;
+  first_class_module : unit Envi.t;
+  signatures : Name.t list Envi.t;
+  typs : unit Envi.t;
+  vars : unit Envi.t }
 
 let empty : t = {
-  vars = Envi.empty;
-  typs = Envi.empty;
   constructors = Envi.empty;
-  fields = Envi.empty }
-
-let add_var (path : Name.t list) (base : Name.t) (env : t) : t =
-  { env with vars = Envi.add (PathName.of_name path base) () env.vars }
-
-let add_typ (path : Name.t list) (base : Name.t) (env : t) : t =
-  { env with typs = Envi.add (PathName.of_name path base) () env.typs }
+  fields = Envi.empty;
+  first_class_module = Envi.empty;
+  signatures = Envi.empty;
+  typs = Envi.empty;
+  vars = Envi.empty }
 
 let add_constructor (path : Name.t list) (base : Name.t) (env : t) : t =
   { env with constructors =
@@ -26,20 +24,39 @@ let add_field (path : Name.t list) (base : Name.t) (env : t) : t =
   { env with fields =
     Envi.add (PathName.of_name path base) () env.fields }
 
+let add_first_class_module  (path : Name.t list) (base : Name.t) (env :t) : t =
+  { env with first_class_module =
+    Envi.add (PathName.of_name path base) () env.first_class_module }
+
+let add_signature (path : Name.t list) (base : Name.t) (typ_params : Name.t list) (env : t) : t =
+  { env with signatures = Envi.add (PathName.of_name path base) typ_params env.signatures }
+
+let add_typ (path : Name.t list) (base : Name.t) (env : t) : t =
+  { env with typs = Envi.add (PathName.of_name path base) () env.typs }
+
+let add_var (path : Name.t list) (base : Name.t) (env : t) : t =
+  { env with vars = Envi.add (PathName.of_name path base) () env.vars }
+
 let enter_module (env : t) : t =
-  { vars = Envi.enter_module env.vars;
+  { constructors = Envi.enter_module env.constructors;
+    fields = Envi.enter_module env.fields;
+    first_class_module = Envi.enter_module env.first_class_module;
+    signatures = Envi.enter_module env.signatures;
     typs = Envi.enter_module env.typs;
-    constructors = Envi.enter_module env.constructors;
-    fields = Envi.enter_module env.fields }
+    vars = Envi.enter_module env.vars }
 
 let leave_module (module_name : Name.t) (env : t) : t =
-  { vars = Envi.leave_module env.vars module_name;
+  { constructors = Envi.leave_module env.constructors module_name;
+    fields = Envi.leave_module env.fields module_name;
+    first_class_module = Envi.leave_module env.first_class_module module_name;
+    signatures = Envi.leave_module env.signatures module_name;
     typs = Envi.leave_module env.typs module_name;
-    constructors = Envi.leave_module env.constructors module_name;
-    fields = Envi.leave_module env.fields module_name }
+    vars = Envi.leave_module env.vars module_name }
 
 let open_module (module_name : Name.t list) (env : t) : t =
-  { vars = Envi.open_module env.vars module_name;
+  { constructors = Envi.open_module env.constructors module_name;
+    fields = Envi.open_module env.fields module_name;
+    first_class_module = Envi.open_module env.first_class_module module_name;
+    signatures = Envi.open_module env.signatures module_name;
     typs = Envi.open_module env.typs module_name;
-    constructors = Envi.open_module env.constructors module_name;
-    fields = Envi.open_module env.fields module_name }
+    vars = Envi.open_module env.vars module_name }

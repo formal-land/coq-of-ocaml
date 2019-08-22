@@ -85,7 +85,10 @@ let rec of_structure (env : FullEnvi.t) (structure : structure)
       let name = Name.of_ident mtd_id in
       begin
         match mty_desc with
-        | Tmty_signature signature -> (env, Signature (name, Signature.of_signature env signature))
+        | Tmty_signature signature ->
+          let signature = Signature.of_signature env signature in
+          let env = FullEnvi.add_signature [] name signature.typ_params env in
+          (env, Signature (name, signature))
         | _ -> Error.raise loc "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
