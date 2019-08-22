@@ -79,6 +79,7 @@ Record Boxed_set (elt : Type) := {
   OPS' : {ex_typs : Type * Type & let '(elt, t) := ex_typs in S.SET elt t};
   OPS'' : {_ : unit & S.SET elt (list string)};
   size : Z;
+  table (a : Type) := list a;
 }.
 
 Record Triple (a b c : Type) := {
