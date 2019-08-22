@@ -78,13 +78,13 @@ let to_coq (module_typ : t) : SmartPrint.t =
       | [] -> !^ "_" ^^ !^ ":" ^^ !^ "unit" ^^ !^ "&"
       | [existential_name] -> Name.to_coq existential_name ^^ !^ ":" ^^ !^ "Type" ^^ !^ "&"
       | _ ->
-        !^ "existential_types" ^^ !^ ":" ^^
+        !^ "ex_typs" ^^ !^ ":" ^^
         separate (space ^^ !^ "*" ^^ space) (List.map (fun _ -> !^ "Type") existential_names) ^^
         !^ "&" ^^ !^ "let" ^^
         !^ "'(" ^-^ indent (
           separate (!^ "," ^^ space) (List.map Name.to_coq existential_names)
         ) ^-^ !^ ")" ^^
-        !^ ":=" ^^ !^ "existential_types" ^^ !^ "in"
+        !^ ":=" ^^ !^ "ex_typs" ^^ !^ "in"
       end ^^
       BoundName.to_coq name ^^
       separate space (typ_values |> List.map (function
