@@ -66,7 +66,7 @@ let of_ocaml (env : FullEnvi.t) (module_typ : module_type) : t =
 let to_coq (module_typ : t) : SmartPrint.t =
   match module_typ with
   | With (name, typ_values) ->
-    let existential_names = List.fold_left
+    let existential_names = List.rev @@ List.fold_left
       (fun names defined_or_existential ->
         match defined_or_existential with
         | Defined _ -> names
