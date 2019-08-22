@@ -81,9 +81,9 @@ let to_coq (module_typ : t) : SmartPrint.t =
         !^ "existential_types" ^^ !^ ":" ^^
         separate (space ^^ !^ "*" ^^ space) (List.map (fun _ -> !^ "Type") existential_names) ^^
         !^ "&" ^^ !^ "let" ^^
-        parens (indent (
+        !^ "'(" ^-^ indent (
           separate (!^ "," ^^ space) (List.map Name.to_coq existential_names)
-        )) ^^
+        ) ^-^ !^ ")" ^^
         !^ ":=" ^^ !^ "existential_types" ^^ !^ "in"
       end ^^
       BoundName.to_coq name ^^

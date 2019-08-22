@@ -76,7 +76,17 @@ Record Boxed_set (elt : Type) := {
   elt := elt;
   elt_ty : comparable_ty elt;
   OPS : {t : Type & S.SET elt t};
-  OPS' : {existential_types : Type * Type & let (t, elt) := existential_types in S.SET elt t};
+  OPS' : {existential_types : Type * Type & let '(t, elt) := existential_types in S.SET elt t};
   OPS'' : {_ : unit & S.SET elt (list string)};
   size : Z;
+}.
+
+Record Triple (a b c : Type) := {
+  a := a;
+  b := b;
+  c := c;
+}.
+
+Record UsingTriple := {
+  T : {existential_types : Type * Type * Type & let '(c, b, a) := existential_types in Triple a b c};
 }.

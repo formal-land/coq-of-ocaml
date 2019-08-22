@@ -217,4 +217,11 @@
          (Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Apply ((path_name ((path ()) (base string))) (depth 1)) ())))))))
      (Value size () (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-   (typ_params (elt)))))
+   (typ_params (elt))))
+ (Signature Triple ((items ((Typ a) (Typ b) (Typ c))) (typ_params (a b c))))
+ (Signature UsingTriple
+  ((items
+    ((Module T
+      (With ((path_name ((path ()) (base Triple))) (depth 0))
+       ((Existential a) (Existential b) (Existential c))))))
+   (typ_params ()))))

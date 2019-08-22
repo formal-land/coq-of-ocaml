@@ -63,3 +63,13 @@ module type Boxed_set = sig
   module OPS'' : S.SET with type elt = elt and type t = string list
   val size : int
 end
+
+module type Triple = sig
+  type a
+  type b
+  type c
+end
+
+module type UsingTriple = sig
+  module T : Triple
+end
