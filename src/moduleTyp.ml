@@ -17,8 +17,8 @@ let of_ocaml_module_with_substitutions
   (long_ident_loc : Longident.t Asttypes.loc)
   (substitutions : (Path.t * Longident.t Asttypes.loc * with_constraint) list)
   : t =
-  let name = Envi.bound_name loc (PathName.of_loc long_ident_loc) env.FullEnvi.signatures in
-  let signature_typ_params = Envi.find name env.FullEnvi.signatures in
+  let (name, signature_typ_params) =
+    Envi.bound_name loc (PathName.of_loc long_ident_loc) env.FullEnvi.signatures in
   let typ_substitutions: (Name.t * Type.t) list = substitutions |> List.map (function
     | (Path.Pident ident, _, with_constraint) ->
       begin match with_constraint with

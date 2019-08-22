@@ -1,8 +1,10 @@
 open SmartPrint
 
 module Segment = struct
+  type path = Name.t list
+
   type 'a t = {
-    opens : Name.t list list;
+    opens : path list;
     names : 'a PathName.Map.t }
 
   let cardinal (segment : 'a t) : int =
@@ -15,16 +17,14 @@ module Segment = struct
   let add (x : PathName.t) (v : 'a) (segment : 'a t) : 'a t =
     { segment with names = PathName.Map.add x v segment.names }
 
-  let mem (x : PathName.t) (segment : 'a t) : bool =
-    PathName.Map.mem x segment.names
-
-  let find (x : PathName.t) (segment : 'a t) : 'a =
-    PathName.Map.find x segment.names
+  let find_opt (x : PathName.t) (segment : 'a t) : 'a option =
+    PathName.Map.find_opt x segment.names
 
   let map (f : 'a -> 'b) (segment : 'a t) : 'b t =
     { segment with names = PathName.Map.map f segment.names }
 
-  let merge (segment1 : 'a t) (segment2 : 'a t) (module_name : Name.t) : 'a t =
+  (** Close [segment1] by merging it into [segment2] while prefixing it with [module_name]. *)
+  let close_and_merge (segment1 : 'a t) (segment2 : 'a t) (module_name : Name.t) : 'a t =
     PathName.Map.fold
       (fun x v segment2 ->
         let x = { x with PathName.path = module_name :: x.PathName.path } in
@@ -33,7 +33,7 @@ module Segment = struct
       segment1.names
       segment2
 
-  let open_module (segment : 'a t) (module_name : Name.t list) : 'a t =
+  let open_module (segment : 'a t) (module_name : path) : 'a t =
     { segment with opens = module_name :: segment.opens }
 end
 
@@ -46,8 +46,7 @@ let rec size (env : 'a t) : int =
 
 let empty : 'a t = [Segment.empty]
 
-let add (x : PathName.t) (v : 'a) (env : 'a t)
-  : 'a t =
+let add (x : PathName.t) (v : 'a) (env : 'a t) : 'a t =
   match env with
   | segment :: env -> Segment.add x v segment :: env
   | [] -> failwith "The environment must be a non-empty list."
@@ -60,31 +59,29 @@ let rec find_first (f : 'a -> 'b option) (l : 'a list) : 'b option =
     | None -> find_first f l
     | y -> y)
 
-let rec depth (x : PathName.t) (env : 'a t) : (PathName.t * int) option =
+(** Returns the depth of the definition in the segments and the path name as if
+    there were no [open]. *)
+let rec depth (x : PathName.t) (env : 'a t) : (PathName.t * int * 'a) option =
   match env with
   | segment :: env ->
-    if Segment.mem x segment then
-      Some (x, 0)
-    else
+    begin match Segment.find_opt x segment with
+    | Some y -> Some (x, 0, y)
+    | None ->
       segment.Segment.opens |> find_first (fun path ->
         let x = { x with PathName.path = path @ x.PathName.path } in
         match depth x env with
         | None -> None
-        | Some (x, d) -> Some (x, d + 1))
+        | Some (x, d, y) -> Some (x, d + 1, y)
+      )
+    end
   | [] -> None
 
-let bound_name (loc : Loc.t) (x : PathName.t) (env : 'a t) : BoundName.t =
+let bound_name (loc : Loc.t) (x : PathName.t) (env : 'a t) : BoundName.t * 'a =
   match depth x env with
-  | Some (x, d) -> { BoundName.path_name = x; depth = d }
+  | Some (x, d, y) -> ({ BoundName.path_name = x; depth = d }, y)
   | None ->
-    let message = Sexplib.Sexp.to_string (PathName.sexp_of_t x) ^ " not found." in
+    let message = Pp.to_string (PathName.to_coq x) ^ " not found." in
     Error.raise loc message
-
-let rec find (x : BoundName.t) (env : 'a t) : 'a =
-  let segment =
-    try List.nth env x.BoundName.depth with
-    | Failure _ -> raise Not_found in
-  Segment.find x.BoundName.path_name segment
 
 let mem (x : PathName.t) (env : 'a t) : bool =
   match depth x env with
@@ -115,7 +112,7 @@ let enter_module (env : 'a t) : 'a t =
 let leave_module (env : 'a t) (module_name : Name.t) : 'a t =
   match env with
   | segment1 :: segment2 :: env ->
-    Segment.merge segment1 segment2 module_name :: env
+    Segment.close_and_merge segment1 segment2 module_name :: env
   | _ -> failwith "You should have entered in at least one module."
 
 let open_module (env : 'a t) (module_name : Name.t list) : 'a t =

@@ -14,7 +14,7 @@ let pp (e : t) : SmartPrint.t =
 (** Display a warning. *)
 let warn (location : Loc.t) (message : string) : unit =
   let message = "Warning: " ^ message in
-  prerr_endline @@ to_string 80 2 (pp {location = location; message = message})
+  prerr_endline @@ Pp.to_string (pp {location = location; message = message})
 
 (** Raise an exception. *)
 let raise (location : Loc.t) (message : string) : 'a =

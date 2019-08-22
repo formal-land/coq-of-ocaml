@@ -26,7 +26,7 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
     print_newline ();
     flush stdout with
   | Error.Make x ->
-    prerr_endline @@ to_string 80 2 @@ (!^ "Error:" ^^ Error.pp x)
+    prerr_endline @@ Pp.to_string (!^ "Error:" ^^ Error.pp x)
 
 (** Parse a .cmt file to a typed AST. *)
 let parse_cmt (file_name : string) : Typedtree.structure =
