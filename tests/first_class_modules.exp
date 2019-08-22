@@ -1,7 +1,7 @@
 ((Module S
   ((Signature SET
     ((items
-      ((Typ elt) (Typ t)
+      ((TypExistential elt) (TypExistential t)
        (Value empty ()
         (Apply ((path_name ((path ()) (base t))) (depth 0)) ()))
        (Value is_empty ()
@@ -199,7 +199,7 @@
     ((Variable a) (Apply ((path_name ((path ()) (base comb))) (depth 0)) ())))))
  (Signature Boxed_set
   ((items
-    ((Typ elt)
+    ((TypExistential elt)
      (Value elt_ty ()
       (Apply ((path_name ((path ()) (base comparable_ty))) (depth 0))
        ((Apply ((path_name ((path ()) (base elt))) (depth 0)) ()))))
@@ -216,9 +216,13 @@
         (Defined
          (Apply ((path_name ((path ()) (base list))) (depth 1))
           ((Apply ((path_name ((path ()) (base string))) (depth 1)) ())))))))
-     (Value size () (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+     (Value size () (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
+     (TypSynonym table (a)
+      (Apply ((path_name ((path ()) (base list))) (depth 1)) ((Variable a))))))
    (typ_params (elt))))
- (Signature Triple ((items ((Typ a) (Typ b) (Typ c))) (typ_params (a b c))))
+ (Signature Triple
+  ((items ((TypExistential a) (TypExistential b) (TypExistential c)))
+   (typ_params (a b c))))
  (Signature UsingTriple
   ((items
     ((Module T
