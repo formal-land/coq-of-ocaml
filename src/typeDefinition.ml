@@ -73,10 +73,11 @@ let of_ocaml (env : FullEnvi.t) (loc : Loc.t) (typs : type_declaration list) : t
       List.map (Type.of_type_expr_variable loc) typ_type.type_params in
     (match typ_type.type_kind with
     | Type_variant cases ->
+      let (bound_name, ()) = Envi.bound_name loc (PathName.of_name [] name) env.FullEnvi.typs in
       (* The `defined_typ` is useful to give a default return type for non-GADT
          constructors in GADT types. *)
       let defined_typ = Type.Apply (
-        Envi.bound_name loc (PathName.of_name [] name) env.FullEnvi.typs,
+        bound_name,
         List.map (fun typ_arg -> Type.Variable typ_arg) typ_args
       ) in
       let constructors = Constructors.of_ocaml env defined_typ cases in

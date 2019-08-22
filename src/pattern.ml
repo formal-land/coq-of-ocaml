@@ -23,13 +23,13 @@ let rec of_pattern (env : FullEnvi.t) (p : pattern) : t =
   | Tpat_var (x, _) -> Variable (Name.of_ident x)
   | Tpat_tuple ps -> Tuple (List.map (of_pattern env) ps)
   | Tpat_construct (x, _, ps) ->
-    let x = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.constructors in
+    let (x, ()) = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.constructors in
     Constructor (x, List.map (of_pattern env) ps)
   | Tpat_alias (p, x, _) -> Alias (of_pattern env p, Name.of_ident x)
   | Tpat_constant c -> Constant (Constant.of_constant l c)
   | Tpat_record (fields, _) ->
     Record (fields |> List.map (fun (x, _, p) ->
-      let x = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.fields in
+      let (x, ()) = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.fields in
       (x, of_pattern env p)))
   | Tpat_or (p1, p2, _) -> Or (of_pattern env p1, of_pattern env p2)
   | _ -> Error.raise l "Unhandled pattern."

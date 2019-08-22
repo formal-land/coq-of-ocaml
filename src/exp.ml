@@ -72,7 +72,7 @@ let rec of_expression (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   let l = Loc.of_location e.exp_loc in
   match e.exp_desc with
   | Texp_ident (path, _, _) ->
-    let x = Envi.bound_name l (PathName.of_path l path) env.FullEnvi.vars in
+    let (x, ()) = Envi.bound_name l (PathName.of_path l path) env.FullEnvi.vars in
     Variable x
   | Texp_constant constant -> Constant (Constant.of_constant l constant)
   | Texp_let (_, [{ vb_pat = p; vb_expr = e1 }], e2)
@@ -115,7 +115,7 @@ let rec of_expression (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
           let l_exn = Loc.of_location e_x.exp_loc in
           let x = PathName.of_loc x in
           let x = { x with PathName.base = "raise_" ^ x.PathName.base } in
-          let x = Envi.bound_name l_exn x env.FullEnvi.vars in
+          let (x, ()) = Envi.bound_name l_exn x env.FullEnvi.vars in
           let es = List.map (of_expression env typ_vars) es in
           Apply (Variable x, [Tuple es])
         | _ ->
@@ -131,7 +131,7 @@ let rec of_expression (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
           let read = PathName.of_path l_x path in
           let read =
             { read with PathName.base = "read_" ^ read.PathName.base } in
-          let read = Envi.bound_name l_x read env.FullEnvi.vars in
+          let (read, ()) = Envi.bound_name l_x read env.FullEnvi.vars in
           Apply (Variable read, [Tuple []])
         | _ -> Error.raise l "Name of a reference expected after '!'.")
       | _ -> Error.raise l "Expected one argument for '!'.")
@@ -145,7 +145,7 @@ let rec of_expression (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
           let write = PathName.of_path l_r path in
           let write =
             { write with PathName.base = "write_" ^ write.PathName.base } in
-          let write = Envi.bound_name l_r write env.FullEnvi.vars in
+          let (write, ()) = Envi.bound_name l_r write env.FullEnvi.vars in
           let e_v = of_expression env typ_vars e_v in
           Apply (Variable write, [e_v])
         | _ -> Error.raise l "Name of a reference expected after ':='.")
@@ -167,7 +167,7 @@ let rec of_expression (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     Match (e, cases)
   | Texp_tuple es -> Tuple (List.map (of_expression env typ_vars) es)
   | Texp_construct (x, _, es) ->
-    let x = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.constructors in
+    let (x, ()) = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.constructors in
     Constructor (x, List.map (of_expression env typ_vars) es)
   | Texp_record { fields = fields; extended_expression = None } ->
     Record (Array.to_list fields |> List.map (fun (label, definition) ->
@@ -176,10 +176,10 @@ let rec of_expression (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
         | Kept _ -> Error.raise l "Records with overwriting not handled."
         | Overridden (loc, e) -> (loc, e) in
       let loc = Loc.of_location label.lbl_loc in
-      let x = Envi.bound_name loc (PathName.of_loc x) env.FullEnvi.fields in
+      let (x, ()) = Envi.bound_name loc (PathName.of_loc x) env.FullEnvi.fields in
       (x, of_expression env typ_vars e)))
   | Texp_field (e, x, _) ->
-    let x = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.fields in
+    let (x, ()) = Envi.bound_name l (PathName.of_loc x) env.FullEnvi.fields in
     Field (of_expression env typ_vars e, x)
   | Texp_ifthenelse (e1, e2, e3) ->
     let e3 = match e3 with
@@ -202,7 +202,7 @@ let rec of_expression (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
   | Texp_while _ -> Error.raise l "While loops not handled."
   | Texp_for _ -> Error.raise l "For loops not handled."
   | Texp_assert e ->
-    let assert_function =
+    let (assert_function, ()) =
       Envi.bound_name l (PathName.of_name ["OCaml"] "assert") env.FullEnvi.vars in
     Apply (Variable assert_function, [of_expression env typ_vars e])
   | _ -> Error.raise l "Expression not handled."
@@ -219,7 +219,7 @@ and open_cases (env : FullEnvi.t) (typ_vars : Name.t Name.Map.t)
     let p = Pattern.of_pattern env p in
     let env = Pattern.add_to_env p env in
     (p, of_expression env typ_vars e)) in
-  let bound_x = Envi.bound_name Loc.Unknown (PathName.of_name [] x) env_vars in
+  let (bound_x, ()) = Envi.bound_name Loc.Unknown (PathName.of_name [] x) env_vars in
   (x, Match (Variable bound_x, cases))
 
 and import_let_fun (env : FullEnvi.t) (loc : Loc.t)
