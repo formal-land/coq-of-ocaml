@@ -1,95 +1,81 @@
 ((Module SizedString
   ((TypeDefinition
     (Record t
-     ((name (Apply ((path_name ((path ()) (base string))) (depth 2)) ()))
-      (size (Apply ((path_name ((path ()) (base Z))) (depth 2)) ())))))))
+     ((name (Apply ((path ()) (base string)) ()))
+      (size (Apply ((path ()) (base Z)) ())))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name r) (typ_vars ()) (args ())
-       (typ
-        ((Apply ((path_name ((path (SizedString)) (base t))) (depth 0)) ()))))
+       (typ ((Apply ((path (SizedString)) (base t)) ()))))
       (Record
-       ((((path_name ((path (SizedString)) (base name))) (depth 0))
-         (Constant (String gre)))
-        (((path_name ((path (SizedString)) (base size))) (depth 0))
-         (Constant (Int 3))))))))))
+       ((((path (SizedString)) (base name)) (Constant (String gre)))
+        (((path (SizedString)) (base size)) (Constant (Int 3))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name r') (typ_vars ()) (args ())
-       (typ
-        ((Apply ((path_name ((path (SizedString)) (base t))) (depth 0)) ()))))
+       (typ ((Apply ((path (SizedString)) (base t)) ()))))
       (Record
-       ((((path_name ((path (SizedString)) (base name))) (depth 0))
-         (Constant (String haha)))
-        (((path_name ((path (SizedString)) (base size))) (depth 0))
-         (Constant (Int 4))))))))))
+       ((((path (SizedString)) (base name)) (Constant (String haha)))
+        (((path (SizedString)) (base size)) (Constant (Int 4))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name s) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
-       ((Field (Variable ((path_name ((path ()) (base r))) (depth 0)))
-         ((path_name ((path (SizedString)) (base size))) (depth 0)))
-        (Field (Variable ((path_name ((path ()) (base r'))) (depth 0)))
-         ((path_name ((path (SizedString)) (base size))) (depth 0))))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base add)))
+       ((Field (Variable ((path ()) (base r)))
+         ((path (SizedString)) (base size)))
+        (Field (Variable ((path ()) (base r')))
+         ((path (SizedString)) (base size))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name f) (typ_vars ())
        (args
-        ((x
-          (Apply ((path_name ((path (SizedString)) (base t))) (depth 0)) ()))))
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Match (Variable ((path_name ((path ()) (base x))) (depth 0)))
-       (((Record
-          ((((path_name ((path (SizedString)) (base size))) (depth 0))
-            (Constant (Int 3)))))
-         (Constructor ((path_name ((path ()) (base true))) (depth 1)) ()))
-        (Any
-         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ())))))))))
+        ((function_parameter (Apply ((path (SizedString)) (base t)) ()))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Match (Variable ((path ()) (base function_parameter)))
+       (((Record ((((path (SizedString)) (base size)) (Constant (Int 3)))))
+         (Constructor ((path ()) (base true)) ()))
+        (Any (Constructor ((path ()) (base false)) ())))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
-       ((Variable ((path_name ((path ()) (base r))) (depth 0))))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base f)))
+       ((Variable ((path ()) (base r))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b') (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
-       ((Variable ((path_name ((path ()) (base r'))) (depth 0))))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base f)))
+       ((Variable ((path ()) (base r'))))))))))
  (Module Point
   ((TypeDefinition
     (Record t
-     ((x (Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))
-      (y (Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))
-      (z (Apply ((path_name ((path ()) (base Z))) (depth 2)) ())))))
+     ((x (Apply ((path ()) (base Z)) ())) (y (Apply ((path ()) (base Z)) ()))
+      (z (Apply ((path ()) (base Z)) ())))))
    (Value
     ((is_rec (New false))
      (cases
       ((((name p) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base t))) (depth 0)) ()))))
+         (typ ((Apply ((path ()) (base t)) ()))))
         (Record
-         ((((path_name ((path ()) (base x))) (depth 0)) (Constant (Int 5)))
-          (((path_name ((path ()) (base y))) (depth 0)) (Constant (Int -3)))
-          (((path_name ((path ()) (base z))) (depth 0)) (Constant (Int 1))))))))))
+         ((((path ()) (base x)) (Constant (Int 5)))
+          (((path ()) (base y)) (Constant (Int -3)))
+          (((path ()) (base z)) (Constant (Int 1))))))))))
    (Value
     ((is_rec (New false))
      (cases
       ((((name b) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
-        (Match (Variable ((path_name ((path ()) (base p))) (depth 0)))
+         (typ ((Apply ((path ()) (base bool)) ()))))
+        (Match (Variable ((path ()) (base p)))
          (((Record
-            ((((path_name ((path ()) (base x))) (depth 0))
-              (Constant (Int 5)))
-             (((path_name ((path ()) (base z))) (depth 0))
-              (Constant (Int 1)))))
-           (Constructor ((path_name ((path ()) (base true))) (depth 2)) ()))
-          (Any
-           (Constructor ((path_name ((path ()) (base false))) (depth 2)) ()))))))))))))
+            ((((path ()) (base x)) (Constant (Int 5)))
+             (((path ()) (base z)) (Constant (Int 1)))))
+           (Constructor ((path ()) (base true)) ()))
+          (Any (Constructor ((path ()) (base false)) ()))))))))))))

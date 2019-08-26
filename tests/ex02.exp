@@ -2,16 +2,16 @@
   ((is_rec (New false))
    (cases
     ((((name t0) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base unit))) (depth 1)) ()))))
-      (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ()))))))
+       (typ ((Apply ((path ()) (base unit)) ()))))
+      (Constructor ((path ()) (base tt)) ()))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name t1) (typ_vars ()) (args ())
        (typ
         ((Tuple
-          ((Apply ((path_name ((path ()) (base ascii))) (depth 1)) ())
-           (Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))))
+          ((Apply ((path ()) (base ascii)) ())
+           (Apply ((path ()) (base string)) ()))))))
       (Tuple ((Constant (Char c)) (Constant (String one)))))))))
  (Value
   ((is_rec (New false))
@@ -19,30 +19,25 @@
     ((((name t2) (typ_vars ()) (args ())
        (typ
         ((Tuple
-          ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
-           (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
-           (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
-           (Apply ((path_name ((path ()) (base bool))) (depth 1)) ())
-           (Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))))
+          ((Apply ((path ()) (base Z)) ()) (Apply ((path ()) (base Z)) ())
+           (Apply ((path ()) (base Z)) ()) (Apply ((path ()) (base bool)) ())
+           (Apply ((path ()) (base bool)) ()))))))
       (Tuple
        ((Constant (Int 1)) (Constant (Int 2)) (Constant (Int 3))
-        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base true))) (depth 1)) ()))))))))
+        (Constructor ((path ()) (base false)) ())
+        (Constructor ((path ()) (base true)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name f) (typ_vars (A)) (args ((x (Variable A))))
        (typ ((Tuple ((Variable A) (Variable A))))))
       (Tuple
-       ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-        (Variable ((path_name ((path ()) (base x))) (depth 0))))))))))
+       ((Variable ((path ()) (base x))) (Variable ((path ()) (base x))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name t3) (typ_vars ()) (args ())
        (typ
         ((Tuple
-          ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
-           (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-      (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
-       ((Constant (Int 12))))))))))
+          ((Apply ((path ()) (base Z)) ()) (Apply ((path ()) (base Z)) ()))))))
+      (Apply (Variable ((path ()) (base f))) ((Constant (Int 12))))))))))

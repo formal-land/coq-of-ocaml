@@ -3,77 +3,59 @@
     (Inductive t (a)
      (NonGadt
       ((Nil ())
-       (Cons
-        ((Variable a)
-         (Apply ((path_name ((path ()) (base t))) (depth 0)) ((Variable a)))))))))
+       (Cons ((Variable a) (Apply ((path ()) (base t)) ((Variable a)))))))))
    (Value
     ((is_rec (New true))
      (cases
       ((((name sum) (typ_vars ())
          (args
-          ((l
-            (Apply ((path_name ((path ()) (base t))) (depth 0))
-             ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))))
-         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
-        (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
-         (((Constructor ((path_name ((path ()) (base Nil))) (depth 0)) ())
-           (Constant (Int 0)))
-          ((Constructor ((path_name ((path ()) (base Cons))) (depth 0))
-            ((Variable x) (Variable xs)))
-           (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 2)))
-            ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-             (Apply (Variable ((path_name ((path ()) (base sum))) (depth 0)))
-              ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+          ((l (Apply ((path ()) (base t)) ((Apply ((path ()) (base Z)) ()))))))
+         (typ ((Apply ((path ()) (base Z)) ()))))
+        (Match (Variable ((path ()) (base l)))
+         (((Constructor ((path ()) (base Nil)) ()) (Constant (Int 0)))
+          ((Constructor ((path ()) (base Cons)) ((Variable x) (Variable xs)))
+           (Apply (Variable ((path (Z)) (base add)))
+            ((Variable ((path ()) (base x)))
+             (Apply (Variable ((path ()) (base sum)))
+              ((Variable ((path ()) (base xs)))))))))))))))
    (Value
     ((is_rec (New true))
      (cases
       ((((name of_list) (typ_vars (A))
          (args
-          ((x
-            (Apply ((path_name ((path ()) (base list))) (depth 2))
-             ((Variable A))))))
-         (typ
-          ((Apply ((path_name ((path ()) (base t))) (depth 0))
-            ((Variable A))))))
-        (Match (Variable ((path_name ((path ()) (base x))) (depth 0)))
-         (((Constructor ((path_name ((path ()) (base []))) (depth 2)) ())
-           (Constructor ((path_name ((path ()) (base Nil))) (depth 0)) ()))
-          ((Constructor ((path_name ((path ()) (base cons))) (depth 2))
-            ((Variable x) (Variable xs)))
-           (Constructor ((path_name ((path ()) (base Cons))) (depth 0))
-            ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-             (Apply
-              (Variable ((path_name ((path ()) (base of_list))) (depth 0)))
-              ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+          ((function_parameter
+            (Apply ((path ()) (base list)) ((Variable A))))))
+         (typ ((Apply ((path ()) (base t)) ((Variable A))))))
+        (Match (Variable ((path ()) (base function_parameter)))
+         (((Constructor ((path ()) (base [])) ())
+           (Constructor ((path ()) (base Nil)) ()))
+          ((Constructor ((path ()) (base cons)) ((Variable x) (Variable xs)))
+           (Constructor ((path ()) (base Cons))
+            ((Variable ((path ()) (base x)))
+             (Apply (Variable ((path ()) (base of_list)))
+              ((Variable ((path ()) (base xs)))))))))))))))
    (Module Inside
     ((Value
       ((is_rec (New false))
        (cases
         ((((name x) (typ_vars ()) (args ())
-           (typ ((Apply ((path_name ((path ()) (base Z))) (depth 3)) ()))))
+           (typ ((Apply ((path ()) (base Z)) ()))))
           (Constant (Int 12)))))))))))
  (Value
   ((is_rec (New false))
    (cases
-    ((((name n) (typ_vars (A)) (args ((x (Variable A))))
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Match (Variable ((path_name ((path ()) (base x))) (depth 0)))
+    ((((name n) (typ_vars (A)) (args ((function_parameter (Variable A))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Match (Variable ((path ()) (base function_parameter)))
        ((Any
-         (Apply
-          (Variable ((path_name ((path (List2)) (base sum))) (depth 0)))
-          ((Apply
-            (Variable
-             ((path_name ((path (List2)) (base of_list))) (depth 0)))
-            ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+         (Apply (Variable ((path (List2)) (base sum)))
+          ((Apply (Variable ((path (List2)) (base of_list)))
+            ((Constructor ((path ()) (base cons))
               ((Constant (Int 5))
-               (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+               (Constructor ((path ()) (base cons))
                 ((Constant (Int 7))
-                 (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+                 (Constructor ((path ()) (base cons))
                   ((Constant (Int 6))
-                   (Constructor
-                    ((path_name ((path ()) (base cons))) (depth 1))
-                    ((Variable
-                      ((path_name ((path (List2 Inside)) (base x)))
-                       (depth 0)))
-                     (Constructor
-                      ((path_name ((path ()) (base []))) (depth 1)) ()))))))))))))))))))))))
+                   (Constructor ((path ()) (base cons))
+                    ((Variable ((path (List2 Inside)) (base x)))
+                     (Constructor ((path ()) (base [])) ()))))))))))))))))))))))

@@ -1,92 +1,73 @@
 ((TypeDefinition
   (Inductive t1 ()
    (NonGadt
-    ((C1 ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ())))
+    ((C1 ((Apply ((path ()) (base Z)) ())))
      (C2
-      ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ())
-       (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())))
+      ((Apply ((path ()) (base bool)) ()) (Apply ((path ()) (base Z)) ())))
      (C3 ())))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base t1))) (depth 0)) ()))))
-      (Constructor ((path_name ((path ()) (base C2))) (depth 0))
-       ((Constructor ((path_name ((path ()) (base false))) (depth 1)) ())
-        (Constant (Int 3)))))))))
+       (typ ((Apply ((path ()) (base t1)) ()))))
+      (Constructor ((path ()) (base C2))
+       ((Constructor ((path ()) (base false)) ()) (Constant (Int 3)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name m) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Match (Variable ((path_name ((path ()) (base n))) (depth 0)))
-       (((Constructor ((path_name ((path ()) (base C2))) (depth 0))
-          ((Variable b) Any))
-         (Variable ((path_name ((path ()) (base b))) (depth 0))))
-        (Any
-         (Constructor ((path_name ((path ()) (base true))) (depth 1)) ())))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Match (Variable ((path ()) (base n)))
+       (((Constructor ((path ()) (base C2)) ((Variable b) Any))
+         (Variable ((path ()) (base b))))
+        (Any (Constructor ((path ()) (base true)) ())))))))))
  (TypeDefinition
   (Inductive t2 (a)
    (NonGadt
     ((D1 ())
-     (D2
-      ((Variable a)
-       (Apply ((path_name ((path ()) (base t2))) (depth 0)) ((Variable a)))))))))
+     (D2 ((Variable a) (Apply ((path ()) (base t2)) ((Variable a)))))))))
  (Value
   ((is_rec (New true))
    (cases
     ((((name of_list) (typ_vars (A))
-       (args
-        ((l
-          (Apply ((path_name ((path ()) (base list))) (depth 1))
-           ((Variable A))))))
-       (typ
-        ((Apply ((path_name ((path ()) (base t2))) (depth 0)) ((Variable A))))))
-      (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
-       (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-         (Constructor ((path_name ((path ()) (base D1))) (depth 0)) ()))
-        ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
-          ((Variable x) (Variable xs)))
-         (Constructor ((path_name ((path ()) (base D2))) (depth 0))
-          ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-           (Apply
-            (Variable ((path_name ((path ()) (base of_list))) (depth 0)))
-            ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+       (args ((l (Apply ((path ()) (base list)) ((Variable A))))))
+       (typ ((Apply ((path ()) (base t2)) ((Variable A))))))
+      (Match (Variable ((path ()) (base l)))
+       (((Constructor ((path ()) (base [])) ())
+         (Constructor ((path ()) (base D1)) ()))
+        ((Constructor ((path ()) (base cons)) ((Variable x) (Variable xs)))
+         (Constructor ((path ()) (base D2))
+          ((Variable ((path ()) (base x)))
+           (Apply (Variable ((path ()) (base of_list)))
+            ((Variable ((path ()) (base xs)))))))))))))))
  (Value
   ((is_rec (New true))
    (cases
     ((((name sum) (typ_vars ())
        (args
-        ((l
-          (Apply ((path_name ((path ()) (base t2))) (depth 0))
-           ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
-       (((Constructor ((path_name ((path ()) (base D1))) (depth 0)) ())
-         (Constant (Int 0)))
-        ((Constructor ((path_name ((path ()) (base D2))) (depth 0))
-          ((Variable x) (Variable xs)))
-         (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
-          ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-           (Apply (Variable ((path_name ((path ()) (base sum))) (depth 0)))
-            ((Variable ((path_name ((path ()) (base xs))) (depth 0)))))))))))))))
+        ((l (Apply ((path ()) (base t2)) ((Apply ((path ()) (base Z)) ()))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Match (Variable ((path ()) (base l)))
+       (((Constructor ((path ()) (base D1)) ()) (Constant (Int 0)))
+        ((Constructor ((path ()) (base D2)) ((Variable x) (Variable xs)))
+         (Apply (Variable ((path (Z)) (base add)))
+          ((Variable ((path ()) (base x)))
+           (Apply (Variable ((path ()) (base sum)))
+            ((Variable ((path ()) (base xs)))))))))))))))
  (Value
   ((is_rec (New false))
    (cases
-    ((((name s) (typ_vars (A)) (args ((x (Variable A))))
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Match (Variable ((path_name ((path ()) (base x))) (depth 0)))
+    ((((name s) (typ_vars (A)) (args ((function_parameter (Variable A))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Match (Variable ((path ()) (base function_parameter)))
        ((Any
-         (Apply (Variable ((path_name ((path ()) (base sum))) (depth 0)))
-          ((Apply
-            (Variable ((path_name ((path ()) (base of_list))) (depth 0)))
-            ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+         (Apply (Variable ((path ()) (base sum)))
+          ((Apply (Variable ((path ()) (base of_list)))
+            ((Constructor ((path ()) (base cons))
               ((Constant (Int 5))
-               (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+               (Constructor ((path ()) (base cons))
                 ((Constant (Int 7))
-                 (Constructor ((path_name ((path ()) (base cons))) (depth 1))
-                  ((Constant (Int 3))
-                   (Constructor ((path_name ((path ()) (base []))) (depth 1))
-                    ())))))))))))))))))))
+                 (Constructor ((path ()) (base cons))
+                  ((Constant (Int 3)) (Constructor ((path ()) (base [])) ())))))))))))))))))))
  (TypeDefinition (Abstract t3 ())) (TypeDefinition (Abstract t4 (a)))
  (TypeDefinition (Inductive t5 () (NonGadt ((C ()))))))

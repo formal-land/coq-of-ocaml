@@ -8,24 +8,49 @@ type defined_or_existential =
   [@@deriving sexp]
 
 type t =
-  | With of BoundName.t * defined_or_existential list
+  | With of PathName.t * defined_or_existential list
   [@@deriving sexp]
 
+let get_signature_typ_params (signature : Types.signature) : Name.t list =
+  List.rev @@ List.fold_left
+    (fun typ_params (item : Types.signature_item) ->
+      match item with
+      | Sig_type (ident, { type_manifest = None }, _) ->
+        let typ_param = Name.of_ident ident in
+        typ_param :: typ_params
+      | _ -> typ_params
+    )
+    []
+    signature
+
+let rec get_module_typ_typ_params (env : Env.t) (loc : Loc.t)
+  (module_typ_declaration : Types.modtype_declaration) : Name.t list =
+  match module_typ_declaration with
+  | { mtd_type = None } ->
+    Error.raise loc "Cannot instantiate an abstract signature."
+  | { mtd_type = Some (Mty_signature signature) } ->
+    get_signature_typ_params signature
+  | { mtd_type = Some (Mty_alias (_, path)) } | { mtd_type = Some (Mty_ident path) } ->
+    get_module_typ_typ_params env loc (Env.find_modtype path env)
+  | { mtd_type = Some (Mty_functor _) } ->
+    Error.raise loc "Cannot instantiate functors (yet)."
+
 let of_ocaml_module_with_substitutions
-  (env : FullEnvi.t)
+  (env: Env.t)
   (loc :Loc.t)
   (long_ident_loc : Longident.t Asttypes.loc)
   (substitutions : (Path.t * Longident.t Asttypes.loc * with_constraint) list)
   : t =
-  let (name, signature_typ_params) =
-    Envi.bound_name loc (PathName.of_loc long_ident_loc) env.FullEnvi.signatures in
+  let signature_path_name = PathName.of_loc long_ident_loc in
+  let (_, module_typ) = try Env.lookup_modtype long_ident_loc.txt env with _ -> failwith "Arg2" in
+  let signature_typ_params = get_module_typ_typ_params env loc module_typ in
   let typ_substitutions: (Name.t * Type.t) list = substitutions |> List.map (function
     | (Path.Pident ident, _, with_constraint) ->
       begin match with_constraint with
       | Twith_type { typ_loc; typ_type } ->
         begin match typ_type with
         | { type_kind = Type_abstract; type_manifest = Some typ } ->
-          (Name.of_ident ident, Type.of_type_expr env (Loc.of_location typ_loc) typ)
+          (Name.of_ident ident, Type.of_type_expr (Loc.of_location typ_loc) typ)
         | _ ->
           Error.raise loc (
             "Can only do `with` on types in module types using type expressions " ^
@@ -46,10 +71,11 @@ let of_ocaml_module_with_substitutions
     )
     (signature_typ_params |> List.map (fun name -> Existential name))
     typ_substitutions in
-  With (name, typ_values)
+  With (signature_path_name, typ_values)
 
-let of_ocaml (env : FullEnvi.t) (module_typ : module_type) : t =
+let of_ocaml (module_typ : module_type) : t =
   let loc = Loc.of_location module_typ.mty_loc in
+  let env = Envaux.env_of_only_summary module_typ.mty_env in
   match module_typ.mty_desc with
   | Tmty_alias _ -> Error.raise loc "Aliases in module types are not handled."
   | Tmty_functor _ -> Error.raise loc "The application of functors in module types is not handled."
@@ -82,7 +108,7 @@ let to_coq (module_typ : t) : SmartPrint.t =
           separate (!^ "," ^^ space) (List.map Name.to_coq existential_names)
         ) ^-^ !^ ")" ^^ !^ ":" ^^ !^ "_" ^^ !^ "&"
       end ^^
-      BoundName.to_coq name ^^
+      PathName.to_coq name ^^
       separate space (typ_values |> List.map (function
         | Defined typ -> Type.to_coq true typ
         | Existential name -> Name.to_coq name

@@ -18,8 +18,8 @@ Definition r' : SizedString.t :=
 
 Definition s : Z := Z.add (SizedString.size r) (SizedString.size r').
 
-Definition f (x : SizedString.t) : bool :=
-  match x with
+Definition f (function_parameter : SizedString.t) : bool :=
+  match function_parameter with
   | {| SizedString.size := 3 |} => true
   | _ => false
   end.

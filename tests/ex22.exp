@@ -3,29 +3,25 @@
    (cases
     ((((name op_plus_plus_plus) (typ_vars ())
        (args
-        ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
-         (y (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
-       ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-        (Variable ((path_name ((path ()) (base y))) (depth 0))))))))))
+        ((x (Apply ((path ()) (base Z)) ()))
+         (y (Apply ((path ()) (base Z)) ()))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base add)))
+       ((Variable ((path ()) (base x))) (Variable ((path ()) (base y))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name op_tilde_tilde) (typ_vars ())
-       (args ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base opp))) (depth 1)))
-       ((Variable ((path_name ((path ()) (base x))) (depth 0))))))))))
+       (args ((x (Apply ((path ()) (base Z)) ()))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base opp)))
+       ((Variable ((path ()) (base x))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name z) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path ()) (base op_plus_plus_plus))) (depth 0)))
-       ((Apply
-         (Variable ((path_name ((path ()) (base op_tilde_tilde))) (depth 0)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path ()) (base op_plus_plus_plus)))
+       ((Apply (Variable ((path ()) (base op_tilde_tilde)))
          ((Constant (Int 12))))
         (Constant (Int 14))))))))))

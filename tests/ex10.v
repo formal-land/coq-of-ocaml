@@ -17,8 +17,8 @@ Module List2.
     | Cons x xs => Z.add x (sum xs)
     end.
   
-  Fixpoint of_list {A : Type} (x : list A) : t A :=
-    match x with
+  Fixpoint of_list {A : Type} (function_parameter : list A) : t A :=
+    match function_parameter with
     | [] => Nil
     | cons x xs => Cons x (of_list xs)
     end.
@@ -28,8 +28,8 @@ Module List2.
   End Inside.
 End List2.
 
-Definition n {A : Type} (x : A) : Z :=
-  match x with
+Definition n {A : Type} (function_parameter : A) : Z :=
+  match function_parameter with
   | _ =>
     List2.sum
       (List2.of_list (cons 5 (cons 7 (cons 6 (cons List2.Inside.x [])))))
