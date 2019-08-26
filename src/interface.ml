@@ -33,17 +33,6 @@ let of_typ_definition (typ_def : TypeDefinition.t) : t list =
     [Typ name]
 
 
-let rec to_full_envi (interface : t) (env : FullEnvi.t) : FullEnvi.t =
-  match interface with
-  | Var (x, shape) -> FullEnvi.add_var [] x env
-  | Typ x -> FullEnvi.add_typ [] x env
-  | Constructor x -> FullEnvi.add_constructor [] x env
-  | Field x -> FullEnvi.add_field [] x env
-  | Interface (x, defs) ->
-    let env = FullEnvi.enter_module env in
-    let env = List.fold_left (fun env def -> to_full_envi def env) env defs in
-    FullEnvi.leave_module x env
-
 let rec to_json (interface : t) : Yojson.Basic.t =
   match interface with
   | Var (x, shape) ->

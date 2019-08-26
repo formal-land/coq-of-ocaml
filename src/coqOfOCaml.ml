@@ -5,7 +5,7 @@ type ast = Structure.t list
   [@@deriving sexp]
 
 let exp (structure : Typedtree.structure) : ast =
-  snd @@ Structure.of_structure PervasivesModule.env structure
+  Structure.of_structure structure
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml (structure : Typedtree.structure) (mode : string)
@@ -32,7 +32,11 @@ let of_ocaml (structure : Typedtree.structure) (mode : string)
 let parse_cmt (file_name : string) : Typedtree.structure =
   let (_, cmt) = Cmt_format.read file_name in
   match cmt with
-  | Some { Cmt_format.cmt_annots = Cmt_format.Implementation structure } ->
+  | Some { Cmt_format.cmt_annots = Cmt_format.Implementation structure; cmt_loadpath } ->
+    (* We set the [load_path] so that the OCaml compiler can import the environments
+       from the [.cmt] files. This is required to specify were to find the definitions
+       of the standard library. See https://discuss.ocaml.org/t/getting-the-environment-from-the-ast-in-cmt/4287 *)
+    Config.load_path := cmt_loadpath;
     structure
   | _ -> failwith "Cannot extract cmt data."
 

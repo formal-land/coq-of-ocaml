@@ -3,11 +3,11 @@
    (cases
     ((((name f) (typ_vars (A B)) (args ((x (Variable A)) (y (Variable B))))
        (typ ((Variable A))))
-      (Variable ((path_name ((path ()) (base x))) (depth 0))))))))
+      (Variable ((path ()) (base x))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path ()) (base f)))
        ((Constant (Int 12)) (Constant (Int 3))))))))))

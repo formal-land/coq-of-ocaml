@@ -2,15 +2,15 @@
   ((is_rec (New false))
    (cases
     ((((name n1) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
       (LetVar m (Constant (Int 12))
-       (LetVar n1 (Variable ((path_name ((path ()) (base m))) (depth 0)))
-        (Variable ((path_name ((path ()) (base n1))) (depth 0))))))))))
+       (LetVar n1 (Variable ((path ()) (base m)))
+        (Variable ((path ()) (base n1))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n2) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
       (LetFun
        ((is_rec (New false))
         (cases
@@ -20,23 +20,18 @@
                (Arrow (Arrow (Variable A) (Arrow (Variable B) (Variable A)))
                 (Variable C)))))
             (typ ((Variable C))))
-           (Apply (Variable ((path_name ((path ()) (base c))) (depth 0)))
-            ((Function x
-              (Function y
-               (Variable ((path_name ((path ()) (base x))) (depth 0)))))))))))
+           (Apply (Variable ((path ()) (base c)))
+            ((Function x (Function y (Variable ((path ()) (base x)))))))))))
        (LetFun
         ((is_rec (New false))
          (cases
           ((((name c) (typ_vars (A))
              (args
               ((f
-                (Arrow
-                 (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
-                 (Arrow
-                  (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
-                  (Variable A))))))
+                (Arrow (Apply ((path ()) (base Z)) ())
+                 (Arrow (Apply ((path ()) (base Z)) ()) (Variable A))))))
              (typ ((Variable A))))
-            (Apply (Variable ((path_name ((path ()) (base f))) (depth 0)))
+            (Apply (Variable ((path ()) (base f)))
              ((Constant (Int 12)) (Constant (Int 23))))))))
-        (Apply (Variable ((path_name ((path ()) (base p1))) (depth 0)))
-         ((Variable ((path_name ((path ()) (base c))) (depth 0)))))))))))))
+        (Apply (Variable ((path ()) (base p1)))
+         ((Variable ((path ()) (base c)))))))))))))

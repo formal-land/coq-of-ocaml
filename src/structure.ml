@@ -46,20 +46,16 @@ type t =
   [@@deriving sexp]
 
 (** Import an OCaml structure. *)
-let rec of_structure (env : FullEnvi.t) (structure : structure)
-  : FullEnvi.t * t list =
-  let of_structure_item (env : FullEnvi.t) (item : structure_item)
-    : FullEnvi.t * t =
+let rec of_structure (structure : structure) : t list =
+  let of_structure_item (item : structure_item) : t =
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
     | Tstr_value (is_rec, cases) ->
-      let (env, def) =
-        Exp.import_let_fun env loc Name.Map.empty is_rec cases in
-      (env, Value def)
+      let def = Exp.import_let_fun loc Name.Map.empty is_rec cases in
+      Value def
     | Tstr_type (_, typs) ->
-      let def = TypeDefinition.of_ocaml env loc typs in
-      let env = TypeDefinition.update_env def env in
-      (env, TypeDefinition def)
+      let def = TypeDefinition.of_ocaml loc typs in
+      TypeDefinition def
     | Tstr_exception _ ->
       Error.raise loc (
         "The definition of exception is not handled.\n\n" ^
@@ -68,27 +64,23 @@ let rec of_structure (env : FullEnvi.t) (structure : structure)
       )
     | Tstr_open { open_path = path } ->
       let o = Open.of_ocaml loc path in
-      let env = Open.update_env o env in
-      (env, Open o)
+      Open o
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc = Tmod_structure structure }}
     | Tstr_module {mb_id = name;
       mb_expr = { mod_desc =
         Tmod_constraint ({ mod_desc = Tmod_structure structure }, _, _, _) }} ->
       let name = Name.of_ident name in
-      let env = FullEnvi.enter_module env in
-      let (env, structures) = of_structure env structure in
-      let env = FullEnvi.leave_module name env in
-      (env, Module (name, structures))
+      let structures = of_structure structure in
+      Module (name, structures)
     | Tstr_modtype { mtd_type = None } -> Error.raise loc "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->
       let name = Name.of_ident mtd_id in
       begin
         match mty_desc with
         | Tmty_signature signature ->
-          let signature = Signature.of_signature env signature in
-          let env = FullEnvi.add_signature [] name signature.typ_params env in
-          (env, Signature (name, signature))
+          let signature = Signature.of_signature signature in
+          Signature (name, signature)
         | _ -> Error.raise loc "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
@@ -102,16 +94,18 @@ let rec of_structure (env : FullEnvi.t) (structure : structure)
     | Tstr_class_type _ -> Error.raise loc "Structure item `class_type` not handled."
     | Tstr_include _ -> Error.raise loc "Structure item `include` not handled."
     | Tstr_attribute _ -> Error.raise loc "Structure item `attribute` not handled." in
-  let (env, defs) =
-    List.fold_left (fun (env, defs) item ->
-      (* We ignore attribute items. *)
-      match item.str_desc with
-      | Tstr_attribute _ -> (env, defs)
-      | _ ->
-        let (env, def) = of_structure_item env item in
-        (env, def :: defs))
-    (env, []) structure.str_items in
-  (env, List.rev defs)
+  let defs =
+    List.fold_left
+      (fun defs item ->
+        (* We ignore attribute items. *)
+        match item.str_desc with
+        | Tstr_attribute _ -> defs
+        | _ ->
+          let def = of_structure_item item in
+          def :: defs
+      )
+      [] structure.str_items in
+  List.rev defs
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =

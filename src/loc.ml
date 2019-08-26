@@ -3,25 +3,27 @@ open SmartPrint
 
 module Position = struct
   type t = {
-    line : int }
-    [@@deriving sexp]
+    line : int;
+  }
 
   let of_position (position : Lexing.position) : t =
     { line = position.Lexing.pos_lnum }
 end
 
-type t =
-  | Unknown
-  | Known of string * Position.t * Position.t
-  [@@deriving sexp]
+type t = {
+  end_ : Position.t;
+  file_name : string;
+  start : Position.t;
+  }
 
-let to_user (l : t) : SmartPrint.t =
-  match l with
-  | Unknown -> !^ "?"
-  | Known (file_name, { line }, _) ->
-    !^ file_name ^-^ !^ "," ^^ !^ "line" ^^ OCaml.int line
+let to_user (loc : t) : SmartPrint.t =
+  !^ (loc.file_name) ^-^ !^ "," ^^ !^ "line" ^^ OCaml.int loc.start.Position.line
 
-let of_location (l : Location.t) : t =
-  let start = l.Location.loc_start in
-  let _end = l.Location.loc_end in
-  Known (start.Lexing.pos_fname, Position.of_position start, Position.of_position _end)
+let of_location (location : Location.t) : t =
+  let start = location.Location.loc_start in
+  let end_ = location.Location.loc_end in
+  {
+    end_ = Position.of_position end_;
+    file_name = start.Lexing.pos_fname;
+    start = Position.of_position start;
+  }

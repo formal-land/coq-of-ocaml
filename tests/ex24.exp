@@ -2,365 +2,316 @@
   ((is_rec (New false))
    (cases
     ((((name b_eq) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base equiv_decb))) (depth 1)))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base equiv_decb)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_neq1) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply
-       (Variable ((path_name ((path ()) (base nequiv_decb))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base nequiv_decb)))
+       ((Constructor ((path ()) (base true)) ())
+        (Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_neq2) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply
-       (Variable ((path_name ((path ()) (base nequiv_decb))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base tt))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base nequiv_decb)))
+       ((Constructor ((path ()) (base tt)) ())
+        (Constructor ((path ()) (base tt)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_lt) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base lt)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_gt) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base gt))) (depth 1)))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base gt)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_le) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base le))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base le)))
+       ((Constructor ((path ()) (base true)) ())
+        (Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_ge) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base ge))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base tt))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base tt))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base ge)))
+       ((Constructor ((path ()) (base tt)) ())
+        (Constructor ((path ()) (base tt)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name comp) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base compare))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base compare)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_min) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base min))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base min)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_max) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base max))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base max)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_not) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base negb))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base negb)))
+       ((Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_and) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base andb))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base andb)))
+       ((Constructor ((path ()) (base true)) ())
+        (Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_and_old) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base andb))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base andb)))
+       ((Constructor ((path ()) (base true)) ())
+        (Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_or) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base orb))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base orb)))
+       ((Constructor ((path ()) (base true)) ())
+        (Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b_or_old) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base orb))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base true))) (depth 1)) ())
-        (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path ()) (base orb)))
+       ((Constructor ((path ()) (base true)) ())
+        (Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name app1) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base reverse_apply)))
-         (depth 1)))
-       ((Constant (Int 12))
-        (Function x (Variable ((path_name ((path ()) (base x))) (depth 0)))))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base reverse_apply)))
+       ((Constant (Int 12)) (Function x (Variable ((path ()) (base x)))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name app2) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base apply))) (depth 1)))
-       ((Function x (Variable ((path_name ((path ()) (base x))) (depth 0))))
-        (Constant (Int 12)))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path ()) (base apply)))
+       ((Function x (Variable ((path ()) (base x)))) (Constant (Int 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_neg1) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base opp))) (depth 1)))
-       ((Constant (Int 12)))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base opp))) ((Constant (Int 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_neg2) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
       (Constant (Int -12)))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_pos1) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base ""))) (depth 1)))
-       ((Constant (Int 12)))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path ()) (base ""))) ((Constant (Int 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_pos2) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
       (Constant (Int 12)))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_succ) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base succ))) (depth 1)))
-       ((Constant (Int 1)))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base succ))) ((Constant (Int 1)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_pred) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base pred))) (depth 1)))
-       ((Constant (Int 1)))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base pred))) ((Constant (Int 1)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_plus) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base add)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_minus) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base sub))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base sub)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_times) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base mul))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base mul)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_div) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base div))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base div)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_mod) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base modulo))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base modulo)))
        ((Constant (Int 1)) (Constant (Int 2)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_abs) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base abs))) (depth 1)))
-       ((Constant (Int 1)))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base abs))) ((Constant (Int 1)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_land) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base land))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base land)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_lor) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base lor))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base lor)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_lxor) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base lxor))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base lxor)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_lsl) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base shiftl))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base shiftl)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_lsr) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base shiftr))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base shiftr)))
        ((Constant (Int 12)) (Constant (Int 13)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name ss) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))
-      (Apply
-       (Variable ((path_name ((path (String)) (base append))) (depth 1)))
+       (typ ((Apply ((path ()) (base string)) ()))))
+      (Apply (Variable ((path (String)) (base append)))
        ((Constant (String begin)) (Constant (String end)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_char) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base int_of_char)))
-         (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base int_of_char)))
        ((Constant (Char c)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name i) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base unit))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base ignore))) (depth 1)))
+       (typ ((Apply ((path ()) (base unit)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base ignore)))
        ((Constant (Int 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name s_bool) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base string_of_bool)))
-         (depth 1)))
-       ((Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))))))))
+       (typ ((Apply ((path ()) (base string)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base string_of_bool)))
+       ((Constructor ((path ()) (base false)) ()))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name bool_s) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base bool_of_string)))
-         (depth 1)))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base bool_of_string)))
        ((Constant (String false)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name s_n) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base string))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base string_of_int)))
-         (depth 1)))
+       (typ ((Apply ((path ()) (base string)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base string_of_int)))
        ((Constant (Int 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n_s) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base int_of_string)))
-         (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base int_of_string)))
        ((Constant (String 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n1) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base fst))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path ()) (base fst)))
        ((Tuple ((Constant (Int 12)) (Constant (Int 13)))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n2) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path ()) (base snd))) (depth 1)))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path ()) (base snd)))
        ((Tuple ((Constant (Int 12)) (Constant (Int 13)))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name ll) (typ_vars ()) (args ())
        (typ
-        ((Apply ((path_name ((path ()) (base list))) (depth 1))
-          ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))))
-      (Apply
-       (Variable
-        ((path_name ((path (OCaml Pervasives)) (base app))) (depth 1)))
-       ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+        ((Apply ((path ()) (base list)) ((Apply ((path ()) (base Z)) ()))))))
+      (Apply (Variable ((path (OCaml Pervasives)) (base app)))
+       ((Constructor ((path ()) (base cons))
          ((Constant (Int 1))
-          (Constructor ((path_name ((path ()) (base cons))) (depth 1))
-           ((Constant (Int 2))
-            (Constructor ((path_name ((path ()) (base []))) (depth 1)) ())))))
-        (Constructor ((path_name ((path ()) (base cons))) (depth 1))
+          (Constructor ((path ()) (base cons))
+           ((Constant (Int 2)) (Constructor ((path ()) (base [])) ())))))
+        (Constructor ((path ()) (base cons))
          ((Constant (Int 3))
-          (Constructor ((path_name ((path ()) (base cons))) (depth 1))
-           ((Constant (Int 4))
-            (Constructor ((path_name ((path ()) (base []))) (depth 1)) ())))))))))))))
+          (Constructor ((path ()) (base cons))
+           ((Constant (Int 4)) (Constructor ((path ()) (base [])) ())))))))))))))

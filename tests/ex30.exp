@@ -3,38 +3,38 @@
     ((is_rec (New false))
      (cases
       ((((name n) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
+         (typ ((Apply ((path ()) (base Z)) ()))))
         (Constant (Int 12)))))))))
  (Module N
   ((Value
     ((is_rec (New false))
      (cases
       ((((name n) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
-        (Constructor ((path_name ((path ()) (base true))) (depth 2)) ()))))))
+         (typ ((Apply ((path ()) (base bool)) ()))))
+        (Constructor ((path ()) (base true)) ()))))))
    (Value
     ((is_rec (New false))
      (cases
       ((((name x) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
-        (Variable ((path_name ((path ()) (base n))) (depth 0))))))))
+         (typ ((Apply ((path ()) (base bool)) ()))))
+        (Variable ((path ()) (base n))))))))
    (Open (M))
    (Value
     ((is_rec (New false))
      (cases
       ((((name y) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
-        (Variable ((path_name ((path (M)) (base n))) (depth 1))))))))))
+         (typ ((Apply ((path ()) (base Z)) ()))))
+        (Variable ((path (M)) (base n))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Variable ((path_name ((path (N)) (base n))) (depth 0))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Variable ((path (N)) (base n))))))))
  (Open (N))
  (Value
   ((is_rec (New false))
    (cases
     ((((name b') (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Variable ((path_name ((path (N)) (base n))) (depth 0)))))))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Variable ((path (N)) (base n)))))))))

@@ -4,78 +4,52 @@
     ((((name map) (typ_vars (A B))
        (args
         ((f (Arrow (Variable A) (Variable B)))
-         (l
-          (Apply ((path_name ((path ()) (base list))) (depth 1))
-           ((Variable A))))))
-       (typ
-        ((Apply ((path_name ((path ()) (base list))) (depth 1))
-          ((Variable B))))))
+         (l (Apply ((path ()) (base list)) ((Variable A))))))
+       (typ ((Apply ((path ()) (base list)) ((Variable B))))))
       (LetFun
        ((is_rec (New true))
         (cases
          ((((name map_coq_rec) (typ_vars ())
-            (args
-             ((l
-               (Apply ((path_name ((path ()) (base list))) (depth 1))
-                ((Variable A))))))
-            (typ
-             ((Apply ((path_name ((path ()) (base list))) (depth 1))
-               ((Variable B))))))
-           (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
-            (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-              (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))
-             ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+            (args ((l (Apply ((path ()) (base list)) ((Variable A))))))
+            (typ ((Apply ((path ()) (base list)) ((Variable B))))))
+           (Match (Variable ((path ()) (base l)))
+            (((Constructor ((path ()) (base [])) ())
+              (Constructor ((path ()) (base [])) ()))
+             ((Constructor ((path ()) (base cons))
                ((Variable x) (Variable l)))
-              (Constructor ((path_name ((path ()) (base cons))) (depth 1))
-               ((Apply
-                 (Variable ((path_name ((path ()) (base f))) (depth 0)))
-                 ((Variable ((path_name ((path ()) (base x))) (depth 0)))))
-                (Apply
-                 (Variable
-                  ((path_name ((path ()) (base map_coq_rec))) (depth 0)))
-                 ((Variable ((path_name ((path ()) (base l))) (depth 0))))))))))))))
-       (Apply
-        (Variable ((path_name ((path ()) (base map_coq_rec))) (depth 0)))
-        ((Variable ((path_name ((path ()) (base l))) (depth 0)))))))))))
+              (Constructor ((path ()) (base cons))
+               ((Apply (Variable ((path ()) (base f)))
+                 ((Variable ((path ()) (base x)))))
+                (Apply (Variable ((path ()) (base map_coq_rec)))
+                 ((Variable ((path ()) (base l))))))))))))))
+       (Apply (Variable ((path ()) (base map_coq_rec)))
+        ((Variable ((path ()) (base l)))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name map2) (typ_vars (A B))
        (args
         ((f (Arrow (Variable A) (Variable B)))
-         (l
-          (Apply ((path_name ((path ()) (base list))) (depth 1))
-           ((Variable A))))))
-       (typ
-        ((Apply ((path_name ((path ()) (base list))) (depth 1))
-          ((Variable B))))))
+         (l (Apply ((path ()) (base list)) ((Variable A))))))
+       (typ ((Apply ((path ()) (base list)) ((Variable B))))))
       (LetFun
        ((is_rec (New true))
         (cases
          ((((name map2_coq_rec) (typ_vars (C D))
             (args
              ((f (Arrow (Variable C) (Variable D)))
-              (l
-               (Apply ((path_name ((path ()) (base list))) (depth 1))
-                ((Variable C))))))
-            (typ
-             ((Apply ((path_name ((path ()) (base list))) (depth 1))
-               ((Variable D))))))
-           (Match (Variable ((path_name ((path ()) (base l))) (depth 0)))
-            (((Constructor ((path_name ((path ()) (base []))) (depth 1)) ())
-              (Constructor ((path_name ((path ()) (base []))) (depth 1)) ()))
-             ((Constructor ((path_name ((path ()) (base cons))) (depth 1))
+              (l (Apply ((path ()) (base list)) ((Variable C))))))
+            (typ ((Apply ((path ()) (base list)) ((Variable D))))))
+           (Match (Variable ((path ()) (base l)))
+            (((Constructor ((path ()) (base [])) ())
+              (Constructor ((path ()) (base [])) ()))
+             ((Constructor ((path ()) (base cons))
                ((Variable x) (Variable l)))
-              (Constructor ((path_name ((path ()) (base cons))) (depth 1))
-               ((Apply
-                 (Variable ((path_name ((path ()) (base f))) (depth 0)))
-                 ((Variable ((path_name ((path ()) (base x))) (depth 0)))))
-                (Apply
-                 (Variable
-                  ((path_name ((path ()) (base map2_coq_rec))) (depth 0)))
-                 ((Variable ((path_name ((path ()) (base f))) (depth 0)))
-                  (Variable ((path_name ((path ()) (base l))) (depth 0))))))))))))))
-       (Apply
-        (Variable ((path_name ((path ()) (base map2_coq_rec))) (depth 0)))
-        ((Variable ((path_name ((path ()) (base f))) (depth 0)))
-         (Variable ((path_name ((path ()) (base l))) (depth 0))))))))))))
+              (Constructor ((path ()) (base cons))
+               ((Apply (Variable ((path ()) (base f)))
+                 ((Variable ((path ()) (base x)))))
+                (Apply (Variable ((path ()) (base map2_coq_rec)))
+                 ((Variable ((path ()) (base f)))
+                  (Variable ((path ()) (base l))))))))))))))
+       (Apply (Variable ((path ()) (base map2_coq_rec)))
+        ((Variable ((path ()) (base f))) (Variable ((path ()) (base l))))))))))))

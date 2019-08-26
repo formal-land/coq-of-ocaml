@@ -35,8 +35,8 @@ Fixpoint sum (l : t2 Z) : Z :=
   | D2 x xs => Z.add x (sum xs)
   end.
 
-Definition s {A : Type} (x : A) : Z :=
-  match x with
+Definition s {A : Type} (function_parameter : A) : Z :=
+  match function_parameter with
   | _ => sum (of_list (cons 5 (cons 7 (cons 3 []))))
   end.
 

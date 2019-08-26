@@ -3,19 +3,18 @@
     ((is_rec (New false))
      (cases
       ((((name b) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base bool))) (depth 2)) ()))))
-        (Constructor ((path_name ((path ()) (base false))) (depth 2)) ()))))))
+         (typ ((Apply ((path ()) (base bool)) ()))))
+        (Constructor ((path ()) (base false)) ()))))))
    (Value
     ((is_rec (New false))
      (cases
       ((((name n) (typ_vars ()) (args ())
-         (typ ((Apply ((path_name ((path ()) (base Z))) (depth 2)) ()))))
+         (typ ((Apply ((path ()) (base Z)) ()))))
         (Constant (Int 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())
-       (typ ((Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))))
-      (Apply (Variable ((path_name ((path (Z)) (base add))) (depth 1)))
-       ((Variable ((path_name ((path (M)) (base n))) (depth 0)))
-        (Constant (Int 2))))))))))
+       (typ ((Apply ((path ()) (base Z)) ()))))
+      (Apply (Variable ((path (Z)) (base add)))
+       ((Variable ((path (M)) (base n))) (Constant (Int 2))))))))))

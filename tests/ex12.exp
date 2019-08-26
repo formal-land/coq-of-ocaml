@@ -3,38 +3,31 @@
    (NonGadt
     ((Leaf ())
      (Node
-      ((Apply ((path_name ((path ()) (base tree))) (depth 0)) ())
-       (Apply ((path_name ((path ()) (base Z))) (depth 1)) ())
-       (Apply ((path_name ((path ()) (base tree))) (depth 0)) ())))))))
+      ((Apply ((path ()) (base tree)) ()) (Apply ((path ()) (base Z)) ())
+       (Apply ((path ()) (base tree)) ())))))))
  (Value
   ((is_rec (New true))
    (cases
     ((((name find) (typ_vars ())
        (args
-        ((x (Apply ((path_name ((path ()) (base Z))) (depth 1)) ()))
-         (t (Apply ((path_name ((path ()) (base tree))) (depth 0)) ()))))
-       (typ ((Apply ((path_name ((path ()) (base bool))) (depth 1)) ()))))
-      (Match (Variable ((path_name ((path ()) (base t))) (depth 0)))
-       (((Constructor ((path_name ((path ()) (base Leaf))) (depth 0)) ())
-         (Constructor ((path_name ((path ()) (base false))) (depth 1)) ()))
-        ((Constructor ((path_name ((path ()) (base Node))) (depth 0))
+        ((x (Apply ((path ()) (base Z)) ()))
+         (t (Apply ((path ()) (base tree)) ()))))
+       (typ ((Apply ((path ()) (base bool)) ()))))
+      (Match (Variable ((path ()) (base t)))
+       (((Constructor ((path ()) (base Leaf)) ())
+         (Constructor ((path ()) (base false)) ()))
+        ((Constructor ((path ()) (base Node))
           ((Variable t1) (Variable x') (Variable t2)))
          (IfThenElse
-          (Apply
-           (Variable
-            ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
-           ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-            (Variable ((path_name ((path ()) (base x'))) (depth 0)))))
-          (Apply (Variable ((path_name ((path ()) (base find))) (depth 0)))
-           ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-            (Variable ((path_name ((path ()) (base t1))) (depth 0)))))
+          (Apply (Variable ((path (OCaml Pervasives)) (base lt)))
+           ((Variable ((path ()) (base x))) (Variable ((path ()) (base x')))))
+          (Apply (Variable ((path ()) (base find)))
+           ((Variable ((path ()) (base x))) (Variable ((path ()) (base t1)))))
           (IfThenElse
-           (Apply
-            (Variable
-             ((path_name ((path (OCaml Pervasives)) (base lt))) (depth 1)))
-            ((Variable ((path_name ((path ()) (base x'))) (depth 0)))
-             (Variable ((path_name ((path ()) (base x))) (depth 0)))))
-           (Apply (Variable ((path_name ((path ()) (base find))) (depth 0)))
-            ((Variable ((path_name ((path ()) (base x))) (depth 0)))
-             (Variable ((path_name ((path ()) (base t2))) (depth 0)))))
-           (Constructor ((path_name ((path ()) (base true))) (depth 1)) ()))))))))))))
+           (Apply (Variable ((path (OCaml Pervasives)) (base lt)))
+            ((Variable ((path ()) (base x')))
+             (Variable ((path ()) (base x)))))
+           (Apply (Variable ((path ()) (base find)))
+            ((Variable ((path ()) (base x)))
+             (Variable ((path ()) (base t2)))))
+           (Constructor ((path ()) (base true)) ()))))))))))))
