@@ -207,6 +207,9 @@
         (Defined
          (Apply (PathName ((path ()) (base list)))
           ((Apply (PathName ((path ()) (base string))) ())))))))
+     (Value boxed ()
+      (Apply (Access (PathName ((path ()) (base OPS))) ((path (S)) (base t)))
+       ()))
      (Value size () (Apply (PathName ((path ()) (base Z))) ()))
      (TypSynonym table (a)
       (Apply (PathName ((path ()) (base list))) ((Variable a))))))

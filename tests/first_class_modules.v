@@ -109,6 +109,7 @@ Record Boxed_set (elt : Type) := {
   OPS : {t : Type & S.SET elt t};
   OPS' : {'(elt, t) : _ & S.SET elt t};
   OPS'' : {_ : unit & S.SET elt (list string)};
+  boxed : (projT2 OPS).(S.t);
   size : Z;
   table (a : Type) := list a;
 }.
@@ -117,6 +118,7 @@ Arguments elt_ty {_} _.
 Arguments OPS {_} _.
 Arguments OPS' {_} _.
 Arguments OPS'' {_} _.
+Arguments boxed {_} _.
 Arguments size {_} _.
 Arguments table {_} _.
 
