@@ -17,6 +17,7 @@ type t = {
 
 let of_signature (signature : signature) : t =
   let of_signature_item (signature_item : signature_item) : item =
+    let env = Envaux.env_of_only_summary signature_item.sig_env in
     let loc = Loc.of_location signature_item.sig_loc in
     match signature_item.sig_desc with
     | Tsig_attribute _ -> Error.raise loc "Signature item `attribute` not handled."
@@ -41,13 +42,13 @@ let of_signature (signature : signature) : t =
       let typ_args = type_params |> List.map (fun typ_param ->
         Type.of_type_expr_variable loc typ_param
       ) in
-      let typ = Type.of_type_expr loc typ in
+      let typ = Type.of_type_expr env loc typ in
       TypSynonym (name, typ_args, typ)
     | Tsig_type (_, _) -> Error.raise loc "Mutual type definitions in signatures not handled."
     | Tsig_typext _ -> Error.raise loc "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
-      let typ = Type.of_type_expr loc ctyp_type in
+      let typ = Type.of_type_expr env loc ctyp_type in
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       Value (name, typ_args, typ) in
   {

@@ -2,7 +2,7 @@
   ((is_rec (New false))
    (cases
     ((((name n) (typ_vars ()) (args ())
-       (typ ((Apply ((path ()) (base Z)) ()))))
+       (typ ((Apply (PathName ((path ()) (base Z))) ()))))
       (Match
        (Tuple
         ((Constructor ((path ()) (base cons))
@@ -16,12 +16,12 @@
              (Constructor ((path ()) (base cons))
               (Any (Constructor ((path ()) (base [])) ())))))
            (Constructor ((path ()) (base true)) ())))
-         (Variable ((path ()) (base x))))
+         (Variable (PathName ((path ()) (base x)))))
         ((Tuple
           ((Constructor ((path ()) (base cons))
             (Any
              (Constructor ((path ()) (base cons))
               ((Variable y) (Constructor ((path ()) (base [])) ())))))
            (Constructor ((path ()) (base false)) ())))
-         (Variable ((path ()) (base y))))
+         (Variable (PathName ((path ()) (base y)))))
         (Any (Constant (Int 0)))))))))))

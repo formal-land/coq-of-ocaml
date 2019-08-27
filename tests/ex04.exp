@@ -2,20 +2,21 @@
   ((is_rec (New false))
    (cases
     ((((name u) (typ_vars ()) (args ())
-       (typ ((Apply ((path ()) (base unit)) ()))))
+       (typ ((Apply (PathName ((path ()) (base unit))) ()))))
       (Constructor ((path ()) (base tt)) ()))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name l1) (typ_vars (A)) (args ())
-       (typ ((Apply ((path ()) (base list)) ((Variable A))))))
+       (typ ((Apply (PathName ((path ()) (base list))) ((Variable A))))))
       (Constructor ((path ()) (base [])) ()))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name l2) (typ_vars ()) (args ())
        (typ
-        ((Apply ((path ()) (base list)) ((Apply ((path ()) (base Z)) ()))))))
+        ((Apply (PathName ((path ()) (base list)))
+          ((Apply (PathName ((path ()) (base Z))) ()))))))
       (Constructor ((path ()) (base cons))
        ((Constant (Int 1)) (Constructor ((path ()) (base [])) ()))))))))
  (Value
@@ -23,7 +24,8 @@
    (cases
     ((((name l3) (typ_vars ()) (args ())
        (typ
-        ((Apply ((path ()) (base list)) ((Apply ((path ()) (base Z)) ()))))))
+        ((Apply (PathName ((path ()) (base list)))
+          ((Apply (PathName ((path ()) (base Z))) ()))))))
       (Constructor ((path ()) (base cons))
        ((Constant (Int 1))
         (Constructor ((path ()) (base cons))
@@ -38,30 +40,31 @@
   ((is_rec (New false))
    (cases
     ((((name o1) (typ_vars (A)) (args ())
-       (typ ((Apply ((path ()) (base option)) ((Variable A))))))
+       (typ ((Apply (PathName ((path ()) (base option))) ((Variable A))))))
       (Constructor ((path ()) (base None)) ()))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name o2) (typ_vars ()) (args ())
        (typ
-        ((Apply ((path ()) (base option)) ((Apply ((path ()) (base Z)) ()))))))
+        ((Apply (PathName ((path ()) (base option)))
+          ((Apply (PathName ((path ()) (base Z))) ()))))))
       (Constructor ((path ()) (base Some)) ((Constant (Int 12)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name c) (typ_vars ()) (args ())
-       (typ ((Apply ((path ()) (base ascii)) ()))))
+       (typ ((Apply (PathName ((path ()) (base ascii))) ()))))
       (Constant (Char g)))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name s1) (typ_vars ()) (args ())
-       (typ ((Apply ((path ()) (base string)) ()))))
+       (typ ((Apply (PathName ((path ()) (base string))) ()))))
       (Constant (String bla)))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name s2) (typ_vars ()) (args ())
-       (typ ((Apply ((path ()) (base string)) ()))))
+       (typ ((Apply (PathName ((path ()) (base string))) ()))))
       (Constant (String "\""))))))))

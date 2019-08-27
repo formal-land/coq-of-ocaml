@@ -24,7 +24,7 @@ end
     simplify the importation in Coq. *)
 type t =
   | Constant of Constant.t
-  | Variable of PathName.t
+  | Variable of MixedPath.t
   | Tuple of t list (** A tuple of expressions. *)
   | Constructor of PathName.t * t list
     (** A constructor name and a list of arguments. *)
@@ -52,9 +52,10 @@ let rec open_function (e : t) : Name.t list * t =
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t =
   let l = Loc.of_location e.exp_loc in
+  let env = Envaux.env_of_only_summary e.exp_env in
   match e.exp_desc with
   | Texp_ident (path, _, _) ->
-    let x = PathName.of_path l path in
+    let x = MixedPath.of_path env l path in
     Variable x
   | Texp_constant constant -> Constant (Constant.of_constant l constant)
   | Texp_let (_, [{ vb_pat = p; vb_expr = e1 }], e2)
@@ -141,8 +142,7 @@ and open_cases (typ_vars : Name.t Name.Map.t) (cases : case list) : Name.t * t =
     let p = Pattern.of_pattern p in
     (p, of_expression typ_vars e)) in
   let name = Name.of_string "function_parameter" in
-  let path_name = PathName.of_name [] name in
-  (name, Match (Variable path_name, cases))
+  (name, Match (Variable (MixedPath.of_name name), cases))
 
 and import_let_fun (loc : Loc.t)
   (typ_vars : Name.t Name.Map.t) (is_rec : Asttypes.rec_flag)
@@ -156,8 +156,9 @@ and import_let_fun (loc : Loc.t)
     | Pattern.Variable x -> (x, e, loc)
     | _ -> Error.raise loc "A variable name instead of a pattern was expected.") in
   let cases = cases |> List.map (fun (x, e, loc) ->
+    let env = Envaux.env_of_only_summary e.exp_env in
     let (e_typ, typ_vars, new_typ_vars) =
-      Type.of_type_expr_new_typ_vars loc typ_vars e.exp_type in
+      Type.of_type_expr_new_typ_vars env loc typ_vars e.exp_type in
     let e = of_expression typ_vars e in
     let (args_names, e_body) = open_function e in
     let (args_typs, e_body_typ) =
@@ -178,7 +179,7 @@ and import_let_fun (loc : Loc.t)
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   match e with
   | Constant c -> Constant.to_coq c
-  | Variable x -> PathName.to_coq x
+  | Variable x -> MixedPath.to_coq x
   | Tuple es ->
     if es = [] then
       !^ "tt"

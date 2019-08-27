@@ -9,7 +9,11 @@ module Constructors = struct
     | NonGadt of (Name.t * Type.t list) list
     [@@deriving sexp]
 
-  let rec of_ocaml (defined_typ : Type.t) (cases : Types.constructor_declaration list) : t =
+  let rec of_ocaml
+    (env : Env.t)
+    (defined_typ : Type.t)
+    (cases : Types.constructor_declaration list)
+    : t =
     match cases with
     | [] -> NonGadt []
     | { cd_args; cd_id; cd_loc; cd_res; } :: cases ->
@@ -17,14 +21,14 @@ module Constructors = struct
       let loc = Loc.of_location cd_loc in
       let typs =
         match cd_args with
-        | Cstr_tuple typs -> List.map (fun typ -> Type.of_type_expr loc typ) typs
+        | Cstr_tuple typs -> List.map (fun typ -> Type.of_type_expr env loc typ) typs
         | Cstr_record _ ->
           let loc = Loc.of_location cd_loc in
           Error.raise loc "Unhandled named constructor parameters." in
       let res_typ =
         match cd_res with
         | None -> None
-        | Some res -> Some (Type.of_type_expr loc res) in
+        | Some res -> Some (Type.of_type_expr env loc res) in
       let res_typ_or_defined_typ =
         match res_typ with
         | None -> defined_typ
@@ -32,7 +36,7 @@ module Constructors = struct
       (* We need to compute the free variables to add `forall` annotations in Coq as
          polymorphic variables cannot be infered. *)
       let free_typ_vars = Name.Set.elements (Type.typ_args_of_typs (res_typ_or_defined_typ :: typs)) in
-      let constructors = of_ocaml defined_typ cases in
+      let constructors = of_ocaml env defined_typ cases in
       (* In case of types mixing GADT and non-GADT constructors, we automatically lift
          to a GADT type. *)
       match (res_typ, constructors) with
@@ -62,7 +66,7 @@ type t =
   | Abstract of Name.t * Name.t list
   [@@deriving sexp]
 
-let of_ocaml (loc : Loc.t) (typs : type_declaration list) : t =
+let of_ocaml (env : Env.t) (loc : Loc.t) (typs : type_declaration list) : t =
   match typs with
   | [] -> Error.raise loc "Unexpected type definition with no case."
   | [ { typ_id; typ_type } ] ->
@@ -71,23 +75,23 @@ let of_ocaml (loc : Loc.t) (typs : type_declaration list) : t =
       List.map (Type.of_type_expr_variable loc) typ_type.type_params in
     (match typ_type.type_kind with
     | Type_variant cases ->
-      let path_name = PathName.of_name [] name in
+      let mixed_path = MixedPath.of_name name in
       (* The `defined_typ` is useful to give a default return type for non-GADT
          constructors in GADT types. *)
       let defined_typ = Type.Apply (
-        path_name,
+        mixed_path,
         List.map (fun typ_arg -> Type.Variable typ_arg) typ_args
       ) in
-      let constructors = Constructors.of_ocaml defined_typ cases in
+      let constructors = Constructors.of_ocaml env defined_typ cases in
       Inductive (name, typ_args, constructors)
     | Type_record (fields, _) ->
       let fields =
         fields |> List.map (fun { Types.ld_id = x; ld_type = typ } ->
-          (Name.of_ident x, Type.of_type_expr loc typ)) in
+          (Name.of_ident x, Type.of_type_expr env loc typ)) in
       Record (name, fields)
     | Type_abstract ->
       (match typ_type.type_manifest with
-      | Some typ -> Synonym (name, typ_args, Type.of_type_expr loc typ)
+      | Some typ -> Synonym (name, typ_args, Type.of_type_expr env loc typ)
       | None -> Abstract (name, typ_args))
       | Type_open -> Error.raise loc "Open type definition not handled.")
   | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."

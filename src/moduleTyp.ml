@@ -50,7 +50,7 @@ let of_ocaml_module_with_substitutions
       | Twith_type { typ_loc; typ_type } ->
         begin match typ_type with
         | { type_kind = Type_abstract; type_manifest = Some typ } ->
-          (Name.of_ident ident, Type.of_type_expr (Loc.of_location typ_loc) typ)
+          (Name.of_ident ident, Type.of_type_expr env (Loc.of_location typ_loc) typ)
         | _ ->
           Error.raise loc (
             "Can only do `with` on types in module types using type expressions " ^

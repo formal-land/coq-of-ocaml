@@ -2,7 +2,7 @@
   ((is_rec (New false))
    (cases
     ((((name t0) (typ_vars ()) (args ())
-       (typ ((Apply ((path ()) (base unit)) ()))))
+       (typ ((Apply (PathName ((path ()) (base unit))) ()))))
       (Constructor ((path ()) (base tt)) ()))))))
  (Value
   ((is_rec (New false))
@@ -10,8 +10,8 @@
     ((((name t1) (typ_vars ()) (args ())
        (typ
         ((Tuple
-          ((Apply ((path ()) (base ascii)) ())
-           (Apply ((path ()) (base string)) ()))))))
+          ((Apply (PathName ((path ()) (base ascii))) ())
+           (Apply (PathName ((path ()) (base string))) ()))))))
       (Tuple ((Constant (Char c)) (Constant (String one)))))))))
  (Value
   ((is_rec (New false))
@@ -19,9 +19,11 @@
     ((((name t2) (typ_vars ()) (args ())
        (typ
         ((Tuple
-          ((Apply ((path ()) (base Z)) ()) (Apply ((path ()) (base Z)) ())
-           (Apply ((path ()) (base Z)) ()) (Apply ((path ()) (base bool)) ())
-           (Apply ((path ()) (base bool)) ()))))))
+          ((Apply (PathName ((path ()) (base Z))) ())
+           (Apply (PathName ((path ()) (base Z))) ())
+           (Apply (PathName ((path ()) (base Z))) ())
+           (Apply (PathName ((path ()) (base bool))) ())
+           (Apply (PathName ((path ()) (base bool))) ()))))))
       (Tuple
        ((Constant (Int 1)) (Constant (Int 2)) (Constant (Int 3))
         (Constructor ((path ()) (base false)) ())
@@ -32,12 +34,15 @@
     ((((name f) (typ_vars (A)) (args ((x (Variable A))))
        (typ ((Tuple ((Variable A) (Variable A))))))
       (Tuple
-       ((Variable ((path ()) (base x))) (Variable ((path ()) (base x))))))))))
+       ((Variable (PathName ((path ()) (base x))))
+        (Variable (PathName ((path ()) (base x)))))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name t3) (typ_vars ()) (args ())
        (typ
         ((Tuple
-          ((Apply ((path ()) (base Z)) ()) (Apply ((path ()) (base Z)) ()))))))
-      (Apply (Variable ((path ()) (base f))) ((Constant (Int 12))))))))))
+          ((Apply (PathName ((path ()) (base Z))) ())
+           (Apply (PathName ((path ()) (base Z))) ()))))))
+      (Apply (Variable (PathName ((path ()) (base f))))
+       ((Constant (Int 12))))))))))
