@@ -56,6 +56,13 @@ let of_signature (signature : signature) : t =
     typ_params = ModuleTyp.get_signature_typ_params signature.sig_type;
   }
 
+let get_name_of_item (signature_item : item) : Name.t =
+  match signature_item with
+  | Module (name, _) -> name
+  | TypExistential name -> name
+  | TypSynonym (name, _, _) -> name
+  | Value (name, _, _) -> name
+
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
   | Module (name, module_typ) ->
@@ -84,9 +91,19 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
     | [] -> empty
     | _ ->
       !^ "(" ^-^
-      separate space (List.map (fun typ_param -> !^ typ_param) signature.typ_params) ^^
+      separate space (signature.typ_params |> List.map (fun typ_param -> !^ typ_param)) ^^
       !^ ":" ^^ !^ "Type" ^-^ !^ ")"
     ) ^^
     !^ ":=" ^^ !^ "{" ^^ newline ^^
     indent (separate newline (List.map (fun item -> to_coq_item item ^-^ !^ ";") signature.items)) ^^ newline ^^
-    !^ "}" ^-^ !^ ".")
+    !^ "}" ^-^ !^ ".") ^^
+    (match signature.typ_params with
+    | [] -> empty
+    | _ ->
+      newline ^^ separate newline (signature.items |> List.map (fun item ->
+        !^ "Arguments" ^^ Name.to_coq (get_name_of_item item) ^^
+        braces (
+          separate space (signature.typ_params |> List.map (fun _ -> !^ "_"))
+        ) ^^ !^ "_" ^-^ !^ "."
+      ))
+    )
