@@ -5,7 +5,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Module S.
-  Record SET (elt t : Type) := {
+  Record SET {elt t : Type} := {
     elt := elt;
     t := t;
     empty : t;
@@ -38,37 +38,7 @@ Module S.
     find_last_opt : (elt -> bool) -> t -> option elt;
     of_list : (list elt) -> t;
   }.
-  Arguments elt {_ _} _.
-  Arguments t {_ _} _.
-  Arguments empty {_ _} _.
-  Arguments is_empty {_ _} _.
-  Arguments mem {_ _} _.
-  Arguments add {_ _} _.
-  Arguments singleton {_ _} _.
-  Arguments remove {_ _} _.
-  Arguments union {_ _} _.
-  Arguments inter {_ _} _.
-  Arguments diff {_ _} _.
-  Arguments compare {_ _} _.
-  Arguments equal {_ _} _.
-  Arguments subset {_ _} _.
-  Arguments iter {_ _} _.
-  Arguments map {_ _} _.
-  Arguments fold {_ _} _.
-  Arguments for_all {_ _} _.
-  Arguments _exists {_ _} _.
-  Arguments filter {_ _} _.
-  Arguments partition {_ _} _.
-  Arguments cardinal {_ _} _.
-  Arguments elements {_ _} _.
-  Arguments min_elt_opt {_ _} _.
-  Arguments max_elt_opt {_ _} _.
-  Arguments choose_opt {_ _} _.
-  Arguments split {_ _} _.
-  Arguments find_opt {_ _} _.
-  Arguments find_first_opt {_ _} _.
-  Arguments find_last_opt {_ _} _.
-  Arguments of_list {_ _} _.
+  Arguments SET : clear implicits.
 End S.
 
 Inductive type_annot : Type :=
@@ -103,7 +73,7 @@ Arguments Pair_key {a b position} _ _ _.
 
 Definition comparable_ty (a : Type) := comparable_struct a comb.
 
-Record Boxed_set (elt : Type) := {
+Record Boxed_set {elt : Type} := {
   elt := elt;
   elt_ty : comparable_ty elt;
   OPS : {t : Type & S.SET elt t};
@@ -113,23 +83,14 @@ Record Boxed_set (elt : Type) := {
   size : Z;
   table (a : Type) := list a;
 }.
-Arguments elt {_} _.
-Arguments elt_ty {_} _.
-Arguments OPS {_} _.
-Arguments OPS' {_} _.
-Arguments OPS'' {_} _.
-Arguments boxed {_} _.
-Arguments size {_} _.
-Arguments table {_} _.
+Arguments Boxed_set : clear implicits.
 
-Record Triple (a b c : Type) := {
+Record Triple {a b c : Type} := {
   a := a;
   b := b;
   c := c;
 }.
-Arguments a {_ _ _} _.
-Arguments b {_ _ _} _.
-Arguments c {_ _ _} _.
+Arguments Triple : clear implicits.
 
 Record UsingTriple := {
   T : {'(a, b, c) : _ & Triple a b c};
