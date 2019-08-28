@@ -3,14 +3,18 @@ open Typedtree
 open Sexplib.Std
 open SmartPrint
 
+(** [Access] corresponds to projections from first-class modules. *)
 type t =
   | Access of t * PathName.t
   | PathName of PathName.t
   [@@deriving sexp]
 
+(** Shortcut to introduce new local variables for example. *)
 let of_name (name : Name.t) : t =
   PathName (PathName.of_name [] name)
 
+(** Recursively get all the module type declarations inside a module declaration.
+    We retreive the path prefix and definition of each.  *)
 let rec get_modtype_declarations_of_module_declaration
   (module_declaration : Types.module_declaration)
   : (Ident.t list * Types.modtype_declaration) list =
@@ -40,8 +44,14 @@ let is_modtype_declaration_similar_to_shape
 let rec apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
   List.fold_left (fun path ident -> Path.Pdot (path, Ident.name ident, 0)) path (List.rev idents)
 
+(** Find the [Path.t] of all the signature definitions which are found to be similar
+    to [signature]. If the signature is the one of a module used as a namespace there
+    should be none. If the signature is the one a first-class module ther should be
+    exactly one. There may be more than one result if two signatures have the same
+    or similar definitions. In this case we fail with an explicit error message. *)
 let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t list =
   let shape = SignatureShape.of_signature signature in
+  (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
     Env.fold_modtypes
       (fun _ signature_path modtype_declaration signature_paths ->
@@ -51,6 +61,7 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t
           signature_paths
       )
       None env [] in
+  (* We explore signatures in modules in the current namespace. *)
   let similar_signature_paths_in_modules =
     Env.fold_modules
       (fun _ module_path module_declaration signature_paths ->
@@ -72,10 +83,12 @@ let rec of_path_aux (env : Env.t) (loc : Loc.t) (path : Path.t) : Path.t * (Path
     let (path, fields) = of_path_aux env loc path in
     begin match fields with
     | [] ->
+      (* Get the module declaration of the current [path] to check if it refers
+         to a first-class module. *)
       begin match Env.find_module path env with
       | module_declaration ->
-      begin match module_declaration.md_type with
-      | Mty_signature signature ->
+        begin match module_declaration.md_type with
+        | Mty_signature signature ->
           let signature_paths = find_similar_signatures env signature in
           begin match signature_paths with
           | [] -> (Pdot (path, field_string, pos), [])
@@ -91,10 +104,12 @@ let rec of_path_aux (env : Env.t) (loc : Loc.t) (path : Path.t) : Path.t * (Path
         end
       | exception _ -> Error.raise loc "Unexpected module not found"
       end
-    | _ :: _ -> Error.raise loc "Does not handled nested accesses into first-class modules (yet)"
+    | _ :: _ -> Error.raise loc "Nested accesses into first-class modules are not handled (yet)"
     end
   | Pident _ -> (path, [])
 
+(** The [env] must include the eventual first-class module signature definition of
+    the corresponding projection in the [path]. *)
 let of_path (env : Env.t) (loc : Loc.t) (path : Path.t) : t =
   let (path, fields) = of_path_aux env loc path in
   let path_name = PathName.of_path loc path in

@@ -1,3 +1,8 @@
+(** The shape of a signature to simplify comparisons. Two signatures are considered
+    similar if they have the same shape. The shape only contains the names of the
+    value and type definitions (without the values of the types for example), and such
+    recursively for each sub-module. Basically, shapes are trees of strings. *)
+
 type t = item list
 and item =
   | Module of Name.t * t
@@ -17,6 +22,7 @@ let rec of_signature (signature : Types.signature) : t =
   signature |> Util.List.filter_map of_signature_item
 
 let rec are_equal (shape1 : t) (shape2 : t) : bool =
+  (* To speedup the comparison, with first compare the lengths. *)
   List.length shape1 = List.length shape2 &&
   let compare_items = fun item1 item2 ->
     match (item1, item2) with
