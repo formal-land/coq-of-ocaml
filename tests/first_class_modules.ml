@@ -1,5 +1,3 @@
-(** First-class modules *)
-
 module S = struct
   module type SET = sig
     type elt

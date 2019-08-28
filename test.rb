@@ -136,16 +136,8 @@ class Tests
   end
 end
 
-black_list = [
-  "ex09",
-  "ex20",
-  "ex25",
-  "ex27",
-  "ex33"
-]
-
 test_files = Dir.glob('tests/*.ml').select do |file_name|
-  not black_list.any? {|black_listed_test| "tests/#{black_listed_test}.ml" == file_name}
+  not file_name.include?("disabled")
 end
 tests = Tests.new(test_files)
 tests.compile
