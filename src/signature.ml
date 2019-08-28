@@ -17,6 +17,7 @@ type t = {
 
 let of_signature (signature : signature) : t =
   let of_signature_item (signature_item : signature_item) : item =
+    let env = Envaux.env_of_only_summary signature_item.sig_env in
     let loc = Loc.of_location signature_item.sig_loc in
     match signature_item.sig_desc with
     | Tsig_attribute _ -> Error.raise loc "Signature item `attribute` not handled."
@@ -41,19 +42,26 @@ let of_signature (signature : signature) : t =
       let typ_args = type_params |> List.map (fun typ_param ->
         Type.of_type_expr_variable loc typ_param
       ) in
-      let typ = Type.of_type_expr loc typ in
+      let typ = Type.of_type_expr env loc typ in
       TypSynonym (name, typ_args, typ)
     | Tsig_type (_, _) -> Error.raise loc "Mutual type definitions in signatures not handled."
     | Tsig_typext _ -> Error.raise loc "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
-      let typ = Type.of_type_expr loc ctyp_type in
+      let typ = Type.of_type_expr env loc ctyp_type in
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       Value (name, typ_args, typ) in
   {
     items = List.map of_signature_item signature.sig_items;
     typ_params = ModuleTyp.get_signature_typ_params signature.sig_type;
   }
+
+let get_name_of_item (signature_item : item) : Name.t =
+  match signature_item with
+  | Module (name, _) -> name
+  | TypExistential name -> name
+  | TypSynonym (name, _, _) -> name
+  | Value (name, _, _) -> name
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
@@ -83,9 +91,19 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
     | [] -> empty
     | _ ->
       !^ "(" ^-^
-      separate space (List.map (fun typ_param -> !^ typ_param) signature.typ_params) ^^
+      separate space (signature.typ_params |> List.map (fun typ_param -> !^ typ_param)) ^^
       !^ ":" ^^ !^ "Type" ^-^ !^ ")"
     ) ^^
     !^ ":=" ^^ !^ "{" ^^ newline ^^
     indent (separate newline (List.map (fun item -> to_coq_item item ^-^ !^ ";") signature.items)) ^^ newline ^^
-    !^ "}" ^-^ !^ ".")
+    !^ "}" ^-^ !^ ".") ^^
+    (match signature.typ_params with
+    | [] -> empty
+    | _ ->
+      newline ^^ separate newline (signature.items |> List.map (fun item ->
+        !^ "Arguments" ^^ Name.to_coq (get_name_of_item item) ^^
+        braces (
+          separate space (signature.typ_params |> List.map (fun _ -> !^ "_"))
+        ) ^^ !^ "_" ^-^ !^ "."
+      ))
+    )

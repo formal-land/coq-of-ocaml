@@ -48,13 +48,14 @@ type t =
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list =
   let of_structure_item (item : structure_item) : t =
+    let env = Envaux.env_of_only_summary item.str_env in
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
     | Tstr_value (is_rec, cases) ->
       let def = Exp.import_let_fun loc Name.Map.empty is_rec cases in
       Value def
     | Tstr_type (_, typs) ->
-      let def = TypeDefinition.of_ocaml loc typs in
+      let def = TypeDefinition.of_ocaml env loc typs in
       TypeDefinition def
     | Tstr_exception _ ->
       Error.raise loc (

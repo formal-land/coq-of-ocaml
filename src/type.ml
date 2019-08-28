@@ -7,11 +7,15 @@ type t =
   | Variable of Name.t
   | Arrow of t * t
   | Tuple of t list
-  | Apply of PathName.t * t list
+  | Apply of MixedPath.t * t list
   [@@deriving sexp]
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
-let rec of_type_expr_new_typ_vars (loc : Loc.t) (typ_vars : Name.t Name.Map.t) (typ : Types.type_expr)
+let rec of_type_expr_new_typ_vars
+  (env : Env.t)
+  (loc : Loc.t)
+  (typ_vars : Name.t Name.Map.t)
+  (typ : Types.type_expr)
   : t * Name.t Name.Map.t * Name.Set.t =
   match typ.desc with
   | Tvar None ->
@@ -28,45 +32,49 @@ let rec of_type_expr_new_typ_vars (loc : Loc.t) (typ_vars : Name.t Name.Map.t) (
     let typ = Variable name in
     (typ, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
-    let (typ_x, typ_vars, new_typ_vars_x) = of_type_expr_new_typ_vars loc typ_vars typ_x in
-    let (typ_y, typ_vars, new_typ_vars_y) = of_type_expr_new_typ_vars loc typ_vars typ_y in
+    let (typ_x, typ_vars, new_typ_vars_x) = of_type_expr_new_typ_vars env loc typ_vars typ_x in
+    let (typ_y, typ_vars, new_typ_vars_y) = of_type_expr_new_typ_vars env loc typ_vars typ_y in
     (Arrow (typ_x, typ_y), typ_vars, Name.Set.union new_typ_vars_x new_typ_vars_y)
   | Ttuple typs ->
-    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars loc typ_vars typs in
+    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env loc typ_vars typs in
     (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars loc typ_vars typs in
-    let path_name = PathName.of_path loc path in
-    (Apply (path_name, typs), typ_vars, new_typ_vars)
-  | Tlink typ -> of_type_expr_new_typ_vars loc typ_vars typ
-  | Tpoly (typ, []) -> of_type_expr_new_typ_vars loc typ_vars typ
+    let (typs, typ_vars, new_typ_vars) = of_typs_exprs_new_free_vars env loc typ_vars typs in
+    let mixed_path = MixedPath.of_path env loc path in
+    (Apply (mixed_path, typs), typ_vars, new_typ_vars)
+  | Tlink typ -> of_type_expr_new_typ_vars env loc typ_vars typ
+  | Tpoly (typ, []) -> of_type_expr_new_typ_vars env loc typ_vars typ
   | _ ->
     Error.warn loc "Type not handled.";
     (Variable "unhandled_type", typ_vars, Name.Set.empty)
 
-and of_typs_exprs_new_free_vars (loc : Loc.t) (typ_vars : Name.t Name.Map.t) (typs : Types.type_expr list)
+and of_typs_exprs_new_free_vars
+  (env : Env.t)
+  (loc : Loc.t)
+  (typ_vars : Name.t Name.Map.t)
+  (typs : Types.type_expr list)
   : t list * Name.t Name.Map.t * Name.Set.t =
   let (typs, typ_vars, new_typ_vars) =
     List.fold_left (fun (typs, typ_vars, new_typ_vars) typ ->
-      let (typ, typ_vars, new_typ_vars') = of_type_expr_new_typ_vars loc typ_vars typ in
+      let (typ, typ_vars, new_typ_vars') = of_type_expr_new_typ_vars env loc typ_vars typ in
       (typ :: typs, typ_vars, Name.Set.union new_typ_vars new_typ_vars'))
       ([], typ_vars, Name.Set.empty) typs in
   (List.rev typs, typ_vars, new_typ_vars)
 
-let rec of_type_expr (loc : Loc.t) (typ : Types.type_expr) : t =
+let rec of_type_expr (env : Env.t) (loc : Loc.t) (typ : Types.type_expr) : t =
   match typ.desc with
   | Tvar None ->
     Error.raise loc "The placeholders `_` in types are not handled."
   | Tvar (Some x) -> Variable x
   | Tarrow (_, typ_x, typ_y, _) ->
-    Arrow (of_type_expr loc typ_x, of_type_expr loc typ_y)
+    Arrow (of_type_expr env loc typ_x, of_type_expr env loc typ_y)
   | Ttuple typs ->
-    Tuple (List.map (of_type_expr loc) typs)
+    Tuple (List.map (of_type_expr env loc) typs)
   | Tconstr (path, typs, _) ->
-    let path_name = PathName.of_path loc path in
-    Apply (path_name, List.map (of_type_expr loc) typs)
-  | Tlink typ -> of_type_expr loc typ
-  | Tpoly (typ, []) -> of_type_expr loc typ
+    let mixed_path = MixedPath.of_path env loc path in
+    Apply (mixed_path, List.map (of_type_expr env loc) typs)
+  | Tlink typ -> of_type_expr env loc typ
+  | Tpoly (typ, []) -> of_type_expr env loc typ
   | _ ->
     Error.warn loc "Type not handled.";
     Variable "unhandled_type"
@@ -113,4 +121,4 @@ let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
         (List.map (to_coq true) typs))
   | Apply (path, typs) ->
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
-      (PathName.to_coq path :: List.map (to_coq true) typs)
+      (MixedPath.to_coq path :: List.map (to_coq true) typs)

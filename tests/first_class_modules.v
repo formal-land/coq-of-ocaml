@@ -38,6 +38,37 @@ Module S.
     find_last_opt : (elt -> bool) -> t -> option elt;
     of_list : (list elt) -> t;
   }.
+  Arguments elt {_ _} _.
+  Arguments t {_ _} _.
+  Arguments empty {_ _} _.
+  Arguments is_empty {_ _} _.
+  Arguments mem {_ _} _.
+  Arguments add {_ _} _.
+  Arguments singleton {_ _} _.
+  Arguments remove {_ _} _.
+  Arguments union {_ _} _.
+  Arguments inter {_ _} _.
+  Arguments diff {_ _} _.
+  Arguments compare {_ _} _.
+  Arguments equal {_ _} _.
+  Arguments subset {_ _} _.
+  Arguments iter {_ _} _.
+  Arguments map {_ _} _.
+  Arguments fold {_ _} _.
+  Arguments for_all {_ _} _.
+  Arguments _exists {_ _} _.
+  Arguments filter {_ _} _.
+  Arguments partition {_ _} _.
+  Arguments cardinal {_ _} _.
+  Arguments elements {_ _} _.
+  Arguments min_elt_opt {_ _} _.
+  Arguments max_elt_opt {_ _} _.
+  Arguments choose_opt {_ _} _.
+  Arguments split {_ _} _.
+  Arguments find_opt {_ _} _.
+  Arguments find_first_opt {_ _} _.
+  Arguments find_last_opt {_ _} _.
+  Arguments of_list {_ _} _.
 End S.
 
 Inductive type_annot : Type :=
@@ -78,15 +109,27 @@ Record Boxed_set (elt : Type) := {
   OPS : {t : Type & S.SET elt t};
   OPS' : {'(elt, t) : _ & S.SET elt t};
   OPS'' : {_ : unit & S.SET elt (list string)};
+  boxed : (projT2 OPS).(S.t);
   size : Z;
   table (a : Type) := list a;
 }.
+Arguments elt {_} _.
+Arguments elt_ty {_} _.
+Arguments OPS {_} _.
+Arguments OPS' {_} _.
+Arguments OPS'' {_} _.
+Arguments boxed {_} _.
+Arguments size {_} _.
+Arguments table {_} _.
 
 Record Triple (a b c : Type) := {
   a := a;
   b := b;
   c := c;
 }.
+Arguments a {_ _ _} _.
+Arguments b {_ _ _} _.
+Arguments c {_ _ _} _.
 
 Record UsingTriple := {
   T : {'(a, b, c) : _ & Triple a b c};

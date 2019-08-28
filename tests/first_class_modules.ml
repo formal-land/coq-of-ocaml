@@ -61,6 +61,7 @@ module type Boxed_set = sig
   module OPS : S.SET with type elt = elt
   module OPS' : S.SET
   module OPS'' : S.SET with type elt = elt and type t = string list
+  val boxed : OPS.t
   val size : int
   type 'a table = 'a list
 end
