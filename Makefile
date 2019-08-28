@@ -7,7 +7,7 @@ default:
 
 clean:
 	ocamlbuild -clean
-	rm -Rf a.out tests/extraction tests/.ex*.aux tests/ex*.cmo tests/ex*.cmi tests/ex*.cmt tests/Nex* tests/ex*.glob tests/ex*.vo
+	rm -Rf a.out tests/extraction tests/.*.aux tests/*.cmo tests/*.cmi tests/*.cmt tests/Nex* tests/*.glob tests/*.vo
 
 test:
 	ruby test.rb

@@ -1,5 +1,3 @@
-(** GADTs *)
-
 type 'a gre = Arg of 'a
 
 type ('a , 'b) foo =
