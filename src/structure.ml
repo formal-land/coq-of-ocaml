@@ -47,16 +47,16 @@ type t =
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list =
-  let of_structure_item (item : structure_item) : t =
+  let of_structure_item (item : structure_item) : t option =
     let env = Envaux.env_of_only_summary item.str_env in
     let loc = Loc.of_location item.str_loc in
     match item.str_desc with
     | Tstr_value (is_rec, cases) ->
       let def = Exp.import_let_fun loc Name.Map.empty is_rec cases in
-      Value def
+      Some (Value def)
     | Tstr_type (_, typs) ->
       let def = TypeDefinition.of_ocaml env loc typs in
-      TypeDefinition def
+      Some (TypeDefinition def)
     | Tstr_exception _ ->
       Error.raise loc (
         "The definition of exception is not handled.\n\n" ^
@@ -65,23 +65,52 @@ let rec of_structure (structure : structure) : t list =
       )
     | Tstr_open { open_path = path } ->
       let o = Open.of_ocaml loc path in
-      Open o
-    | Tstr_module {mb_id = name;
-      mb_expr = { mod_desc = Tmod_structure structure }}
-    | Tstr_module {mb_id = name;
-      mb_expr = { mod_desc =
-        Tmod_constraint ({ mod_desc = Tmod_structure structure }, _, _, _) }} ->
+      Some (Open o)
+    | Tstr_module {
+        mb_id = name;
+        mb_expr = {
+          mod_desc = Tmod_structure structure;
+          mod_type
+        }
+      }
+    | Tstr_module {
+        mb_id = name;
+        mb_expr = {
+          mod_desc = Tmod_constraint ({ mod_desc = Tmod_structure structure }, _, _, _);
+          mod_type
+        }
+      } ->
       let name = Name.of_ident name in
-      let structures = of_structure structure in
-      Module (name, structures)
-    | Tstr_modtype { mtd_type = None } -> Error.raise loc "Abstract module types not handled."
+      begin match IsFirstClassModule.is_module_typ_first_class env loc mod_type with
+      | None ->
+        let structures = of_structure structure in
+        Some (Module (name, structures))
+      | Some signature_path ->
+        let module_value = Exp.of_structure signature_path structure in
+        Some (Value {
+          is_rec = Recursivity.New false;
+          cases = [
+            (
+              {
+                name;
+                typ_vars = [];
+                args = [];
+                typ = None
+              },
+              module_value
+            )
+          ]
+        })
+      end
+    | Tstr_modtype { mtd_type = None } ->
+      Error.raise loc "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->
       let name = Name.of_ident mtd_id in
       begin
         match mty_desc with
         | Tmty_signature signature ->
           let signature = Signature.of_signature signature in
-          Signature (name, signature)
+          Some (Signature (name, signature))
         | _ -> Error.raise loc "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
@@ -94,19 +123,9 @@ let rec of_structure (structure : structure) : t list =
     | Tstr_class _ -> Error.raise loc "Structure item `class` not handled."
     | Tstr_class_type _ -> Error.raise loc "Structure item `class_type` not handled."
     | Tstr_include _ -> Error.raise loc "Structure item `include` not handled."
-    | Tstr_attribute _ -> Error.raise loc "Structure item `attribute` not handled." in
-  let defs =
-    List.fold_left
-      (fun defs item ->
-        (* We ignore attribute items. *)
-        match item.str_desc with
-        | Tstr_attribute _ -> defs
-        | _ ->
-          let def = of_structure_item item in
-          def :: defs
-      )
-      [] structure.str_items in
-  List.rev defs
+    (* We ignore attribute fields. *)
+    | Tstr_attribute _ -> None in
+  structure.str_items |> Util.List.filter_map of_structure_item
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =

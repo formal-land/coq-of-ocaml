@@ -38,6 +38,7 @@ type t =
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
+  | Module of Type.t list * (PathName.t * t) list (** The value of a first-class module. *)
   [@@deriving sexp]
 
 (** Take a function expression and make explicit the list of arguments and
@@ -174,6 +175,42 @@ and import_let_fun (loc : Loc.t)
     cases = cases;
   }
 
+let of_structure (signature_path : Path.t) (structure : structure) : t =
+  let fields = structure.str_items |> Util.List.filter_map (fun item ->
+    let loc = Loc.of_location item.str_loc in
+    match item.str_desc with
+    | Tstr_eval _ -> Error.raise loc "Eval not handled"
+    | Tstr_value (rec_flag, cases) ->
+      let def = import_let_fun loc Name.Map.empty rec_flag cases in
+      begin match def with
+      | { is_rec = Recursivity.New true } ->
+        Error.raise loc "Recursivity not handled in first-class module values"
+      | { cases = [(header, value)] } ->
+        begin match header with
+        | { name; typ_vars = []; args = [] } ->
+          let path_name = PathName.of_path_and_name loc signature_path name in
+          Some (path_name, value)
+        | _ ->
+          Error.raise loc "This kind of definition of value for first-class modules is not handled (yet)"
+        end
+      | _ -> Error.raise loc "Mutual definitions not handled in first-class module values"
+      end
+    | Tstr_primitive _ -> Error.raise loc "Primitive not handled"
+    | Tstr_type _ -> None
+    | Tstr_typext _ -> Error.raise loc "Type extension not handled"
+    | Tstr_exception _ -> Error.raise loc "Exception not handled"
+    | Tstr_module _ -> Error.raise loc "Modules in first-class module values not handled (yet)"
+    | Tstr_recmodule _ -> Error.raise loc "Recursive modules not handled"
+    | Tstr_modtype _ ->
+      Error.raise loc "Definition of signatures inside first-class module value is not handled"
+    | Tstr_open _ -> Error.raise loc "Open not handled in first-class module value"
+    | Tstr_class _ -> Error.raise loc "Object oriented programming not handled"
+    | Tstr_class_type _ -> Error.raise loc "Object oriented programming not handled"
+    | Tstr_include _ -> Error.raise loc "Include is not handled inside first-class module values"
+    | Tstr_attribute _ -> None
+  ) in
+  Module ([], fields)
+
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
@@ -237,3 +274,24 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
+  | Module (existential_typs, fields) ->
+    Pp.parens paren @@ nest (
+      !^ "existT" ^^ !^ "_" ^^
+      (match existential_typs with
+      | [] -> !^ "unit"
+      | [existential_typ] -> Type.to_coq true existential_typ
+      | _ ->
+        parens @@ nest @@ separate (!^ "," ^^ space) (
+          existential_typs |> List.map (fun existential_typ ->
+            Type.to_coq false existential_typ ^^ !^ ":" ^^ !^ "Type"
+          )
+        )
+      ) ^^
+      nest (
+        !^ "{|" ^^
+        separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
+          nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))
+        ) ^^
+        !^ "|}"
+      )
+    )
