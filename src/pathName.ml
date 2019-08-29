@@ -152,17 +152,30 @@ let of_loc (loc : Longident.t loc) : t =
   of_long_ident loc.txt
 
 (** Import an OCaml [Path.t]. *)
-let of_path (loc : Loc.t) (p : Path.t) : t =
-  let rec aux p : Name.t list * Name.t =
-    match p with
+let of_path (loc : Loc.t) (path : Path.t) : t =
+  let rec aux path : Name.t list * Name.t =
+    match path with
     | Path.Pident x -> ([], Name.of_ident x)
-    | Path.Pdot (p, s, _) ->
-      let (path, base) = aux p in
+    | Path.Pdot (path, s, _) ->
+      let (path, base) = aux path in
       (base :: path, s)
     | Path.Papply _ ->
-      Error.warn loc "Application of paths not handled.";
+      Error.warn loc "Application of paths is not handled.";
       ([], "application_of_paths") in
-  let (path, base) = aux p in
+  let (path, base) = aux path in
+  convert (of_name (List.rev path) base)
+
+let of_path_and_name (loc : Loc.t) (path : Path.t) (name : Name.t) : t =
+  let rec aux p : Name.t list * Name.t =
+    match p with
+    | Path.Pident x -> ([Name.of_ident x], name)
+    | Path.Pdot (p, s, _) ->
+      let (path, base) = aux p in
+      (s :: path, base)
+    | Path.Papply _ ->
+      Error.warn loc "Application of paths is not handled.";
+      ([], "application_of_paths") in
+  let (path, base) = aux path in
   convert (of_name (List.rev path) base)
 
 let to_coq (x : t) : SmartPrint.t =

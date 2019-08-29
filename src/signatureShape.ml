@@ -2,6 +2,7 @@
     similar if they have the same shape. The shape only contains the names of the
     value and type definitions (without the values of the types for example), and such
     recursively for each sub-module. Basically, shapes are trees of strings. *)
+open SmartPrint
 
 type t = item list
 and item =
@@ -39,3 +40,10 @@ let rec are_equal (shape1 : t) (shape2 : t) : bool =
     )
     shape1
     shape2
+
+let rec pp (shape : t) : SmartPrint.t =
+  let rec pp_item (shape_item) : SmartPrint.t =
+    match shape_item with
+    | Module (name, shape) -> Name.to_coq name ^-^ !^ ":" ^^ pp shape
+    | Name name -> Name.to_coq name in
+  OCaml.list pp_item shape
