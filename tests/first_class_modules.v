@@ -73,13 +73,13 @@ Arguments Pair_key {a b position} _ _ _.
 
 Definition comparable_ty (a : Type) := comparable_struct a comb.
 
-Record Boxed_set {elt : Type} := {
+Record Boxed_set {elt OPS_t OPS'_elt OPS'_t : Type} := {
   elt := elt;
   elt_ty : comparable_ty elt;
-  OPS : {t : Type & S.SET elt t};
-  OPS' : {'(elt, t) : _ & S.SET elt t};
-  OPS'' : {_ : unit & S.SET elt (list string)};
-  boxed : (projT2 OPS).(S.t);
+  OPS : S.SET elt OPS_t;
+  OPS' : S.SET OPS'_elt OPS'_t;
+  OPS'' : S.SET elt (list string);
+  boxed : OPS.(S.t);
   size : Z;
   table (a : Type) := list a;
 }.
@@ -92,6 +92,7 @@ Record Triple {a b c : Type} := {
 }.
 Arguments Triple : clear implicits.
 
-Record UsingTriple := {
-  T : {'(a, b, c) : _ & Triple a b c};
+Record UsingTriple {T_a T_b T_c : Type} := {
+  T : Triple T_a T_b T_c;
 }.
+Arguments UsingTriple : clear implicits.

@@ -178,6 +178,16 @@ let of_path_and_name (loc : Loc.t) (path : Path.t) (name : Name.t) : t =
   let (path, base) = aux path in
   convert (of_name (List.rev path) base)
 
+let get_head_and_tail (path_name : t) : Name.t * t option =
+  let { path; base } = path_name in
+  match path with
+  | [] -> (base, None)
+  | head :: path -> (head, Some { path; base })
+
+let add_prefix (prefix : Name.t) (path_name : t) : t =
+  let { path; base } = path_name in
+  { path = prefix :: path; base }
+
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
 

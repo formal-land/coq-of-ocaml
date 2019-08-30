@@ -139,7 +139,7 @@
          (Apply (PathName ((path ()) (base list)))
           ((Apply (PathName ((path ()) (base elt))) ())))
          (Apply (PathName ((path ()) (base t))) ())))))
-     (typ_params (elt t))))))
+     (typ_params ((Item elt ()) (Item t ())))))))
  (TypeDefinition
   (Inductive type_annot ()
    (NonGadt ((Type_annot ((Apply (PathName ((path ()) (base string))) ())))))))
@@ -197,29 +197,32 @@
        ((Apply (PathName ((path ()) (base elt))) ()))))
      (Module OPS
       (With ((path (S)) (base SET))
-       ((Defined (Apply (PathName ((path ()) (base elt))) ()))
-        (Existential t))))
+       ((Item elt (Defined (Apply (PathName ((path ()) (base elt))) ())))
+        (Item t Free))))
      (Module OPS'
-      (With ((path (S)) (base SET)) ((Existential elt) (Existential t))))
+      (With ((path (S)) (base SET)) ((Item elt Free) (Item t Free))))
      (Module OPS''
       (With ((path (S)) (base SET))
-       ((Defined (Apply (PathName ((path ()) (base elt))) ()))
-        (Defined
-         (Apply (PathName ((path ()) (base list)))
-          ((Apply (PathName ((path ()) (base string))) ())))))))
+       ((Item elt (Defined (Apply (PathName ((path ()) (base elt))) ())))
+        (Item t
+         (Defined
+          (Apply (PathName ((path ()) (base list)))
+           ((Apply (PathName ((path ()) (base string))) ()))))))))
      (Value boxed ()
       (Apply (Access (PathName ((path ()) (base OPS))) ((path (S)) (base t)))
        ()))
      (Value size () (Apply (PathName ((path ()) (base Z))) ()))
      (TypSynonym table (a)
       (Apply (PathName ((path ()) (base list))) ((Variable a))))))
-   (typ_params (elt))))
+   (typ_params
+    ((Item elt ()) (Module OPS ((Item t ())))
+     (Module OPS' ((Item elt ()) (Item t ()))) (Module OPS'' ())))))
  (Signature Triple
   ((items ((TypExistential a) (TypExistential b) (TypExistential c)))
-   (typ_params (a b c))))
+   (typ_params ((Item a ()) (Item b ()) (Item c ())))))
  (Signature UsingTriple
   ((items
     ((Module T
       (With ((path ()) (base Triple))
-       ((Existential a) (Existential b) (Existential c))))))
-   (typ_params ()))))
+       ((Item a Free) (Item b Free) (Item c Free))))))
+   (typ_params ((Module T ((Item a ()) (Item b ()) (Item c ()))))))))

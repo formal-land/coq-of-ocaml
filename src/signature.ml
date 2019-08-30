@@ -12,10 +12,10 @@ type item =
 
 type t = {
   items: item list;
-  typ_params: Name.t list }
+  typ_params: unit Tree.t }
   [@@deriving sexp]
 
-let of_signature (signature : signature) : t =
+let of_signature (env : Env.t) (loc : Loc.t) (signature : signature) : t =
   let of_signature_item (signature_item : signature_item) : item =
     let env = Envaux.env_of_only_summary signature_item.sig_env in
     let loc = Loc.of_location signature_item.sig_loc in
@@ -53,13 +53,13 @@ let of_signature (signature : signature) : t =
       Value (name, typ_args, typ) in
   {
     items = List.map of_signature_item signature.sig_items;
-    typ_params = ModuleTyp.get_signature_typ_params signature.sig_type;
+    typ_params = ModuleTyp.get_signature_typ_params env loc signature.sig_type;
   }
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
   | Module (name, module_typ) ->
-    Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq module_typ
+    Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ
   | TypExistential name -> Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name
   | TypSynonym (name, typ_args, typ) ->
     Name.to_coq name ^^
@@ -78,20 +78,20 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
     Type.to_coq false typ
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
+  let typ_params : Name.t list =
+    Tree.flatten signature.typ_params |> List.map (fun (path_name, _) ->
+      ModuleTyp.get_typ_param_name path_name
+    ) in
   nest (
     !^ "Record" ^^ Name.to_coq name ^^
-    (match signature.typ_params with
+    (match typ_params with
     | [] -> empty
-    | _ ->
-      braces (
-        separate space (signature.typ_params |> List.map (fun typ_param -> !^ typ_param)) ^^
-        !^ ":" ^^ !^ "Type"
-      )
+    | _ -> braces (separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")
     ) ^^
     !^ ":=" ^^ !^ "{" ^^ newline ^^
     indent (separate newline (List.map (fun item -> to_coq_item item ^-^ !^ ";") signature.items)) ^^ newline ^^
     !^ "}" ^-^ !^ ".") ^^
-    (match signature.typ_params with
+    (match typ_params with
     | [] -> empty
     | _ ->
       newline ^^ !^ "Arguments" ^^ Name.to_coq name ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
