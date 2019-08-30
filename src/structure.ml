@@ -109,7 +109,7 @@ let rec of_structure (structure : structure) : t list =
       begin
         match mty_desc with
         | Tmty_signature signature ->
-          let signature = Signature.of_signature signature in
+          let signature = Signature.of_signature env loc signature in
           Some (Signature (name, signature))
         | _ -> Error.raise loc "This kind of signature is not handled."
       end

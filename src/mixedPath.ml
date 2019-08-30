@@ -51,5 +51,5 @@ let of_path (env : Env.t) (loc : Loc.t) (path : Path.t) : t =
 let rec to_coq (path : t) : SmartPrint.t =
   match path with
   | Access (path, field_path_name) ->
-    parens (!^ "projT2" ^^ to_coq path) ^-^ !^ "." ^-^ parens (PathName.to_coq field_path_name)
+    to_coq path ^-^ !^ "." ^-^ parens (PathName.to_coq field_path_name)
   | PathName path_name -> PathName.to_coq path_name

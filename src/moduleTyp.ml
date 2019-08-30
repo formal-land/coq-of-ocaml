@@ -2,38 +2,70 @@ open Sexplib.Std
 open SmartPrint
 open Typedtree
 
-type defined_or_existential =
+type defined_or_free =
   | Defined of Type.t
-  | Existential of Name.t
+  | Free
   [@@deriving sexp]
 
 type t =
-  | With of PathName.t * defined_or_existential list
+  | With of PathName.t * defined_or_free Tree.t
   [@@deriving sexp]
 
-let get_signature_typ_params (signature : Types.signature) : Name.t list =
-  List.rev @@ List.fold_left
-    (fun typ_params (item : Types.signature_item) ->
-      match item with
-      | Sig_type (ident, { type_manifest = None }, _) ->
-        let typ_param = Name.of_ident ident in
-        typ_param :: typ_params
-      | _ -> typ_params
-    )
-    []
-    signature
+let rec get_signature_typ_params
+  (env : Env.t)
+  (loc : Loc.t)
+  (signature : Types.signature)
+  : unit Tree.t =
+  let get_signature_item_typ_params
+    (signature_item : Types.signature_item)
+    : unit Tree.item option =
+    match signature_item with
+    | Sig_value _ -> None
+    | Sig_type (ident, { type_manifest }, _) ->
+      begin match type_manifest with
+      | None ->
+        let name = Name.of_ident ident in
+        Some (Tree.Item (name, ()))
+      | Some _ -> None
+      end
+    | Sig_typext _ ->
+      Error.raise loc "Type extensions are not handled"
+    | Sig_module (ident, module_declaration, _) ->
+      let name = Name.of_ident ident in
+      let loc = Loc.of_location module_declaration.md_loc in
+      let typ_params = get_module_typ_typ_params env loc module_declaration.md_type in
+      Some (Tree.Module (name, typ_params))
+    | Sig_modtype _ ->
+      Error.raise loc "Nested signatures are not handled in signatures"
+    | Sig_class _ ->
+      Error.raise loc "Classes are not handled"
+    | Sig_class_type _ ->
+      Error.raise loc "Class types are not handled" in
+  signature |> Util.List.filter_map get_signature_item_typ_params
 
-let rec get_module_typ_typ_params (env : Env.t) (loc : Loc.t)
-  (module_typ_declaration : Types.modtype_declaration) : Name.t list =
-  match module_typ_declaration with
-  | { mtd_type = None } ->
-    Error.raise loc "Cannot instantiate an abstract signature."
-  | { mtd_type = Some (Mty_signature signature) } ->
-    get_signature_typ_params signature
-  | { mtd_type = Some (Mty_alias (_, path)) } | { mtd_type = Some (Mty_ident path) } ->
-    get_module_typ_typ_params env loc (Env.find_modtype path env)
-  | { mtd_type = Some (Mty_functor _) } ->
+and get_module_typ_typ_params
+  (env : Env.t)
+  (loc : Loc.t)
+  (module_typ : Types.module_type)
+  : unit Tree.t =
+  match module_typ with
+  | Mty_signature signature ->
+    get_signature_typ_params env loc signature
+  | Mty_alias (_, path) | Mty_ident path ->
+    get_module_typ_declaration_typ_params env (Env.find_modtype path env)
+  | Mty_functor _ ->
     Error.raise loc "Cannot instantiate functors (yet)."
+
+and get_module_typ_declaration_typ_params
+  (env : Env.t)
+  (module_typ_declaration : Types.modtype_declaration)
+  : unit Tree.t =
+  let loc = Loc.of_location module_typ_declaration.mtd_loc in
+  match module_typ_declaration.mtd_type with
+  | None ->
+    Error.raise loc "Cannot instantiate an abstract signature."
+  | Some module_typ ->
+    get_module_typ_typ_params env loc module_typ
 
 let of_ocaml_module_with_substitutions
   (env: Env.t)
@@ -43,14 +75,15 @@ let of_ocaml_module_with_substitutions
   : t =
   let signature_path_name = PathName.of_loc long_ident_loc in
   let (_, module_typ) = try Env.lookup_modtype long_ident_loc.txt env with _ -> failwith "Arg2" in
-  let signature_typ_params = get_module_typ_typ_params env loc module_typ in
-  let typ_substitutions: (Name.t * Type.t) list = substitutions |> List.map (function
-    | (Path.Pident ident, _, with_constraint) ->
+  let signature_typ_params = get_module_typ_declaration_typ_params env module_typ in
+  let typ_substitutions: (PathName.t * Type.t) list =
+    substitutions |> List.map (fun (path, _, with_constraint) ->
       begin match with_constraint with
       | Twith_type { typ_loc; typ_type } ->
         begin match typ_type with
         | { type_kind = Type_abstract; type_manifest = Some typ } ->
-          (Name.of_ident ident, Type.of_type_expr env (Loc.of_location typ_loc) typ)
+          let loc = Loc.of_location typ_loc in
+          (PathName.of_path loc path, Type.of_type_expr env loc typ)
         | _ ->
           Error.raise loc (
             "Can only do `with` on types in module types using type expressions " ^
@@ -59,17 +92,12 @@ let of_ocaml_module_with_substitutions
         end
       | _ -> Error.raise loc "Can only do `with` on types in module types."
       end
-    | (_, _, _) -> Error.raise loc "Can only do `with` in module types for top-level identifiers."
-  ) in
+    ) in
   let typ_values = List.fold_left
-    (fun typ_values (name, typ) ->
-      typ_values |> List.map (fun defined_or_existential ->
-        match defined_or_existential with
-        | Existential name' -> if name = name' then Defined typ else defined_or_existential
-        | _ -> defined_or_existential
-      )
+    (fun typ_values (path_name, typ) ->
+      Tree.map_at typ_values path_name (fun _ -> Defined typ)
     )
-    (signature_typ_params |> List.map (fun name -> Existential name))
+    (signature_typ_params |> Tree.map (fun _ -> Free))
     typ_substitutions in
   With (signature_path_name, typ_values)
 
@@ -89,28 +117,15 @@ let of_ocaml (module_typ : module_type) : t =
   | Tmty_with _ ->
     Error.raise loc "With on something else than a signature name is not handled."
 
-let to_coq (module_typ : t) : SmartPrint.t =
+let get_typ_param_name (path_name : PathName.t) : Name.t =
+  Name.of_string (String.concat "_" (path_name.path @ [path_name.base]))
+
+let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
   match module_typ with
-  | With (name, typ_values) ->
-    let existential_names = List.rev @@ List.fold_left
-      (fun names defined_or_existential ->
-        match defined_or_existential with
-        | Defined _ -> names
-        | Existential name -> name :: names
-      )
-      [] typ_values in
-    braces (indent (
-      begin match existential_names with
-      | [] -> !^ "_" ^^ !^ ":" ^^ !^ "unit" ^^ !^ "&"
-      | [existential_name] -> Name.to_coq existential_name ^^ !^ ":" ^^ !^ "Type" ^^ !^ "&"
-      | _ ->
-        !^ "'(" ^-^ indent (
-          separate (!^ "," ^^ space) (List.map Name.to_coq existential_names)
-        ) ^-^ !^ ")" ^^ !^ ":" ^^ !^ "_" ^^ !^ "&"
-      end ^^
-      PathName.to_coq name ^^
-      separate space (typ_values |> List.map (function
-        | Defined typ -> Type.to_coq true typ
-        | Existential name -> Name.to_coq name
-      ))
+  | With (path_name, typ_values) ->
+    PathName.to_coq path_name ^^
+    separate space (Tree.flatten typ_values |> List.map (fun (path_name, defined_or_free) ->
+      match defined_or_free with
+      | Defined typ -> Type.to_coq true typ
+      | Free -> Name.to_coq (get_typ_param_name (PathName.add_prefix typ_variables_prefix path_name))
     ))
