@@ -83,11 +83,3 @@ let unsafe_fresh : string -> t =
 (** Pretty-print a name to Coq. *)
 let to_coq (x : t) : SmartPrint.t =
   !^ x
-
-let to_json (x : t) : Yojson.Basic.t =
-  `String x
-
-let of_json (json : Yojson.Basic.t) : t =
-  match json with
-  | `String x -> x
-  | _ -> raise (Error.Json "String expected.")

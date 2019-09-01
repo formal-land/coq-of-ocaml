@@ -4,29 +4,36 @@ open SmartPrint
 type ast = Structure.t list
   [@@deriving sexp]
 
-let exp (structure : Typedtree.structure) : ast =
-  Structure.of_structure structure
+let exp (structure : Typedtree.structure) : ast option =
+  let env = Obj.magic None in
+  let loc = Obj.magic None in
+  match MonadEval.eval (Structure.of_structure structure) env loc with
+  | Success ast -> Some ast
+  | Error errors ->
+    errors |> List.iter (fun (loc, message) ->
+      prerr_endline @@ Pp.to_string (!^ "Error:" ^^ Loc.to_user loc ^-^ !^ ":" ^^ !^ message)
+    );
+    None
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
-let of_ocaml (structure : Typedtree.structure) (mode : string)
-  (module_name : string) : unit =
-  try
+let of_ocaml (structure : Typedtree.structure) (mode : string) : unit =
+  match exp structure with
+  | None -> ()
+  | Some ast ->
     let document =
       match mode with
-      | "exp" -> !^ (Sexplib.Sexp.to_string_hum (sexp_of_ast (exp structure)))
+      | "exp" -> !^ (Sexplib.Sexp.to_string_hum (sexp_of_ast ast))
       | "v" ->
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import OCaml.OCaml." ^^ newline;
           !^ "Local Open Scope Z_scope.";
           !^ "Local Open Scope type_scope.";
           !^ "Import ListNotations."]) ^^ newline ^^
-        Structure.to_coq (exp structure)
+        Structure.to_coq ast
       | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
     to_stdout 80 2 document;
     print_newline ();
-    flush stdout with
-  | Error.Make x ->
-    prerr_endline @@ Pp.to_string (!^ "Error:" ^^ Error.pp x)
+    flush stdout
 
 (** Parse a .cmt file to a typed AST. *)
 let parse_cmt (file_name : string) : Typedtree.structure =
@@ -40,9 +47,6 @@ let parse_cmt (file_name : string) : Typedtree.structure =
     structure
   | _ -> failwith "Cannot extract cmt data."
 
-let module_name (file_name : string) : string =
-  String.capitalize_ascii @@ Filename.chop_extension @@ Filename.basename file_name
-
 (** The main function. *)
 let main () =
   let file_name = ref None in
@@ -53,6 +57,6 @@ let main () =
   Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage options usage_msg
-  | Some file_name -> of_ocaml (parse_cmt file_name) !mode (module_name file_name);
+  | Some file_name -> of_ocaml (parse_cmt file_name) !mode;
 
 ;;main ()

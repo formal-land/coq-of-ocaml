@@ -1,6 +1,7 @@
 open Sexplib.Std
 open SmartPrint
 open Typedtree
+open Monad.Notations
 
 type defined_or_free =
   | Defined of Type.t
@@ -11,111 +12,102 @@ type t =
   | With of PathName.t * defined_or_free Tree.t
   [@@deriving sexp]
 
-let rec get_signature_typ_params
-  (env : Env.t)
-  (loc : Loc.t)
-  (signature : Types.signature)
-  : unit Tree.t =
+let rec get_signature_typ_params (signature : Types.signature) : unit Tree.t Monad.t =
   let get_signature_item_typ_params
     (signature_item : Types.signature_item)
-    : unit Tree.item option =
+    : unit Tree.item option Monad.t =
     match signature_item with
-    | Sig_value _ -> None
+    | Sig_value _ -> return None
     | Sig_type (ident, { type_manifest }, _) ->
       begin match type_manifest with
       | None ->
         let name = Name.of_ident ident in
-        Some (Tree.Item (name, ()))
-      | Some _ -> None
+        return (Some (Tree.Item (name, ())))
+      | Some _ -> return None
       end
     | Sig_typext _ ->
-      Error.raise loc "Type extensions are not handled"
+      raise "Type extensions are not handled"
     | Sig_module (ident, module_declaration, _) ->
       let name = Name.of_ident ident in
-      let loc = Loc.of_location module_declaration.md_loc in
-      let typ_params = get_module_typ_typ_params env loc module_declaration.md_type in
-      Some (Tree.Module (name, typ_params))
+      set_loc (Loc.of_location module_declaration.md_loc) (
+      get_module_typ_typ_params module_declaration.md_type >>= fun typ_params ->
+      return (Some (Tree.Module (name, typ_params))))
     | Sig_modtype _ ->
-      Error.raise loc "Nested signatures are not handled in signatures"
+      raise "Nested signatures are not handled in signatures"
     | Sig_class _ ->
-      Error.raise loc "Classes are not handled"
+      raise "Classes are not handled"
     | Sig_class_type _ ->
-      Error.raise loc "Class types are not handled" in
-  signature |> Util.List.filter_map get_signature_item_typ_params
+      raise "Class types are not handled" in
+  signature |> Monad.List.filter_map get_signature_item_typ_params
 
-and get_module_typ_typ_params
-  (env : Env.t)
-  (loc : Loc.t)
-  (module_typ : Types.module_type)
-  : unit Tree.t =
+and get_module_typ_typ_params (module_typ : Types.module_type) : unit Tree.t Monad.t =
   match module_typ with
   | Mty_signature signature ->
-    get_signature_typ_params env loc signature
+    get_signature_typ_params signature
   | Mty_alias (_, path) | Mty_ident path ->
-    get_module_typ_declaration_typ_params env (Env.find_modtype path env)
+    get_env >>= fun env ->
+    get_module_typ_declaration_typ_params (Env.find_modtype path env)
   | Mty_functor _ ->
-    Error.raise loc "Cannot instantiate functors (yet)."
+    raise "Cannot instantiate functors (yet)."
 
 and get_module_typ_declaration_typ_params
-  (env : Env.t)
   (module_typ_declaration : Types.modtype_declaration)
-  : unit Tree.t =
-  let loc = Loc.of_location module_typ_declaration.mtd_loc in
+  : unit Tree.t Monad.t =
+  set_loc (Loc.of_location module_typ_declaration.mtd_loc) (
   match module_typ_declaration.mtd_type with
   | None ->
-    Error.raise loc "Cannot instantiate an abstract signature."
+    raise "Cannot instantiate an abstract signature."
   | Some module_typ ->
-    get_module_typ_typ_params env loc module_typ
+    get_module_typ_typ_params module_typ)
 
 let of_ocaml_module_with_substitutions
-  (env: Env.t)
-  (loc :Loc.t)
   (long_ident_loc : Longident.t Asttypes.loc)
   (substitutions : (Path.t * Longident.t Asttypes.loc * with_constraint) list)
-  : t =
+  : t Monad.t =
   let signature_path_name = PathName.of_loc long_ident_loc in
-  let (_, module_typ) = try Env.lookup_modtype long_ident_loc.txt env with _ -> failwith "Arg2" in
-  let signature_typ_params = get_module_typ_declaration_typ_params env module_typ in
-  let typ_substitutions: (PathName.t * Type.t) list =
-    substitutions |> List.map (fun (path, _, with_constraint) ->
-      begin match with_constraint with
-      | Twith_type { typ_loc; typ_type } ->
-        begin match typ_type with
-        | { type_kind = Type_abstract; type_manifest = Some typ } ->
-          let loc = Loc.of_location typ_loc in
-          (PathName.of_path loc path, Type.of_type_expr env loc typ)
-        | _ ->
-          Error.raise loc (
-            "Can only do `with` on types in module types using type expressions " ^
-            "rather than type definitions."
-          )
-        end
-      | _ -> Error.raise loc "Can only do `with` on types in module types."
+  get_env >>= fun env ->
+  let (_, module_typ) = Env.lookup_modtype long_ident_loc.txt env in
+  get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
+  (substitutions |> Monad.List.map (fun (path, _, with_constraint) ->
+    begin match with_constraint with
+    | Twith_type { typ_loc; typ_type } ->
+      begin match typ_type with
+      | { type_kind = Type_abstract; type_manifest = Some typ } ->
+        set_loc (Loc.of_location typ_loc) (
+        Type.of_type_expr typ >>= fun typ ->
+        return (PathName.of_path path, typ))
+      | _ ->
+        raise (
+          "Can only do `with` on types in module types using type expressions " ^
+          "rather than type definitions."
+        )
       end
-    ) in
+    | _ -> raise "Can only do `with` on types in module types."
+    end
+  )) >>= fun (typ_substitutions : (PathName.t * Type.t) list) ->
   let typ_values = List.fold_left
     (fun typ_values (path_name, typ) ->
       Tree.map_at typ_values path_name (fun _ -> Defined typ)
     )
     (signature_typ_params |> Tree.map (fun _ -> Free))
     typ_substitutions in
-  With (signature_path_name, typ_values)
+  return (With (signature_path_name, typ_values))
 
-let of_ocaml (module_typ : module_type) : t =
-  let loc = Loc.of_location module_typ.mty_loc in
-  let env = Envaux.env_of_only_summary module_typ.mty_env in
+let of_ocaml (module_typ : module_type) : t Monad.t =
+  set_env module_typ.mty_env (
+  set_loc (Loc.of_location module_typ.mty_loc) (
   match module_typ.mty_desc with
-  | Tmty_alias _ -> Error.raise loc "Aliases in module types are not handled."
-  | Tmty_functor _ -> Error.raise loc "The application of functors in module types is not handled."
+  | Tmty_alias _ -> raise "Aliases in module types are not handled."
+  | Tmty_functor _ -> raise "The application of functors in module types is not handled."
   | Tmty_ident (_, long_ident_loc) ->
-    of_ocaml_module_with_substitutions env loc long_ident_loc []
+    of_ocaml_module_with_substitutions long_ident_loc []
   | Tmty_signature signature ->
-    Error.raise loc "Anonymous definition of signatures is not handled."
-  | Tmty_typeof _ -> Error.raise loc "The typeof in module types is not handled."
+    raise "Anonymous definition of signatures is not handled."
+  | Tmty_typeof _ -> raise "The typeof in module types is not handled."
   | Tmty_with ({ mty_desc = Tmty_ident (_, long_ident_loc) }, substitutions) ->
-    of_ocaml_module_with_substitutions env loc long_ident_loc substitutions
+    of_ocaml_module_with_substitutions long_ident_loc substitutions
   | Tmty_with _ ->
-    Error.raise loc "With on something else than a signature name is not handled."
+    raise "With on something else than a signature name is not handled."))
 
 let get_typ_param_name (path_name : PathName.t) : Name.t =
   Name.of_string (String.concat "_" (path_name.path @ [path_name.base]))

@@ -3,6 +3,7 @@ open Types
 open Typedtree
 open Sexplib.Std
 open SmartPrint
+open Monad.Notations
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
@@ -46,26 +47,26 @@ type t =
   [@@deriving sexp]
 
 (** Import an OCaml structure. *)
-let rec of_structure (structure : structure) : t list =
-  let of_structure_item (item : structure_item) : t option =
-    let env = Envaux.env_of_only_summary item.str_env in
-    let loc = Loc.of_location item.str_loc in
+let rec of_structure (structure : structure) : t list Monad.t =
+  let of_structure_item (item : structure_item) : t option Monad.t =
+    set_env item.str_env (
+    set_loc (Loc.of_location item.str_loc) (
     match item.str_desc with
     | Tstr_value (is_rec, cases) ->
-      let def = Exp.import_let_fun loc Name.Map.empty is_rec cases in
-      Some (Value def)
+      Exp.import_let_fun Name.Map.empty is_rec cases >>= fun def ->
+      return (Some (Value def))
     | Tstr_type (_, typs) ->
-      let def = TypeDefinition.of_ocaml env loc typs in
-      Some (TypeDefinition def)
+      TypeDefinition.of_ocaml typs >>= fun def ->
+      return (Some (TypeDefinition def))
     | Tstr_exception _ ->
-      Error.raise loc (
+      raise (
         "The definition of exception is not handled.\n\n" ^
         "You could use sum types (\"option\", \"result\", ...) to represent error cases, " ^
         "or avoid importing this part of the code."
       )
     | Tstr_open { open_path = path } ->
-      let o = Open.of_ocaml loc path in
-      Some (Open o)
+      let o = Open.of_ocaml path in
+      return (Some (Open o))
     | Tstr_module {
         mb_id = name;
         mb_expr = {
@@ -81,13 +82,14 @@ let rec of_structure (structure : structure) : t list =
         }
       } ->
       let name = Name.of_ident name in
-      begin match IsFirstClassModule.is_module_typ_first_class env loc mod_type with
+      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
+      begin match is_first_class with
       | None ->
-        let structures = of_structure structure in
-        Some (Module (name, structures))
+        of_structure structure >>= fun structures ->
+        return (Some (Module (name, structures)))
       | Some signature_path ->
-        let module_value = Exp.of_structure signature_path structure in
-        Some (Value {
+        Exp.of_structure signature_path structure >>= fun module_value ->
+        return (Some (Value {
           is_rec = Recursivity.New false;
           cases = [
             (
@@ -100,32 +102,32 @@ let rec of_structure (structure : structure) : t list =
               module_value
             )
           ]
-        })
+        }))
       end
     | Tstr_modtype { mtd_type = None } ->
-      Error.raise loc "Abstract module types not handled."
+      raise "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->
       let name = Name.of_ident mtd_id in
       begin
         match mty_desc with
         | Tmty_signature signature ->
-          let signature = Signature.of_signature env loc signature in
-          Some (Signature (name, signature))
-        | _ -> Error.raise loc "This kind of signature is not handled."
+          Signature.of_signature signature >>= fun signature ->
+          return (Some (Signature (name, signature)))
+        | _ -> raise "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
-      Error.raise loc "Functors not handled."
-    | Tstr_module _ -> Error.raise loc "This kind of module is not handled."
-    | Tstr_eval _ -> Error.raise loc "Structure item `eval` not handled."
-    | Tstr_primitive _ -> Error.raise loc "Structure item `primitive` not handled."
-    | Tstr_typext _ -> Error.raise loc "Structure item `typext` not handled."
-    | Tstr_recmodule _ -> Error.raise loc "Structure item `recmodule` not handled."
-    | Tstr_class _ -> Error.raise loc "Structure item `class` not handled."
-    | Tstr_class_type _ -> Error.raise loc "Structure item `class_type` not handled."
-    | Tstr_include _ -> Error.raise loc "Structure item `include` not handled."
+      raise "Functors not handled."
+    | Tstr_module _ -> raise "This kind of module is not handled."
+    | Tstr_eval _ -> raise "Structure item `eval` not handled."
+    | Tstr_primitive _ -> raise "Structure item `primitive` not handled."
+    | Tstr_typext _ -> raise "Structure item `typext` not handled."
+    | Tstr_recmodule _ -> raise "Structure item `recmodule` not handled."
+    | Tstr_class _ -> raise "Structure item `class` not handled."
+    | Tstr_class_type _ -> raise "Structure item `class_type` not handled."
+    | Tstr_include _ -> raise "Structure item `include` not handled."
     (* We ignore attribute fields. *)
-    | Tstr_attribute _ -> None in
-  structure.str_items |> Util.List.filter_map of_structure_item
+    | Tstr_attribute _ -> return None)) in
+  structure.str_items |> Monad.List.filter_map of_structure_item
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =

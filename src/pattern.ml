@@ -3,6 +3,7 @@ open Typedtree
 open Types
 open Sexplib.Std
 open SmartPrint
+open Monad.Notations
 
 type t =
   | Any
@@ -16,24 +17,35 @@ type t =
   [@@deriving sexp]
 
 (** Import an OCaml pattern. *)
-let rec of_pattern (p : pattern) : t =
-  let l = Loc.of_location p.pat_loc in
+let rec of_pattern (p : pattern) : t Monad.t =
+  set_loc (Loc.of_location p.pat_loc) (
   match p.pat_desc with
-  | Tpat_any -> Any
-  | Tpat_var (x, _) -> Variable (Name.of_ident x)
-  | Tpat_tuple ps -> Tuple (List.map of_pattern ps)
+  | Tpat_any -> return Any
+  | Tpat_var (x, _) -> return (Variable (Name.of_ident x))
+  | Tpat_tuple ps ->
+    Monad.List.map of_pattern ps >>= fun patterns ->
+    return (Tuple patterns)
   | Tpat_construct (x, _, ps) ->
     let x = PathName.of_loc x in
-    Constructor (x, List.map of_pattern ps)
-  | Tpat_alias (p, x, _) -> Alias (of_pattern p, Name.of_ident x)
-  | Tpat_constant c -> Constant (Constant.of_constant l c)
+    Monad.List.map of_pattern ps >>= fun patterns ->
+    return (Constructor (x, patterns))
+  | Tpat_alias (p, x, _) ->
+    of_pattern p >>= fun pattern ->
+    return (Alias (pattern, Name.of_ident x))
+  | Tpat_constant c ->
+    Constant.of_constant c >>= fun constant ->
+    return (Constant constant)
   | Tpat_record (fields, _) ->
-    Record (fields |> List.map (fun (x, _, p) ->
+    (fields |> Monad.List.map (fun (x, _, p) ->
       let x = PathName.of_loc x in
-      (x, of_pattern p)
-    ))
-  | Tpat_or (p1, p2, _) -> Or (of_pattern p1, of_pattern p2)
-  | _ -> Error.raise l "Unhandled pattern."
+      of_pattern p >>= fun pattern ->
+      return (x, pattern)
+    )) >>= fun fields ->
+    return (Record fields)
+  | Tpat_or (p1, p2, _) ->
+    all2 (of_pattern p1) (of_pattern p2) >>= fun (pattern1, pattern2) ->
+    return (Or (pattern1, pattern2))
+  | _ -> raise "Unhandled pattern.")
 
 (** Free variables in a pattern. *)
 let rec free_variables (p : t) : Name.Set.t =

@@ -5,8 +5,8 @@ open SmartPrint
 type t = Name.t list
   [@@deriving sexp]
 
-let of_ocaml (loc : Loc.t) (path : Path.t) : t =
-  let o = PathName.of_path loc path in
+let of_ocaml (path : Path.t) : t =
+  let o = PathName.of_path path in
   o.PathName.path @ [o.PathName.base]
 
 (** Pretty-print an open construct to Coq. *)

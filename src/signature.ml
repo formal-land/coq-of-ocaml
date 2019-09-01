@@ -2,6 +2,7 @@
 open Sexplib.Std
 open SmartPrint
 open Typedtree
+open Monad.Notations
 
 type item =
   | Module of Name.t * ModuleTyp.t
@@ -15,46 +16,47 @@ type t = {
   typ_params: unit Tree.t }
   [@@deriving sexp]
 
-let of_signature (env : Env.t) (loc : Loc.t) (signature : signature) : t =
-  let of_signature_item (signature_item : signature_item) : item =
-    let env = Envaux.env_of_only_summary signature_item.sig_env in
-    let loc = Loc.of_location signature_item.sig_loc in
+let of_signature (signature : signature) : t Monad.t =
+  let of_signature_item (signature_item : signature_item) : item Monad.t =
+    set_env signature_item.sig_env (
+    set_loc (Loc.of_location signature_item.sig_loc) (
     match signature_item.sig_desc with
-    | Tsig_attribute _ -> Error.raise loc "Signature item `attribute` not handled."
-    | Tsig_class _ -> Error.raise loc "Signature item `class` not handled."
-    | Tsig_class_type _ -> Error.raise loc "Signature item `class_type` not handled."
-    | Tsig_exception _ -> Error.raise loc "Signature item `exception` not handled."
-    | Tsig_include _ -> Error.raise loc "Signature item `include` not handled."
-    | Tsig_modtype _ -> Error.raise loc "Signatures inside signatures are not handled."
+    | Tsig_attribute _ -> raise "Signature item `attribute` not handled."
+    | Tsig_class _ -> raise "Signature item `class` not handled."
+    | Tsig_class_type _ -> raise "Signature item `class_type` not handled."
+    | Tsig_exception _ -> raise "Signature item `exception` not handled."
+    | Tsig_include _ -> raise "Signature item `include` not handled."
+    | Tsig_modtype _ -> raise "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type } ->
       let name = Name.of_ident md_id in
-      let module_typ = ModuleTyp.of_ocaml md_type in
-      Module (name, module_typ)
-    | Tsig_open _ -> Error.raise loc "Signature item `open` not handled."
-    | Tsig_recmodule _ -> Error.raise loc "Recursive module signatures are not handled."
+      ModuleTyp.of_ocaml md_type >>= fun module_typ ->
+      return (Module (name, module_typ))
+    | Tsig_open _ -> raise "Signature item `open` not handled."
+    | Tsig_recmodule _ -> raise "Recursive module signatures are not handled."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params = [] } } ]) ->
       let name = Name.of_ident typ_id in
-      TypExistential name
+      return (TypExistential name)
     | Tsig_type (_, [ { typ_type = { type_manifest = None; type_params = _ :: _ } } ]) ->
-      Error.raise loc "Polymorphic existential types not handled in signatures."
+      raise "Polymorphic existential types not handled in signatures."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params } } ]) ->
       let name = Name.of_ident typ_id in
-      let typ_args = type_params |> List.map (fun typ_param ->
-        Type.of_type_expr_variable loc typ_param
-      ) in
-      let typ = Type.of_type_expr env loc typ in
-      TypSynonym (name, typ_args, typ)
-    | Tsig_type (_, _) -> Error.raise loc "Mutual type definitions in signatures not handled."
-    | Tsig_typext _ -> Error.raise loc "Extensible types are not handled."
+      all2
+        (type_params |> Monad.List.map Type.of_type_expr_variable)
+        (Type.of_type_expr typ)
+      >>= fun (typ_args, typ) ->
+      return (TypSynonym (name, typ_args, typ))
+    | Tsig_type (_, _) -> raise "Mutual type definitions in signatures not handled."
+    | Tsig_typext _ -> raise "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
-      let typ = Type.of_type_expr env loc ctyp_type in
+      Type.of_type_expr ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
-      Value (name, typ_args, typ) in
-  {
-    items = List.map of_signature_item signature.sig_items;
-    typ_params = ModuleTyp.get_signature_typ_params env loc signature.sig_type;
-  }
+      return (Value (name, typ_args, typ)))) in
+  all2
+    (signature.sig_items |> Monad.List.map of_signature_item)
+    (ModuleTyp.get_signature_typ_params signature.sig_type)
+  >>= fun (items, typ_params) ->
+  return { items; typ_params }
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with

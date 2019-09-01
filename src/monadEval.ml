@@ -14,7 +14,8 @@ module Command = struct
       match command with
       | GetEnv -> Success env
       | GetLoc -> Success loc
-      | Raise error_message -> Error [(loc, error_message)]
+      | Raise message -> Error [(loc, message)]
+      | Warn message -> Success (Error.warn loc message)
 end
 
 module Wrapper = struct
