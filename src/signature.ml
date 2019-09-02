@@ -21,23 +21,23 @@ let of_signature (signature : signature) : t Monad.t =
     set_env signature_item.sig_env (
     set_loc (Loc.of_location signature_item.sig_loc) (
     match signature_item.sig_desc with
-    | Tsig_attribute _ -> raise "Signature item `attribute` not handled."
-    | Tsig_class _ -> raise "Signature item `class` not handled."
-    | Tsig_class_type _ -> raise "Signature item `class_type` not handled."
-    | Tsig_exception _ -> raise "Signature item `exception` not handled."
-    | Tsig_include _ -> raise "Signature item `include` not handled."
-    | Tsig_modtype _ -> raise "Signatures inside signatures are not handled."
+    | Tsig_attribute _ -> raise NotSupported "Signature item `attribute` not handled."
+    | Tsig_class _ -> raise NotSupported "Signature item `class` not handled."
+    | Tsig_class_type _ -> raise NotSupported "Signature item `class_type` not handled."
+    | Tsig_exception _ -> raise SideEffect "Signature item `exception` not handled."
+    | Tsig_include _ -> raise NotSupported "Signature item `include` not handled."
+    | Tsig_modtype _ -> raise NotSupported "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type } ->
       let name = Name.of_ident md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
       return (Module (name, module_typ))
-    | Tsig_open _ -> raise "Signature item `open` not handled."
-    | Tsig_recmodule _ -> raise "Recursive module signatures are not handled."
+    | Tsig_open _ -> raise NotSupported "Signature item `open` not handled."
+    | Tsig_recmodule _ -> raise NotSupported "Recursive module signatures are not handled."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params = [] } } ]) ->
       let name = Name.of_ident typ_id in
       return (TypExistential name)
     | Tsig_type (_, [ { typ_type = { type_manifest = None; type_params = _ :: _ } } ]) ->
-      raise "Polymorphic existential types not handled in signatures."
+      raise NotSupported "Polymorphic existential types not handled in signatures."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params } } ]) ->
       let name = Name.of_ident typ_id in
       all2
@@ -45,8 +45,8 @@ let of_signature (signature : signature) : t Monad.t =
         (Type.of_type_expr typ)
       >>= fun (typ_args, typ) ->
       return (TypSynonym (name, typ_args, typ))
-    | Tsig_type (_, _) -> raise "Mutual type definitions in signatures not handled."
-    | Tsig_typext _ -> raise "Extensible types are not handled."
+    | Tsig_type (_, _) -> raise NotSupported "Mutual type definitions in signatures not handled."
+    | Tsig_typext _ -> raise NotSupported "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
       Type.of_type_expr ctyp_type >>= fun typ ->

@@ -1,6 +1,6 @@
 module Result = struct
   type 'a t =
-    | Error of (Loc.t * string) list
+    | Error of (Loc.t * Error.Category.t * string) list
     | Success of 'a
 end
 
@@ -14,7 +14,7 @@ module Command = struct
       match command with
       | GetEnv -> Success env
       | GetLoc -> Success loc
-      | Raise message -> Error [(loc, message)]
+      | Raise (category, message) -> Error [(loc, category, message)]
       | Warn message -> Success (Error.warn loc message)
 end
 

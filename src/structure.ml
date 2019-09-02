@@ -59,10 +59,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
       TypeDefinition.of_ocaml typs >>= fun def ->
       return (Some (TypeDefinition def))
     | Tstr_exception _ ->
-      raise (
-        "The definition of exception is not handled.\n\n" ^
-        "You could use sum types (\"option\", \"result\", ...) to represent error cases, " ^
-        "or avoid importing this part of the code."
+      raise SideEffect (
+        "The definition of exceptions is not handled.\n\n" ^
+        "Alternative: using sum types (\"option\", \"result\", ...) to represent error cases."
       )
     | Tstr_open { open_path = path } ->
       let o = Open.of_ocaml path in
@@ -105,7 +104,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         }))
       end
     | Tstr_modtype { mtd_type = None } ->
-      raise "Abstract module types not handled."
+      raise NotSupported "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->
       let name = Name.of_ident mtd_id in
       begin
@@ -113,20 +112,20 @@ let rec of_structure (structure : structure) : t list Monad.t =
         | Tmty_signature signature ->
           Signature.of_signature signature >>= fun signature ->
           return (Some (Signature (name, signature)))
-        | _ -> raise "This kind of signature is not handled."
+        | _ -> raise NotSupported "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
-      raise "Functors are not handled."
+      raise NotSupported "Functors are not handled."
     | Tstr_module { mb_expr = { mod_desc = Tmod_apply _ }} ->
-      raise "Applications of functors are not handled."
-    | Tstr_module _ -> raise "This kind of module is not handled."
-    | Tstr_eval _ -> raise "Top-level evaluations are not handled"
-    | Tstr_primitive _ -> raise "Structure item `primitive` not handled."
-    | Tstr_typext _ -> raise "Structure item `typext` not handled."
-    | Tstr_recmodule _ -> raise "Structure item `recmodule` not handled."
-    | Tstr_class _ -> raise "Structure item `class` not handled."
-    | Tstr_class_type _ -> raise "Structure item `class_type` not handled."
-    | Tstr_include _ -> raise "Structure item `include` not handled."
+      raise NotSupported "Applications of functors are not handled."
+    | Tstr_module _ -> raise NotSupported "This kind of module is not handled."
+    | Tstr_eval _ -> raise SideEffect "Top-level evaluations are not handled"
+    | Tstr_primitive _ -> raise NotSupported "Structure item `primitive` not handled."
+    | Tstr_typext _ -> raise NotSupported "Structure item `typext` not handled."
+    | Tstr_recmodule _ -> raise NotSupported "Structure item `recmodule` not handled."
+    | Tstr_class _ -> raise NotSupported "Structure item `class` not handled."
+    | Tstr_class_type _ -> raise NotSupported "Structure item `class_type` not handled."
+    | Tstr_include _ -> raise NotSupported "Structure item `include` not handled."
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return None)) in
   structure.str_items |> Monad.List.filter_map of_structure_item

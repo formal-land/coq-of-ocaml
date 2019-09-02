@@ -16,7 +16,7 @@ let of_name (name : Name.t) : t =
 
 let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t =
   match path with
-  | Papply _ -> raise "Application of paths is not handled"
+  | Papply _ -> failwith "Unexpected path application"
   | Pdot (path, field_string, pos) ->
     of_path_aux path >>= fun (path, fields) ->
     begin match fields with
@@ -32,9 +32,9 @@ let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t 
         | None -> return (Path.Pdot (path, field_string, pos), [])
         | Some signature_path -> return (path, [(signature_path, field_string)])
         end
-      | exception _ -> raise ("Module '" ^ Path.name path ^ "' not found")
+      | exception _ -> raise NotFound ("Module '" ^ Path.name path ^ "' not found")
       end
-    | _ :: _ -> raise "Nested accesses into first-class modules are not handled (yet)"
+    | _ :: _ -> raise NotSupported "Nested accesses into first-class modules are not handled (yet)"
     end
   | Pident _ -> return (path, [])
 

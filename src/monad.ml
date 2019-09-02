@@ -10,7 +10,7 @@ module Command = struct
   type 'a t =
     | GetEnv : Env.t t
     | GetLoc : Loc.t t
-    | Raise : string -> 'a t
+    | Raise : Error.Category.t * string -> 'a t
     | Warn : string -> unit t
 end
 
@@ -56,8 +56,8 @@ module Notations = struct
   let set_loc (loc : Loc.t) (x : 'a t) : 'a t =
     Wrapper (Wrapper.Loc loc, x)
 
-  let raise (message : string) : 'a t =
-    Command (Command.Raise message)
+  let raise (category : Error.Category.t) (message : string) : 'a t =
+    Command (Command.Raise (category, message))
 
   let warn (message : string) : 'a t =
     Command (Command.Warn message)

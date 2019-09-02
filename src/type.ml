@@ -44,14 +44,14 @@ let rec of_type_expr_new_typ_vars
     of_typs_exprs_new_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     MixedPath.of_path path >>= fun mixed_path ->
     return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
-  | Tobject _ -> raise "Object types are not handled"
-  | Tfield _ -> raise "Field types are not handled"
-  | Tnil -> raise "Nil type is not handled"
+  | Tobject _ -> raise NotSupported "Object types are not handled"
+  | Tfield _ -> raise NotSupported "Field types are not handled"
+  | Tnil -> raise NotSupported "Nil type is not handled"
   | Tlink typ | Tsubst typ -> of_type_expr_new_typ_vars typ_vars typ
-  | Tvariant _ -> raise "Polymorphic variant types are not handled"
-  | Tunivar _ | Tpoly (_, _ :: _) -> raise "Forall quantifier is not handled (yet)"
+  | Tvariant _ -> raise NotSupported "Polymorphic variant types are not handled"
+  | Tunivar _ | Tpoly (_, _ :: _) -> raise NotSupported "Forall quantifier is not handled (yet)"
   | Tpoly (typ, []) -> of_type_expr_new_typ_vars typ_vars typ
-  | Tpackage _ -> raise "First-class module types are not handled (yet)"
+  | Tpackage _ -> raise NotSupported "First-class module types are not handled (yet)"
 
 and of_typs_exprs_new_free_vars
   (typ_vars : Name.t Name.Map.t)
@@ -70,7 +70,7 @@ and of_typs_exprs_new_free_vars
 let rec of_type_expr (typ : Types.type_expr) : t Monad.t =
   match typ.desc with
   | Tvar None ->
-    raise "The placeholders `_` in types are not handled"
+    raise NotSupported "The placeholders `_` in types are not handled"
   | Tvar (Some x) -> return (Variable x)
   | Tarrow (_, typ_x, typ_y, _) ->
     all2 (of_type_expr typ_x) (of_type_expr typ_y) >>= fun (typ_x, typ_y) ->
@@ -83,12 +83,12 @@ let rec of_type_expr (typ : Types.type_expr) : t Monad.t =
     return (Apply (mixed_path, typs))
   | Tlink typ -> of_type_expr typ
   | Tpoly (typ, []) -> of_type_expr typ
-  | _ -> raise "This type is not handled"
+  | _ -> raise NotSupported "This type is not handled"
 
 let of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with
   | Tvar (Some x) -> return x
-  | _ -> raise "The type parameter was expected to be a variable"
+  | _ -> raise NotSupported "Only type variables are supported as parameters"
 
 let rec typ_args (typ : t) : Name.Set.t =
   match typ with

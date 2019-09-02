@@ -94,7 +94,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       (e_xs |> Monad.List.map (fun (_, e_x) ->
         match e_x with
         | Some e_x -> of_expression typ_vars e_x
-        | None -> raise "expected an argument")
+        | None -> raise Unexpected "expected an argument")
       ) >>= fun (e_f, e_xs) ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, _, _) ->
@@ -102,7 +102,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       (of_expression typ_vars e)
       (cases |> Monad.List.map (fun {c_lhs = p; c_guard = g; c_rhs = e} ->
         match g with
-        | Some _ -> raise "Guard on pattern ignored."
+        | Some _ -> raise NotSupported "Guard on pattern not supported"
         | None -> all2 (Pattern.of_pattern p) (of_expression typ_vars e)
       )) >>= fun (e, cases) ->
     return (Match (e, cases))
@@ -116,7 +116,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_record { fields = fields; extended_expression = None } ->
     (Array.to_list fields |> Monad.List.map (fun (label, definition) ->
       (match definition with
-      | Kept _ -> raise "Records with overwriting are not handled"
+      | Kept _ -> raise NotSupported "Records with overwriting are not handled"
       | Overridden (loc, e) -> return (loc, e)) >>= fun (x, e) ->
       let x = PathName.of_loc x in
       of_expression typ_vars e >>= fun e ->
@@ -136,22 +136,21 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       | Some e3 -> of_expression typ_vars e3) >>= fun (e1, e2, e3) ->
     return (IfThenElse (e1, e2, e3))
   | Texp_sequence _ ->
-    raise (
-      "Sequences of instructions are not handled (operator \";\").\n\n" ^
-      "Sequences are usually there to sequence side-effects. " ^
-      "You could rewrite this code without side-effects or use a monad."
+    raise SideEffect (
+      "Sequences of instructions are not handled (operator \";\")\n\n" ^
+      "Alternative: use a monad to sequence side-effects."
     )
   | Texp_try _ ->
-    raise (
+    raise SideEffect (
       "Try-with and exceptions are not handled.\n\n" ^
-      "You could use sum types (\"option\", \"result\", ...) to represent an error case."
+      "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
     )
-  | Texp_setfield _ -> raise "Set field not handled."
-  | Texp_array _ -> raise "Arrays not handled."
-  | Texp_while _ -> raise "While loops not handled."
-  | Texp_for _ -> raise "For loops not handled."
-  | Texp_assert e -> raise "Assert instruction is not handled."
-  | _ -> raise "Expression not handled."))
+  | Texp_setfield _ -> raise SideEffect "Set field not handled."
+  | Texp_array _ -> raise NotSupported "Arrays not handled."
+  | Texp_while _ -> raise SideEffect "While loops not handled."
+  | Texp_for _ -> raise SideEffect "For loops not handled."
+  | Texp_assert e -> raise SideEffect "Assert instruction is not handled."
+  | _ -> raise NotSupported "Expression not handled."))
 
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
@@ -178,7 +177,7 @@ and import_let_fun
       (Pattern.of_pattern p >>= fun p ->
       (match p with
       | Pattern.Variable x -> return x
-      | _ -> raise "A variable name instead of a pattern was expected."
+      | _ -> raise Unexpected "A variable name instead of a pattern was expected."
       ))
       (Type.of_type_expr_new_typ_vars typ_vars e.exp_type)
     >>= fun (x, (e_typ, typ_vars, new_typ_vars)) ->
@@ -202,34 +201,34 @@ let of_structure (signature_path : Path.t) (structure : structure) : t Monad.t =
   (structure.str_items |> Monad.List.filter_map (fun item ->
     set_loc (Loc.of_location item.str_loc) (
     match item.str_desc with
-    | Tstr_eval _ -> raise "Eval not handled"
+    | Tstr_eval _ -> raise SideEffect "Top-level evaluation is not handled"
     | Tstr_value (rec_flag, cases) ->
       import_let_fun Name.Map.empty rec_flag cases >>= fun def ->
       begin match def with
       | { is_rec = Recursivity.New true } ->
-        raise "Recursivity not handled in first-class module values"
+        raise NotSupported "Recursivity not handled in first-class module values"
       | { cases = [(header, value)] } ->
         begin match header with
         | { name; typ_vars = []; args = [] } ->
           let path_name = PathName.of_path_and_name signature_path name in
           return (Some (path_name, value))
         | _ ->
-          raise "This kind of definition of value for first-class modules is not handled (yet)"
+          raise NotSupported "This kind of definition of value for first-class modules is not handled (yet)"
         end
-      | _ -> raise "Mutual definitions not handled in first-class module values"
+      | _ -> raise NotSupported "Mutual definitions not handled in first-class module values"
       end
-    | Tstr_primitive _ -> raise "Primitive not handled"
+    | Tstr_primitive _ -> raise NotSupported "Primitive not handled"
     | Tstr_type _ -> return None
-    | Tstr_typext _ -> raise "Type extension not handled"
-    | Tstr_exception _ -> raise "Exception not handled"
-    | Tstr_module _ -> raise "Modules in first-class module values not handled (yet)"
-    | Tstr_recmodule _ -> raise "Recursive modules not handled"
+    | Tstr_typext _ -> raise NotSupported "Type extension not handled"
+    | Tstr_exception _ -> raise SideEffect "Exception not handled"
+    | Tstr_module _ -> raise NotSupported "Modules in first-class module values not handled (yet)"
+    | Tstr_recmodule _ -> raise NotSupported "Recursive modules not handled"
     | Tstr_modtype _ ->
-      raise "Definition of signatures inside first-class module value is not handled"
-    | Tstr_open _ -> raise "Open not handled in first-class module value"
-    | Tstr_class _ -> raise "Object oriented programming not handled"
-    | Tstr_class_type _ -> raise "Object oriented programming not handled"
-    | Tstr_include _ -> raise "Include is not handled inside first-class module values"
+      raise NotSupported "Definition of signatures inside first-class module value is not handled"
+    | Tstr_open _ -> raise NotSupported "Open not handled in first-class module value"
+    | Tstr_class _ -> raise NotSupported "Object oriented programming not handled"
+    | Tstr_class_type _ -> raise NotSupported "Object oriented programming not handled"
+    | Tstr_include _ -> raise NotSupported "Include is not handled inside first-class module values"
     | Tstr_attribute _ -> return None)
   )) >>= fun fields ->
   return (Module ([], fields))

@@ -24,7 +24,7 @@ module Constructors = struct
         | Cstr_tuple typs -> typs |> Monad.List.map Type.of_type_expr
         | Cstr_record _ ->
           set_loc (Loc.of_location cd_loc) (
-          raise "Unhandled named constructor parameters."))
+          raise NotSupported "Unhandled named constructor parameters."))
         (match cd_res with
         | None -> return None
         | Some res ->
@@ -70,7 +70,7 @@ type t =
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [] -> raise "Unexpected type definition with no case."
+  | [] -> raise NotSupported "Unexpected type definition with no case"
   | [ { typ_id; typ_type } ] ->
     let name = Name.of_ident typ_id in
     (typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
@@ -97,8 +97,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         Type.of_type_expr typ >>= fun typ ->
         return (Synonym (name, typ_args, typ))
       | None -> return (Abstract (name, typ_args)))
-    | Type_open -> raise "Open type definition not handled.")
-  | typ :: _ :: _ -> raise "Type definition with 'and' not handled."
+    | Type_open -> raise NotSupported "Open type definition not handled.")
+  | typ :: _ :: _ -> raise NotSupported "Type definition with 'and' not handled."
 
 let to_coq (def : t) : SmartPrint.t =
   match def with

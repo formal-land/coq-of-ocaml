@@ -74,7 +74,7 @@ let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t opti
     begin match Env.find_modtype path env with
     | { mtd_type = None } -> return None
     | { mtd_type = Some module_typ } -> is_module_typ_first_class module_typ
-    | exception _ -> raise ("Module signature '" ^ Path.name path ^ "' not found")
+    | exception _ -> raise NotFound ("Module signature '" ^ Path.name path ^ "' not found")
     end
   | Mty_signature signature ->
     let signature_paths = find_similar_signatures env signature in
@@ -82,9 +82,9 @@ let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t opti
     | [] -> return None
     | [signature_path] -> return (Some signature_path)
     | _ ->
-      raise (
+      raise FirstClassModule (
         "It is unclear which first-class module this projection is from. " ^
         "At least two similar module signatures."
       )
     end
-  | Mty_functor _ -> raise "Functor module types are not handled (yet)"
+  | Mty_functor _ -> raise NotSupported "Functor module types are not handled (yet)"

@@ -45,7 +45,7 @@ let rec of_pattern (p : pattern) : t Monad.t =
   | Tpat_or (p1, p2, _) ->
     all2 (of_pattern p1) (of_pattern p2) >>= fun (pattern1, pattern2) ->
     return (Or (pattern1, pattern2))
-  | _ -> raise "Unhandled pattern.")
+  | _ -> raise NotSupported "Unhandled pattern.")
 
 (** Free variables in a pattern. *)
 let rec free_variables (p : t) : Name.Set.t =
