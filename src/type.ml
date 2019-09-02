@@ -17,20 +17,22 @@ let rec of_type_expr_new_typ_vars
   (typ : Types.type_expr)
   : (t * Name.t Name.Map.t * Name.Set.t) Monad.t =
   match typ.desc with
-  | Tvar None ->
-    let x = Printf.sprintf "A%d" typ.id in
+  | Tvar x ->
+    let (source_name, generated_name) =
+      match x with
+      | None ->
+        let n = Name.Map.cardinal typ_vars in
+        (Printf.sprintf "A%d" typ.id, String.make 1 (Char.chr (Char.code 'A' + n)))
+      | Some x -> (x, x) in
     let (typ_vars, new_typ_vars, name) =
-      if Name.Map.mem x typ_vars then (
-        let name = Name.Map.find x typ_vars in
+      if Name.Map.mem source_name typ_vars then (
+        let name = Name.Map.find source_name typ_vars in
         (typ_vars, Name.Set.empty, name)
       ) else (
-        let n = Name.Map.cardinal typ_vars in
-        let name = String.make 1 (Char.chr (Char.code 'A' + n)) in
-        let typ_vars = Name.Map.add x name typ_vars in
-        (typ_vars, Name.Set.singleton name, name)
+        let typ_vars = Name.Map.add source_name generated_name typ_vars in
+        (typ_vars, Name.Set.singleton generated_name, generated_name)
       ) in
-    let typ = Variable name in
-    return (typ, typ_vars, new_typ_vars)
+    return (Variable name, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
     of_type_expr_new_typ_vars typ_vars typ_x >>= fun (typ_x, typ_vars, new_typ_vars_x) ->
     of_type_expr_new_typ_vars typ_vars typ_y >>= fun (typ_y, typ_vars, new_typ_vars_y) ->
