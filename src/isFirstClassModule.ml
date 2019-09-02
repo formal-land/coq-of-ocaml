@@ -67,9 +67,15 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t
 
 (** Get the path of the namespace of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. *)
-let is_module_typ_first_class (module_typ : Types.module_type) : Path.t option Monad.t =
+let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t option Monad.t =
   get_env >>= fun env ->
   match module_typ with
+  | Mty_ident path | Mty_alias (_, path) ->
+    begin match Env.find_modtype path env with
+    | { mtd_type = None } -> return None
+    | { mtd_type = Some module_typ } -> is_module_typ_first_class module_typ
+    | exception _ -> raise ("Module signature '" ^ Path.name path ^ "' not found")
+    end
   | Mty_signature signature ->
     let signature_paths = find_similar_signatures env signature in
     begin match signature_paths with
@@ -81,4 +87,4 @@ let is_module_typ_first_class (module_typ : Types.module_type) : Path.t option M
         "At least two similar module signatures."
       )
     end
-  | _ -> raise "Unhandled kind of module signature for this module"
+  | Mty_functor _ -> raise "Functor module types are not handled (yet)"

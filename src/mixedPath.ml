@@ -32,7 +32,7 @@ let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t 
         | None -> return (Path.Pdot (path, field_string, pos), [])
         | Some signature_path -> return (path, [(signature_path, field_string)])
         end
-      | exception _ -> raise "Unexpected module not found"
+      | exception _ -> raise ("Module '" ^ Path.name path ^ "' not found")
       end
     | _ :: _ -> raise "Nested accesses into first-class modules are not handled (yet)"
     end

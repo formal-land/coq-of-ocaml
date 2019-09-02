@@ -116,9 +116,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
         | _ -> raise "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
-      raise "Functors not handled."
+      raise "Functors are not handled."
+    | Tstr_module { mb_expr = { mod_desc = Tmod_apply _ }} ->
+      raise "Applications of functors are not handled."
     | Tstr_module _ -> raise "This kind of module is not handled."
-    | Tstr_eval _ -> raise "Structure item `eval` not handled."
+    | Tstr_eval _ -> raise "Top-level evaluations are not handled"
     | Tstr_primitive _ -> raise "Structure item `primitive` not handled."
     | Tstr_typext _ -> raise "Structure item `typext` not handled."
     | Tstr_recmodule _ -> raise "Structure item `recmodule` not handled."
