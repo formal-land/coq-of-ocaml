@@ -4,44 +4,68 @@ open SmartPrint
 type ast = Structure.t list
   [@@deriving sexp]
 
-let exp (structure : Typedtree.structure) : ast =
-  Structure.of_structure structure
+let exp
+  (env : Env.t)
+  (loc : Loc.t)
+  (structure : Typedtree.structure)
+  (source_file : string)
+  : ast option =
+  try
+    match MonadEval.eval (Structure.of_structure structure) env loc with
+    | Success ast -> Some ast
+    | Error errors ->
+      Error.display_errors source_file errors;
+      None with
+  | Envaux.Error (Module_not_found path) ->
+    prerr_endline ("Fatal error: module '" ^ Path.name path ^ "' not found while importing environments");
+    None
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
-let of_ocaml (structure : Typedtree.structure) (mode : string)
-  (module_name : string) : unit =
-  try
+let of_ocaml
+  (env : Env.t)
+  (loc : Loc.t)
+  (structure : Typedtree.structure)
+  (source_file : string)
+  (mode : string)
+  : unit =
+  match exp env loc structure source_file with
+  | None -> ()
+  | Some ast ->
     let document =
       match mode with
-      | "exp" -> !^ (Sexplib.Sexp.to_string_hum (sexp_of_ast (exp structure)))
+      | "exp" -> !^ (Sexplib.Sexp.to_string_hum (sexp_of_ast ast))
       | "v" ->
         concat (List.map (fun d -> d ^^ newline) [
           !^ "Require Import OCaml.OCaml." ^^ newline;
           !^ "Local Open Scope Z_scope.";
           !^ "Local Open Scope type_scope.";
           !^ "Import ListNotations."]) ^^ newline ^^
-        Structure.to_coq (exp structure)
+        Structure.to_coq ast
       | _ -> failwith (Printf.sprintf "Unknown mode '%s'." mode) in
     to_stdout 80 2 document;
     print_newline ();
-    flush stdout with
-  | Error.Make x ->
-    prerr_endline @@ Pp.to_string (!^ "Error:" ^^ Error.pp x)
+    flush stdout
 
 (** Parse a .cmt file to a typed AST. *)
-let parse_cmt (file_name : string) : Typedtree.structure =
+let parse_cmt (file_name : string) : Env.t * Loc.t * Typedtree.structure * string =
   let (_, cmt) = Cmt_format.read file_name in
   match cmt with
-  | Some { Cmt_format.cmt_annots = Cmt_format.Implementation structure; cmt_loadpath } ->
+  | Some {
+    Cmt_format.cmt_annots = Cmt_format.Implementation structure;
+    cmt_initial_env;
+    cmt_loadpath;
+    cmt_sourcefile = Some source_file
+  } ->
     (* We set the [load_path] so that the OCaml compiler can import the environments
        from the [.cmt] files. This is required to specify were to find the definitions
        of the standard library. See https://discuss.ocaml.org/t/getting-the-environment-from-the-ast-in-cmt/4287 *)
     Config.load_path := cmt_loadpath;
-    structure
-  | _ -> failwith "Cannot extract cmt data."
-
-let module_name (file_name : string) : string =
-  String.capitalize_ascii @@ Filename.chop_extension @@ Filename.basename file_name
+    let initial_loc =
+      match structure.str_items with
+      | structure_item :: _ -> Loc.of_location structure_item.str_loc
+      | [] -> failwith "Unexpected empty file" in
+    (cmt_initial_env, initial_loc, structure, source_file)
+  | _ -> failwith "Cannot extract cmt data"
 
 (** The main function. *)
 let main () =
@@ -53,6 +77,8 @@ let main () =
   Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage options usage_msg
-  | Some file_name -> of_ocaml (parse_cmt file_name) !mode (module_name file_name);
+  | Some file_name ->
+    let (env, loc, structure, source_file) = parse_cmt file_name in
+    of_ocaml env loc structure source_file !mode;
 
 ;;main ()

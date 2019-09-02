@@ -1,8 +1,9 @@
 (** Utilities to check if a module is a first-class module and get the
     namespace of its signature definition. *)
+open Monad.Notations
 
 (** Recursively get all the module type declarations inside a module declaration.
-    We retreive the path prefix and definition of each.  *)
+    We retreive the path prefix and definition of each. *)
 let rec get_modtype_declarations_of_module_declaration
   (module_declaration : Types.module_declaration)
   : (Ident.t list * Types.modtype_declaration) list =
@@ -66,21 +67,24 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t
 
 (** Get the path of the namespace of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. *)
-let is_module_typ_first_class
-  (env : Env.t)
-  (loc : Loc.t)
-  (module_typ : Types.module_type)
-  : Path.t option =
+let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t option Monad.t =
+  get_env >>= fun env ->
   match module_typ with
+  | Mty_ident path | Mty_alias (_, path) ->
+    begin match Env.find_modtype path env with
+    | { mtd_type = None } -> return None
+    | { mtd_type = Some module_typ } -> is_module_typ_first_class module_typ
+    | exception _ -> raise NotFound ("Module signature '" ^ Path.name path ^ "' not found")
+    end
   | Mty_signature signature ->
     let signature_paths = find_similar_signatures env signature in
     begin match signature_paths with
-    | [] -> None
-    | [signature_path] -> Some signature_path
+    | [] -> return None
+    | [signature_path] -> return (Some signature_path)
     | _ ->
-      Error.raise loc (
+      raise FirstClassModule (
         "It is unclear which first-class module this projection is from. " ^
         "At least two similar module signatures."
       )
     end
-  | _ -> Error.raise loc "Unhandled kind of module signature for this module"
+  | Mty_functor _ -> raise NotSupported "Functor module types are not handled (yet)"

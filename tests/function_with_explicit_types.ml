@@ -3,3 +3,6 @@ let f (n : int) (b : bool) =
     n + 1
   else
     n - 1
+
+let id (x : 'a) : 'a =
+  x

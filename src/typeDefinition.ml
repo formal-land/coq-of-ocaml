@@ -1,6 +1,7 @@
 open Typedtree
 open Sexplib.Std
 open SmartPrint
+open Monad.Notations
 
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
@@ -10,25 +11,26 @@ module Constructors = struct
     [@@deriving sexp]
 
   let rec of_ocaml
-    (env : Env.t)
     (defined_typ : Type.t)
     (cases : Types.constructor_declaration list)
-    : t =
+    : t Monad.t =
     match cases with
-    | [] -> NonGadt []
+    | [] -> return (NonGadt [])
     | { cd_args; cd_id; cd_loc; cd_res; } :: cases ->
+      set_loc (Loc.of_location cd_loc) (
       let name = Name.of_ident cd_id in
-      let loc = Loc.of_location cd_loc in
-      let typs =
-        match cd_args with
-        | Cstr_tuple typs -> List.map (fun typ -> Type.of_type_expr env loc typ) typs
+      all2
+        (match cd_args with
+        | Cstr_tuple typs -> typs |> Monad.List.map Type.of_type_expr
         | Cstr_record _ ->
-          let loc = Loc.of_location cd_loc in
-          Error.raise loc "Unhandled named constructor parameters." in
-      let res_typ =
-        match cd_res with
-        | None -> None
-        | Some res -> Some (Type.of_type_expr env loc res) in
+          set_loc (Loc.of_location cd_loc) (
+          raise NotSupported "Unhandled named constructor parameters."))
+        (match cd_res with
+        | None -> return None
+        | Some res ->
+          Type.of_type_expr res >>= fun typ ->
+          return (Some typ))
+      >>= fun (typs, res_typ) ->
       let res_typ_or_defined_typ =
         match res_typ with
         | None -> defined_typ
@@ -36,10 +38,10 @@ module Constructors = struct
       (* We need to compute the free variables to add `forall` annotations in Coq as
          polymorphic variables cannot be infered. *)
       let free_typ_vars = Name.Set.elements (Type.typ_args_of_typs (res_typ_or_defined_typ :: typs)) in
-      let constructors = of_ocaml env defined_typ cases in
+      of_ocaml defined_typ cases >>= fun constructors ->
       (* In case of types mixing GADT and non-GADT constructors, we automatically lift
          to a GADT type. *)
-      match (res_typ, constructors) with
+      return (match (res_typ, constructors) with
       | (None, NonGadt constructors) ->
         NonGadt ((name, typs) :: constructors)
       | (Some res_typ, Gadt constructors) ->
@@ -51,7 +53,7 @@ module Constructors = struct
           let free_typ_vars = Name.Set.elements (Type.typ_args_of_typs (defined_typ :: typs)) in
           (name, free_typ_vars, typs, defined_typ)
         ) in
-        Gadt ((name, free_typ_vars, typs, res_typ) :: lifted_constructors)
+        Gadt ((name, free_typ_vars, typs, res_typ) :: lifted_constructors)))
 
   let constructor_names (constructors : t) : Name.t list =
     match constructors with
@@ -66,13 +68,12 @@ type t =
   | Abstract of Name.t * Name.t list
   [@@deriving sexp]
 
-let of_ocaml (env : Env.t) (loc : Loc.t) (typs : type_declaration list) : t =
+let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [] -> Error.raise loc "Unexpected type definition with no case."
+  | [] -> raise NotSupported "Unexpected type definition with no case"
   | [ { typ_id; typ_type } ] ->
     let name = Name.of_ident typ_id in
-    let typ_args =
-      List.map (Type.of_type_expr_variable loc) typ_type.type_params in
+    (typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
     (match typ_type.type_kind with
     | Type_variant cases ->
       let mixed_path = MixedPath.of_name name in
@@ -82,19 +83,22 @@ let of_ocaml (env : Env.t) (loc : Loc.t) (typs : type_declaration list) : t =
         mixed_path,
         List.map (fun typ_arg -> Type.Variable typ_arg) typ_args
       ) in
-      let constructors = Constructors.of_ocaml env defined_typ cases in
-      Inductive (name, typ_args, constructors)
+      Constructors.of_ocaml defined_typ cases >>= fun constructors ->
+      return (Inductive (name, typ_args, constructors))
     | Type_record (fields, _) ->
-      let fields =
-        fields |> List.map (fun { Types.ld_id = x; ld_type = typ } ->
-          (Name.of_ident x, Type.of_type_expr env loc typ)) in
-      Record (name, fields)
+      (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ } ->
+        Type.of_type_expr typ >>= fun typ ->
+        return (Name.of_ident x, typ)
+      )) >>= fun fields ->
+      return (Record (name, fields))
     | Type_abstract ->
       (match typ_type.type_manifest with
-      | Some typ -> Synonym (name, typ_args, Type.of_type_expr env loc typ)
-      | None -> Abstract (name, typ_args))
-      | Type_open -> Error.raise loc "Open type definition not handled.")
-  | typ :: _ :: _ -> Error.raise loc "Type definition with 'and' not handled."
+      | Some typ ->
+        Type.of_type_expr typ >>= fun typ ->
+        return (Synonym (name, typ_args, typ))
+      | None -> return (Abstract (name, typ_args)))
+    | Type_open -> raise NotSupported "Open type definition not handled.")
+  | typ :: _ :: _ -> raise NotSupported "Type definition with 'and' not handled."
 
 let to_coq (def : t) : SmartPrint.t =
   match def with

@@ -16,8 +16,8 @@ type t = {
   start : Position.t;
   }
 
-let to_user (loc : t) : SmartPrint.t =
-  !^ (loc.file_name) ^-^ !^ "," ^^ !^ "line" ^^ OCaml.int loc.start.Position.line
+let to_string (loc : t) : string =
+  loc.file_name ^ "," ^ " line " ^ string_of_int loc.start.Position.line
 
 let of_location (location : Location.t) : t =
   let start = location.Location.loc_start in

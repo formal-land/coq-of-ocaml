@@ -2,7 +2,6 @@
 open Asttypes
 open Sexplib.Std
 open SmartPrint
-open Yojson.Basic
 
 type t = {
   path : Name.t list;
@@ -152,29 +151,25 @@ let of_loc (loc : Longident.t loc) : t =
   of_long_ident loc.txt
 
 (** Import an OCaml [Path.t]. *)
-let of_path (loc : Loc.t) (path : Path.t) : t =
-  let rec aux path : Name.t list * Name.t =
+let of_path (path : Path.t) : t =
+  let rec aux path : (Name.t list * Name.t) =
     match path with
     | Path.Pident x -> ([], Name.of_ident x)
     | Path.Pdot (path, s, _) ->
       let (path, base) = aux path in
       (base :: path, s)
-    | Path.Papply _ ->
-      Error.warn loc "Application of paths is not handled.";
-      ([], "application_of_paths") in
+    | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
   convert (of_name (List.rev path) base)
 
-let of_path_and_name (loc : Loc.t) (path : Path.t) (name : Name.t) : t =
+let of_path_and_name (path : Path.t) (name : Name.t) : t =
   let rec aux p : Name.t list * Name.t =
     match p with
     | Path.Pident x -> ([Name.of_ident x], name)
     | Path.Pdot (p, s, _) ->
       let (path, base) = aux p in
       (s :: path, base)
-    | Path.Papply _ ->
-      Error.warn loc "Application of paths is not handled.";
-      ([], "application_of_paths") in
+    | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
   convert (of_name (List.rev path) base)
 
@@ -190,20 +185,3 @@ let add_prefix (prefix : Name.t) (path_name : t) : t =
 
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
-
-let to_json (x : t) : Yojson.Basic.t =
-  `String (String.concat "." (x.path @ [x.base]))
-
-let of_json (json : Yojson.Basic.t) : t =
-  let rec split_at_last l =
-    match l with
-    | [] -> assert false
-    | [x] -> ([], x)
-    | x :: l ->
-      let (path, base) = split_at_last l in
-      (x :: path, base) in
-  match json with
-  | `String x ->
-    let (path, base) = split_at_last @@ Str.split (Str.regexp_string ".") x in
-    of_name path base
-  | _ -> raise (Error.Json "List expected.")

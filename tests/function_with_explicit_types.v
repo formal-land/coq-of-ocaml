@@ -9,3 +9,5 @@ Definition f (n : Z) (b : bool) : Z :=
     Z.add n 1
   else
     Z.sub n 1.
+
+Definition id {a : Type} (x : a) : a := x.
