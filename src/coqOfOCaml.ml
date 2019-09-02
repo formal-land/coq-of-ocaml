@@ -4,17 +4,32 @@ open SmartPrint
 type ast = Structure.t list
   [@@deriving sexp]
 
-let exp (env : Env.t) (loc : Loc.t) (structure : Typedtree.structure) : ast option =
+let read_source_file (source_file : string) : string =
+  let channel = open_in source_file in
+  let length = in_channel_length channel in
+  really_input_string channel length
+
+let exp
+  (env : Env.t)
+  (loc : Loc.t)
+  (structure : Typedtree.structure)
+  (source_file : string)
+  : ast option =
   try
     match MonadEval.eval (Structure.of_structure structure) env loc with
     | Success ast -> Some ast
     | Error errors ->
-      errors |> List.iter (fun (loc, message) ->
-        prerr_endline @@ Pp.to_string (!^ "Error:" ^^ Loc.to_user loc ^-^ !^ ":" ^^ !^ message)
+      let source_file_content = read_source_file source_file in
+      let source_lines = String.split_on_char '\n' source_file_content in
+      errors |> List.iteri (fun index (loc, message) ->
+        begin if index <> 0 then
+          Error.display_separator ()
+        end;
+        Error.display_error source_lines loc message
       );
       None with
   | Envaux.Error (Module_not_found path) ->
-    prerr_endline ("Fatal error: module '" ^ Path.name path ^ "' not found");
+    prerr_endline ("Fatal error: module '" ^ Path.name path ^ "' not found while importing environments");
     None
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
@@ -22,9 +37,10 @@ let of_ocaml
   (env : Env.t)
   (loc : Loc.t)
   (structure : Typedtree.structure)
+  (source_file : string)
   (mode : string)
   : unit =
-  match exp env loc structure with
+  match exp env loc structure source_file with
   | None -> ()
   | Some ast ->
     let document =
@@ -43,13 +59,14 @@ let of_ocaml
     flush stdout
 
 (** Parse a .cmt file to a typed AST. *)
-let parse_cmt (file_name : string) : Env.t * Loc.t * Typedtree.structure =
+let parse_cmt (file_name : string) : Env.t * Loc.t * Typedtree.structure * string =
   let (_, cmt) = Cmt_format.read file_name in
   match cmt with
   | Some {
     Cmt_format.cmt_annots = Cmt_format.Implementation structure;
     cmt_initial_env;
-    cmt_loadpath
+    cmt_loadpath;
+    cmt_sourcefile = Some source_file
   } ->
     (* We set the [load_path] so that the OCaml compiler can import the environments
        from the [.cmt] files. This is required to specify were to find the definitions
@@ -59,7 +76,7 @@ let parse_cmt (file_name : string) : Env.t * Loc.t * Typedtree.structure =
       match structure.str_items with
       | structure_item :: _ -> Loc.of_location structure_item.str_loc
       | [] -> failwith "Unexpected empty file" in
-    (cmt_initial_env, initial_loc, structure)
+    (cmt_initial_env, initial_loc, structure, source_file)
   | _ -> failwith "Cannot extract cmt data"
 
 (** The main function. *)
@@ -73,7 +90,7 @@ let main () =
   match !file_name with
   | None -> Arg.usage options usage_msg
   | Some file_name ->
-    let (env, loc, structure) = parse_cmt file_name in
-    of_ocaml env loc structure !mode;
+    let (env, loc, structure, source_file) = parse_cmt file_name in
+    of_ocaml env loc structure source_file !mode;
 
 ;;main ()
