@@ -44,9 +44,14 @@ let rec of_type_expr_new_typ_vars
     of_typs_exprs_new_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     MixedPath.of_path path >>= fun mixed_path ->
     return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
-  | Tlink typ -> of_type_expr_new_typ_vars typ_vars typ
+  | Tobject _ -> raise "Object types are not handled"
+  | Tfield _ -> raise "Field types are not handled"
+  | Tnil -> raise "Nil type is not handled"
+  | Tlink typ | Tsubst typ -> of_type_expr_new_typ_vars typ_vars typ
+  | Tvariant _ -> raise "Polymorphic variant types are not handled"
+  | Tunivar _ | Tpoly (_, _ :: _) -> raise "Forall quantifier is not handled (yet)"
   | Tpoly (typ, []) -> of_type_expr_new_typ_vars typ_vars typ
-  | _ -> raise "This kind of type is not handled"
+  | Tpackage _ -> raise "First-class module types are not handled (yet)"
 
 and of_typs_exprs_new_free_vars
   (typ_vars : Name.t Name.Map.t)
