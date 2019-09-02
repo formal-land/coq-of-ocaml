@@ -6,8 +6,21 @@ let warn (loc : Loc.t) (message : string) : unit =
   let message = "Warning: " ^ message in
   prerr_endline (Loc.to_string loc ^ ": " ^ message)
 
-let left_pad (message : string) (width : int) : string =
-  String.make (max 0 (width - String.length message)) ' ' ^ message
+type left_or_right = Left | Right
+
+let pad
+  (direction : left_or_right)
+  (width : int)
+  (character : char)
+  (message : string)
+  : string =
+  let padding_text = String.make (max 0 (width - String.length message)) character in
+  match direction with
+  | Left -> padding_text ^ message
+  | Right  -> message ^ padding_text
+
+let colorize (color : string) (message : string) : string =
+  "\027[" ^ color ^ "m" ^ message ^ "\027[0m"
 
 let get_code_frame (source_lines : string list) (line_number : int) : string =
   let output_lines : string list ref = ref [] in
@@ -18,22 +31,49 @@ let get_code_frame (source_lines : string list) (line_number : int) : string =
   for current_line_number = first_line_number to last_line_number do
     let current_line_index = current_line_number - 1 in
     begin if current_line_index >= 0 && current_line_index < nb_source_lines then
+      let is_error_line = current_line_number = line_number in
       let current_line =
-          (if current_line_number = line_number then "> " else "  ") ^
-          left_pad (string_of_int current_line_number) line_number_width ^ " | " ^
-          List.nth source_lines current_line_index in
-      output_lines := current_line :: !output_lines
+          (if is_error_line then colorize "31;1" "> " else "  ") ^
+          colorize (if is_error_line then "1" else "0") (
+            pad Left line_number_width ' ' (string_of_int current_line_number) ^ " | "
+          ) ^
+          colorize (if is_error_line then "33;1" else "33") (List.nth source_lines current_line_index) in
+      output_lines := colorize (if is_error_line then "1" else "") current_line :: !output_lines
     end
   done;
   String.concat "\n" (List.rev !output_lines)
 
 let display_error (source_lines : string list) (loc : Loc.t) (message : string) : unit =
   print_endline (
-    Loc.to_string loc ^ ":" ^ "\n" ^
-    get_code_frame source_lines loc.start.line ^ "\n" ^
+    colorize "34;1" (pad Right 100 '-' (
+      "--- " ^ loc.file_name ^ ":" ^ string_of_int loc.start.line ^ " "
+    )) ^ "\n" ^
     "\n" ^
-    message
+    get_code_frame source_lines loc.start.line ^ "\n" ^
+    "\n\n" ^
+    message ^
+    "\n\n"
   )
 
-let display_separator () : unit =
-  print_endline ("\n" ^ String.make 80 '-' ^ "\n")
+let read_source_file (source_file : string) : string =
+  let channel = open_in source_file in
+  let length = in_channel_length channel in
+  really_input_string channel length
+
+let display_errors (source_file : string) (errors : (Loc.t * string) list) : unit =
+  let source_file_content = read_source_file source_file in
+  let source_lines = String.split_on_char '\n' source_file_content in
+  errors |> List.iteri (fun index (loc, message) ->
+    display_error source_lines loc message
+  );
+  let nb_errors = List.length errors in
+  print_endline (
+    colorize "34;1" (pad Right 100 '-' "") ^ "\n" ^
+    "\n\n" ^
+    colorize "1" (
+      "Cannot import '" ^ source_file ^ "' to Coq:" ^ "\n" ^
+      string_of_int nb_errors ^
+      (if nb_errors = 1 then " error" else " errors")
+    ) ^ "\n" ^
+    "\n"
+  )

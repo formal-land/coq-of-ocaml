@@ -4,11 +4,6 @@ open SmartPrint
 type ast = Structure.t list
   [@@deriving sexp]
 
-let read_source_file (source_file : string) : string =
-  let channel = open_in source_file in
-  let length = in_channel_length channel in
-  really_input_string channel length
-
 let exp
   (env : Env.t)
   (loc : Loc.t)
@@ -19,14 +14,7 @@ let exp
     match MonadEval.eval (Structure.of_structure structure) env loc with
     | Success ast -> Some ast
     | Error errors ->
-      let source_file_content = read_source_file source_file in
-      let source_lines = String.split_on_char '\n' source_file_content in
-      errors |> List.iteri (fun index (loc, message) ->
-        begin if index <> 0 then
-          Error.display_separator ()
-        end;
-        Error.display_error source_lines loc message
-      );
+      Error.display_errors source_file errors;
       None with
   | Envaux.Error (Module_not_found path) ->
     prerr_endline ("Fatal error: module '" ^ Path.name path ^ "' not found while importing environments");
