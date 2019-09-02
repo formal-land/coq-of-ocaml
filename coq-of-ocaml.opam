@@ -24,7 +24,6 @@ depends: [
   "ppx_sexp_conv"
   "sexplib"
   "smart-print"
-  "yojson"
 ]
 tags: [
   "keyword:compilation"
