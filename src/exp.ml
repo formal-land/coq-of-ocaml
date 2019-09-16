@@ -135,11 +135,15 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       | None -> return (Tuple [])
       | Some e3 -> of_expression typ_vars e3) >>= fun (e1, e2, e3) ->
     return (IfThenElse (e1, e2, e3))
-  | Texp_sequence _ ->
-    raise SideEffect (
-      "Sequences of instructions are not handled (operator \";\")\n\n" ^
-      "Alternative: use a monad to sequence side-effects."
-    )
+  | Texp_sequence (e1, e2) ->
+    all3
+      (of_expression typ_vars e1)
+      (raise SideEffect (
+        "Sequences of instructions are not handled (operator \";\")\n\n" ^
+        "Alternative: use a monad to sequence side-effects."
+      ))
+      (of_expression typ_vars e2) >>= fun (_, e, _) ->
+    e
   | Texp_try _ ->
     raise SideEffect (
       "Try-with and exceptions are not handled.\n\n" ^
@@ -170,27 +174,32 @@ and import_let_fun
   (cases : value_binding list)
   : t Definition.t Monad.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
-  (cases |> Monad.List.map (fun { vb_pat = p; vb_expr = e } ->
+  (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr = e } ->
     set_env e.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     all2
       (Pattern.of_pattern p >>= fun p ->
       (match p with
-      | Pattern.Variable x -> return x
+      | Pattern.Any -> return None
+      | Pattern.Variable x -> return (Some x)
       | _ -> raise Unexpected "A variable name instead of a pattern was expected."
       ))
       (Type.of_type_expr_new_typ_vars typ_vars e.exp_type)
     >>= fun (x, (e_typ, typ_vars, new_typ_vars)) ->
-    of_expression typ_vars e >>= fun e ->
-    let (args_names, e_body) = open_function e in
-    let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
-    let header = {
-      Header.name = x;
-      typ_vars = Name.Set.elements new_typ_vars;
-      args = List.combine args_names args_typs;
-      typ = Some e_body_typ
-    } in
-    return (header, e_body))
+    match x with
+    | None -> return None
+    | Some x ->
+      of_expression typ_vars e >>= fun e ->
+      let (args_names, e_body) = open_function e in
+      let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
+      let header = {
+        Header.name = x;
+        typ_vars = Name.Set.elements new_typ_vars;
+        args = List.combine args_names args_typs;
+        typ = Some e_body_typ
+      } in
+      return (Some (header, e_body))
+    )
   ))) >>= fun cases ->
   return {
     Definition.is_rec = is_rec;
@@ -258,11 +267,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
   | LetFun (def, e) ->
-    let firt_case = ref true in (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
+    (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
     Pp.parens paren @@ nest (separate newline
-      (def.Definition.cases |> List.map (fun (header, e) ->
-        (if !firt_case then (
-          firt_case := false;
+      (def.Definition.cases |> List.mapi (fun index (header, e) ->
+        let first_case = index = 0 in
+        (if first_case then (
           !^ "let" ^^
           (if Recursivity.to_bool def.Definition.is_rec then !^ "fix" else empty)
         ) else

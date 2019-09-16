@@ -1,5 +1,4 @@
 (** Error messages. *)
-open SmartPrint
 
 module Category = struct
   type t =
