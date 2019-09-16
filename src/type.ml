@@ -12,18 +12,21 @@ type t =
   [@@deriving sexp]
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
-let rec of_type_expr_new_typ_vars
+let rec of_type_expr
+  (with_free_vars: bool)
   (typ_vars : Name.t Name.Map.t)
   (typ : Types.type_expr)
   : (t * Name.t Name.Map.t * Name.Set.t) Monad.t =
   match typ.desc with
   | Tvar x ->
-    let (source_name, generated_name) =
-      match x with
-      | None ->
+    (match x with
+    | None ->
+      if with_free_vars then
         let n = Name.Map.cardinal typ_vars in
-        (Printf.sprintf "A%d" typ.id, String.make 1 (Char.chr (Char.code 'A' + n)))
-      | Some x -> (x, x) in
+        return (Printf.sprintf "A%d" typ.id, String.make 1 (Char.chr (Char.code 'A' + n)))
+      else
+        raise NotSupported "The placeholders `_` in types are not handled"
+    | Some x -> return (x, x)) >>= fun (source_name, generated_name) ->
     let (typ_vars, new_typ_vars, name) =
       if Name.Map.mem source_name typ_vars then (
         let name = Name.Map.find source_name typ_vars in
@@ -34,32 +37,33 @@ let rec of_type_expr_new_typ_vars
       ) in
     return (Variable name, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
-    of_type_expr_new_typ_vars typ_vars typ_x >>= fun (typ_x, typ_vars, new_typ_vars_x) ->
-    of_type_expr_new_typ_vars typ_vars typ_y >>= fun (typ_y, typ_vars, new_typ_vars_y) ->
+    of_type_expr with_free_vars typ_vars typ_x >>= fun (typ_x, typ_vars, new_typ_vars_x) ->
+    of_type_expr with_free_vars typ_vars typ_y >>= fun (typ_y, typ_vars, new_typ_vars_y) ->
     return (Arrow (typ_x, typ_y), typ_vars, Name.Set.union new_typ_vars_x new_typ_vars_y)
   | Ttuple typs ->
-    of_typs_exprs_new_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
+    of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    of_typs_exprs_new_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
+    of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     MixedPath.of_path path >>= fun mixed_path ->
     return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
   | Tobject _ -> raise NotSupported "Object types are not handled"
   | Tfield _ -> raise NotSupported "Field types are not handled"
   | Tnil -> raise NotSupported "Nil type is not handled"
-  | Tlink typ | Tsubst typ -> of_type_expr_new_typ_vars typ_vars typ
+  | Tlink typ | Tsubst typ -> of_type_expr with_free_vars typ_vars typ
   | Tvariant _ -> raise NotSupported "Polymorphic variant types are not handled"
   | Tunivar _ | Tpoly (_, _ :: _) -> raise NotSupported "Forall quantifier is not handled (yet)"
-  | Tpoly (typ, []) -> of_type_expr_new_typ_vars typ_vars typ
+  | Tpoly (typ, []) -> of_type_expr with_free_vars typ_vars typ
   | Tpackage _ -> raise NotSupported "First-class module types are not handled (yet)"
 
-and of_typs_exprs_new_free_vars
+and of_typs_exprs
+  (with_free_vars: bool)
   (typ_vars : Name.t Name.Map.t)
   (typs : Types.type_expr list)
   : (t list * Name.t Name.Map.t * Name.Set.t) Monad.t =
   (Monad.List.fold_left
     (fun (typs, typ_vars, new_typ_vars) typ ->
-      of_type_expr_new_typ_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
+      of_type_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
       return (typ :: typs, typ_vars, Name.Set.union new_typ_vars new_typ_vars')
     )
     ([], typ_vars, Name.Set.empty)
@@ -67,23 +71,9 @@ and of_typs_exprs_new_free_vars
   ) >>= fun (typs, typ_vars, new_typ_vars) ->
   return (List.rev typs, typ_vars, new_typ_vars)
 
-let rec of_type_expr (typ : Types.type_expr) : t Monad.t =
-  match typ.desc with
-  | Tvar None ->
-    raise NotSupported "The placeholders `_` in types are not handled"
-  | Tvar (Some x) -> return (Variable x)
-  | Tarrow (_, typ_x, typ_y, _) ->
-    all2 (of_type_expr typ_x) (of_type_expr typ_y) >>= fun (typ_x, typ_y) ->
-    return (Arrow (typ_x, typ_y))
-  | Ttuple typs ->
-    Monad.List.map of_type_expr typs >>= fun typs ->
-    return (Tuple typs)
-  | Tconstr (path, typs, _) ->
-    all2 (MixedPath.of_path path) (Monad.List.map of_type_expr typs) >>= fun (mixed_path, typs) ->
-    return (Apply (mixed_path, typs))
-  | Tlink typ -> of_type_expr typ
-  | Tpoly (typ, []) -> of_type_expr typ
-  | _ -> raise NotSupported "This type is not handled"
+let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
+  of_type_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
+  return typ
 
 let of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with

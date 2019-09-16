@@ -74,7 +74,7 @@ let of_ocaml_module_with_substitutions
       begin match typ_type with
       | { type_kind = Type_abstract; type_manifest = Some typ } ->
         set_loc (Loc.of_location typ_loc) (
-        Type.of_type_expr typ >>= fun typ ->
+        Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return (PathName.of_path path, typ))
       | _ ->
         raise NotSupported (

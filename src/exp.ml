@@ -184,7 +184,7 @@ and import_let_fun
       | Pattern.Variable x -> return (Some x)
       | _ -> raise Unexpected "A variable name instead of a pattern was expected."
       ))
-      (Type.of_type_expr_new_typ_vars typ_vars e.exp_type)
+      (Type.of_type_expr true typ_vars e.exp_type)
     >>= fun (x, (e_typ, typ_vars, new_typ_vars)) ->
     match x with
     | None -> return None

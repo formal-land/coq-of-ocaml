@@ -42,14 +42,14 @@ let of_signature (signature : signature) : t Monad.t =
       let name = Name.of_ident typ_id in
       all2
         (type_params |> Monad.List.map Type.of_type_expr_variable)
-        (Type.of_type_expr typ)
+        (Type.of_type_expr_without_free_vars typ)
       >>= fun (typ_args, typ) ->
       return (TypSynonym (name, typ_args, typ))
     | Tsig_type (_, _) -> raise NotSupported "Mutual type definitions in signatures not handled."
     | Tsig_typext _ -> raise NotSupported "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
       let name = Name.of_ident val_id in
-      Type.of_type_expr ctyp_type >>= fun typ ->
+      Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return (Value (name, typ_args, typ)))) in
   all2
