@@ -11,30 +11,32 @@ module Value = struct
     [@@deriving sexp]
 
   (** Pretty-print a value definition to Coq. *)
-  let to_coq (value : t) : SmartPrint.t =
-    let firt_case = ref true in
-    separate (newline ^^ newline) (value.Exp.Definition.cases |> List.map (fun (header, e) ->
-      nest (
-        (if !firt_case then (
-          firt_case := false;
-          if Recursivity.to_bool value.Exp.Definition.is_rec then
-            !^ "Fixpoint"
-          else
-            !^ "Definition"
-        ) else
-          !^ "with") ^^
-        Name.to_coq header.Exp.Header.name ^^
-        (match header.Exp.Header.typ_vars with
-        | [] -> empty
-        | _ :: _ ->
-          braces @@ group (separate space (List.map Name.to_coq header.Exp.Header.typ_vars) ^^
-          !^ ":" ^^ !^ "Type")) ^^
-        group (separate space (header.Exp.Header.args |> List.map (fun (x, t) ->
-          parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
-        (match header.Exp.Header.typ with
-        | None -> empty
-        | Some typ -> !^ ": " ^-^ Type.to_coq false typ) ^-^
-        !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
+  let to_coq (value : t) : SmartPrint.t option =
+    match value.Exp.Definition.cases with
+    | [] -> None
+    | _ :: _ ->
+      Some (separate (newline ^^ newline) (value.Exp.Definition.cases |> List.mapi (fun index (header, e) ->
+        let firt_case = index = 0 in
+        nest (
+          (if firt_case then (
+            if Recursivity.to_bool value.Exp.Definition.is_rec then
+              !^ "Fixpoint"
+            else
+              !^ "Definition"
+          ) else
+            !^ "with") ^^
+          Name.to_coq header.Exp.Header.name ^^
+          (match header.Exp.Header.typ_vars with
+          | [] -> empty
+          | _ :: _ ->
+            braces @@ group (separate space (List.map Name.to_coq header.Exp.Header.typ_vars) ^^
+            !^ ":" ^^ !^ "Type")) ^^
+          group (separate space (header.Exp.Header.args |> List.map (fun (x, t) ->
+            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false t)))) ^^
+          (match header.Exp.Header.typ with
+          | None -> empty
+          | Some typ -> !^ ": " ^-^ Type.to_coq false typ) ^-^
+          !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ ".")
 end
 
 (** A structure. *)
@@ -132,15 +134,15 @@ let rec of_structure (structure : structure) : t list Monad.t =
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
-  let to_coq_one (def : t) : SmartPrint.t =
+  let to_coq_one (def : t) : SmartPrint.t option =
     match def with
     | Value value -> Value.to_coq value
-    | TypeDefinition typ_def -> TypeDefinition.to_coq typ_def
-    | Open o -> Open.to_coq o
+    | TypeDefinition typ_def -> Some (TypeDefinition.to_coq typ_def)
+    | Open o -> Some (Open.to_coq o)
     | Module (name, defs) ->
-      nest (
+      Some (nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
-        !^ "End" ^^ Name.to_coq name ^-^ !^ ".")
-    | Signature (name, signature) -> Signature.to_coq_definition name signature in
-  separate (newline ^^ newline) (List.map to_coq_one defs)
+        !^ "End" ^^ Name.to_coq name ^-^ !^ "."))
+    | Signature (name, signature) -> Some (Signature.to_coq_definition name signature) in
+  separate (newline ^^ newline) (Util.List.filter_map to_coq_one defs)

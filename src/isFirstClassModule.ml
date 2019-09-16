@@ -70,7 +70,8 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t
 let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t option Monad.t =
   get_env >>= fun env ->
   match module_typ with
-  | Mty_ident path | Mty_alias (_, path) ->
+  | Mty_alias (Mta_absent, _) -> return None
+  | Mty_ident path | Mty_alias (Mta_present, path) ->
     begin match Env.find_modtype path env with
     | { mtd_type = None } -> return None
     | { mtd_type = Some module_typ } -> is_module_typ_first_class module_typ
@@ -84,7 +85,7 @@ let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t opti
     | _ ->
       raise FirstClassModule (
         "It is unclear which first-class module this projection is from. " ^
-        "At least two similar module signatures."
+        "At least two similar module signatures found."
       )
     end
   | Mty_functor _ -> raise NotSupported "Functor module types are not handled (yet)"
