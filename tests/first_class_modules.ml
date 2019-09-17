@@ -64,6 +64,8 @@ module type Boxed_set = sig
   type 'a table = 'a list
 end
 
+type 'elt set = (module Boxed_set with type elt = 'elt)
+
 module type Triple = sig
   type a
   type b

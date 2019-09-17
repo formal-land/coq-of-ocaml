@@ -9,6 +9,7 @@ type t =
   | Arrow of t * t
   | Tuple of t list
   | Apply of MixedPath.t * t list
+  | Package of PathName.t * t option Tree.t
   [@@deriving sexp]
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
@@ -54,7 +55,31 @@ let rec of_type_expr
   | Tvariant _ -> raise NotSupported "Polymorphic variant types are not handled"
   | Tunivar _ | Tpoly (_, _ :: _) -> raise NotSupported "Forall quantifier is not handled (yet)"
   | Tpoly (typ, []) -> of_type_expr with_free_vars typ_vars typ
-  | Tpackage _ -> raise NotSupported "First-class module types are not handled (yet)"
+  | Tpackage (path, idents, typs) ->
+      let path_name = PathName.of_path path in
+      let typ_substitutions = List.map2 (fun ident typ -> (ident, typ)) idents typs in
+      Monad.List.fold_left
+        (fun (typ_substitutions, typ_vars, new_typ_vars) (ident, typ) ->
+          let path_name = PathName.of_long_ident ident in
+          of_type_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
+          return (
+            (path_name, typ) :: typ_substitutions,
+            typ_vars,
+            Name.Set.union new_typ_vars new_typ_vars'
+          )
+        )
+        ([], typ_vars, Name.Set.empty)
+        typ_substitutions >>= fun (typ_substitutions, typ_vars, new_typ_vars) ->
+      get_env >>= fun env ->
+      let module_typ = Env.find_modtype path env in
+      ModuleTypParams.get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
+      let typ_params = List.fold_left
+        (fun typ_values (path_name, typ) ->
+          Tree.map_at typ_values path_name (fun _ -> Some typ)
+        )
+        (signature_typ_params |> Tree.map (fun _ -> None))
+        typ_substitutions in
+      return (Package (path_name, typ_params), typ_vars, Name.Set.empty)
 
 and of_typs_exprs
   (with_free_vars: bool)
@@ -85,6 +110,14 @@ let rec typ_args (typ : t) : Name.Set.t =
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
+  | Package (_, typ_params) ->
+    Tree.flatten typ_params |>
+    Util.List.filter_map (fun (_, typ) ->
+      match typ with
+      | None -> None
+      | Some typ -> Some (typ_args typ)
+    ) |>
+    List.fold_left Name.Set.union Name.Set.empty
 
 and typ_args_of_typs (typs : t list) : Name.Set.t =
   List.fold_left (fun args typ -> Name.Set.union args (typ_args typ))
@@ -116,3 +149,25 @@ let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
   | Apply (path, typs) ->
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
       (MixedPath.to_coq path :: List.map (to_coq true) typs)
+  | Package (path_name, typ_params) ->
+    let existential_typs =
+      Tree.flatten typ_params |>
+      List.filter (fun (_, typ) -> typ = None) |>
+      List.map (fun (path_name, _) ->
+        Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
+      ) in
+    nest (braces (
+      (match existential_typs with
+      | [] -> !^ "_" ^^ !^ ":" ^^ !^ "unit"
+      | [typ] -> typ ^^ !^ ":" ^^ !^ "_"
+      | _ -> !^ "'" ^-^ OCaml.tuple existential_typs ^^ !^ ":" ^^ !^ "_"
+      ) ^^ !^ "&" ^^
+      nest (
+        PathName.to_coq path_name ^^
+        separate space (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
+          match typ with
+          | None -> Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
+          | Some typ -> to_coq true typ
+        ))
+      )
+    ))

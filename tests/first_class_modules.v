@@ -85,6 +85,9 @@ Record Boxed_set {elt OPS_t OPS'_elt OPS'_t : Type} := {
 }.
 Arguments Boxed_set : clear implicits.
 
+Definition set (elt : Type) :=
+  {'(OPS_t, OPS'_elt, OPS'_t) : _ & Boxed_set elt OPS_t OPS'_elt OPS'_t}.
+
 Record Triple {a b c : Type} := {
   a := a;
   b := b;

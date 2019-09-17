@@ -217,6 +217,11 @@
    (typ_params
     ((Item elt ()) (Module OPS ((Item t ())))
      (Module OPS' ((Item elt ()) (Item t ()))) (Module OPS'' ())))))
+ (TypeDefinition
+  (Synonym set (elt)
+   (Package ((path ()) (base Boxed_set))
+    ((Item elt ((Variable elt))) (Module OPS ((Item t ())))
+     (Module OPS' ((Item elt ()) (Item t ()))) (Module OPS'' ())))))
  (Signature Triple
   ((items ((TypExistential a) (TypExistential b) (TypExistential c)))
    (typ_params ((Item a ()) (Item b ()) (Item c ())))))
