@@ -35,7 +35,7 @@ let rec apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
 
 (** Find the [Path.t] of all the signature definitions which are found to be similar
     to [signature]. If the signature is the one of a module used as a namespace there
-    should be none. If the signature is the one a first-class module ther should be
+    should be none. If the signature is the one a first-class module there should be
     exactly one. There may be more than one result if two signatures have the same
     or similar definitions. In this case we fail with an explicit error message. *)
 let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t list =
