@@ -123,6 +123,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       return (x, e)
     )) >>= fun fields ->
     return (Record fields)
+  | Texp_variant _ -> raise NotSupported "Variants not supported"
+  | Texp_record _ -> raise NotSupported "This kind of record expression is not supported"
   | Texp_field (e, x, _) ->
     let x = PathName.of_loc x in
     of_expression typ_vars e >>= fun e ->
@@ -153,8 +155,19 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_array _ -> raise NotSupported "Arrays not handled."
   | Texp_while _ -> raise SideEffect "While loops not handled."
   | Texp_for _ -> raise SideEffect "For loops not handled."
-  | Texp_assert e -> raise SideEffect "Assert instruction is not handled."
-  | _ -> raise NotSupported "Expression not handled."))
+  | Texp_send _ -> raise NotSupported "Sending method message is not handled"
+  | Texp_new _ -> raise NotSupported "Creation of new objects is not handled"
+  | Texp_instvar _ -> raise NotSupported "Creating an instance variable is not handled"
+  | Texp_setinstvar _ -> raise NotSupported "Setting an instance variable is not handled"
+  | Texp_override _ -> raise NotSupported "Overriding is not handled"
+  | Texp_letmodule _ -> raise NotSupported "Let of modules is not handled"
+  | Texp_letexception _ -> raise NotSupported "Let of exception is not handled"
+  | Texp_assert _ -> raise SideEffect "Assert instruction is not handled."
+  | Texp_lazy _ -> raise NotSupported "Lazy expressions are not handled"
+  | Texp_object _ -> raise NotSupported "Creation of objects is not handled"
+  | Texp_pack _ -> raise NotSupported "Packing of modules is not handled"
+  | Texp_unreachable -> raise NotSupported "Unreachable expressions are not supported"
+  | Texp_extension_constructor _ -> raise NotSupported "Construction of extensions is not handled"))
 
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
