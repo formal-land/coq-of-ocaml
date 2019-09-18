@@ -57,11 +57,8 @@ module type Boxed_set = sig
   type elt
   val elt_ty : elt comparable_ty
   module OPS : S.SET with type elt = elt
-  module OPS' : S.SET
-  module OPS'' : S.SET with type elt = elt and type t = string list
   val boxed : OPS.t
   val size : int
-  type 'a table = 'a list
 end
 
 type 'elt set = (module Boxed_set with type elt = 'elt)
@@ -73,5 +70,9 @@ module type Triple = sig
 end
 
 module type UsingTriple = sig
+  type elt'
   module T : Triple
+  module OPS' : S.SET
+  module OPS'' : S.SET with type elt = elt' and type t = string list
+  type 'a table = 'a list
 end
