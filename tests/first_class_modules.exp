@@ -199,30 +199,35 @@
       (With ((path (S)) (base SET))
        ((Item elt (Defined (Apply (PathName ((path ()) (base elt))) ())))
         (Item t Free))))
-     (Module OPS'
-      (With ((path (S)) (base SET)) ((Item elt Free) (Item t Free))))
-     (Module OPS''
-      (With ((path (S)) (base SET))
-       ((Item elt (Defined (Apply (PathName ((path ()) (base elt))) ())))
-        (Item t
-         (Defined
-          (Apply (PathName ((path ()) (base list)))
-           ((Apply (PathName ((path ()) (base string))) ()))))))))
      (Value boxed ()
       (Apply (Access (PathName ((path ()) (base OPS))) ((path (S)) (base t)))
        ()))
-     (Value size () (Apply (PathName ((path ()) (base Z))) ()))
-     (TypSynonym table (a)
-      (Apply (PathName ((path ()) (base list))) ((Variable a))))))
-   (typ_params
-    ((Item elt ()) (Module OPS ((Item t ())))
-     (Module OPS' ((Item elt ()) (Item t ()))) (Module OPS'' ())))))
+     (Value size () (Apply (PathName ((path ()) (base Z))) ()))))
+   (typ_params ((Item elt ()) (Module OPS ((Item t ())))))))
+ (TypeDefinition
+  (Synonym set (elt)
+   (Package ((path ()) (base Boxed_set))
+    ((Item elt ((Variable elt))) (Module OPS ((Item t ())))))))
  (Signature Triple
   ((items ((TypExistential a) (TypExistential b) (TypExistential c)))
    (typ_params ((Item a ()) (Item b ()) (Item c ())))))
  (Signature UsingTriple
   ((items
-    ((Module T
+    ((TypExistential elt')
+     (Module T
       (With ((path ()) (base Triple))
-       ((Item a Free) (Item b Free) (Item c Free))))))
-   (typ_params ((Module T ((Item a ()) (Item b ()) (Item c ()))))))))
+       ((Item a Free) (Item b Free) (Item c Free))))
+     (Module OPS'
+      (With ((path (S)) (base SET)) ((Item elt Free) (Item t Free))))
+     (Module OPS''
+      (With ((path (S)) (base SET))
+       ((Item elt (Defined (Apply (PathName ((path ()) (base elt'))) ())))
+        (Item t
+         (Defined
+          (Apply (PathName ((path ()) (base list)))
+           ((Apply (PathName ((path ()) (base string))) ()))))))))
+     (TypSynonym table (a)
+      (Apply (PathName ((path ()) (base list))) ((Variable a))))))
+   (typ_params
+    ((Item elt' ()) (Module T ((Item a ()) (Item b ()) (Item c ())))
+     (Module OPS' ((Item elt ()) (Item t ()))) (Module OPS'' ()))))))

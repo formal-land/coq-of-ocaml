@@ -21,14 +21,14 @@ module Constructors = struct
       let name = Name.of_ident cd_id in
       all2
         (match cd_args with
-        | Cstr_tuple typs -> typs |> Monad.List.map Type.of_type_expr
+        | Cstr_tuple typs -> typs |> Monad.List.map Type.of_type_expr_without_free_vars
         | Cstr_record _ ->
           set_loc (Loc.of_location cd_loc) (
           raise NotSupported "Unhandled named constructor parameters."))
         (match cd_res with
         | None -> return None
         | Some res ->
-          Type.of_type_expr res >>= fun typ ->
+          Type.of_type_expr_without_free_vars res >>= fun typ ->
           return (Some typ))
       >>= fun (typs, res_typ) ->
       let res_typ_or_defined_typ =
@@ -87,14 +87,14 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       return (Inductive (name, typ_args, constructors))
     | Type_record (fields, _) ->
       (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ } ->
-        Type.of_type_expr typ >>= fun typ ->
+        Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return (Name.of_ident x, typ)
       )) >>= fun fields ->
       return (Record (name, fields))
     | Type_abstract ->
       (match typ_type.type_manifest with
       | Some typ ->
-        Type.of_type_expr typ >>= fun typ ->
+        Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return (Synonym (name, typ_args, typ))
       | None -> return (Abstract (name, typ_args)))
     | Type_open -> raise NotSupported "Open type definition not handled.")
