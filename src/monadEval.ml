@@ -1,7 +1,8 @@
 module Result = struct
-  type 'a t =
-    | Error of (Loc.t * Error.Category.t * string) list
-    | Success of 'a
+  type 'a t = {
+    errors: (Loc.t * Error.Category.t * string) list;
+    value: 'a;
+  }
 end
 
 module Interpret = struct
@@ -12,10 +13,10 @@ module Command = struct
   let eval (type a) (command : a Monad.Command.t) : a Interpret.t =
     fun env loc ->
       match command with
-      | GetEnv -> Success env
-      | GetLoc -> Success loc
-      | Raise (category, message) -> Error [(loc, category, message)]
-      | Warn message -> Success (Error.warn loc message)
+      | GetEnv -> { errors = []; value = env }
+      | GetLoc -> { errors = []; value = loc }
+      | Raise (value, category, message) -> { errors = [(loc, category, message)]; value }
+      | Warn message -> { errors = []; value = Error.warn loc message }
 end
 
 module Wrapper = struct
@@ -31,18 +32,10 @@ end
 let rec eval : type a. a Monad.t -> a Interpret.t =
   fun x env loc ->
     match x with
-    | Monad.All (x1, x2) ->
-      begin match (eval x1 env loc, eval x2 env loc) with
-      | Error errors1, Error errors2 -> Error (errors1 @ errors2)
-      | (Error _ as result1), Success _ -> result1
-      | Success _, (Error _ as result2) -> result2
-      | Success success1, Success success2 -> Success (success1, success2)
-      end
     | Bind (x, f) ->
-      begin match eval x env loc with
-      | Error _ as result -> result
-      | Success success -> eval (f success) env loc
-      end
+      let { Result.errors = errors_x; value = value_x } = eval x env loc in
+      let { Result.errors = errors_y; value = value_y } = eval (f value_x) env loc in
+      { errors = errors_y @ errors_x; value = value_y }
     | Command command -> Command.eval command env loc
-    | Return value -> Success value
+    | Return value -> { errors = []; value }
     | Wrapper (wrapper, x) -> Wrapper.eval wrapper (eval x) env loc

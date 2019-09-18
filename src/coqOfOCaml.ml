@@ -11,11 +11,11 @@ let exp
   (source_file : string)
   : ast option =
   try
-    match MonadEval.eval (Structure.of_structure structure) env loc with
-    | Success ast -> Some ast
-    | Error errors ->
-      Error.display_errors source_file errors;
-      None with
+    let { MonadEval.Result.errors; value} = MonadEval.eval (Structure.of_structure structure) env loc in
+    begin if errors <> [] then
+      Error.display_errors source_file errors
+    end;
+    Some value with
   | Envaux.Error (Module_not_found path) ->
     prerr_endline ("Fatal error: module '" ^ Path.name path ^ "' not found while importing environments");
     None

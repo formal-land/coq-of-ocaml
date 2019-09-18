@@ -62,7 +62,7 @@ let display_error
   (category : Category.t)
   (message : string)
   : unit =
-  print_endline (
+  prerr_endline (
     colorize "34;1" (
       pad 100 '-'
         ("--- " ^ loc.file_name ^ ":" ^ string_of_int loc.start.line ^ " ")

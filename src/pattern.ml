@@ -35,6 +35,13 @@ let rec of_pattern (p : pattern) : t Monad.t =
   | Tpat_constant c ->
     Constant.of_constant c >>= fun constant ->
     return (Constant constant)
+  | Tpat_variant (label, p, _) ->
+    let path_name = PathName.of_name [] (Name.of_string label) in
+    (match p with
+    | None -> return []
+    | Some p -> of_pattern p >>= fun pattern -> return [pattern]
+    ) >>= fun patterns ->
+    raise (Constructor (path_name, patterns)) NotSupported "Patterns on variants are not supported"
   | Tpat_record (fields, _) ->
     (fields |> Monad.List.map (fun (x, _, p) ->
       let x = PathName.of_loc x in
@@ -42,10 +49,16 @@ let rec of_pattern (p : pattern) : t Monad.t =
       return (x, pattern)
     )) >>= fun fields ->
     return (Record fields)
+  | Tpat_array ps ->
+    Monad.List.map of_pattern ps >>= fun patterns ->
+    raise (Tuple patterns) NotSupported "Patterns on array are not supported"
   | Tpat_or (p1, p2, _) ->
-    all2 (of_pattern p1) (of_pattern p2) >>= fun (pattern1, pattern2) ->
+    of_pattern p1 >>= fun pattern1 ->
+    of_pattern p2 >>= fun pattern2 ->
     return (Or (pattern1, pattern2))
-  | _ -> raise NotSupported "Unhandled pattern.")
+  | Tpat_lazy p ->
+    of_pattern p >>= fun pattern ->
+    raise pattern NotSupported "Lazy patterns are not supported")
 
 (** Free variables in a pattern. *)
 let rec free_variables (p : t) : Name.Set.t =

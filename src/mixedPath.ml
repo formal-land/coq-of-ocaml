@@ -17,24 +17,24 @@ let of_name (name : Name.t) : t =
 let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t =
   match path with
   | Papply _ -> failwith "Unexpected path application"
-  | Pdot (path, field_string, pos) ->
-    of_path_aux path >>= fun (path, fields) ->
+  | Pdot (path', field_string, pos) ->
+    of_path_aux path' >>= fun (path', fields) ->
     begin match fields with
     | [] ->
-      (* Get the module declaration of the current [path] to check if it refers
+      (* Get the module declaration of the current [path'] to check if it refers
          to a first-class module. *)
       get_env >>= fun env ->
-      begin match Env.find_module path env with
+      begin match Env.find_module path' env with
       | module_declaration ->
         let { Types.md_type } = module_declaration in
         IsFirstClassModule.is_module_typ_first_class md_type >>= fun is_first_class ->
         begin match is_first_class with
-        | None -> return (Path.Pdot (path, field_string, pos), [])
-        | Some signature_path -> return (path, [(signature_path, field_string)])
+        | None -> return (path, [])
+        | Some signature_path -> return (path', [(signature_path, field_string)])
         end
-      | exception _ -> raise NotFound ("Module '" ^ Path.name path ^ "' not found")
+      | exception _ -> raise (path, []) NotFound ("Module '" ^ Path.name path ^ "' not found")
       end
-    | _ :: _ -> raise NotSupported "Nested accesses into first-class modules are not handled (yet)"
+    | _ :: _ -> raise (path, []) NotSupported "Nested accesses into first-class modules are not handled (yet)"
     end
   | Pident _ -> return (path, [])
 
