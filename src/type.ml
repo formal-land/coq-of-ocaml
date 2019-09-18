@@ -53,8 +53,12 @@ let rec of_type_expr
   | Tnil -> raise NotSupported "Nil type is not handled"
   | Tlink typ | Tsubst typ -> of_type_expr with_free_vars typ_vars typ
   | Tvariant _ -> raise NotSupported "Polymorphic variant types are not handled"
-  | Tunivar _ | Tpoly (_, _ :: _) -> raise NotSupported "Forall quantifier is not handled (yet)"
+  | Tunivar None -> raise NotSupported "Unnamed universal variable not supported"
+  | Tunivar (Some name) ->
+    let name = Name.of_string name in
+    return (Variable name, typ_vars, Name.Set.empty)
   | Tpoly (typ, []) -> of_type_expr with_free_vars typ_vars typ
+  | Tpoly (_, _ :: _) -> raise NotSupported "Forall quantifier is not handled (yet)"
   | Tpackage (path, idents, typs) ->
       let path_name = PathName.of_path path in
       let typ_substitutions = List.map2 (fun ident typ -> (ident, typ)) idents typs in
