@@ -26,14 +26,14 @@
         ((Constructor ((path ()) (base Node))
           ((Variable s1) (Variable y) (Variable s2)))
          (IfThenElse
-          (Apply (Variable (PathName ((path (OCaml Pervasives)) (base lt))))
+          (Apply (Variable (PathName ((path (OCaml Stdlib)) (base lt))))
            ((Variable (PathName ((path ()) (base x))))
             (Variable (PathName ((path ()) (base y))))))
           (Apply (Variable (PathName ((path ()) (base member))))
            ((Variable (PathName ((path ()) (base x))))
             (Variable (PathName ((path ()) (base s1))))))
           (IfThenElse
-           (Apply (Variable (PathName ((path (OCaml Pervasives)) (base lt))))
+           (Apply (Variable (PathName ((path (OCaml Stdlib)) (base lt))))
             ((Variable (PathName ((path ()) (base y))))
              (Variable (PathName ((path ()) (base x))))))
            (Apply (Variable (PathName ((path ()) (base member))))
@@ -57,7 +57,7 @@
         ((Constructor ((path ()) (base Node))
           ((Variable s1) (Variable y) (Variable s2)))
          (IfThenElse
-          (Apply (Variable (PathName ((path (OCaml Pervasives)) (base lt))))
+          (Apply (Variable (PathName ((path (OCaml Stdlib)) (base lt))))
            ((Variable (PathName ((path ()) (base x))))
             (Variable (PathName ((path ()) (base y))))))
           (Constructor ((path ()) (base Node))
@@ -67,7 +67,7 @@
             (Variable (PathName ((path ()) (base y))))
             (Variable (PathName ((path ()) (base s2))))))
           (IfThenElse
-           (Apply (Variable (PathName ((path (OCaml Pervasives)) (base lt))))
+           (Apply (Variable (PathName ((path (OCaml Stdlib)) (base lt))))
             ((Variable (PathName ((path ()) (base y))))
              (Variable (PathName ((path ()) (base x))))))
            (Constructor ((path ()) (base Node))

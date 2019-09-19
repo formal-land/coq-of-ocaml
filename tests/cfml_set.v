@@ -14,10 +14,10 @@ Fixpoint member (x : Z) (s : set) : bool :=
   match s with
   | Empty => false
   | Node s1 y s2 =>
-    if OCaml.Pervasives.lt x y then
+    if OCaml.Stdlib.lt x y then
       member x s1
     else
-      if OCaml.Pervasives.lt y x then
+      if OCaml.Stdlib.lt y x then
         member x s2
       else
         true
@@ -27,10 +27,10 @@ Fixpoint insert (x : Z) (s : set) : set :=
   match s with
   | Empty => Node Empty x Empty
   | Node s1 y s2 =>
-    if OCaml.Pervasives.lt x y then
+    if OCaml.Stdlib.lt x y then
       Node (insert x s1) y s2
     else
-      if OCaml.Pervasives.lt y x then
+      if OCaml.Stdlib.lt y x then
         Node s1 y (insert x s2)
       else
         s

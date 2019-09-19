@@ -109,7 +109,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
-  | Error message -> !^ message
+  | Error message -> nest (!^ "Definition" ^^ !^ "error" ^^ !^ ":=" ^^ OCaml.string message ^^ !^ "% string.")
   | Inductive (name, typ_args, Constructors.Gadt constructors) ->
     nest (
       !^ "Inductive" ^^ Name.to_coq name ^^ !^ ":" ^^

@@ -41,7 +41,7 @@ let escape_operator_character (c : char) : string =
   | '~' -> "tilde"
   | '.' -> "point"
   | ':' -> "colon"
-  | _ -> failwith "Unexpected character for an operator."
+  | _ -> String.make 1 c
 
 let escape_operator (s : string) : string =
   let b = Buffer.create 0 in
@@ -53,6 +53,7 @@ let escape_operator (s : string) : string =
 let escape_reserved_word (s : string) : string =
   match s with
   | "exists" -> "_exists"
+  | "return" -> "_return"
   | _ -> s
 
 let convert (x : t) : t =

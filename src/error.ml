@@ -90,7 +90,7 @@ let display_errors
     display_error source_lines loc category message
   );
   let nb_errors = List.length errors in
-  print_endline (
+  prerr_endline (
     colorize "34;1" (
       pad (100 + 20) '-'
         "--- Failure "

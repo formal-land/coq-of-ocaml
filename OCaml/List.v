@@ -21,7 +21,7 @@ Lemma length_is_pos {A : Type} (l : list A) : 0 <= length l.
 Admitted.
 
 Definition append {A : Type} : (list A) -> (list A) -> list A :=
-  Pervasives.app.
+  Stdlib.app.
 
 Fixpoint rev_append {A : Type} (l1 : list A) (l2 : list A) : list A :=
   match l1 with
@@ -34,7 +34,7 @@ Definition rev {A : Type} (l : list A) : list A := rev_append l [].
 Fixpoint flatten {A : Type} (x : list (list A)) : list A :=
   match x with
   | [] => []
-  | cons l r => Pervasives.app l (flatten r)
+  | cons l r => Stdlib.app l (flatten r)
   end.
 
 Definition concat {A : Type} : (list (list A)) -> list A := flatten.
@@ -167,7 +167,7 @@ Fixpoint merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
     | ([], l2) => l2
     | (l1, []) => l1
     | (cons h1 t1, cons h2 t2) =>
-      if Pervasives.le (cmp h1 h2) 0 then
+      if Stdlib.le (cmp h1 h2) 0 then
         cons h1 (merge cmp t1 l2)
       else
         cons h2 (merge_aux t2)
