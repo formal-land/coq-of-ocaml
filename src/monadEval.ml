@@ -1,6 +1,6 @@
 module Result = struct
   type 'a t = {
-    errors: (Loc.t * Error.Category.t * string) list;
+    errors: Error.t list;
     value: 'a;
   }
 end
@@ -15,7 +15,7 @@ module Command = struct
       match command with
       | GetEnv -> { errors = []; value = env }
       | GetLoc -> { errors = []; value = loc }
-      | Raise (value, category, message) -> { errors = [(loc, category, message)]; value }
+      | Raise (value, category, message) -> { errors = [{ category; loc; message }]; value }
       | Warn message -> { errors = []; value = Error.warn loc message }
 end
 
