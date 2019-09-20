@@ -14,7 +14,6 @@ build: [
 install: [
   [make "-C" "OCaml" "install"]
   ["install" "-T" "coqOfOCaml.native" "%{bin}%/coq-of-ocaml"]
-  ["install" "interfaces/list.interface" "%{lib}%/coq-of-ocaml"]
 ]
 depends: [
   "conf-ruby" {with-test}
