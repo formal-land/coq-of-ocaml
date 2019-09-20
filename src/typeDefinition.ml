@@ -63,56 +63,64 @@ module Constructors = struct
 end
 
 type t =
-  | Inductive of Name.t * Name.t list * Constructors.t
+  | Inductive of (Name.t * Name.t list * Constructors.t) list
   | Record of Name.t * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
-  | Error of string
   [@@deriving sexp]
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [] ->
-    raise
-      (Error "empty_type_definition")
-      NotSupported
-      "Unexpected type definition with no case"
-  | [ { typ_id; typ_type } ] ->
+  | [ { typ_id; typ_type = { type_kind = Type_record (fields, _) } } ] ->
     let name = Name.of_ident typ_id in
-    (typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
-    (match typ_type.type_kind with
-    | Type_variant cases ->
-      let mixed_path = MixedPath.of_name name in
-      (* The `defined_typ` is useful to give a default return type for non-GADT
-         constructors in GADT types. *)
-      let defined_typ = Type.Apply (
-        mixed_path,
-        List.map (fun typ_arg -> Type.Variable typ_arg) typ_args
-      ) in
-      Constructors.of_ocaml defined_typ cases >>= fun constructors ->
-      return (Inductive (name, typ_args, constructors))
-    | Type_record (fields, _) ->
-      (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ } ->
-        Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return (Name.of_ident x, typ)
-      )) >>= fun fields ->
-      return (Record (name, fields))
-    | Type_abstract ->
-      (match typ_type.type_manifest with
-      | Some typ ->
-        Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return (Synonym (name, typ_args, typ))
-      | None -> return (Abstract (name, typ_args)))
-    | Type_open -> raise (Error "open_type") NotSupported "Open type definition not handled.")
-  | typ :: _ :: _ ->
-    raise (Error "mutual_type_definition") NotSupported "Type definition with 'and' not handled."
+    (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ } ->
+      Type.of_type_expr_without_free_vars typ >>= fun typ ->
+      return (Name.of_ident x, typ)
+    )) >>= fun fields ->
+    return (Record (name, fields))
+  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params } } ] ->
+    let name = Name.of_ident typ_id in
+    (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+    begin match type_manifest with
+    | Some typ ->
+      Type.of_type_expr_without_free_vars typ >>= fun typ ->
+      return (Synonym (name, typ_args, typ))
+    | None -> return (Abstract (name, typ_args))
+    end
+  | [ { typ_id; typ_type = { type_kind = Type_open } } ] ->
+    let name = Name.of_ident typ_id in
+    let typ = Type.Apply (MixedPath.of_name "False", []) in
+    raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
+  | _ ->
+    (typs |> Monad.List.filter_map (fun typ ->
+      match typ with
+      | { typ_id; typ_type = { type_kind = Type_variant cases; type_params } } ->
+        let name = Name.of_ident typ_id in
+        let mixed_path = MixedPath.of_name name in
+        (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+        (* The `defined_typ` is useful to give a default return type for non-GADT
+          constructors in GADT types. *)
+        let defined_typ = Type.Apply (
+          mixed_path,
+          List.map (fun typ_arg -> Type.Variable typ_arg) typ_args
+        ) in
+        Constructors.of_ocaml defined_typ cases >>= fun constructors ->
+        return (Some (name, typ_args, constructors))
+      | _ -> raise None NotSupported "Only algebraic data types are supported in mutually recursive types"
+    )) >>= fun typs ->
+    return (Inductive typs)
 
-let to_coq (def : t) : SmartPrint.t =
-  match def with
-  | Error message -> nest (!^ "Definition" ^^ !^ "error" ^^ !^ ":=" ^^ OCaml.string message ^^ !^ "% string.")
-  | Inductive (name, typ_args, Constructors.Gadt constructors) ->
+let to_coq_inductive
+  (is_first : bool)
+  (name : Name.t)
+  (typ_args : Name.t list)
+  (constructors : Constructors.t)
+  : SmartPrint.t =
+  let keyword = if is_first then !^ "Inductive" else !^ "with" in
+  match constructors with
+  | Constructors.Gadt constructors ->
     nest (
-      !^ "Inductive" ^^ Name.to_coq name ^^ !^ ":" ^^
+      keyword ^^ Name.to_coq name ^^ !^ ":" ^^
       (if typ_args = []
       then empty
       else !^ "forall" ^^ parens @@ nest (
@@ -130,22 +138,11 @@ let to_coq (def : t) : SmartPrint.t =
             ) ^-^ !^ ",") ^^
           separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^
           Type.to_coq false res_typ
-        ))) ^-^ !^ "." ^^
-      separate empty (constructors |> List.map (fun (constr_name, free_typ_vars, args, _) ->
-        if free_typ_vars = [] then
-          empty
-        else
-          newline ^^ nest (
-            !^ "Arguments" ^^ Name.to_coq constr_name ^^
-            braces (separate space (List.map Name.to_coq free_typ_vars)) ^^
-            separate space (List.map (fun _ -> !^ "_") args)
-            ^-^ !^ "."
-          )
-      ))
+        )))
     )
-  | Inductive (name, typ_args, Constructors.NonGadt constructors) ->
+  | Constructors.NonGadt constructors ->
     nest (
-      !^ "Inductive" ^^ Name.to_coq name ^^
+      keyword ^^ Name.to_coq name ^^
       (if typ_args = []
       then empty
       else parens @@ nest (
@@ -157,18 +154,61 @@ let to_coq (def : t) : SmartPrint.t =
           !^ "|" ^^ Name.to_coq constr_name ^^ !^ ":" ^^
           separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^
           separate space (List.map Name.to_coq (name :: typ_args))
-        ))) ^-^ !^ "." ^^
-      separate empty (constructors |> List.map (fun (constr_name, args) ->
-        if typ_args = [] then
-          empty
-        else
-          newline ^^ nest (
+        )))
+    )
+
+let to_coq_inductive_implicits
+  (typ_args : Name.t list)
+  (constructors : Constructors.t)
+  : SmartPrint.t list =
+  match constructors with
+  | Constructors.Gadt constructors ->
+    constructors |> Util.List.filter_map (fun (constr_name, free_typ_vars, args, _) ->
+      if free_typ_vars = [] then
+        None
+      else
+        Some (
+          nest (
+            !^ "Arguments" ^^ Name.to_coq constr_name ^^
+            braces (separate space (List.map Name.to_coq free_typ_vars)) ^^
+            separate space (List.map (fun _ -> !^ "_") args)
+            ^-^ !^ "."
+          )
+        )
+    )
+  | Constructors.NonGadt constructors ->
+    constructors |> Util.List.filter_map (fun (constr_name, args) ->
+      if typ_args = [] then
+        None
+      else
+        Some (
+          nest (
             !^ "Arguments" ^^ Name.to_coq constr_name ^^
             braces (separate space (List.map Name.to_coq typ_args)) ^-^
             concat (List.map (fun _ -> space ^^ !^ "_") args)
             ^-^ !^ "."
           )
-      ))
+        )
+    )
+
+let to_coq (def : t) : SmartPrint.t =
+  match def with
+  | Inductive typs ->
+    nest (
+      separate (newline ^^ newline) (typs |> List.mapi (fun index (name, typ_args, constructors) ->
+        let is_first = index = 0 in
+        to_coq_inductive is_first name typ_args constructors
+      )) ^-^ !^ "." ^^ (
+        let constructors_with_implicits =
+          typs |>
+          List.map (fun (_, typ_args, constructors) ->
+            to_coq_inductive_implicits typ_args constructors
+          ) |>
+          List.concat in
+        match constructors_with_implicits with
+        | [] -> empty
+        | _ :: _ -> newline ^^ separate newline constructors_with_implicits
+      )
     )
   | Record (name, fields) ->
     nest (

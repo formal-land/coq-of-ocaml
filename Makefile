@@ -3,7 +3,7 @@ TESTS_INPUT = $(wildcard tests/ex*.ml)
 TESTS_OUTPUT = $(TESTS_INPUT:.ml=.vo)
 
 default:
-	OCAMLFIND_IGNORE_DUPS_IN=`ocamlc -where`/compiler-libs ocamlbuild src/$(OUTPUT) -cflag -bin-annot -lflags -I,+compiler-libs,ocamlcommon.cmxa -use-ocamlfind -package compiler-libs,ppx_sexp_conv,sexplib,smart_print,str
+	OCAMLFIND_IGNORE_DUPS_IN=`ocamlc -where`/compiler-libs ocamlbuild src/$(OUTPUT) -cflag -bin-annot -lflags -I,+compiler-libs,ocamlcommon.cmxa -use-ocamlfind -package compiler-libs,ppx_sexp_conv,sexplib,smart_print
 
 clean:
 	ocamlbuild -clean

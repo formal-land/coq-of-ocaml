@@ -1,11 +1,12 @@
 ((TypeDefinition
-  (Inductive tree ()
-   (NonGadt
-    ((Leaf ())
-     (Node
-      ((Apply (PathName ((path ()) (base tree))) ())
-       (Apply (PathName ((path ()) (base Z))) ())
-       (Apply (PathName ((path ()) (base tree))) ())))))))
+  (Inductive
+   ((tree ()
+     (NonGadt
+      ((Leaf ())
+       (Node
+        ((Apply (PathName ((path ()) (base tree))) ())
+         (Apply (PathName ((path ()) (base Z))) ())
+         (Apply (PathName ((path ()) (base tree))) ())))))))))
  (Value
   ((is_rec (New true))
    (cases
