@@ -12,10 +12,10 @@ Fixpoint find (x : Z) (t : tree) : bool :=
   match t with
   | Leaf => false
   | Node t1 x' t2 =>
-    if OCaml.Pervasives.lt x x' then
+    if OCaml.Stdlib.lt x x' then
       find x t1
     else
-      if OCaml.Pervasives.lt x' x then
+      if OCaml.Stdlib.lt x' x then
         find x t2
       else
         true

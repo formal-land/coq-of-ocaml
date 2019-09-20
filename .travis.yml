@@ -10,7 +10,7 @@ env:
   - PACKAGE_NAME="coq-of-ocaml"
   matrix:
   - COQ_IMAGE="coqorg/coq:8.7" SHOULD_SUPPORT="false"
-  - COQ_IMAGE="coqorg/coq:8.8" SHOULD_SUPPORT="true"
+  - COQ_IMAGE="coqorg/coq:8.8" SHOULD_SUPPORT="false"
   - COQ_IMAGE="coqorg/coq:8.9" SHOULD_SUPPORT="true"
 
 install: |
@@ -39,7 +39,7 @@ script:
     sudo chown -R coq:coq /home/project
     export OPAMWITHTEST=true
     # Check if the package is compatible with the current environment
-    if [ ${SHOULD_SUPPORT} ] || opam install ${PACKAGE_NAME} --show-action; then
+    if [ "${SHOULD_SUPPORT}" = "true" ] || opam install ${PACKAGE_NAME} --show-action; then
       # First install the dependencies
       sudo apt-get update
       opam depext ${PACKAGE_NAME} -y

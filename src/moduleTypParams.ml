@@ -14,18 +14,18 @@ let rec get_signature_typ_params (signature : Types.signature) : unit Tree.t Mon
       | Some _ -> return None
       end
     | Sig_typext _ ->
-      raise NotSupported "Type extensions are not handled"
+      raise None NotSupported "Type extensions are not handled"
     | Sig_module (ident, module_declaration, _) ->
       let name = Name.of_ident ident in
       set_loc (Loc.of_location module_declaration.md_loc) (
       get_module_typ_typ_params module_declaration.md_type >>= fun typ_params ->
       return (Some (Tree.Module (name, typ_params))))
     | Sig_modtype _ ->
-      raise NotSupported "Nested signatures are not handled in signatures"
+      raise None NotSupported "Nested signatures are not handled in signatures"
     | Sig_class _ ->
-      raise NotSupported "Classes are not handled"
+      raise None NotSupported "Classes are not handled"
     | Sig_class_type _ ->
-      raise NotSupported "Class types are not handled" in
+      raise None NotSupported "Class types are not handled" in
   signature |> Monad.List.filter_map get_signature_item_typ_params
 
 and get_module_typ_typ_params (module_typ : Types.module_type) : unit Tree.t Monad.t =
@@ -36,7 +36,7 @@ and get_module_typ_typ_params (module_typ : Types.module_type) : unit Tree.t Mon
     get_env >>= fun env ->
     get_module_typ_declaration_typ_params (Env.find_modtype path env)
   | Mty_functor _ ->
-    raise NotSupported "Cannot instantiate functors (yet)."
+    raise [] NotSupported "Cannot instantiate functors (yet)."
 
 and get_module_typ_declaration_typ_params
   (module_typ_declaration : Types.modtype_declaration)
@@ -44,7 +44,7 @@ and get_module_typ_declaration_typ_params
   set_loc (Loc.of_location module_typ_declaration.mtd_loc) (
   match module_typ_declaration.mtd_type with
   | None ->
-    raise NotSupported "Cannot instantiate an abstract signature."
+    raise [] NotSupported "Cannot instantiate an abstract signature."
   | Some module_typ ->
     get_module_typ_typ_params module_typ)
 

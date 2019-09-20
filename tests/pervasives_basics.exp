@@ -79,15 +79,14 @@
    (cases
     ((((name c) (typ_vars ()) (args ())
        (typ ((Apply (PathName ((path ()) (base Z))) ()))))
-      (Apply
-       (Variable (PathName ((path (OCaml Pervasives)) (base int_of_char))))
+      (Apply (Variable (PathName ((path (OCaml Stdlib)) (base int_of_char))))
        ((Constant (Char c)))))))))
  (Value
   ((is_rec (New false))
    (cases
     ((((name x) (typ_vars ()) (args ())
        (typ ((Apply (PathName ((path ()) (base unit))) ()))))
-      (Apply (Variable (PathName ((path (OCaml Pervasives)) (base ignore))))
+      (Apply (Variable (PathName ((path (OCaml Stdlib)) (base ignore))))
        ((Constant (Int 23)))))))))
  (Value
   ((is_rec (New false))
@@ -106,7 +105,7 @@
        (typ
         ((Apply (PathName ((path ()) (base list)))
           ((Apply (PathName ((path ()) (base Z))) ()))))))
-      (Apply (Variable (PathName ((path (OCaml Pervasives)) (base app))))
+      (Apply (Variable (PathName ((path (OCaml Stdlib)) (base app))))
        ((Constructor ((path ()) (base cons))
          ((Constant (Int 1))
           (Constructor ((path ()) (base cons))

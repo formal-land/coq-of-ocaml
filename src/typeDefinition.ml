@@ -19,18 +19,19 @@ module Constructors = struct
     | { cd_args; cd_id; cd_loc; cd_res; } :: cases ->
       set_loc (Loc.of_location cd_loc) (
       let name = Name.of_ident cd_id in
-      all2
-        (match cd_args with
-        | Cstr_tuple typs -> typs |> Monad.List.map Type.of_type_expr_without_free_vars
-        | Cstr_record _ ->
-          set_loc (Loc.of_location cd_loc) (
-          raise NotSupported "Unhandled named constructor parameters."))
-        (match cd_res with
-        | None -> return None
-        | Some res ->
-          Type.of_type_expr_without_free_vars res >>= fun typ ->
-          return (Some typ))
-      >>= fun (typs, res_typ) ->
+      (match cd_args with
+      | Cstr_tuple typs -> typs |> Monad.List.map Type.of_type_expr_without_free_vars
+      | Cstr_record labeled_typs ->
+        set_loc (Loc.of_location cd_loc) (
+        (labeled_typs |> Monad.List.map (fun { Types.ld_type } ->
+          Type.of_type_expr_without_free_vars ld_type
+        )) >>= fun typs ->
+        raise typs NotSupported "Unhandled named constructor parameters.")) >>= fun typs ->
+      (match cd_res with
+      | None -> return None
+      | Some res ->
+        Type.of_type_expr_without_free_vars res >>= fun typ ->
+        return (Some typ)) >>= fun res_typ ->
       let res_typ_or_defined_typ =
         match res_typ with
         | None -> defined_typ
@@ -66,11 +67,16 @@ type t =
   | Record of Name.t * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
+  | Error of string
   [@@deriving sexp]
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [] -> raise NotSupported "Unexpected type definition with no case"
+  | [] ->
+    raise
+      (Error "empty_type_definition")
+      NotSupported
+      "Unexpected type definition with no case"
   | [ { typ_id; typ_type } ] ->
     let name = Name.of_ident typ_id in
     (typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
@@ -97,11 +103,13 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return (Synonym (name, typ_args, typ))
       | None -> return (Abstract (name, typ_args)))
-    | Type_open -> raise NotSupported "Open type definition not handled.")
-  | typ :: _ :: _ -> raise NotSupported "Type definition with 'and' not handled."
+    | Type_open -> raise (Error "open_type") NotSupported "Open type definition not handled.")
+  | typ :: _ :: _ ->
+    raise (Error "mutual_type_definition") NotSupported "Type definition with 'and' not handled."
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
+  | Error message -> nest (!^ "Definition" ^^ !^ "error" ^^ !^ ":=" ^^ OCaml.string message ^^ !^ "% string.")
   | Inductive (name, typ_args, Constructors.Gadt constructors) ->
     nest (
       !^ "Inductive" ^^ Name.to_coq name ^^ !^ ":" ^^
