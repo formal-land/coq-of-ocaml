@@ -1,11 +1,12 @@
 ((TypeDefinition
-  (Inductive set ()
-   (NonGadt
-    ((Empty ())
-     (Node
-      ((Apply (PathName ((path ()) (base set))) ())
-       (Apply (PathName ((path ()) (base Z))) ())
-       (Apply (PathName ((path ()) (base set))) ())))))))
+  (Inductive
+   ((set ()
+     (NonGadt
+      ((Empty ())
+       (Node
+        ((Apply (PathName ((path ()) (base set))) ())
+         (Apply (PathName ((path ()) (base Z))) ())
+         (Apply (PathName ((path ()) (base set))) ())))))))))
  (Value
   ((is_rec (New false))
    (cases

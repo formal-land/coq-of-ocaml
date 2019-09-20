@@ -1,0 +1,14 @@
+((TypeDefinition
+  (Synonym foo () (Apply (PathName ((path ()) (base string))) ())))
+ (TypeDefinition
+  (Inductive
+   ((tree (a)
+     (NonGadt
+      ((Tree
+        ((Apply (PathName ((path ()) (base list)))
+          ((Apply (PathName ((path ()) (base node))) ((Variable a))))))))))
+    (node (a)
+     (NonGadt
+      ((Leaf ((Apply (PathName ((path ()) (base string))) ())))
+       (Node ((Apply (PathName ((path ()) (base tree))) ((Variable a))))))))
+    (unrelated (a) (NonGadt ((Unrelated ((Variable a) (Variable a))))))))))

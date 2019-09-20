@@ -1,11 +1,12 @@
 ((TypeDefinition
-  (Inductive t1 ()
-   (NonGadt
-    ((C1 ((Apply (PathName ((path ()) (base Z))) ())))
-     (C2
-      ((Apply (PathName ((path ()) (base bool))) ())
-       (Apply (PathName ((path ()) (base Z))) ())))
-     (C3 ())))))
+  (Inductive
+   ((t1 ()
+     (NonGadt
+      ((C1 ((Apply (PathName ((path ()) (base Z))) ())))
+       (C2
+        ((Apply (PathName ((path ()) (base bool))) ())
+         (Apply (PathName ((path ()) (base Z))) ())))
+       (C3 ())))))))
  (Value
   ((is_rec (New false))
    (cases
@@ -23,11 +24,13 @@
          (Variable (PathName ((path ()) (base b)))))
         (Any (Constructor ((path ()) (base true)) ())))))))))
  (TypeDefinition
-  (Inductive t2 (a)
-   (NonGadt
-    ((D1 ())
-     (D2
-      ((Variable a) (Apply (PathName ((path ()) (base t2))) ((Variable a)))))))))
+  (Inductive
+   ((t2 (a)
+     (NonGadt
+      ((D1 ())
+       (D2
+        ((Variable a)
+         (Apply (PathName ((path ()) (base t2))) ((Variable a)))))))))))
  (Value
   ((is_rec (New true))
    (cases
@@ -74,4 +77,4 @@
                  (Constructor ((path ()) (base cons))
                   ((Constant (Int 3)) (Constructor ((path ()) (base [])) ())))))))))))))))))))
  (TypeDefinition (Abstract t3 ())) (TypeDefinition (Abstract t4 (a)))
- (TypeDefinition (Inductive t5 () (NonGadt ((C ()))))))
+ (TypeDefinition (Inductive ((t5 () (NonGadt ((C ()))))))))
