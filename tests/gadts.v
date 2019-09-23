@@ -4,8 +4,10 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Inductive gre : forall (a : Type), Type :=
-| Arg : forall {a : Type}, a -> gre a.
+Inductive gre (a : Type) : Type :=
+| Arg : a -> gre a.
+
+Arguments Arg {_}.
 
 Inductive foo : forall (a b : Type), Type :=
 | Bar : forall {a b c : Type}, a -> Z -> b -> c -> foo b string

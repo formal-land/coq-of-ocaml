@@ -17,7 +17,7 @@ module Constructors = struct
     [@@deriving sexp]
 
   let of_ocaml
-    (defined_typ_params : Type.t list)
+    (defined_typ_params : Name.t list)
     (cases : Types.constructor_declaration list)
     : t Monad.t =
     cases |> Monad.List.map (fun { Types.cd_args; cd_id; cd_loc; cd_res } ->
@@ -36,7 +36,11 @@ module Constructors = struct
         raise result NotSupported "Unhandled named constructor parameters.")
       ) >>= fun (param_typs, typ_vars, new_typ_vars_params) ->
       (match cd_res with
-      | None -> return (defined_typ_params, Type.typ_args_of_typs defined_typ_params)
+      | None ->
+        return (
+          List.map (fun name -> Type.Variable name) defined_typ_params,
+          Name.Set.of_list defined_typ_params
+        )
       | Some res_typ ->
         Type.of_typ_expr true typ_vars res_typ >>= fun (res_typ, _, new_typ_vars) ->
         begin match res_typ with
@@ -51,10 +55,35 @@ module Constructors = struct
         typ_vars = Name.Set.elements (Name.Set.union new_typ_vars_params new_typ_vars_res);
       })
     )
+
+  let remove_typ_var (typ_var : Name.t) (constructors : t) : t =
+    constructors |> List.map (fun constructor ->
+      { constructor with
+        typ_vars = constructor.typ_vars |> List.filter (fun typ_var' -> typ_var' <> typ_var)
+      }
+    )
+
+  let extract_common_typ_args (typ_args : Name.t list) (constructors : t) : Name.t list * Name.t list * t =
+    let (left_typ_args, right_typ_args, constructors) =
+      typ_args |>
+      List.mapi (fun index typ_arg -> (index, typ_arg)) |>
+      List.fold_left (fun (left_typ_args, right_typ_args, constructors) (index, typ_arg) ->
+        let is_typ_arg_common =
+          constructors |> List.for_all (fun constructor ->
+            match List.nth_opt constructor.res_typ_params index with
+            | Some (Type.Variable typ_arg') -> typ_arg = typ_arg'
+            | _ -> false
+          ) in
+        if is_typ_arg_common then
+          (typ_arg :: left_typ_args, right_typ_args, remove_typ_var typ_arg constructors)
+        else
+          (left_typ_args, typ_arg :: right_typ_args, constructors)
+      ) ([], [], constructors) in
+    (List.rev left_typ_args, List.rev right_typ_args, constructors)
 end
 
 type t =
-  | Inductive of (Name.t * Name.t list * Constructors.t) list
+  | Inductive of (Name.t * Name.t list * Name.t list * Constructors.t) list
   | Record of Name.t * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
@@ -90,29 +119,44 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
         (* The `defined_typ` is useful to give a default return type for non-GADT
           constructors in GADT types. *)
-        let defined_typ_params = List.map (fun typ_arg -> Type.Variable typ_arg) typ_args in
-        Constructors.of_ocaml defined_typ_params cases >>= fun constructors ->
+        Constructors.of_ocaml typ_args cases >>= fun constructors ->
         return (Some (name, typ_args, constructors))
       | _ -> raise None NotSupported "Only algebraic data types are supported in mutually recursive types"
     )) >>= fun typs ->
+    let typs = typs |> List.map (fun (name, typ_args, constructors) ->
+      let (left_typ_args, right_typ_args, constructors) =
+        Constructors.extract_common_typ_args typ_args constructors in
+      (name, left_typ_args, right_typ_args, constructors)
+    ) in
     return (Inductive typs)
 
 let to_coq_inductive
   (is_first : bool)
   (name : Name.t)
-  (typ_args : Name.t list)
+  (left_typ_args : Name.t list)
+  (right_typ_args : Name.t list)
   (constructors : Constructors.t)
   : SmartPrint.t =
   let keyword = if is_first then !^ "Inductive" else !^ "with" in
   nest (
-    keyword ^^ Name.to_coq name ^^ !^ ":" ^^
-    (if typ_args = [] then
+    keyword ^^ Name.to_coq name ^^
+    (if left_typ_args = [] then
+      empty
+    else
+      parens (
+        nest (
+          separate space (List.map Name.to_coq left_typ_args) ^^
+          !^ ":" ^^ !^ "Type"
+        )
+      )
+    ) ^^ !^ ":" ^^
+    (if right_typ_args = [] then
       empty
     else
       !^ "forall" ^^
       parens (
         nest (
-          separate space (List.map Name.to_coq typ_args) ^^
+          separate space (List.map Name.to_coq right_typ_args) ^^
           !^ ":" ^^ !^ "Type"
         )
       ) ^-^ !^ ","
@@ -136,14 +180,38 @@ let to_coq_inductive
     )
   )
 
+let to_coq_inductive_implicits
+  (left_typ_args : Name.t list)
+  (constructors : Constructors.t)
+  : SmartPrint.t list =
+  match left_typ_args with
+  | [] -> []
+  | _ :: _ ->
+    constructors |> List.map (fun { Constructors.constructor_name } ->
+      !^ "Arguments" ^^ Name.to_coq constructor_name ^^ braces (
+        nest (
+          separate space (left_typ_args |> List.map (fun _ -> !^ "_"))
+        )
+      ) ^-^ !^ "."
+    )
+
 let to_coq (def : t) : SmartPrint.t =
   match def with
   | Inductive typs ->
+    let implicit_arguments =
+      List.concat (typs |> List.map (fun (_, left_typ_args, _, constructors) ->
+        to_coq_inductive_implicits left_typ_args constructors
+      )) in
     nest (
-      separate (newline ^^ newline) (typs |> List.mapi (fun index (name, typ_args, constructors) ->
-        let is_first = index = 0 in
-        to_coq_inductive is_first name typ_args constructors
-      )) ^-^ !^ "."
+      separate (newline ^^ newline) (typs |>
+        List.mapi (fun index (name, left_typ_args, right_typ_args, constructors) ->
+          let is_first = index = 0 in
+          to_coq_inductive is_first name left_typ_args right_typ_args constructors
+        )
+      ) ^-^ !^ "." ^^
+      (match implicit_arguments with
+      | [] -> empty
+      | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments)
     )
   | Record (name, fields) ->
     nest (

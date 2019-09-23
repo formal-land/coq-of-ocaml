@@ -1,11 +1,11 @@
 ((TypeDefinition
   (Inductive
-   ((gre (a)
+   ((gre (a) ()
      (((constructor_name Arg) (param_typs ((Variable a)))
-       (res_typ_params ((Variable a))) (typ_vars (a))))))))
+       (res_typ_params ((Variable a))) (typ_vars ())))))))
  (TypeDefinition
   (Inductive
-   ((foo (a b)
+   ((foo () (a b)
      (((constructor_name Bar)
        (param_typs
         ((Variable a) (Apply (PathName ((path ()) (base Z))) ()) (Variable b)
@@ -18,7 +18,7 @@
        (res_typ_params ((Variable a) (Variable b))) (typ_vars (a b))))))))
  (TypeDefinition
   (Inductive
-   ((expr (a)
+   ((expr () (a)
      (((constructor_name Int) (param_typs ())
        (res_typ_params ((Apply (PathName ((path ()) (base Z))) ())))
        (typ_vars ()))

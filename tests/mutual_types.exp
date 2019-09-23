@@ -2,20 +2,20 @@
   (Synonym foo () (Apply (PathName ((path ()) (base string))) ())))
  (TypeDefinition
   (Inductive
-   ((tree (a)
+   ((tree (a) ()
      (((constructor_name Tree)
        (param_typs
         ((Apply (PathName ((path ()) (base list)))
           ((Apply (PathName ((path ()) (base node))) ((Variable a)))))))
-       (res_typ_params ((Variable a))) (typ_vars (a)))))
-    (node (a)
+       (res_typ_params ((Variable a))) (typ_vars ()))))
+    (node (a) ()
      (((constructor_name Leaf)
        (param_typs ((Apply (PathName ((path ()) (base string))) ())))
-       (res_typ_params ((Variable a))) (typ_vars (a)))
+       (res_typ_params ((Variable a))) (typ_vars ()))
       ((constructor_name Node)
        (param_typs
         ((Apply (PathName ((path ()) (base tree))) ((Variable a)))))
-       (res_typ_params ((Variable a))) (typ_vars (a)))))
-    (unrelated (a)
+       (res_typ_params ((Variable a))) (typ_vars ()))))
+    (unrelated (a) ()
      (((constructor_name Unrelated) (param_typs ((Variable a) (Variable a)))
-       (res_typ_params ((Variable a))) (typ_vars (a)))))))))
+       (res_typ_params ((Variable a))) (typ_vars ()))))))))

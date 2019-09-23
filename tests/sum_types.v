@@ -17,9 +17,12 @@ Definition m : bool :=
   | _ => true
   end.
 
-Inductive t2 : forall (a : Type), Type :=
-| D1 : forall {a : Type}, t2 a
-| D2 : forall {a : Type}, a -> (t2 a) -> t2 a.
+Inductive t2 (a : Type) : Type :=
+| D1 : t2 a
+| D2 : a -> (t2 a) -> t2 a.
+
+Arguments D1 {_}.
+Arguments D2 {_}.
 
 Fixpoint of_list {A : Type} (l : list A) : t2 A :=
   match l with
