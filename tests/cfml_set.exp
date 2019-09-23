@@ -1,14 +1,14 @@
 ((TypeDefinition
   (Inductive
    ((set ()
-     (((constructor_name Empty) (param_typs ())
-       (res_typ (Apply (PathName ((path ()) (base set))) ())) (typ_vars ()))
+     (((constructor_name Empty) (param_typs ()) (res_typ_params ())
+       (typ_vars ()))
       ((constructor_name Node)
        (param_typs
         ((Apply (PathName ((path ()) (base set))) ())
          (Apply (PathName ((path ()) (base Z))) ())
          (Apply (PathName ((path ()) (base set))) ())))
-       (res_typ (Apply (PathName ((path ()) (base set))) ())) (typ_vars ())))))))
+       (res_typ_params ()) (typ_vars ())))))))
  (Value
   ((is_rec (New false))
    (cases

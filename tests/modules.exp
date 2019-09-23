@@ -3,14 +3,12 @@
     (Inductive
      ((t (a)
        (((constructor_name Nil) (param_typs ())
-         (res_typ (Apply (PathName ((path ()) (base t))) ((Variable a))))
-         (typ_vars (a)))
+         (res_typ_params ((Variable a))) (typ_vars (a)))
         ((constructor_name Cons)
          (param_typs
           ((Variable a)
            (Apply (PathName ((path ()) (base t))) ((Variable a)))))
-         (res_typ (Apply (PathName ((path ()) (base t))) ((Variable a))))
-         (typ_vars (a))))))))
+         (res_typ_params ((Variable a))) (typ_vars (a))))))))
    (Value
     ((is_rec (New true))
      (cases

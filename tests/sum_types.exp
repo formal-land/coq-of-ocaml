@@ -3,14 +3,14 @@
    ((t1 ()
      (((constructor_name C1)
        (param_typs ((Apply (PathName ((path ()) (base Z))) ())))
-       (res_typ (Apply (PathName ((path ()) (base t1))) ())) (typ_vars ()))
+       (res_typ_params ()) (typ_vars ()))
       ((constructor_name C2)
        (param_typs
         ((Apply (PathName ((path ()) (base bool))) ())
          (Apply (PathName ((path ()) (base Z))) ())))
-       (res_typ (Apply (PathName ((path ()) (base t1))) ())) (typ_vars ()))
-      ((constructor_name C3) (param_typs ())
-       (res_typ (Apply (PathName ((path ()) (base t1))) ())) (typ_vars ())))))))
+       (res_typ_params ()) (typ_vars ()))
+      ((constructor_name C3) (param_typs ()) (res_typ_params ())
+       (typ_vars ())))))))
  (Value
   ((is_rec (New false))
    (cases
@@ -30,15 +30,13 @@
  (TypeDefinition
   (Inductive
    ((t2 (a)
-     (((constructor_name D1) (param_typs ())
-       (res_typ (Apply (PathName ((path ()) (base t2))) ((Variable a))))
+     (((constructor_name D1) (param_typs ()) (res_typ_params ((Variable a)))
        (typ_vars (a)))
       ((constructor_name D2)
        (param_typs
         ((Variable a)
          (Apply (PathName ((path ()) (base t2))) ((Variable a)))))
-       (res_typ (Apply (PathName ((path ()) (base t2))) ((Variable a))))
-       (typ_vars (a))))))))
+       (res_typ_params ((Variable a))) (typ_vars (a))))))))
  (Value
   ((is_rec (New true))
    (cases
@@ -88,5 +86,5 @@
  (TypeDefinition
   (Inductive
    ((t5 ()
-     (((constructor_name C) (param_typs ())
-       (res_typ (Apply (PathName ((path ()) (base t5))) ())) (typ_vars ()))))))))
+     (((constructor_name C) (param_typs ()) (res_typ_params ())
+       (typ_vars ()))))))))

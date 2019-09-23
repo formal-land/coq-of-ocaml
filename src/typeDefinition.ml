@@ -5,18 +5,19 @@ open Monad.Notations
 
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
+  (** [constructor_name]: forall [typ_vars], [param_typs] -> t [res_typ_params] *)
   type item = {
     constructor_name : Name.t;
-    param_typs : Type.t list;
-    res_typ : Type.t;
-    typ_vars : Name.t list;
+    param_typs : Type.t list; (** The parameters of the constructor. *)
+    res_typ_params : Type.t list; (** The type parameters of the result type of the constructor. *)
+    typ_vars : Name.t list; (** The polymorphic type variables. *)
   } [@@deriving sexp]
 
   type t = item list
     [@@deriving sexp]
 
   let of_ocaml
-    (defined_typ : Type.t)
+    (defined_typ_params : Type.t list)
     (cases : Types.constructor_declaration list)
     : t Monad.t =
     cases |> Monad.List.map (fun { Types.cd_args; cd_id; cd_loc; cd_res } ->
@@ -35,15 +36,18 @@ module Constructors = struct
         raise result NotSupported "Unhandled named constructor parameters.")
       ) >>= fun (param_typs, typ_vars, new_typ_vars_params) ->
       (match cd_res with
-      | None -> return (defined_typ, Type.typ_args defined_typ)
+      | None -> return (defined_typ_params, Type.typ_args_of_typs defined_typ_params)
       | Some res_typ ->
         Type.of_typ_expr true typ_vars res_typ >>= fun (res_typ, _, new_typ_vars) ->
-        return (res_typ, new_typ_vars)
-      ) >>= fun (res_typ, new_typ_vars_res) ->
+        begin match res_typ with
+        | Type.Apply (_, res_typ_params) -> return (res_typ_params, new_typ_vars)
+        | _ -> raise ([], Name.Set.empty) Unexpected "Expected an applied type as return type"
+        end
+      ) >>= fun (res_typ_params, new_typ_vars_res) ->
       return {
         constructor_name;
         param_typs;
-        res_typ;
+        res_typ_params;
         typ_vars = Name.Set.elements (Name.Set.union new_typ_vars_params new_typ_vars_res);
       })
     )
@@ -83,15 +87,11 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       match typ with
       | { typ_id; typ_type = { type_kind = Type_variant cases; type_params } } ->
         let name = Name.of_ident typ_id in
-        let mixed_path = MixedPath.of_name name in
         (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
         (* The `defined_typ` is useful to give a default return type for non-GADT
           constructors in GADT types. *)
-        let defined_typ = Type.Apply (
-          mixed_path,
-          List.map (fun typ_arg -> Type.Variable typ_arg) typ_args
-        ) in
-        Constructors.of_ocaml defined_typ cases >>= fun constructors ->
+        let defined_typ_params = List.map (fun typ_arg -> Type.Variable typ_arg) typ_args in
+        Constructors.of_ocaml defined_typ_params cases >>= fun constructors ->
         return (Some (name, typ_args, constructors))
       | _ -> raise None NotSupported "Only algebraic data types are supported in mutually recursive types"
     )) >>= fun typs ->
@@ -118,7 +118,7 @@ let to_coq_inductive
       ) ^-^ !^ ","
     ) ^^ !^ "Type" ^^ !^ ":=" ^-^
     separate empty (
-      constructors |> List.map (fun { Constructors.constructor_name; param_typs; res_typ; typ_vars } ->
+      constructors |> List.map (fun { Constructors.constructor_name; param_typs; res_typ_params; typ_vars } ->
         newline ^^ nest (
           !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
           (match typ_vars with
@@ -130,7 +130,7 @@ let to_coq_inductive
           ) ^^
           separate space (param_typs |> List.map (fun param_typ ->
             Type.to_coq true param_typ ^^ !^ "->"
-          )) ^^ Type.to_coq false res_typ
+          )) ^^ Type.to_coq false (Type.Apply (MixedPath.of_name name, res_typ_params))
         )
       )
     )
