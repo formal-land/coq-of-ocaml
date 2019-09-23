@@ -82,8 +82,146 @@ module Constructors = struct
     (List.rev left_typ_args, List.rev right_typ_args, constructors)
 end
 
+module Inductive = struct
+  type t = {
+    notations : (Name.t * Name.t list * Type.t) list;
+    typs : (Name.t * Name.t list * Name.t list * Constructors.t) list;
+  } [@@deriving sexp]
+
+  let to_coq_notations_reserved (inductive : t) : SmartPrint.t list =
+    inductive.notations |> List.map (fun (name, _, _) ->
+      !^ "Reserved Notation" ^^ !^ "\"'" ^-^ Name.to_coq name ^-^ !^ "\"" ^-^ !^ "."
+    )
+
+  let to_coq_typs
+    (subst : (Name.t -> Name.t) option)
+    (is_first : bool)
+    (name : Name.t)
+    (left_typ_args : Name.t list)
+    (right_typ_args : Name.t list)
+    (constructors : Constructors.t)
+    : SmartPrint.t =
+    let keyword = if is_first then !^ "Inductive" else !^ "with" in
+    nest (
+      keyword ^^ Name.to_coq name ^^
+      (if left_typ_args = [] then
+        empty
+      else
+        parens (
+          nest (
+            separate space (List.map Name.to_coq left_typ_args) ^^
+            !^ ":" ^^ !^ "Type"
+          )
+        )
+      ) ^^ !^ ":" ^^
+      (if right_typ_args = [] then
+        empty
+      else
+        !^ "forall" ^^
+        parens (
+          nest (
+            separate space (List.map Name.to_coq right_typ_args) ^^
+            !^ ":" ^^ !^ "Type"
+          )
+        ) ^-^ !^ ","
+      ) ^^ !^ "Type" ^^ !^ ":=" ^-^
+      separate empty (
+        constructors |> List.map (fun { Constructors.constructor_name; param_typs; res_typ_params; typ_vars } ->
+          newline ^^ nest (
+            !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
+            (match typ_vars with
+            | [] -> empty
+            | _ ->
+              !^ "forall" ^^ braces (
+                separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type"
+              ) ^-^ !^ ","
+            ) ^^
+            separate space (param_typs |> List.map (fun param_typ ->
+              Type.to_coq subst true param_typ ^^ !^ "->"
+            )) ^^ Type.to_coq subst false (Type.Apply (MixedPath.of_name name, res_typ_params))
+          )
+        )
+      )
+    )
+
+  let to_coq_notations_wheres (subst : (Name.t -> Name.t) option) (inductive : t) : SmartPrint.t list =
+    inductive.notations |> List.mapi (fun index (name, typ_args, value) ->
+      let is_first = index = 0 in
+      nest (
+        !^ (if is_first then "where" else "and") ^^
+        !^ "\"'" ^-^ Name.to_coq name ^-^ !^ "\"" ^^ !^ ":=" ^^ parens (
+          (match typ_args with
+          | [] -> empty
+          | _ :: _ ->
+            !^ "fun" ^^ parens (
+              nest (
+                separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type"
+              )
+            ) ^^ !^ "=>"
+          ) ^^ Type.to_coq subst false value
+        )
+      )
+    )
+
+  let to_coq_notations_definitions (inductive : t) : SmartPrint.t list =
+    inductive.notations |> List.map (fun (name, typ_args, value) ->
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "'" ^-^ Name.to_coq name ^-^ !^ "."
+      )
+    )
+
+  let to_coq_typs_implicits
+    (left_typ_args : Name.t list)
+    (constructors : Constructors.t)
+    : SmartPrint.t list =
+    match left_typ_args with
+    | [] -> []
+    | _ :: _ ->
+      constructors |> List.map (fun { Constructors.constructor_name } ->
+        !^ "Arguments" ^^ Name.to_coq constructor_name ^^ braces (
+          nest (
+            separate space (left_typ_args |> List.map (fun _ -> !^ "_"))
+          )
+        ) ^-^ !^ "."
+      )
+
+  let to_coq (inductive : t) : SmartPrint.t =
+    let subst = Some (fun name ->
+      match inductive.notations |> List.find_opt (fun (name', _, _) -> name' = name) with
+      | None -> name
+      | Some (name', _, _) -> "'" ^ name'
+    ) in
+    let reserved_notations = to_coq_notations_reserved inductive in
+    let implicit_arguments =
+      List.concat (inductive.typs |> List.map (fun (_, left_typ_args, _, constructors) ->
+        to_coq_typs_implicits left_typ_args constructors
+      )) in
+    let notation_wheres = to_coq_notations_wheres subst inductive in
+    let notation_definitions = to_coq_notations_definitions inductive in
+    nest (
+      (match reserved_notations with
+      | [] -> empty
+      | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
+      separate (newline ^^ newline) (inductive.typs |>
+        List.mapi (fun index (name, left_typ_args, right_typ_args, constructors) ->
+          let is_first = index = 0 in
+          to_coq_typs subst is_first name left_typ_args right_typ_args constructors
+        )
+      ) ^-^
+      (match notation_wheres with
+      | [] -> empty
+      | _ :: _ -> newline ^^ newline ^^ separate (newline ^^ newline) notation_wheres) ^-^ !^ "." ^^
+      (match notation_definitions with
+      | [] -> empty
+      | _ :: _ -> newline ^^ newline ^^ separate newline notation_definitions) ^^
+      (match implicit_arguments with
+      | [] -> empty
+      | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments)
+    )
+end
+
 type t =
-  | Inductive of (Name.t * Name.t list * Name.t list * Constructors.t) list
+  | Inductive of Inductive.t
   | Record of Name.t * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
@@ -112,112 +250,37 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     let typ = Type.Apply (MixedPath.of_name "False", []) in
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
   | _ ->
-    (typs |> Monad.List.filter_map (fun typ ->
+    (typs |> Monad.List.fold_left (fun (notations, typs) typ ->
+      let name = Name.of_ident typ.typ_id in
+      (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       match typ with
+      | { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = Some typ; type_params } } ->
+        Type.of_type_expr_without_free_vars typ >>= fun typ ->
+        return ((name, typ_args, typ) :: notations, typs)
       | { typ_id; typ_type = { type_kind = Type_variant cases; type_params } } ->
-        let name = Name.of_ident typ_id in
-        (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
-        (* The `defined_typ` is useful to give a default return type for non-GADT
-          constructors in GADT types. *)
         Constructors.of_ocaml typ_args cases >>= fun constructors ->
-        return (Some (name, typ_args, constructors))
-      | _ -> raise None NotSupported "Only algebraic data types are supported in mutually recursive types"
-    )) >>= fun typs ->
+        return (notations, (name, typ_args, constructors) :: typs)
+      | _ ->
+        raise
+          (notations, typs)
+          NotSupported
+          "Only algebraic or synonym types are supported in mutually recursive types"
+    ) ([], [])) >>= fun (notations, typs) ->
     let typs = typs |> List.map (fun (name, typ_args, constructors) ->
       let (left_typ_args, right_typ_args, constructors) =
         Constructors.extract_common_typ_args typ_args constructors in
       (name, left_typ_args, right_typ_args, constructors)
     ) in
-    return (Inductive typs)
-
-let to_coq_inductive
-  (is_first : bool)
-  (name : Name.t)
-  (left_typ_args : Name.t list)
-  (right_typ_args : Name.t list)
-  (constructors : Constructors.t)
-  : SmartPrint.t =
-  let keyword = if is_first then !^ "Inductive" else !^ "with" in
-  nest (
-    keyword ^^ Name.to_coq name ^^
-    (if left_typ_args = [] then
-      empty
-    else
-      parens (
-        nest (
-          separate space (List.map Name.to_coq left_typ_args) ^^
-          !^ ":" ^^ !^ "Type"
-        )
-      )
-    ) ^^ !^ ":" ^^
-    (if right_typ_args = [] then
-      empty
-    else
-      !^ "forall" ^^
-      parens (
-        nest (
-          separate space (List.map Name.to_coq right_typ_args) ^^
-          !^ ":" ^^ !^ "Type"
-        )
-      ) ^-^ !^ ","
-    ) ^^ !^ "Type" ^^ !^ ":=" ^-^
-    separate empty (
-      constructors |> List.map (fun { Constructors.constructor_name; param_typs; res_typ_params; typ_vars } ->
-        newline ^^ nest (
-          !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
-          (match typ_vars with
-          | [] -> empty
-          | _ ->
-            !^ "forall" ^^ braces (
-              separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type"
-            ) ^-^ !^ ","
-          ) ^^
-          separate space (param_typs |> List.map (fun param_typ ->
-            Type.to_coq true param_typ ^^ !^ "->"
-          )) ^^ Type.to_coq false (Type.Apply (MixedPath.of_name name, res_typ_params))
-        )
-      )
-    )
-  )
-
-let to_coq_inductive_implicits
-  (left_typ_args : Name.t list)
-  (constructors : Constructors.t)
-  : SmartPrint.t list =
-  match left_typ_args with
-  | [] -> []
-  | _ :: _ ->
-    constructors |> List.map (fun { Constructors.constructor_name } ->
-      !^ "Arguments" ^^ Name.to_coq constructor_name ^^ braces (
-        nest (
-          separate space (left_typ_args |> List.map (fun _ -> !^ "_"))
-        )
-      ) ^-^ !^ "."
-    )
+    return (Inductive { notations = List.rev notations; typs = List.rev typs })
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
-  | Inductive typs ->
-    let implicit_arguments =
-      List.concat (typs |> List.map (fun (_, left_typ_args, _, constructors) ->
-        to_coq_inductive_implicits left_typ_args constructors
-      )) in
-    nest (
-      separate (newline ^^ newline) (typs |>
-        List.mapi (fun index (name, left_typ_args, right_typ_args, constructors) ->
-          let is_first = index = 0 in
-          to_coq_inductive is_first name left_typ_args right_typ_args constructors
-        )
-      ) ^-^ !^ "." ^^
-      (match implicit_arguments with
-      | [] -> empty
-      | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments)
-    )
+  | Inductive inductive -> Inductive.to_coq inductive
   | Record (name, fields) ->
     nest (
       !^ "Record" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
-        nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false typ)))) ^^
+        nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false typ)))) ^^
       !^ "}.")
   | Synonym (name, typ_args, value) ->
     nest (
@@ -225,7 +288,7 @@ let to_coq (def : t) : SmartPrint.t =
       (match typ_args with
       | [] -> empty
       | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")) ^^
-      !^ ":=" ^^ Type.to_coq false value ^-^ !^ "."
+      !^ ":=" ^^ Type.to_coq None false value ^-^ !^ "."
     )
   | Abstract (name, typ_args) ->
     nest (

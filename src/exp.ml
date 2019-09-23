@@ -314,10 +314,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           separate space (List.map Name.to_coq header.Header.typ_vars) ^^
           !^ ":" ^^ !^ "Type")) ^^
         group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->
-          parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq false x_typ)))) ^^
+          parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false x_typ)))) ^^
         (match header.Header.typ with
         | None -> empty
-        | Some typ -> !^ ": " ^-^ Type.to_coq false typ) ^-^
+        | Some typ -> !^ ": " ^-^ Type.to_coq None false typ) ^-^
         !^ " :=" ^^ newline ^^
         indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (e, cases) ->
@@ -341,11 +341,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "existT" ^^ !^ "_" ^^
       (match existential_typs with
       | [] -> !^ "unit"
-      | [existential_typ] -> Type.to_coq true existential_typ
+      | [existential_typ] -> Type.to_coq None true existential_typ
       | _ ->
         parens @@ nest @@ separate (!^ "," ^^ space) (
           existential_typs |> List.map (fun existential_typ ->
-            Type.to_coq false existential_typ ^^ !^ ":" ^^ !^ "Type"
+            Type.to_coq None false existential_typ ^^ !^ ":" ^^ !^ "Type"
           )
         )
       ) ^^
