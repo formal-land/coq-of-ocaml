@@ -5,61 +5,48 @@ open Monad.Notations
 
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
-  type t =
-    | Gadt of (Name.t * Name.t list * Type.t list * Type.t) list
-    | NonGadt of (Name.t * Type.t list) list
+  type item = {
+    constructor_name : Name.t;
+    param_typs : Type.t list;
+    res_typ : Type.t;
+    typ_vars : Name.t list;
+  } [@@deriving sexp]
+
+  type t = item list
     [@@deriving sexp]
 
-  let rec of_ocaml
+  let of_ocaml
     (defined_typ : Type.t)
     (cases : Types.constructor_declaration list)
     : t Monad.t =
-    match cases with
-    | [] -> return (NonGadt [])
-    | { cd_args; cd_id; cd_loc; cd_res; } :: cases ->
+    cases |> Monad.List.map (fun { Types.cd_args; cd_id; cd_loc; cd_res } ->
       set_loc (Loc.of_location cd_loc) (
-      let name = Name.of_ident cd_id in
+      let constructor_name = Name.of_ident cd_id in
+      let typ_vars = Name.Map.empty in
       (match cd_args with
-      | Cstr_tuple typs -> typs |> Monad.List.map Type.of_type_expr_without_free_vars
+      | Cstr_tuple param_typs -> Type.of_typs_exprs true typ_vars param_typs
       | Cstr_record labeled_typs ->
         set_loc (Loc.of_location cd_loc) (
-        (labeled_typs |> Monad.List.map (fun { Types.ld_type } ->
-          Type.of_type_expr_without_free_vars ld_type
-        )) >>= fun typs ->
-        raise typs NotSupported "Unhandled named constructor parameters.")) >>= fun typs ->
+        (
+          labeled_typs |>
+          List.map (fun { Types.ld_type } -> ld_type) |>
+          Type.of_typs_exprs true typ_vars
+        ) >>= fun result ->
+        raise result NotSupported "Unhandled named constructor parameters.")
+      ) >>= fun (param_typs, typ_vars, new_typ_vars_params) ->
       (match cd_res with
-      | None -> return None
-      | Some res ->
-        Type.of_type_expr_without_free_vars res >>= fun typ ->
-        return (Some typ)) >>= fun res_typ ->
-      let res_typ_or_defined_typ =
-        match res_typ with
-        | None -> defined_typ
-        | Some res_typ -> res_typ in
-      (* We need to compute the free variables to add `forall` annotations in Coq as
-         polymorphic variables cannot be infered. *)
-      let free_typ_vars = Name.Set.elements (Type.typ_args_of_typs (res_typ_or_defined_typ :: typs)) in
-      of_ocaml defined_typ cases >>= fun constructors ->
-      (* In case of types mixing GADT and non-GADT constructors, we automatically lift
-         to a GADT type. *)
-      return (match (res_typ, constructors) with
-      | (None, NonGadt constructors) ->
-        NonGadt ((name, typs) :: constructors)
-      | (Some res_typ, Gadt constructors) ->
-        Gadt ((name, free_typ_vars, typs, res_typ) :: constructors)
-      | (None, Gadt constructors) ->
-        Gadt ((name, free_typ_vars, typs, defined_typ) :: constructors)
-      | (Some res_typ, NonGadt constructors) ->
-        let lifted_constructors = constructors |> List.map (fun (name, typs) ->
-          let free_typ_vars = Name.Set.elements (Type.typ_args_of_typs (defined_typ :: typs)) in
-          (name, free_typ_vars, typs, defined_typ)
-        ) in
-        Gadt ((name, free_typ_vars, typs, res_typ) :: lifted_constructors)))
-
-  let constructor_names (constructors : t) : Name.t list =
-    match constructors with
-    | Gadt cases -> List.map (fun (x, _, _, _) -> x) cases
-    | NonGadt cases -> List.map (fun (x, _) -> x) cases
+      | None -> return (defined_typ, Type.typ_args defined_typ)
+      | Some res_typ ->
+        Type.of_typ_expr true typ_vars res_typ >>= fun (res_typ, _, new_typ_vars) ->
+        return (res_typ, new_typ_vars)
+      ) >>= fun (res_typ, new_typ_vars_res) ->
+      return {
+        constructor_name;
+        param_typs;
+        res_typ;
+        typ_vars = Name.Set.elements (Name.Set.union new_typ_vars_params new_typ_vars_res);
+      })
+    )
 end
 
 type t =
@@ -117,79 +104,37 @@ let to_coq_inductive
   (constructors : Constructors.t)
   : SmartPrint.t =
   let keyword = if is_first then !^ "Inductive" else !^ "with" in
-  match constructors with
-  | Constructors.Gadt constructors ->
-    nest (
-      keyword ^^ Name.to_coq name ^^ !^ ":" ^^
-      (if typ_args = []
-      then empty
-      else !^ "forall" ^^ parens @@ nest (
-        separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ !^ "Type")) ^-^
-      !^ "," ^^ !^ "Type" ^^ !^ ":=" ^-^
-      separate empty (constructors |> List.map (fun (constr_name, free_typ_vars, args, res_typ) ->
+  nest (
+    keyword ^^ Name.to_coq name ^^ !^ ":" ^^
+    (if typ_args = [] then
+      empty
+    else
+      !^ "forall" ^^
+      parens (
+        nest (
+          separate space (List.map Name.to_coq typ_args) ^^
+          !^ ":" ^^ !^ "Type"
+        )
+      ) ^-^ !^ ","
+    ) ^^ !^ "Type" ^^ !^ ":=" ^-^
+    separate empty (
+      constructors |> List.map (fun { Constructors.constructor_name; param_typs; res_typ; typ_vars } ->
         newline ^^ nest (
-          !^ "|" ^^ Name.to_coq constr_name ^^ !^ ":" ^^
-          (match free_typ_vars with
+          !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
+          (match typ_vars with
           | [] -> empty
-          | free_typ_vars ->
-            !^ "forall" ^^ parens (
-              separate space (free_typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type"
-            ) ^-^ !^ ",") ^^
-          separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^
-          Type.to_coq false res_typ
-        )))
-    )
-  | Constructors.NonGadt constructors ->
-    nest (
-      keyword ^^ Name.to_coq name ^^
-      (if typ_args = []
-      then empty
-      else parens @@ nest (
-        separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ !^ "Type")) ^^
-      !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^-^
-      separate empty (constructors |> List.map (fun (constr_name, args) ->
-        newline ^^ nest (
-          !^ "|" ^^ Name.to_coq constr_name ^^ !^ ":" ^^
-          separate space (args |> List.map (fun arg -> Type.to_coq true arg ^^ !^ "->")) ^^
-          separate space (List.map Name.to_coq (name :: typ_args))
-        )))
-    )
-
-let to_coq_inductive_implicits
-  (typ_args : Name.t list)
-  (constructors : Constructors.t)
-  : SmartPrint.t list =
-  match constructors with
-  | Constructors.Gadt constructors ->
-    constructors |> Util.List.filter_map (fun (constr_name, free_typ_vars, args, _) ->
-      if free_typ_vars = [] then
-        None
-      else
-        Some (
-          nest (
-            !^ "Arguments" ^^ Name.to_coq constr_name ^^
-            braces (separate space (List.map Name.to_coq free_typ_vars)) ^^
-            separate space (List.map (fun _ -> !^ "_") args)
-            ^-^ !^ "."
-          )
+          | _ ->
+            !^ "forall" ^^ braces (
+              separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type"
+            ) ^-^ !^ ","
+          ) ^^
+          separate space (param_typs |> List.map (fun param_typ ->
+            Type.to_coq true param_typ ^^ !^ "->"
+          )) ^^ Type.to_coq false res_typ
         )
+      )
     )
-  | Constructors.NonGadt constructors ->
-    constructors |> Util.List.filter_map (fun (constr_name, args) ->
-      if typ_args = [] then
-        None
-      else
-        Some (
-          nest (
-            !^ "Arguments" ^^ Name.to_coq constr_name ^^
-            braces (separate space (List.map Name.to_coq typ_args)) ^-^
-            concat (List.map (fun _ -> space ^^ !^ "_") args)
-            ^-^ !^ "."
-          )
-        )
-    )
+  )
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
@@ -198,17 +143,7 @@ let to_coq (def : t) : SmartPrint.t =
       separate (newline ^^ newline) (typs |> List.mapi (fun index (name, typ_args, constructors) ->
         let is_first = index = 0 in
         to_coq_inductive is_first name typ_args constructors
-      )) ^-^ !^ "." ^^ (
-        let constructors_with_implicits =
-          typs |>
-          List.map (fun (_, typ_args, constructors) ->
-            to_coq_inductive_implicits typ_args constructors
-          ) |>
-          List.concat in
-        match constructors_with_implicits with
-        | [] -> empty
-        | _ :: _ -> newline ^^ separate newline constructors_with_implicits
-      )
+      )) ^-^ !^ "."
     )
   | Record (name, fields) ->
     nest (

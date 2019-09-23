@@ -6,16 +6,12 @@ Import ListNotations.
 
 Definition foo := string.
 
-Inductive tree (a : Type) : Type :=
-| Tree : (list (node a)) -> tree a
+Inductive tree : forall (a : Type), Type :=
+| Tree : forall {a : Type}, (list (node a)) -> tree a
 
-with node (a : Type) : Type :=
-| Leaf : string -> node a
-| Node : (tree a) -> node a
+with node : forall (a : Type), Type :=
+| Leaf : forall {a : Type}, string -> node a
+| Node : forall {a : Type}, (tree a) -> node a
 
-with unrelated (a : Type) : Type :=
-| Unrelated : a -> a -> unrelated a.
-Arguments Tree {a} _.
-Arguments Leaf {a} _.
-Arguments Node {a} _.
-Arguments Unrelated {a} _ _.
+with unrelated : forall (a : Type), Type :=
+| Unrelated : forall {a : Type}, a -> a -> unrelated a.
