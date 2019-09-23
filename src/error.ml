@@ -17,6 +17,12 @@ module Category = struct
     | Unexpected -> "Unexpected"
 end
 
+type t = {
+  category : Category.t;
+  loc : Loc.t;
+  message : string;
+}
+
 (** Display a warning. *)
 let warn (loc : Loc.t) (message : string) : unit =
   let message = "Warning: " ^ message in
@@ -80,13 +86,12 @@ let read_source_file (source_file : string) : string =
   let length = in_channel_length channel in
   really_input_string channel length
 
-let display_errors
-  (source_file : string)
-  (errors : (Loc.t * Category.t * string) list)
-  : unit =
+let display_errors (source_file : string) (errors : t list) : unit =
   let source_file_content = read_source_file source_file in
   let source_lines = String.split_on_char '\n' source_file_content in
-  errors |> List.iteri (fun index (loc, category, message) ->
+  errors |>
+  List.sort (fun error1 error2 -> compare error1.loc.start.line error2.loc.start.line) |>
+  List.iteri (fun index { category; loc; message } ->
     display_error source_lines loc category message
   );
   let nb_errors = List.length errors in

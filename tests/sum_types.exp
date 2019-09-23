@@ -1,12 +1,16 @@
 ((TypeDefinition
   (Inductive
-   ((t1 ()
-     (NonGadt
-      ((C1 ((Apply (PathName ((path ()) (base Z))) ())))
-       (C2
+   ((t1 () ()
+     (((constructor_name C1)
+       (param_typs ((Apply (PathName ((path ()) (base Z))) ())))
+       (res_typ_params ()) (typ_vars ()))
+      ((constructor_name C2)
+       (param_typs
         ((Apply (PathName ((path ()) (base bool))) ())
          (Apply (PathName ((path ()) (base Z))) ())))
-       (C3 ())))))))
+       (res_typ_params ()) (typ_vars ()))
+      ((constructor_name C3) (param_typs ()) (res_typ_params ())
+       (typ_vars ())))))))
  (Value
   ((is_rec (New false))
    (cases
@@ -25,12 +29,14 @@
         (Any (Constructor ((path ()) (base true)) ())))))))))
  (TypeDefinition
   (Inductive
-   ((t2 (a)
-     (NonGadt
-      ((D1 ())
-       (D2
+   ((t2 (a) ()
+     (((constructor_name D1) (param_typs ()) (res_typ_params ((Variable a)))
+       (typ_vars ()))
+      ((constructor_name D2)
+       (param_typs
         ((Variable a)
-         (Apply (PathName ((path ()) (base t2))) ((Variable a)))))))))))
+         (Apply (PathName ((path ()) (base t2))) ((Variable a)))))
+       (res_typ_params ((Variable a))) (typ_vars ())))))))
  (Value
   ((is_rec (New true))
    (cases
@@ -77,4 +83,8 @@
                  (Constructor ((path ()) (base cons))
                   ((Constant (Int 3)) (Constructor ((path ()) (base [])) ())))))))))))))))))))
  (TypeDefinition (Abstract t3 ())) (TypeDefinition (Abstract t4 (a)))
- (TypeDefinition (Inductive ((t5 () (NonGadt ((C ()))))))))
+ (TypeDefinition
+  (Inductive
+   ((t5 () ()
+     (((constructor_name C) (param_typs ()) (res_typ_params ())
+       (typ_vars ()))))))))

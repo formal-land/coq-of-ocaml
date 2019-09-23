@@ -15,7 +15,8 @@ with node (a : Type) : Type :=
 
 with unrelated (a : Type) : Type :=
 | Unrelated : a -> a -> unrelated a.
-Arguments Tree {a} _.
-Arguments Leaf {a} _.
-Arguments Node {a} _.
-Arguments Unrelated {a} _ _.
+
+Arguments Tree {_}.
+Arguments Leaf {_}.
+Arguments Node {_}.
+Arguments Unrelated {_}.

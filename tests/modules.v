@@ -8,8 +8,9 @@ Module List2.
   Inductive t (a : Type) : Type :=
   | Nil : t a
   | Cons : a -> (t a) -> t a.
-  Arguments Nil {a}.
-  Arguments Cons {a} _ _.
+  
+  Arguments Nil {_}.
+  Arguments Cons {_}.
   
   Fixpoint sum (l : t Z) : Z :=
     match l with

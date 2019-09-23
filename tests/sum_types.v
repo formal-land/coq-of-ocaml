@@ -20,8 +20,9 @@ Definition m : bool :=
 Inductive t2 (a : Type) : Type :=
 | D1 : t2 a
 | D2 : a -> (t2 a) -> t2 a.
-Arguments D1 {a}.
-Arguments D2 {a} _ _.
+
+Arguments D1 {_}.
+Arguments D2 {_}.
 
 Fixpoint of_list {A : Type} (l : list A) : t2 A :=
   match l with
