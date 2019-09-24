@@ -42,3 +42,8 @@ Module Point.
     | _ => false
     end.
 End Point.
+
+Record poly {first second : Type} := {
+  first : first;
+  second : second }.
+Arguments poly : clear implicits.

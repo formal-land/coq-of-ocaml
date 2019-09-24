@@ -1,6 +1,6 @@
 ((Module SizedString
   ((TypeDefinition
-    (Record t
+    (Record t ()
      ((name (Apply (PathName ((path ()) (base string))) ()))
       (size (Apply (PathName ((path ()) (base Z))) ())))))))
  (Value
@@ -57,7 +57,7 @@
        ((Variable (PathName ((path ()) (base r')))))))))))
  (Module Point
   ((TypeDefinition
-    (Record t
+    (Record t ()
      ((x (Apply (PathName ((path ()) (base Z))) ()))
       (y (Apply (PathName ((path ()) (base Z))) ()))
       (z (Apply (PathName ((path ()) (base Z))) ())))))
@@ -80,4 +80,7 @@
             ((((path ()) (base x)) (Constant (Int 5)))
              (((path ()) (base z)) (Constant (Int 1)))))
            (Constructor ((path ()) (base true)) ()))
-          (Any (Constructor ((path ()) (base false)) ()))))))))))))
+          (Any (Constructor ((path ()) (base false)) ())))))))))))
+ (TypeDefinition
+  (Record poly (first second)
+   ((first (Variable first)) (second (Variable second))))))

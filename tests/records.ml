@@ -28,3 +28,7 @@ module Point = struct
     | { x = 5; z = 1 } -> true
     | _ -> false
 end
+
+type ('first, 'second) poly = {
+  first : 'first;
+  second : 'second }

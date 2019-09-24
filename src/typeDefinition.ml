@@ -222,20 +222,21 @@ end
 
 type t =
   | Inductive of Inductive.t
-  | Record of Name.t * (Name.t * Type.t) list
+  | Record of Name.t * Name.t list * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
   [@@deriving sexp]
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [ { typ_id; typ_type = { type_kind = Type_record (fields, _) } } ] ->
+  | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params } } ] ->
     let name = Name.of_ident typ_id in
+    (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
     (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ } ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (Name.of_ident x, typ)
     )) >>= fun fields ->
-    return (Record (name, fields))
+    return (Record (name, typ_args, fields))
   | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params } } ] ->
     let name = Name.of_ident typ_id in
     (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
@@ -251,6 +252,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
   | _ ->
     (typs |> Monad.List.fold_left (fun (notations, typs) typ ->
+      set_loc (Loc.of_location typ.typ_loc) (
       let name = Name.of_ident typ.typ_id in
       (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       match typ with
@@ -265,6 +267,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           (notations, typs)
           NotSupported
           "Only algebraic or synonym types are supported in mutually recursive types"
+      )
     ) ([], [])) >>= fun (notations, typs) ->
     let typs = typs |> List.map (fun (name, typ_args, constructors) ->
       let (left_typ_args, right_typ_args, constructors) =
@@ -276,12 +279,27 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
 let to_coq (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq inductive
-  | Record (name, fields) ->
+  | Record (name, typ_args, fields) ->
     nest (
-      !^ "Record" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "{" ^^ newline ^^
+      !^ "Record" ^^ Name.to_coq name ^^
+      (match typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        braces (nest (
+          separate space (List.map Name.to_coq typ_args) ^^
+          !^ ":" ^^ !^ "Type"
+        ))
+      ) ^^
+      !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
         nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false typ)))) ^^
-      !^ "}.")
+      !^ "}." ^^
+      (match typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        newline ^^ !^ "Arguments" ^^ Name.to_coq name ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
+      )
+    )
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
