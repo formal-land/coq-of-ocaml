@@ -143,6 +143,10 @@ let convert (x : t) : t =
   | { path = ["Stdlib"; "List"]; base = "exists" } -> { path = ["OCaml"; "List"]; base = "_exists" }
   | { path = ["Stdlib"; "List"]; base = "exists2" } -> { path = ["OCaml"; "List"]; base = "_exists2" }
   | { path = ["Stdlib"; "List"]; base = "map" } -> { path = ["List"]; base = "map" }
+  | { path = ["Stdlib"; "List"]; base = "rev" } -> { path = ["List"]; base = "rev" }
+
+  (* String *)
+  | { path = ["Stdlib"; "String"]; base = "length" } -> { path = ["OCaml"; "String"]; base = "length" }
 
   | { path = path; base = base } -> { path = path; base = Name.convert base }
 

@@ -90,10 +90,10 @@ let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
     else
       Pp.parens paren @@ nest @@ separate space (PathName.to_coq x :: List.map (to_coq true) ps)
   | Alias (p, x) ->
-    Pp.parens paren @@ nest (to_coq false p ^^ !^ "as" ^^ Name.to_coq x)
+    Pp.parens paren @@ nest (to_coq true p ^^ !^ "as" ^^ Name.to_coq x)
   | Record fields ->
     !^ "{|" ^^
     nest_all @@ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, p) ->
       nest (PathName.to_coq x ^^ !^ ":=" ^^ to_coq false p)))
     ^^ !^ "|}"
-  | Or (p1, p2) -> to_coq false p1 ^^ !^ "|" ^^ to_coq false p2
+  | Or (p1, p2) -> Pp.parens paren @@ nest (to_coq false p1 ^^ !^ "|" ^^ to_coq false p2)
