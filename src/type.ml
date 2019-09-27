@@ -167,20 +167,28 @@ let rec open_type (typ : t) (n : int) : t list * t =
     | _ -> failwith "Expected an arrow type."
 
 (** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
-let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
+let rec to_coq (subst : (Name.t -> Name.t) option) (paren : bool) (typ : t) : SmartPrint.t =
   match typ with
   | Variable x -> Name.to_coq x
   | Arrow (typ_x, typ_y) ->
-    Pp.parens paren @@ nest (to_coq true typ_x ^^ !^ "->" ^^ to_coq false typ_y)
+    Pp.parens paren @@ nest (to_coq subst true typ_x ^^ !^ "->" ^^ to_coq subst false typ_y)
   | Tuple typs ->
     (match typs with
     | [] -> !^ "unit"
     | _ ->
       Pp.parens paren @@ nest @@ separate (space ^^ !^ "*" ^^ space)
-        (List.map (to_coq true) typs))
+        (List.map (to_coq subst true) typs))
   | Apply (path, typs) ->
+    let path =
+      match subst with
+      | None -> path
+      | Some subst ->
+        begin match path with
+        | MixedPath.PathName { path = []; base = name } -> MixedPath.of_name (subst name)
+        | _ -> path
+        end in
     Pp.parens (paren && typs <> []) @@ nest @@ separate space
-      (MixedPath.to_coq path :: List.map (to_coq true) typs)
+      (MixedPath.to_coq path :: List.map (to_coq subst true) typs)
   | Package (path_name, typ_params) ->
     let existential_typs =
       Tree.flatten typ_params |>
@@ -199,7 +207,7 @@ let rec to_coq (paren : bool) (typ : t) : SmartPrint.t =
         separate space (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
           match typ with
           | None -> Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
-          | Some typ -> to_coq true typ
+          | Some typ -> to_coq subst true typ
         ))
       )
     ))

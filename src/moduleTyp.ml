@@ -75,6 +75,6 @@ let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
     PathName.to_coq path_name ^^
     separate space (Tree.flatten typ_values |> List.map (fun (path_name, defined_or_free) ->
       match defined_or_free with
-      | Defined typ -> Type.to_coq true typ
+      | Defined typ -> Type.to_coq None true typ
       | Free -> Name.to_coq (ModuleTypParams.get_typ_param_name (PathName.add_prefix typ_variables_prefix path_name))
     ))

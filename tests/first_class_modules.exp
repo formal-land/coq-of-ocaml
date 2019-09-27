@@ -142,70 +142,81 @@
      (typ_params ((Item elt ()) (Item t ())))))))
  (TypeDefinition
   (Inductive
-   ((type_annot () ()
-     (((constructor_name Type_annot)
-       (param_typs ((Apply (PathName ((path ()) (base string))) ())))
-       (res_typ_params ()) (typ_vars ())))))))
+   ((notations ())
+    (typs
+     ((type_annot () ()
+       (((constructor_name Type_annot)
+         (param_typs ((Apply (PathName ((path ()) (base string))) ())))
+         (res_typ_params ()) (typ_vars ())))))))))
  (TypeDefinition
   (Inductive
-   ((field_annot () ()
-     (((constructor_name Field_annot)
-       (param_typs ((Apply (PathName ((path ()) (base string))) ())))
-       (res_typ_params ()) (typ_vars ())))))))
+   ((notations ())
+    (typs
+     ((field_annot () ()
+       (((constructor_name Field_annot)
+         (param_typs ((Apply (PathName ((path ()) (base string))) ())))
+         (res_typ_params ()) (typ_vars ())))))))))
  (TypeDefinition (Synonym pair (a b) (Tuple ((Variable a) (Variable b)))))
  (TypeDefinition
   (Inductive
-   ((comb () ()
-     (((constructor_name Comb) (param_typs ()) (res_typ_params ())
-       (typ_vars ())))))))
+   ((notations ())
+    (typs
+     ((comb () ()
+       (((constructor_name Comb) (param_typs ()) (res_typ_params ())
+         (typ_vars ())))))))))
  (TypeDefinition
   (Inductive
-   ((leaf () ()
-     (((constructor_name Leaf) (param_typs ()) (res_typ_params ())
-       (typ_vars ())))))))
+   ((notations ())
+    (typs
+     ((leaf () ()
+       (((constructor_name Leaf) (param_typs ()) (res_typ_params ())
+         (typ_vars ())))))))))
  (TypeDefinition
   (Inductive
-   ((comparable_struct () (_ _)
-     (((constructor_name Int_key)
-       (param_typs
-        ((Apply (PathName ((path ()) (base option)))
-          ((Apply (PathName ((path ()) (base type_annot))) ())))))
-       (res_typ_params
-        ((Apply (PathName ((path ()) (base Z))) ()) (Variable position)))
-       (typ_vars (position)))
-      ((constructor_name String_key)
-       (param_typs
-        ((Apply (PathName ((path ()) (base option)))
-          ((Apply (PathName ((path ()) (base type_annot))) ())))))
-       (res_typ_params
-        ((Apply (PathName ((path ()) (base string))) ()) (Variable position)))
-       (typ_vars (position)))
-      ((constructor_name Bool_key)
-       (param_typs
-        ((Apply (PathName ((path ()) (base option)))
-          ((Apply (PathName ((path ()) (base type_annot))) ())))))
-       (res_typ_params
-        ((Apply (PathName ((path ()) (base bool))) ()) (Variable position)))
-       (typ_vars (position)))
-      ((constructor_name Pair_key)
-       (param_typs
-        ((Tuple
-          ((Apply (PathName ((path ()) (base comparable_struct)))
-            ((Variable a) (Apply (PathName ((path ()) (base leaf))) ())))
+   ((notations ())
+    (typs
+     ((comparable_struct () (_ _)
+       (((constructor_name Int_key)
+         (param_typs
+          ((Apply (PathName ((path ()) (base option)))
+            ((Apply (PathName ((path ()) (base type_annot))) ())))))
+         (res_typ_params
+          ((Apply (PathName ((path ()) (base Z))) ()) (Variable position)))
+         (typ_vars (position)))
+        ((constructor_name String_key)
+         (param_typs
+          ((Apply (PathName ((path ()) (base option)))
+            ((Apply (PathName ((path ()) (base type_annot))) ())))))
+         (res_typ_params
+          ((Apply (PathName ((path ()) (base string))) ())
+           (Variable position)))
+         (typ_vars (position)))
+        ((constructor_name Bool_key)
+         (param_typs
+          ((Apply (PathName ((path ()) (base option)))
+            ((Apply (PathName ((path ()) (base type_annot))) ())))))
+         (res_typ_params
+          ((Apply (PathName ((path ()) (base bool))) ()) (Variable position)))
+         (typ_vars (position)))
+        ((constructor_name Pair_key)
+         (param_typs
+          ((Tuple
+            ((Apply (PathName ((path ()) (base comparable_struct)))
+              ((Variable a) (Apply (PathName ((path ()) (base leaf))) ())))
+             (Apply (PathName ((path ()) (base option)))
+              ((Apply (PathName ((path ()) (base field_annot))) ())))))
+           (Tuple
+            ((Apply (PathName ((path ()) (base comparable_struct)))
+              ((Variable b) (Variable position)))
+             (Apply (PathName ((path ()) (base option)))
+              ((Apply (PathName ((path ()) (base field_annot))) ())))))
            (Apply (PathName ((path ()) (base option)))
-            ((Apply (PathName ((path ()) (base field_annot))) ())))))
-         (Tuple
-          ((Apply (PathName ((path ()) (base comparable_struct)))
-            ((Variable b) (Variable position)))
-           (Apply (PathName ((path ()) (base option)))
-            ((Apply (PathName ((path ()) (base field_annot))) ())))))
-         (Apply (PathName ((path ()) (base option)))
-          ((Apply (PathName ((path ()) (base type_annot))) ())))))
-       (res_typ_params
-        ((Apply (PathName ((path ()) (base pair)))
-          ((Variable a) (Variable b)))
-         (Apply (PathName ((path ()) (base comb))) ())))
-       (typ_vars (a b position))))))))
+            ((Apply (PathName ((path ()) (base type_annot))) ())))))
+         (res_typ_params
+          ((Apply (PathName ((path ()) (base pair)))
+            ((Variable a) (Variable b)))
+           (Apply (PathName ((path ()) (base comb))) ())))
+         (typ_vars (a b position))))))))))
  (TypeDefinition
   (Synonym comparable_ty (a)
    (Apply (PathName ((path ()) (base comparable_struct)))

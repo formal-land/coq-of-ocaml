@@ -6,4 +6,8 @@ and 'a node =
   | Leaf of string
   | Node of 'a tree
 
-and 'a unrelated = Unrelated of 'a * 'a
+and 'b simple = 'b
+  
+and 'b double = 'b * 'b simple
+
+and 'a unrelated = Unrelated of ('a simple) double

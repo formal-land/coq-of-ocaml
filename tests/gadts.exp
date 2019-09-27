@@ -1,41 +1,47 @@
 ((TypeDefinition
   (Inductive
-   ((gre (a) ()
-     (((constructor_name Arg) (param_typs ((Variable a)))
-       (res_typ_params ((Variable a))) (typ_vars ())))))))
+   ((notations ())
+    (typs
+     ((gre (a) ()
+       (((constructor_name Arg) (param_typs ((Variable a)))
+         (res_typ_params ((Variable a))) (typ_vars ())))))))))
  (TypeDefinition
   (Inductive
-   ((foo () (a b)
-     (((constructor_name Bar)
-       (param_typs
-        ((Variable a) (Apply (PathName ((path ()) (base Z))) ()) (Variable b)
-         (Variable c)))
-       (res_typ_params
-        ((Variable b) (Apply (PathName ((path ()) (base string))) ())))
-       (typ_vars (a b c)))
-      ((constructor_name Other)
-       (param_typs ((Apply (PathName ((path ()) (base Z))) ())))
-       (res_typ_params ((Variable a) (Variable b))) (typ_vars (a b))))))))
+   ((notations ())
+    (typs
+     ((foo () (a b)
+       (((constructor_name Bar)
+         (param_typs
+          ((Variable a) (Apply (PathName ((path ()) (base Z))) ())
+           (Variable b) (Variable c)))
+         (res_typ_params
+          ((Variable b) (Apply (PathName ((path ()) (base string))) ())))
+         (typ_vars (a b c)))
+        ((constructor_name Other)
+         (param_typs ((Apply (PathName ((path ()) (base Z))) ())))
+         (res_typ_params ((Variable a) (Variable b))) (typ_vars (a b))))))))))
  (TypeDefinition
   (Inductive
-   ((expr () (a)
-     (((constructor_name Int) (param_typs ())
-       (res_typ_params ((Apply (PathName ((path ()) (base Z))) ())))
-       (typ_vars ()))
-      ((constructor_name String) (param_typs ())
-       (res_typ_params ((Apply (PathName ((path ()) (base string))) ())))
-       (typ_vars ()))
-      ((constructor_name Sum)
-       (param_typs
-        ((Apply (PathName ((path ()) (base expr)))
-          ((Apply (PathName ((path ()) (base Z))) ())))
-         (Apply (PathName ((path ()) (base expr)))
-          ((Apply (PathName ((path ()) (base Z))) ())))))
-       (res_typ_params ((Apply (PathName ((path ()) (base Z))) ())))
-       (typ_vars ()))
-      ((constructor_name Pair)
-       (param_typs
-        ((Apply (PathName ((path ()) (base expr))) ((Variable a)))
-         (Apply (PathName ((path ()) (base expr))) ((Variable b)))))
-       (res_typ_params ((Tuple ((Variable a) (Variable b)))))
-       (typ_vars (a b)))))))))
+   ((notations ())
+    (typs
+     ((expr () (a)
+       (((constructor_name Int) (param_typs ())
+         (res_typ_params ((Apply (PathName ((path ()) (base Z))) ())))
+         (typ_vars ()))
+        ((constructor_name String) (param_typs ())
+         (res_typ_params ((Apply (PathName ((path ()) (base string))) ())))
+         (typ_vars ()))
+        ((constructor_name Sum)
+         (param_typs
+          ((Apply (PathName ((path ()) (base expr)))
+            ((Apply (PathName ((path ()) (base Z))) ())))
+           (Apply (PathName ((path ()) (base expr)))
+            ((Apply (PathName ((path ()) (base Z))) ())))))
+         (res_typ_params ((Apply (PathName ((path ()) (base Z))) ())))
+         (typ_vars ()))
+        ((constructor_name Pair)
+         (param_typs
+          ((Apply (PathName ((path ()) (base expr))) ((Variable a)))
+           (Apply (PathName ((path ()) (base expr))) ((Variable b)))))
+         (res_typ_params ((Tuple ((Variable a) (Variable b)))))
+         (typ_vars (a b)))))))))))
