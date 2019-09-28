@@ -32,6 +32,8 @@ let convert (x : t) : t =
   | { path = []; base = "option" } -> { path = []; base = "option" }
   | { path = []; base = "None" } -> { path = []; base = "None" }
   | { path = []; base = "Some" } -> { path = []; base = "Some" }
+  | { path = ["*predef*"]; base = "None" } -> { path = []; base = "None" } (* for optional parameters *)
+  | { path = ["*predef*"]; base = "Some" } -> { path = []; base = "Some" }
   (* Predefined exceptions *)
   | { path = []; base = "Match_failure" } -> { path = ["OCaml"]; base = "Match_failure" }
   | { path = []; base = "Assert_failure" } -> { path = ["OCaml"]; base = "Assert_failure" }
@@ -142,6 +144,7 @@ let convert (x : t) : t =
   (* List *)
   | { path = ["Stdlib"; "List"]; base = "exists" } -> { path = ["OCaml"; "List"]; base = "_exists" }
   | { path = ["Stdlib"; "List"]; base = "exists2" } -> { path = ["OCaml"; "List"]; base = "_exists2" }
+  | { path = ["Stdlib"; "List"]; base = "length" } -> { path = ["OCaml"; "List"]; base = "length" }
   | { path = ["Stdlib"; "List"]; base = "map" } -> { path = ["List"]; base = "map" }
   | { path = ["Stdlib"; "List"]; base = "rev" } -> { path = ["List"]; base = "rev" }
 
