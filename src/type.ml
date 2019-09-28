@@ -19,7 +19,7 @@ let rec of_typ_expr
   (typ : Types.type_expr)
   : (t * Name.t Name.Map.t * Name.Set.t) Monad.t =
   match typ.desc with
-  | Tvar x ->
+  | Tvar x | Tunivar x ->
     (match x with
     | None ->
       if with_free_vars then
@@ -74,11 +74,6 @@ let rec of_typ_expr
       (Variable "variant", typ_vars, Name.Set.empty)
       NotSupported
       "Polymorphic variant types are not handled"
-  | Tunivar None ->
-    raise (Variable "_", typ_vars, Name.Set.empty) NotSupported "Unnamed universal variable not supported"
-  | Tunivar (Some name) ->
-    let name = Name.of_string name in
-    return (Variable name, typ_vars, Name.Set.empty)
   | Tpoly (typ, []) -> of_typ_expr with_free_vars typ_vars typ
   | Tpoly (typ, typs) ->
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
