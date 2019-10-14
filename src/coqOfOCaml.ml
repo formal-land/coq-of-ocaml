@@ -86,18 +86,28 @@ let parse_cmt (build_dir : string) (file_name : string)
 (** The main function. *)
 let main () =
   let file_name = ref None in
-  let build_dir = ref "" in
-  let mode = ref "" in
+  let build_dir = ref None in
+  let mode = ref None in
   let options = [
-    "-build-dir", Arg.Set_string build_dir, "the build directory";
-    "-mode", Arg.Set_string mode, " v (generate Coq .v files, you probably want this option), exp (the simplified expression tree)"
+    (
+      "-build-dir",
+      Arg.String (fun value -> build_dir := Some value),
+      "the build directory, where the other .cmt files are"
+    );
+    (
+      "-mode",
+      Arg.String (fun value -> mode := Some value),
+      " v (generate Coq .v files, you probably want this option), exp (the generated AST, for debugging)"
+    )
   ] in
   let usage_msg = "Usage: ./coqOfOCaml.native file.cmt\nOptions are:" in
   Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage options usage_msg
   | Some file_name ->
-    let (env, loc, structure, source_file) = parse_cmt !build_dir file_name in
-    of_ocaml env loc structure source_file !mode;
+    let build_dir = match !build_dir with None -> Filename.dirname file_name | Some build_dir -> build_dir in
+    let mode = match !mode with None -> "v" | Some mode -> mode in
+    let (env, loc, structure, source_file) = parse_cmt build_dir file_name in
+    of_ocaml env loc structure source_file mode;
 
 ;;main ()
