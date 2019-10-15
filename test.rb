@@ -24,11 +24,12 @@ class Test
   end
 
   def coq_of_ocaml_cmd(mode)
-    cmd = ['./coqOfOCaml.native', '-build-dir', 'tests', '-mode', mode, extension('.cmt')]
+    cmd = ['./coqOfOCaml.native', '-build-dir', 'tests', '-mode', mode, '-output', '/dev/stdout', extension('.cmt')]
   end
 
   def coq_of_ocaml(mode)
-    IO.popen(coq_of_ocaml_cmd(mode)).read
+    # We remove the fist line which is a success message
+    IO.popen(coq_of_ocaml_cmd(mode)).read.split("\n")[1..-1].join("\n") + "\n"
   end
 
   def reference(mode)

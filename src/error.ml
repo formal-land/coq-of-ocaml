@@ -67,43 +67,37 @@ let display_error
   (loc : Loc.t)
   (category : Category.t)
   (message : string)
-  : unit =
-  prerr_endline (
-    colorize "34;1" (
-      pad 100 '-'
-        ("--- " ^ loc.file_name ^ ":" ^ string_of_int loc.start.line ^ " ")
-        (" " ^ Category.to_string category ^ " ---")
-    ) ^ "\n" ^
-    "\n" ^
-    get_code_frame source_lines loc.start.line ^ "\n" ^
-    "\n\n" ^
-    message ^
-    "\n\n"
-  )
+  : string =
+  colorize "34;1" (
+    pad 100 '-'
+      ("--- " ^ loc.file_name ^ ":" ^ string_of_int loc.start.line ^ " ")
+      (" " ^ Category.to_string category ^ " ---")
+  ) ^ "\n" ^
+  "\n" ^
+  get_code_frame source_lines loc.start.line ^ "\n" ^
+  "\n\n" ^
+  message ^
+  "\n\n"
 
 let read_source_file (source_file : string) : string =
   let channel = open_in source_file in
   let length = in_channel_length channel in
   really_input_string channel length
 
-let display_errors (source_file : string) (errors : t list) : unit =
+let display_errors (source_file : string) (errors : t list) : string =
   let source_file_content = read_source_file source_file in
   let source_lines = String.split_on_char '\n' source_file_content in
-  errors |>
+  let error_messages = errors |>
   List.sort (fun error1 error2 -> compare error1.loc.start.line error2.loc.start.line) |>
-  List.iteri (fun index { category; loc; message } ->
-    display_error source_lines loc category message
-  );
+  List.map (fun { category; loc; message } ->
+    display_error source_lines loc category message) |>
+  String.concat "" in
   let nb_errors = List.length errors in
-  prerr_endline (
-    colorize "34;1" (
-      pad (100 + 20) '-'
-        "--- Failure "
-        ("[ " ^
-          colorize "31" (string_of_int nb_errors ^ (if nb_errors = 1 then " error" else " errors")) ^
-          colorize "34;1" " ]---")
-      ) ^ "\n" ^
-    "\n\n" ^
-    colorize "" ("Cannot import '" ^ source_file ^ "' to Coq.") ^ "\n" ^
-    "\n"
-  )
+  error_messages ^
+  colorize "34;1" (
+    pad (100 + 20) '-'
+      "--- Errors "
+      ("[ " ^
+        colorize "31" (string_of_int nb_errors ^ (if nb_errors = 1 then " error" else " errors")) ^
+        colorize "34;1" " ]---")
+    ) ^ "\n"
