@@ -12,6 +12,7 @@ env:
   - COQ_IMAGE="coqorg/coq:8.7" SHOULD_SUPPORT="false"
   - COQ_IMAGE="coqorg/coq:8.8" SHOULD_SUPPORT="false"
   - COQ_IMAGE="coqorg/coq:8.9" SHOULD_SUPPORT="true"
+  - COQ_IMAGE="coqorg/coq:8.10" SHOULD_SUPPORT="true"
 
 install: |
   # Prepare the COQ container
