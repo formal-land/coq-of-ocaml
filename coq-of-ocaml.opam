@@ -1,3 +1,5 @@
+version: "dev"
+
 opam-version: "2.0"
 maintainer: "dev@clarus.me"
 homepage: "https://github.com/clarus/coq-of-ocaml"
@@ -27,5 +29,6 @@ depends: [
 tags: [
   "keyword:compilation"
   "keyword:ocaml"
+  "logpath:OCaml"
 ]
-synopsis: "Compile OCaml to Coq"
+synopsis: "Compile a subset of OCaml to Coq"
