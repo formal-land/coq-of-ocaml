@@ -15,7 +15,8 @@
             ((Variable (PathName ((path ()) (base x))))))
            (Apply (Variable (PathName ((path ()) (base f_map))))
             ((Variable (PathName ((path ()) (base f))))
-             (Variable (PathName ((path ()) (base l))))))))))))))))
+             (Variable (PathName ((path ()) (base l))))))))))
+       ()))))))
  (Value
   ((is_rec (New false))
    (cases
@@ -37,7 +38,8 @@
               (Apply (Variable (PathName ((path (Z)) (base add))))
                ((Variable (PathName ((path ()) (base x))))
                 (Apply (Variable (PathName ((path ()) (base sum))))
-                 ((Variable (PathName ((path ()) (base l)))))))))))))))
+                 ((Variable (PathName ((path ()) (base l))))))))))
+            ())))))
        (Apply (Variable (PathName ((path ()) (base sum))))
         ((Constructor ((path ()) (base cons))
           ((Constant (Int 1))
