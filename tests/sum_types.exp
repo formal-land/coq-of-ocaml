@@ -28,7 +28,8 @@
       (Match (Variable (PathName ((path ()) (base n))))
        (((Constructor ((path ()) (base C2)) ((Variable b) Any))
          (Variable (PathName ((path ()) (base b)))))
-        (Any (Constructor ((path ()) (base true)) ())))))))))
+        (Any (Constructor ((path ()) (base true)) ())))
+       ()))))))
  (TypeDefinition
   (Inductive
    ((notations ())
@@ -54,7 +55,8 @@
          (Constructor ((path ()) (base D2))
           ((Variable (PathName ((path ()) (base x))))
            (Apply (Variable (PathName ((path ()) (base of_list))))
-            ((Variable (PathName ((path ()) (base xs))))))))))))))))
+            ((Variable (PathName ((path ()) (base xs))))))))))
+       ()))))))
  (Value
   ((is_rec (New true))
    (cases
@@ -70,7 +72,8 @@
          (Apply (Variable (PathName ((path (Z)) (base add))))
           ((Variable (PathName ((path ()) (base x))))
            (Apply (Variable (PathName ((path ()) (base sum))))
-            ((Variable (PathName ((path ()) (base xs))))))))))))))))
+            ((Variable (PathName ((path ()) (base xs))))))))))
+       ()))))))
  (Value
   ((is_rec (New false))
    (cases
@@ -85,7 +88,8 @@
                (Constructor ((path ()) (base cons))
                 ((Constant (Int 7))
                  (Constructor ((path ()) (base cons))
-                  ((Constant (Int 3)) (Constructor ((path ()) (base [])) ())))))))))))))))))))
+                  ((Constant (Int 3)) (Constructor ((path ()) (base [])) ())))))))))))))
+       ()))))))
  (TypeDefinition (Abstract t3 ())) (TypeDefinition (Abstract t4 (a)))
  (TypeDefinition
   (Inductive

@@ -40,7 +40,8 @@
       (Match (Variable (PathName ((path ()) (base function_parameter))))
        (((Record ((((path (SizedString)) (base size)) (Constant (Int 3)))))
          (Constructor ((path ()) (base true)) ()))
-        (Any (Constructor ((path ()) (base false)) ())))))))))
+        (Any (Constructor ((path ()) (base false)) ())))
+       ()))))))
  (Value
   ((is_rec (New false))
    (cases
@@ -80,7 +81,8 @@
             ((((path ()) (base x)) (Constant (Int 5)))
              (((path ()) (base z)) (Constant (Int 1)))))
            (Constructor ((path ()) (base true)) ()))
-          (Any (Constructor ((path ()) (base false)) ())))))))))))
+          (Any (Constructor ((path ()) (base false)) ())))
+         ()))))))))
  (TypeDefinition
   (Record poly (first second)
    ((first (Variable first)) (second (Variable second))))))

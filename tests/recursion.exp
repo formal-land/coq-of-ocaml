@@ -15,7 +15,8 @@
             ((Variable (PathName ((path ()) (base x))))))
            (Apply (Variable (PathName ((path ()) (base map))))
             ((Variable (PathName ((path ()) (base f))))
-             (Variable (PathName ((path ()) (base xs))))))))))))))))
+             (Variable (PathName ((path ()) (base xs))))))))))
+       ()))))))
  (Value
   ((is_rec (New true))
    (cases
@@ -34,7 +35,8 @@
            (Apply (Variable (PathName ((path ()) (base f))))
             ((Variable (PathName ((path ()) (base a))))
              (Variable (PathName ((path ()) (base x))))))
-           (Variable (PathName ((path ()) (base xs))))))))))))))
+           (Variable (PathName ((path ()) (base xs))))))))
+       ()))))))
  (Value
   ((is_rec (New false))
    (cases

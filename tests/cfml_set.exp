@@ -44,7 +44,8 @@
            (Apply (Variable (PathName ((path ()) (base member))))
             ((Variable (PathName ((path ()) (base x))))
              (Variable (PathName ((path ()) (base s2))))))
-           (Constructor ((path ()) (base true)) ())))))))))))
+           (Constructor ((path ()) (base true)) ())))))
+       ()))))))
  (Value
   ((is_rec (New true))
    (cases
@@ -81,4 +82,5 @@
              (Apply (Variable (PathName ((path ()) (base insert))))
               ((Variable (PathName ((path ()) (base x))))
                (Variable (PathName ((path ()) (base s2))))))))
-           (Variable (PathName ((path ()) (base s)))))))))))))))
+           (Variable (PathName ((path ()) (base s))))))))
+       ())))))))
