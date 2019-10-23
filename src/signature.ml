@@ -95,17 +95,22 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
     Tree.flatten signature.typ_params |> List.map (fun (path_name, _) ->
       ModuleTypParams.get_typ_param_name path_name
     ) in
-  nest (
-    !^ "Record" ^^ Name.to_coq name ^^
-    (match typ_params with
-    | [] -> empty
-    | _ -> braces (separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")
+  !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+  indent (
+    nest (
+      !^ "Record" ^^ !^ "signature" ^^
+      (match typ_params with
+      | [] -> empty
+      | _ -> braces (separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")
+      ) ^^
+      !^ ":=" ^^ !^ "{" ^^ newline ^^
+      indent (separate newline (List.map (fun item -> to_coq_item item ^-^ !^ ";") signature.items)) ^^ newline ^^
+      !^ "}" ^-^ !^ "."
     ) ^^
-    !^ ":=" ^^ !^ "{" ^^ newline ^^
-    indent (separate newline (List.map (fun item -> to_coq_item item ^-^ !^ ";") signature.items)) ^^ newline ^^
-    !^ "}" ^-^ !^ ".") ^^
     (match typ_params with
     | [] -> empty
     | _ ->
-      newline ^^ !^ "Arguments" ^^ Name.to_coq name ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
+      newline ^^ !^ "Arguments" ^^ !^ "signature" ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
     )
+  ) ^^ newline ^^
+  !^ "End" ^^ Name.to_coq name ^-^ !^ "."

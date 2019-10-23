@@ -72,7 +72,7 @@ let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
   match module_typ with
   | Error message -> !^ message
   | With (path_name, typ_values) ->
-    PathName.to_coq path_name ^^
+    nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^
     separate space (Tree.flatten typ_values |> List.map (fun (path_name, defined_or_free) ->
       match defined_or_free with
       | Defined typ -> Type.to_coq None true typ

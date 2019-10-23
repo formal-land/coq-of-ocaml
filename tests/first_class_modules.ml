@@ -76,3 +76,21 @@ module type UsingTriple = sig
   module OPS'' : S.SET with type elt = elt' and type t = string list
   type 'a table = 'a list
 end
+
+let set_update
+  : type a. a -> bool -> a set -> a set
+  = fun v b (module Box) ->
+  (module struct
+    type elt = a
+    let elt_ty = Box.elt_ty
+    module OPS = Box.OPS
+    let boxed =
+      if b
+      then Box.OPS.add v Box.boxed
+      else Box.OPS.remove v Box.boxed
+    let size =
+      let mem = Box.OPS.mem v Box.boxed in
+    if mem
+    then if b then Box.size else Box.size - 1
+    else if b then Box.size + 1 else Box.size
+  end)

@@ -39,7 +39,9 @@ type t =
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of Type.t list * (PathName.t * t) list (** The value of a first-class module. *)
+  | Module of (PathName.t * t) list (** The value of a first-class module. *)
+  | ModuleNested of (PathName.t * t) list (** The value of a first-class module inside another module (no existentials). *)
+  | ModuleUnpack of t (** Open a first-class module *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorSeq of t * t (** A sequence of two expressions (an error in Coq). *)
   [@@deriving sexp]
@@ -191,7 +193,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_setinstvar _ ->
     raise (Error "set_instance_variable") SideEffect "Setting an instance variable is not handled"
   | Texp_override _ -> raise (Error "override") NotSupported "Overriding is not handled"
-  | Texp_letmodule _ -> raise (Error "let_module") NotSupported "Let of modules is not handled"
+  | Texp_letmodule (x, _, module_expr, e) ->
+    let x = Name.of_ident x in
+    of_module_expr typ_vars module_expr None >>= fun value ->
+    of_expression typ_vars e >>= fun e ->
+    return (LetVar (x, value, e))
   | Texp_letexception _ -> raise (Error "let_exception") SideEffect "Let of exception is not handled"
   | Texp_assert e ->
     of_expression typ_vars e >>= fun e ->
@@ -200,7 +206,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     of_expression typ_vars e >>= fun e ->
     raise e SideEffect "Lazy expressions are not handled"
   | Texp_object _ -> raise (Error "object") NotSupported "Creation of objects is not handled"
-  | Texp_pack _ -> raise (Error "module") NotSupported "Packing of modules is not handled"
+  | Texp_pack module_expr -> of_module_expr typ_vars module_expr None
   | Texp_unreachable ->
     raise (Error "unreachable") NotSupported "Unreachable expressions are not supported"
   | Texp_extension_constructor _ ->
@@ -256,8 +262,60 @@ and import_let_fun
     cases = cases;
   }
 
-let of_structure (signature_path : Path.t) (structure : structure) : t Monad.t =
+and of_module_expr
+  (typ_vars : Name.t Name.Map.t)
+  (module_expr : module_expr)
+  (module_type : Types.module_type option)
+  : t Monad.t =
+  let { mod_desc; mod_env; mod_loc; mod_type } = module_expr in
+  set_env mod_env (
+  set_loc (Loc.of_location mod_loc) (
+  match mod_desc with
+  | Tmod_ident (path, _) ->
+    MixedPath.of_path path >>= fun path ->
+    return (Variable path)
+  | Tmod_structure structure ->
+    let module_type =
+      match module_type with
+      | Some module_type -> module_type
+      | None -> mod_type in
+    IsFirstClassModule.is_module_typ_first_class module_type >>= fun is_first_class ->
+    begin match is_first_class with
+    | Some signature_path -> of_structure typ_vars signature_path structure
+    | None ->
+      raise
+        (Error "module_of_unknown_signature_name")
+        Unexpected
+        "The signature name of this module could not be found"
+    end
+  | Tmod_functor _ ->
+    raise
+      (Error "unsupported_functor")
+      NotSupported
+      "Functors are not supported for first-class module values"
+  | Tmod_apply _ ->
+    raise
+      (Error "unsupported_functor_application")
+      NotSupported
+      "Applications of functors are not supported for first-class module values"
+  | Tmod_constraint (module_expr, mod_type, _, _) ->
+    let module_type =
+      match module_type with
+      | Some _ -> module_type
+      | None -> Some mod_type in
+    of_module_expr typ_vars module_expr module_type
+  | Tmod_unpack (e, _) ->
+    of_expression typ_vars e >>= fun e ->
+    return (ModuleUnpack e)
+  ))
+
+and of_structure
+  (typ_vars : Name.t Name.Map.t)
+  (signature_path : Path.t)
+  (structure : structure)
+  : t Monad.t =
   (structure.str_items |> Monad.List.filter_map (fun item ->
+    set_env item.str_env (
     set_loc (Loc.of_location item.str_loc) (
     match item.str_desc with
     | Tstr_eval _ -> raise None SideEffect "Top-level evaluation is not handled"
@@ -269,8 +327,7 @@ let of_structure (signature_path : Path.t) (structure : structure) : t Monad.t =
       | { cases = [(header, value)] } ->
         begin match header with
         | { name; typ_vars = []; args = [] } ->
-          let path_name = PathName.of_path_and_name signature_path name in
-          return (Some (path_name, value))
+          return (Some (name, value))
         | _ ->
           raise
             None
@@ -283,7 +340,10 @@ let of_structure (signature_path : Path.t) (structure : structure) : t Monad.t =
     | Tstr_type _ -> return None
     | Tstr_typext _ -> raise None NotSupported "Type extension not handled"
     | Tstr_exception _ -> raise None SideEffect "Exception not handled"
-    | Tstr_module _ -> raise None NotSupported "Modules in first-class module values not handled (yet)"
+    | Tstr_module { mb_id; mb_expr } ->
+      let name = Name.of_ident mb_id in
+      of_module_expr typ_vars mb_expr None >>= fun value ->
+      return (Some (name, value))
     | Tstr_recmodule _ -> raise None NotSupported "Recursive modules not handled"
     | Tstr_modtype _ ->
       raise None NotSupported "Definition of signatures inside first-class module value is not handled"
@@ -292,8 +352,9 @@ let of_structure (signature_path : Path.t) (structure : structure) : t Monad.t =
     | Tstr_class_type _ -> raise None NotSupported "Object oriented programming not handled"
     | Tstr_include _ -> raise None NotSupported "Include is not handled inside first-class module values"
     | Tstr_attribute _ -> return None)
-  )) >>= fun fields ->
-  return (Module ([], fields))
+  ))) >>= fun fields ->
+  let fields = fields |> List.map (fun (name, field) -> (PathName.of_path_and_name signature_path name, field)) in
+  return (Module fields)
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
@@ -363,27 +424,26 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Module (existential_typs, fields) ->
+  | Module fields ->
     Pp.parens paren @@ nest (
-      !^ "existT" ^^ !^ "_" ^^
-      (match existential_typs with
-      | [] -> !^ "unit"
-      | [existential_typ] -> Type.to_coq None true existential_typ
-      | _ ->
-        parens @@ nest @@ separate (!^ "," ^^ space) (
-          existential_typs |> List.map (fun existential_typ ->
-            Type.to_coq None false existential_typ ^^ !^ ":" ^^ !^ "Type"
-          )
-        )
-      ) ^^
+      !^ "existT" ^^ !^ "_" ^^ !^ "_" ^^
       nest (
-        !^ "{|" ^^
-        separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
+        !^ "{|" ^^ newline ^^
+        indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, e) ->
           nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))
-        ) ^^
+        ) ^^ newline ^^
         !^ "|}"
       )
     )
+  | ModuleNested fields ->
+    Pp.parens paren @@ nest (
+      !^ "{|" ^^ newline ^^
+      indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, e) ->
+        nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))
+      ) ^^ newline ^^
+      !^ "|}"
+    )
+  | ModuleUnpack e -> Pp.parens paren @@ nest (!^ "projT2" ^^ to_coq true e)
   | Error message -> !^ message
   | ErrorSeq (e1, e2) ->
     Pp.parens paren @@ nest (to_coq false e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)

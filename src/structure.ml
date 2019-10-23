@@ -89,7 +89,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         of_structure structure >>= fun structures ->
         return (Some (Module (name, structures)))
       | Some signature_path ->
-        Exp.of_structure signature_path structure >>= fun module_value ->
+        Exp.of_structure Name.Map.empty signature_path structure >>= fun module_value ->
         return (Some (Value {
           is_rec = Recursivity.New false;
           cases = [

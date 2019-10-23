@@ -232,7 +232,8 @@
        ((Item elt (Defined (Apply (PathName ((path ()) (base elt))) ())))
         (Item t Free))))
      (Value boxed ()
-      (Apply (Access (PathName ((path ()) (base OPS))) ((path (S)) (base t)))
+      (Apply
+       (Access (PathName ((path ()) (base OPS))) ((path (S SET)) (base t)))
        ()))
      (Value size () (Apply (PathName ((path ()) (base Z))) ()))))
    (typ_params ((Item elt ()) (Module OPS ((Item t ())))))))
@@ -262,4 +263,75 @@
       (Apply (PathName ((path ()) (base list))) ((Variable a))))))
    (typ_params
     ((Item elt' ()) (Module T ((Item a ()) (Item b ()) (Item c ())))
-     (Module OPS' ((Item elt ()) (Item t ()))) (Module OPS'' ()))))))
+     (Module OPS' ((Item elt ()) (Item t ()))) (Module OPS'' ())))))
+ (Value
+  ((is_rec (New false))
+   (cases
+    ((((name set_update) (typ_vars (a))
+       (args
+        ((v (Variable a)) (b (Apply (PathName ((path ()) (base bool))) ()))
+         (Box (Apply (PathName ((path ()) (base set))) ((Variable a))))))
+       (typ ((Apply (PathName ((path ()) (base set))) ((Variable a))))))
+      (LetVar Box (ModuleUnpack (Variable (PathName ((path ()) (base Box)))))
+       (Module
+        ((((path (Boxed_set)) (base elt_ty))
+          (Variable
+           (Access (PathName ((path ()) (base Box)))
+            ((path (Boxed_set)) (base elt_ty)))))
+         (((path (Boxed_set)) (base OPS))
+          (Variable
+           (Access (PathName ((path ()) (base Box)))
+            ((path (Boxed_set)) (base OPS)))))
+         (((path (Boxed_set)) (base boxed))
+          (IfThenElse (Variable (PathName ((path ()) (base b))))
+           (Apply
+            (Variable
+             (Access
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base OPS)))
+              ((path (S SET)) (base add))))
+            ((Variable (PathName ((path ()) (base v))))
+             (Variable
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base boxed))))))
+           (Apply
+            (Variable
+             (Access
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base OPS)))
+              ((path (S SET)) (base remove))))
+            ((Variable (PathName ((path ()) (base v))))
+             (Variable
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base boxed))))))))
+         (((path (Boxed_set)) (base size))
+          (LetVar mem
+           (Apply
+            (Variable
+             (Access
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base OPS)))
+              ((path (S SET)) (base mem))))
+            ((Variable (PathName ((path ()) (base v))))
+             (Variable
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base boxed))))))
+           (IfThenElse (Variable (PathName ((path ()) (base mem))))
+            (IfThenElse (Variable (PathName ((path ()) (base b))))
+             (Variable
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base size))))
+             (Apply (Variable (PathName ((path (Z)) (base sub))))
+              ((Variable
+                (Access (PathName ((path ()) (base Box)))
+                 ((path (Boxed_set)) (base size))))
+               (Constant (Int 1)))))
+            (IfThenElse (Variable (PathName ((path ()) (base b))))
+             (Apply (Variable (PathName ((path (Z)) (base add))))
+              ((Variable
+                (Access (PathName ((path ()) (base Box)))
+                 ((path (Boxed_set)) (base size))))
+               (Constant (Int 1))))
+             (Variable
+              (Access (PathName ((path ()) (base Box)))
+               ((path (Boxed_set)) (base size)))))))))))))))))

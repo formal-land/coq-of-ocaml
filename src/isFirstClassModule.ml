@@ -3,7 +3,7 @@
 open Monad.Notations
 
 (** Recursively get all the module type declarations inside a module declaration.
-    We retreive the path prefix and definition of each. *)
+    We retreive the path and definition of each. *)
 let rec get_modtype_declarations_of_module_declaration
   (module_declaration : Types.module_declaration)
   : (Ident.t list * Types.modtype_declaration) list =
@@ -15,7 +15,7 @@ let rec get_modtype_declarations_of_module_declaration
         signatures |> List.map (fun (signature_path_prefix, signature) ->
           (module_ident :: signature_path_prefix, signature)
         )
-      | Sig_modtype (_, module_type) -> [([], module_type)]
+      | Sig_modtype (module_type_ident, module_type) -> [([module_type_ident], module_type)]
       | _ -> []
     ))
   | _ -> []
@@ -65,7 +65,7 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t
       None env [] in
   similar_signature_paths @ similar_signature_paths_in_modules
 
-(** Get the path of the namespace of the signature definition of the [module_typ]
+(** Get the path of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. *)
 let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t option Monad.t =
   get_env >>= fun env ->
