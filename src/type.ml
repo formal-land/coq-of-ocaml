@@ -198,7 +198,7 @@ let rec to_coq (subst : (Name.t -> Name.t) option) (paren : bool) (typ : t) : Sm
       | _ -> !^ "'" ^-^ OCaml.tuple existential_typs ^^ !^ ":" ^^ !^ "_"
       ) ^^ !^ "&" ^^
       nest (
-        PathName.to_coq path_name ^^
+        nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^
         separate space (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
           match typ with
           | None -> Name.to_coq (ModuleTypParams.get_typ_param_name path_name)

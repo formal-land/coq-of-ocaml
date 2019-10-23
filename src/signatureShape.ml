@@ -39,3 +39,10 @@ let rec are_equal (shape1 : t) (shape2 : t) : bool =
     )
     shape1
     shape2
+
+let rec pretty_print (shape : t) : SmartPrint.t =
+  shape |> OCaml.list (fun item ->
+    match item with
+    | Tree.Item (name, _) -> Name.to_coq name
+    | Tree.Module (name, shape) -> OCaml.tuple [Name.to_coq name; pretty_print shape]
+  )
