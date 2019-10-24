@@ -40,6 +40,13 @@ let rec flatten_aux (prefix : Name.t list) (tree : 'a t) : (PathName.t * 'a) lis
 let flatten (tree : 'a t) : (PathName.t * 'a) list =
   flatten_aux [] tree
 
+let rec size (tree : 'a t) : int =
+  tree |> List.fold_left (fun s item ->
+    match item with
+    | Item _ -> s + 1
+    | Module (_, tree) -> s + size tree
+  ) 0
+
 let rec pp (pp_a : 'a -> SmartPrint.t option) (tree : 'a t) : SmartPrint.t =
   let rec pp_item (item : 'a item) : SmartPrint.t =
     match item with

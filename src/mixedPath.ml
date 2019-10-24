@@ -27,8 +27,9 @@ let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t 
       let { Types.md_type } = module_declaration in
       IsFirstClassModule.is_module_typ_first_class md_type >>= fun is_first_class ->
       begin match is_first_class with
-      | None -> return (path, [])
-      | Some signature_path -> return (namespace_path, (signature_path, field_string) :: fields)
+      | IsFirstClassModule.Found signature_path ->
+        return (namespace_path, (signature_path, field_string) :: fields)
+      | IsFirstClassModule.Not_found _ -> return (path, [])
       end
     | exception _ -> raise (path, []) NotFound ("Module '" ^ Path.name path ^ "' not found")
     end

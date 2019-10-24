@@ -67,7 +67,20 @@ module type Triple = sig
   type a
   type b
   type c
+  val va : a
+  val vb : b
+  val vc : c
 end
+
+let tripe : (module Triple) =
+  (module struct
+    type a = int
+    type b = bool
+    type c = string
+    let va = 0
+    let vb = false
+    let vc = ""
+  end)
 
 module type UsingTriple = sig
   type elt'
@@ -94,3 +107,13 @@ let set_update
     then if b then Box.size else Box.size - 1
     else if b then Box.size + 1 else Box.size
   end)
+
+let set_mem
+  : type elt. elt -> elt set -> bool
+  = fun v (module Box) ->
+    Box.OPS.mem v Box.boxed
+
+let set_fold
+  : type elt acc. (elt -> acc -> acc) -> elt set -> acc -> acc
+  = fun f (module Box) ->
+    Box.OPS.fold f Box.boxed

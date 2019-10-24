@@ -37,8 +37,9 @@ let rec apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
     to [signature]. If the signature is the one of a module used as a namespace there
     should be none. If the signature is the one a first-class module there should be
     exactly one. There may be more than one result if two signatures have the same
-    or similar definitions. In this case we fail with an explicit error message. *)
-let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t list =
+    or similar definitions. In this case we will fail later with an explicit
+    error message. *)
+let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t list * unit Tree.t =
   let shape = SignatureShape.of_signature signature in
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
@@ -63,29 +64,50 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t
         signature_paths
       )
       None env [] in
-  similar_signature_paths @ similar_signature_paths_in_modules
+  (similar_signature_paths @ similar_signature_paths_in_modules, shape)
+
+type maybe_found =
+  | Found of Path.t
+  | Not_found of string option
 
 (** Get the path of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. *)
-let rec is_module_typ_first_class (module_typ : Types.module_type) : Path.t option Monad.t =
+let rec is_module_typ_first_class (module_typ : Types.module_type) : maybe_found Monad.t =
   get_env >>= fun env ->
   match module_typ with
-  | Mty_alias (Mta_absent, _) -> return None
+  | Mty_alias (Mta_absent, _) -> return (Not_found None)
   | Mty_ident path | Mty_alias (Mta_present, path) ->
     begin match Env.find_modtype path env with
-    | { mtd_type = None } -> return None
+    | { mtd_type = None } -> return (Not_found None)
     | { mtd_type = Some module_typ } -> is_module_typ_first_class module_typ
-    | exception _ -> raise None NotFound ("Module signature '" ^ Path.name path ^ "' not found")
+    | exception _ ->
+      raise (Not_found None) NotFound ("Module signature '" ^ Path.name path ^ "' not found")
     end
   | Mty_signature signature ->
-    let signature_paths = find_similar_signatures env signature in
+    let (signature_paths, shape) = find_similar_signatures env signature in
     begin match signature_paths with
-    | [] -> return None
-    | [signature_path] -> return (Some signature_path)
+    | [] ->
+      return (
+        Not_found (
+          Some (
+            "Did not find a module signature name for the following shape:\n" ^
+            Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
+            "(a shape is a list of names of types and values)\n\n" ^
+            "We use the concept of shape to find a name of a signature for Coq."
+          )
+        )
+      )
+    | [signature_path] -> return (Found signature_path)
     | signature_path :: (_ :: _) ->
-      raise (Some signature_path) FirstClassModule (
-        "It is unclear which first-class module this projection is from. " ^
-        "At least two similar module signatures found."
+      raise (Found signature_path) FirstClassModule (
+        "It is unclear which first-class module this projection is from. At least two similar\n" ^
+        "module signatures found, namely:\n" ^
+        String.concat ", " (signature_paths |> List.map Path.name) ^ "\n\n" ^
+        "We were looking for a module signature name for the following shape:\n" ^
+        Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
+        "(a shape is a list of names of types and values)\n\n" ^
+        "We use the concept of shape to find a name of a signature for Coq."
       )
     end
-  | Mty_functor _ -> raise None NotSupported "Functor module types are not handled (yet)"
+  | Mty_functor _ ->
+    raise (Not_found None) NotSupported "Functor module types are not handled (yet)"

@@ -242,8 +242,24 @@
    (Package ((path ()) (base Boxed_set))
     ((Item elt ((Variable elt))) (Module OPS ((Item t ())))))))
  (Signature Triple
-  ((items ((TypExistential a) (TypExistential b) (TypExistential c)))
+  ((items
+    ((TypExistential a) (TypExistential b) (TypExistential c)
+     (Value va () (Apply (PathName ((path ()) (base a))) ()))
+     (Value vb () (Apply (PathName ((path ()) (base b))) ()))
+     (Value vc () (Apply (PathName ((path ()) (base c))) ()))))
    (typ_params ((Item a ()) (Item b ()) (Item c ())))))
+ (Value
+  ((is_rec (New false))
+   (cases
+    ((((name tripe) (typ_vars ()) (args ())
+       (typ
+        ((Package ((path ()) (base Triple))
+          ((Item a ()) (Item b ()) (Item c ()))))))
+      (Module 3
+       ((((path (Triple)) (base va)) (Constant (Int 0)))
+        (((path (Triple)) (base vb))
+         (Constructor ((path ()) (base false)) ()))
+        (((path (Triple)) (base vc)) (Constant (String ""))))))))))
  (Signature UsingTriple
   ((items
     ((TypExistential elt')
@@ -273,7 +289,7 @@
          (Box (Apply (PathName ((path ()) (base set))) ((Variable a))))))
        (typ ((Apply (PathName ((path ()) (base set))) ((Variable a))))))
       (LetVar Box (ModuleUnpack (Variable (PathName ((path ()) (base Box)))))
-       (Module
+       (Module 1
         ((((path (Boxed_set)) (base elt_ty))
           (Variable
            (Access (PathName ((path ()) (base Box)))
@@ -334,4 +350,42 @@
                (Constant (Int 1))))
              (Variable
               (Access (PathName ((path ()) (base Box)))
-               ((path (Boxed_set)) (base size)))))))))))))))))
+               ((path (Boxed_set)) (base size))))))))))))))))
+ (Value
+  ((is_rec (New false))
+   (cases
+    ((((name set_mem) (typ_vars (elt))
+       (args
+        ((v (Variable elt))
+         (Box (Apply (PathName ((path ()) (base set))) ((Variable elt))))))
+       (typ ((Apply (PathName ((path ()) (base bool))) ()))))
+      (LetVar Box (ModuleUnpack (Variable (PathName ((path ()) (base Box)))))
+       (Apply
+        (Variable
+         (Access
+          (Access (PathName ((path ()) (base Box)))
+           ((path (Boxed_set)) (base OPS)))
+          ((path (S SET)) (base mem))))
+        ((Variable (PathName ((path ()) (base v))))
+         (Variable
+          (Access (PathName ((path ()) (base Box)))
+           ((path (Boxed_set)) (base boxed))))))))))))
+ (Value
+  ((is_rec (New false))
+   (cases
+    ((((name set_fold) (typ_vars (acc elt))
+       (args
+        ((f (Arrow (Variable elt) (Arrow (Variable acc) (Variable acc))))
+         (Box (Apply (PathName ((path ()) (base set))) ((Variable elt))))))
+       (typ ((Arrow (Variable acc) (Variable acc)))))
+      (LetVar Box (ModuleUnpack (Variable (PathName ((path ()) (base Box)))))
+       (Apply
+        (Variable
+         (Access
+          (Access (PathName ((path ()) (base Box)))
+           ((path (Boxed_set)) (base OPS)))
+          ((path (S SET)) (base fold))))
+        ((Variable (PathName ((path ()) (base f))))
+         (Variable
+          (Access (PathName ((path ()) (base Box)))
+           ((path (Boxed_set)) (base boxed)))))))))))))

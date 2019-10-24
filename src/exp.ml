@@ -39,7 +39,7 @@ type t =
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of (PathName.t * t) list (** The value of a first-class module. *)
+  | Module of int * (PathName.t * t) list (** The value of a first-class module. *)
   | ModuleNested of (PathName.t * t) list (** The value of a first-class module inside another module (no existentials). *)
   | ModuleUnpack of t (** Open a first-class module *)
   | Error of string (** An error message for unhandled expressions. *)
@@ -281,12 +281,22 @@ and of_module_expr
       | None -> mod_type in
     IsFirstClassModule.is_module_typ_first_class module_type >>= fun is_first_class ->
     begin match is_first_class with
-    | Some signature_path -> of_structure typ_vars signature_path structure
-    | None ->
+    | IsFirstClassModule.Found signature_path ->
+      ModuleTypParams.get_module_typ_nb_of_existential_variables module_type >>= fun nb_of_existential_variables ->
+      of_structure typ_vars signature_path nb_of_existential_variables structure
+    | IsFirstClassModule.Not_found reason ->
+      let signature_path = Path.Pident (Ident.create "unknown_signature_name") in
+      let nb_of_existential_variables = 1 in
+      of_structure typ_vars signature_path nb_of_existential_variables structure >>= fun value ->
       raise
-        (Error "module_of_unknown_signature_name")
-        Unexpected
-        "The signature name of this module could not be found"
+        value
+        FirstClassModule
+        (
+          "The signature name of this module could not be found" ^
+          match reason with
+          | None -> ""
+          | Some reason -> "\n\n" ^ "Reason:\n" ^ reason
+        )
     end
   | Tmod_functor _ ->
     raise
@@ -312,6 +322,7 @@ and of_module_expr
 and of_structure
   (typ_vars : Name.t Name.Map.t)
   (signature_path : Path.t)
+  (nb_of_existential_variables : int)
   (structure : structure)
   : t Monad.t =
   (structure.str_items |> Monad.List.filter_map (fun item ->
@@ -354,7 +365,13 @@ and of_structure
     | Tstr_attribute _ -> return None)
   ))) >>= fun fields ->
   let fields = fields |> List.map (fun (name, field) -> (PathName.of_path_and_name signature_path name, field)) in
-  return (Module fields)
+  return (Module (nb_of_existential_variables, fields))
+
+let rec to_coq_n_uplet_of_underscores (n : int) : SmartPrint.t =
+  match n with
+  | 0 -> !^ "unit"
+  | 1 -> !^ "_"
+  | _ -> OCaml.tuple [to_coq_n_uplet_of_underscores (n - 1); !^ "_"]
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
@@ -424,9 +441,9 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Module fields ->
+  | Module (nb_of_existential_variables, fields) ->
     Pp.parens paren @@ nest (
-      !^ "existT" ^^ !^ "_" ^^ !^ "_" ^^
+      !^ "existT" ^^ !^ "_" ^^ to_coq_n_uplet_of_underscores nb_of_existential_variables ^^
       nest (
         !^ "{|" ^^ newline ^^
         indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, e) ->
