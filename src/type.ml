@@ -57,7 +57,7 @@ let rec of_typ_expr
       return (typs, typ_vars, Name.Set.union new_typ_vars new_typ_vars_params)
     ) >>= fun (typs, typ_vars, new_typ_vars) ->
     raise (Tuple (typ :: typs), typ_vars, new_typ_vars) NotSupported "Object types are not handled"
-  | Tfield (name, _, typ1, typ2) ->
+  | Tfield (_, _, typ1, typ2) ->
     of_typ_expr with_free_vars typ_vars typ1 >>= fun (typ1, typ_vars, new_typ_vars1) ->
     of_typ_expr with_free_vars typ_vars typ2 >>= fun (typ2, typ_vars, new_typ_vars2) ->
     raise
@@ -79,7 +79,7 @@ let rec of_typ_expr
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars_typs) ->
     raise
-      (Tuple [typ; Tuple typs], typ_vars, Name.Set.empty)
+      (Tuple [typ; Tuple typs], typ_vars, Name.Set.union new_typ_vars_typ new_typ_vars_typs)
       NotSupported
       "Forall quantifier is not handled (yet)"
   | Tpackage (path, idents, typs) ->
@@ -106,7 +106,7 @@ let rec of_typ_expr
         )
         (signature_typ_params |> Tree.map (fun _ -> None))
         typ_substitutions in
-      return (Package (path_name, typ_params), typ_vars, Name.Set.empty)
+      return (Package (path_name, typ_params), typ_vars, new_typ_vars)
 
 and of_typs_exprs
   (with_free_vars: bool)

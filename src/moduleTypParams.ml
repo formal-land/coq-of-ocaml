@@ -6,7 +6,7 @@ let rec get_signature_typ_params (signature : Types.signature) : unit Tree.t Mon
     : unit Tree.item option Monad.t =
     match signature_item with
     | Sig_value _ -> return None
-    | Sig_type (ident, { type_manifest }, _) ->
+    | Sig_type (ident, { type_manifest; _ }, _) ->
       begin match type_manifest with
       | None ->
         let name = Name.of_ident ident in

@@ -48,7 +48,7 @@ let rec size (tree : 'a t) : int =
   ) 0
 
 let rec pp (pp_a : 'a -> SmartPrint.t option) (tree : 'a t) : SmartPrint.t =
-  let rec pp_item (item : 'a item) : SmartPrint.t =
+  let pp_item (item : 'a item) : SmartPrint.t =
     match item with
     | Item (name, value) ->
       Name.to_coq name ^-^

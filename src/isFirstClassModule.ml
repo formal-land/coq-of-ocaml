@@ -30,7 +30,7 @@ let is_modtype_declaration_similar_to_shape
     SignatureShape.are_equal shape shape'
   | _ -> false
 
-let rec apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
+let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
   List.fold_left (fun path ident -> Path.Pdot (path, Ident.name ident, 0)) path (List.rev idents)
 
 (** Find the [Path.t] of all the signature definitions which are found to be similar
@@ -78,8 +78,8 @@ let rec is_module_typ_first_class (module_typ : Types.module_type) : maybe_found
   | Mty_alias (Mta_absent, _) -> return (Not_found None)
   | Mty_ident path | Mty_alias (Mta_present, path) ->
     begin match Env.find_modtype path env with
-    | { mtd_type = None } -> return (Not_found None)
-    | { mtd_type = Some module_typ } -> is_module_typ_first_class module_typ
+    | { mtd_type = None; _ } -> return (Not_found None)
+    | { mtd_type = Some module_typ; _ } -> is_module_typ_first_class module_typ
     | exception _ ->
       raise (Not_found None) NotFound ("Module signature '" ^ Path.name path ^ "' not found")
     end

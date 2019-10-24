@@ -7,7 +7,7 @@ open SmartPrint
 type t = unit Tree.t
 
 let rec of_signature (signature : Types.signature) : t =
-  let rec of_signature_item (signature_item : Types.signature_item) =
+  let of_signature_item (signature_item : Types.signature_item) =
     match signature_item with
     | Sig_value (ident, _) | Sig_type (ident, _, _) ->
       Some (Tree.Item (Name.of_ident ident, ()))

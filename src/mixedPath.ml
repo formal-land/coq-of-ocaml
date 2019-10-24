@@ -1,6 +1,4 @@
 (** A [PathName.t], eventually followed by accesses inside first-class modules. *)
-open Typedtree
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
@@ -17,14 +15,14 @@ let of_name (name : Name.t) : t =
 let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t =
   match path with
   | Papply _ -> failwith "Unexpected path application"
-  | Pdot (path', field_string, pos) ->
+  | Pdot (path', field_string, _) ->
     of_path_aux path' >>= fun (namespace_path, fields) ->
     (* Get the module declaration of the current [path'] to check if it refers
         to a first-class module. *)
     get_env >>= fun env ->
     begin match Env.find_module path' env with
     | module_declaration ->
-      let { Types.md_type } = module_declaration in
+      let { Types.md_type; _ } = module_declaration in
       IsFirstClassModule.is_module_typ_first_class md_type >>= fun is_first_class ->
       begin match is_first_class with
       | IsFirstClassModule.Found signature_path ->

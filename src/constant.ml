@@ -32,7 +32,7 @@ let of_constant (c : constant) : t Monad.t =
     return (Int (Nativeint.to_int n))
 
 (** Pretty-print a constant to Coq. *)
-let rec to_coq (c : t) : SmartPrint.t =
+let to_coq (c : t) : SmartPrint.t =
   match c with
   | Int n ->
     if n >= 0 then
