@@ -18,8 +18,6 @@ a.out
 .coqdeps.d
 Makefile.conf
 _build/
-smartPrint/*.v
-smartPrint/*.monadise
 \#*\#
 OCaml/Makefile
 tests/extraction
