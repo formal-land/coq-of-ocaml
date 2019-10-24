@@ -83,28 +83,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
         }
       } ->
       let name = Name.of_ident name in
-      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
-      begin match is_first_class with
-      | None ->
-        of_structure structure >>= fun structures ->
-        return (Some (Module (name, structures)))
-      | Some signature_path ->
-        Exp.of_structure Name.Map.empty signature_path structure >>= fun module_value ->
-        return (Some (Value {
-          is_rec = Recursivity.New false;
-          cases = [
-            (
-              {
-                name;
-                typ_vars = [];
-                args = [];
-                typ = None
-              },
-              module_value
-            )
-          ]
-        }))
-      end
+      of_structure structure >>= fun structures ->
+      return (Some (Module (name, structures)))
     | Tstr_modtype { mtd_type = None } ->
       raise None NotSupported "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->

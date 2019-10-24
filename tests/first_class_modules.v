@@ -89,9 +89,20 @@ Module Triple.
     a := a;
     b := b;
     c := c;
+    va : a;
+    vb : b;
+    vc : c;
   }.
   Arguments signature : clear implicits.
 End Triple.
+
+Definition tripe : {'(a, b, c) : _ & Triple.signature a b c} :=
+  existT _ ((_, _), _)
+    {|
+      Triple.va := 0;
+      Triple.vb := false;
+      Triple.vc := "" % string
+      |}.
 
 Module UsingTriple.
   Record signature {elt' T_a T_b T_c OPS'_elt OPS'_t : Type} := {
@@ -128,3 +139,12 @@ Definition set_update {a : Type} (v : a) (b : bool) (Box : set a) : set a :=
           else
             Box.(Boxed_set.size)
       |}.
+
+Definition set_mem {elt : Type} (v : elt) (Box : set elt) : bool :=
+  let Box := projT2 Box in
+  Box.(Boxed_set.OPS).(S.SET.mem) v Box.(Boxed_set.boxed).
+
+Definition set_fold {acc elt : Type} (f : elt -> acc -> acc) (Box : set elt)
+  : acc -> acc :=
+  let Box := projT2 Box in
+  Box.(Boxed_set.OPS).(S.SET.fold) f Box.(Boxed_set.boxed).
