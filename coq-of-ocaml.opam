@@ -15,11 +15,12 @@ build: [
 ]
 install: [
   [make "-C" "OCaml" "install"]
-  ["install" "-T" "coqOfOCaml.native" "%{bin}%/coq-of-ocaml"]
+  ["install" "-T" "_build/default/src/coqOfOCaml.exe" "%{bin}%/coq-of-ocaml"]
 ]
 depends: [
   "conf-ruby" {with-test}
   "coq" {>= "8.9"}
+  "dune" {build}
   "ocaml" {>= "4.07.0" & < "4.08.0"}
   "ppx_deriving"
   "ppx_sexp_conv"

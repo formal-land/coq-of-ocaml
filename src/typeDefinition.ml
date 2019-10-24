@@ -20,7 +20,7 @@ module Constructors = struct
     (defined_typ_params : Name.t list)
     (cases : Types.constructor_declaration list)
     : t Monad.t =
-    cases |> Monad.List.map (fun { Types.cd_args; cd_id; cd_loc; cd_res } ->
+    cases |> Monad.List.map (fun { Types.cd_args; cd_id; cd_loc; cd_res; _ } ->
       set_loc (Loc.of_location cd_loc) (
       let constructor_name = Name.of_ident cd_id in
       let typ_vars = Name.Map.empty in
@@ -30,7 +30,7 @@ module Constructors = struct
         set_loc (Loc.of_location cd_loc) (
         (
           labeled_typs |>
-          List.map (fun { Types.ld_type } -> ld_type) |>
+          List.map (fun { Types.ld_type; _ } -> ld_type) |>
           Type.of_typs_exprs true typ_vars
         ) >>= fun result ->
         raise result NotSupported "Unhandled named constructor parameters.")
@@ -164,7 +164,7 @@ module Inductive = struct
     )
 
   let to_coq_notations_definitions (inductive : t) : SmartPrint.t list =
-    inductive.notations |> List.map (fun (name, typ_args, value) ->
+    inductive.notations |> List.map (fun (name, _, _) ->
       nest (
         !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "'" ^-^ Name.to_coq name ^-^ !^ "."
       )
@@ -177,7 +177,7 @@ module Inductive = struct
     match left_typ_args with
     | [] -> []
     | _ :: _ ->
-      constructors |> List.map (fun { Constructors.constructor_name } ->
+      constructors |> List.map (fun { Constructors.constructor_name; _ } ->
         !^ "Arguments" ^^ Name.to_coq constructor_name ^^ braces (
           nest (
             separate space (left_typ_args |> List.map (fun _ -> !^ "_"))
@@ -229,15 +229,15 @@ type t =
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params } } ] ->
+  | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
     let name = Name.of_ident typ_id in
     (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
-    (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ } ->
+    (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (Name.of_ident x, typ)
     )) >>= fun fields ->
     return (Record (name, typ_args, fields))
-  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params } } ] ->
+  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params; _ }; _ } ] ->
     let name = Name.of_ident typ_id in
     (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
     begin match type_manifest with
@@ -246,7 +246,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       return (Synonym (name, typ_args, typ))
     | None -> return (Abstract (name, typ_args))
     end
-  | [ { typ_id; typ_type = { type_kind = Type_open } } ] ->
+  | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let name = Name.of_ident typ_id in
     let typ = Type.Apply (MixedPath.of_name "False", []) in
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
@@ -256,10 +256,10 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       let name = Name.of_ident typ.typ_id in
       (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       match typ with
-      | { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = Some typ; type_params } } ->
+      | { typ_type = { type_kind = Type_abstract; type_manifest = Some typ; _ }; _ } ->
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return ((name, typ_args, typ) :: notations, typs)
-      | { typ_id; typ_type = { type_kind = Type_variant cases; type_params } } ->
+      | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
         Constructors.of_ocaml typ_args cases >>= fun constructors ->
         return (notations, (name, typ_args, constructors) :: typs)
       | _ ->

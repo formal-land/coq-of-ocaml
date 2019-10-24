@@ -21,3 +21,4 @@ _build/
 \#*\#
 OCaml/Makefile
 tests/extraction
+src/.merlin

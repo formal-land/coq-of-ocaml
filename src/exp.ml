@@ -1,6 +1,5 @@
 (** An expression. *)
 open Typedtree
-open Types
 open Sexplib.Std
 open SmartPrint
 open Monad.Notations
@@ -66,7 +65,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
     return (Constant constant)
-  | Texp_let (_, [{ vb_pat = p; vb_expr = e1 }], e2)
+  | Texp_let (_, [{ vb_pat = p; vb_expr = e1; _ }], e2)
     when (match e1.exp_desc with
     | Texp_function _ -> false
     | _ -> true) ->
@@ -81,13 +80,19 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     import_let_fun typ_vars is_rec cases >>= fun def ->
     of_expression typ_vars e >>= fun e ->
     return (LetFun (def, e))
-  | Texp_function { cases = [{c_lhs = {pat_desc = Tpat_var (x, _)}; c_rhs = e}] }
-  | Texp_function { cases = [{c_lhs = { pat_desc = Tpat_alias
-    ({ pat_desc = Tpat_any }, x, _)}; c_rhs = e}] } ->
+  | Texp_function { cases = [{c_lhs = {pat_desc = Tpat_var (x, _); _}; c_rhs = e; _}]; _ }
+  | Texp_function {
+      cases = [{
+        c_lhs = { pat_desc = Tpat_alias ({ pat_desc = Tpat_any; _ }, x, _); _ };
+        c_rhs = e;
+        _
+      }];
+      _
+    } ->
     let x = Name.of_ident x in
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
-  | Texp_function { cases = cases } ->
+  | Texp_function { cases = cases; _ } ->
     open_cases typ_vars cases >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
@@ -139,8 +144,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Constructor (x, es))
   | Texp_variant _ -> raise (Error "variant") NotSupported "Variants not supported"
-  | Texp_record { fields = fields; extended_expression = None } ->
-    (Array.to_list fields |> Monad.List.filter_map (fun (label, definition) ->
+  | Texp_record { fields = fields; extended_expression = None; _ } ->
+    (Array.to_list fields |> Monad.List.filter_map (fun (_, definition) ->
       (match definition with
       | Kept _ ->
         raise None NotSupported "Records with overwriting are not handled"
@@ -218,7 +223,7 @@ and open_cases
   (typ_vars : Name.t Name.Map.t)
   (cases : case list)
   : (Name.t * t) Monad.t =
-  (cases |> Monad.List.map (fun {c_lhs = p; c_rhs = e} ->
+  (cases |> Monad.List.map (fun { c_lhs = p; c_rhs = e; _ } ->
     Pattern.of_pattern p >>= fun pattern ->
     of_expression typ_vars e >>= fun e ->
     return (pattern, e)
@@ -232,7 +237,7 @@ and import_let_fun
   (cases : value_binding list)
   : t Definition.t Monad.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
-  (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr = e } ->
+  (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr = e; _ } ->
     set_env e.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
@@ -267,7 +272,7 @@ and of_module_expr
   (module_expr : module_expr)
   (module_type : Types.module_type option)
   : t Monad.t =
-  let { mod_desc; mod_env; mod_loc; mod_type } = module_expr in
+  let { mod_desc; mod_env; mod_loc; mod_type; _ } = module_expr in
   set_env mod_env (
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
@@ -333,11 +338,11 @@ and of_structure
     | Tstr_value (rec_flag, cases) ->
       import_let_fun Name.Map.empty rec_flag cases >>= fun def ->
       begin match def with
-      | { is_rec = Recursivity.New true } ->
+      | { is_rec = Recursivity.New true; _ } ->
         raise None NotSupported "Recursivity not handled in first-class module values"
-      | { cases = [(header, value)] } ->
+      | { cases = [(header, value)]; _ } ->
         begin match header with
-        | { name; typ_vars = []; args = [] } ->
+        | { name; typ_vars = []; args = []; _ } ->
           return (Some (name, value))
         | _ ->
           raise
@@ -351,7 +356,7 @@ and of_structure
     | Tstr_type _ -> return None
     | Tstr_typext _ -> raise None NotSupported "Type extension not handled"
     | Tstr_exception _ -> raise None SideEffect "Exception not handled"
-    | Tstr_module { mb_id; mb_expr } ->
+    | Tstr_module { mb_id; mb_expr; _ } ->
       let name = Name.of_ident mb_id in
       of_module_expr typ_vars mb_expr None >>= fun value ->
       return (Some (name, value))

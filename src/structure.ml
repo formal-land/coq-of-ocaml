@@ -1,5 +1,4 @@
 (** A structure represents the contents of a ".ml" file. *)
-open Types
 open Typedtree
 open Sexplib.Std
 open SmartPrint
@@ -65,29 +64,31 @@ let rec of_structure (structure : structure) : t list Monad.t =
         "The definition of exceptions is not handled.\n\n" ^
         "Alternative: using sum types (\"option\", \"result\", ...) to represent error cases."
       )
-    | Tstr_open { open_path = path } ->
+    | Tstr_open { open_path = path; _ } ->
       let o = Open.of_ocaml path in
       return (Some (Open o))
     | Tstr_module {
         mb_id = name;
         mb_expr = {
           mod_desc = Tmod_structure structure;
-          mod_type
-        }
+          _
+        };
+        _
       }
     | Tstr_module {
         mb_id = name;
         mb_expr = {
-          mod_desc = Tmod_constraint ({ mod_desc = Tmod_structure structure }, _, _, _);
-          mod_type
-        }
+          mod_desc = Tmod_constraint ({ mod_desc = Tmod_structure structure; _ }, _, _, _);
+          _
+        };
+        _
       } ->
       let name = Name.of_ident name in
       of_structure structure >>= fun structures ->
       return (Some (Module (name, structures)))
-    | Tstr_modtype { mtd_type = None } ->
+    | Tstr_modtype { mtd_type = None; _ } ->
       raise None NotSupported "Abstract module types not handled."
-    | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc } } ->
+    | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
       let name = Name.of_ident mtd_id in
       begin
         match mty_desc with
@@ -96,9 +97,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
           return (Some (Signature (name, signature)))
         | _ -> raise None NotSupported "This kind of signature is not handled."
       end
-    | Tstr_module { mb_expr = { mod_desc = Tmod_functor _ }} ->
+    | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
       raise None NotSupported "Functors are not handled."
-    | Tstr_module { mb_expr = { mod_desc = Tmod_apply _ }} ->
+    | Tstr_module { mb_expr = { mod_desc = Tmod_apply _; _ }; _ } ->
       raise None NotSupported "Applications of functors are not handled."
     | Tstr_module _ -> raise None NotSupported "This kind of module is not handled."
     | Tstr_eval _ -> raise None SideEffect "Top-level evaluations are not handled"

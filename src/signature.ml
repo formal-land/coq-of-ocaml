@@ -34,7 +34,7 @@ let of_signature (signature : signature) : t Monad.t =
       raise (Error "include") NotSupported "Signature item `include` not handled."
     | Tsig_modtype _ ->
       raise (Error "module_type") NotSupported "Signatures inside signatures are not handled."
-    | Tsig_module { md_id; md_type } ->
+    | Tsig_module { md_id; md_type; _ } ->
       let name = Name.of_ident md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
       return (Module (name, module_typ))
@@ -42,15 +42,15 @@ let of_signature (signature : signature) : t Monad.t =
       raise (Error "open") NotSupported "Signature item `open` not handled."
     | Tsig_recmodule _ ->
       raise (Error "recursive_module") NotSupported "Recursive module signatures are not handled."
-    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params = [] } } ]) ->
+    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params = []; _ }; _ } ]) ->
       let name = Name.of_ident typ_id in
       return (TypExistential name)
-    | Tsig_type (_, [ { typ_type = { type_manifest = None; type_params = _ :: _ } } ]) ->
+    | Tsig_type (_, [ { typ_type = { type_manifest = None; type_params = _ :: _; _ }; _ } ]) ->
       raise
         (Error "polymorphic_abstract_type")
         NotSupported
         "Polymorphic abstract types not handled in signatures."
-    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params } } ]) ->
+    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ]) ->
       let name = Name.of_ident typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
@@ -59,7 +59,7 @@ let of_signature (signature : signature) : t Monad.t =
       raise (Error "mutual_type") NotSupported "Mutual type definitions in signatures not handled."
     | Tsig_typext _ ->
       raise (Error "extensible_type") NotSupported "Extensible types are not handled."
-    | Tsig_value { val_id; val_desc = { ctyp_desc; ctyp_type } } ->
+    | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in

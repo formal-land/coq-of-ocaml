@@ -1,6 +1,5 @@
 (** Recursivity flag. *)
 open Sexplib.Std
-open SmartPrint
 
 type t = New of bool
   [@@deriving sexp]

@@ -131,7 +131,8 @@ let parse_cmt (build_dir : string) (file_name : string)
     cmt_initial_env;
     cmt_loadpath;
     cmt_sourcefile = Some source_file;
-    cmt_imports
+    cmt_imports;
+    _
   } ->
     (* We set the [load_path] so that the OCaml compiler can import the environments
        from the [.cmt] files. This is required to specify were to find the definitions

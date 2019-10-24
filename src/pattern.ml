@@ -1,6 +1,5 @@
 (** Patterns used for the "match". *)
 open Typedtree
-open Types
 open Sexplib.Std
 open SmartPrint
 open Monad.Notations

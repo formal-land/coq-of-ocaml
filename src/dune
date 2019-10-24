@@ -1,0 +1,5 @@
+(executable
+  (name coqOfOCaml)
+  (libraries compiler-libs.common sexplib smart_print)
+  (preprocess (pps ppx_sexp_conv))
+)

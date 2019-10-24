@@ -23,9 +23,9 @@ let of_ocaml_module_with_substitutions
   ModuleTypParams.get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
   (substitutions |> Monad.List.filter_map (fun (path, _, with_constraint) ->
     begin match with_constraint with
-    | Twith_type { typ_loc; typ_type } ->
+    | Twith_type { typ_loc; typ_type; _ } ->
       begin match typ_type with
-      | { type_kind = Type_abstract; type_manifest = Some typ } ->
+      | { type_kind = Type_abstract; type_manifest = Some typ; _ } ->
         set_loc (Loc.of_location typ_loc) (
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return (Some (PathName.of_path path, typ)))
@@ -56,11 +56,11 @@ let of_ocaml (module_typ : module_type) : t Monad.t =
     raise (Error "functor") NotSupported "The application of functors in module types is not handled."
   | Tmty_ident (_, long_ident_loc) ->
     of_ocaml_module_with_substitutions long_ident_loc []
-  | Tmty_signature signature ->
+  | Tmty_signature _ ->
     raise (Error "signature") NotSupported "Anonymous definition of signatures is not handled."
   | Tmty_typeof _ ->
     raise (Error "typeof") NotSupported "The typeof in module types is not handled."
-  | Tmty_with ({ mty_desc = Tmty_ident (_, long_ident_loc) }, substitutions) ->
+  | Tmty_with ({ mty_desc = Tmty_ident (_, long_ident_loc); _ }, substitutions) ->
     of_ocaml_module_with_substitutions long_ident_loc substitutions
   | Tmty_with _ ->
     raise
