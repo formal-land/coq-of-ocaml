@@ -23,31 +23,31 @@ class Test
     system(*cmd)
   end
 
-  def coq_of_ocaml_cmd(mode)
+  def coq_of_ocaml_cmd
     coq_of_ocaml = '_build/default/src/coqOfOCaml.exe'
-    cmd = [coq_of_ocaml, '-mode', mode, '-output', '/dev/stdout', extension('.ml')]
+    cmd = [coq_of_ocaml, '-output', '/dev/stdout', extension('.ml')]
   end
 
-  def coq_of_ocaml(mode)
+  def coq_of_ocaml
     # We remove the fist line which is a success message
-    IO.popen(coq_of_ocaml_cmd(mode)).read.split("\n")[1..-1].join("\n") + "\n"
+    IO.popen(coq_of_ocaml_cmd).read.split("\n")[1..-1].join("\n") + "\n"
   end
 
-  def reference(mode)
-    file_name = extension('.' + mode)
+  def reference
+    file_name = extension('.v')
     FileUtils.touch file_name unless File.exists?(file_name)
     File.read(file_name)
   end
 
   # Update the reference snapshot file.
-  def update(mode)
-    output = coq_of_ocaml(mode)
-    file_name = extension('.' + mode)
+  def update
+    output = coq_of_ocaml
+    file_name = extension('.v')
     File.write(file_name, output)
   end
 
-  def check(mode)
-    coq_of_ocaml(mode) == reference(mode)
+  def check
+    coq_of_ocaml == reference
   end
 
   def coq_cmd
@@ -104,11 +104,11 @@ class Tests
     end
   end
 
-  def check(mode)
-    puts "\e[1mChecking '-#{mode}':\e[0m"
+  def check
+    puts "\e[1mChecking '.v':\e[0m"
     for test in @tests do
-      print_result(test.check(mode))
-      puts test.coq_of_ocaml_cmd(mode).join(" ")
+      print_result(test.check)
+      puts test.coq_of_ocaml_cmd.join(" ")
     end
   end
 
@@ -144,9 +144,7 @@ end
 tests = Tests.new(test_files)
 tests.compile
 puts
-tests.check('exp')
-puts
-tests.check('v')
+tests.check
 puts
 tests.coq
 puts

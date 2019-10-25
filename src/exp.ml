@@ -1,6 +1,5 @@
 (** An expression. *)
 open Typedtree
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
@@ -10,14 +9,12 @@ module Header = struct
     typ_vars : Name.t list;
     args : (Name.t * Type.t) list;
     typ : Type.t option }
-    [@@deriving sexp]
 end
 
 module Definition = struct
   type 'a t = {
     is_rec : Recursivity.t;
     cases : (Header.t * 'a) list }
-    [@@deriving sexp]
 end
 
 (** The simplified OCaml AST we use. We do not use a mutualy recursive type to
@@ -43,7 +40,6 @@ type t =
   | ModuleUnpack of t (** Open a first-class module *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorSeq of t * t (** A sequence of two expressions (an error in Coq). *)
-  [@@deriving sexp]
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)

@@ -1,13 +1,11 @@
 (** A structure represents the contents of a ".ml" file. *)
 open Typedtree
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
   type t = Exp.t Exp.Definition.t
-    [@@deriving sexp]
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : t) : SmartPrint.t option =

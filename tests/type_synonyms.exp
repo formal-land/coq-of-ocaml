@@ -1,3 +1,0 @@
-((TypeDefinition
-  (Synonym t1 () (Apply (PathName ((path ()) (base string))) ())))
- (TypeDefinition (Synonym t2 (a b) (Tuple ((Variable a) (Variable b))))))

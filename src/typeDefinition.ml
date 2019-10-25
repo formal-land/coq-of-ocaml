@@ -1,5 +1,4 @@
 open Typedtree
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
@@ -11,10 +10,9 @@ module Constructors = struct
     param_typs : Type.t list; (** The parameters of the constructor. *)
     res_typ_params : Type.t list; (** The type parameters of the result type of the constructor. *)
     typ_vars : Name.t list; (** The polymorphic type variables. *)
-  } [@@deriving sexp]
+  }
 
   type t = item list
-    [@@deriving sexp]
 
   let of_ocaml
     (defined_typ_params : Name.t list)
@@ -86,7 +84,7 @@ module Inductive = struct
   type t = {
     notations : (Name.t * Name.t list * Type.t) list;
     typs : (Name.t * Name.t list * Name.t list * Constructors.t) list;
-  } [@@deriving sexp]
+  }
 
   let to_coq_notations_reserved (inductive : t) : SmartPrint.t list =
     inductive.notations |> List.map (fun (name, _, _) ->
@@ -225,7 +223,6 @@ type t =
   | Record of Name.t * Name.t list * (Name.t * Type.t) list
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
-  [@@deriving sexp]
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with

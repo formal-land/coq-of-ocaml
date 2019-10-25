@@ -1,28 +1,6 @@
-open Sexplib.Std
 open SmartPrint
 
 type ast = Structure.t list
-  [@@deriving sexp]
-
-module Mode = struct
-  type t =
-    | Exp
-    | V
-
-  let of_string (mode : string) : t option=
-    match mode with
-    | "exp" -> Some Exp
-    | "v" -> Some V
-    | _ -> None
-
-  let get_extension (mode : t): string =
-    match mode with
-    | Exp -> ".exp"
-    | V -> ".v"
-
-  let get_output_file_name (mode : t) (source_file_name : string) : string =
-    Filename.remove_extension (Filename.basename source_file_name) ^ (get_extension mode)
-end
 
 module Output = struct
   type t = {
@@ -70,71 +48,53 @@ let of_ocaml
   (structure : Typedtree.structure)
   (source_file_name : string)
   (source_file_content : string)
-  (mode : string)
   (output_file_name : string option)
   : Output.t =
-  match Mode.of_string mode with
+  let (ast, error_message) = exp env loc structure source_file_content in
+  match ast with
   | None ->
     {
-      error_message = Some (Printf.sprintf "Unknown mode '%s'" mode);
+      error_message;
       generated_file = None;
       success_message = None;
     }
-  | Some mode ->
-    let (ast, error_message) = exp env loc structure source_file_content in
-    begin match ast with
-    | None ->
-      {
-        error_message;
-        generated_file = None;
-        success_message = None;
-      }
-    | Some ast ->
-      let document =
-        match mode with
-        | Mode.Exp -> !^ (Sexplib.Sexp.to_string_hum (sexp_of_ast ast))
-        | Mode.V ->
-          concat (List.map (fun d -> d ^^ newline) [
-            !^ "Require Import OCaml.OCaml." ^^ newline;
-            !^ "Local Open Scope Z_scope.";
-            !^ "Local Open Scope type_scope.";
-            !^ "Import ListNotations."]) ^^ newline ^^
-          Structure.to_coq ast in
-      let generated_file_name =
-        match output_file_name with
-        | None -> Mode.get_output_file_name mode source_file_name
-        | Some output_file_name -> output_file_name in
-      let generated_file_content = SmartPrint.to_string 80 2 document in
-      let success_message =
-        match error_message with
-        | None ->
-          Some (Printf.sprintf "File '%s' successfully generated" generated_file_name)
-        | Some _ ->
-          Some (Printf.sprintf "File '%s' generated with some errors" generated_file_name) in
-      {
-        error_message;
-        generated_file = Some (generated_file_name, generated_file_content);
-        success_message;
-      }
-    end
+  | Some ast ->
+    let document =
+      concat (List.map (fun d -> d ^^ newline) [
+        !^ "Require Import OCaml.OCaml." ^^ newline;
+        !^ "Local Open Scope Z_scope.";
+        !^ "Local Open Scope type_scope.";
+        !^ "Import ListNotations."]) ^^ newline ^^
+      Structure.to_coq ast in
+    let generated_file_name =
+      match output_file_name with
+      | None ->
+        Filename.remove_extension (Filename.basename source_file_name) ^ ".v"
+      | Some output_file_name -> output_file_name in
+    let generated_file_content = SmartPrint.to_string 80 2 document in
+    let success_message =
+      match error_message with
+      | None ->
+        Some (Printf.sprintf "File '%s' successfully generated" generated_file_name)
+      | Some _ ->
+        Some (Printf.sprintf "File '%s' generated with some errors" generated_file_name) in
+    {
+      error_message;
+      generated_file = Some (generated_file_name, generated_file_content);
+      success_message;
+    }
 
 (** The main function. *)
 let main () =
   Printexc.record_backtrace true;
   let file_name = ref None in
   let merlin_file_name = ref None in
-  let mode = ref None in
   let output_file_name = ref None in
   let options = [
     (
       "-merlin",
       Arg.String (fun value -> merlin_file_name := Some value),
       "file   the configuration file of Merlin"
-    );
-    (
-      "-mode",
-      Arg.String (fun value -> mode := Some value),
-      "[v|exp]   v to generate a Coq .v file (default), exp to generate an AST .exp file (for debugging)"
     );
     (
       "-output",
@@ -147,8 +107,6 @@ let main () =
   match !file_name with
   | None -> Arg.usage options usage_msg
   | Some file_name ->
-    let mode = match !mode with None -> "v" | Some mode -> mode in
-
     let merlin_file_names =
       match !merlin_file_name with
       | None -> []
@@ -170,7 +128,7 @@ let main () =
       match structure.str_items with
       | structure_item :: _ -> Loc.of_location structure_item.str_loc
       | [] -> failwith "Unexpected empty file" in
-      let output = of_ocaml initial_env initial_loc structure file_name file_content mode !output_file_name in
+      let output = of_ocaml initial_env initial_loc structure file_name file_content !output_file_name in
       Output.write output
     | `Interface _ -> failwith "Unexpected interface"
     end

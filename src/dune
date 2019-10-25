@@ -1,5 +1,4 @@
 (executable
   (name coqOfOCaml)
-  (libraries merlin_kernel sexplib smart_print)
-  (preprocess (pps ppx_sexp_conv))
+  (libraries merlin_kernel smart_print)
 )

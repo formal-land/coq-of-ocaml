@@ -1,6 +1,5 @@
 (** Patterns used for the "match". *)
 open Typedtree
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
@@ -13,7 +12,6 @@ type t =
   | Alias of t * Name.t
   | Record of (PathName.t * t) list (** A list of fields from a record with their expected patterns. *)
   | Or of t * t
-  [@@deriving sexp]
 
 (** Import an OCaml pattern. *)
 let rec of_pattern (p : pattern) : t Monad.t =

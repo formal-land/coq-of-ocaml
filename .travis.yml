@@ -9,10 +9,12 @@ env:
   global:
   - PACKAGE_NAME="coq-of-ocaml"
   matrix:
-  - COQ_IMAGE="coqorg/coq:8.7" SHOULD_SUPPORT="false"
-  - COQ_IMAGE="coqorg/coq:8.8" SHOULD_SUPPORT="false"
-  - COQ_IMAGE="coqorg/coq:8.9" SHOULD_SUPPORT="true"
-  - COQ_IMAGE="coqorg/coq:8.10" SHOULD_SUPPORT="true"
+  - COQ_IMAGE="coqorg/coq:8.7" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="false"
+  - COQ_IMAGE="coqorg/coq:8.8" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="false"
+  - COQ_IMAGE="coqorg/coq:8.9" OCAML_VERSION="4.05.0" SHOULD_SUPPORT="true"
+  - COQ_IMAGE="coqorg/coq:8.9" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="true"
+  - COQ_IMAGE="coqorg/coq:8.10" OCAML_VERSION="4.05.0" SHOULD_SUPPORT="true"
+  - COQ_IMAGE="coqorg/coq:8.10" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="true"
 
 install: |
   # Prepare the COQ container
@@ -23,7 +25,7 @@ install: |
     echo \"Build triggered by ${TRAVIS_EVENT_TYPE}\"
     export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
     set -ex  # -e = exit on failure; -x = trace for debug
-    opam switch 4.07.1+flambda
+    opam switch ${OCAML_VERSION}
     opam update
     opam pin add ${PACKAGE_NAME}.opam . --kind=path --no-action
     opam config list
