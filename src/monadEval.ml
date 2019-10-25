@@ -24,7 +24,6 @@ module Wrapper = struct
     fun env loc ->
       match wrapper with
       | Env env ->
-        let env = Envaux.env_of_only_summary env in
         interpret env loc
       | Loc loc -> interpret env loc
 end

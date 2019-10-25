@@ -79,13 +79,7 @@ let display_error
   message ^
   "\n\n"
 
-let read_source_file (source_file : string) : string =
-  let channel = open_in source_file in
-  let length = in_channel_length channel in
-  really_input_string channel length
-
-let display_errors (source_file : string) (errors : t list) : string =
-  let source_file_content = read_source_file source_file in
+let display_errors (source_file_content : string) (errors : t list) : string =
   let source_lines = String.split_on_char '\n' source_file_content in
   let error_messages = errors |>
   List.sort (fun error1 error2 -> compare error1.loc.start.line error2.loc.start.line) |>

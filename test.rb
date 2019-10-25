@@ -25,7 +25,7 @@ class Test
 
   def coq_of_ocaml_cmd(mode)
     coq_of_ocaml = '_build/default/src/coqOfOCaml.exe'
-    cmd = [coq_of_ocaml, '-build-dir', 'tests', '-mode', mode, '-output', '/dev/stdout', extension('.cmt')]
+    cmd = [coq_of_ocaml, '-mode', mode, '-output', '/dev/stdout', extension('.ml')]
   end
 
   def coq_of_ocaml(mode)

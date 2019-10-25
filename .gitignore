@@ -6,6 +6,7 @@ a.out
 *.cma
 *.cmi
 *.cmt
+*.cmly
 *.a
 *.o
 *.cmx
@@ -21,4 +22,8 @@ _build/
 \#*\#
 OCaml/Makefile
 tests/extraction
-src/.merlin
+.merlin
+merlin/ocaml/preprocess/*/parser_raw.ml
+merlin/ocaml/preprocess/*/parser_raw.mli
+merlin/utils/menhirLib.ml
+merlin/utils/menhirLib.mli
