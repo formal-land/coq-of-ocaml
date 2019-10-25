@@ -24,9 +24,9 @@ type t = {
 }
 
 (** Display a warning. *)
-let warn (loc : Loc.t) (message : string) : unit =
+let warn (file_name : string) (loc : Loc.t) (message : string) : unit =
   let message = "Warning: " ^ message in
-  prerr_endline (Loc.to_string loc ^ ": " ^ message)
+  prerr_endline (Loc.to_string file_name loc ^ ": " ^ message)
 
 let pad
   (width : int)
@@ -63,6 +63,7 @@ let get_code_frame (source_lines : string list) (line_number : int) : string =
   String.concat "\n" (List.rev !output_lines)
 
 let display_error
+  (file_name : string)
   (source_lines : string list)
   (loc : Loc.t)
   (category : Category.t)
@@ -70,7 +71,7 @@ let display_error
   : string =
   colorize "34;1" (
     pad 100 '-'
-      ("--- " ^ loc.file_name ^ ":" ^ string_of_int loc.start.line ^ " ")
+      ("--- " ^ file_name ^ ":" ^ string_of_int loc.start.line ^ " ")
       (" " ^ Category.to_string category ^ " ---")
   ) ^ "\n" ^
   "\n" ^
@@ -79,12 +80,16 @@ let display_error
   message ^
   "\n\n"
 
-let display_errors (source_file_content : string) (errors : t list) : string =
+let display_errors
+  (source_file_name : string)
+  (source_file_content : string)
+  (errors : t list)
+  : string =
   let source_lines = String.split_on_char '\n' source_file_content in
   let error_messages = errors |>
   List.sort (fun error1 error2 -> compare error1.loc.start.line error2.loc.start.line) |>
   List.map (fun { category; loc; message } ->
-    display_error source_lines loc category message) |>
+    display_error source_file_name source_lines loc category message) |>
   String.concat "" in
   let nb_errors = List.length errors in
   error_messages ^

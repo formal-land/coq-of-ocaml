@@ -32,13 +32,15 @@ let exp
   (env : Env.t)
   (loc : Loc.t)
   (structure : Typedtree.structure)
+  (source_file_name : string)
   (source_file_content : string)
   : ast option * string option =
-  let { MonadEval.Result.errors; value} = MonadEval.eval (Structure.of_structure structure) env loc in
+  let { MonadEval.Result.errors; value} =
+    MonadEval.eval source_file_name (Structure.of_structure structure) env loc in
   let error_message =
     match errors with
     | [] -> None
-    | _ :: _ -> Some (Error.display_errors source_file_content errors) in
+    | _ :: _ -> Some (Error.display_errors source_file_name source_file_content errors) in
   (Some value, error_message)
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
@@ -50,7 +52,7 @@ let of_ocaml
   (source_file_content : string)
   (output_file_name : string option)
   : Output.t =
-  let (ast, error_message) = exp env loc structure source_file_content in
+  let (ast, error_message) = exp env loc structure source_file_name source_file_content in
   match ast with
   | None ->
     {
@@ -68,8 +70,7 @@ let of_ocaml
       Structure.to_coq ast in
     let generated_file_name =
       match output_file_name with
-      | None ->
-        Filename.remove_extension (Filename.basename source_file_name) ^ ".v"
+      | None -> Filename.remove_extension source_file_name ^ ".v"
       | Some output_file_name -> output_file_name in
     let generated_file_content = SmartPrint.to_string 80 2 document in
     let success_message =
@@ -99,19 +100,19 @@ let main () =
     (
       "-output",
       Arg.String (fun value -> output_file_name := Some value),
-      "file    the name of the file to output"
+      "file   the name of the .v file to output"
     )
   ] in
-  let usage_msg = "Usage:\n  ./coqOfOCaml.native [options] file.cmt\nOptions are:" in
+  let usage_msg = "Usage:\n  ./coqOfOCaml.native [options] file.ml\nOptions are:" in
   Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage options usage_msg
   | Some file_name ->
-    let merlin_file_names =
+    let merlin_file_name =
       match !merlin_file_name with
-      | None -> []
-      | Some merlin_file_name -> [merlin_file_name] in
-    let merlin_config = Mconfig.load_dotmerlins ~filenames:merlin_file_names Mconfig.initial in
+      | None -> Filename.concat (Filename.dirname file_name) ".merlin"
+      | Some merlin_file_name -> merlin_file_name in
+    let merlin_config = Mconfig.load_dotmerlins ~filenames:[merlin_file_name] Mconfig.initial in
 
     let file_channel = open_in file_name in
     let file_size = in_channel_length file_channel in
