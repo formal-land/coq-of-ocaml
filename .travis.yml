@@ -9,24 +9,19 @@ env:
   global:
   - PACKAGE_NAME="coq-of-ocaml"
   matrix:
-  - COQ_IMAGE="coqorg/coq:8.7" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="false"
-  - COQ_IMAGE="coqorg/coq:8.8" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="false"
-  - COQ_IMAGE="coqorg/coq:8.9" OCAML_VERSION="4.05.0" SHOULD_SUPPORT="true"
-  - COQ_IMAGE="coqorg/coq:8.9" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="true"
-  - COQ_IMAGE="coqorg/coq:8.10" OCAML_VERSION="4.05.0" SHOULD_SUPPORT="true"
-  - COQ_IMAGE="coqorg/coq:8.10" OCAML_VERSION="4.07.1+flambda" SHOULD_SUPPORT="true"
+  - COQ_VERSION="8.9.1" OCAML_VERSION="4.05" SHOULD_SUPPORT="true"
 
 install: |
-  # Prepare the COQ container
-  docker pull ${COQ_IMAGE}
-  docker run -d -i --init --name=COQ -v ${TRAVIS_BUILD_DIR}:/home/project -w /home/project ${COQ_IMAGE}
-  docker exec COQ /bin/bash --login -c "
+  # Prepare the Docker container
+  docker pull ocaml/opam2:${OCAML_VERSION}
+  docker run -d -i --init --name=CONTAINER -v ${TRAVIS_BUILD_DIR}:/home/project -w /home/project ocaml/opam2:${OCAML_VERSION}
+  docker exec CONTAINER /bin/bash --login -c "
     # This bash script is double-quoted to interpolate Travis CI env vars:
     echo \"Build triggered by ${TRAVIS_EVENT_TYPE}\"
     export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
     set -ex  # -e = exit on failure; -x = trace for debug
-    opam switch ${OCAML_VERSION}
     opam update
+    opam pin add coq ${COQ_VERSION} --no-action
     opam pin add ${PACKAGE_NAME}.opam . --kind=path --no-action
     opam config list
     opam repo list
@@ -36,21 +31,22 @@ install: |
 script:
 - echo -e "${ANSI_YELLOW}Building...${ANSI_RESET}" && echo -en 'travis_fold:start:script\\r'
 - |
-  docker exec COQ /bin/bash --login -c "
+  docker exec CONTAINER /bin/bash --login -c "
     export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
     set -ex
-    sudo chown -R coq:coq /home/project
+    whoami
+    sudo chown -R opam:opam /home/project
     export OPAMWITHTEST=true
     # Check if the package is compatible with the current environment
     if [ "${SHOULD_SUPPORT}" = "true" ] || opam install ${PACKAGE_NAME} --show-action; then
-      # First install the dependencies
+      # First, install the dependencies
       sudo apt-get update
       opam depext ${PACKAGE_NAME} -y
       opam install ${PACKAGE_NAME} --deps-only -y
       opam list
-      # Then install the package itself in verbose mode
+      # Then, install the package itself in verbose mode
       opam install ${PACKAGE_NAME} -v
     fi;
     " script
-- docker stop COQ  # optional
+- docker stop CONTAINER  # optional
 - echo -en 'travis_fold:end:script\\r'
