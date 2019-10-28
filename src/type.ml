@@ -1,6 +1,5 @@
 (** A type, with free type variables for polymorphic arguments. *)
 open Types
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
@@ -10,7 +9,6 @@ type t =
   | Tuple of t list
   | Apply of MixedPath.t * t list
   | Package of PathName.t * t option Tree.t
-  [@@deriving sexp]
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr

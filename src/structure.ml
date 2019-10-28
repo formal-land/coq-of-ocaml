@@ -1,13 +1,11 @@
 (** A structure represents the contents of a ".ml" file. *)
 open Typedtree
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
   type t = Exp.t Exp.Definition.t
-    [@@deriving sexp]
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : t) : SmartPrint.t option =
@@ -40,6 +38,7 @@ end
 
 (** A structure. *)
 type t =
+  | Eval of Exp.t
   | Value of Value.t
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
@@ -102,7 +101,12 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_module { mb_expr = { mod_desc = Tmod_apply _; _ }; _ } ->
       raise None NotSupported "Applications of functors are not handled."
     | Tstr_module _ -> raise None NotSupported "This kind of module is not handled."
-    | Tstr_eval _ -> raise None SideEffect "Top-level evaluations are not handled"
+    | Tstr_eval (e, _) ->
+      Exp.of_expression Name.Map.empty e >>= fun e ->
+      raise
+        (Some (Eval e))
+        SideEffect
+        "Top-level evaluations are considered as an error as sources of side-effects"
     | Tstr_primitive _ -> raise None NotSupported "Structure item `primitive` not handled."
     | Tstr_typext _ -> raise None NotSupported "Structure item `typext` not handled."
     | Tstr_recmodule _ -> raise None NotSupported "Structure item `recmodule` not handled."
@@ -117,6 +121,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
 let rec to_coq (defs : t list) : SmartPrint.t =
   let to_coq_one (def : t) : SmartPrint.t option =
     match def with
+    | Eval e -> Some (!^ "Compute" ^^ Exp.to_coq false e ^-^ !^ ".")
     | Value value -> Value.to_coq value
     | TypeDefinition typ_def -> Some (TypeDefinition.to_coq typ_def)
     | Open o -> Some (Open.to_coq o)

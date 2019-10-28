@@ -1,4 +1,3 @@
-open Sexplib.Std
 open SmartPrint
 
 type 'a item =
@@ -6,7 +5,6 @@ type 'a item =
   | Module of Name.t * 'a t
 
 and 'a t = 'a item list
-  [@@deriving sexp]
 
 let rec map (f : 'a -> 'b) (tree : 'a t) : 'b t =
   let map_item (item : 'a item) : 'b item =

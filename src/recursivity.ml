@@ -1,8 +1,6 @@
 (** Recursivity flag. *)
-open Sexplib.Std
 
 type t = New of bool
-  [@@deriving sexp]
 
 (** Import an OCaml recursivity flag. *)
 let of_rec_flag (f : Asttypes.rec_flag) : t =

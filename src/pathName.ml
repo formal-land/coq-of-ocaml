@@ -1,161 +1,193 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open Asttypes
-open Sexplib.Std
 open SmartPrint
 
 type t = {
   path : Name.t list;
   base : Name.t }
-  [@@deriving sexp]
 
 type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
 
+let stdlib_name =
+  if Sys.ocaml_version >= "4.07" then
+    "Stdlib"
+  else
+    "Pervasives"
+
 (* Convert an identifier from OCaml to its Coq's equivalent. *)
-let convert (x : t) : t =
-  match x with
+let convert ({ path; base } : t) : t =
+  let default = { path; base = Name.convert base } in
+  match path with
   (* The core library *)
-  (* Built-in types *)
-  | { path = []; base = "int" } -> { path = []; base = "Z" }
-  | { path = []; base = "char" } -> { path = []; base = "ascii" }
-  | { path = []; base = "bytes" } -> { path = []; base = "string" }
-  | { path = []; base = "string" } -> { path = []; base = "string" }
-  | { path = []; base = "bool" } -> { path = []; base = "bool" }
-  | { path = []; base = "false" } -> { path = []; base = "false" }
-  | { path = []; base = "true" } -> { path = []; base = "true" }
-  | { path = []; base = "unit" } -> { path = []; base = "unit" }
-  | { path = []; base = "()" } -> { path = []; base = "tt" }
-  | { path = []; base = "list" } -> { path = []; base = "list" }
-  | { path = []; base = "[]" } -> { path = []; base = "[]" }
-  | { path = []; base = "::" } -> { path = []; base = "cons" }
-  | { path = []; base = "option" } -> { path = []; base = "option" }
-  | { path = []; base = "None" } -> { path = []; base = "None" }
-  | { path = []; base = "Some" } -> { path = []; base = "Some" }
-  | { path = ["*predef*"]; base = "None" } -> { path = []; base = "None" } (* for optional parameters *)
-  | { path = ["*predef*"]; base = "Some" } -> { path = []; base = "Some" }
-  (* Predefined exceptions *)
-  | { path = []; base = "Match_failure" } -> { path = ["OCaml"]; base = "Match_failure" }
-  | { path = []; base = "Assert_failure" } -> { path = ["OCaml"]; base = "Assert_failure" }
-  | { path = []; base = "Invalid_argument" } -> { path = ["OCaml"]; base = "Invalid_argument" }
-  | { path = []; base = "Failure" } -> { path = ["OCaml"]; base = "Failure" }
-  | { path = []; base = "Not_found" } -> { path = ["OCaml"]; base = "Not_found" }
-  | { path = []; base = "Out_of_memory" } -> { path = ["OCaml"]; base = "Out_of_memory" }
-  | { path = []; base = "Stack_overflow" } -> { path = ["OCaml"]; base = "Stack_overflow" }
-  | { path = []; base = "Sys_error" } -> { path = ["OCaml"]; base = "Sys_error" }
-  | { path = []; base = "End_of_file" } -> { path = ["OCaml"]; base = "End_of_file" }
-  | { path = []; base = "Division_by_zero" } -> { path = ["OCaml"]; base = "Division_by_zero" }
-  | { path = []; base = "Sys_blocked_io" } -> { path = ["OCaml"]; base = "Sys_blocked_io" }
-  | { path = []; base = "Undefined_recursive_module" } -> { path = ["OCaml"]; base = "Undefined_recursive_module" }
+  | [] ->
+    begin match base with
+    (* Built-in types *)
+    | "int" -> { path = []; base = "Z" }
+    | "char" -> { path = []; base = "ascii" }
+    | "bytes" -> { path = []; base = "string" }
+    | "string" -> { path = []; base = "string" }
+    | "bool" -> { path = []; base = "bool" }
+    | "false" -> { path = []; base = "false" }
+    | "true" -> { path = []; base = "true" }
+    | "unit" -> { path = []; base = "unit" }
+    | "()" -> { path = []; base = "tt" }
+    | "list" -> { path = []; base = "list" }
+    | "[]" -> { path = []; base = "[]" }
+    | "::" -> { path = []; base = "cons" }
+    | "option" -> { path = []; base = "option" }
+    | "None" -> { path = []; base = "None" }
+    | "Some" -> { path = []; base = "Some" }
+    | "Ok" -> { path = []; base = "inl" }
+    | "Error" -> { path = []; base = "inr" }
+
+    (* Predefined exceptions *)
+    | "Match_failure" -> { path = ["OCaml"]; base = "Match_failure" }
+    | "Assert_failure" -> { path = ["OCaml"]; base = "Assert_failure" }
+    | "Invalid_argument" -> { path = ["OCaml"]; base = "Invalid_argument" }
+    | "Failure" -> { path = ["OCaml"]; base = "Failure" }
+    | "Not_found" -> { path = ["OCaml"]; base = "Not_found" }
+    | "Out_of_memory" -> { path = ["OCaml"]; base = "Out_of_memory" }
+    | "Stack_overflow" -> { path = ["OCaml"]; base = "Stack_overflow" }
+    | "Sys_error" -> { path = ["OCaml"]; base = "Sys_error" }
+    | "End_of_file" -> { path = ["OCaml"]; base = "End_of_file" }
+    | "Division_by_zero" -> { path = ["OCaml"]; base = "Division_by_zero" }
+    | "Sys_blocked_io" -> { path = ["OCaml"]; base = "Sys_blocked_io" }
+    | "Undefined_recursive_module" -> { path = ["OCaml"]; base = "Undefined_recursive_module" }
+    | _ -> default
+    end
+
+  (* Optional parameters *)
+  | ["*predef*"] ->
+    begin match base with
+    | "None" -> { path = []; base = "None" }
+    | "Some" -> { path = []; base = "Some" }
+    | _ -> default
+    end
 
   (* Stdlib *)
-  (* Exceptions *)
-  | { path = ["Stdlib"]; base = "invalid_arg" } -> { path = ["OCaml"; "Stdlib"]; base = "invalid_arg" }
-  | { path = ["Stdlib"]; base = "failwith" } -> { path = ["OCaml"; "Stdlib"]; base = "failwith" }
-  | { path = []; base = "Exit" } | { path = ["Stdlib"]; base = "Exit" } ->
-    { path = ["OCaml"; "Stdlib"]; base = "Exit" }
-  (* Comparisons *)
-  | { path = ["Stdlib"]; base = "=" } -> { path = []; base = "equiv_decb" }
-  | { path = ["Stdlib"]; base = "<>" } -> { path = []; base = "nequiv_decb" }
-  | { path = ["Stdlib"]; base = "<" } -> { path = ["OCaml"; "Stdlib"]; base = "lt" }
-  | { path = ["Stdlib"]; base = ">" } -> { path = ["OCaml"; "Stdlib"]; base = "gt" }
-  | { path = ["Stdlib"]; base = "<=" } -> { path = ["OCaml"; "Stdlib"]; base = "le" }
-  | { path = ["Stdlib"]; base = ">=" } -> { path = ["OCaml"; "Stdlib"]; base = "ge" }
-  | { path = ["Stdlib"]; base = "compare" } -> { path = ["OCaml"; "Stdlib"]; base = "compare" }
-  | { path = ["Stdlib"]; base = "min" } -> { path = ["OCaml"; "Stdlib"]; base = "min" }
-  | { path = ["Stdlib"]; base = "max" } -> { path = ["OCaml"; "Stdlib"]; base = "max" }
-  (* Boolean operations *)
-  | { path = ["Stdlib"]; base = "not" } -> { path = []; base = "negb" }
-  | { path = ["Stdlib"]; base = "&&" } -> { path = []; base = "andb" }
-  | { path = ["Stdlib"]; base = "&" } -> { path = []; base = "andb" }
-  | { path = ["Stdlib"]; base = "||" } -> { path = []; base = "orb" }
-  | { path = ["Stdlib"]; base = "or" } -> { path = []; base = "orb" }
-  (* Composition operators *)
-  | { path = ["Stdlib"]; base = "|>" } -> { path = ["OCaml"; "Stdlib"]; base = "reverse_apply" }
-  | { path = ["Stdlib"]; base = "@@" } -> { path = []; base = "apply" }
-  (* Integer arithmetic *)
-  | { path = ["Stdlib"]; base = "~-" } -> { path = ["Z"]; base = "opp" }
-  | { path = ["Stdlib"]; base = "~+" } -> { path = []; base = "" }
-  | { path = ["Stdlib"]; base = "succ" } -> { path = ["Z"]; base = "succ" }
-  | { path = ["Stdlib"]; base = "pred" } -> { path = ["Z"]; base = "pred" }
-  | { path = ["Stdlib"]; base = "+" } -> { path = ["Z"]; base = "add" }
-  | { path = ["Stdlib"]; base = "-" } -> { path = ["Z"]; base = "sub" }
-  | { path = ["Stdlib"]; base = "*" } -> { path = ["Z"]; base = "mul" }
-  | { path = ["Stdlib"]; base = "/" } -> { path = ["Z"]; base = "div" }
-  | { path = ["Stdlib"]; base = "mod" } -> { path = ["Z"]; base = "modulo" }
-  | { path = ["Stdlib"]; base = "abs" } -> { path = ["Z"]; base = "abs" }
-  (* Bitwise operations *)
-  | { path = ["Stdlib"]; base = "land" } -> { path = ["Z"]; base = "land" }
-  | { path = ["Stdlib"]; base = "lor" } -> { path = ["Z"]; base = "lor" }
-  | { path = ["Stdlib"]; base = "lxor" } -> { path = ["Z"]; base = "lxor" }
-  | { path = ["Stdlib"]; base = "lsl" } -> { path = ["Z"]; base = "shiftl" }
-  | { path = ["Stdlib"]; base = "lsr" } -> { path = ["Z"]; base = "shiftr" }
-  (* Floating-point arithmetic *)
-  (* String operations *)
-  | { path = ["Stdlib"]; base = "^" } -> { path = ["String"]; base = "append" }
-  (* Character operations *)
-  | { path = ["Stdlib"]; base = "int_of_char" } -> { path = ["OCaml"; "Stdlib"]; base = "int_of_char" }
-  | { path = ["Stdlib"]; base = "char_of_int" } -> { path = ["OCaml"; "Stdlib"]; base = "char_of_int" }
-  (* Unit operations *)
-  | { path = ["Stdlib"]; base = "ignore" } -> { path = ["OCaml"; "Stdlib"]; base = "ignore" }
-  (* String conversion functions *)
-  | { path = ["Stdlib"]; base = "string_of_bool" } -> { path = ["OCaml"; "Stdlib"]; base = "string_of_bool" }
-  | { path = ["Stdlib"]; base = "bool_of_string" } -> { path = ["OCaml"; "Stdlib"]; base = "bool_of_string" }
-  | { path = ["Stdlib"]; base = "string_of_int" } -> { path = ["OCaml"; "Stdlib"]; base = "string_of_int" }
-  | { path = ["Stdlib"]; base = "int_of_string" } -> { path = ["OCaml"; "Stdlib"]; base = "int_of_string" }
-  (* Pair operations *)
-  | { path = ["Stdlib"]; base = "fst" } -> { path = []; base = "fst" }
-  | { path = ["Stdlib"]; base = "snd" } -> { path = []; base = "snd" }
-  (* List operations *)
-  | { path = ["Stdlib"]; base = "@" } -> { path = ["OCaml"; "Stdlib"]; base = "app" }
-  (* Input/output *)
-  (* Output functions on standard output *)
-  | { path = ["Stdlib"]; base = "print_char" } -> { path = ["OCaml"; "Stdlib"]; base = "print_char" }
-  | { path = ["Stdlib"]; base = "print_string" } -> { path = ["OCaml"; "Stdlib"]; base = "print_string" }
-  | { path = ["Stdlib"]; base = "print_int" } -> { path = ["OCaml"; "Stdlib"]; base = "print_int" }
-  | { path = ["Stdlib"]; base = "print_endline" } -> { path = ["OCaml"; "Stdlib"]; base = "print_endline" }
-  | { path = ["Stdlib"]; base = "print_newline" } -> { path = ["OCaml"; "Stdlib"]; base = "print_newline" }
-  (* Output functions on standard error *)
-  | { path = ["Stdlib"]; base = "prerr_char" } -> { path = ["OCaml"; "Stdlib"]; base = "prerr_char" }
-  | { path = ["Stdlib"]; base = "prerr_string" } -> { path = ["OCaml"; "Stdlib"]; base = "prerr_string" }
-  | { path = ["Stdlib"]; base = "prerr_int" } -> { path = ["OCaml"; "Stdlib"]; base = "prerr_int" }
-  | { path = ["Stdlib"]; base = "prerr_endline" } -> { path = ["OCaml"; "Stdlib"]; base = "prerr_endline" }
-  | { path = ["Stdlib"]; base = "prerr_newline" } -> { path = ["OCaml"; "Stdlib"]; base = "prerr_newline" }
-  (* Input functions on standard input *)
-  | { path = ["Stdlib"]; base = "read_line" } -> { path = ["OCaml"; "Stdlib"]; base = "read_line" }
-  | { path = ["Stdlib"]; base = "read_int" } -> { path = ["OCaml"; "Stdlib"]; base = "read_int" }
-  (* General output functions *)
-  (* General input functions *)
-  (* Operations on large files *)
-  (* References *)
-  (* Result type *)
-  | { path = ["Stdlib"]; base = "result" } -> { path = []; base = "sum" }
-  | { path = []; base = "Ok" } -> { path = []; base = "inl" }
-  | { path = []; base = "Error" } -> { path = []; base = "inr" }
-  (* Operations on format strings *)
-  (* Program termination *)
+  | [lib_name] when lib_name = stdlib_name ->
+    begin match base with
+    (* Exceptions *)
+    | "invalid_arg" -> { path = ["OCaml"; "Stdlib"]; base = "invalid_arg" }
+    | "failwith" -> { path = ["OCaml"; "Stdlib"]; base = "failwith" }
+    | "Exit" ->
+      { path = ["OCaml"; "Stdlib"]; base = "Exit" }
+    (* Comparisons *)
+    | "=" -> { path = []; base = "equiv_decb" }
+    | "<>" -> { path = []; base = "nequiv_decb" }
+    | "<" -> { path = ["OCaml"; "Stdlib"]; base = "lt" }
+    | ">" -> { path = ["OCaml"; "Stdlib"]; base = "gt" }
+    | "<=" -> { path = ["OCaml"; "Stdlib"]; base = "le" }
+    | ">=" -> { path = ["OCaml"; "Stdlib"]; base = "ge" }
+    | "compare" -> { path = ["OCaml"; "Stdlib"]; base = "compare" }
+    | "min" -> { path = ["OCaml"; "Stdlib"]; base = "min" }
+    | "max" -> { path = ["OCaml"; "Stdlib"]; base = "max" }
+    (* Boolean operations *)
+    | "not" -> { path = []; base = "negb" }
+    | "&&" -> { path = []; base = "andb" }
+    | "&" -> { path = []; base = "andb" }
+    | "||" -> { path = []; base = "orb" }
+    | "or" -> { path = []; base = "orb" }
+    (* Composition operators *)
+    | "|>" -> { path = ["OCaml"; "Stdlib"]; base = "reverse_apply" }
+    | "@@" -> { path = []; base = "apply" }
+    (* Integer arithmetic *)
+    | "~-" -> { path = ["Z"]; base = "opp" }
+    | "~+" -> { path = []; base = "" }
+    | "succ" -> { path = ["Z"]; base = "succ" }
+    | "pred" -> { path = ["Z"]; base = "pred" }
+    | "+" -> { path = ["Z"]; base = "add" }
+    | "-" -> { path = ["Z"]; base = "sub" }
+    | "*" -> { path = ["Z"]; base = "mul" }
+    | "/" -> { path = ["Z"]; base = "div" }
+    | "mod" -> { path = ["Z"]; base = "modulo" }
+    | "abs" -> { path = ["Z"]; base = "abs" }
+    (* Bitwise operations *)
+    | "land" -> { path = ["Z"]; base = "land" }
+    | "lor" -> { path = ["Z"]; base = "lor" }
+    | "lxor" -> { path = ["Z"]; base = "lxor" }
+    | "lsl" -> { path = ["Z"]; base = "shiftl" }
+    | "lsr" -> { path = ["Z"]; base = "shiftr" }
+    (* Floating-point arithmetic *)
+    (* String operations *)
+    | "^" -> { path = ["String"]; base = "append" }
+    (* Character operations *)
+    | "int_of_char" -> { path = ["OCaml"; "Stdlib"]; base = "int_of_char" }
+    | "char_of_int" -> { path = ["OCaml"; "Stdlib"]; base = "char_of_int" }
+    (* Unit operations *)
+    | "ignore" -> { path = ["OCaml"; "Stdlib"]; base = "ignore" }
+    (* String conversion functions *)
+    | "string_of_bool" -> { path = ["OCaml"; "Stdlib"]; base = "string_of_bool" }
+    | "bool_of_string" -> { path = ["OCaml"; "Stdlib"]; base = "bool_of_string" }
+    | "string_of_int" -> { path = ["OCaml"; "Stdlib"]; base = "string_of_int" }
+    | "int_of_string" -> { path = ["OCaml"; "Stdlib"]; base = "int_of_string" }
+    (* Pair operations *)
+    | "fst" -> { path = []; base = "fst" }
+    | "snd" -> { path = []; base = "snd" }
+    (* List operations *)
+    | "@" -> { path = ["OCaml"; "Stdlib"]; base = "app" }
+    (* Input/output *)
+    (* Output functions on standard output *)
+    | "print_char" -> { path = ["OCaml"; "Stdlib"]; base = "print_char" }
+    | "print_string" -> { path = ["OCaml"; "Stdlib"]; base = "print_string" }
+    | "print_int" -> { path = ["OCaml"; "Stdlib"]; base = "print_int" }
+    | "print_endline" -> { path = ["OCaml"; "Stdlib"]; base = "print_endline" }
+    | "print_newline" -> { path = ["OCaml"; "Stdlib"]; base = "print_newline" }
+    (* Output functions on standard error *)
+    | "prerr_char" -> { path = ["OCaml"; "Stdlib"]; base = "prerr_char" }
+    | "prerr_string" -> { path = ["OCaml"; "Stdlib"]; base = "prerr_string" }
+    | "prerr_int" -> { path = ["OCaml"; "Stdlib"]; base = "prerr_int" }
+    | "prerr_endline" -> { path = ["OCaml"; "Stdlib"]; base = "prerr_endline" }
+    | "prerr_newline" -> { path = ["OCaml"; "Stdlib"]; base = "prerr_newline" }
+    (* Input functions on standard input *)
+    | "read_line" -> { path = ["OCaml"; "Stdlib"]; base = "read_line" }
+    | "read_int" -> { path = ["OCaml"; "Stdlib"]; base = "read_int" }
+    (* General output functions *)
+    (* General input functions *)
+    (* Operations on large files *)
+    (* References *)
+    (* Result type *)
+    | "result" -> { path = []; base = "sum" }
+    (* Operations on format strings *)
+    (* Program termination *)
+    | _ -> default
+    end
 
   (* Bytes *)
-  | { path = ["Stdlib"; "Bytes"]; base = "cat" } -> { path = ["String"]; base = "append" }
-  | { path = ["Stdlib"; "Bytes"]; base = "concat" } -> { path = ["String"]; base = "concat" }
-  | { path = ["Stdlib"; "Bytes"]; base = "length" } -> { path = ["String"]; base = "length" }
-  | { path = ["Stdlib"; "Bytes"]; base = "sub" } -> { path = ["String"]; base = "sub" }
+  | [lib_name; "Bytes"] when lib_name = stdlib_name ->
+    begin match base with
+    | "cat" -> { path = ["String"]; base = "append" }
+    | "concat" -> { path = ["String"]; base = "concat" }
+    | "length" -> { path = ["String"]; base = "length" }
+    | "sub" -> { path = ["String"]; base = "sub" }
+    | _ -> default
+    end
 
   (* List *)
-  | { path = ["Stdlib"; "List"]; base = "exists" } -> { path = ["OCaml"; "List"]; base = "_exists" }
-  | { path = ["Stdlib"; "List"]; base = "exists2" } -> { path = ["OCaml"; "List"]; base = "_exists2" }
-  | { path = ["Stdlib"; "List"]; base = "length" } -> { path = ["OCaml"; "List"]; base = "length" }
-  | { path = ["Stdlib"; "List"]; base = "map" } -> { path = ["List"]; base = "map" }
-  | { path = ["Stdlib"; "List"]; base = "rev" } -> { path = ["List"]; base = "rev" }
+  | [lib_name; "List"] when lib_name = stdlib_name ->
+    begin match base with
+    | "exists" -> { path = ["OCaml"; "List"]; base = "_exists" }
+    | "exists2" -> { path = ["OCaml"; "List"]; base = "_exists2" }
+    | "length" -> { path = ["OCaml"; "List"]; base = "length" }
+    | "map" -> { path = ["List"]; base = "map" }
+    | "rev" -> { path = ["List"]; base = "rev" }
+    | _ -> default
+    end
 
   (* String *)
-  | { path = ["Stdlib"; "String"]; base = "length" } -> { path = ["OCaml"; "String"]; base = "length" }
+  | [lib_name; "String"] when lib_name = stdlib_name ->
+    begin match base with
+    | "length" -> { path = ["OCaml"; "String"]; base = "length" }
+    | _ -> default
+    end
 
-  | { path = path; base = base } -> { path = path; base = Name.convert base }
+  | _ -> default
 
 (** Lift a local name to a global name. *)
 let of_name (path : Name.t list) (base : Name.t) : t =
-  { path = path; base = base }
+  { path; base }
 
 (** Import an OCaml [Longident.t]. *)
 let of_long_ident (long_ident : Longident.t) : t =

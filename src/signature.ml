@@ -1,5 +1,4 @@
 (** An OCaml signature which will by transformed into a dependent record. *)
-open Sexplib.Std
 open SmartPrint
 open Typedtree
 open Monad.Notations
@@ -10,12 +9,10 @@ type item =
   | TypExistential of Name.t
   | TypSynonym of Name.t * Name.t list * Type.t
   | Value of Name.t * Name.t list * Type.t
-  [@@deriving sexp]
 
 type t = {
   items: item list;
   typ_params: unit Tree.t }
-  [@@deriving sexp]
 
 let of_signature (signature : signature) : t Monad.t =
   let of_signature_item (signature_item : signature_item) : item Monad.t =

@@ -21,11 +21,10 @@ depends: [
   "conf-ruby" {with-test}
   "coq" {>= "8.9"}
   "dune" {build}
-  "ocaml" {>= "4.07.0" & < "4.08.0"}
-  "ppx_deriving"
-  "ppx_sexp_conv"
-  "sexplib"
+  "menhir" {build}
+  "ocaml" {>= "4.02" & < "4.09"}
   "smart-print"
+  "yojson" {>= "1.6.0"}
 ]
 tags: [
   "keyword:compilation"

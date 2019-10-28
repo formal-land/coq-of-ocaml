@@ -1,8 +1,6 @@
-open Sexplib.Std
 open SmartPrint
 
 type t = Name.t list
-  [@@deriving sexp]
 
 let of_ocaml (path : Path.t) : t =
   let o = PathName.of_path path in

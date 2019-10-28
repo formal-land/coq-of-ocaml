@@ -6,7 +6,6 @@ open Monad.Notations
 type t =
   | Access of t * PathName.t
   | PathName of PathName.t
-  [@@deriving sexp]
 
 (** Shortcut to introduce new local variables for example. *)
 let of_name (name : Name.t) : t =

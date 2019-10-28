@@ -1,6 +1,5 @@
 (** Constants. *)
 open Asttypes
-open Sexplib.Std
 open SmartPrint
 open Monad.Notations
 
@@ -9,7 +8,6 @@ type t =
   | Int of int
   | Char of char
   | String of string
-  [@@deriving sexp]
 
 (** Import an OCaml constant. *)
 let of_constant (c : constant) : t Monad.t =

@@ -1,4 +1,3 @@
-open Sexplib.Std
 open SmartPrint
 open Typedtree
 open Monad.Notations
@@ -6,12 +5,10 @@ open Monad.Notations
 type defined_or_free =
   | Defined of Type.t
   | Free
-  [@@deriving sexp]
 
 type t =
   | Error of string
   | With of PathName.t * defined_or_free Tree.t
-  [@@deriving sexp]
 
 let of_ocaml_module_with_substitutions
   (long_ident_loc : Longident.t Asttypes.loc)
