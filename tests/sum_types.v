@@ -43,7 +43,7 @@ Definition s {A : Type} (function_parameter : A) : Z :=
 
 Parameter t3 : Type.
 
-Parameter t4 : forall {a : Type}, Type.
+Parameter t4 : forall (a : Type), Type.
 
 Inductive t5 : Type :=
 | C : t5.

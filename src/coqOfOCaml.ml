@@ -1,7 +1,3 @@
-open SmartPrint
-
-type ast = Structure.t list
-
 module Output = struct
   type t = {
     error_message : string option;
@@ -31,12 +27,12 @@ end
 let exp
   (env : Env.t)
   (loc : Loc.t)
-  (structure : Typedtree.structure)
+  (typedtree : Mtyper.typedtree)
   (source_file_name : string)
   (source_file_content : string)
-  : ast option * string option =
+  : Ast.t option * string option =
   let { MonadEval.Result.errors; value} =
-    MonadEval.eval source_file_name (Structure.of_structure structure) env loc in
+    MonadEval.eval source_file_name (Ast.of_typedtree typedtree) env loc in
   let error_message =
     match errors with
     | [] -> None
@@ -47,12 +43,12 @@ let exp
 let of_ocaml
   (env : Env.t)
   (loc : Loc.t)
-  (structure : Typedtree.structure)
+  (typedtree : Mtyper.typedtree)
   (source_file_name : string)
   (source_file_content : string)
   (output_file_name : string option)
   : Output.t =
-  let (ast, error_message) = exp env loc structure source_file_name source_file_content in
+  let (ast, error_message) = exp env loc typedtree source_file_name source_file_content in
   match ast with
   | None ->
     {
@@ -61,13 +57,7 @@ let of_ocaml
       success_message = None;
     }
   | Some ast ->
-    let document =
-      concat (List.map (fun d -> d ^^ newline) [
-        !^ "Require Import OCaml.OCaml." ^^ newline;
-        !^ "Local Open Scope Z_scope.";
-        !^ "Local Open Scope type_scope.";
-        !^ "Import ListNotations."]) ^^ newline ^^
-      Structure.to_coq ast in
+    let document = Ast.to_coq ast in
     let generated_file_name =
       match output_file_name with
       | None -> Filename.remove_extension source_file_name ^ ".v"
@@ -108,11 +98,21 @@ let main () =
   match !file_name with
   | None -> Arg.usage options usage_msg
   | Some file_name ->
+    let base_name = Filename.basename file_name in
+    let directory_name = Filename.dirname file_name in
     let merlin_file_name =
       match !merlin_file_name with
-      | None -> Filename.concat (Filename.dirname file_name) ".merlin"
+      | None -> Filename.concat directory_name ".merlin"
       | Some merlin_file_name -> merlin_file_name in
     let merlin_config = Mconfig.load_dotmerlins ~filenames:[merlin_file_name] Mconfig.initial in
+    let merlin_config = {
+      merlin_config with
+      query = {
+        merlin_config.query with
+        directory = directory_name;
+        filename = base_name
+      }
+    } in
 
     let file_channel = open_in file_name in
     let file_size = in_channel_length file_channel in
@@ -122,16 +122,10 @@ let main () =
 
     let pipeline = Mpipeline.make merlin_config file_source in
     let typing = Mpipeline.typer_result pipeline in
+    let typedtree = Mtyper.get_typedtree typing in
+    let initial_loc = Ast.get_initial_loc typedtree in
     let initial_env = Mtyper.get_env typing in
-    begin match Mtyper.get_typedtree typing with
-    | `Implementation structure ->
-    let initial_loc =
-      match structure.str_items with
-      | structure_item :: _ -> Loc.of_location structure_item.str_loc
-      | [] -> failwith "Unexpected empty file" in
-      let output = of_ocaml initial_env initial_loc structure file_name file_content !output_file_name in
-      Output.write output
-    | `Interface _ -> failwith "Unexpected interface"
-    end
+    let output = of_ocaml initial_env initial_loc typedtree file_name file_content !output_file_name in
+    Output.write output
 
 ;;main ()
