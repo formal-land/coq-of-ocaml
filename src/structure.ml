@@ -40,11 +40,11 @@ end
 type t =
   | Eval of Exp.t
   | Value of Value.t
+  | AbstractValue of Name.t * Name.t list * Type.t
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
   | Module of Name.t * t list
   | Signature of Name.t * Signature.t
-  [@@deriving sexp]
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -107,7 +107,10 @@ let rec of_structure (structure : structure) : t list Monad.t =
         (Some (Eval e))
         SideEffect
         "Top-level evaluations are considered as an error as sources of side-effects"
-    | Tstr_primitive _ -> raise None NotSupported "Structure item `primitive` not handled."
+    | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
+      let name = Name.of_ident val_id in
+      Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
+      return (Some (AbstractValue (name, Name.Set.elements free_typ_vars, typ)))
     | Tstr_typext _ -> raise None NotSupported "Structure item `typext` not handled."
     | Tstr_recmodule _ -> raise None NotSupported "Structure item `recmodule` not handled."
     | Tstr_class _ -> raise None NotSupported "Structure item `class` not handled."
@@ -123,6 +126,17 @@ let rec to_coq (defs : t list) : SmartPrint.t =
     match def with
     | Eval e -> Some (!^ "Compute" ^^ Exp.to_coq false e ^-^ !^ ".")
     | Value value -> Value.to_coq value
+    | AbstractValue (name, typ_vars, typ) ->
+      Some (
+        !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
+        (match typ_vars with
+        | [] -> empty
+        | _ :: _ ->
+          !^ "forall" ^^
+          nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")) ^-^ !^ ","
+        ) ^^
+        Type.to_coq None false typ ^-^ !^ "."
+      )
     | TypeDefinition typ_def -> Some (TypeDefinition.to_coq typ_def)
     | Open o -> Some (Open.to_coq o)
     | Module (name, defs) ->

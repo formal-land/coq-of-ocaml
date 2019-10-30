@@ -75,8 +75,9 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
     Name.to_coq name ^^
     (match typ_args with
     | [] -> empty
-    | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")) ^^
-    !^ ":=" ^^ Type.to_coq None false typ
+    | _ ->
+      parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")
+    ) ^^ !^ ":=" ^^ Type.to_coq None false typ
   | Value (name, typ_args, typ) ->
     Name.to_coq name ^^ !^ ":" ^^
     (match typ_args with

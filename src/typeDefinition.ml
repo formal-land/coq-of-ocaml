@@ -311,7 +311,7 @@ let to_coq (def : t) : SmartPrint.t =
       (match typ_args with
       | [] -> empty
       | _ :: _ ->
-        !^ "forall" ^^ braces (group (
+        !^ "forall" ^^ parens (group (
           separate space (List.map Name.to_coq typ_args) ^^
           !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
       !^ "Type" ^-^ !^ ".")
