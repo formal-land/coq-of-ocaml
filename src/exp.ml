@@ -71,8 +71,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
-  | Texp_ident (path, _, _) ->
-    MixedPath.of_path path >>= fun x ->
+  | Texp_ident (path, loc, _) ->
+    MixedPath.of_path path (Some loc.txt) >>= fun x ->
     return (Variable x)
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
@@ -152,8 +152,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
-  | Texp_construct (x, _, es) ->
-    let x = PathName.of_loc x in
+  | Texp_construct (_, constuctor_description, es) ->
+    let x = PathName.of_constructor_description constuctor_description in
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Constructor (x, es))
   | Texp_variant _ -> error_message (Error "variant") NotSupported "Variants not supported"
@@ -166,7 +166,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       match x_e with
       | None -> return None
       | Some (x, e) ->
-        let x = PathName.of_loc x in
+        let x = PathName.of_long_ident x.txt in
         of_expression typ_vars e >>= fun e ->
         return (Some (x, e))
     )) >>= fun fields ->
@@ -174,7 +174,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_record { extended_expression = Some _; _ } ->
     error_message (Error "record_substitution") NotSupported "Record substitution not handled"
   | Texp_field (e, x, _) ->
-    let x = PathName.of_loc x in
+    let x = PathName.of_long_ident x.txt in
     of_expression typ_vars e >>= fun e ->
     return (Field (e, x))
   | Texp_ifthenelse (e1, e2, e3) ->
@@ -300,8 +300,8 @@ and of_module_expr
   set_env mod_env (
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
-  | Tmod_ident (path, _) ->
-    MixedPath.of_path path >>= fun path ->
+  | Tmod_ident (path, loc) ->
+    MixedPath.of_path path (Some loc.txt) >>= fun path ->
     return (Variable path)
   | Tmod_structure structure ->
     let module_type =
@@ -458,7 +458,7 @@ and of_structure
     | Tstr_attribute _ -> return None)
   ))) >>= fun fields ->
   let fields = fields |> List.map (fun (error_message, name, field) ->
-    (error_message, PathName.of_path_and_name signature_path name, field)
+    (error_message, PathName.of_path_and_name_without_convert signature_path name, field)
   ) in
   return (Module (nb_of_existential_variables, fields))
 

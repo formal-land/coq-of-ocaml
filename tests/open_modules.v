@@ -15,7 +15,7 @@ Module N.
   
   Import M.
   
-  Definition y : Z := M.n.
+  Definition y : Z := n.
 End N.
 
 Definition b : bool := N.n.
