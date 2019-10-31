@@ -1,0 +1,34 @@
+<%= header("../", :tezos) %>
+<div class="row">
+  <div class="col-md-3"></div>
+  <div class="col-md-6">
+    <h2>Tezos</h2>
+    <p>These are the sources <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. The market cap of Tezos is more than US $500 millions at the time of writting. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+  </div>
+  <div class="col-md-3"></div>
+</div>
+<div class="row">
+  <% 4.times do |i| %>
+  <div class="col-md-3">
+    <ul>
+      <% for ocaml_name, _, _, _ in tezos_conversions[i * (tezos_conversions.size / 3)..(i + 1) * (tezos_conversions.size / 3) - 1] do %>
+      <li><a href="#<%= h(File.basename(ocaml_name, ".ml")) %>"><%= h(ocaml_name) %></a></li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+</div>
+<% for ocaml_name, ocaml_content, coq_name, coq_content in tezos_conversions do %>
+<hr />
+<div class="row" id="<%= h(File.basename(ocaml_name, ".ml")) %>" style="padding-bottom: 20px; padding-top: 20px;">
+  <div class="col-md-6">
+    <code><%= h(ocaml_name) %></code>
+    <pre><%= h(ocaml_content) %></pre>
+  </div>
+  <div class="col-md-6">
+    <code><%= h(coq_name) %></code>
+    <pre><%= h(coq_content) %></pre>
+  </div>
+</div>
+<% end %>
+<%= footer("../") %>
