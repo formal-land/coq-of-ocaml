@@ -24,13 +24,13 @@ class Test
 
   def coq_of_ocaml
     # We remove the fist line which is a success message
-    IO.popen(coq_of_ocaml_cmd).read.split("\n")[1..-1].join("\n") + "\n"
+    IO.popen(coq_of_ocaml_cmd, :external_encoding => "utf-8").read.split("\n")[1..-1].join("\n") + "\n"
   end
 
   def reference
     file_name = generated_name
     FileUtils.touch file_name unless File.exists?(file_name)
-    File.read(file_name)
+    File.read(file_name, :encoding => 'utf-8')
   end
 
   # Update the reference snapshot file.
