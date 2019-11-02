@@ -8,11 +8,11 @@ module Value = struct
   type t = Exp.t Exp.Definition.t
 
   (** Pretty-print a value definition to Coq. *)
-  let to_coq (value : t) : SmartPrint.t option =
+  let to_coq (value : t) : SmartPrint.t =
     match value.Exp.Definition.cases with
-    | [] -> None
+    | [] -> empty
     | _ :: _ ->
-      Some (separate (newline ^^ newline) (value.Exp.Definition.cases |> List.mapi (fun index (header, e) ->
+      separate (newline ^^ newline) (value.Exp.Definition.cases |> List.mapi (fun index (header, e) ->
         let firt_case = index = 0 in
         nest (
           (if firt_case then (
@@ -33,7 +33,7 @@ module Value = struct
           (match header.Exp.Header.typ with
           | None -> empty
           | Some typ -> !^ ": " ^-^ Type.to_coq None false typ) ^-^
-          !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ ".")
+          !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
 end
 
 (** A structure. *)
@@ -45,6 +45,7 @@ type t =
   | Open of Open.t
   | Module of Name.t * t list
   | Signature of Name.t * Signature.t
+  | ErrorMessage of string * t
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -122,27 +123,31 @@ let rec of_structure (structure : structure) : t list Monad.t =
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
-  let to_coq_one (def : t) : SmartPrint.t option =
+  let rec to_coq_one (def : t) : SmartPrint.t =
     match def with
-    | Eval e -> Some (!^ "Compute" ^^ Exp.to_coq false e ^-^ !^ ".")
+    | Eval e -> !^ "Compute" ^^ Exp.to_coq false e ^-^ !^ "."
     | Value value -> Value.to_coq value
     | AbstractValue (name, typ_vars, typ) ->
-      Some (
-        !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
-        (match typ_vars with
-        | [] -> empty
-        | _ :: _ ->
-          !^ "forall" ^^
-          nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")) ^-^ !^ ","
-        ) ^^
-        Type.to_coq None false typ ^-^ !^ "."
-      )
-    | TypeDefinition typ_def -> Some (TypeDefinition.to_coq typ_def)
-    | Open o -> Some (Open.to_coq o)
+      !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
+      (match typ_vars with
+      | [] -> empty
+      | _ :: _ ->
+        !^ "forall" ^^
+        nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")) ^-^ !^ ","
+      ) ^^
+      Type.to_coq None false typ ^-^ !^ "."
+    | TypeDefinition typ_def -> TypeDefinition.to_coq typ_def
+    | Open o -> Open.to_coq o
     | Module (name, defs) ->
-      Some (nest (
+      nest (
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
-        !^ "End" ^^ Name.to_coq name ^-^ !^ "."))
-    | Signature (name, signature) -> Some (Signature.to_coq_definition name signature) in
-  separate (newline ^^ newline) (Util.List.filter_map to_coq_one defs)
+        !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+      )
+    | Signature (name, signature) -> Signature.to_coq_definition name signature
+    | ErrorMessage (message, def) ->
+      nest (
+        !^ message ^^ newline ^^
+        to_coq_one def
+      ) in
+  separate (newline ^^ newline) (defs |> List.map to_coq_one)

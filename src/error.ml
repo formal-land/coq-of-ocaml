@@ -1,4 +1,5 @@
 (** Error messages. *)
+open SmartPrint
 
 module Category = struct
   type t =
@@ -22,6 +23,9 @@ type t = {
   loc : Loc.t;
   message : string;
 }
+
+let to_comment (error_message : string) : SmartPrint.t =
+  !^ ("(* ❌ " ^ List.hd (String.split_on_char '\n' error_message) ^ " *)")
 
 (** Display a warning. *)
 let warn (file_name : string) (loc : Loc.t) (message : string) : unit =
