@@ -6,7 +6,7 @@
     <title>Coq of OCaml</title>
     <link rel="icon" data-emoji="🐓" type="image/png">
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -37,13 +37,16 @@
   <div class="col-md-3"></div>
   <div class="col-md-6">
     <h2>Coq of OCaml</h2>
-    <p>Some demos of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
-    <dl>
-      <dt><a href="kernel/">Kernel of Coq</a></dt>
-      The heart of the <a href="https://coq.inria.fr/">Coq</a> system.
-      <dt><a href="tezos/">Tezos</a></dt>
-      The sources of <a href="https://tezos.com/">Tezos</a>, a crypto-currency with smart-contracts and an upgradable protocol.
-    </dl>
+    <p>Some demos of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>. We use it to verify the implementation of <a href="https://tezos.gitlab.io/whitedoc/michelson.html">Michelson</a>, the language to write smart-contracts in the crypto-currency <a href="https://tezos.com/">Tezos</a>. Contributors needed.</p>
+
+    <h3>Examples</h3>
+    <ul>
+      <li><a href="kernel/">the kernel of Coq</a> (30.000 lines)</li>
+      <li><a href="tezos/">Tezos</a> (200.000 lines)</li>
+    </ul>
+    <p>We import the purely functional part of <a href="https://ocaml.org/">OCaml</a> to <a href="https://coq.inria.fr/">Coq</a>. We aim to generate readable Coq files with no encodings. The semantics of the generated files may not be exactly the same as the sources. One should do manual reviews to assert that the generated files are a reasonable formalization of the sources. We always generate something, even in case of errors&nbsp;(which are explicitely notified).</p>
+    <p>We compile OCaml projects by pluging into <a href="https://github.com/ocaml/merlin">Merlin</a>. This means that if you are using Merlin you can run <code>coq-of-ocaml</code>. The method to verify the termination of generated fixpoints is praying. The package <a href="https://github.com/SimonBoulier/TypingFlags">coq-typing-flags</a> can disable termination checks in Coq. Similarly, matching on <a href="https://caml.inria.fr/pub/docs/manual-ocaml/manual033.html">GADTs</a> may or may not work. For modularity, we support modules without functors as namespaces, and first-class modules encoded into dependent records. We do not support functors. We generate axioms for&nbsp;<code>.mli</code> files as it may help formalizations.</p>
+    <p>We do not support yet cross-referencing between the generated Coq files.</p>
   </div>
   <div class="col-md-3"></div>
 </div>
