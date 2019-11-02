@@ -25,12 +25,14 @@ kernel_conversions.sort_by! {|ocaml_name, _, _, _| ocaml_name}
 tezos_conversions = []
 Dir.glob(File.join(tezos_directory, "**", "*.ml*")).each do |ocaml_file_name|
   ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(tezos_directory)).to_s
-  ocaml_content = File.read(ocaml_file_name)
+  ocaml_content = File.read(ocaml_file_name, :encoding => 'utf-8')
   coq_file_name = ocaml_file_name + ".v"
   coq_name = ocaml_name + ".v"
   if File.exists?(coq_file_name) then
-    coq_content = File.read(coq_file_name, :encoding => 'iso-8859-1').encode("utf-8")
-    tezos_conversions << [ocaml_name, ocaml_content, coq_name, coq_content]
+    coq_content = File.read(coq_file_name, :encoding => 'utf-8')
+    if coq_content.valid_encoding? then
+      tezos_conversions << [ocaml_name, ocaml_content, coq_name, coq_content]
+    end
   end
 end
 tezos_conversions.sort_by! {|ocaml_name, _, _, _| ocaml_name}
