@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'erb'
 require 'pathname'
 include(ERB::Util)
@@ -31,6 +32,7 @@ Dir.glob(File.join(tezos_directory, "**", "*.ml*")).each do |ocaml_file_name|
   if File.exists?(coq_file_name) then
     coq_content = File.read(coq_file_name, :encoding => 'utf-8')
     if coq_content.valid_encoding? then
+      coq_content.gsub!("❌", "🔥")
       tezos_conversions << [ocaml_name, ocaml_content, coq_name, coq_content]
     end
   end
