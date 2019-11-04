@@ -3,6 +3,8 @@
 
 [![travis status](https://img.shields.io/travis/clarus/coq-of-ocaml/master.svg?label=travis-ci)](https://travis-ci.org/clarus/coq-of-ocaml)
 
+**Online examples on https://clarus.github.io/coq-of-ocaml/**
+
 Start with the file `main.ml`:
 ```ocaml
 type 'a tree =
