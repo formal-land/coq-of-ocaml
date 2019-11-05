@@ -45,7 +45,11 @@ type t =
   | Open of Open.t
   | Module of Name.t * t list
   | Signature of Name.t * Signature.t
+  | Error of string
   | ErrorMessage of string * t
+
+let error_message (structure : t) (category : Error.Category.t) (message : string) : t option Monad.t =
+  raise (Some (ErrorMessage (message, structure))) category message
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -60,7 +64,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       TypeDefinition.of_ocaml typs >>= fun def ->
       return (Some (TypeDefinition def))
     | Tstr_exception _ ->
-      raise None SideEffect (
+      error_message (Error "exception") SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
         "Alternative: using sum types (\"option\", \"result\", ...) to represent error cases."
       )
@@ -87,7 +91,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       of_structure structure >>= fun structures ->
       return (Some (Module (name, structures)))
     | Tstr_modtype { mtd_type = None; _ } ->
-      raise None NotSupported "Abstract module types not handled."
+      error_message (Error "abstract_module_type") NotSupported "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
       let name = Name.of_ident mtd_id in
       begin
@@ -95,28 +99,28 @@ let rec of_structure (structure : structure) : t list Monad.t =
         | Tmty_signature signature ->
           Signature.of_signature signature >>= fun signature ->
           return (Some (Signature (name, signature)))
-        | _ -> raise None NotSupported "This kind of signature is not handled."
+        | _ -> error_message (Error "unhandled_module_type") NotSupported "This kind of signature is not handled."
       end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
-      raise None NotSupported "Functors are not handled."
+      error_message (Error "functor") NotSupported "Functors are not handled."
     | Tstr_module { mb_expr = { mod_desc = Tmod_apply _; _ }; _ } ->
-      raise None NotSupported "Applications of functors are not handled."
-    | Tstr_module _ -> raise None NotSupported "This kind of module is not handled."
+      error_message (Error "functor_application") NotSupported "Applications of functors are not handled."
+    | Tstr_module _ -> error_message (Error "unhandled_module") NotSupported "This kind of module is not handled."
     | Tstr_eval (e, _) ->
       Exp.of_expression Name.Map.empty e >>= fun e ->
-      raise
-        (Some (Eval e))
+      error_message
+        (Eval e)
         SideEffect
         "Top-level evaluations are considered as an error as sources of side-effects"
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
       let name = Name.of_ident val_id in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
       return (Some (AbstractValue (name, Name.Set.elements free_typ_vars, typ)))
-    | Tstr_typext _ -> raise None NotSupported "Structure item `typext` not handled."
-    | Tstr_recmodule _ -> raise None NotSupported "Structure item `recmodule` not handled."
-    | Tstr_class _ -> raise None NotSupported "Structure item `class` not handled."
-    | Tstr_class_type _ -> raise None NotSupported "Structure item `class_type` not handled."
-    | Tstr_include _ -> raise None NotSupported "Structure item `include` not handled."
+    | Tstr_typext _ -> error_message (Error "type_extension") NotSupported "Structure item `typext` not handled."
+    | Tstr_recmodule _ -> error_message (Error "recursive_module") NotSupported "Structure item `recmodule` not handled."
+    | Tstr_class _ -> error_message (Error "class") NotSupported "Structure item `class` not handled."
+    | Tstr_class_type _ -> error_message (Error "class_type") NotSupported "Structure item `class_type` not handled."
+    | Tstr_include _ -> error_message (Error "include") NotSupported "Structure item `include` not handled."
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return None)) in
   structure.str_items |> Monad.List.filter_map of_structure_item
@@ -145,9 +149,10 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         !^ "End" ^^ Name.to_coq name ^-^ !^ "."
       )
     | Signature (name, signature) -> Signature.to_coq_definition name signature
+    | Error message -> !^ message
     | ErrorMessage (message, def) ->
       nest (
-        !^ message ^^ newline ^^
+        Error.to_comment message ^^ newline ^^
         to_coq_one def
       ) in
   separate (newline ^^ newline) (defs |> List.map to_coq_one)
