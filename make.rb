@@ -17,6 +17,7 @@ Dir.glob(File.join(kernel_directory, "*.ml")).each do |ocaml_file_name|
   coq_name = File.basename(coq_file_name)
   if File.exists?(coq_file_name) then
     coq_content = File.read(coq_file_name)
+    coq_content.gsub!("❌", "🔥")
     kernel_conversions << [ocaml_name, ocaml_content, coq_name, coq_content]
   end
 end
