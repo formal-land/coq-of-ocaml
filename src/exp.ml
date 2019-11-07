@@ -41,6 +41,7 @@ type t =
     (** The value of a first-class module inside another module (no existentials). There may be error messages. *)
   | ModuleUnpack of t (** Open a first-class module *)
   | Error of string (** An error message for unhandled expressions. *)
+  | ErrorArray of t list (** An error produced by an array of elements. *)
   | ErrorTyp of Type.t (** An error composed of a type. *)
   | ErrorSeq of t * t (** A sequence of two expressions (an error in Coq). *)
   | ErrorMessage of t * string (** An expression together with an error message. *)
@@ -170,7 +171,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
         return (Some (x, e))
     )) >>= fun fields ->
     return (Record fields)
-  | Texp_record _ -> error_message (Error "record") NotSupported "This kind of record expression is not supported"
+  | Texp_record { extended_expression = Some _; _ } ->
+    error_message (Error "record_substitution") NotSupported "Record substitution not handled"
   | Texp_field (e, x, _) ->
     let x = PathName.of_loc x in
     of_expression typ_vars e >>= fun e ->
@@ -192,15 +194,25 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
         "Sequences of instructions are not handled (operator \";\")\n\n" ^
         "Alternative: use a monad to sequence side-effects."
       )
-  | Texp_try _ ->
-    error_message (Error "try") SideEffect (
-      "Try-with and exceptions are not handled.\n\n" ^
-      "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
-    )
-  | Texp_setfield _ -> error_message (Error "set_field") SideEffect "Set field not handled."
+  | Texp_try (e, _) ->
+    of_expression typ_vars e >>= fun e ->
+    error_message
+      (Apply (Error "try", [e]))
+      SideEffect
+      (
+        "Try-with are not handled\n\n" ^
+        "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
+      )
+  | Texp_setfield (e_record, _, { lbl_name; _ }, e) ->
+    of_expression typ_vars e_record >>= fun e_record ->
+    of_expression typ_vars e >>= fun e ->
+    error_message
+      (Apply (Error "set_record_field", [e_record; Constant (Constant.String lbl_name); e]))
+      SideEffect
+      "Set record field not handled."
   | Texp_array es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
-    error_message (Tuple es) NotSupported "Arrays not handled."
+    error_message (ErrorArray es) NotSupported "Arrays not handled."
   | Texp_while _ -> error_message (Error "while") SideEffect "While loops not handled."
   | Texp_for _ -> error_message (Error "for") SideEffect "For loops not handled."
   | Texp_send _ -> error_message (Error "send") NotSupported "Sending method message is not handled"
@@ -218,10 +230,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_letexception _ -> error_message (Error "let_exception") SideEffect "Let of exception is not handled"
   | Texp_assert e ->
     of_expression typ_vars e >>= fun e ->
-    error_message e SideEffect "Assert instruction is not handled."
+    error_message (Apply (Error "assert", [e])) SideEffect "Assert instruction is not handled."
   | Texp_lazy e ->
     of_expression typ_vars e >>= fun e ->
-    error_message e SideEffect "Lazy expressions are not handled"
+    error_message (Apply (Error "lazy", [e])) SideEffect "Lazy expressions are not handled"
   | Texp_object _ -> error_message (Error "object") NotSupported "Creation of objects is not handled"
   | Texp_pack module_expr -> of_module_expr typ_vars module_expr None
   | Texp_unreachable ->
@@ -551,6 +563,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )
   | ModuleUnpack e -> Pp.parens paren @@ nest (!^ "projT2" ^^ to_coq true e)
   | Error message -> !^ message
+  | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Type.to_coq None paren typ
   | ErrorSeq (e1, e2) ->
     Pp.parens paren @@ group (to_coq false e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
