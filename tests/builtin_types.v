@@ -17,10 +17,6 @@ Definition c4 : ascii := """" % char.
 Definition s : string := "hi
 	:)""" % string.
 
-Definition f : Z :=
-  (* ❌ Float constant 1.0 is approximated by the integer 1 *)
-  1.
-
 Definition b1 : bool := false.
 
 Definition b2 : bool := true.

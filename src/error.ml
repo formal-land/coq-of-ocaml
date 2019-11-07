@@ -30,7 +30,7 @@ let to_comment (error_message : string) : SmartPrint.t =
 (** Display a warning. *)
 let warn (file_name : string) (loc : Loc.t) (message : string) : unit =
   let message = "Warning: " ^ message in
-  prerr_endline (Loc.to_string file_name loc ^ ": " ^ message)
+  print_endline (Loc.to_string file_name loc ^ ": " ^ message)
 
 let pad
   (width : int)
@@ -84,7 +84,7 @@ let display_error
   message ^
   "\n\n"
 
-let display_errors
+let display_errors_human
   (source_file_name : string)
   (source_file_content : string)
   (errors : t list)
@@ -104,3 +104,28 @@ let display_errors
         colorize "31" (string_of_int nb_errors ^ (if nb_errors = 1 then " error" else " errors")) ^
         colorize "34;1" " ]---")
     ) ^ "\n"
+
+let display_errors_json (errors : t list) : string =
+  Yojson.pretty_to_string ~std:true (
+    `List (errors |> List.map (fun { category; loc; message } ->
+      `Assoc [
+        ("category", `String (Category.to_string category));
+        ("location", `Assoc [
+          ("end", `Int loc.end_.character);
+          ("start", `Int loc.start.character);
+        ]);
+        ("message", `String message);
+      ]
+    ))
+  )
+
+let display_errors
+  (json_mode : bool)
+  (source_file_name : string)
+  (source_file_content : string)
+  (errors : t list)
+  : string =
+  if not json_mode then
+    display_errors_human source_file_name source_file_content errors
+  else
+    display_errors_json errors
