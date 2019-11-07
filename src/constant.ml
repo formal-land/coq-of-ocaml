@@ -61,4 +61,4 @@ let rec to_coq (c : t) : SmartPrint.t =
       else
         Buffer.add_char b c);
     nest (double_quotes (!^ (Buffer.contents b)) ^^ !^ "%" ^^ !^ "string")
-  | Warn (c, message) -> nest (Error.to_comment message ^^ to_coq c)
+  | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)

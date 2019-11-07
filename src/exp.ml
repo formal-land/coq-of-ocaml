@@ -553,5 +553,5 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Error message -> !^ message
   | ErrorTyp typ -> Type.to_coq None paren typ
   | ErrorSeq (e1, e2) ->
-    Pp.parens paren @@ nest (to_coq false e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
-  | ErrorMessage (e, error_message) -> nest (Error.to_comment error_message ^^ to_coq paren e)
+    Pp.parens paren @@ group (to_coq false e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
+  | ErrorMessage (e, error_message) -> group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
