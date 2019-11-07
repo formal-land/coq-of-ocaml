@@ -12,7 +12,7 @@
   <div class="col-md-2">
     <ul>
       <% for ocaml_name, nb_errors, _, _, _ in kernel_conversions[i * (kernel_conversions.size / 5)..(i + 1) * (kernel_conversions.size / 5) - 1] do %>
-      <li><a href="#<%= h(File.basename(ocaml_name, ".ml")) %>"><%= h(ocaml_name) %></a>&nbsp;<span class="label label-<%= nb_errors == 0 ? "success" : "danger" %>"><%= nb_errors == 0 ? "success" : "#{nb_errors} error#{nb_errors != 1 ? "s" : ""}" %></span></li>
+      <li><a href="#<%= h(File.basename(ocaml_name, ".ml")) %>"><%= h(ocaml_name) %></a>&nbsp;<%= nb_errors == 0 ? "<span class=\"label label-success\">✓</span>" : "<span class=\"label label-danger\">#{nb_errors}</span>" %></li>
       <% end %>
     </ul>
   </div>

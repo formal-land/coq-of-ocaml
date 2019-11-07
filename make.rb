@@ -30,7 +30,7 @@ def mark_text(text, errors)
     if fragment[:errors].size == 0 then
       output << encoded_text
     else
-      output << "<abbr class=\"mark\" title=\"#{encoded_errors}\">#{encoded_text}</abbr>"
+      output << "<abbr class=\"mark-error\" title=\"#{encoded_errors}\">#{encoded_text}</abbr>"
     end
   end
   output

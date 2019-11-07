@@ -1,0 +1,8 @@
+.mark-error {
+  background-color: #ff4136;
+  border-bottom: none !important;
+  color: white;
+  font-weight: 500;
+  padding: .2em;
+  text-decoration: none !important;
+}
