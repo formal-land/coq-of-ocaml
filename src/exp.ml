@@ -35,11 +35,16 @@ type t =
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of int * (PathName.t * t) list (** The value of a first-class module. *)
-  | ModuleNested of (PathName.t * t) list (** The value of a first-class module inside another module (no existentials). *)
+  | Module of int * (string option * PathName.t * t) list
+    (** The value of a first-class module. There may be error messages. *)
+  | ModuleNested of (string option * PathName.t * t) list
+    (** The value of a first-class module inside another module (no existentials). There may be error messages. *)
   | ModuleUnpack of t (** Open a first-class module *)
   | Error of string (** An error message for unhandled expressions. *)
+  | ErrorArray of t list (** An error produced by an array of elements. *)
+  | ErrorTyp of Type.t (** An error composed of a type. *)
   | ErrorSeq of t * t (** A sequence of two expressions (an error in Coq). *)
+  | ErrorMessage of t * string (** An expression together with an error message. *)
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -49,6 +54,17 @@ let rec open_function (e : t) : Name.t list * t =
     let (xs, e) = open_function e in
     (x :: xs, e)
   | _ -> ([], e)
+
+let error_message (e : t) (category : Error.Category.t) (message : string) : t Monad.t =
+  raise (ErrorMessage (e, message)) category message
+
+let error_message_in_module
+  (field : string)
+  (e : t)
+  (category : Error.Category.t)
+  (message : string)
+  : (string option * string * t) option Monad.t =
+  raise (Some (Some message, field, e)) category message
 
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.t =
@@ -96,7 +112,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     (e_xs |> Monad.List.map (fun (_, e_x) ->
       match e_x with
       | Some e_x -> of_expression typ_vars e_x
-      | None -> raise (Error "expected_argument") Unexpected "expected an argument")
+      | None -> error_message (Error "expected_argument") Unexpected "expected an argument")
     ) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
@@ -125,7 +141,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
         raise None NotSupported (
           "Pattern-matching on exceptions not supported\n\n" ^
           "Only the special case `| exception _ when false -> ...` is supported for default value of GADT pattern-matching"
-        ))
+        )
+      )
     )) >>= fun default_values ->
     let default_value =
       match default_values with
@@ -139,7 +156,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     let x = PathName.of_loc x in
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Constructor (x, es))
-  | Texp_variant _ -> raise (Error "variant") NotSupported "Variants not supported"
+  | Texp_variant _ -> error_message (Error "variant") NotSupported "Variants not supported"
   | Texp_record { fields = fields; extended_expression = None; _ } ->
     (Array.to_list fields |> Monad.List.filter_map (fun (_, definition) ->
       (match definition with
@@ -154,7 +171,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
         return (Some (x, e))
     )) >>= fun fields ->
     return (Record fields)
-  | Texp_record _ -> raise (Error "record") NotSupported "This kind of record expression is not supported"
+  | Texp_record { extended_expression = Some _; _ } ->
+    error_message (Error "record_substitution") NotSupported "Record substitution not handled"
   | Texp_field (e, x, _) ->
     let x = PathName.of_loc x in
     of_expression typ_vars e >>= fun e ->
@@ -169,49 +187,59 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_sequence (e1, e2) ->
     of_expression typ_vars e1 >>= fun e1 ->
     of_expression typ_vars e2 >>= fun e2 ->
-    raise
+    error_message
       (ErrorSeq (e1, e2))
       SideEffect
       (
         "Sequences of instructions are not handled (operator \";\")\n\n" ^
         "Alternative: use a monad to sequence side-effects."
       )
-  | Texp_try _ ->
-    raise (Error "try") SideEffect (
-      "Try-with and exceptions are not handled.\n\n" ^
-      "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
-    )
-  | Texp_setfield _ -> raise (Error "set_field") SideEffect "Set field not handled."
+  | Texp_try (e, _) ->
+    of_expression typ_vars e >>= fun e ->
+    error_message
+      (Apply (Error "try", [e]))
+      SideEffect
+      (
+        "Try-with are not handled\n\n" ^
+        "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
+      )
+  | Texp_setfield (e_record, _, { lbl_name; _ }, e) ->
+    of_expression typ_vars e_record >>= fun e_record ->
+    of_expression typ_vars e >>= fun e ->
+    error_message
+      (Apply (Error "set_record_field", [e_record; Constant (Constant.String lbl_name); e]))
+      SideEffect
+      "Set record field not handled."
   | Texp_array es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
-    raise (Tuple es) NotSupported "Arrays not handled."
-  | Texp_while _ -> raise (Error "while") SideEffect "While loops not handled."
-  | Texp_for _ -> raise (Error "for") SideEffect "For loops not handled."
-  | Texp_send _ -> raise (Error "send") NotSupported "Sending method message is not handled"
-  | Texp_new _ -> raise (Error "new") NotSupported "Creation of new objects is not handled"
+    error_message (ErrorArray es) NotSupported "Arrays not handled."
+  | Texp_while _ -> error_message (Error "while") SideEffect "While loops not handled."
+  | Texp_for _ -> error_message (Error "for") SideEffect "For loops not handled."
+  | Texp_send _ -> error_message (Error "send") NotSupported "Sending method message is not handled"
+  | Texp_new _ -> error_message (Error "new") NotSupported "Creation of new objects is not handled"
   | Texp_instvar _ ->
-    raise (Error "instance_variable") NotSupported "Creating an instance variable is not handled"
+    error_message (Error "instance_variable") NotSupported "Creating an instance variable is not handled"
   | Texp_setinstvar _ ->
-    raise (Error "set_instance_variable") SideEffect "Setting an instance variable is not handled"
-  | Texp_override _ -> raise (Error "override") NotSupported "Overriding is not handled"
+    error_message (Error "set_instance_variable") SideEffect "Setting an instance variable is not handled"
+  | Texp_override _ -> error_message (Error "override") NotSupported "Overriding is not handled"
   | Texp_letmodule (x, _, module_expr, e) ->
     let x = Name.of_ident x in
     of_module_expr typ_vars module_expr None >>= fun value ->
     of_expression typ_vars e >>= fun e ->
     return (LetVar (x, value, e))
-  | Texp_letexception _ -> raise (Error "let_exception") SideEffect "Let of exception is not handled"
+  | Texp_letexception _ -> error_message (Error "let_exception") SideEffect "Let of exception is not handled"
   | Texp_assert e ->
     of_expression typ_vars e >>= fun e ->
-    raise e SideEffect "Assert instruction is not handled."
+    error_message (Apply (Error "assert", [e])) SideEffect "Assert instruction is not handled."
   | Texp_lazy e ->
     of_expression typ_vars e >>= fun e ->
-    raise e SideEffect "Lazy expressions are not handled"
-  | Texp_object _ -> raise (Error "object") NotSupported "Creation of objects is not handled"
+    error_message (Apply (Error "lazy", [e])) SideEffect "Lazy expressions are not handled"
+  | Texp_object _ -> error_message (Error "object") NotSupported "Creation of objects is not handled"
   | Texp_pack module_expr -> of_module_expr typ_vars module_expr None
   | Texp_unreachable ->
-    raise (Error "unreachable") NotSupported "Unreachable expressions are not supported"
+    error_message (Error "unreachable") NotSupported "Unreachable expressions are not supported"
   | Texp_extension_constructor _ ->
-    raise (Error "extension") NotSupported "Construction of extensions is not handled"))
+    error_message (Error "extension") NotSupported "Construction of extensions is not handled"))
 
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
@@ -289,7 +317,7 @@ and of_module_expr
       let signature_path = Path.Pident (Ident.create "unknown_signature_name") in
       let nb_of_existential_variables = 1 in
       of_structure typ_vars signature_path nb_of_existential_variables structure >>= fun value ->
-      raise
+      error_message
         value
         FirstClassModule
         (
@@ -300,12 +328,12 @@ and of_module_expr
         )
     end
   | Tmod_functor _ ->
-    raise
+    error_message
       (Error "unsupported_functor")
       NotSupported
       "Functors are not supported for first-class module values"
   | Tmod_apply _ ->
-    raise
+    error_message
       (Error "unsupported_functor_application")
       NotSupported
       "Applications of functors are not supported for first-class module values"
@@ -330,42 +358,108 @@ and of_structure
     set_env item.str_env (
     set_loc (Loc.of_location item.str_loc) (
     match item.str_desc with
-    | Tstr_eval _ -> raise None SideEffect "Top-level evaluation is not handled"
+    | Tstr_eval (e, _) ->
+      of_expression typ_vars e >>= fun e ->
+      error_message_in_module
+        "_"
+        e
+        SideEffect
+        "Top-level evaluation is not handled"
     | Tstr_value (rec_flag, cases) ->
       import_let_fun Name.Map.empty rec_flag cases >>= fun def ->
       begin match def with
       | { is_rec = Recursivity.New true; _ } ->
-        raise None NotSupported "Recursivity not handled in first-class module values"
+        error_message_in_module
+          "_"
+          (Error "recursive")
+          NotSupported
+          "Recursivity not handled in first-class module values"
       | { cases = [(header, value)]; _ } ->
         begin match header with
         | { name; typ_vars = []; args = []; _ } ->
-          return (Some (name, value))
-        | _ ->
-          raise
-            None
+          return (Some (None, name, value))
+        | { name; _ } ->
+          error_message_in_module
+            name
+            (Error "unhandled")
             NotSupported
-            "This kind of definition of value for first-class modules is not handled (yet)"
+            "This kind of definition of value for first-class modules is not handled"
         end
-      | _ -> raise None NotSupported "Mutual definitions not handled in first-class module values"
+      | _ ->
+        error_message_in_module
+          "_"
+          (Error "mutually_recursive")
+          NotSupported
+          "Mutual definitions not handled in first-class module values"
       end
-    | Tstr_primitive _ -> raise None NotSupported "Primitive not handled"
+    | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
+      let name = Name.of_ident val_id in
+      Type.of_typ_expr true typ_vars val_type >>= fun (typ, _, _) ->
+      error_message_in_module
+        name
+        (ErrorTyp typ)
+        NotSupported
+        "Primitive not handled"
     | Tstr_type _ -> return None
-    | Tstr_typext _ -> raise None NotSupported "Type extension not handled"
-    | Tstr_exception _ -> raise None SideEffect "Exception not handled"
+    | Tstr_typext _ ->
+      error_message_in_module
+        "_"
+        (Error "type_extension")
+        NotSupported
+        "Type extension not handled"
+    | Tstr_exception { ext_id; _ } ->
+      let name = Name.of_ident ext_id in
+      error_message_in_module
+        name
+        (Error "exception")
+        SideEffect
+        "Exception not handled"
     | Tstr_module { mb_id; mb_expr; _ } ->
       let name = Name.of_ident mb_id in
       of_module_expr typ_vars mb_expr None >>= fun value ->
-      return (Some (name, value))
-    | Tstr_recmodule _ -> raise None NotSupported "Recursive modules not handled"
-    | Tstr_modtype _ ->
-      raise None NotSupported "Definition of signatures inside first-class module value is not handled"
-    | Tstr_open _ -> raise None NotSupported "Open not handled in first-class module value"
-    | Tstr_class _ -> raise None NotSupported "Object oriented programming not handled"
-    | Tstr_class_type _ -> raise None NotSupported "Object oriented programming not handled"
-    | Tstr_include _ -> raise None NotSupported "Include is not handled inside first-class module values"
+      return (Some (None, name, value))
+    | Tstr_recmodule _ ->
+      error_message_in_module
+        "_"
+        (Error "Recursive module")
+        NotSupported
+        "Recursive modules not handled"
+    | Tstr_modtype { mtd_id; _ } ->
+      let name = Name.of_ident mtd_id in
+      error_message_in_module
+        name
+        (Error "module_type")
+        NotSupported
+        "Definition of signatures inside first-class module value is not handled"
+    | Tstr_open _ ->
+      error_message_in_module
+        "_"
+        (Error "open")
+        NotSupported
+        "Open not handled in first-class module value"
+    | Tstr_class _ ->
+      error_message_in_module
+        "_"
+        (Error "class")
+        NotSupported
+        "Object oriented programming not handled"
+    | Tstr_class_type _ ->
+      error_message_in_module
+        "_"
+        (Error "class_type")
+        NotSupported
+        "Object oriented programming not handled"
+    | Tstr_include _ ->
+      error_message_in_module
+        "_"
+        (Error "include")
+        NotSupported
+        "Include is not handled inside first-class module values"
     | Tstr_attribute _ -> return None)
   ))) >>= fun fields ->
-  let fields = fields |> List.map (fun (name, field) -> (PathName.of_path_and_name signature_path name, field)) in
+  let fields = fields |> List.map (fun (error_message, name, field) ->
+    (error_message, PathName.of_path_and_name signature_path name, field)
+  ) in
   return (Module (nb_of_existential_variables, fields))
 
 let rec to_coq_n_uplet_of_underscores (n : int) : SmartPrint.t =
@@ -447,7 +541,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "existT" ^^ !^ "_" ^^ to_coq_n_uplet_of_underscores nb_of_existential_variables ^^
       nest (
         !^ "{|" ^^ newline ^^
-        indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, e) ->
+        indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (error_message, x, e) ->
+          (match error_message with
+          | None -> empty
+          | Some error_message -> Error.to_comment error_message ^^ newline) ^^
           nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))
         ) ^^ newline ^^
         !^ "|}"
@@ -456,12 +553,18 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | ModuleNested fields ->
     Pp.parens paren @@ nest (
       !^ "{|" ^^ newline ^^
-      indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, e) ->
-        nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))
-      ) ^^ newline ^^
+      indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (error_message, x, e) ->
+        (match error_message with
+        | None -> empty
+        | Some error_message -> Error.to_comment error_message ^^ newline) ^^
+        nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e)
+    )) ^^ newline ^^
       !^ "|}"
     )
   | ModuleUnpack e -> Pp.parens paren @@ nest (!^ "projT2" ^^ to_coq true e)
   | Error message -> !^ message
+  | ErrorArray es -> OCaml.list (to_coq false) es
+  | ErrorTyp typ -> Type.to_coq None paren typ
   | ErrorSeq (e1, e2) ->
-    Pp.parens paren @@ nest (to_coq false e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
+    Pp.parens paren @@ group (to_coq false e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
+  | ErrorMessage (e, error_message) -> group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)

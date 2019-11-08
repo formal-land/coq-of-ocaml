@@ -1,16 +1,19 @@
 module Position = struct
   type t = {
+    character : int;
     line : int;
   }
 
-  let of_position (position : Lexing.position) : t =
-    { line = position.Lexing.pos_lnum }
+  let of_position (position : Lexing.position) : t = {
+    character = position.Lexing.pos_cnum;
+    line = position.Lexing.pos_lnum;
+  }
 end
 
 type t = {
   end_ : Position.t;
   start : Position.t;
-  }
+}
 
 let to_string (file_name : string) (loc : t) : string =
   file_name ^ "," ^ " line " ^ string_of_int loc.start.Position.line

@@ -27,7 +27,7 @@ let escape_operator_character (c : char) : string =
   | '^' -> "caret"
   | '|' -> "pipe"
   | '&' -> "and"
-  | '+' -> "plus"
+  | '+' -> "p"
   | '-' -> "minus"
   | '*' -> "star"
   | '/' -> "div"
@@ -43,8 +43,8 @@ let escape_operator_character (c : char) : string =
 let escape_operator (s : string) : string =
   let b = Buffer.create 0 in
   s |> String.iter (fun c ->
-    Buffer.add_char b '_';
-    Buffer.add_string b (escape_operator_character c));
+    Buffer.add_string b (escape_operator_character c)
+  );
   Buffer.contents b
 
 let escape_reserved_word (s : string) : string =
@@ -55,7 +55,7 @@ let escape_reserved_word (s : string) : string =
 
 let convert (x : t) : t =
   if is_operator x then
-    "op" ^ escape_operator x
+    "op_" ^ escape_operator x
   else
     escape_reserved_word x
 

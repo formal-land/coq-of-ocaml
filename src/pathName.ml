@@ -25,6 +25,7 @@ let convert ({ path; base } : t) : t =
     begin match base with
     (* Built-in types *)
     | "int" -> { path = []; base = "Z" }
+    | "float" -> { path = []; base = "Z" }
     | "char" -> { path = []; base = "ascii" }
     | "bytes" -> { path = []; base = "string" }
     | "string" -> { path = []; base = "string" }

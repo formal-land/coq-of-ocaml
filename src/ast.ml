@@ -35,6 +35,7 @@ let to_coq (ast : t) : SmartPrint.t =
     !^ "Local Open Scope type_scope.";
     !^ "Import ListNotations."
   ]) ^^ newline ^^
-  match ast with
+  (match ast with
   | SignatureAxioms signature -> SignatureAxioms.to_coq signature
-  | Structure structure -> Structure.to_coq structure
+  | Structure structure -> Structure.to_coq structure) ^^
+  newline

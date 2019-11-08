@@ -8,6 +8,7 @@ type t =
   | Int of int
   | Char of char
   | String of string
+  | Warn of t * string
 
 (** Import an OCaml constant. *)
 let of_constant (c : constant) : t Monad.t =
@@ -17,20 +18,24 @@ let of_constant (c : constant) : t Monad.t =
   | Const_string (s, _) -> return (String s)
   | Const_float s ->
     let n = int_of_float (float_of_string s) in
-    warn (Printf.sprintf "Float constant %s is approximated by the integer %d." s n) >>
-    return (Int n)
+    let message = Printf.sprintf "Float constant %s is approximated by the integer %d" s n in
+    warn message >>
+    return (Warn (Int n, message))
   | Const_int32 n ->
-    warn "Constant of type int32 is converted to int." >>
-    return (Int (Int32.to_int n))
+    let message = "Constant of type int32 is converted to int" in
+    warn message >>
+    return (Warn (Int (Int32.to_int n), message))
   | Const_int64 n ->
-    warn "Constant of type int64 is converted to int." >>
-    return (Int (Int64.to_int n))
+    let message = "Constant of type int64 is converted to int" in
+    warn message >>
+    return (Warn (Int (Int64.to_int n), message))
   | Const_nativeint n ->
-    warn "Constant of type nativeint is converted to int." >>
-    return (Int (Nativeint.to_int n))
+    let message = "Constant of type nativeint is converted to int" in
+    warn message >>
+    return (Warn (Int (Nativeint.to_int n), message))
 
 (** Pretty-print a constant to Coq. *)
-let to_coq (c : t) : SmartPrint.t =
+let rec to_coq (c : t) : SmartPrint.t =
   match c with
   | Int n ->
     if n >= 0 then
@@ -56,3 +61,4 @@ let to_coq (c : t) : SmartPrint.t =
       else
         Buffer.add_char b c);
     nest (double_quotes (!^ (Buffer.contents b)) ^^ !^ "%" ^^ !^ "string")
+  | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)
