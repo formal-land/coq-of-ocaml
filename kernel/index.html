@@ -35,13 +35,15 @@
       <div class="article">
 
 <div class="row">
-  <div class="col-md-3"></div>
-  <div class="col-md-6">
+  <div class="col-md-4"></div>
+  <div class="col-md-4">
     <h2>Kernel of Coq</h2>
     <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>. We show the original source code on the left and the imported Coq code on the right. The imported code probably does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
   </div>
-  <div class="col-md-3"></div>
+  <div class="col-md-4"></div>
 </div>
+
+<h3>Source files</h3>
 <div class="row">
   
   <div class="col-md-2">
@@ -192,8 +194,11 @@
   
 </div>
 
-<hr />
-<div class="row" id="cClosure" style="padding-bottom: 20px; padding-top: 20px;">
+<h3>Output</h3>
+
+
+
+<div class="row" id="cClosure" style="padding-bottom: 20px; ">
   <div class="col-md-6">
     <code>cClosure.ml</code>&nbsp;<span class="label label-danger">126 errors</span>
     <pre>(************************************************************************)
@@ -3866,6 +3871,7 @@ Definition set_relevance (r : Sorts.relevance) (f : fconstr) : unit :=
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="cPrimitives" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -4182,6 +4188,7 @@ Definition op_or_type_to_string (function_parameter : op_or_type) : string :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="cbytecodes" style="padding-bottom: 20px; padding-top: 20px;">
@@ -4576,6 +4583,7 @@ with pp_bytecodes (c : bytecodes) : Pp.t :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="cbytegen" style="padding-bottom: 20px; padding-top: 20px;">
@@ -7048,6 +7056,7 @@ Definition compile_alias (kn : Names.Constant.t) : Cemitcodes.body_code :=
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="cemitcodes" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -8815,6 +8824,7 @@ Definition to_memory {A : Type}
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="clambda" style="padding-bottom: 20px; padding-top: 20px;">
@@ -10893,6 +10903,7 @@ Definition lambda_of_constr
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="context" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -12039,6 +12050,7 @@ End Compacted.
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="conv_oracle" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -12311,6 +12323,7 @@ Definition get_strategy (o : oracle)
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="cooking" style="padding-bottom: 20px; padding-top: 20px;">
@@ -13231,6 +13244,7 @@ Definition expmod_constr
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="copcodes" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -13728,6 +13742,7 @@ Definition opSTOP : Z := 119.
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="csymtable" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -14193,6 +14208,7 @@ Definition set_opaque_const {A : Type} (_kn : A) : unit := tt.
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="declarations" style="padding-bottom: 20px; padding-top: 20px;">
@@ -14710,6 +14726,7 @@ Definition module_type_body := 'module_type_body.
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="declareops" style="padding-bottom: 20px; padding-top: 20px;">
@@ -15736,6 +15753,7 @@ with hcons_module_type (mb : Declarations.module_type_body)
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="entries" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -15950,6 +15968,7 @@ Inductive module_entry : Type :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="environ" style="padding-bottom: 20px; padding-top: 20px;">
@@ -17920,6 +17939,7 @@ Definition add_native_symbols
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="esubst" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -18334,6 +18354,7 @@ Fixpoint comp {A : Type}
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="evar" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -18391,6 +18412,7 @@ unhandled_module
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="genOpcodeFiles" style="padding-bottom: 20px; padding-top: 20px;">
@@ -18905,6 +18927,7 @@ Definition main (function_parameter : unit) : unit :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="indTyping" style="padding-bottom: 20px; padding-top: 20px;">
@@ -19890,6 +19913,7 @@ Definition typecheck_inductive
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="indtypes" style="padding-bottom: 20px; padding-top: 20px;">
@@ -21377,6 +21401,7 @@ Definition check_inductive
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="inductive" style="padding-bottom: 20px; padding-top: 20px;">
@@ -24593,6 +24618,7 @@ Definition check_cofix {A : Type}
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="inferCumulativity" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -25229,6 +25255,7 @@ Definition dummy_variance (function_parameter : Entries.universes_entry)
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="mod_subst" style="padding-bottom: 20px; padding-top: 20px;">
@@ -26913,6 +26940,7 @@ Definition repr_substituted {A : Type} (r : substituted A)
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="mod_typing" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -27986,6 +28014,7 @@ Definition translate_mse_incl
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="modops" style="padding-bottom: 20px; padding-top: 20px;">
@@ -29570,6 +29599,7 @@ Definition join_structure
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="names" style="padding-bottom: 20px; padding-top: 20px;">
@@ -32265,6 +32295,7 @@ Definition lstring := CAst.t string.
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="nativecode" style="padding-bottom: 20px; padding-top: 20px;">
@@ -39237,6 +39268,7 @@ Definition add_header_comment (mlcode : list global) (s : string)
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="nativeconv" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -39775,6 +39807,7 @@ Definition native_conv
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="nativelambda" style="padding-bottom: 20px; padding-top: 20px;">
@@ -41230,6 +41263,7 @@ Definition mk_lazy (c : lambda) : lambda :=
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="nativelib" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -41885,6 +41919,7 @@ Definition link_library
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="nativelibrary" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -42163,6 +42198,7 @@ Definition dump_library {A : Type}
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="nativevalues" style="padding-bottom: 20px; padding-top: 20px;">
@@ -43343,6 +43379,7 @@ Definition str_decode {A : Type} (s : string) : A :=
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="opaqueproof" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -43764,6 +43801,7 @@ Definition dump (op_staroptstar : option Future.UUIDSet.t)
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="primred" style="padding-bottom: 20px; padding-top: 20px;">
@@ -44187,6 +44225,7 @@ functor
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="reduction" style="padding-bottom: 20px; padding-top: 20px;">
@@ -46978,6 +47017,7 @@ Definition eta_expand
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="retroknowledge" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -47052,6 +47092,7 @@ Inductive action : Type :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="retypeops" style="padding-bottom: 20px; padding-top: 20px;">
@@ -47347,6 +47388,7 @@ Definition relevance_of_term (env : Environ.env) (c : Constr.constr)
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="safe_typing" style="padding-bottom: 20px; padding-top: 20px;">
@@ -52095,6 +52137,7 @@ Definition set_strategy
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="section" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -52639,6 +52682,7 @@ Definition is_in_section {A : Type}
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="sorts" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -52995,6 +53039,7 @@ Definition pr_sort_family (function_parameter : family) : Pp.t :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="subtyping" style="padding-bottom: 20px; padding-top: 20px;">
@@ -54659,6 +54704,7 @@ Definition check_subtypes
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="term" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -55637,6 +55683,7 @@ Definition kind_of_type (t : Constr.constr)
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="term_typing" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -56463,6 +56510,7 @@ Definition translate_local_def {A : Type}
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="transparentState" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -56551,6 +56599,7 @@ Definition is_transparent_constant (ts : t) (cst : Names.Cpred.elt) : bool :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="type_errors" style="padding-bottom: 20px; padding-top: 20px;">
@@ -57085,6 +57134,7 @@ Definition map_ptype_error {A B : Type}
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="typeops" style="padding-bottom: 20px; padding-top: 20px;">
@@ -58922,6 +58972,7 @@ Definition check_primitive_type
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="uGraph" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -59514,6 +59565,7 @@ Definition check_leq : t -&gt; Univ.Universe.t -&gt; Univ.Universe.t -&gt; bool 
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="uint63" style="padding-bottom: 20px; padding-top: 20px;">
@@ -60710,6 +60762,7 @@ Definition subcarryc (x : Z) (y : Z) : carry Z :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="uint63_31" style="padding-bottom: 20px; padding-top: 20px;">
@@ -62189,6 +62242,7 @@ Definition subcarryc (x : Int64.t) (y : Int64.t) : carry int64 :=
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="uint63_63" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -63384,6 +63438,7 @@ Definition subcarryc (x : Z) (y : Z) : carry Z :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="univ" style="padding-bottom: 20px; padding-top: 20px;">
@@ -66394,6 +66449,7 @@ Definition explain_universe_inconsistency
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="vars" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -67245,6 +67301,7 @@ Definition universes_of_constr (c : Constr.constr) : Univ.LSet.t :=
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="vconv" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -67856,6 +67913,7 @@ Definition vm_conv
   </div>
 </div>
 
+
 <hr />
 <div class="row" id="vm" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
@@ -68457,6 +68515,7 @@ Definition apply_whd (k : Z) (whd : Vmvalues.whd) : Vmvalues.values :=
 </pre>
   </div>
 </div>
+
 
 <hr />
 <div class="row" id="vmvalues" style="padding-bottom: 20px; padding-top: 20px;">
@@ -70222,6 +70281,7 @@ with pr_zipper (z : zipper) : Pp.t :=
 </pre>
   </div>
 </div>
+
 
       </div>
       <hr/>

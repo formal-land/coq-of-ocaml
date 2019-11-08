@@ -1,7 +1,7 @@
 <%= header("", nil) %>
 <div class="row">
-  <div class="col-md-3"></div>
-  <div class="col-md-6">
+  <div class="col-md-4"></div>
+  <div class="col-md-4">
     <h2>Coq of OCaml <small>Demos</small></h2>
     <p>Here we present some demos of the development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Write at <code>web [at] clarus [dot] me</code> for more information. This work is currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>. We use <code>coq-of-ocaml</code> to verify the implementation of <a href="https://tezos.gitlab.io/whitedoc/michelson.html">Michelson</a>, the language to write smart-contracts in the crypto-currency <a href="https://tezos.com/">Tezos</a>. Contributors needed!</p>
 
@@ -15,8 +15,7 @@
     <p>We import the purely functional part of <a href="https://ocaml.org/">OCaml</a> to <a href="https://coq.inria.fr/">Coq</a>. We aim to generate readable and idiomatic Coq code with no encodings. The semantics of the source code may not be completely preserved. One should do manual reviews to assert that the generated Coq is a reasonable formalization of the sources. We always generate something, even in case of errors&nbsp;(which are explicitely notified).</p>
     <p>We compile OCaml projects by pluging into <a href="https://github.com/ocaml/merlin">Merlin</a>. This means that if you are using Merlin then you can run <code>coq-of-ocaml</code> with no additional configurations.</p>
     <p>The method to verify the termination of generated fixpoints is praying. To help you start, you can use the package <a href="https://github.com/SimonBoulier/TypingFlags">coq-typing-flags</a> to locally disable termination checks in Coq. The generated code for pattern matching on <a href="https://caml.inria.fr/pub/docs/manual-ocaml/manual033.html">GADTs</a> may not type check in some cases.</p>
-    <p>We support modules and first-class modules. We do not support the functors. We generate either Coq modules or dependent records depending on the use case. We generate axioms for&nbsp;<code>.mli</code> files to help formalizations, but importing <code>.mli</code> files should be optional.</p>
-    <p>We do not yet support cross-referencing between the generated Coq files.</p>
+    <p>We support modules and first-class modules. We do not support the functors. We generate either Coq modules or dependent records depending on the use case. We generate axioms for&nbsp;<code>.mli</code> files to help formalizations, but importing <code>.mli</code> files should be optional. We do not yet support cross-referencing between the generated Coq files.</p>
 
     <h3>Related projects</h3>
     <p>In the <a href="http://www.crowdsafety.org/wp-content/uploads/2015/03/crowd2-1024x352.jpg">JavaScript</a> community:</p>
@@ -29,6 +28,6 @@
       <li><a href="https://github.com/gdijkstra/hs-to-gallina">hs-to-gallina</a> (2012, by <a href="http://gdijkstra.github.io/">Gabe Dijkstra</a>, first such project)</li>
     </ul>
   </div>
-  <div class="col-md-3"></div>
+  <div class="col-md-4"></div>
 </div>
 <%= footer("") %>
