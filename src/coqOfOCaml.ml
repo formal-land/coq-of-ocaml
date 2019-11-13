@@ -28,12 +28,13 @@ let exp
   (env : Env.t)
   (loc : Loc.t)
   (typedtree : Mtyper.typedtree)
+  (typedtree_errors : exn list)
   (source_file_name : string)
   (source_file_content : string)
   (json_mode : bool)
   : Ast.t * string option =
   let { MonadEval.Result.errors; value} =
-    MonadEval.eval source_file_name (Ast.of_typedtree typedtree) env loc in
+    MonadEval.eval source_file_name (Ast.of_typedtree typedtree typedtree_errors) env loc in
   let error_message =
     match errors with
     | [] -> None
@@ -45,12 +46,14 @@ let of_ocaml
   (env : Env.t)
   (loc : Loc.t)
   (typedtree : Mtyper.typedtree)
+  (typedtree_errors : exn list)
   (source_file_name : string)
   (source_file_content : string)
   (output_file_name : string option)
   (json_mode : bool)
   : Output.t =
-  let (ast, error_message) = exp env loc typedtree source_file_name source_file_content json_mode in
+  let (ast, error_message) =
+    exp env loc typedtree typedtree_errors source_file_name source_file_content json_mode in
   let document = Ast.to_coq ast in
   let generated_file_name =
     match output_file_name with
@@ -123,9 +126,11 @@ let main () =
     let pipeline = Mpipeline.make merlin_config file_source in
     let typing = Mpipeline.typer_result pipeline in
     let typedtree = Mtyper.get_typedtree typing in
+    let typedtree_errors = Mtyper.get_errors typing in
     let initial_loc = Ast.get_initial_loc typedtree in
     let initial_env = Mtyper.get_env typing in
-    let output = of_ocaml initial_env initial_loc typedtree file_name file_content !output_file_name !json_mode in
+    let output =
+        of_ocaml initial_env initial_loc typedtree typedtree_errors file_name file_content !output_file_name !json_mode in
     Output.write output
 
 ;;main ()

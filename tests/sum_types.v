@@ -37,9 +37,8 @@ Fixpoint sum (l : t2 Z) : Z :=
   end.
 
 Definition s {A : Type} (function_parameter : A) : Z :=
-  match function_parameter with
-  | _ => sum (of_list (cons 5 (cons 7 (cons 3 []))))
-  end.
+  let '_ := function_parameter in
+  sum (of_list (cons 5 (cons 7 (cons 3 [])))).
 
 Parameter t3 : Type.
 
@@ -47,3 +46,10 @@ Parameter t4 : forall (a : Type), Type.
 
 Inductive t5 : Type :=
 | C : t5.
+
+Inductive single_string : Type :=
+| Single : string -> single_string.
+
+Definition get_string (s : single_string) : string :=
+  let 'Single s := s in
+  s.

@@ -20,138 +20,140 @@ let stdlib_name =
    to be converted, as conversion also means keeping the name as it (without
    taking into accounts that the stdlib was open). *)
 let try_convert (path_name : t) : t option =
+  let make (path : string list) (base : string) : t option =
+    Some { path = path |> List.map (fun name -> Name.Make name); base = Name.Make base } in
   let { path; base } = path_name in
-  match path with
+  match path |> List.map Name.to_string with
   (* The core library *)
   | [] ->
-    begin match base with
+    begin match Name.to_string base with
     (* Built-in types *)
-    | "int" -> Some { path = []; base = "Z" }
-    | "float" -> Some { path = []; base = "Z" }
-    | "char" -> Some { path = []; base = "ascii" }
-    | "bytes" -> Some { path = []; base = "string" }
-    | "string" -> Some { path = []; base = "string" }
-    | "bool" -> Some { path = []; base = "bool" }
-    | "false" -> Some { path = []; base = "false" }
-    | "true" -> Some { path = []; base = "true" }
-    | "unit" -> Some { path = []; base = "unit" }
-    | "()" -> Some { path = []; base = "tt" }
-    | "list" -> Some { path = []; base = "list" }
-    | "[]" -> Some { path = []; base = "[]" }
-    | "::" -> Some { path = []; base = "cons" }
-    | "option" -> Some { path = []; base = "option" }
-    | "None" -> Some { path = []; base = "None" }
-    | "Some" -> Some { path = []; base = "Some" }
-    | "Ok" -> Some { path = []; base = "inl" }
-    | "Error" -> Some { path = []; base = "inr" }
+    | "int" -> make [] "Z"
+    | "float" -> make [] "Z"
+    | "char" -> make [] "ascii"
+    | "bytes" -> make [] "string"
+    | "string" -> make [] "string"
+    | "bool" -> make [] "bool"
+    | "false" -> make [] "false"
+    | "true" -> make [] "true"
+    | "unit" -> make [] "unit"
+    | "()" -> make [] "tt"
+    | "list" -> make [] "list"
+    | "[]" -> make [] "[]"
+    | "op_coloncolon" -> make [] "cons"
+    | "option" -> make [] "option"
+    | "None" -> make [] "None"
+    | "Some" -> make [] "Some"
+    | "Ok" -> make [] "inl"
+    | "Error" -> make [] "inr"
 
     (* Predefined exceptions *)
-    | "Match_failure" -> Some { path = ["OCaml"]; base = "Match_failure" }
-    | "Assert_failure" -> Some { path = ["OCaml"]; base = "Assert_failure" }
-    | "Invalid_argument" -> Some { path = ["OCaml"]; base = "Invalid_argument" }
-    | "Failure" -> Some { path = ["OCaml"]; base = "Failure" }
-    | "Not_found" -> Some { path = ["OCaml"]; base = "Not_found" }
-    | "Out_of_memory" -> Some { path = ["OCaml"]; base = "Out_of_memory" }
-    | "Stack_overflow" -> Some { path = ["OCaml"]; base = "Stack_overflow" }
-    | "Sys_error" -> Some { path = ["OCaml"]; base = "Sys_error" }
-    | "End_of_file" -> Some { path = ["OCaml"]; base = "End_of_file" }
-    | "Division_by_zero" -> Some { path = ["OCaml"]; base = "Division_by_zero" }
-    | "Sys_blocked_io" -> Some { path = ["OCaml"]; base = "Sys_blocked_io" }
-    | "Undefined_recursive_module" -> Some { path = ["OCaml"]; base = "Undefined_recursive_module" }
+    | "Match_failure" -> make ["OCaml"] "Match_failure"
+    | "Assert_failure" -> make ["OCaml"] "Assert_failure"
+    | "Invalid_argument" -> make ["OCaml"] "Invalid_argument"
+    | "Failure" -> make ["OCaml"] "Failure"
+    | "Not_found" -> make ["OCaml"] "Not_found"
+    | "Out_of_memory" -> make ["OCaml"] "Out_of_memory"
+    | "Stack_overflow" -> make ["OCaml"] "Stack_overflow"
+    | "Sys_error" -> make ["OCaml"] "Sys_error"
+    | "End_of_file" -> make ["OCaml"] "End_of_file"
+    | "Division_by_zero" -> make ["OCaml"] "Division_by_zero"
+    | "Sys_blocked_io" -> make ["OCaml"] "Sys_blocked_io"
+    | "Undefined_recursive_module" -> make ["OCaml"] "Undefined_recursive_module"
     | _ -> None
     end
 
   (* Optional parameters *)
   | ["*predef*"] ->
-    begin match base with
-    | "None" -> Some { path = []; base = "None" }
-    | "Some" -> Some { path = []; base = "Some" }
+    begin match Name.to_string base with
+    | "None" -> make [] "None"
+    | "Some" -> make [] "Some"
     | _ -> None
     end
 
   (* Stdlib *)
   | [lib_name] when lib_name = stdlib_name ->
-    begin match base with
+    begin match Name.to_string base with
     (* Exceptions *)
-    | "invalid_arg" -> Some { path = ["OCaml"; "Stdlib"]; base = "invalid_arg" }
-    | "failwith" -> Some { path = ["OCaml"; "Stdlib"]; base = "failwith" }
-    | "Exit" -> Some { path = ["OCaml"; "Stdlib"]; base = "Exit" }
+    | "invalid_arg" -> make ["OCaml"; "Stdlib"] "invalid_arg"
+    | "failwith" -> make ["OCaml"; "Stdlib"] "failwith"
+    | "Exit" -> make ["OCaml"; "Stdlib"] "Exit"
     (* Comparisons *)
-    | "=" -> Some { path = []; base = "equiv_decb" }
-    | "<>" -> Some { path = []; base = "nequiv_decb" }
-    | "<" -> Some { path = ["OCaml"; "Stdlib"]; base = "lt" }
-    | ">" -> Some { path = ["OCaml"; "Stdlib"]; base = "gt" }
-    | "<=" -> Some { path = ["OCaml"; "Stdlib"]; base = "le" }
-    | ">=" -> Some { path = ["OCaml"; "Stdlib"]; base = "ge" }
-    | "compare" -> Some { path = ["OCaml"; "Stdlib"]; base = "compare" }
-    | "min" -> Some { path = ["OCaml"; "Stdlib"]; base = "min" }
-    | "max" -> Some { path = ["OCaml"; "Stdlib"]; base = "max" }
+    | "op_eq" -> make [] "equiv_decb"
+    | "op_ltgt" -> make [] "nequiv_decb"
+    | "op_lt" -> make ["OCaml"; "Stdlib"] "lt"
+    | "op_gt" -> make ["OCaml"; "Stdlib"] "gt"
+    | "op_lteq" -> make ["OCaml"; "Stdlib"] "le"
+    | "op_gteq" -> make ["OCaml"; "Stdlib"] "ge"
+    | "compare" -> make ["OCaml"; "Stdlib"] "compare"
+    | "min" -> make ["OCaml"; "Stdlib"] "min"
+    | "max" -> make ["OCaml"; "Stdlib"] "max"
     (* Boolean operations *)
-    | "not" -> Some { path = []; base = "negb" }
-    | "&&" -> Some { path = []; base = "andb" }
-    | "&" -> Some { path = []; base = "andb" }
-    | "||" -> Some { path = []; base = "orb" }
-    | "or" -> Some { path = []; base = "orb" }
+    | "not" -> make [] "negb"
+    | "op_andand" -> make [] "andb"
+    | "op_and" -> make [] "andb"
+    | "op_pipepipe" -> make [] "orb"
+    | "or" -> make [] "orb"
     (* Composition operators *)
-    | "|>" -> Some { path = ["OCaml"; "Stdlib"]; base = "reverse_apply" }
-    | "@@" -> Some { path = []; base = "apply" }
+    | "op_pipegt" -> make ["OCaml"; "Stdlib"] "reverse_apply"
+    | "op_atat" -> make [] "apply"
     (* Integer arithmetic *)
-    | "~-" -> Some { path = ["Z"]; base = "opp" }
-    | "~+" -> Some { path = []; base = "" }
-    | "succ" -> Some { path = ["Z"]; base = "succ" }
-    | "pred" -> Some { path = ["Z"]; base = "pred" }
-    | "+" -> Some { path = ["Z"]; base = "add" }
-    | "-" -> Some { path = ["Z"]; base = "sub" }
-    | "*" -> Some { path = ["Z"]; base = "mul" }
-    | "/" -> Some { path = ["Z"]; base = "div" }
-    | "mod" -> Some { path = ["Z"]; base = "modulo" }
-    | "abs" -> Some { path = ["Z"]; base = "abs" }
+    | "op_tildeminus" -> make ["Z"] "opp"
+    | "op_tildeplus" -> make []  ""
+    | "succ" -> make ["Z"] "succ"
+    | "pred" -> make ["Z"] "pred"
+    | "op_plus" -> make ["Z"] "add"
+    | "op_minus" -> make ["Z"] "sub"
+    | "op_star" -> make ["Z"] "mul"
+    | "op_div" -> make ["Z"] "div"
+    | "mod" -> make ["Z"] "modulo"
+    | "abs" -> make ["Z"] "abs"
     (* Bitwise operations *)
-    | "land" -> Some { path = ["Z"]; base = "land" }
-    | "lor" -> Some { path = ["Z"]; base = "lor" }
-    | "lxor" -> Some { path = ["Z"]; base = "lxor" }
-    | "lsl" -> Some { path = ["Z"]; base = "shiftl" }
-    | "lsr" -> Some { path = ["Z"]; base = "shiftr" }
+    | "land" -> make ["Z"] "land"
+    | "lor" -> make ["Z"] "lor"
+    | "lxor" -> make ["Z"] "lxor"
+    | "lsl" -> make ["Z"] "shiftl"
+    | "lsr" -> make ["Z"] "shiftr"
     (* Floating-point arithmetic *)
     (* String operations *)
-    | "^" -> Some { path = ["String"]; base = "append" }
+    | "op_caret" -> make ["String"] "append"
     (* Character operations *)
-    | "int_of_char" -> Some { path = ["OCaml"; "Stdlib"]; base = "int_of_char" }
-    | "char_of_int" -> Some { path = ["OCaml"; "Stdlib"]; base = "char_of_int" }
+    | "int_of_char" -> make ["OCaml"; "Stdlib"] "int_of_char"
+    | "char_of_int" -> make ["OCaml"; "Stdlib"] "char_of_int"
     (* Unit operations *)
-    | "ignore" -> Some { path = ["OCaml"; "Stdlib"]; base = "ignore" }
+    | "ignore" -> make ["OCaml"; "Stdlib"] "ignore"
     (* String conversion functions *)
-    | "string_of_bool" -> Some { path = ["OCaml"; "Stdlib"]; base = "string_of_bool" }
-    | "bool_of_string" -> Some { path = ["OCaml"; "Stdlib"]; base = "bool_of_string" }
-    | "string_of_int" -> Some { path = ["OCaml"; "Stdlib"]; base = "string_of_int" }
-    | "int_of_string" -> Some { path = ["OCaml"; "Stdlib"]; base = "int_of_string" }
+    | "string_of_bool" -> make ["OCaml"; "Stdlib"] "string_of_bool"
+    | "bool_of_string" -> make ["OCaml"; "Stdlib"] "bool_of_string"
+    | "string_of_int" -> make ["OCaml"; "Stdlib"] "string_of_int"
+    | "int_of_string" -> make ["OCaml"; "Stdlib"] "int_of_string"
     (* Pair operations *)
-    | "fst" -> Some { path = []; base = "fst" }
-    | "snd" -> Some { path = []; base = "snd" }
+    | "fst" -> make [] "fst"
+    | "snd" -> make [] "snd"
     (* List operations *)
-    | "@" -> Some { path = ["OCaml"; "Stdlib"]; base = "app" }
+    | "op_at" -> make ["OCaml"; "Stdlib"] "app"
     (* Input/output *)
     (* Output functions on standard output *)
-    | "print_char" -> Some { path = ["OCaml"; "Stdlib"]; base = "print_char" }
-    | "print_string" -> Some { path = ["OCaml"; "Stdlib"]; base = "print_string" }
-    | "print_int" -> Some { path = ["OCaml"; "Stdlib"]; base = "print_int" }
-    | "print_endline" -> Some { path = ["OCaml"; "Stdlib"]; base = "print_endline" }
-    | "print_newline" -> Some { path = ["OCaml"; "Stdlib"]; base = "print_newline" }
+    | "print_char" -> make ["OCaml"; "Stdlib"] "print_char"
+    | "print_string" -> make ["OCaml"; "Stdlib"] "print_string"
+    | "print_int" -> make ["OCaml"; "Stdlib"] "print_int"
+    | "print_endline" -> make ["OCaml"; "Stdlib"] "print_endline"
+    | "print_newline" -> make ["OCaml"; "Stdlib"] "print_newline"
     (* Output functions on standard error *)
-    | "prerr_char" -> Some { path = ["OCaml"; "Stdlib"]; base = "prerr_char" }
-    | "prerr_string" -> Some { path = ["OCaml"; "Stdlib"]; base = "prerr_string" }
-    | "prerr_int" -> Some { path = ["OCaml"; "Stdlib"]; base = "prerr_int" }
-    | "prerr_endline" -> Some { path = ["OCaml"; "Stdlib"]; base = "prerr_endline" }
-    | "prerr_newline" -> Some { path = ["OCaml"; "Stdlib"]; base = "prerr_newline" }
+    | "prerr_char" -> make ["OCaml"; "Stdlib"] "prerr_char"
+    | "prerr_string" -> make ["OCaml"; "Stdlib"] "prerr_string"
+    | "prerr_int" -> make ["OCaml"; "Stdlib"] "prerr_int"
+    | "prerr_endline" -> make ["OCaml"; "Stdlib"] "prerr_endline"
+    | "prerr_newline" -> make ["OCaml"; "Stdlib"] "prerr_newline"
     (* Input functions on standard input *)
-    | "read_line" -> Some { path = ["OCaml"; "Stdlib"]; base = "read_line" }
-    | "read_int" -> Some { path = ["OCaml"; "Stdlib"]; base = "read_int" }
+    | "read_line" -> make ["OCaml"; "Stdlib"] "read_line"
+    | "read_int" -> make ["OCaml"; "Stdlib"] "read_int"
     (* General output functions *)
     (* General input functions *)
     (* Operations on large files *)
     (* References *)
     (* Result type *)
-    | "result" -> Some { path = []; base = "sum" }
+    | "result" -> make [] "sum"
     (* Operations on format strings *)
     (* Program termination *)
     | _ -> Some path_name
@@ -159,29 +161,29 @@ let try_convert (path_name : t) : t option =
 
   (* Bytes *)
   | [lib_name; "Bytes"] when lib_name = stdlib_name ->
-    begin match base with
-    | "cat" -> Some { path = ["String"]; base = "append" }
-    | "concat" -> Some { path = ["String"]; base = "concat" }
-    | "length" -> Some { path = ["String"]; base = "length" }
-    | "sub" -> Some { path = ["String"]; base = "sub" }
+    begin match Name.to_string base with
+    | "cat" -> make ["String"] "append"
+    | "concat" -> make ["String"] "concat"
+    | "length" -> make ["String"] "length"
+    | "sub" -> make ["String"] "sub"
     | _ -> Some path_name
     end
 
   (* List *)
   | [lib_name; "List"] when lib_name = stdlib_name ->
-    begin match base with
-    | "exists" -> Some { path = ["OCaml"; "List"]; base = "_exists" }
-    | "exists2" -> Some { path = ["OCaml"; "List"]; base = "_exists2" }
-    | "length" -> Some { path = ["OCaml"; "List"]; base = "length" }
-    | "map" -> Some { path = ["List"]; base = "map" }
-    | "rev" -> Some { path = ["List"]; base = "rev" }
+    begin match Name.to_string base with
+    | "exists" -> make ["OCaml"; "List"] "_exists"
+    | "exists2" -> make ["OCaml"; "List"] "_exists2"
+    | "length" -> make ["OCaml"; "List"] "length"
+    | "map" -> make ["List"] "map"
+    | "rev" -> make ["List"] "rev"
     | _ -> Some path_name
     end
 
   (* String *)
   | [lib_name; "String"] when lib_name = stdlib_name ->
-    begin match base with
-    | "length" -> Some { path = ["OCaml"; "String"]; base = "length" }
+    begin match Name.to_string base with
+    | "length" -> make ["OCaml"; "String"] "length"
     | _ -> Some path_name
     end
 
@@ -195,7 +197,7 @@ let of_name (path : Name.t list) (base : Name.t) : t =
 let of_long_ident (long_ident : Longident.t) : t =
   match List.rev (Longident.flatten long_ident) with
   | [] -> failwith "Unexpected Longident.t with an empty list"
-  | x :: xs -> of_name (xs |> List.rev |> List.map Name.convert) (Name.convert x)
+  | x :: xs -> of_name (xs |> List.rev |> List.map Name.of_string) (Name.of_string x)
 
 (** Import an OCaml [Path.t]. *)
 let of_path_without_convert (path : Path.t) : t =
@@ -204,7 +206,7 @@ let of_path_without_convert (path : Path.t) : t =
     | Path.Pident x -> ([], Name.of_ident x)
     | Path.Pdot (path, s, _) ->
       let (path, base) = aux path in
-      (base :: path, s)
+      (base :: path, Name.of_string s)
     | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
   of_name (List.rev path) base
@@ -221,7 +223,7 @@ let of_path_and_name_without_convert (path : Path.t) (name : Name.t) : t =
     | Path.Pident x -> ([Name.of_ident x], name)
     | Path.Pdot (p, s, _) ->
       let (path, base) = aux p in
-      (s :: path, base)
+      (Name.of_string s :: path, base)
     | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
   of_name (List.rev path) base
@@ -230,7 +232,7 @@ let of_constructor_description (constructor_description : Types.constructor_desc
   match constructor_description with
   | { cstr_name; cstr_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
     let { path; _ } = of_path_without_convert path in
-    let path_name = { path; base = cstr_name } in
+    let path_name = { path; base = Name.of_string cstr_name } in
     begin match try_convert path_name with
     | None -> path_name
     | Some path_name -> path_name

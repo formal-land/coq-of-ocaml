@@ -1,22 +1,12 @@
 (** Local identifiers, used for variable names in patterns for example. *)
 open SmartPrint
 
-(** Just a [string] (no freshness counter for now). *)
-type t = string
+(** Just a [string]. *)
+type t = Make of string
 
 type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
-
-let is_operator (s : string) : bool =
-  if s = "" then
-    failwith "Unexpected empty argument."
-  else
-    let c = Char.code s.[0] in
-    not (c = Char.code '_' ||
-      (Char.code 'a' <= c && c <= Char.code 'z') ||
-      (Char.code 'A' <= c && c <= Char.code 'Z') ||
-      (Char.code '0' <= c && c <= Char.code '9'))
 
 let escape_operator_character (c : char) : string =
   match c with
@@ -27,7 +17,7 @@ let escape_operator_character (c : char) : string =
   | '^' -> "caret"
   | '|' -> "pipe"
   | '&' -> "and"
-  | '+' -> "p"
+  | '+' -> "plus"
   | '-' -> "minus"
   | '*' -> "star"
   | '/' -> "div"
@@ -53,30 +43,29 @@ let escape_reserved_word (s : string) : string =
   | "return" -> "_return"
   | _ -> s
 
-let convert (x : t) : t =
-  if is_operator x then
-    "op_" ^ escape_operator x
+let convert (s : string) : string =
+  let s_escaped_operator = escape_operator s in
+  if s_escaped_operator <> s then
+    "op_" ^ s_escaped_operator
   else
-    escape_reserved_word x
-
-(** Import an OCaml identifier. *)
-let of_ident (i : Ident.t) : t =
-  convert (Ident.name i)
+    escape_reserved_word s
 
 (** Lift a [string] to an identifier. *)
 let of_string (s : string) : t =
-  s
+  Make (convert s)
 
-(** Generate a fresh name from a given [prefix] using an internal counter. *)
-let unsafe_fresh : string -> t =
-  let counters : int Map.t ref = ref Map.empty in
-  fun prefix ->
-    if not (Map.mem prefix !counters) then
-      counters := Map.add prefix 0 !counters;
-    let n = Map.find prefix !counters in
-    counters := Map.add prefix (n + 1) !counters;
-    Printf.sprintf "%s_%d" prefix n
+(** Import an OCaml identifier. *)
+let of_ident (i : Ident.t) : t =
+  of_string (Ident.name i)
+
+let to_string (name : t) : string =
+  let Make name = name in
+  name
+
+let prefix_by_single_quote (name : t) : t =
+  let Make name = name in
+  Make ("'" ^ name)
 
 (** Pretty-print a name to Coq. *)
-let to_coq (x : t) : SmartPrint.t =
-  !^ x
+let to_coq (name : t) : SmartPrint.t =
+  !^ (to_string name)

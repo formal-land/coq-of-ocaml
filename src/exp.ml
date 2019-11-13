@@ -59,11 +59,11 @@ let error_message (e : t) (category : Error.Category.t) (message : string) : t M
   raise (ErrorMessage (e, message)) category message
 
 let error_message_in_module
-  (field : string)
+  (field : Name.t option)
   (e : t)
   (category : Error.Category.t)
   (message : string)
-  : (string option * string * t) option Monad.t =
+  : (string option * Name.t option * t) option Monad.t =
   raise (Some (Some message, field, e)) category message
 
 (** Import an OCaml expression. *)
@@ -117,14 +117,17 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
     of_expression typ_vars e >>= fun e ->
-    (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
+    (cases |> Monad.List.map (fun {c_lhs; c_guard; c_rhs} ->
       set_loc (Loc.of_location c_lhs.pat_loc) (
-      match c_guard with
-      | Some _ -> raise None NotSupported "Guard on pattern not supported"
-      | None ->
-        Pattern.of_pattern c_lhs >>= fun pattern ->
-        of_expression typ_vars c_rhs >>= fun c_rhs ->
-        return (Some (pattern, c_rhs)))
+      begin match c_guard with
+      | Some { exp_loc; _ } ->
+        set_loc (Loc.of_location exp_loc) (raise () NotSupported "Guard on pattern not supported")
+      | None -> return ()
+      end >>
+      Pattern.of_pattern c_lhs >>= fun pattern ->
+      of_expression typ_vars c_rhs >>= fun c_rhs ->
+      return (pattern, c_rhs)
+      )
     )) >>= fun cases ->
     (exception_cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
       set_loc (Loc.of_location c_lhs.pat_loc) (
@@ -132,7 +135,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       | Some guard_exp ->
         of_expression typ_vars guard_exp >>= fun guard_exp ->
         begin match guard_exp with
-        | Constructor ({ PathName.path = []; base = "false" }, []) ->
+        | Constructor ({ PathName.path = []; base = Name.Make "false" }, []) ->
           of_expression typ_vars c_rhs >>= fun c_rhs ->
           return (Some c_rhs)
         | _ -> raise None Unexpected "Expected `false` as guard on the exception case to represent the default GADT case"
@@ -361,7 +364,7 @@ and of_structure
     | Tstr_eval (e, _) ->
       of_expression typ_vars e >>= fun e ->
       error_message_in_module
-        "_"
+        None
         e
         SideEffect
         "Top-level evaluation is not handled"
@@ -370,24 +373,24 @@ and of_structure
       begin match def with
       | { is_rec = Recursivity.New true; _ } ->
         error_message_in_module
-          "_"
+          None
           (Error "recursive")
           NotSupported
           "Recursivity not handled in first-class module values"
       | { cases = [(header, value)]; _ } ->
         begin match header with
         | { name; typ_vars = []; args = []; _ } ->
-          return (Some (None, name, value))
+          return (Some (None, Some name, value))
         | { name; _ } ->
           error_message_in_module
-            name
+            (Some name)
             (Error "unhandled")
             NotSupported
             "This kind of definition of value for first-class modules is not handled"
         end
       | _ ->
         error_message_in_module
-          "_"
+          None
           (Error "mutually_recursive")
           NotSupported
           "Mutual definitions not handled in first-class module values"
@@ -396,68 +399,72 @@ and of_structure
       let name = Name.of_ident val_id in
       Type.of_typ_expr true typ_vars val_type >>= fun (typ, _, _) ->
       error_message_in_module
-        name
+        (Some name)
         (ErrorTyp typ)
         NotSupported
         "Primitive not handled"
     | Tstr_type _ -> return None
     | Tstr_typext _ ->
       error_message_in_module
-        "_"
+        None
         (Error "type_extension")
         NotSupported
         "Type extension not handled"
     | Tstr_exception { ext_id; _ } ->
       let name = Name.of_ident ext_id in
       error_message_in_module
-        name
+        (Some name)
         (Error "exception")
         SideEffect
         "Exception not handled"
     | Tstr_module { mb_id; mb_expr; _ } ->
       let name = Name.of_ident mb_id in
       of_module_expr typ_vars mb_expr None >>= fun value ->
-      return (Some (None, name, value))
+      return (Some (None, Some name, value))
     | Tstr_recmodule _ ->
       error_message_in_module
-        "_"
+        None
         (Error "Recursive module")
         NotSupported
         "Recursive modules not handled"
     | Tstr_modtype { mtd_id; _ } ->
       let name = Name.of_ident mtd_id in
       error_message_in_module
-        name
+        (Some name)
         (Error "module_type")
         NotSupported
         "Definition of signatures inside first-class module value is not handled"
     | Tstr_open _ ->
       error_message_in_module
-        "_"
+        None
         (Error "open")
         NotSupported
         "Open not handled in first-class module value"
     | Tstr_class _ ->
       error_message_in_module
-        "_"
+        None
         (Error "class")
         NotSupported
         "Object oriented programming not handled"
     | Tstr_class_type _ ->
       error_message_in_module
-        "_"
+        None
         (Error "class_type")
         NotSupported
         "Object oriented programming not handled"
     | Tstr_include _ ->
       error_message_in_module
-        "_"
+        None
         (Error "include")
         NotSupported
         "Include is not handled inside first-class module values"
     | Tstr_attribute _ -> return None)
   ))) >>= fun fields ->
   let fields = fields |> List.map (fun (error_message, name, field) ->
+    let name =
+      match name with
+      | None -> Name.of_string "_"
+      | Some name -> name in
     (error_message, PathName.of_path_and_name_without_convert signature_path name, field)
   ) in
   return (Module (nb_of_existential_variables, fields))
@@ -516,16 +523,24 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         !^ " :=" ^^ newline ^^
         indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (e, cases, default_value) ->
-    nest (
-      !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
-      separate space (cases |> List.map (fun (p, e) ->
-        nest (!^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^ to_coq false e ^^ newline)
-      )) ^^
-      (match default_value with
-      | None -> empty
-      | Some default_value -> nest (!^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline)
-      ) ^^
-      !^ "end")
+    begin match cases with
+    | [(pattern, e2)] ->
+      Pp.parens paren @@ nest (
+        !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^ to_coq false e ^^ !^ "in" ^^ newline ^^ to_coq false e2
+      )
+    | _ ->
+      nest (
+        !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
+        separate space (cases |> List.map (fun (p, e) ->
+          nest (!^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^ to_coq false e ^^ newline)
+        )) ^^
+        (match default_value with
+        | None -> empty
+        | Some default_value -> nest (!^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline)
+        ) ^^
+        !^ "end"
+      )
+    end
   | Record fields ->
     nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
       nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))) ^^ !^ "|}")
@@ -566,5 +581,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Type.to_coq None paren typ
   | ErrorSeq (e1, e2) ->
-    Pp.parens paren @@ group (to_coq false e1 ^-^ !^ ";" ^^ newline ^^ to_coq false e2)
+    Pp.parens paren @@ group (
+      nest (!^ "let" ^^ !^ "_" ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in") ^^ newline ^^
+      to_coq false e2
+    )
   | ErrorMessage (e, error_message) -> group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)

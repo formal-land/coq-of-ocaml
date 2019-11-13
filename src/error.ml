@@ -6,6 +6,7 @@ module Category = struct
     | FirstClassModule
     | NotFound
     | NotSupported
+    | OCaml
     | SideEffect
     | Unexpected
 
@@ -14,6 +15,7 @@ module Category = struct
     | FirstClassModule -> "First class module"
     | NotFound -> "Not found"
     | NotSupported -> "Not supported"
+    | OCaml -> "OCaml"
     | SideEffect -> "Side effect"
     | Unexpected -> "Unexpected"
 end
