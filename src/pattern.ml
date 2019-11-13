@@ -22,8 +22,8 @@ let rec of_pattern (p : pattern) : t Monad.t =
   | Tpat_tuple ps ->
     Monad.List.map of_pattern ps >>= fun patterns ->
     return (Tuple patterns)
-  | Tpat_construct (x, _, ps) ->
-    let x = PathName.of_loc x in
+  | Tpat_construct (_, constructor_description, ps) ->
+    let x = PathName.of_constructor_description constructor_description in
     Monad.List.map of_pattern ps >>= fun patterns ->
     return (Constructor (x, patterns))
   | Tpat_alias (p, x, _) ->
@@ -41,7 +41,7 @@ let rec of_pattern (p : pattern) : t Monad.t =
     raise (Constructor (path_name, patterns)) NotSupported "Patterns on variants are not supported"
   | Tpat_record (fields, _) ->
     (fields |> Monad.List.map (fun (x, _, p) ->
-      let x = PathName.of_loc x in
+      let x = PathName.of_long_ident x.Location.txt in
       of_pattern p >>= fun pattern ->
       return (x, pattern)
     )) >>= fun fields ->

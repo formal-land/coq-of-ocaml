@@ -44,7 +44,7 @@ let rec of_typ_expr
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
-    MixedPath.of_path path >>= fun mixed_path ->
+    MixedPath.of_path path None >>= fun mixed_path ->
     return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
   | Tobject (typ, params) ->
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars) ->
@@ -81,7 +81,7 @@ let rec of_typ_expr
       NotSupported
       "Forall quantifier is not handled (yet)"
   | Tpackage (path, idents, typs) ->
-      let path_name = PathName.of_path path in
+      let path_name = PathName.of_path_without_convert path in
       let typ_substitutions = List.map2 (fun ident typ -> (ident, typ)) idents typs in
       Monad.List.fold_left
         (fun (typ_substitutions, typ_vars, new_typ_vars) (ident, typ) ->

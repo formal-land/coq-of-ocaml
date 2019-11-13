@@ -68,8 +68,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
         "The definition of exceptions is not handled.\n\n" ^
         "Alternative: using sum types (\"option\", \"result\", ...) to represent error cases."
       )
-    | Tstr_open { open_path = path; _ } ->
-      let o = Open.of_ocaml path in
+    | Tstr_open open_description ->
+      let o = Open.of_ocaml open_description in
       return (Some (Open o))
     | Tstr_module {
         mb_id = name;
