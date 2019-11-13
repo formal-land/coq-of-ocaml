@@ -76,6 +76,11 @@ module List = struct
       f accumulator x >>= fun accumulator ->
       fold_left f accumulator l
 
+  let rec iter (f : 'a -> unit t) (l :'a list) : unit t =
+    match l with
+    | [] -> return ()
+    | x :: l -> f x >> iter f l
+
   let rec map (f : 'a -> 'b t) (l :'a list) : 'b list t =
     match l with
     | [] -> return []

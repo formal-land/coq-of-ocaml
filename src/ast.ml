@@ -19,7 +19,20 @@ let get_initial_loc (typedtree : Mtyper.typedtree) : Loc.t =
     | [] -> failwith "Unexpected empty file"
     end
 
-let of_typedtree (typedtree : Mtyper.typedtree) : t Monad.t =
+let report_errors (typedtree_errors : exn list) : unit Monad.t =
+  typedtree_errors |> Monad.List.iter (fun exn ->
+    let error = Location.error_of_exn exn in
+    match error with
+    | Some (`Ok error) ->
+      let loc = Location.loc_of_report error in
+      let error_buffer = Buffer.create 0 in
+      Location.report_error (Format.formatter_of_buffer error_buffer) error;
+      set_loc (Loc.of_location loc) (raise () Error.Category.OCaml (Buffer.contents error_buffer))
+    | _ -> return ()
+  )
+
+let of_typedtree (typedtree : Mtyper.typedtree) (typedtree_errors : exn list) : t Monad.t =
+  report_errors typedtree_errors >>
   match typedtree with
   | `Implementation structure ->
     Structure.of_structure structure >>= fun structure ->
