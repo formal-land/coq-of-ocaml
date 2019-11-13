@@ -12,22 +12,22 @@
   <% 4.times do |i| %>
   <div class="col-md-3">
     <ul>
-      <% for ocaml_name, _, _, _ in tezos_conversions[i * (tezos_conversions.size / 3)..(i + 1) * (tezos_conversions.size / 3) - 1] do %>
-      <li><a href="#<%= h(File.basename(ocaml_name, ".ml")) %>"><%= h(ocaml_name) %></a></li>
+      <% for ocaml_name, nb_errors, _, _, _, _ in tezos_conversions[i * (tezos_conversions.size / 3)..(i + 1) * (tezos_conversions.size / 3) - 1] do %>
+      <li><a href="#<%= u(ocaml_name) %>"><%= h(ocaml_name) %></a>&nbsp;<%= nb_errors == 0 ? "<span class=\"label label-success\">✓</span>" : "<span class=\"label label-danger\">#{nb_errors}</span>" %></li>
       <% end %>
     </ul>
   </div>
   <% end %>
 </div>
-<% for ocaml_name, ocaml_content, coq_name, coq_content in tezos_conversions do %>
+<% for ocaml_name, nb_errors, ocaml_content, coq_name, coq_content in tezos_conversions do %>
 <hr />
-<div class="row" id="<%= h(File.basename(ocaml_name, ".ml")) %>" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="<%= u(ocaml_name) %>" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code><%= h(ocaml_name) %></code>
-    <pre><%= h(ocaml_content) %></pre>
+    <a href="#<%= u(ocaml_name) %>"><code><%= h(ocaml_name) %></code></a>&nbsp;<span class="label label-<%= nb_errors == 0 ? "success" : "danger" %>"><%= nb_errors == 0 ? "success" : "#{nb_errors} error#{nb_errors != 1 ? "s" : ""}" %></span>
+    <pre><%= ocaml_content %></pre>
   </div>
   <div class="col-md-6">
-    <code><%= h(coq_name) %></code>
+    <a href="#<%= u(ocaml_name) %>"><code><%= h(coq_name) %></code></a>
     <pre><%= h(coq_content) %></pre>
   </div>
 </div>

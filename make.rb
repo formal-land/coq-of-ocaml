@@ -47,8 +47,8 @@ Dir.glob(File.join(kernel_directory, "*.ml")).each do |ocaml_file_name|
     File.dirname(ocaml_file_name),
     File.basename(ocaml_file_name, ".ml") + ".v"
   )
-  errors_file_name = ocaml_file_name + ".errors"
   coq_name = File.basename(coq_file_name)
+  errors_file_name = ocaml_file_name + ".errors"
   if File.exists?(coq_file_name) then
     coq_content = File.read(coq_file_name)
     errors_content = File.read(errors_file_name)
@@ -66,19 +66,29 @@ kernel_conversions.sort_by! {|ocaml_name, _, _, _| ocaml_name}
 
 # Get the conversions for Tezos.
 tezos_conversions = []
-Dir.glob(File.join(tezos_directory, "**", "*.ml*")).each do |ocaml_file_name|
+Dir.glob(File.join(tezos_directory, "src/**", "*.ml*")).each do |ocaml_file_name|
   ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(tezos_directory)).to_s
   ocaml_content = File.read(ocaml_file_name, :encoding => 'utf-8')
   coq_file_name = ocaml_file_name + ".v"
   coq_name = ocaml_name + ".v"
+  errors_file_name = ocaml_file_name + ".errors"
   if File.exists?(coq_file_name) then
     coq_content = File.read(coq_file_name, :encoding => 'utf-8')
+    errors_content = File.read(errors_file_name)
+    errors_json = errors_content != "" ? JSON.parse(errors_content) : []
     if coq_content.valid_encoding? then
-      tezos_conversions << [ocaml_name, ocaml_content, coq_name, coq_content]
+      p ocaml_name
+      tezos_conversions << [
+        ocaml_name,
+        errors_json.size,
+        mark_text(ocaml_content, errors_json),
+        coq_name,
+        coq_content
+      ]
     end
   end
 end
-tezos_conversions.sort_by! {|ocaml_name, _, _, _| ocaml_name}
+tezos_conversions.sort_by! {|ocaml_name, _, _, _, _| ocaml_name}
 
 # Helpers.
 def header(root, section)
