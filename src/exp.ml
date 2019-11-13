@@ -117,14 +117,17 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
     of_expression typ_vars e >>= fun e ->
-    (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
+    (cases |> Monad.List.map (fun {c_lhs; c_guard; c_rhs} ->
       set_loc (Loc.of_location c_lhs.pat_loc) (
-      match c_guard with
-      | Some _ -> raise None NotSupported "Guard on pattern not supported"
-      | None ->
-        Pattern.of_pattern c_lhs >>= fun pattern ->
-        of_expression typ_vars c_rhs >>= fun c_rhs ->
-        return (Some (pattern, c_rhs)))
+      begin match c_guard with
+      | Some { exp_loc; _ } ->
+        set_loc (Loc.of_location exp_loc) (raise () NotSupported "Guard on pattern not supported")
+      | None -> return ()
+      end >>
+      Pattern.of_pattern c_lhs >>= fun pattern ->
+      of_expression typ_vars c_rhs >>= fun c_rhs ->
+      return (pattern, c_rhs)
+      )
     )) >>= fun cases ->
     (exception_cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
       set_loc (Loc.of_location c_lhs.pat_loc) (
@@ -520,16 +523,24 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         !^ " :=" ^^ newline ^^
         indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (e, cases, default_value) ->
-    nest (
-      !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
-      separate space (cases |> List.map (fun (p, e) ->
-        nest (!^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^ to_coq false e ^^ newline)
-      )) ^^
-      (match default_value with
-      | None -> empty
-      | Some default_value -> nest (!^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline)
-      ) ^^
-      !^ "end")
+    begin match cases with
+    | [(pattern, e2)] ->
+      Pp.parens paren @@ nest (
+        !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^ to_coq false e ^^ !^ "in" ^^ newline ^^ to_coq false e2
+      )
+    | _ ->
+      nest (
+        !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
+        separate space (cases |> List.map (fun (p, e) ->
+          nest (!^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^ to_coq false e ^^ newline)
+        )) ^^
+        (match default_value with
+        | None -> empty
+        | Some default_value -> nest (!^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline)
+        ) ^^
+        !^ "end"
+      )
+    end
   | Record fields ->
     nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
       nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))) ^^ !^ "|}")

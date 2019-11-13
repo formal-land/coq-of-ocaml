@@ -28,3 +28,9 @@ let s _ = sum (of_list [5; 7; 3])
 type t3
 type 'a t4
 type t5 = C
+
+type single_string = Single of string
+
+let get_string s : string =
+  let Single s = s in
+  s
