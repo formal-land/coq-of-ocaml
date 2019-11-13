@@ -27,7 +27,7 @@ let rec are_equal (shape1 : t) (shape2 : t) : bool =
     match (item1, item2) with
     | (Tree.Module (name1, _) | Tree.Item (name1, ())),
       (Tree.Module (name2, _) | Tree.Item (name2, ())) ->
-      String.compare name1 name2 in
+      compare name1 name2 in
   let shape1 = shape1 |> List.sort compare_items in
   let shape2 = shape2 |> List.sort compare_items in
   List.for_all2

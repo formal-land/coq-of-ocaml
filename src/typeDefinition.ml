@@ -187,7 +187,7 @@ module Inductive = struct
     let subst = Some (fun name ->
       match inductive.notations |> List.find_opt (fun (name', _, _) -> name' = name) with
       | None -> name
-      | Some (name', _, _) -> "'" ^ name'
+      | Some (name', _, _) -> Name.prefix_by_single_quote name'
     ) in
     let reserved_notations = to_coq_notations_reserved inductive in
     let implicit_arguments =
@@ -245,7 +245,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     end
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let name = Name.of_ident typ_id in
-    let typ = Type.Apply (MixedPath.of_name "False", []) in
+    let typ = Type.Apply (MixedPath.of_name (Name.of_string "False"), []) in
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
   | _ ->
     (typs |> Monad.List.fold_left (fun (notations, typs) typ ->
