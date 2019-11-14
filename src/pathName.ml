@@ -249,5 +249,10 @@ let add_prefix (prefix : Name.t) (path_name : t) : t =
   let { path; base } = path_name in
   { path = prefix :: path; base }
 
+let is_unit (path_name : t) : bool =
+  match (path_name.path, Name.to_string path_name.base) with
+  | ([], "unit") -> true
+  | _ -> false
+
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
