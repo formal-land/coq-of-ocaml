@@ -6,3 +6,7 @@
   padding: .2em;
   text-decoration: none !important;
 }
+
+.not-full-width {
+  max-width: 800px;
+}
