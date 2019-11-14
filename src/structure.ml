@@ -44,6 +44,7 @@ type t =
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
   | Module of Name.t * t list
+  | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
   | Error of string
   | ErrorMessage of string * t
@@ -90,6 +91,22 @@ let rec of_structure (structure : structure) : t list Monad.t =
       let name = Name.of_ident name in
       of_structure structure >>= fun structures ->
       return (Some (Module (name, structures)))
+    | Tstr_module {
+        mb_id = name;
+        mb_expr = {
+          mod_desc = Tmod_ident (_, long_ident);
+          _
+        };
+        _
+      } ->
+      let name = Name.of_ident name in
+      let reference = PathName.of_long_ident long_ident.txt in
+      return (Some (ModuleSynonym (name, reference)))
+    | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
+      error_message (Error "functor") NotSupported "Functors are not handled."
+    | Tstr_module { mb_expr = { mod_desc = Tmod_apply _; _ }; _ } ->
+      error_message (Error "functor_application") NotSupported "Applications of functors are not handled."
+    | Tstr_module _ -> error_message (Error "unhandled_module") NotSupported "This kind of module is not handled."
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message (Error "abstract_module_type") NotSupported "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
@@ -101,11 +118,6 @@ let rec of_structure (structure : structure) : t list Monad.t =
           return (Some (Signature (name, signature)))
         | _ -> error_message (Error "unhandled_module_type") NotSupported "This kind of signature is not handled."
       end
-    | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
-      error_message (Error "functor") NotSupported "Functors are not handled."
-    | Tstr_module { mb_expr = { mod_desc = Tmod_apply _; _ }; _ } ->
-      error_message (Error "functor_application") NotSupported "Applications of functors are not handled."
-    | Tstr_module _ -> error_message (Error "unhandled_module") NotSupported "This kind of module is not handled."
     | Tstr_eval (e, _) ->
       Exp.of_expression Name.Map.empty e >>= fun e ->
       error_message
@@ -148,6 +160,8 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         indent (to_coq defs) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ "."
       )
+    | ModuleSynonym (name, reference) ->
+      nest (!^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^ PathName.to_coq reference ^-^ !^ ".")
     | Signature (name, signature) -> Signature.to_coq_definition name signature
     | Error message -> !^ message
     | ErrorMessage (message, def) ->
