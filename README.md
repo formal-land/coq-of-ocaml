@@ -61,22 +61,7 @@ opam pin add coq-of-ocaml .
 ```
 
 ### Manually
-This compiler needs a working installation of OCaml and Coq, plus the dependencies listed in the `.opam` file of the project. Then you have two parts to compile in order, as described below.
-
-#### The Coq library
-Go to `OCaml/` and run:
-```
-./configure.sh
-make
-make install
-```
-
-#### The compiler
-Go to the root folder and run:
-```
-make
-make test
-```
+Read the `.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
 
 ## Usage
 CoqOfOCaml compiles the `.ml` or `.mli` files using [Merlin](https://github.com/ocaml/merlin) to understand the dependencies of a project. One first needs to have a compiled project with a working configuration of Merlin. The basic command is:

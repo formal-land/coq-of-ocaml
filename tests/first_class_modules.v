@@ -84,30 +84,41 @@ End Boxed_set.
 
 Definition set (elt : Type) := {OPS_t : _ & Boxed_set.signature elt OPS_t}.
 
+Module IncludedFoo.
+  Record signature {bar : Type} := {
+    bar := bar;
+    foo : bar;
+  }.
+  Arguments signature : clear implicits.
+End IncludedFoo.
+
 Module Triple.
-  Record signature {a b c : Type} := {
+  Record signature {a b c bar : Type} := {
     a := a;
     b := b;
     c := c;
     va : a;
     vb : b;
     vc : c;
+    bar := bar;
+    foo : bar;
   }.
   Arguments signature : clear implicits.
 End Triple.
 
-Definition tripe : {'(a, b, c) : _ & Triple.signature a b c} :=
-  existT _ ((_, _), _)
+Definition tripe : {'(a, b, c, bar) : _ & Triple.signature a b c bar} :=
+  existT _ (((_, _), _), _)
     {|
       Triple.va := 0;
       Triple.vb := false;
-      Triple.vc := "" % string
+      Triple.vc := "" % string;
+      Triple.foo := 12
       |}.
 
 Module UsingTriple.
-  Record signature {elt' T_a T_b T_c OPS'_elt OPS'_t : Type} := {
+  Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Type} := {
     elt' := elt';
-    T : Triple.signature T_a T_b T_c;
+    T : Triple.signature T_a T_b T_c T_bar;
     OPS' : S.SET.signature OPS'_elt OPS'_t;
     OPS'' : S.SET.signature elt' (list string);
     table (a : Type) := list a;
