@@ -32,3 +32,11 @@ End List2.
 Definition n {A : Type} (function_parameter : A) : Z :=
   let '_ := function_parameter in
   List2.sum (List2.of_list (cons 5 (cons 7 (cons 6 (cons List2.Inside.x []))))).
+
+Module Syn := List2.Inside.
+
+Definition xx : Z := Syn.x.
+
+Export Syn.
+
+Definition y : Z := x.

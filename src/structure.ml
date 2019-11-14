@@ -44,6 +44,7 @@ type t =
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
   | Module of Name.t * t list
+  | ModuleInclude of PathName.t
   | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
   | Error of string
@@ -132,7 +133,17 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_recmodule _ -> error_message (Error "recursive_module") NotSupported "Structure item `recmodule` not handled."
     | Tstr_class _ -> error_message (Error "class") NotSupported "Structure item `class` not handled."
     | Tstr_class_type _ -> error_message (Error "class_type") NotSupported "Structure item `class_type` not handled."
-    | Tstr_include _ -> error_message (Error "include") NotSupported "Structure item `include` not handled."
+    | Tstr_include {
+        incl_mod = {
+          mod_desc = Tmod_constraint ({ mod_desc = Tmod_ident (_, long_ident); _ }, _, _, _);
+          _
+        };
+        _
+      } ->
+      let reference = PathName.of_long_ident long_ident.txt in
+      return (Some (ModuleInclude reference))
+    | Tstr_include _ ->
+      error_message (Error "include") NotSupported "Cannot include this kind of module expression"
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return None)) in
   structure.str_items |> Monad.List.filter_map of_structure_item
@@ -160,6 +171,8 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         indent (to_coq defs) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ "."
       )
+    | ModuleInclude reference ->
+      nest (!^ "Export" ^^ PathName.to_coq reference ^-^ !^ ".")
     | ModuleSynonym (name, reference) ->
       nest (!^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^ PathName.to_coq reference ^-^ !^ ".")
     | Signature (name, signature) -> Signature.to_coq_definition name signature
