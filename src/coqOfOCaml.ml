@@ -57,7 +57,7 @@ let of_ocaml
   let document = Ast.to_coq ast in
   let generated_file_name =
     match output_file_name with
-    | None -> Filename.remove_extension source_file_name ^ ".v"
+    | None -> source_file_name ^ ".v"
     | Some output_file_name -> output_file_name in
   let generated_file_content = SmartPrint.to_string 80 2 document in
   let success_message =
@@ -96,7 +96,7 @@ let main () =
       "    produce the list of error messages in JSON"
     )
   ] in
-  let usage_msg = "Usage:\n  ./coqOfOCaml.native [options] file.ml\nOptions are:" in
+  let usage_msg = "Usage:\n  coq-of-ocaml [options] file.ml\nOptions are:" in
   Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage options usage_msg
