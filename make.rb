@@ -4,6 +4,9 @@ require 'json'
 require 'pathname'
 include(ERB::Util)
 
+# Command line arguments.
+kernel_directory, tezos_directory = ARGV
+
 def mark_text(text, errors)
   bytes_errors = text.bytes.to_a.map {|byte| {byte: byte, errors: []}}
   errors.each do |error|
@@ -36,59 +39,34 @@ def mark_text(text, errors)
   output
 end
 
-kernel_directory, tezos_directory = ARGV
-
-# Get the conversions for the Coq kernel.
-kernel_conversions = []
-Dir.glob(File.join(kernel_directory, "*.ml")).each do |ocaml_file_name|
-  ocaml_name = File.basename(ocaml_file_name)
-  ocaml_content = File.read(ocaml_file_name)
-  coq_file_name = File.join(
-    File.dirname(ocaml_file_name),
-    File.basename(ocaml_file_name, ".ml") + ".v"
-  )
-  coq_name = File.basename(coq_file_name)
-  errors_file_name = ocaml_file_name + ".errors"
-  if File.exists?(coq_file_name) then
-    coq_content = File.read(coq_file_name)
-    errors_content = File.read(errors_file_name)
-    errors_json = errors_content != "" ? JSON.parse(errors_content) : []
-    kernel_conversions << [
-      ocaml_name,
-      errors_json.size,
-      mark_text(ocaml_content, errors_json),
-      coq_name,
-      coq_content
-    ]
-  end
-end
-kernel_conversions.sort_by! {|ocaml_name, _, _, _| ocaml_name}
-
-# Get the conversions for Tezos.
-tezos_conversions = []
-Dir.glob(File.join(tezos_directory, "src/**", "*.ml*")).each do |ocaml_file_name|
-  ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(tezos_directory)).to_s
-  ocaml_content = File.read(ocaml_file_name, :encoding => 'utf-8')
-  coq_file_name = ocaml_file_name + ".v"
-  coq_name = ocaml_name + ".v"
-  errors_file_name = ocaml_file_name + ".errors"
-  if File.exists?(coq_file_name) then
-    coq_content = File.read(coq_file_name, :encoding => 'utf-8')
-    errors_content = File.read(errors_file_name)
-    errors_json = errors_content != "" ? JSON.parse(errors_content) : []
-    if coq_content.valid_encoding? then
-      p ocaml_name
-      tezos_conversions << [
-        ocaml_name,
-        errors_json.size,
-        mark_text(ocaml_content, errors_json),
-        coq_name,
-        coq_content
-      ]
+def get_conversions(directory)
+  conversions = []
+  ocaml_file_names = Dir.glob(File.join(directory, "**/*.ml{,i}")).to_a
+  ocaml_file_names.each_with_index do |ocaml_file_name, index|
+    print "\r#{directory} (#{index + 1}/#{ocaml_file_names.size})"
+    ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(directory)).to_s
+    ocaml_content = File.read(ocaml_file_name, :encoding => 'utf-8')
+    coq_file_name = ocaml_file_name + ".v"
+    coq_name = File.basename(coq_file_name)
+    errors_file_name = ocaml_file_name + ".errors"
+    if File.exists?(coq_file_name) then
+      coq_content = File.read(coq_file_name, :encoding => 'utf-8')
+      errors_content = File.read(errors_file_name)
+      errors_json = errors_content != "" ? JSON.parse(errors_content) : []
+      if coq_content.valid_encoding? then
+        conversions << [
+          ocaml_name,
+          errors_json.size,
+          mark_text(ocaml_content, errors_json),
+          coq_name,
+          coq_content
+        ]
+      end
     end
   end
+  puts
+  conversions.sort_by {|ocaml_name, _, _, _| ocaml_name}
 end
-tezos_conversions.sort_by! {|ocaml_name, _, _, _, _| ocaml_name}
 
 # Helpers.
 def header(root, section)
@@ -105,9 +83,21 @@ File.open("index.html", "w") do |file|
 end
 
 File.open("kernel/index.html", "w") do |file|
-  file << ERB.new(File.read("kernel.html.erb")).result(binding)
+  project_name = :kernel
+  project_intro = <<END
+    <h2>Kernel of Coq</h2>
+    <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>. We show the original source code on the left and the imported Coq code on the right. The imported code probably does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+END
+  conversions = get_conversions(kernel_directory)
+  file << ERB.new(File.read("template/project.html.erb")).result(binding)
 end
 
 File.open("tezos/index.html", "w") do |file|
-  file << ERB.new(File.read("tezos.html.erb")).result(binding)
+  project_name = :tezos
+  project_intro = <<END
+    <h2>Tezos</h2>
+    <p>These are the sources <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. The market cap of Tezos is more than US $500 millions at the time of writting. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+END
+  conversions = get_conversions(tezos_directory)
+  file << ERB.new(File.read("template/project.html.erb")).result(binding)
 end

@@ -37,170 +37,155 @@
 <div class="row">
   <div class="col-md-4"></div>
   <div class="col-md-4">
-    <h2>Kernel of Coq</h2>
+        <h2>Kernel of Coq</h2>
     <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>. We show the original source code on the left and the imported Coq code on the right. The imported code probably does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+
   </div>
   <div class="col-md-4"></div>
 </div>
-
-<h3>Source files</h3>
+<hr />
 <div class="row">
   
-  <div class="col-md-2">
+  <div class="col-md-3">
     <ul>
       
-      <li><a href="#cClosure">cClosure.ml</a>&nbsp;<span class="label label-danger">136</span></li>
+      <li><a href="#cClosure.ml">cClosure.ml</a>&nbsp;<span class="label label-danger">136</span></li>
       
-      <li><a href="#cPrimitives">cPrimitives.ml</a>&nbsp;<span class="label label-success">✓</span></li>
+      <li><a href="#cPrimitives.ml">cPrimitives.ml</a>&nbsp;<span class="label label-success">✓</span></li>
       
-      <li><a href="#cbytecodes">cbytecodes.ml</a>&nbsp;<span class="label label-danger">2</span></li>
+      <li><a href="#cbytecodes.ml">cbytecodes.ml</a>&nbsp;<span class="label label-danger">2</span></li>
       
-      <li><a href="#cbytegen">cbytegen.ml</a>&nbsp;<span class="label label-danger">57</span></li>
+      <li><a href="#cbytegen.ml">cbytegen.ml</a>&nbsp;<span class="label label-danger">57</span></li>
       
-      <li><a href="#cemitcodes">cemitcodes.ml</a>&nbsp;<span class="label label-danger">98</span></li>
+      <li><a href="#cemitcodes.ml">cemitcodes.ml</a>&nbsp;<span class="label label-danger">98</span></li>
       
-      <li><a href="#clambda">clambda.ml</a>&nbsp;<span class="label label-danger">43</span></li>
+      <li><a href="#clambda.ml">clambda.ml</a>&nbsp;<span class="label label-danger">43</span></li>
       
-      <li><a href="#context">context.ml</a>&nbsp;<span class="label label-danger">5</span></li>
+      <li><a href="#context.ml">context.ml</a>&nbsp;<span class="label label-danger">5</span></li>
       
-      <li><a href="#conv_oracle">conv_oracle.ml</a>&nbsp;<span class="label label-danger">4</span></li>
+      <li><a href="#conv_oracle.ml">conv_oracle.ml</a>&nbsp;<span class="label label-danger">4</span></li>
       
-      <li><a href="#cooking">cooking.ml</a>&nbsp;<span class="label label-danger">15</span></li>
+      <li><a href="#cooking.ml">cooking.ml</a>&nbsp;<span class="label label-danger">13</span></li>
       
-      <li><a href="#copcodes">copcodes.ml</a>&nbsp;<span class="label label-success">✓</span></li>
+      <li><a href="#copcodes.ml">copcodes.ml</a>&nbsp;<span class="label label-success">✓</span></li>
       
-      <li><a href="#csymtable">csymtable.ml</a>&nbsp;<span class="label label-danger">19</span></li>
+      <li><a href="#csymtable.ml">csymtable.ml</a>&nbsp;<span class="label label-danger">17</span></li>
+      
+      <li><a href="#declarations.ml">declarations.ml</a>&nbsp;<span class="label label-danger">1</span></li>
+      
+      <li><a href="#declareops.ml">declareops.ml</a>&nbsp;<span class="label label-danger">9</span></li>
+      
+      <li><a href="#entries.ml">entries.ml</a>&nbsp;<span class="label label-success">✓</span></li>
+      
+      <li><a href="#environ.ml">environ.ml</a>&nbsp;<span class="label label-danger">38</span></li>
+      
+      <li><a href="#esubst.ml">esubst.ml</a>&nbsp;<span class="label label-danger">3</span></li>
+      
+      <li><a href="#evar.ml">evar.ml</a>&nbsp;<span class="label label-success">✓</span></li>
+      
+      <li><a href="#genOpcodeFiles.ml">genOpcodeFiles.ml</a>&nbsp;<span class="label label-danger">9</span></li>
       
     </ul>
   </div>
   
-  <div class="col-md-2">
+  <div class="col-md-3">
     <ul>
       
-      <li><a href="#declarations">declarations.ml</a>&nbsp;<span class="label label-danger">1</span></li>
+      <li><a href="#indTyping.ml">indTyping.ml</a>&nbsp;<span class="label label-danger">13</span></li>
       
-      <li><a href="#declareops">declareops.ml</a>&nbsp;<span class="label label-danger">10</span></li>
+      <li><a href="#indtypes.ml">indtypes.ml</a>&nbsp;<span class="label label-danger">26</span></li>
       
-      <li><a href="#entries">entries.ml</a>&nbsp;<span class="label label-success">✓</span></li>
+      <li><a href="#inductive.ml">inductive.ml</a>&nbsp;<span class="label label-danger">73</span></li>
       
-      <li><a href="#environ">environ.ml</a>&nbsp;<span class="label label-danger">39</span></li>
+      <li><a href="#inferCumulativity.ml">inferCumulativity.ml</a>&nbsp;<span class="label label-danger">11</span></li>
       
-      <li><a href="#esubst">esubst.ml</a>&nbsp;<span class="label label-danger">3</span></li>
+      <li><a href="#mod_subst.ml">mod_subst.ml</a>&nbsp;<span class="label label-danger">27</span></li>
       
-      <li><a href="#evar">evar.ml</a>&nbsp;<span class="label label-danger">2</span></li>
+      <li><a href="#mod_typing.ml">mod_typing.ml</a>&nbsp;<span class="label label-danger">22</span></li>
       
-      <li><a href="#genOpcodeFiles">genOpcodeFiles.ml</a>&nbsp;<span class="label label-danger">9</span></li>
+      <li><a href="#modops.ml">modops.ml</a>&nbsp;<span class="label label-danger">18</span></li>
       
-      <li><a href="#indTyping">indTyping.ml</a>&nbsp;<span class="label label-danger">13</span></li>
+      <li><a href="#names.ml">names.ml</a>&nbsp;<span class="label label-danger">41</span></li>
       
-      <li><a href="#indtypes">indtypes.ml</a>&nbsp;<span class="label label-danger">26</span></li>
+      <li><a href="#nativecode.ml">nativecode.ml</a>&nbsp;<span class="label label-danger">162</span></li>
       
-      <li><a href="#inductive">inductive.ml</a>&nbsp;<span class="label label-danger">73</span></li>
+      <li><a href="#nativeconv.ml">nativeconv.ml</a>&nbsp;<span class="label label-danger">9</span></li>
       
-      <li><a href="#inferCumulativity">inferCumulativity.ml</a>&nbsp;<span class="label label-danger">11</span></li>
+      <li><a href="#nativelambda.ml">nativelambda.ml</a>&nbsp;<span class="label label-danger">21</span></li>
+      
+      <li><a href="#nativelib.ml">nativelib.ml</a>&nbsp;<span class="label label-danger">16</span></li>
+      
+      <li><a href="#nativelibrary.ml">nativelibrary.ml</a>&nbsp;<span class="label label-danger">8</span></li>
+      
+      <li><a href="#nativevalues.ml">nativevalues.ml</a>&nbsp;<span class="label label-danger">13</span></li>
+      
+      <li><a href="#opaqueproof.ml">opaqueproof.ml</a>&nbsp;<span class="label label-danger">2</span></li>
+      
+      <li><a href="#primred.ml">primred.ml</a>&nbsp;<span class="label label-danger">17</span></li>
+      
+      <li><a href="#reduction.ml">reduction.ml</a>&nbsp;<span class="label label-danger">38</span></li>
+      
+      <li><a href="#retroknowledge.ml">retroknowledge.ml</a>&nbsp;<span class="label label-success">✓</span></li>
       
     </ul>
   </div>
   
-  <div class="col-md-2">
+  <div class="col-md-3">
     <ul>
       
-      <li><a href="#mod_subst">mod_subst.ml</a>&nbsp;<span class="label label-danger">27</span></li>
+      <li><a href="#retypeops.ml">retypeops.ml</a>&nbsp;<span class="label label-danger">3</span></li>
       
-      <li><a href="#mod_typing">mod_typing.ml</a>&nbsp;<span class="label label-danger">22</span></li>
+      <li><a href="#safe_typing.ml">safe_typing.ml</a>&nbsp;<span class="label label-danger">141</span></li>
       
-      <li><a href="#modops">modops.ml</a>&nbsp;<span class="label label-danger">18</span></li>
+      <li><a href="#section.ml">section.ml</a>&nbsp;<span class="label label-danger">6</span></li>
       
-      <li><a href="#names">names.ml</a>&nbsp;<span class="label label-danger">75</span></li>
+      <li><a href="#sorts.ml">sorts.ml</a>&nbsp;<span class="label label-danger">1</span></li>
       
-      <li><a href="#nativecode">nativecode.ml</a>&nbsp;<span class="label label-danger">162</span></li>
+      <li><a href="#subtyping.ml">subtyping.ml</a>&nbsp;<span class="label label-danger">29</span></li>
       
-      <li><a href="#nativeconv">nativeconv.ml</a>&nbsp;<span class="label label-danger">9</span></li>
+      <li><a href="#term.ml">term.ml</a>&nbsp;<span class="label label-danger">8</span></li>
       
-      <li><a href="#nativelambda">nativelambda.ml</a>&nbsp;<span class="label label-danger">22</span></li>
+      <li><a href="#term_typing.ml">term_typing.ml</a>&nbsp;<span class="label label-danger">20</span></li>
       
-      <li><a href="#nativelib">nativelib.ml</a>&nbsp;<span class="label label-danger">16</span></li>
+      <li><a href="#transparentState.ml">transparentState.ml</a>&nbsp;<span class="label label-success">✓</span></li>
       
-      <li><a href="#nativelibrary">nativelibrary.ml</a>&nbsp;<span class="label label-danger">8</span></li>
+      <li><a href="#type_errors.ml">type_errors.ml</a>&nbsp;<span class="label label-danger">3</span></li>
       
-      <li><a href="#nativevalues">nativevalues.ml</a>&nbsp;<span class="label label-danger">13</span></li>
+      <li><a href="#typeops.ml">typeops.ml</a>&nbsp;<span class="label label-danger">41</span></li>
       
-      <li><a href="#opaqueproof">opaqueproof.ml</a>&nbsp;<span class="label label-danger">3</span></li>
+      <li><a href="#uGraph.ml">uGraph.ml</a>&nbsp;<span class="label label-danger">14</span></li>
+      
+      <li><a href="#uint63.ml">uint63.ml</a>&nbsp;<span class="label label-danger">26</span></li>
+      
+      <li><a href="#uint63_31.ml">uint63_31.ml</a>&nbsp;<span class="label label-danger">57</span></li>
+      
+      <li><a href="#uint63_63.ml">uint63_63.ml</a>&nbsp;<span class="label label-danger">26</span></li>
+      
+      <li><a href="#univ.ml">univ.ml</a>&nbsp;<span class="label label-danger">30</span></li>
+      
+      <li><a href="#vars.ml">vars.ml</a>&nbsp;<span class="label label-danger">24</span></li>
+      
+      <li><a href="#vconv.ml">vconv.ml</a>&nbsp;<span class="label label-danger">15</span></li>
+      
+      <li><a href="#vm.ml">vm.ml</a>&nbsp;<span class="label label-danger">28</span></li>
       
     </ul>
   </div>
   
-  <div class="col-md-2">
+  <div class="col-md-3">
     <ul>
       
-      <li><a href="#primred">primred.ml</a>&nbsp;<span class="label label-danger">17</span></li>
-      
-      <li><a href="#reduction">reduction.ml</a>&nbsp;<span class="label label-danger">45</span></li>
-      
-      <li><a href="#retroknowledge">retroknowledge.ml</a>&nbsp;<span class="label label-success">✓</span></li>
-      
-      <li><a href="#retypeops">retypeops.ml</a>&nbsp;<span class="label label-danger">4</span></li>
-      
-      <li><a href="#safe_typing">safe_typing.ml</a>&nbsp;<span class="label label-danger">142</span></li>
-      
-      <li><a href="#section">section.ml</a>&nbsp;<span class="label label-danger">7</span></li>
-      
-      <li><a href="#sorts">sorts.ml</a>&nbsp;<span class="label label-danger">1</span></li>
-      
-      <li><a href="#subtyping">subtyping.ml</a>&nbsp;<span class="label label-danger">29</span></li>
-      
-      <li><a href="#term">term.ml</a>&nbsp;<span class="label label-danger">8</span></li>
-      
-      <li><a href="#term_typing">term_typing.ml</a>&nbsp;<span class="label label-danger">21</span></li>
-      
-      <li><a href="#transparentState">transparentState.ml</a>&nbsp;<span class="label label-success">✓</span></li>
-      
-    </ul>
-  </div>
-  
-  <div class="col-md-2">
-    <ul>
-      
-      <li><a href="#type_errors">type_errors.ml</a>&nbsp;<span class="label label-danger">3</span></li>
-      
-      <li><a href="#typeops">typeops.ml</a>&nbsp;<span class="label label-danger">43</span></li>
-      
-      <li><a href="#uGraph">uGraph.ml</a>&nbsp;<span class="label label-danger">14</span></li>
-      
-      <li><a href="#uint63">uint63.ml</a>&nbsp;<span class="label label-danger">26</span></li>
-      
-      <li><a href="#uint63_31">uint63_31.ml</a>&nbsp;<span class="label label-danger">34</span></li>
-      
-      <li><a href="#uint63_63">uint63_63.ml</a>&nbsp;<span class="label label-danger">26</span></li>
-      
-      <li><a href="#univ">univ.ml</a>&nbsp;<span class="label label-danger">32</span></li>
-      
-      <li><a href="#vars">vars.ml</a>&nbsp;<span class="label label-danger">25</span></li>
-      
-      <li><a href="#vconv">vconv.ml</a>&nbsp;<span class="label label-danger">15</span></li>
-      
-      <li><a href="#vm">vm.ml</a>&nbsp;<span class="label label-danger">28</span></li>
-      
-      <li><a href="#vmvalues">vmvalues.ml</a>&nbsp;<span class="label label-danger">51</span></li>
-      
-    </ul>
-  </div>
-  
-  <div class="col-md-2">
-    <ul>
+      <li><a href="#vmvalues.ml">vmvalues.ml</a>&nbsp;<span class="label label-danger">51</span></li>
       
     </ul>
   </div>
   
 </div>
 
-<h3>Output</h3>
-
-
-
-<div class="row" id="cClosure" style="padding-bottom: 20px; ">
+<hr />
+<div class="row" id="cClosure.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>cClosure.ml</code>&nbsp;<span class="label label-danger">136 errors</span>
+    <a href="#cClosure.ml"><code>cClosure.ml</code></a>&nbsp;<span class="label label-danger">136 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -2036,7 +2021,7 @@ let set_relevance r f = <abbr class="mark-error" title="Set record field not han
 </pre>
   </div>
   <div class="col-md-6">
-    <code>cClosure.v</code>
+    <a href="#cClosure.ml"><code>cClosure.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -3923,11 +3908,10 @@ Definition set_relevance (r : Sorts.relevance) (f : fconstr) : unit :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="cPrimitives" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="cPrimitives.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>cPrimitives.ml</code>&nbsp;<span class="label label-success">success</span>
+    <a href="#cPrimitives.ml"><code>cPrimitives.ml</code></a>&nbsp;<span class="label label-success">success</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -4086,7 +4070,7 @@ let op_or_type_to_string = function
 </pre>
   </div>
   <div class="col-md-6">
-    <code>cPrimitives.v</code>
+    <a href="#cPrimitives.ml"><code>cPrimitives.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -4240,11 +4224,10 @@ Definition op_or_type_to_string (function_parameter : op_or_type) : string :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="cbytecodes" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="cbytecodes.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>cbytecodes.ml</code>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#cbytecodes.ml"><code>cbytecodes.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -4411,7 +4394,7 @@ and pp_bytecodes c =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>cbytecodes.v</code>
+    <a href="#cbytecodes.ml"><code>cbytecodes.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -4621,11 +4604,10 @@ with pp_bytecodes (c : bytecodes) : Pp.t :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="cbytegen" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="cbytegen.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>cbytegen.ml</code>&nbsp;<span class="label label-danger">57 errors</span>
+    <a href="#cbytegen.ml"><code>cbytegen.ml</code></a>&nbsp;<span class="label label-danger">57 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -6225,7 +6207,7 @@ let compile_alias kn = BCalias (Constant.make1 (Constant.canonical kn))
 </pre>
   </div>
   <div class="col-md-6">
-    <code>cbytegen.v</code>
+    <a href="#cbytegen.ml"><code>cbytegen.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -7090,11 +7072,10 @@ Definition compile_alias (kn : Names.Constant.t) : Cemitcodes.body_code :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="cemitcodes" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="cemitcodes.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>cemitcodes.ml</code>&nbsp;<span class="label label-danger">98 errors</span>
+    <a href="#cemitcodes.ml"><code>cemitcodes.ml</code></a>&nbsp;<span class="label label-danger">98 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -8197,7 +8178,7 @@ Alternative: use a monad to sequence side-effects.">)) env.label_table;
 </pre>
   </div>
   <div class="col-md-6">
-    <code>cemitcodes.v</code>
+    <a href="#cemitcodes.ml"><code>cemitcodes.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -8882,11 +8863,10 @@ Definition to_memory {A : Type}
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="clambda" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="clambda.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>clambda.ml</code>&nbsp;<span class="label label-danger">43 errors</span>
+    <a href="#clambda.ml"><code>clambda.ml</code></a>&nbsp;<span class="label label-danger">43 errors</span>
     <pre>open Util
 open Names
 open Esubst
@@ -9859,7 +9839,7 @@ Alternative: use a monad to sequence side-effects.">if !dump_lambda then
 </pre>
   </div>
   <div class="col-md-6">
-    <code>clambda.v</code>
+    <a href="#clambda.ml"><code>clambda.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -10926,11 +10906,10 @@ Definition lambda_of_constr
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="context" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="context.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>context.ml</code>&nbsp;<span class="label label-danger">5 errors</span>
+    <a href="#context.ml"><code>context.ml</code></a>&nbsp;<span class="label label-danger">5 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -11435,7 +11414,7 @@ module Compacted =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>context.v</code>
+    <a href="#context.ml"><code>context.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -12064,11 +12043,10 @@ End Compacted.
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="conv_oracle" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="conv_oracle.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>conv_oracle.ml</code>&nbsp;<span class="label label-danger">4 errors</span>
+    <a href="#conv_oracle.ml"><code>conv_oracle.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -12186,7 +12164,7 @@ let get_strategy o = get_strategy o (fun x -&gt; x)
 </pre>
   </div>
   <div class="col-md-6">
-    <code>conv_oracle.v</code>
+    <a href="#conv_oracle.ml"><code>conv_oracle.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -12334,11 +12312,10 @@ Definition get_strategy (o : oracle)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="cooking" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="cooking.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>cooking.ml</code>&nbsp;<span class="label label-danger">15 errors</span>
+    <a href="#cooking.ml"><code>cooking.ml</code></a>&nbsp;<span class="label label-danger">13 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -12364,8 +12341,8 @@ open Declarations
 open Univ
 open Context
 
-<abbr class="mark-error" title="This kind of module is not handled.">module NamedDecl = Context.Named.Declaration</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module RelDecl = Context.Rel.Declaration</abbr>
+module NamedDecl = Context.Named.Declaration
+module RelDecl = Context.Rel.Declaration
 
 (*s Cooking the constants. *)
 
@@ -12740,7 +12717,7 @@ let expmod_constr modlist c = expmod_constr (RefTable.create 13) modlist c
 </pre>
   </div>
   <div class="col-md-6">
-    <code>cooking.v</code>
+    <a href="#cooking.ml"><code>cooking.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -12761,11 +12738,9 @@ Import Univ.
 
 Import Context.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module NamedDecl := Context.Named.Declaration.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module RelDecl := Context.Rel.Declaration.
 
 Inductive my_global_reference : Type :=
 | ConstRef : Names.Constant.t -&gt; my_global_reference
@@ -13191,11 +13166,10 @@ Definition expmod_constr
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="copcodes" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="copcodes.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>copcodes.ml</code>&nbsp;<span class="label label-success">success</span>
+    <a href="#copcodes.ml"><code>copcodes.ml</code></a>&nbsp;<span class="label label-success">success</span>
     <pre>(* DO NOT EDIT: automatically generated by kernel/genOpcodeFiles.ml *)let opACC0 = 0
 
 let opACC1 = 1
@@ -13439,7 +13413,7 @@ let opSTOP = 119
 </pre>
   </div>
   <div class="col-md-6">
-    <code>copcodes.v</code>
+    <a href="#copcodes.ml"><code>copcodes.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -13689,11 +13663,10 @@ Definition opSTOP : Z := 119.
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="csymtable" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="csymtable.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>csymtable.ml</code>&nbsp;<span class="label label-danger">19 errors</span>
+    <a href="#csymtable.ml"><code>csymtable.ml</code></a>&nbsp;<span class="label label-danger">17 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -13719,8 +13692,8 @@ open Declarations
 open Environ
 open Cbytegen
 
-<abbr class="mark-error" title="This kind of module is not handled.">module NamedDecl = Context.Named.Declaration</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module RelDecl = Context.Rel.Declaration</abbr>
+module NamedDecl = Context.Named.Declaration
+module RelDecl = Context.Rel.Declaration
 
 external eval_tcode : tcode -&gt; atom array -&gt; vm_global -&gt; values array -&gt; values = &quot;coq_eval_tcode&quot;
 
@@ -13949,7 +13922,7 @@ let set_opaque_const _kn = () (* !?! *)
 </pre>
   </div>
   <div class="col-md-6">
-    <code>csymtable.v</code>
+    <a href="#csymtable.ml"><code>csymtable.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -13972,11 +13945,9 @@ Import Environ.
 
 Import Cbytegen.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module NamedDecl := Context.Named.Declaration.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module RelDecl := Context.Rel.Declaration.
 
 Parameter eval_tcode :
 Vmvalues.tcode -&gt;
@@ -14145,11 +14116,10 @@ Definition set_opaque_const {A : Type} (_kn : A) : unit := tt.
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="declarations" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="declarations.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>declarations.ml</code>&nbsp;<span class="label label-danger">1 error</span>
+    <a href="#declarations.ml"><code>declarations.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -14478,7 +14448,7 @@ and _ module_retroknowledge =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>declarations.v</code>
+    <a href="#declarations.ml"><code>declarations.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -14663,11 +14633,10 @@ Definition module_type_body := 'module_type_body.
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="declareops" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="declareops.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>declareops.ml</code>&nbsp;<span class="label label-danger">10 errors</span>
+    <a href="#declareops.ml"><code>declareops.ml</code></a>&nbsp;<span class="label label-danger">9 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -14682,7 +14651,7 @@ open Declarations
 open Mod_subst
 open Util
 
-<abbr class="mark-error" title="This kind of module is not handled.">module RelDecl = Context.Rel.Declaration</abbr>
+module RelDecl = Context.Rel.Declaration
 
 (** Operations concernings types in [Declarations] :
     [constant_body], [mutual_inductive_body], [module_body] ... *)
@@ -15103,7 +15072,7 @@ and hcons_module_type mb =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>declareops.v</code>
+    <a href="#declareops.ml"><code>declareops.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -15116,8 +15085,7 @@ Import Mod_subst.
 
 Import Util.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module RelDecl := Context.Rel.Declaration.
 
 Definition safe_flags (oracle : Conv_oracle.oracle)
   : Declarations.typing_flags :=
@@ -15667,11 +15635,10 @@ with hcons_module_type (mb : Declarations.module_type_body)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="entries" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="entries.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>entries.ml</code>&nbsp;<span class="label label-success">success</span>
+    <a href="#entries.ml"><code>entries.ml</code></a>&nbsp;<span class="label label-success">success</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -15794,7 +15761,7 @@ type module_entry =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>entries.v</code>
+    <a href="#entries.ml"><code>entries.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -15883,11 +15850,10 @@ Inductive module_entry : Type :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="environ" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="environ.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>environ.ml</code>&nbsp;<span class="label label-danger">39 errors</span>
+    <a href="#environ.ml"><code>environ.ml</code></a>&nbsp;<span class="label label-danger">38 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -15920,7 +15886,7 @@ open Vars
 open Declarations
 open Context.Rel.Declaration
 
-<abbr class="mark-error" title="This kind of module is not handled.">module NamedDecl = Context.Named.Declaration</abbr>
+module NamedDecl = Context.Named.Declaration
 
 (* The type of environments. *)
 
@@ -16732,7 +16698,7 @@ let add_native_symbols dir syms env =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>environ.v</code>
+    <a href="#environ.ml"><code>environ.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -16753,8 +16719,7 @@ Import Declarations.
 
 Import Context.Rel.Declaration.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module NamedDecl := Context.Named.Declaration.
 
 Definition key := Pervasives.ref (option (CEphemeron.key Z)).
 
@@ -17796,11 +17761,10 @@ Definition add_native_symbols
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="esubst" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="esubst.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>esubst.ml</code>&nbsp;<span class="label label-danger">3 errors</span>
+    <a href="#esubst.ml"><code>esubst.ml</code></a>&nbsp;<span class="label label-danger">3 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -17990,7 +17954,7 @@ let rec comp mk_cl s1 s2 =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>esubst.v</code>
+    <a href="#esubst.ml"><code>esubst.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -18214,11 +18178,10 @@ Fixpoint comp {A : Type}
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="evar" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="evar.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>evar.ml</code>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#evar.ml"><code>evar.ml</code></a>&nbsp;<span class="label label-success">success</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -18238,12 +18201,12 @@ let equal = Int.equal
 let hash = Int.hash
 let print x = Pp.(str &quot;?X&quot; ++ int x)
 
-<abbr class="mark-error" title="This kind of module is not handled.">module Set = Int.Set</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module Map = Int.Map</abbr>
+module Set = Int.Set
+module Map = Int.Map
 </pre>
   </div>
   <div class="col-md-6">
-    <code>evar.v</code>
+    <a href="#evar.ml"><code>evar.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -18264,20 +18227,17 @@ Definition hash : Int.t -&gt; Z := Int.hash.
 
 Definition print (x : Z) : Pp.t := op_plusplus (str &quot;?X&quot; % string) (int x).
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module Set := Int.Set.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module Map := Int.Map.
 </pre>
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="genOpcodeFiles" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="genOpcodeFiles.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>genOpcodeFiles.ml</code>&nbsp;<span class="label label-danger">9 errors</span>
+    <a href="#genOpcodeFiles.ml"><code>genOpcodeFiles.ml</code></a>&nbsp;<span class="label label-danger">9 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -18520,11 +18480,11 @@ let main () =
 
 Only the special case `| exception _ when false -&gt; ...` is supported for default value of GADT pattern-matching">Invalid_argument _</abbr> -&gt; usage ()
 
-let <abbr class="mark-error" title="A variable name instead of a pattern was expected.">()</abbr> = main ()
+<abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () = main ()</abbr>
 </pre>
   </div>
   <div class="col-md-6">
-    <code>genOpcodeFiles.v</code>
+    <a href="#genOpcodeFiles.ml"><code>genOpcodeFiles.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -18780,16 +18740,16 @@ Definition main (function_parameter : unit) : unit :=
   | _ =&gt; usage tt
   end.
 
-
+(* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
+Compute main tt.
 </pre>
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="indTyping" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="indTyping.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>indTyping.ml</code>&nbsp;<span class="label label-danger">13 errors</span>
+    <a href="#indTyping.ml"><code>indTyping.ml</code></a>&nbsp;<span class="label label-danger">13 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -19230,7 +19190,7 @@ Alternative: use a monad to sequence side-effects.">;
 </pre>
   </div>
   <div class="col-md-6">
-    <code>indTyping.v</code>
+    <a href="#indTyping.ml"><code>indTyping.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -19735,11 +19695,10 @@ Definition typecheck_inductive
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="indtypes" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="indtypes.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>indtypes.ml</code>&nbsp;<span class="label label-danger">26 errors</span>
+    <a href="#indtypes.ml"><code>indtypes.ml</code></a>&nbsp;<span class="label label-danger">26 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -20371,7 +20330,7 @@ let check_inductive env kn mie =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>indtypes.v</code>
+    <a href="#indtypes.ml"><code>indtypes.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -21100,11 +21059,10 @@ Definition check_inductive
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="inductive" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="inductive.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>inductive.ml</code>&nbsp;<span class="label label-danger">73 errors</span>
+    <a href="#inductive.ml"><code>inductive.ml</code></a>&nbsp;<span class="label label-danger">73 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -22557,7 +22515,7 @@ let check_cofix env (_bodynum,(names,types,bodies as recdef)) =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>inductive.v</code>
+    <a href="#inductive.ml"><code>inductive.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -24164,11 +24122,10 @@ Definition check_cofix {A : Type}
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="inferCumulativity" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="inferCumulativity.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>inferCumulativity.ml</code>&nbsp;<span class="label label-danger">11 errors</span>
+    <a href="#inferCumulativity.ml"><code>inferCumulativity.ml</code></a>&nbsp;<span class="label label-danger">11 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -24437,7 +24394,7 @@ let dummy_variance = let open Entries in function
 </pre>
   </div>
   <div class="col-md-6">
-    <code>inferCumulativity.v</code>
+    <a href="#inferCumulativity.ml"><code>inferCumulativity.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -24786,11 +24743,10 @@ Definition dummy_variance (function_parameter : Entries.universes_entry)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="mod_subst" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="mod_subst.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>mod_subst.ml</code>&nbsp;<span class="label label-danger">27 errors</span>
+    <a href="#mod_subst.ml"><code>mod_subst.ml</code></a>&nbsp;<span class="label label-danger">27 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -25423,7 +25379,7 @@ let repr_substituted r = match r.subst_subst with
 </pre>
   </div>
   <div class="col-md-6">
-    <code>mod_subst.v</code>
+    <a href="#mod_subst.ml"><code>mod_subst.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -26427,11 +26383,10 @@ Definition repr_substituted {A : Type} (r : substituted A)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="mod_typing" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="mod_typing.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>mod_typing.ml</code>&nbsp;<span class="label label-danger">22 errors</span>
+    <a href="#mod_typing.ml"><code>mod_typing.ml</code></a>&nbsp;<span class="label label-danger">22 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -26933,7 +26888,7 @@ let translate_mse_incl is_mod env mp inl me =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>mod_typing.v</code>
+    <a href="#mod_typing.ml"><code>mod_typing.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -27462,11 +27417,10 @@ Definition translate_mse_incl
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="modops" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="modops.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>modops.ml</code>&nbsp;<span class="label label-danger">18 errors</span>
+    <a href="#modops.ml"><code>modops.ml</code></a>&nbsp;<span class="label label-danger">18 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -28109,7 +28063,7 @@ Alternative: use a monad to sequence side-effects.">implem_iter join_signature j
 </pre>
   </div>
   <div class="col-md-6">
-    <code>modops.v</code>
+    <a href="#modops.ml"><code>modops.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -29001,11 +28955,10 @@ Definition join_structure
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="names" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="names.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>names.ml</code>&nbsp;<span class="label label-danger">75 errors</span>
+    <a href="#names.ml"><code>names.ml</code></a>&nbsp;<span class="label label-danger">41 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -29082,7 +29035,7 @@ Alternative: use a monad to sequence side-effects.">check_valid s;
 
   <abbr class="mark-error" title="Applications of functors are not handled.">module Pred = Predicate.Make(Self)</abbr>
 
-  <abbr class="mark-error" title="This kind of module is not handled.">module List = String.List</abbr>
+  module List = String.List
 
   let hcons = String.hcons
 
@@ -29154,8 +29107,8 @@ type variable = Id.t
 
 type module_ident = Id.t
 
-<abbr class="mark-error" title="This kind of module is not handled.">module ModIdset = Id.Set</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module ModIdmap = Id.Map</abbr>
+module ModIdset = Id.Set
+module ModIdmap = Id.Map
 
 (** {6 Directory paths = section names paths } *)
 
@@ -29271,7 +29224,7 @@ end
 
 module Label =
 struct
-  <abbr class="mark-error" title="Structure item `include` not handled.">include Id</abbr>
+  <abbr class="mark-error" title="Cannot include this kind of module expression">include Id</abbr>
   let make = Id.of_string
   let of_id id = id
   let to_id id = id
@@ -29453,7 +29406,7 @@ end
 
 <abbr class="mark-error" title="Applications of functors are not handled.">module KNmap = HMap.Make(KerName)</abbr>
 <abbr class="mark-error" title="Applications of functors are not handled.">module KNpred = Predicate.Make(KerName)</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module KNset = KNmap.Set</abbr>
+module KNset = KNmap.Set
 
 (** {6 Kernel pairs } *)
 
@@ -29595,7 +29548,7 @@ end
 
 (** {6 Constant Names} *)
 
-<abbr class="mark-error" title="This kind of module is not handled.">module Constant = KerPair</abbr>
+module Constant = KerPair
 
 <abbr class="mark-error" title="Applications of functors are not handled.">module Cmap = HMap.Make(Constant.CanOrd)</abbr>
 (** A map whose keys are constants (values of the {!Constant.t} type).
@@ -29606,15 +29559,15 @@ end
     Keys are ordered wrt. &quot;user form&quot; of the constant. *)
 
 <abbr class="mark-error" title="Applications of functors are not handled.">module Cpred = Predicate.Make(Constant.CanOrd)</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module Cset = Cmap.Set</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module Cset_env = Cmap_env.Set</abbr>
+module Cset = Cmap.Set
+module Cset_env = Cmap_env.Set
 
 (** {6 Names of mutual inductive types } *)
 
-<abbr class="mark-error" title="This kind of module is not handled.">module MutInd = KerPair</abbr>
+module MutInd = KerPair
 
 <abbr class="mark-error" title="Applications of functors are not handled.">module Mindmap = HMap.Make(MutInd.CanOrd)</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module Mindset = Mindmap.Set</abbr>
+module Mindset = Mindmap.Set
 <abbr class="mark-error" title="Applications of functors are not handled.">module Mindmap_env = HMap.Make(MutInd.UserOrd)</abbr>
 
 (** Designation of a (particular) inductive type. *)
@@ -29638,26 +29591,26 @@ let index_of_constructor (_ind, i) = i
 
 let eq_ind (m1, i1) (m2, i2) = Int.equal i1 i2 &amp;&amp; MutInd.equal m1 m2
 let eq_user_ind (m1, i1) (m2, i2) =
-  Int.equal i1 i2 &amp;&amp; <abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">MutInd.UserOrd.equal</abbr> m1 m2
+  Int.equal i1 i2 &amp;&amp; MutInd.UserOrd.equal m1 m2
 let eq_syntactic_ind (m1, i1) (m2, i2) =
-  Int.equal i1 i2 &amp;&amp; <abbr class="mark-error" title="Module signature 'KerPair.SyntacticOrd' not found">MutInd.SyntacticOrd.equal</abbr> m1 m2
+  Int.equal i1 i2 &amp;&amp; MutInd.SyntacticOrd.equal m1 m2
 
 let ind_ord (m1, i1) (m2, i2) =
   let c = Int.compare i1 i2 in
-  if Int.equal c 0 then <abbr class="mark-error" title="Module signature 'KerPair.CanOrd' not found">MutInd.CanOrd.compare</abbr> m1 m2 else c
+  if Int.equal c 0 then MutInd.CanOrd.compare m1 m2 else c
 let ind_user_ord (m1, i1) (m2, i2) =
   let c = Int.compare i1 i2 in
-  if Int.equal c 0 then <abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">MutInd.UserOrd.compare</abbr> m1 m2 else c
+  if Int.equal c 0 then MutInd.UserOrd.compare m1 m2 else c
 let ind_syntactic_ord (m1, i1) (m2, i2) =
   let c = Int.compare i1 i2 in
-  if Int.equal c 0 then <abbr class="mark-error" title="Module signature 'KerPair.SyntacticOrd' not found">MutInd.SyntacticOrd.compare</abbr> m1 m2 else c
+  if Int.equal c 0 then MutInd.SyntacticOrd.compare m1 m2 else c
 
 let ind_hash (m, i) =
   Hashset.Combine.combine (MutInd.hash m) (Int.hash i)
 let ind_user_hash (m, i) =
-  Hashset.Combine.combine (<abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">MutInd.UserOrd.hash</abbr> m) (Int.hash i)
+  Hashset.Combine.combine (MutInd.UserOrd.hash m) (Int.hash i)
 let ind_syntactic_hash (m, i) =
-  Hashset.Combine.combine (<abbr class="mark-error" title="Module signature 'KerPair.SyntacticOrd' not found">MutInd.SyntacticOrd.hash</abbr> m) (Int.hash i)
+  Hashset.Combine.combine (MutInd.SyntacticOrd.hash m) (Int.hash i)
 
 let eq_constructor (ind1, j1) (ind2, j2) = Int.equal j1 j2 &amp;&amp; eq_ind ind1 ind2
 let eq_user_constructor (ind1, j1) (ind2, j2) =
@@ -29729,16 +29682,8 @@ end
     let hash = constructor_hash
   end)</abbr>
 
-let <abbr class="mark-error" title="Module signature 'KerPair.HashKP' not found
-
-——————————
-
-Module signature 'KerPair.HashKP' not found">hcons_con</abbr> = Hashcons.simple_hcons <abbr class="mark-error" title="Module signature 'KerPair.HashKP' not found">Constant.HashKP.generate</abbr> <abbr class="mark-error" title="Module signature 'KerPair.HashKP' not found">Constant.HashKP.hcons</abbr> KerName.hcons
-let <abbr class="mark-error" title="Module signature 'KerPair.HashKP' not found
-
-——————————
-
-Module signature 'KerPair.HashKP' not found">hcons_mind</abbr> = Hashcons.simple_hcons <abbr class="mark-error" title="Module signature 'KerPair.HashKP' not found">MutInd.HashKP.generate</abbr> <abbr class="mark-error" title="Module signature 'KerPair.HashKP' not found">MutInd.HashKP.hcons</abbr> KerName.hcons
+let hcons_con = Hashcons.simple_hcons Constant.HashKP.generate Constant.HashKP.hcons KerName.hcons
+let hcons_mind = Hashcons.simple_hcons MutInd.HashKP.generate MutInd.HashKP.hcons KerName.hcons
 let hcons_ind = Hashcons.simple_hcons Hind.generate Hind.hcons hcons_mind
 let hcons_construct = Hashcons.simple_hcons Hconstruct.generate Hconstruct.hcons hcons_ind
 
@@ -29761,13 +29706,13 @@ let eq_table_key f ik1 ik2 =
   | RelKey k1, RelKey k2 -&gt; Int.equal k1 k2
   | _ -&gt; false
 
-let eq_mind_chk = <abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">MutInd.UserOrd.equal</abbr>
+let eq_mind_chk = MutInd.UserOrd.equal
 let eq_ind_chk (kn1,i1) (kn2,i2) = Int.equal i1 i2 &amp;&amp; eq_mind_chk kn1 kn2
 
 (*******************************************************************)
 (** Compatibility layers *)
 
-let eq_constant_key = <abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">Constant.UserOrd.equal</abbr>
+let eq_constant_key = Constant.UserOrd.equal
 
 (** Compatibility layer for [ModPath] *)
 
@@ -30009,28 +29954,28 @@ module GlobRef = struct
     open Constant.CanOrd
     type t = GlobRefInternal.t
     let compare gr1 gr2 =
-      GlobRefInternal.global_ord_gen <abbr class="mark-error" title="Module signature 'KerPair.CanOrd' not found">compare</abbr> ind_ord constructor_ord gr1 gr2
-    let equal gr1 gr2 = GlobRefInternal.global_eq_gen <abbr class="mark-error" title="Module signature 'KerPair.CanOrd' not found">equal</abbr> eq_ind eq_constructor gr1 gr2
-    let hash gr = GlobRefInternal.global_hash_gen <abbr class="mark-error" title="Module signature 'KerPair.CanOrd' not found">hash</abbr> ind_hash constructor_hash gr
+      GlobRefInternal.global_ord_gen compare ind_ord constructor_ord gr1 gr2
+    let equal gr1 gr2 = GlobRefInternal.global_eq_gen equal eq_ind eq_constructor gr1 gr2
+    let hash gr = GlobRefInternal.global_hash_gen hash ind_hash constructor_hash gr
   end
 
   module Ordered_env = struct
     open Constant.UserOrd
     type t = GlobRefInternal.t
     let compare gr1 gr2 =
-      GlobRefInternal.global_ord_gen <abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">compare</abbr> ind_user_ord constructor_user_ord gr1 gr2
+      GlobRefInternal.global_ord_gen compare ind_user_ord constructor_user_ord gr1 gr2
     let equal gr1 gr2 =
-      GlobRefInternal.global_eq_gen <abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">equal</abbr> eq_user_ind eq_user_constructor gr1 gr2
-    let hash gr = GlobRefInternal.global_hash_gen <abbr class="mark-error" title="Module signature 'KerPair.UserOrd' not found">hash</abbr> ind_user_hash constructor_user_hash gr
+      GlobRefInternal.global_eq_gen equal eq_user_ind eq_user_constructor gr1 gr2
+    let hash gr = GlobRefInternal.global_hash_gen hash ind_user_hash constructor_user_hash gr
   end
 
   <abbr class="mark-error" title="Applications of functors are not handled.">module Map = HMap.Make(Ordered)</abbr>
-  <abbr class="mark-error" title="This kind of module is not handled.">module Set = Map.Set</abbr>
+  module Set = Map.Set
 
   (* Alternative sets and maps indexed by the user part of the kernel names *)
 
   <abbr class="mark-error" title="Applications of functors are not handled.">module Map_env = HMap.Make(Ordered_env)</abbr>
-  <abbr class="mark-error" title="This kind of module is not handled.">module Set_env = Map_env.Set</abbr>
+  module Set_env = Map_env.Set
 
 end
 
@@ -30052,7 +29997,7 @@ type lstring = string CAst.t
 </pre>
   </div>
   <div class="col-md-6">
-    <code>names.v</code>
+    <a href="#names.ml"><code>names.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -30132,8 +30077,7 @@ Module Id.
   (* ❌ Applications of functors are not handled. *)
   functor_application
   
-  (* ❌ This kind of module is not handled. *)
-  unhandled_module
+  Module List := String.List.
   
   Definition hcons : string -&gt; string := Util.String.(CString.ExtS.hcons).
 End Id.
@@ -30218,11 +30162,9 @@ Definition variable := Id.t.
 
 Definition module_ident := Id.t.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module ModIdset := Id.Set.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module ModIdmap := Id.Map.
 
 Definition default_module_name : string :=
   &quot;If you see this, it's a bug&quot; % string.
@@ -30381,7 +30323,7 @@ functor_application
 functor_application
 
 Module Label.
-  (* ❌ Structure item `include` not handled. *)
+  (* ❌ Cannot include this kind of module expression *)
   include
   
   Definition make : string -&gt; string := Id.of_string.
@@ -30624,8 +30566,7 @@ functor_application
 (* ❌ Applications of functors are not handled. *)
 functor_application
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module KNset := KNmap.Set.
 
 Module KerPair.
   Inductive t : Type :=
@@ -30783,8 +30724,7 @@ Module KerPair.
   functor_application
 End KerPair.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module Constant := KerPair.
 
 (* ❌ Applications of functors are not handled. *)
 functor_application
@@ -30795,20 +30735,16 @@ functor_application
 (* ❌ Applications of functors are not handled. *)
 functor_application
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module Cset := Cmap.Set.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module Cset_env := Cmap_env.Set.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module MutInd := KerPair.
 
 (* ❌ Applications of functors are not handled. *)
 functor_application
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module Mindset := Mindmap.Set.
 
 (* ❌ Applications of functors are not handled. *)
 functor_application
@@ -31520,14 +31456,12 @@ Module GlobRef.
   (* ❌ Applications of functors are not handled. *)
   functor_application
   
-  (* ❌ This kind of module is not handled. *)
-  unhandled_module
+  Module Set := Map.Set.
   
   (* ❌ Applications of functors are not handled. *)
   functor_application
   
-  (* ❌ This kind of module is not handled. *)
-  unhandled_module
+  Module Set_env := Map_env.Set.
 End GlobRef.
 
 Inductive evaluable_global_reference : Type :=
@@ -31551,11 +31485,10 @@ Definition lstring := CAst.t string.
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="nativecode" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="nativecode.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>nativecode.ml</code>&nbsp;<span class="label label-danger">162 errors</span>
+    <a href="#nativecode.ml"><code>nativecode.ml</code></a>&nbsp;<span class="label label-danger">162 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -34593,7 +34526,7 @@ let add_header_comment mlcode s =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>nativecode.v</code>
+    <a href="#nativecode.ml"><code>nativecode.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -35584,10 +35517,9 @@ Definition get_rel (env : env) (id : Names.Name.t) (i : Z) : mllambda :=
     (* ❌ Try-with are not handled *)
     try (Int.List.assoc i (op_exclamation (env_urel env))).
 
-Definition get_var (env : env) (id : Names.Id.List.(CList.MonoS.elt))
-  : mllambda :=
+Definition get_var (env : env) (id : Names.Id.List.elt) : mllambda :=
   (* ❌ Try-with are not handled *)
-  try (Names.Id.List.(CList.MonoS.assoc) id (op_exclamation (env_named env))).
+  try (Id.List.assoc id (op_exclamation (env_named env))).
 
 Definition fresh_univ (function_parameter : unit) : lname :=
   let 'tt := function_parameter in
@@ -35648,8 +35580,8 @@ Definition empty_args {A : Type} : array A :=
   [ ].
 
 Definition fv_args {A : Type}
-  (env : env) (fvn : list (Names.Id.List.(CList.MonoS.elt) * A))
-  (fvr : list (Z * mllambda)) : array mllambda :=
+  (env : env) (fvn : list (Names.Id.List.elt * A)) (fvr : list (Z * mllambda))
+  : array mllambda :=
   let size :=
     op_plus (Util.List.(CList.ExtS.length) fvn)
       (Util.List.(CList.ExtS.length) fvr) in
@@ -38360,11 +38292,10 @@ Definition add_header_comment (mlcode : list global) (s : string)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="nativeconv" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="nativeconv.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>nativeconv.ml</code>&nbsp;<span class="label label-danger">9 errors</span>
+    <a href="#nativeconv.ml"><code>nativeconv.ml</code></a>&nbsp;<span class="label label-danger">9 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -38579,7 +38510,7 @@ let native_conv cv_pb sigma env t1 t2 =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>nativeconv.v</code>
+    <a href="#nativeconv.ml"><code>nativeconv.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -38898,11 +38829,10 @@ Definition native_conv
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="nativelambda" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="nativelambda.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>nativelambda.ml</code>&nbsp;<span class="label label-danger">22 errors</span>
+    <a href="#nativelambda.ml"><code>nativelambda.ml</code></a>&nbsp;<span class="label label-danger">21 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -38920,7 +38850,7 @@ open Declarations
 open Environ
 open Nativevalues
 
-<abbr class="mark-error" title="This kind of module is not handled.">module RelDecl = Context.Rel.Declaration</abbr>
+module RelDecl = Context.Rel.Declaration
 
 (** This file defines the lambda code generation phase of the native compiler *)
 type prefix = string
@@ -39559,7 +39489,7 @@ let mk_lazy c =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>nativelambda.v</code>
+    <a href="#nativelambda.ml"><code>nativelambda.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -39580,8 +39510,7 @@ Import Environ.
 
 Import Nativevalues.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module RelDecl := Context.Rel.Declaration.
 
 Definition prefix := string.
 
@@ -40320,11 +40249,10 @@ Definition mk_lazy (c : lambda) : lambda :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="nativelib" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="nativelib.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>nativelib.ml</code>&nbsp;<span class="label label-danger">16 errors</span>
+    <a href="#nativelib.ml"><code>nativelib.ml</code></a>&nbsp;<span class="label label-danger">16 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -40702,7 +40630,7 @@ let link_library env ~prefix ~dirname ~basename =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>nativelib.v</code>
+    <a href="#nativelib.ml"><code>nativelib.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -40969,11 +40897,10 @@ Definition link_library
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="nativelibrary" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="nativelibrary.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>nativelibrary.ml</code>&nbsp;<span class="label label-danger">8 errors</span>
+    <a href="#nativelibrary.ml"><code>nativelibrary.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -41091,7 +41018,7 @@ Assert instruction is not handled.">assert false</abbr>
 </pre>
   </div>
   <div class="col-md-6">
-    <code>nativelibrary.v</code>
+    <a href="#nativelibrary.ml"><code>nativelibrary.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -41247,11 +41174,10 @@ Definition dump_library {A : Type}
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="nativevalues" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="nativevalues.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>nativevalues.ml</code>&nbsp;<span class="label label-danger">13 errors</span>
+    <a href="#nativevalues.ml"><code>nativevalues.ml</code></a>&nbsp;<span class="label label-danger">13 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -41819,7 +41745,7 @@ Alternative: use a monad to sequence side-effects.">;
 </pre>
   </div>
   <div class="col-md-6">
-    <code>nativevalues.v</code>
+    <a href="#nativevalues.ml"><code>nativevalues.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -42421,11 +42347,10 @@ Definition str_decode {A : Type} (s : string) : A :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="opaqueproof" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="opaqueproof.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>opaqueproof.ml</code>&nbsp;<span class="label label-danger">3 errors</span>
+    <a href="#opaqueproof.ml"><code>opaqueproof.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -42561,7 +42486,7 @@ let force_constraints _access { opaque_val = prfs; opaque_dir = odp; _ } = funct
         get_mono (Future.force cu)
       else Univ.ContextSet.empty
 
-<abbr class="mark-error" title="This kind of module is not handled.">module FMap = Future.UUIDMap</abbr>
+module FMap = Future.UUIDMap
 
 let dump ?(except = Future.UUIDSet.empty) { opaque_val = otab; opaque_len = n; _ } =
   let opaque_table = Array.make n None in
@@ -42586,7 +42511,7 @@ let dump ?(except = Future.UUIDSet.empty) { opaque_val = otab; opaque_len = n; _
 </pre>
   </div>
   <div class="col-md-6">
-    <code>opaqueproof.v</code>
+    <a href="#opaqueproof.ml"><code>opaqueproof.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -42768,8 +42693,7 @@ Definition force_constraints {A : Type}
     else
       Univ.ContextSet.empty.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module FMap := Future.UUIDMap.
 
 Definition dump (op_staroptstar : option Future.UUIDSet.t)
   : opaquetab -&gt;
@@ -42810,11 +42734,10 @@ Definition dump (op_staroptstar : option Future.UUIDSet.t)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="primred" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="primred.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>primred.ml</code>&nbsp;<span class="label label-danger">17 errors</span>
+    <a href="#primred.ml"><code>primred.ml</code></a>&nbsp;<span class="label label-danger">17 errors</span>
     <pre>(* Reduction of native operators *)
 open Names
 open CPrimitives
@@ -43064,7 +42987,7 @@ end</abbr>
 </pre>
   </div>
   <div class="col-md-6">
-    <code>primred.v</code>
+    <a href="#primred.ml"><code>primred.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -43239,11 +43162,10 @@ functor
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="reduction" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="reduction.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>reduction.ml</code>&nbsp;<span class="label label-danger">45 errors</span>
+    <a href="#reduction.ml"><code>reduction.ml</code></a>&nbsp;<span class="label label-danger">38 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -43531,63 +43453,7 @@ let conv_table_key infos k1 k2 cuniv =
     if Univ.Instance.equal u u' then cuniv
     else 
       let flex = evaluable_constant cst (info_env infos) 
-	&amp;&amp; <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-CClosure.RedFlagsSig, CClosure.RedFlagsSig
-
-We were looking for a module signature name for the following shape:
-[
-  reds;
-  red_kind;
-  fBETA;
-  fDELTA;
-  fETA;
-  fMATCH;
-  fFIX;
-  fCOFIX;
-  fZETA;
-  fCONST;
-  fVAR;
-  no_red;
-  red_add;
-  red_sub;
-  red_add_transparent;
-  red_transparent;
-  mkflags;
-  red_set;
-  red_projection
-]
-(a shape is a list of names of types and values)
-
-We use the concept of shape to find a name of a signature for Coq.">RedFlags.red_set</abbr> (info_flags infos) (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-CClosure.RedFlagsSig, CClosure.RedFlagsSig
-
-We were looking for a module signature name for the following shape:
-[
-  reds;
-  red_kind;
-  fBETA;
-  fDELTA;
-  fETA;
-  fMATCH;
-  fFIX;
-  fCOFIX;
-  fZETA;
-  fCONST;
-  fVAR;
-  no_red;
-  red_add;
-  red_sub;
-  red_add_transparent;
-  red_transparent;
-  mkflags;
-  red_set;
-  red_projection
-]
-(a shape is a list of names of types and values)
-
-We use the concept of shape to find a name of a signature for Coq.">RedFlags.fCONST</abbr> cst)
+	&amp;&amp; RedFlags.red_set (info_flags infos) (RedFlags.fCONST cst)
       in convert_instances ~flex u u' cuniv
   | VarKey id, VarKey id' when <abbr class="mark-error" title="Guard on pattern not supported">Id.equal id id'</abbr> -&gt; cuniv
   | RelKey n, RelKey n' when <abbr class="mark-error" title="Guard on pattern not supported">Int.equal n n'</abbr> -&gt; cuniv
@@ -43860,79 +43726,7 @@ Alternative: use a monad to sequence side-effects.">
               Conversion check to rigid terms eventually implies full weak-head
               reduction, so instead of repeatedly performing small-step
               unfoldings, we perform reduction with all flags on. *)
-            let all = </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-CClosure.RedFlagsSig, CClosure.RedFlagsSig
-
-We were looking for a module signature name for the following shape:
-[
-  reds;
-  red_kind;
-  fBETA;
-  fDELTA;
-  fETA;
-  fMATCH;
-  fFIX;
-  fCOFIX;
-  fZETA;
-  fCONST;
-  fVAR;
-  no_red;
-  red_add;
-  red_sub;
-  red_add_transparent;
-  red_transparent;
-  mkflags;
-  red_set;
-  red_projection
-]
-(a shape is a list of names of types and values)
-
-We use the concept of shape to find a name of a signature for Coq.">RedFlags.red_add_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> all (</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-CClosure.RedFlagsSig, CClosure.RedFlagsSig
-
-We were looking for a module signature name for the following shape:
-[
-  reds;
-  red_kind;
-  fBETA;
-  fDELTA;
-  fETA;
-  fMATCH;
-  fFIX;
-  fCOFIX;
-  fZETA;
-  fCONST;
-  fVAR;
-  no_red;
-  red_add;
-  red_sub;
-  red_add_transparent;
-  red_transparent;
-  mkflags;
-  red_set;
-  red_projection
-]
-(a shape is a list of names of types and values)
-
-We use the concept of shape to find a name of a signature for Coq.">RedFlags.red_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> (info_flags infos.cnv_inf)) in
+            let all = RedFlags.red_add_transparent all (RedFlags.red_transparent (info_flags infos.cnv_inf)) in
             let r1 = whd_stack (infos_with_reds infos.cnv_inf all) infos.lft_tab def1 v1 in
             eqappr cv_pb l2r infos (lft1, r1) appr2 cuniv
         | None -&gt;
@@ -43960,79 +43754,7 @@ Alternative: use a monad to sequence side-effects.">
        begin match unfold_ref_with_args infos.cnv_inf infos.rgt_tab fl2 v2 with
         | Some (def2, v2) -&gt;
           (** Symmetrical case of above. *)
-          let all = </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-CClosure.RedFlagsSig, CClosure.RedFlagsSig
-
-We were looking for a module signature name for the following shape:
-[
-  reds;
-  red_kind;
-  fBETA;
-  fDELTA;
-  fETA;
-  fMATCH;
-  fFIX;
-  fCOFIX;
-  fZETA;
-  fCONST;
-  fVAR;
-  no_red;
-  red_add;
-  red_sub;
-  red_add_transparent;
-  red_transparent;
-  mkflags;
-  red_set;
-  red_projection
-]
-(a shape is a list of names of types and values)
-
-We use the concept of shape to find a name of a signature for Coq.">RedFlags.red_add_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> all (</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-CClosure.RedFlagsSig, CClosure.RedFlagsSig
-
-We were looking for a module signature name for the following shape:
-[
-  reds;
-  red_kind;
-  fBETA;
-  fDELTA;
-  fETA;
-  fMATCH;
-  fFIX;
-  fCOFIX;
-  fZETA;
-  fCONST;
-  fVAR;
-  no_red;
-  red_add;
-  red_sub;
-  red_add_transparent;
-  red_transparent;
-  mkflags;
-  red_set;
-  red_projection
-]
-(a shape is a list of names of types and values)
-
-We use the concept of shape to find a name of a signature for Coq.">RedFlags.red_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> (info_flags infos.cnv_inf)) in
+          let all = RedFlags.red_add_transparent all (RedFlags.red_transparent (info_flags infos.cnv_inf)) in
           let r2 = whd_stack (infos_with_reds infos.cnv_inf all) infos.rgt_tab def2 v2 in
           eqappr cv_pb l2r infos appr1 (lft2, r2) cuniv
         | None -&gt;
@@ -44245,35 +43967,7 @@ Only the special case `| exception _ when false -&gt; ...` is supported for defa
   Array.fold_right3 fold ci.ci_cstr_nargs br1 br2 cuniv
 
 let clos_gen_conv trans cv_pb l2r evars env univs t1 t2 =
-  let reds = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-CClosure.RedFlagsSig, CClosure.RedFlagsSig
-
-We were looking for a module signature name for the following shape:
-[
-  reds;
-  red_kind;
-  fBETA;
-  fDELTA;
-  fETA;
-  fMATCH;
-  fFIX;
-  fCOFIX;
-  fZETA;
-  fCONST;
-  fVAR;
-  no_red;
-  red_add;
-  red_sub;
-  red_add_transparent;
-  red_transparent;
-  mkflags;
-  red_set;
-  red_projection
-]
-(a shape is a list of names of types and values)
-
-We use the concept of shape to find a name of a signature for Coq.">CClosure.RedFlags.red_add_transparent</abbr> betaiotazeta trans in
+  let reds = CClosure.RedFlags.red_add_transparent betaiotazeta trans in
   let infos = create_clos_infos ~evars reds env in
   let infos = {
     cnv_inf = infos;
@@ -44574,7 +44268,7 @@ let eta_expand env t ty =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>reduction.v</code>
+    <a href="#reduction.ml"><code>reduction.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -46010,11 +45704,10 @@ Definition eta_expand
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="retroknowledge" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="retroknowledge.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>retroknowledge.ml</code>&nbsp;<span class="label label-success">success</span>
+    <a href="#retroknowledge.ml"><code>retroknowledge.ml</code></a>&nbsp;<span class="label label-success">success</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -46058,7 +45751,7 @@ type action =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>retroknowledge.v</code>
+    <a href="#retroknowledge.ml"><code>retroknowledge.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -46086,11 +45779,10 @@ Inductive action : Type :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="retypeops" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="retypeops.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>retypeops.ml</code>&nbsp;<span class="label label-danger">4 errors</span>
+    <a href="#retypeops.ml"><code>retypeops.ml</code></a>&nbsp;<span class="label label-danger">3 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -46108,7 +45800,7 @@ open Declarations
 open Environ
 open Context
 
-<abbr class="mark-error" title="This kind of module is not handled.">module RelDecl = Context.Rel.Declaration</abbr>
+module RelDecl = Context.Rel.Declaration
 
 let relevance_of_rel env n =
   let decl = lookup_rel n env in
@@ -46215,7 +45907,7 @@ let relevance_of_term env c =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>retypeops.v</code>
+    <a href="#retypeops.ml"><code>retypeops.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -46234,8 +45926,7 @@ Import Environ.
 
 Import Context.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module RelDecl := Context.Rel.Declaration.
 
 Definition relevance_of_rel (env : Environ.env) (n : Z) : Sorts.relevance :=
   let decl := lookup_rel n env in
@@ -46384,11 +46075,10 @@ Definition relevance_of_term (env : Environ.env) (c : Constr.constr)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="safe_typing" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="safe_typing.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>safe_typing.ml</code>&nbsp;<span class="label label-danger">142 errors</span>
+    <a href="#safe_typing.ml"><code>safe_typing.ml</code></a>&nbsp;<span class="label label-danger">141 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -46456,7 +46146,7 @@ open Declarations
 open Constr
 open Context.Named.Declaration
 
-<abbr class="mark-error" title="This kind of module is not handled.">module NamedDecl = Context.Named.Declaration</abbr>
+module NamedDecl = Context.Named.Declaration
 
 (** {6 Safe environments }
 
@@ -49257,7 +48947,7 @@ let set_strategy k l e = <abbr class="mark-error" title="Record substitution not
 </pre>
   </div>
   <div class="col-md-6">
-    <code>safe_typing.v</code>
+    <a href="#safe_typing.ml"><code>safe_typing.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -49274,8 +48964,7 @@ Import Constr.
 
 Import Context.Named.Declaration.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module NamedDecl := Context.Named.Declaration.
 
 Inductive vodigest : Type :=
 | Dvo_or_vi : Digest.t -&gt; vodigest
@@ -51011,11 +50700,10 @@ Definition set_strategy
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="section" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="section.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>section.ml</code>&nbsp;<span class="label label-danger">7 errors</span>
+    <a href="#section.ml"><code>section.ml</code></a>&nbsp;<span class="label label-danger">6 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -51030,7 +50718,7 @@ open Util
 open Names
 open Univ
 
-<abbr class="mark-error" title="This kind of module is not handled.">module NamedDecl = Context.Named.Declaration</abbr>
+module NamedDecl = Context.Named.Declaration
 
 type section_entry =
 | SecDefinition of Constant.t
@@ -51245,7 +50933,7 @@ let is_in_section env gr s =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>section.v</code>
+    <a href="#section.ml"><code>section.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -51258,8 +50946,7 @@ Import Names.
 
 Import Univ.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module NamedDecl := Context.Named.Declaration.
 
 Inductive section_entry : Type :=
 | SecDefinition : Names.Constant.t -&gt; section_entry
@@ -51539,11 +51226,10 @@ Definition is_in_section {A : Type}
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="sorts" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="sorts.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>sorts.ml</code>&nbsp;<span class="label label-danger">1 error</span>
+    <a href="#sorts.ml"><code>sorts.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -51704,7 +51390,7 @@ let pr_sort_family = function
 </pre>
   </div>
   <div class="col-md-6">
-    <code>sorts.v</code>
+    <a href="#sorts.ml"><code>sorts.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -51897,11 +51583,10 @@ Definition pr_sort_family (function_parameter : family) : Pp.t :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="subtyping" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="subtyping.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>subtyping.ml</code>&nbsp;<span class="label label-danger">29 errors</span>
+    <a href="#subtyping.ml"><code>subtyping.ml</code></a>&nbsp;<span class="label label-danger">29 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -53047,7 +52732,7 @@ let check_subtypes env sup super =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>subtyping.v</code>
+    <a href="#subtyping.ml"><code>subtyping.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -53568,11 +53253,10 @@ Definition check_subtypes
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="term" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="term.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>term.ml</code>&nbsp;<span class="label label-danger">8 errors</span>
+    <a href="#term.ml"><code>term.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -53972,7 +53656,7 @@ let kind_of_type t = match kind t with
 </pre>
   </div>
   <div class="col-md-6">
-    <code>term.v</code>
+    <a href="#term.ml"><code>term.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -54557,11 +54241,10 @@ Definition kind_of_type (t : Constr.constr)
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="term_typing" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="term_typing.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>term_typing.ml</code>&nbsp;<span class="label label-danger">21 errors</span>
+    <a href="#term_typing.ml"><code>term_typing.ml</code></a>&nbsp;<span class="label label-danger">20 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -54586,7 +54269,7 @@ open Declarations
 open Environ
 open Entries
 
-<abbr class="mark-error" title="This kind of module is not handled.">module NamedDecl = Context.Named.Declaration</abbr>
+module NamedDecl = Context.Named.Declaration
 
 (* Insertion of constants and parameters in environment. *)
 
@@ -54918,7 +54601,7 @@ let translate_local_def env _id centry =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>term_typing.v</code>
+    <a href="#term_typing.ml"><code>term_typing.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -54939,8 +54622,7 @@ Import Environ.
 
 Import Entries.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module NamedDecl := Context.Named.Declaration.
 
 Definition effect_handler (a : Type) :=
   Environ.env -&gt; Constr.t -&gt; a -&gt; Constr.t * Univ.ContextSet.t * Z.
@@ -55343,11 +55025,10 @@ Definition translate_local_def {A : Type}
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="transparentState" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="transparentState.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>transparentState.ml</code>&nbsp;<span class="label label-success">success</span>
+    <a href="#transparentState.ml"><code>transparentState.ml</code></a>&nbsp;<span class="label label-success">success</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -55396,7 +55077,7 @@ let is_transparent_constant ts cst =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>transparentState.v</code>
+    <a href="#transparentState.ml"><code>transparentState.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -55429,11 +55110,10 @@ Definition is_transparent_constant (ts : t) (cst : Names.Cpred.elt) : bool :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="type_errors" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="type_errors.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>type_errors.ml</code>&nbsp;<span class="label label-danger">3 errors</span>
+    <a href="#type_errors.ml"><code>type_errors.ml</code></a>&nbsp;<span class="label label-danger">3 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -55644,7 +55324,7 @@ let map_ptype_error f = function
 </pre>
   </div>
   <div class="col-md-6">
-    <code>type_errors.v</code>
+    <a href="#type_errors.ml"><code>type_errors.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -55959,11 +55639,10 @@ Definition map_ptype_error {A B : Type}
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="typeops" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="typeops.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>typeops.ml</code>&nbsp;<span class="label label-danger">43 errors</span>
+    <a href="#typeops.ml"><code>typeops.ml</code></a>&nbsp;<span class="label label-danger">41 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -55989,8 +55668,8 @@ open Reduction
 open Inductive
 open Type_errors
 
-<abbr class="mark-error" title="This kind of module is not handled.">module RelDecl = Context.Rel.Declaration</abbr>
-<abbr class="mark-error" title="This kind of module is not handled.">module NamedDecl = Context.Named.Declaration</abbr>
+module RelDecl = Context.Rel.Declaration
+module NamedDecl = Context.Named.Declaration
 
 <abbr class="mark-error" title="The definition of exceptions is not handled.
 
@@ -56804,7 +56483,7 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 </pre>
   </div>
   <div class="col-md-6">
-    <code>typeops.v</code>
+    <a href="#typeops.ml"><code>typeops.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -56839,11 +56518,9 @@ Import Inductive.
 
 Import Type_errors.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module RelDecl := Context.Rel.Declaration.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module NamedDecl := Context.Named.Declaration.
 
 (* ❌ The definition of exceptions is not handled. *)
 exception
@@ -57672,11 +57349,10 @@ Definition check_primitive_type
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="uGraph" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="uGraph.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>uGraph.ml</code>&nbsp;<span class="label label-danger">14 errors</span>
+    <a href="#uGraph.ml"><code>uGraph.ml</code></a>&nbsp;<span class="label label-danger">14 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -57928,7 +57604,7 @@ let check_leq =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>uGraph.v</code>
+    <a href="#uGraph.ml"><code>uGraph.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -58242,11 +57918,10 @@ Definition check_leq : t -&gt; Univ.Universe.t -&gt; Univ.Universe.t -&gt; bool 
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="uint63" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="uint63.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>uint63.ml</code>&nbsp;<span class="label label-danger">26 errors</span>
+    <a href="#uint63.ml"><code>uint63.ml</code></a>&nbsp;<span class="label label-danger">26 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -59127,7 +58802,7 @@ let subcarryc x y =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>uint63.v</code>
+    <a href="#uint63.ml"><code>uint63.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -59461,11 +59136,10 @@ Definition subcarryc (x : Z) (y : Z) : carry Z :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="uint63_31" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="uint63_31.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>uint63_31.ml</code>&nbsp;<span class="label label-danger">34 errors</span>
+    <a href="#uint63_31.ml"><code>uint63_31.ml</code></a>&nbsp;<span class="label label-danger">57 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -60491,35 +60165,1691 @@ let subcarryc x y =
 
 (* Register all exported functions so that they can be called from C code *)
 
-let <abbr class="mark-error" title="A variable name instead of a pattern was expected.">()</abbr> =
-  Callback.register &quot;uint63 add&quot; add;
-  Callback.register &quot;uint63 addcarry&quot; addcarry;
-  Callback.register &quot;uint63 addmuldiv&quot; addmuldiv;
-  Callback.register &quot;uint63 div&quot; div;
-  Callback.register &quot;uint63 div21_ml&quot; div21;
-  Callback.register &quot;uint63 eq&quot; equal;
-  Callback.register &quot;uint63 eq0&quot; (equal Int64.zero);
-  Callback.register &quot;uint63 head0&quot; head0;
-  Callback.register &quot;uint63 land&quot; l_and;
-  Callback.register &quot;uint63 leq&quot; le;
-  Callback.register &quot;uint63 lor&quot; l_or;
-  Callback.register &quot;uint63 lsl&quot; l_sl;
-  Callback.register &quot;uint63 lsl1&quot; (fun x -&gt; l_sl x Int64.one);
-  Callback.register &quot;uint63 lsr&quot; l_sr;
-  Callback.register &quot;uint63 lsr1&quot; (fun x -&gt; l_sr x Int64.one);
-  Callback.register &quot;uint63 lt&quot; lt;
-  Callback.register &quot;uint63 lxor&quot; l_xor;
-  Callback.register &quot;uint63 mod&quot; rem;
-  Callback.register &quot;uint63 mul&quot; mul;
-  Callback.register &quot;uint63 mulc_ml&quot; mulc;
-  Callback.register &quot;uint63 one&quot; one;
-  Callback.register &quot;uint63 sub&quot; sub;
-  Callback.register &quot;uint63 subcarry&quot; subcarry;
-  Callback.register &quot;uint63 tail0&quot; tail0
+<abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () =
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 add&quot; add;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 addcarry&quot; addcarry;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 addmuldiv&quot; addmuldiv;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 div&quot; div;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 div21_ml&quot; div21;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 eq&quot; equal;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 eq0&quot; (equal Int64.zero);
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 head0&quot; head0;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 land&quot; l_and;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 leq&quot; le;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lor&quot; l_or;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsl&quot; l_sl;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsl1&quot; (fun x -&gt; l_sl x Int64.one);
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsr&quot; l_sr;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsr1&quot; (fun x -&gt; l_sr x Int64.one);
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lt&quot; lt;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lxor&quot; l_xor;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 mod&quot; rem;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 mul&quot; mul;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 mulc_ml&quot; mulc;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 one&quot; one;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 sub&quot; sub;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 subcarry&quot; subcarry;
+  Callback.register &quot;uint63 tail0&quot; tail0</abbr>
 </pre>
   </div>
   <div class="col-md-6">
-    <code>uint63_31.v</code>
+    <a href="#uint63_31.ml"><code>uint63_31.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -60977,16 +62307,65 @@ Definition subcarryc (x : Int64.t) (y : Int64.t) : carry int64 :=
   else
     C1 r.
 
-
+(* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
+Compute
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 add&quot; % string add in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 addcarry&quot; % string addcarry in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 addmuldiv&quot; % string addmuldiv in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 div&quot; % string div in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 div21_ml&quot; % string div21 in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 eq&quot; % string equal in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 eq0&quot; % string (equal Int64.zero) in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 head0&quot; % string head0 in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 land&quot; % string l_and in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 leq&quot; % string le in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lor&quot; % string l_or in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsl&quot; % string l_sl in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsl1&quot; % string (fun x =&gt; l_sl x Int64.one)
+    in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsr&quot; % string l_sr in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsr1&quot; % string (fun x =&gt; l_sr x Int64.one)
+    in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lt&quot; % string lt in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lxor&quot; % string l_xor in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 mod&quot; % string rem in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 mul&quot; % string mul in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 mulc_ml&quot; % string mulc in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 one&quot; % string one in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 sub&quot; % string sub in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 subcarry&quot; % string subcarry in
+  Callback.register &quot;uint63 tail0&quot; % string tail0.
 </pre>
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="uint63_63" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="uint63_63.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>uint63_63.ml</code>&nbsp;<span class="label label-danger">26 errors</span>
+    <a href="#uint63_63.ml"><code>uint63_63.ml</code></a>&nbsp;<span class="label label-danger">26 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -61867,7 +63246,7 @@ let subcarryc x y =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>uint63_63.v</code>
+    <a href="#uint63_63.ml"><code>uint63_63.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -62201,11 +63580,10 @@ Definition subcarryc (x : Z) (y : Z) : carry Z :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="univ" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="univ.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>univ.ml</code>&nbsp;<span class="label label-danger">32 errors</span>
+    <a href="#univ.ml"><code>univ.ml</code></a>&nbsp;<span class="label label-danger">30 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -62331,7 +63709,7 @@ end
 
 module Level = struct
 
-  <abbr class="mark-error" title="This kind of module is not handled.">module UGlobal = RawLevel.UGlobal</abbr>
+  module UGlobal = RawLevel.UGlobal
 
   type raw_level = RawLevel.t =
   | SProp
@@ -62437,7 +63815,7 @@ end
 (** Level maps *)
 module LMap = struct 
   <abbr class="mark-error" title="Applications of functors are not handled.">module M = HMap.Make (Level)</abbr>
-  <abbr class="mark-error" title="Structure item `include` not handled.">include M</abbr>
+  <abbr class="mark-error" title="Cannot include this kind of module expression">include M</abbr>
 
   let lunion l r =
     union (fun _k l _r -&gt; Some l) l r
@@ -62461,7 +63839,7 @@ module LMap = struct
 end
 
 module LSet = struct
-  <abbr class="mark-error" title="Structure item `include` not handled.">include LMap.Set</abbr>
+  include LMap.Set
 
   let pr prl s =
     str&quot;{&quot; ++ prlist_with_sep spc prl (elements s) ++ str&quot;}&quot;
@@ -62814,7 +64192,7 @@ end
 module Constraint = 
 struct 
   <abbr class="mark-error" title="Applications of functors are not handled.">module S = Set.Make(UConstraintOrd)</abbr>
-  <abbr class="mark-error" title="Structure item `include` not handled.">include S</abbr>
+  <abbr class="mark-error" title="Cannot include this kind of module expression">include S</abbr>
 
   let pr prl c =
     v 0 (prlist_with_sep spc (fun (u1,op,u2) -&gt;
@@ -63490,7 +64868,7 @@ let explain_universe_inconsistency prl (o,u,v,p : univ_inconsistency) =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>univ.v</code>
+    <a href="#univ.ml"><code>univ.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -63616,8 +64994,7 @@ Module RawLevel.
 End RawLevel.
 
 Module Level.
-  (* ❌ This kind of module is not handled. *)
-  unhandled_module
+  Module UGlobal := RawLevel.UGlobal.
   
   Inductive raw_level : Type :=
   | SProp : raw_level
@@ -63758,7 +65135,7 @@ Module LMap.
   (* ❌ Applications of functors are not handled. *)
   functor_application
   
-  (* ❌ Structure item `include` not handled. *)
+  (* ❌ Cannot include this kind of module expression *)
   include
   
   Definition lunion {A : Type} (l : t A) (r : t A) : t A :=
@@ -63795,8 +65172,7 @@ Module LMap.
 End LMap.
 
 Module LSet.
-  (* ❌ Structure item `include` not handled. *)
-  include
+  Export LMap.Set.
   
   Definition pr (prl : elt -&gt; Pp.t) (s : t) : Pp.t :=
     op_plusplus
@@ -64254,7 +65630,7 @@ Module Constraint.
   (* ❌ Applications of functors are not handled. *)
   functor_application
   
-  (* ❌ Structure item `include` not handled. *)
+  (* ❌ Cannot include this kind of module expression *)
   include
   
   Definition pr (prl : Level.t -&gt; Pp.t) (c : t) : Pp.t :=
@@ -65083,11 +66459,10 @@ Definition explain_universe_inconsistency
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="vars" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="vars.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>vars.ml</code>&nbsp;<span class="label label-danger">25 errors</span>
+    <a href="#vars.ml"><code>vars.ml</code></a>&nbsp;<span class="label label-danger">24 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -65100,7 +66475,7 @@ Definition explain_universe_inconsistency
 
 open Names
 
-<abbr class="mark-error" title="This kind of module is not handled.">module RelDecl = Context.Rel.Declaration</abbr>
+module RelDecl = Context.Rel.Declaration
 
 (*********************)
 (*     Occurring     *)
@@ -65489,7 +66864,7 @@ let universes_of_constr c =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>vars.v</code>
+    <a href="#vars.ml"><code>vars.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -65498,8 +66873,7 @@ Import ListNotations.
 
 Import Names.
 
-(* ❌ This kind of module is not handled. *)
-unhandled_module
+Module RelDecl := Context.Rel.Declaration.
 
 (* ❌ The definition of exceptions is not handled. *)
 exception
@@ -65935,11 +67309,10 @@ Definition universes_of_constr (c : Constr.constr) : Univ.LSet.t :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="vconv" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="vconv.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>vconv.ml</code>&nbsp;<span class="label label-danger">15 errors</span>
+    <a href="#vconv.ml"><code>vconv.ml</code></a>&nbsp;<span class="label label-danger">15 errors</span>
     <pre>open Util
 open Names
 open Environ
@@ -66212,7 +67585,7 @@ let vm_conv cv_pb env t1 t2 =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>vconv.v</code>
+    <a href="#vconv.ml"><code>vconv.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -66545,11 +67918,10 @@ Definition vm_conv
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="vm" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="vm.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>vm.ml</code>&nbsp;<span class="label label-danger">28 errors</span>
+    <a href="#vm.ml"><code>vm.ml</code></a>&nbsp;<span class="label label-danger">28 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -66913,7 +68285,7 @@ Alternative: use a monad to sequence side-effects.">push_val v;
 </pre>
   </div>
   <div class="col-md-6">
-    <code>vm.v</code>
+    <a href="#vm.ml"><code>vm.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -67139,11 +68511,10 @@ Definition apply_whd (k : Z) (whd : Vmvalues.whd) : Vmvalues.values :=
   </div>
 </div>
 
-
 <hr />
-<div class="row" id="vmvalues" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row" id="vmvalues.ml" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
-    <code>vmvalues.ml</code>&nbsp;<span class="label label-danger">51 errors</span>
+    <a href="#vmvalues.ml"><code>vmvalues.ml</code></a>&nbsp;<span class="label label-danger">51 errors</span>
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
 (*  v      *   INRIA, CNRS and contributors - Copyright 1999-2019       *)
@@ -68172,7 +69543,7 @@ and pr_zipper z =
 </pre>
   </div>
   <div class="col-md-6">
-    <code>vmvalues.v</code>
+    <a href="#vmvalues.ml"><code>vmvalues.ml.v</code></a>
     <pre>Require Import OCaml.OCaml.
 
 Local Open Scope Z_scope.
@@ -68948,7 +70319,6 @@ with pr_zipper (z : zipper) : Pp.t :=
 </pre>
   </div>
 </div>
-
 
       </div>
       <hr/>

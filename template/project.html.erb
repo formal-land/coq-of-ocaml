@@ -1,9 +1,8 @@
-<%= header("../", :tezos) %>
+<%= header("../", project_name) %>
 <div class="row">
   <div class="col-md-4"></div>
   <div class="col-md-4">
-    <h2>Tezos</h2>
-    <p>These are the sources <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. The market cap of Tezos is more than US $500 millions at the time of writting. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <%= project_intro %>
   </div>
   <div class="col-md-4"></div>
 </div>
@@ -12,14 +11,14 @@
   <% 4.times do |i| %>
   <div class="col-md-3">
     <ul>
-      <% for ocaml_name, nb_errors, _, _, _, _ in tezos_conversions[i * (tezos_conversions.size / 3)..(i + 1) * (tezos_conversions.size / 3) - 1] do %>
+      <% for ocaml_name, nb_errors, _, _, _, _ in conversions[i * (conversions.size / 3)..(i + 1) * (conversions.size / 3) - 1] do %>
       <li><a href="#<%= u(ocaml_name) %>"><%= h(ocaml_name) %></a>&nbsp;<%= nb_errors == 0 ? "<span class=\"label label-success\">✓</span>" : "<span class=\"label label-danger\">#{nb_errors}</span>" %></li>
       <% end %>
     </ul>
   </div>
   <% end %>
 </div>
-<% for ocaml_name, nb_errors, ocaml_content, coq_name, coq_content in tezos_conversions do %>
+<% for ocaml_name, nb_errors, ocaml_content, coq_name, coq_content in conversions do %>
 <hr />
 <div class="row" id="<%= u(ocaml_name) %>" style="padding-bottom: 20px; padding-top: 20px;">
   <div class="col-md-6">
