@@ -63,6 +63,11 @@ end
 
 type 'elt set = (module Boxed_set with type elt = 'elt)
 
+module type IncludedFoo = sig
+  type bar
+  val foo : bar
+end
+
 module type Triple = sig
   type a
   type b
@@ -70,6 +75,7 @@ module type Triple = sig
   val va : a
   val vb : b
   val vc : c
+  include IncludedFoo
 end
 
 let tripe : (module Triple) =
@@ -80,6 +86,8 @@ let tripe : (module Triple) =
     let va = 0
     let vb = false
     let vc = ""
+    type bar = int
+    let foo = 12
   end)
 
 module type UsingTriple = sig
