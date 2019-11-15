@@ -82,7 +82,7 @@ let rec of_typ_expr
     raise
       (Tuple [typ; Tuple typs], typ_vars, Name.Set.union new_typ_vars_typ new_typ_vars_typs)
       NotSupported
-      "Forall quantifier is not handled (yet)"
+      "Forall quantifier is not handled"
   | Tpackage (path, idents, typs) ->
       let path_name = PathName.of_path_without_convert path in
       let typ_substitutions = List.map2 (fun ident typ -> (ident, typ)) idents typs in

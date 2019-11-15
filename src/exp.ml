@@ -523,8 +523,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         !^ " :=" ^^ newline ^^
         indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (e, cases, default_value) ->
-    begin match cases with
-    | [(pattern, e2)] ->
+    begin match (cases, default_value) with
+    | ([(pattern, e2)], None) ->
       Pp.parens paren @@ nest (
         !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^ to_coq false e ^^ !^ "in" ^^ newline ^^ to_coq false e2
       )

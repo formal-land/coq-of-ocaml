@@ -2,6 +2,32 @@ open Typedtree
 open SmartPrint
 open Monad.Notations
 
+let to_coq_record
+  (name : Name.t)
+  (typ_args : Name.t list)
+  (fields : (Name.t * Type.t) list)
+  : SmartPrint.t =
+  nest (
+    !^ "Record" ^^ Name.to_coq name ^^
+    (match typ_args with
+    | [] -> empty
+    | _ :: _ ->
+      braces (nest (
+        separate space (List.map Name.to_coq typ_args) ^^
+        !^ ":" ^^ !^ "Type"
+      ))
+    ) ^^
+    !^ ":=" ^^ !^ "{" ^^ newline ^^
+    indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
+      nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false typ)))) ^^
+    !^ "}." ^^
+    (match typ_args with
+    | [] -> empty
+    | _ :: _ ->
+      newline ^^ !^ "Arguments" ^^ Name.to_coq name ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
+    )
+  )
+
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
   (** [constructor_name]: forall [typ_vars], [param_typs] -> t [res_typ_params] *)
@@ -83,12 +109,18 @@ end
 module Inductive = struct
   type t = {
     notations : (Name.t * Name.t list * Type.t) list;
+    records : (Name.t * Name.t list) list;
     typs : (Name.t * Name.t list * Name.t list * Constructors.t) list;
   }
 
   let to_coq_notations_reserved (inductive : t) : SmartPrint.t list =
     inductive.notations |> List.map (fun (name, _, _) ->
       !^ "Reserved Notation" ^^ !^ "\"'" ^-^ Name.to_coq name ^-^ !^ "\"" ^-^ !^ "."
+    )
+
+  let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
+    inductive.records |> List.map (fun (name, fields) ->
+      to_coq_record name fields (fields |> List.map (fun field -> (field, Type.Variable field)))
     )
 
   let to_coq_typs
@@ -155,8 +187,8 @@ module Inductive = struct
               nest (
                 separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type"
               )
-            ) ^^ !^ "=>"
-          ) ^^ Type.to_coq subst false value
+            ) ^^ !^ "=>" ^^ space
+          ) ^-^ Type.to_coq subst false value
         )
       )
     )
@@ -190,16 +222,20 @@ module Inductive = struct
       | Some (name', _, _) -> Name.prefix_by_single_quote name'
     ) in
     let reserved_notations = to_coq_notations_reserved inductive in
+    let record_skeletons = to_coq_record_skeletons inductive in
+    let notation_wheres = to_coq_notations_wheres subst inductive in
+    let notation_definitions = to_coq_notations_definitions inductive in
     let implicit_arguments =
       List.concat (inductive.typs |> List.map (fun (_, left_typ_args, _, constructors) ->
         to_coq_typs_implicits left_typ_args constructors
       )) in
-    let notation_wheres = to_coq_notations_wheres subst inductive in
-    let notation_definitions = to_coq_notations_definitions inductive in
     nest (
       (match reserved_notations with
       | [] -> empty
       | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
+      (match record_skeletons with
+      | [] -> empty
+      | _ :: _ -> separate (newline ^^ newline) record_skeletons ^^ newline ^^ newline) ^^
       separate (newline ^^ newline) (inductive.typs |>
         List.mapi (fun index (name, left_typ_args, right_typ_args, constructors) ->
           let is_first = index = 0 in
@@ -208,7 +244,7 @@ module Inductive = struct
       ) ^-^
       (match notation_wheres with
       | [] -> empty
-      | _ :: _ -> newline ^^ newline ^^ separate (newline ^^ newline) notation_wheres) ^-^ !^ "." ^^
+      | _ :: _ -> newline ^^ newline ^^ separate newline notation_wheres) ^-^ !^ "." ^^
       (match notation_definitions with
       | [] -> empty
       | _ :: _ -> newline ^^ newline ^^ separate newline notation_definitions) ^^
@@ -248,55 +284,61 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     let typ = Type.Apply (MixedPath.of_name (Name.of_string "False"), []) in
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
   | _ ->
-    (typs |> Monad.List.fold_left (fun (notations, typs) typ ->
+    (typs |> Monad.List.fold_left (fun (notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
       let name = Name.of_ident typ.typ_id in
       (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       match typ with
       | { typ_type = { type_kind = Type_abstract; type_manifest = Some typ; _ }; _ } ->
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return ((name, typ_args, typ) :: notations, typs)
+        return ((name, typ_args, typ) :: notations, records, typs)
+      | { typ_type = { type_kind = Type_abstract; type_manifest = None; _ }; _ } ->
+        raise
+          (notations, records, typs)
+          NotSupported
+          "Abstract types not supported in mutually recursive definitions"
+      | { typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ->
+        (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
+          Type.of_type_expr_without_free_vars typ >>= fun typ ->
+          return (Name.of_ident x, typ)
+        )) >>= fun fields ->
+        (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+        return (
+          (
+            name,
+            typ_args,
+            Type.Apply (
+              MixedPath.of_name (Name.suffix_by_skeleton name),
+              fields |> List.map snd
+            )
+          ) :: notations,
+          (
+            Name.suffix_by_skeleton name,
+            fields |> List.map fst
+          ) :: records,
+          typs
+        )
       | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
         Constructors.of_ocaml typ_args cases >>= fun constructors ->
-        return (notations, (name, typ_args, constructors) :: typs)
-      | _ ->
+        return (notations, records, (name, typ_args, constructors) :: typs)
+      | { typ_type = { type_kind = Type_open; _ }; _ } ->
         raise
-          (notations, typs)
+          (notations, records, typs)
           NotSupported
-          "Only algebraic or synonym types are supported in mutually recursive types"
+          "Extensible types are not handled"
       )
-    ) ([], [])) >>= fun (notations, typs) ->
+    ) ([], [], [])) >>= fun (notations, records, typs) ->
     let typs = typs |> List.map (fun (name, typ_args, constructors) ->
       let (left_typ_args, right_typ_args, constructors) =
         Constructors.extract_common_typ_args typ_args constructors in
       (name, left_typ_args, right_typ_args, constructors)
     ) in
-    return (Inductive { notations = List.rev notations; typs = List.rev typs })
+    return (Inductive { notations = List.rev notations; records; typs = List.rev typs })
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq inductive
-  | Record (name, typ_args, fields) ->
-    nest (
-      !^ "Record" ^^ Name.to_coq name ^^
-      (match typ_args with
-      | [] -> empty
-      | _ :: _ ->
-        braces (nest (
-          separate space (List.map Name.to_coq typ_args) ^^
-          !^ ":" ^^ !^ "Type"
-        ))
-      ) ^^
-      !^ ":=" ^^ !^ "{" ^^ newline ^^
-      indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
-        nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false typ)))) ^^
-      !^ "}." ^^
-      (match typ_args with
-      | [] -> empty
-      | _ :: _ ->
-        newline ^^ !^ "Arguments" ^^ Name.to_coq name ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
-      )
-    )
+  | Record (name, typ_args, fields) -> to_coq_record name typ_args fields
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
