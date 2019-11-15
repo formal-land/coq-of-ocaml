@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Coq of OCaml</title>
+    <title>Coq of OCaml - Demos</title>
     <link rel="icon" data-emoji="🐓" type="image/png">
     <link href="<%= root%>css/bootstrap.min.css" rel="stylesheet">
     <link href="<%= root%>css/custom.css" rel="stylesheet">
@@ -20,10 +20,16 @@
       <div class="navbar navbar-default" role="navigation">
         <div class="container-fluid">
           <div class="navbar-header">
-            <a class="navbar-brand" href="<%= root%>">🐓🐫 Coq of OCaml</a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-list" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+              <a class="navbar-brand" href="<%= root%>">🐓🐫 Coq of OCaml <span class="hidden-xs">- Demos</span></a>
           </div>
 
-          <div class="collapse navbar-collapse">
+          <div class="collapse navbar-collapse" id="navbar-collapse-list">
             <ul class="nav navbar-nav">
               <li <%= 'class="active"' if section == :kernel %>><a href="<%= root%>kernel/">Kernel of Coq</a></li>
               <li <%= 'class="active"' if section == :tezos %>><a href="<%= root%>tezos/">Tezos</a></li>
