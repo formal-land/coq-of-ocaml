@@ -145,6 +145,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_recmodule _ -> error_message (Error "recursive_module") NotSupported "Structure item `recmodule` not handled."
     | Tstr_class _ -> error_message (Error "class") NotSupported "Structure item `class` not handled."
     | Tstr_class_type _ -> error_message (Error "class_type") NotSupported "Structure item `class_type` not handled."
+    | Tstr_include { incl_mod = { mod_desc = Tmod_ident (_, long_ident); _ }; _ }
     | Tstr_include {
         incl_mod = {
           mod_desc = Tmod_constraint ({ mod_desc = Tmod_ident (_, long_ident); _ }, _, _, _);
