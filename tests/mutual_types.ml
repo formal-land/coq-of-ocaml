@@ -11,3 +11,10 @@ and 'b simple = 'b
 and 'b double = 'b * 'b simple
 
 and 'a unrelated = Unrelated of ('a simple) double
+
+type ind =
+  | Ind of int re
+
+and 'a re = { payload : 'a; message : string }
+
+and re_bis = { bis : unit }
