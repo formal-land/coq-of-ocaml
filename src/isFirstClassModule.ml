@@ -104,4 +104,4 @@ let is_module_typ_first_class (module_typ : Types.module_type) : maybe_found Mon
       )
     end
   | Mty_functor _ ->
-    raise (Not_found None) NotSupported "Functor module types are not handled (yet)"
+    raise (Not_found None) NotSupported "Functor module types are not handled"

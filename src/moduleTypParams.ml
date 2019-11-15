@@ -36,7 +36,7 @@ and get_module_typ_typ_params (module_typ : Types.module_type) : unit Tree.t Mon
     get_env >>= fun env ->
     get_module_typ_declaration_typ_params (Env.find_modtype path env)
   | Mty_functor _ ->
-    raise [] NotSupported "Cannot instantiate functors (yet)."
+    raise [] NotSupported "Cannot instantiate functors"
 
 and get_module_typ_declaration_typ_params
   (module_typ_declaration : Types.modtype_declaration)
@@ -44,7 +44,7 @@ and get_module_typ_declaration_typ_params
   set_loc (Loc.of_location module_typ_declaration.mtd_loc) (
   match module_typ_declaration.mtd_type with
   | None ->
-    raise [] NotSupported "Cannot instantiate an abstract signature."
+    raise [] NotSupported "Cannot instantiate an abstract signature"
   | Some module_typ ->
     get_module_typ_typ_params module_typ)
 
