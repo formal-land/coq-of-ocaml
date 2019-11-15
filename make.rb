@@ -9,11 +9,16 @@ kernel_directory, tezos_directory = ARGV
 
 def mark_text(text, errors)
   bytes_errors = text.bytes.to_a.map {|byte| {byte: byte, errors: []}}
+  global_errors = []
   errors.each do |error|
-    error["location"]["start"].upto(error["location"]["end"] - 1) do |byte_index|
-      if bytes_errors[byte_index] then
-        bytes_errors[byte_index][:errors] << error
+    if error["location"]["start"] >= 0 && error["location"]["end"] >= 0 then
+      error["location"]["start"].upto(error["location"]["end"] - 1) do |byte_index|
+        if bytes_errors[byte_index] then
+          bytes_errors[byte_index][:errors] << error
+        end
       end
+    else
+      global_errors << error["message"]
     end
   end
 
@@ -36,12 +41,13 @@ def mark_text(text, errors)
       output << "<abbr class=\"mark-error\" title=\"#{encoded_errors}\">#{encoded_text}</abbr>"
     end
   end
-  output
+
+  [global_errors, output]
 end
 
 def get_conversions(directory)
   conversions = []
-  ocaml_file_names = Dir.glob(File.join(directory, "**/*.ml{,i}")).to_a
+  ocaml_file_names = Dir.glob(File.join(directory, "**/*.ml{,i}")).to_a.sort
   ocaml_file_names.each_with_index do |ocaml_file_name, index|
     print "\r#{directory} (#{index + 1}/#{ocaml_file_names.size})"
     ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(directory)).to_s
@@ -50,14 +56,16 @@ def get_conversions(directory)
     coq_name = File.basename(coq_file_name)
     errors_file_name = ocaml_file_name + ".errors"
     if File.exists?(coq_file_name) then
-      coq_content = File.read(coq_file_name, :encoding => 'utf-8')
       errors_content = File.read(errors_file_name)
       errors_json = errors_content != "" ? JSON.parse(errors_content) : []
+      global_errors, marked_ocaml_content = mark_text(ocaml_content, errors_json)
+      coq_content = File.read(coq_file_name, :encoding => 'utf-8')
       if coq_content.valid_encoding? then
         conversions << [
           ocaml_name,
           errors_json.size,
-          mark_text(ocaml_content, errors_json),
+          global_errors,
+          marked_ocaml_content,
           coq_name,
           coq_content
         ]

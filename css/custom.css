@@ -10,3 +10,17 @@
 .not-full-width {
   max-width: 800px;
 }
+
+.conversion-row {
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+.global-errors {
+  margin-top: 22px;
+  max-width: max-content;
+}
+
+.global-errors ul {
+  padding-right: 40px;
+}

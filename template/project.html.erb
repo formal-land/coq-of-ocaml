@@ -6,21 +6,32 @@
 </div>
 <hr />
 <div class="row">
-  <% 4.times do |i| %>
-  <div class="col-md-3">
+  <% column_size = conversions.size / 3 %>
+  <% column_size += 1 if conversions.size % 3 != 0 %>
+  <% 3.times do |i| %>
+  <div class="col-md-4">
     <ul>
-      <% for ocaml_name, nb_errors, _, _, _, _ in conversions[i * (conversions.size / 3)..(i + 1) * (conversions.size / 3) - 1] do %>
+      <% for ocaml_name, nb_errors, _, _, _, _, _ in conversions[i * column_size..(i + 1) * column_size - 1] do %>
       <li><a href="#<%= u(ocaml_name) %>"><%= h(ocaml_name) %></a>&nbsp;<%= nb_errors == 0 ? "<span class=\"label label-success\">✓</span>" : "<span class=\"label label-danger\">#{nb_errors}</span>" %></li>
       <% end %>
     </ul>
   </div>
   <% end %>
 </div>
-<% for ocaml_name, nb_errors, ocaml_content, coq_name, coq_content in conversions do %>
+<% for ocaml_name, nb_errors, global_errors, ocaml_content, coq_name, coq_content in conversions do %>
 <hr />
-<div class="row" id="<%= u(ocaml_name) %>" style="padding-bottom: 20px; padding-top: 20px;">
+<div class="row conversion-row" id="<%= u(ocaml_name) %>">
   <div class="col-md-6">
     <a href="#<%= u(ocaml_name) %>"><code><%= h(ocaml_name) %></code></a>&nbsp;<span class="label label-<%= nb_errors == 0 ? "success" : "danger" %>"><%= nb_errors == 0 ? "success" : "#{nb_errors} error#{nb_errors != 1 ? "s" : ""}" %></span>
+    <% if global_errors.size != 0 then %>
+      <div class="alert alert-danger global-errors" role="alert">
+        <ul>
+          <% for global_error in global_errors do %>
+            <li><%= h(global_error) %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
     <pre><%= ocaml_content %></pre>
   </div>
   <div class="col-md-6">
