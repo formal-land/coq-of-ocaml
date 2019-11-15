@@ -55,7 +55,7 @@
   <div class="col-md-4">
     <ul>
       
-      <li><a href="#cClosure.ml">cClosure.ml</a>&nbsp;<span class="label label-danger">136</span></li>
+      <li><a href="#cClosure.ml">cClosure.ml</a>&nbsp;<span class="label label-danger">135</span></li>
       
       <li><a href="#cClosure.mli">cClosure.mli</a>&nbsp;<span class="label label-danger">3</span></li>
       
@@ -75,9 +75,9 @@
       
       <li><a href="#cemitcodes.mli">cemitcodes.mli</a>&nbsp;<span class="label label-success">✓</span></li>
       
-      <li><a href="#clambda.ml">clambda.ml</a>&nbsp;<span class="label label-danger">43</span></li>
+      <li><a href="#clambda.ml">clambda.ml</a>&nbsp;<span class="label label-danger">42</span></li>
       
-      <li><a href="#clambda.mli">clambda.mli</a>&nbsp;<span class="label label-danger">2</span></li>
+      <li><a href="#clambda.mli">clambda.mli</a>&nbsp;<span class="label label-danger">1</span></li>
       
       <li><a href="#constr.mli">constr.mli</a>&nbsp;<span class="label label-danger">1</span></li>
       
@@ -99,7 +99,7 @@
       
       <li><a href="#csymtable.mli">csymtable.mli</a>&nbsp;<span class="label label-success">✓</span></li>
       
-      <li><a href="#declarations.ml">declarations.ml</a>&nbsp;<span class="label label-danger">1</span></li>
+      <li><a href="#declarations.ml">declarations.ml</a>&nbsp;<span class="label label-success">✓</span></li>
       
       <li><a href="#declareops.ml">declareops.ml</a>&nbsp;<span class="label label-danger">9</span></li>
       
@@ -167,9 +167,9 @@
       
       <li><a href="#nativeconv.mli">nativeconv.mli</a>&nbsp;<span class="label label-success">✓</span></li>
       
-      <li><a href="#nativelambda.ml">nativelambda.ml</a>&nbsp;<span class="label label-danger">21</span></li>
+      <li><a href="#nativelambda.ml">nativelambda.ml</a>&nbsp;<span class="label label-danger">20</span></li>
       
-      <li><a href="#nativelambda.mli">nativelambda.mli</a>&nbsp;<span class="label label-danger">1</span></li>
+      <li><a href="#nativelambda.mli">nativelambda.mli</a>&nbsp;<span class="label label-success">✓</span></li>
       
       <li><a href="#nativelib.ml">nativelib.ml</a>&nbsp;<span class="label label-danger">16</span></li>
       
@@ -209,7 +209,7 @@
       
       <li><a href="#retypeops.mli">retypeops.mli</a>&nbsp;<span class="label label-success">✓</span></li>
       
-      <li><a href="#safe_typing.ml">safe_typing.ml</a>&nbsp;<span class="label label-danger">141</span></li>
+      <li><a href="#safe_typing.ml">safe_typing.ml</a>&nbsp;<span class="label label-danger">140</span></li>
       
       <li><a href="#safe_typing.mli">safe_typing.mli</a>&nbsp;<span class="label label-success">✓</span></li>
       
@@ -285,7 +285,7 @@
 <hr />
 <div class="row conversion-row" id="cClosure.ml">
   <div class="col-md-6">
-    <a href="#cClosure.ml"><code>cClosure.ml</code></a>&nbsp;<span class="label label-danger">136 errors</span>
+    <a href="#cClosure.ml"><code>cClosure.ml</code></a>&nbsp;<span class="label label-danger">135 errors</span>
     
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
@@ -814,10 +814,10 @@ end = struct
 end
 let mark = Mark.mark
 
-<abbr class="mark-error" title="Only algebraic or synonym types are supported in mutually recursive types">type fconstr = {
+type fconstr = {
   mutable mark : Mark.t;
   mutable term: fterm;
-}</abbr>
+}
 
 and fterm =
   | FRel of int
@@ -2588,29 +2588,40 @@ End Mark.
 
 Definition mark : red_state -&gt; optrel -&gt; Mark.t := Mark.mark.
 
+Reserved Notation &quot;'fconstr&quot;.
+
+Record fconstr_skeleton {mark term : Type} := {
+  mark : mark;
+  term : term }.
+Arguments fconstr_skeleton : clear implicits.
+
 Inductive fterm : Type :=
 | FRel : Z -&gt; fterm
 | FAtom : Constr.constr -&gt; fterm
 | FFlex : table_key -&gt; fterm
 | FInd : Constr.pinductive -&gt; fterm
 | FConstruct : Constr.pconstructor -&gt; fterm
-| FApp : fconstr -&gt; (array fconstr) -&gt; fterm
-| FProj : Names.Projection.t -&gt; fconstr -&gt; fterm
-| FFix : Constr.fixpoint -&gt; (Esubst.subs fconstr) -&gt; fterm
-| FCoFix : Constr.cofixpoint -&gt; (Esubst.subs fconstr) -&gt; fterm
-| FCaseT : Constr.case_info -&gt; Constr.constr -&gt; fconstr -&gt; (array Constr.constr)
-  -&gt; (Esubst.subs fconstr) -&gt; fterm
+| FApp : 'fconstr -&gt; (array 'fconstr) -&gt; fterm
+| FProj : Names.Projection.t -&gt; 'fconstr -&gt; fterm
+| FFix : Constr.fixpoint -&gt; (Esubst.subs 'fconstr) -&gt; fterm
+| FCoFix : Constr.cofixpoint -&gt; (Esubst.subs 'fconstr) -&gt; fterm
+| FCaseT : Constr.case_info -&gt; Constr.constr -&gt; 'fconstr -&gt;
+  (array Constr.constr) -&gt; (Esubst.subs 'fconstr) -&gt; fterm
 | FLambda : Z -&gt; (list ((Context.binder_annot Names.Name.t) * Constr.constr)) -&gt;
-  Constr.constr -&gt; (Esubst.subs fconstr) -&gt; fterm
-| FProd : (Context.binder_annot Names.Name.t) -&gt; fconstr -&gt; Constr.constr -&gt;
-  (Esubst.subs fconstr) -&gt; fterm
-| FLetIn : (Context.binder_annot Names.Name.t) -&gt; fconstr -&gt; fconstr -&gt;
-  Constr.constr -&gt; (Esubst.subs fconstr) -&gt; fterm
-| FEvar : Constr.existential -&gt; (Esubst.subs fconstr) -&gt; fterm
+  Constr.constr -&gt; (Esubst.subs 'fconstr) -&gt; fterm
+| FProd : (Context.binder_annot Names.Name.t) -&gt; 'fconstr -&gt; Constr.constr -&gt;
+  (Esubst.subs 'fconstr) -&gt; fterm
+| FLetIn : (Context.binder_annot Names.Name.t) -&gt; 'fconstr -&gt; 'fconstr -&gt;
+  Constr.constr -&gt; (Esubst.subs 'fconstr) -&gt; fterm
+| FEvar : Constr.existential -&gt; (Esubst.subs 'fconstr) -&gt; fterm
 | FInt : Uint63.t -&gt; fterm
-| FLIFT : Z -&gt; fconstr -&gt; fterm
-| FCLOS : Constr.constr -&gt; (Esubst.subs fconstr) -&gt; fterm
-| FLOCKED : fterm.
+| FLIFT : Z -&gt; 'fconstr -&gt; fterm
+| FCLOS : Constr.constr -&gt; (Esubst.subs 'fconstr) -&gt; fterm
+| FLOCKED : fterm
+
+where &quot;'fconstr&quot; := (fconstr_skeleton Mark.t fterm).
+
+Definition fconstr := 'fconstr.
 
 Definition fterm_of (v : fconstr) : fterm := term v.
 
@@ -2677,7 +2688,7 @@ Inductive stack_member : Type :=
 | Zshift : Z -&gt; stack_member
 | Zupdate : fconstr -&gt; stack_member
 
-where &quot;'stack&quot; := ( list stack_member).
+where &quot;'stack&quot; := (list stack_member).
 
 Definition stack := 'stack.
 
@@ -4304,7 +4315,7 @@ Inductive stack_member : Type :=
 | Zshift : Z -&gt; stack_member
 | Zupdate : fconstr -&gt; stack_member
 
-where &quot;'stack&quot; := ( list stack_member).
+where &quot;'stack&quot; := (list stack_member).
 
 Definition stack := 'stack.
 
@@ -5108,7 +5119,7 @@ Inductive instruction : Type :=
 | Kprim : CPrimitives.t -&gt; (option Constr.pconstant) -&gt; instruction
 | Kareint : Z -&gt; instruction
 
-where &quot;'bytecodes&quot; := ( list instruction).
+where &quot;'bytecodes&quot; := (list instruction).
 
 Definition bytecodes := 'bytecodes.
 
@@ -5390,7 +5401,7 @@ Inductive instruction : Type :=
 | Kprim : CPrimitives.t -&gt; (option Constr.pconstant) -&gt; instruction
 | Kareint : Z -&gt; instruction
 
-where &quot;'bytecodes&quot; := ( list instruction).
+where &quot;'bytecodes&quot; := (list instruction).
 
 Definition bytecodes := 'bytecodes.
 
@@ -9831,7 +9842,7 @@ Parameter to_memory :
 <hr />
 <div class="row conversion-row" id="clambda.ml">
   <div class="col-md-6">
-    <a href="#clambda.ml"><code>clambda.ml</code></a>&nbsp;<span class="label label-danger">43 errors</span>
+    <a href="#clambda.ml"><code>clambda.ml</code></a>&nbsp;<span class="label label-danger">42 errors</span>
     
     <pre>open Util
 open Names
@@ -9871,9 +9882,9 @@ type lambda =
 (* We separate branches for constant and non-constant constructors. If the OCaml
    limitation on non-constant constructors is reached, remaining branches are
    stored in [extra_branches]. *)
-<abbr class="mark-error" title="Only algebraic or synonym types are supported in mutually recursive types">and lam_branches =
+and lam_branches =
   { constant_branches : lambda array;
-    nonconstant_branches : (Name.t Context.binder_annot array * lambda) array }</abbr>
+    nonconstant_branches : (Name.t Context.binder_annot array * lambda) array }
 (*    extra_branches : (name array * lambda) array } *)
 
 and fix_decl =  Name.t Context.binder_annot array * lambda array * lambda array
@@ -10833,7 +10844,14 @@ Import Pp.
 Definition pr_con (sp : Names.Constant.t) : Pp.t :=
   str (Names.Label.to_string (Constant.label sp)).
 
+Reserved Notation &quot;'lam_branches&quot;.
 Reserved Notation &quot;'fix_decl&quot;.
+
+Record lam_branches_skeleton {constant_branches nonconstant_branches : Type} :=
+  {
+  constant_branches : constant_branches;
+  nonconstant_branches : nonconstant_branches }.
+Arguments lam_branches_skeleton : clear implicits.
 
 Inductive lambda : Type :=
 | Lrel : Names.Name.t -&gt; Z -&gt; lambda
@@ -10846,7 +10864,7 @@ Inductive lambda : Type :=
 | Lconst : Constr.pconstant -&gt; lambda
 | Lprim : (option Constr.pconstant) -&gt; CPrimitives.t -&gt; (array lambda) -&gt; lambda
 | Lcase : Constr.case_info -&gt; Vmvalues.reloc_table -&gt; lambda -&gt; lambda -&gt;
-  lam_branches -&gt; lambda
+  'lam_branches -&gt; lambda
 | Lif : lambda -&gt; lambda -&gt; lambda -&gt; lambda
 | Lfix : ((array Z) * Z) -&gt; 'fix_decl -&gt; lambda
 | Lcofix : Z -&gt; 'fix_decl -&gt; lambda
@@ -10858,9 +10876,13 @@ Inductive lambda : Type :=
 | Lind : Constr.pinductive -&gt; lambda
 | Lproj : Names.Projection.Repr.t -&gt; lambda -&gt; lambda
 
-where &quot;'fix_decl&quot; := (
-  (array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
+where &quot;'lam_branches&quot; :=
+  (lam_branches_skeleton (array lambda)
+    (array ((array (Context.binder_annot Names.Name.t)) * lambda)))
+and &quot;'fix_decl&quot; :=
+  ((array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
 
+Definition lam_branches := 'lam_branches.
 Definition fix_decl := 'fix_decl.
 
 Definition pr_annot (x : Context.binder_annot Names.Name.t) : Pp.t :=
@@ -11870,7 +11892,7 @@ Definition lambda_of_constr
 <hr />
 <div class="row conversion-row" id="clambda.mli">
   <div class="col-md-6">
-    <a href="#clambda.mli"><code>clambda.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#clambda.mli"><code>clambda.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>open Names
 open Constr
@@ -11900,9 +11922,9 @@ type lambda =
   | Lind          of pinductive
   | Lproj         of Projection.Repr.t * lambda
 
-<abbr class="mark-error" title="Only algebraic or synonym types are supported in mutually recursive types">and lam_branches =
+and lam_branches =
   { constant_branches : lambda array;
-    nonconstant_branches : (Name.t Context.binder_annot array * lambda) array }</abbr>
+    nonconstant_branches : (Name.t Context.binder_annot array * lambda) array }
 
 and fix_decl =  Name.t Context.binder_annot array * lambda array * lambda array
 
@@ -11926,7 +11948,14 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
+Reserved Notation &quot;'lam_branches&quot;.
 Reserved Notation &quot;'fix_decl&quot;.
+
+Record lam_branches_skeleton {constant_branches nonconstant_branches : Type} :=
+  {
+  constant_branches : constant_branches;
+  nonconstant_branches : nonconstant_branches }.
+Arguments lam_branches_skeleton : clear implicits.
 
 Inductive lambda : Type :=
 | Lrel : Names.Name.t -&gt; Z -&gt; lambda
@@ -11939,7 +11968,7 @@ Inductive lambda : Type :=
 | Lconst : Constr.pconstant -&gt; lambda
 | Lprim : (option Constr.pconstant) -&gt; CPrimitives.t -&gt; (array lambda) -&gt; lambda
 | Lcase : Constr.case_info -&gt; Vmvalues.reloc_table -&gt; lambda -&gt; lambda -&gt;
-  lam_branches -&gt; lambda
+  'lam_branches -&gt; lambda
 | Lif : lambda -&gt; lambda -&gt; lambda -&gt; lambda
 | Lfix : ((array Z) * Z) -&gt; 'fix_decl -&gt; lambda
 | Lcofix : Z -&gt; 'fix_decl -&gt; lambda
@@ -11951,9 +11980,13 @@ Inductive lambda : Type :=
 | Lind : Constr.pinductive -&gt; lambda
 | Lproj : Names.Projection.Repr.t -&gt; lambda -&gt; lambda
 
-where &quot;'fix_decl&quot; := (
-  (array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
+where &quot;'lam_branches&quot; :=
+  (lam_branches_skeleton (array lambda)
+    (array ((array (Context.binder_annot Names.Name.t)) * lambda)))
+and &quot;'fix_decl&quot; :=
+  ((array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
 
+Definition lam_branches := 'lam_branches.
 Definition fix_decl := 'fix_decl.
 
 exception
@@ -17033,7 +17066,7 @@ Parameter get_global_data : unit -&gt; Vmvalues.vm_global.
 <hr />
 <div class="row conversion-row" id="declarations.ml">
   <div class="col-md-6">
-    <a href="#declarations.ml"><code>declarations.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
+    <a href="#declarations.ml"><code>declarations.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
@@ -17318,7 +17351,7 @@ and module_implementation =
   | Struct of module_signature (** interactive body *)
   | FullStruct (** special case of [Struct] : the body is exactly [mod_type] *)
 
-<abbr class="mark-error" title="Only algebraic or synonym types are supported in mutually recursive types">and 'a generic_module_body =
+and 'a generic_module_body =
   { mod_mp : ModPath.t; (** absolute path of the module *)
     mod_expr : 'a; (** implementation *)
     mod_type : module_signature; (** expanded type *)
@@ -17327,7 +17360,7 @@ and module_implementation =
       set of all universes constraints in the module  *)
     mod_delta : Mod_subst.delta_resolver; (**
       quotiented set of equivalent constants and inductive names *)
-    mod_retroknowledge : 'a module_retroknowledge }</abbr>
+    mod_retroknowledge : 'a module_retroknowledge }
 
 (** For a module, there are five possible situations:
     - [Declare Module M : T] then [mod_expr = Abstract; mod_type_alg = Some T]
@@ -17509,8 +17542,21 @@ Inductive module_alg_expr : Type :=
 Reserved Notation &quot;'structure_body&quot;.
 Reserved Notation &quot;'module_signature&quot;.
 Reserved Notation &quot;'module_expression&quot;.
+Reserved Notation &quot;'generic_module_body&quot;.
 Reserved Notation &quot;'module_body&quot;.
 Reserved Notation &quot;'module_type_body&quot;.
+
+Record generic_module_body_skeleton
+  {mod_mp mod_expr mod_type mod_type_alg mod_constraints mod_delta
+    mod_retroknowledge : Type} := {
+  mod_mp : mod_mp;
+  mod_expr : mod_expr;
+  mod_type : mod_type;
+  mod_type_alg : mod_type_alg;
+  mod_constraints : mod_constraints;
+  mod_delta : mod_delta;
+  mod_retroknowledge : mod_retroknowledge }.
+Arguments generic_module_body_skeleton : clear implicits.
 
 Inductive structure_field_body : Type :=
 | SFBconst : (constant_body Opaqueproof.opaque) -&gt; structure_field_body
@@ -17529,19 +17575,20 @@ with module_retroknowledge : forall (_ : Type), Type :=
   module_retroknowledge module_implementation
 | ModTypeRK : module_retroknowledge unit
 
-where &quot;'structure_body&quot; := ( list (Names.Label.t * structure_field_body))
-
-and &quot;'module_signature&quot; := ( functorize 'module_type_body 'structure_body)
-
-and &quot;'module_expression&quot; := ( functorize 'module_type_body module_alg_expr)
-
-and &quot;'module_body&quot; := ( generic_module_body module_implementation)
-
-and &quot;'module_type_body&quot; := ( generic_module_body unit).
+where &quot;'structure_body&quot; := (list (Names.Label.t * structure_field_body))
+and &quot;'module_signature&quot; := (functorize 'module_type_body 'structure_body)
+and &quot;'module_expression&quot; := (functorize 'module_type_body module_alg_expr)
+and &quot;'generic_module_body&quot; := (fun (a : Type) =&gt;
+  generic_module_body_skeleton Names.ModPath.t a 'module_signature
+    (option 'module_expression) Univ.ContextSet.t Mod_subst.delta_resolver
+    (module_retroknowledge a))
+and &quot;'module_body&quot; := ('generic_module_body module_implementation)
+and &quot;'module_type_body&quot; := ('generic_module_body unit).
 
 Definition structure_body := 'structure_body.
 Definition module_signature := 'module_signature.
 Definition module_expression := 'module_expression.
+Definition generic_module_body := 'generic_module_body.
 Definition module_body := 'module_body.
 Definition module_type_body := 'module_type_body.
 </pre>
@@ -41254,8 +41301,8 @@ with mllam_pattern (a : Type) : Type :=
 | ConstPattern : Z -&gt; mllam_pattern a
 | NonConstPattern : Nativevalues.tag -&gt; (array a) -&gt; mllam_pattern a
 
-where &quot;'mllam_branches&quot; := (
-  array ((list (mllam_pattern (option lname))) * mllambda)).
+where &quot;'mllam_branches&quot; :=
+  (array ((list (mllam_pattern (option lname))) * mllambda)).
 
 Definition mllam_branches := 'mllam_branches.
 
@@ -41959,7 +42006,7 @@ Inductive rlist : Type :=
 | Rcons : (Stdlib.ref (list (mllam_pattern (option lname)))) -&gt;
   LNset.(Stdlib__set.S.t) -&gt; mllambda -&gt; 'rlist' -&gt; rlist
 
-where &quot;'rlist'&quot; := ( Stdlib.ref rlist).
+where &quot;'rlist'&quot; := (Stdlib.ref rlist).
 
 Definition rlist' := 'rlist'.
 
@@ -45339,7 +45386,7 @@ Reduction.conv_pb -&gt;
 <hr />
 <div class="row conversion-row" id="nativelambda.ml">
   <div class="col-md-6">
-    <a href="#nativelambda.ml"><code>nativelambda.ml</code></a>&nbsp;<span class="label label-danger">21 errors</span>
+    <a href="#nativelambda.ml"><code>nativelambda.ml</code></a>&nbsp;<span class="label label-danger">20 errors</span>
     
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
@@ -45393,10 +45440,10 @@ type lambda =
   | Llazy
   | Lforce
 
-<abbr class="mark-error" title="Only algebraic or synonym types are supported in mutually recursive types">and lam_branches =
+and lam_branches =
   { constant_branches : lambda array;
     nonconstant_branches : (Name.t Context.binder_annot array * lambda) array;
-  }</abbr>
+  }
 
 and fix_decl =  Name.t Context.binder_annot array * lambda array * lambda array
 
@@ -46022,7 +46069,14 @@ Module RelDecl := Context.Rel.Declaration.
 
 Definition prefix := string.
 
+Reserved Notation &quot;'lam_branches&quot;.
 Reserved Notation &quot;'fix_decl&quot;.
+
+Record lam_branches_skeleton {constant_branches nonconstant_branches : Type} :=
+  {
+  constant_branches : constant_branches;
+  nonconstant_branches : nonconstant_branches }.
+Arguments lam_branches_skeleton : clear implicits.
 
 Inductive lambda : Type :=
 | Lrel : Names.Name.t -&gt; Z -&gt; lambda
@@ -46038,7 +46092,7 @@ Inductive lambda : Type :=
 | Lproj : prefix -&gt; Names.inductive -&gt; Z -&gt; lambda
 | Lprim : prefix -&gt; Constr.pconstant -&gt; CPrimitives.t -&gt; (array lambda) -&gt;
   lambda
-| Lcase : Nativevalues.annot_sw -&gt; lambda -&gt; lambda -&gt; lam_branches -&gt; lambda
+| Lcase : Nativevalues.annot_sw -&gt; lambda -&gt; lambda -&gt; 'lam_branches -&gt; lambda
 | Lif : lambda -&gt; lambda -&gt; lambda -&gt; lambda
 | Lfix : ((array Z) * (array (string * Names.inductive)) * Z) -&gt; 'fix_decl -&gt;
   lambda
@@ -46052,9 +46106,13 @@ Inductive lambda : Type :=
 | Llazy : lambda
 | Lforce : lambda
 
-where &quot;'fix_decl&quot; := (
-  (array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
+where &quot;'lam_branches&quot; :=
+  (lam_branches_skeleton (array lambda)
+    (array ((array (Context.binder_annot Names.Name.t)) * lambda)))
+and &quot;'fix_decl&quot; :=
+  ((array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
 
+Definition lam_branches := 'lam_branches.
 Definition fix_decl := 'fix_decl.
 
 Record evars := {
@@ -46756,7 +46814,7 @@ Definition mk_lazy (c : lambda) : lambda :=
 <hr />
 <div class="row conversion-row" id="nativelambda.mli">
   <div class="col-md-6">
-    <a href="#nativelambda.mli"><code>nativelambda.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
+    <a href="#nativelambda.mli"><code>nativelambda.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
@@ -46804,10 +46862,10 @@ type lambda =
   | Llazy
   | Lforce
 
-<abbr class="mark-error" title="Only algebraic or synonym types are supported in mutually recursive types">and lam_branches =
+and lam_branches =
   { constant_branches : lambda array;
     nonconstant_branches : (Name.t Context.binder_annot array * lambda) array;
-  }</abbr>
+  }
 
 and fix_decl =  Name.t Context.binder_annot array * lambda array * lambda array
 
@@ -46840,7 +46898,14 @@ Import ListNotations.
 
 Definition prefix := string.
 
+Reserved Notation &quot;'lam_branches&quot;.
 Reserved Notation &quot;'fix_decl&quot;.
+
+Record lam_branches_skeleton {constant_branches nonconstant_branches : Type} :=
+  {
+  constant_branches : constant_branches;
+  nonconstant_branches : nonconstant_branches }.
+Arguments lam_branches_skeleton : clear implicits.
 
 Inductive lambda : Type :=
 | Lrel : Names.Name.t -&gt; Z -&gt; lambda
@@ -46856,7 +46921,7 @@ Inductive lambda : Type :=
 | Lproj : prefix -&gt; Names.inductive -&gt; Z -&gt; lambda
 | Lprim : prefix -&gt; Constr.pconstant -&gt; CPrimitives.t -&gt; (array lambda) -&gt;
   lambda
-| Lcase : Nativevalues.annot_sw -&gt; lambda -&gt; lambda -&gt; lam_branches -&gt; lambda
+| Lcase : Nativevalues.annot_sw -&gt; lambda -&gt; lambda -&gt; 'lam_branches -&gt; lambda
 | Lif : lambda -&gt; lambda -&gt; lambda -&gt; lambda
 | Lfix : ((array Z) * (array (string * Names.inductive)) * Z) -&gt; 'fix_decl -&gt;
   lambda
@@ -46870,9 +46935,13 @@ Inductive lambda : Type :=
 | Llazy : lambda
 | Lforce : lambda
 
-where &quot;'fix_decl&quot; := (
-  (array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
+where &quot;'lam_branches&quot; :=
+  (lam_branches_skeleton (array lambda)
+    (array ((array (Context.binder_annot Names.Name.t)) * lambda)))
+and &quot;'fix_decl&quot; :=
+  ((array (Context.binder_annot Names.Name.t)) * (array lambda) * (array lambda)).
 
+Definition lam_branches := 'lam_branches.
 Definition fix_decl := 'fix_decl.
 
 Record evars := {
@@ -51891,7 +51960,7 @@ Inductive lft_constr_stack_elt : Type :=
 | Zlprimitive : CPrimitives.t -&gt; Constr.pconstant -&gt; (list lft_fconstr) -&gt;
   (CClosure.next_native_args lft_fconstr) -&gt; lft_constr_stack_elt
 
-where &quot;'lft_constr_stack&quot; := ( list lft_constr_stack_elt).
+where &quot;'lft_constr_stack&quot; := (list lft_constr_stack_elt).
 
 Definition lft_constr_stack := 'lft_constr_stack.
 
@@ -54004,7 +54073,7 @@ Environ.env -&gt; Names.Projection.t -&gt; Sorts.relevance.
 <hr />
 <div class="row conversion-row" id="safe_typing.ml">
   <div class="col-md-6">
-    <a href="#safe_typing.ml"><code>safe_typing.ml</code></a>&nbsp;<span class="label label-danger">141 errors</span>
+    <a href="#safe_typing.ml"><code>safe_typing.ml</code></a>&nbsp;<span class="label label-danger">140 errors</span>
     
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
@@ -54128,7 +54197,7 @@ type section_data = {
   rev_objlabels : Label.Set.t;
 }
 
-<abbr class="mark-error" title="Only algebraic or synonym types are supported in mutually recursive types">type safe_environment =
+type safe_environment =
   { env : Environ.env;
     sections : section_data Section.t;
     modpath : ModPath.t;
@@ -54144,7 +54213,7 @@ type section_data = {
     required : vodigest DPmap.t;
     loads : (ModPath.t * module_body) list;
     local_retroknowledge : Retroknowledge.action list;
-}</abbr>
+}
 
 and modvariant =
   | NONE
@@ -56917,11 +56986,45 @@ Record section_data := {
   rev_univ : Univ.ContextSet.t;
   rev_objlabels : Names.Label.Set.t }.
 
+Reserved Notation &quot;'safe_environment&quot;.
+
+Record safe_environment_skeleton
+  {env sections modpath modvariant modresolver paramresolver revstruct modlabels
+    objlabels univ future_cst engagement required loads local_retroknowledge :
+    Type} := {
+  env : env;
+  sections : sections;
+  modpath : modpath;
+  modvariant : modvariant;
+  modresolver : modresolver;
+  paramresolver : paramresolver;
+  revstruct : revstruct;
+  modlabels : modlabels;
+  objlabels : objlabels;
+  univ : univ;
+  future_cst : future_cst;
+  engagement : engagement;
+  required : required;
+  loads : loads;
+  local_retroknowledge : local_retroknowledge }.
+Arguments safe_environment_skeleton : clear implicits.
+
 Inductive modvariant : Type :=
 | NONE : modvariant
 | LIBRARY : modvariant
-| SIG : module_parameters -&gt; safe_environment -&gt; modvariant
-| STRUCT : module_parameters -&gt; safe_environment -&gt; modvariant.
+| SIG : module_parameters -&gt; 'safe_environment -&gt; modvariant
+| STRUCT : module_parameters -&gt; 'safe_environment -&gt; modvariant
+
+where &quot;'safe_environment&quot; :=
+  (safe_environment_skeleton Environ.env (Section.t section_data)
+    Names.ModPath.t modvariant Mod_subst.delta_resolver Mod_subst.delta_resolver
+    Declarations.structure_body Names.Label.Set.t Names.Label.Set.t
+    Univ.ContextSet.t (list (Future.computation Univ.ContextSet.t))
+    (option Declarations.engagement) (Names.DPmap.t vodigest)
+    (list (Names.ModPath.t * Declarations.module_body))
+    (list Retroknowledge.action)).
+
+Definition safe_environment := 'safe_environment.
 
 Fixpoint library_dp_of_senv (senv : safe_environment) : Names.DirPath.t :=
   match modvariant senv with
