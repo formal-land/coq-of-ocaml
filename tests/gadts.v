@@ -25,3 +25,13 @@ Fixpoint proj_int (e : expr Z) : Z :=
   | Sum e1 e2 => Z.add (proj_int e1) (proj_int e2)
   | _ => 0
   end.
+
+Inductive one_case : forall (a : Type), Type :=
+| SingleCase : one_case Z
+| Impossible : one_case bool.
+
+Definition x : Z :=
+  match SingleCase with
+  | SingleCase => 0
+  | _ => 1
+  end.

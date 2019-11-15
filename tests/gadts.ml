@@ -15,3 +15,12 @@ let rec proj_int (e : int expr) : int =
   | Int n -> n
   | Sum (e1, e2) -> proj_int e1 + proj_int e2
   | exception _ when false -> 0
+
+type 'a one_case =
+  | SingleCase : int one_case
+  | Impossible : bool one_case
+
+let x : int =
+  match SingleCase with
+  | SingleCase -> 0
+  | exception _ when false -> 1
