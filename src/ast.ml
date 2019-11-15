@@ -27,7 +27,7 @@ let report_errors (typedtree_errors : exn list) : unit Monad.t =
       let loc = Location.loc_of_report error in
       let error_buffer = Buffer.create 0 in
       Location.report_error (Format.formatter_of_buffer error_buffer) error;
-      set_loc (Loc.of_location loc) (raise () Error.Category.OCaml (Buffer.contents error_buffer))
+      set_loc (Loc.of_location loc) (raise () Error.Category.Merlin (Buffer.contents error_buffer))
     | _ -> return ()
   )
 

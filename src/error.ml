@@ -4,18 +4,18 @@ open SmartPrint
 module Category = struct
   type t =
     | FirstClassModule
+    | Merlin
     | NotFound
     | NotSupported
-    | OCaml
     | SideEffect
     | Unexpected
 
   let to_string (category : t) : string =
     match category with
     | FirstClassModule -> "First class module"
+    | Merlin -> "Merlin"
     | NotFound -> "Not found"
     | NotSupported -> "Not supported"
-    | OCaml -> "OCaml"
     | SideEffect -> "Side effect"
     | Unexpected -> "Unexpected"
 end
