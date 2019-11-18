@@ -15,7 +15,6 @@ build: [
 ]
 install: [
   [make "-C" "OCaml" "install"]
-  ["install" "-T" "_build/default/src/coqOfOCaml.exe" "%{bin}%/coq-of-ocaml"]
 ]
 depends: [
   "conf-ruby" {with-test}
