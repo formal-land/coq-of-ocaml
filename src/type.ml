@@ -133,6 +133,7 @@ let of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   | Tvar (Some x) -> return (Name.of_string x)
   | _ -> raise (Name.of_string "expected_variable") NotSupported "Only type variables are supported as parameters"
 
+(** The free variables of a type. *)
 let rec typ_args (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x

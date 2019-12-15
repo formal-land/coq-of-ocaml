@@ -25,7 +25,7 @@ Module S.
       map : (elt -> elt) -> t -> t;
       fold : forall {a : Type}, (elt -> a -> a) -> t -> a -> a;
       for_all : (elt -> bool) -> t -> bool;
-      _exists : (elt -> bool) -> t -> bool;
+      __exists : (elt -> bool) -> t -> bool;
       filter : (elt -> bool) -> t -> t;
       partition : (elt -> bool) -> t -> t * t;
       cardinal : t -> Z;
@@ -57,17 +57,19 @@ Inductive comb : Type :=
 Inductive leaf : Type :=
 | Leaf : leaf.
 
-Inductive comparable_struct : forall (_ _ : Type), Type :=
-| Int_key : forall {position : Type}, (option type_annot) ->
-  comparable_struct Z position
-| String_key : forall {position : Type}, (option type_annot) ->
-  comparable_struct string position
-| Bool_key : forall {position : Type}, (option type_annot) ->
-  comparable_struct bool position
-| Pair_key : forall {a b position : Type},
-  ((comparable_struct a leaf) * (option field_annot)) ->
-  ((comparable_struct b position) * (option field_annot)) -> (option type_annot)
-  -> comparable_struct (pair a b) comb.
+Reserved Notation "'comparable_struct".
+
+Inductive comparable_struct_gadt : Type :=
+| Int_key : (option type_annot) -> comparable_struct_gadt
+| String_key : (option type_annot) -> comparable_struct_gadt
+| Bool_key : (option type_annot) -> comparable_struct_gadt
+| Pair_key : (comparable_struct_gadt * (option field_annot)) ->
+  (comparable_struct_gadt * (option field_annot)) -> (option type_annot) ->
+  comparable_struct_gadt
+
+where "'comparable_struct" := (fun (_ _ : Type) => comparable_struct_gadt).
+
+Definition comparable_struct := 'comparable_struct.
 
 Definition comparable_ty (a : Type) := comparable_struct a comb.
 
