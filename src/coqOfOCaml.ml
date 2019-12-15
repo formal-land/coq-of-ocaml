@@ -57,7 +57,13 @@ let of_ocaml
   let document = Ast.to_coq ast in
   let generated_file_name =
     match output_file_name with
-    | None -> source_file_name ^ ".v"
+    | None ->
+      let source_file_name_without_extension = Filename.remove_extension source_file_name in
+      let extension = Filename.extension source_file_name in
+      let extension_without_dot = extension |> String.map (fun c ->
+        if c = '.' then '_' else c
+      ) in
+      source_file_name_without_extension ^ extension_without_dot ^ ".v"
     | Some output_file_name -> output_file_name in
   let generated_file_content = SmartPrint.to_string 80 2 document in
   let success_message =

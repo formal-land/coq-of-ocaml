@@ -22,7 +22,7 @@ Run:
 coq-of-ocaml main.ml
 ```
 
-Get a file `main.ml.v`:
+Get a file `main_ml.v`:
 ```coq
 Require Import OCaml.OCaml.
 
