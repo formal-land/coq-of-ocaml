@@ -1,5 +1,5 @@
+Require Import ssr.ssrbool.
 Require Import Libraries.
-Require Import Effect.
 
 Local Open Scope Z_scope.
 Import ListNotations.
@@ -71,85 +71,9 @@ Module Z.
     compare_is_sound := Z.compare_spec |}.
 End Z.
 
-Definition Match_failure := Effect.make unit (string * Z * Z).
- Definition raise_Match_failure {A : Type} (x : string * Z * Z)
-  : M [ Match_failure ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Assert_failure := Effect.make unit (string * Z * Z).
-Definition raise_Assert_failure {A : Type} (x : string * Z * Z)
-  : M [ Assert_failure ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Invalid_argument := Effect.make unit string.
-Definition raise_Invalid_argument {A : Type} (x : string)
-  : M [ Invalid_argument ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Failure := Effect.make unit string.
-Definition raise_Failure {A : Type} (x : string)
-  : M [ Failure ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Not_found := Effect.make unit unit.
-Definition raise_Not_found {A : Type} (x : unit)
-  : M [ Not_found ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Out_of_memory := Effect.make unit unit.
-Definition raise_Out_of_memory {A : Type} (x : unit)
-  : M [ Out_of_memory ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Stack_overflow := Effect.make unit unit.
-Definition raise_Stack_overflow {A : Type} (x : unit)
-  : M [ Stack_overflow ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Sys_error := Effect.make unit string.
-Definition raise_Sys_error {A : Type} (x : string)
-  : M [ Sys_error ] A :=
-  fun s => (inr (inl x), s).
-
-Definition End_of_file := Effect.make unit unit.
-Definition raise_End_of_file {A : Type} (x : unit)
-  : M [ End_of_file ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Division_by_zero := Effect.make unit unit.
-Definition raise_Division_by_zero {A : Type} (x : unit)
-  : M [ Division_by_zero ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Sys_blocked_io := Effect.make unit unit.
-Definition raise_Sys_blocked_io {A : Type} (x : unit)
-  : M [ Sys_blocked_io ] A :=
-  fun s => (inr (inl x), s).
-
-Definition Undefined_recursive_module := Effect.make unit (string * Z * Z).
-Definition raise_Undefined_recursive_module {A : Type} (x : string * Z * Z)
-  : M [ Undefined_recursive_module ] A :=
-  fun s => (inr (inl x), s).
-
-Definition assert {A : Type} (b : bool) : M [Assert_failure] A :=
-  raise_Assert_failure ("coq" % string, 0, 0).
-
 (** OCaml functions are converted to their Coq's counter parts when it is
     possible. *)
-Module Pervasives.
-  (** * Exceptions *)
-  Definition invalid_arg {A : Type} (message : string)
-    : M [Invalid_argument] A :=
-    raise_Invalid_argument message.
-
-  Definition failwith {A : Type} (message : string)
-    : M [Failure] A :=
-    raise_Failure message.
-
-  Definition Exit := Effect.make unit unit.
-  Definition raise_Exit {A : Type} (x : unit) : M [ Exit ] A :=
-    fun s => (inr (inl x), s).
-
+Module Stdlib.
   (** * Comparisons *)
   Definition lt {A : Type} {R} `{OrderDec A R} (x y : A) : bool :=
     match compare x y with
@@ -219,12 +143,6 @@ Module Pervasives.
   Definition int_of_char (c : ascii) : Z :=
     Z.of_nat (nat_of_ascii c).
 
-  Definition char_of_int (n : Z) : M [ Invalid_argument ] ascii :=
-    if andb (le 0 n) (le n 255) then
-      ret (ascii_of_nat (Z.to_nat n))
-    else
-      raise_Invalid_argument "char_of_int".
-
   (** * Unit operations *)
   Definition ignore {A : Type} (_ : A) : unit :=
     tt.
@@ -255,188 +173,50 @@ Module Pervasives.
   Definition app {A : Type} (l1 l2 : list A) : list A :=
     app l1 l2.
 
-  (** * Input/output *)
-  (* TODO: add channels. *)
-
-  (** * Output functions on standard output *)
-  Definition print_string (message : string) : M [IO] unit :=
-    fun s =>
-      match s with
-      | ((stream_i, stream_o), _) =>
-        (inl tt, ((stream_i, message :: stream_o), tt))
-      end.
-
-  Definition print_char (c : ascii) : M [IO] unit :=
-    print_string (String.String c String.EmptyString).
-
-  Definition print_int (n : Z) : M [IO] unit :=
-    print_string (string_of_int n).
-
-  Definition print_newline (_ : unit) : M [IO] unit :=
-    print_char "010" % char.
-
-  Definition print_endline (message : string) : M [IO] unit :=
-    let! _ := print_string message in
-    print_newline tt.
-
-  (** * Output functions on standard error *)
-  (* TODO: do it on the error channel. *)
-  Definition prerr_string (message : string) : M [IO] unit :=
-    print_string message.
-
-  Definition prerr_char (c : ascii) : M [IO] unit :=
-    print_char c.
-
-  Definition prerr_int (n : Z) : M [IO] unit :=
-    print_int n.
-
-  Definition prerr_newline (_ : unit) : M [IO] unit :=
-    print_newline tt.
-
-  Definition prerr_endline (message : string) : M [IO] unit :=
-    print_endline message.
-
-  (** * Input functions on standard input *)
-  Definition read_line (_ : unit) : M [IO] string :=
-    fun s =>
-      match s with
-      | ((stream_i, stream_o), _) =>
-        match stream_i with
-        | FiniteStream.nil _ =>
-          (inl "" % string, s) (* We could raise an [End_of_file] exception. *)
-        | FiniteStream.cons message stream_i =>
-          (inl message, ((stream_i, stream_o), tt))
-        end
-      end.
-
-  Definition read_int (_ : unit) : M [IO] Z :=
-    let! s := read_line tt in
-    ret (int_of_string s).
-
-  (** * General output functions *)
-  (* TODO *)
-
-  (** * General input functions *)
-  (* TODO *)
-
-  (** * Operations on large files *)
-  (* TODO *)
-
-  (** * References *)
-  (* No first-class reference for now. *)
-
   (** * Operations on format strings *)
   (* TODO *)
+End Stdlib.
 
-  (** * Program termination *)
-  (* TODO *)
-End Pervasives.
+Module Char.
+  Module Lt.
+    Definition t (c1 c2 : ascii) : Prop :=
+      N.lt (N_of_ascii c1) (N_of_ascii c2).
 
-(*Module List.
-  Definition length {A : Type} (l : list A) : Z :=
-    Z_of_nat (length l).
+    Lemma irreflexivity (c : ascii) : ~ t c c.
+      apply N.lt_irrefl.
+    Qed.
 
-  Definition hd {A : Type} (l : list A) : M [Failure] A :=
-    match l with
-    | [] => raise_Failure "hd" % string
-    | x :: _ => ret x
-    end.
+    Lemma transitivity (c1 c2 c3 : ascii) : t c1 c2 -> t c2 c3 -> t c1 c3.
+      apply N.lt_trans.
+    Qed.
 
-  Definition tl {A : Type} (l : list A) : M [Failure] (list A) :=
-    match l with
-    | [] => raise_Failure "tl" % string
-    | _ :: l => ret l
-    end.
+    Lemma N_of_ascii_inj (c1 c2 : ascii) : N_of_ascii c1 = N_of_ascii c2 -> c1 = c2.
+      intro H.
+      rewrite <- (ascii_N_embedding c1).
+      rewrite <- (ascii_N_embedding c2).
+      rewrite H.
+      reflexivity.
+    Qed.
+  End Lt.
 
-  Definition nth {A : Type} (l : list A) (n : Z) : M [Failure; Invalid_argument] A :=
-    if n <? 0 then
-      lift [_;_] "01" (raise_Invalid_argument "List.nth" % string)
-    else
-      lift [_;_] "10" (
-        let n := Z.to_nat n in
-        match List.nth_error l n with
-        | None => raise_Failure "nth" % string
-        | Some x => ret x
-        end).
+  Instance strict_order : StrictOrder Lt.t :=
+    {|
+      StrictOrder_Irreflexive := Lt.irreflexivity;
+      StrictOrder_Transitive := Lt.transitivity;
+    |}.
 
-  Fixpoint flatten {A : Type} (ll : list (list A)) : list A :=
-    match ll with
-    | [] => []
-    | l :: ll => l ++ flatten ll
-    end.
-
-  (** * Iterators *)
-  Fixpoint mapi_aux {A B : Type} (f : Z -> A -> B) (l : list A) (n : nat) : list B :=
-    match l with
-    | [] => []
-    | x :: l => f (Z.of_nat n) x :: mapi_aux f l (S n)
-    end.
-
-  Definition mapi {A B : Type} (f : Z -> A -> B) (l : list A) : list B :=
-    mapi_aux f l O.
-
-  Fixpoint rev_map_aux {A B : Type} (f : A -> B) (l : list A) (r : list B) : list B :=
-    match l with
-    | [] => r
-    | x :: l => rev_map_aux f l (f x :: r)
-    end.
-
-  Definition rev_map {A B : Type} (f : A -> B) (l : list A) : list B :=
-    rev_map_aux f l [].
-
-  Definition fold_left {A B : Type} (f : A -> B -> A) (a : A) (l : list B) : A :=
-    List.fold_left f l a.
-
-  Definition fold_right {A B : Type} (f : A -> B -> B) (l : list A) (a : B) : B :=
-    List.fold_right f a l.
-
-  (** * Iterators on two lists *)
-  Fixpoint map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
-    : M [Invalid_argument] (list C) :=
-    match (l1, l2) with
-    | ([], []) => ret []
-    | (x1 :: l1, x2 :: l2) =>
-      let! l := map2 f l1 l2 in
-      ret (f x1 x2 :: l)
-    | _ => raise_Invalid_argument "map2"
-    end.
-
-  Fixpoint rev_map2_aux {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
-    (r : list C) : M [Invalid_argument] (list C) :=
-    match (l1, l2) with
-    | ([], []) => ret r
-    | (x1 :: l1, x2 :: l2) => rev_map2_aux f l1 l2 (f x1 x2 :: r)
-    | _ => raise_Invalid_argument "rev_map2"
-    end.
-
-  Definition rev_map2 {A B C : Type} (f : A -> B -> C) (l1 : list A) (l2 : list B)
-    : M [Invalid_argument] (list C) :=
-    rev_map2_aux f l1 l2 [].
-
-  Fixpoint fold_left2 {A B C : Type} (f : A -> B -> C -> A) (a : A)
-    (l1 : list B) (l2 : list C) : M [Invalid_argument] A :=
-    match (l1 , l2) with
-    | ([], []) => ret a
-    | (x1 :: l1, x2 :: l2) => fold_left2 f (f a x1 x2) l1 l2
-    | _ => raise_Invalid_argument "fold_left2"
-    end.
-
-  Fixpoint fold_right2 {A B C : Type} (f : A -> B -> C -> C)
-    (l1 : list A) (l2 : list B) (a : C) :  M [Invalid_argument] C :=
-    match (l1, l2) with
-    | ([], []) => ret a
-    | (x1 :: l1, x2 :: l2) =>
-      let! a := fold_right2 f l1 l2 a in
-      ret (f x1 x2 a)
-    | _ => raise_Invalid_argument "fold_right2"
-    end.
-
-  (** * List scanning *)
-  (** * List searching *)
-  (** * Association lists *)
-  (** * Lists of pairs *)
-  (** * Sorting *)
-End List.*)
+  Instance order_dec : OrderDec strict_order.
+    refine {|
+      compare := fun c1 c2 => (N_of_ascii c1 ?= N_of_ascii c2) % N;
+      compare_is_sound := fun c1 c2 => _;
+    |}.
+    destruct (N.compare_spec (N_of_ascii c1) (N_of_ascii c2)) as [Heq | Hlt | Hgt];
+      [apply CompEq | apply CompLt | apply CompGt].
+    - now apply Lt.N_of_ascii_inj.
+    - exact Hlt.
+    - exact Hgt.
+  Defined.
+End Char.
 
 Module String.
   Definition length (s : string) : Z :=
@@ -455,6 +235,13 @@ Module String.
     | S n => String c (_make n c)
     end.
 
+  Fixpoint concat (sep : string) (sl : list string) : string :=
+    match sl with
+    | [] => ""
+    | [s] => s
+    | s :: sl => String.append (String.append s sep) (concat sep sl)
+    end.
+
   (* TODO: raise an exception if n < 0. *)
   Definition make (n : Z) (c : ascii) : string :=
     _make (Z.to_nat n) c.
@@ -466,4 +253,133 @@ Module String.
   (* TODO *)
   Definition escaped (s : string) : string :=
     s.
+
+  Module Lt.
+    Inductive t : string -> string -> Prop :=
+    | EmptyString : forall c s, t EmptyString (String c s)
+    | StringStringLt : forall c1 s1 c2 s2,
+      N.lt (N_of_ascii c1) (N_of_ascii c2) -> t (String c1 s1) (String c2 s2)
+    | StringStringEq : forall c1 s1 c2 s2,
+      c1 = c2 -> t s1 s2 -> t (String c1 s1) (String c2 s2).
+
+    Fixpoint irreflexivity (s : string) (H : t s s) : False.
+      inversion_clear H.
+      - apply (Char.Lt.irreflexivity H0).
+      - apply (irreflexivity _ H1).
+    Qed.
+
+    Fixpoint transitivity (s1 s2 s3 : string) (H12 : t s1 s2) (H23 : t s2 s3) : t s1 s3.
+      inversion H12; inversion H23; try apply EmptyString; try congruence.
+      - apply StringStringLt.
+        apply N.lt_trans with (m := N_of_ascii c2); congruence.
+      - apply StringStringLt; congruence.
+      - apply StringStringLt; congruence.
+      - apply StringStringEq; try congruence.
+        replace s4 with s5 in * by congruence.
+        now apply transitivity with (s2 := s5).
+    Qed.
+  End Lt.
+
+  Fixpoint ltb (s1 s2 : string) : bool :=
+    match s1, s2 with
+   | EmptyString, EmptyString => false
+   | EmptyString, String _ _ => true
+   | String _ _, EmptyString => false
+   | String c1 s1', String c2 s2' =>
+    let n1 := N_of_ascii c1 in
+    let n2 := N_of_ascii c2 in
+    (N.ltb n1 n2 || (N.eqb n1 n2 && ltb s1' s2')) % bool
+   end.
+
+  Fixpoint ltb_spec (s1 s2 : string) : Bool.reflect (Lt.t s1 s2) (ltb s1 s2).
+    destruct s1 as [| c1 s1]; destruct s2 as [| c2 s2]; simpl.
+    - apply Bool.ReflectF.
+      intro; now apply Lt.irreflexivity with (s := "" % string).
+    - apply Bool.ReflectT.
+      apply Lt.EmptyString.
+    - apply Bool.ReflectF.
+      intro H; inversion H.
+    - case_eq ((N_of_ascii c1 <? N_of_ascii c2)%N); intro H_lt; simpl.
+      + apply Bool.ReflectT.
+        apply Lt.StringStringLt.
+        now apply N.ltb_lt.
+      + case_eq ((N_of_ascii c1 =? N_of_ascii c2)%N); intro H_eq; simpl.
+        * destruct (ltb_spec s1 s2); constructor.
+          -- apply Lt.StringStringEq; trivial.
+             apply Char.Lt.N_of_ascii_inj.
+             now apply N.eqb_eq.
+          -- intro H; inversion H; try tauto.
+             assert ((N_of_ascii c1 <? N_of_ascii c2)%N = true) by
+               now apply N.ltb_lt.
+             congruence.
+        * apply Bool.ReflectF.
+          intro H; inversion H.
+          -- assert ((N_of_ascii c1 <? N_of_ascii c2)%N = true) by
+               now apply N.ltb_lt.
+             congruence.
+          -- assert ((N_of_ascii c1 =? N_of_ascii c2)%N = true) by
+               (apply N.eqb_eq; congruence).
+             congruence.
+  Qed.
+
+  Fixpoint ltb_or_eqb_or_gtb
+    (s1 s2 : string)
+    (H_nltb : ltb s1 s2 = false)
+    (H_neqb : String.eqb s1 s2 = false)
+    : ltb s2 s1 = true.
+    destruct s1 as [| c1 s1]; destruct s2 as [| c2 s2]; simpl in *; try congruence.
+    destruct (Bool.orb_false_elim _ _ H_nltb) as [H_c1c2 H].
+    case_eq ((N_of_ascii c1 ?= N_of_ascii c2)%N); intro H_comp_c1c2.
+    - assert (H_eq_c1c2 : N_of_ascii c1 = N_of_ascii c2) by
+        now apply N.compare_eq_iff.
+      replace ((N_of_ascii c2 =? N_of_ascii c1)%N) with true by (
+        symmetry;
+        apply N.eqb_eq;
+        congruence
+      ).
+      rewrite ltb_or_eqb_or_gtb.
+      + apply Bool.orb_true_r.
+      + destruct (proj1 (Bool.andb_false_iff _ _) H); trivial.
+        assert (H_eq_c1c2_bis := proj2 (N.eqb_eq _ _) H_eq_c1c2).
+        congruence.
+      + assert (H_eqb_c1c2 : (c1 =? c2)%char = true) by (
+          apply Ascii.eqb_eq;
+          now apply Char.Lt.N_of_ascii_inj
+        ).
+        now rewrite H_eqb_c1c2 in H_neqb.
+    - assert ((N_of_ascii c1 <? N_of_ascii c2)%N = true) by (
+        apply N.ltb_lt;
+        now apply N.compare_lt_iff
+      ).
+      congruence.
+    - assert (H_gt_c1c2 : (N_of_ascii c2 < N_of_ascii c1) % N) by
+        now apply N.compare_gt_iff.
+      now rewrite (proj2 (N.ltb_lt _ _) H_gt_c1c2).
+  Qed.
+
+  Instance strict_order : StrictOrder Lt.t := {|
+      StrictOrder_Irreflexive := Lt.irreflexivity;
+      StrictOrder_Transitive := Lt.transitivity;
+    |}.
+
+  Instance order_dec : OrderDec strict_order.
+    refine {|
+      compare := fun s1 s2 =>
+        if String.eqb s1 s2 then
+          Eq
+        else if ltb s1 s2 then
+          Lt
+        else
+          Gt;
+      compare_is_sound := fun s1 s2 => _;
+    |}.
+    case_eq (String.eqb s1 s2); intro H_eq.
+    - apply CompEq.
+      now apply String.eqb_eq.
+    - case_eq (ltb s1 s2); intro H_lt.
+      + apply CompLt.
+        apply (ltb_spec _ _ H_lt).
+      + apply CompGt.
+        apply (ltb_spec _ _ (ltb_or_eqb_or_gtb _ _ H_lt H_eq)).
+  Defined.
 End String.

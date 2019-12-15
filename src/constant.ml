@@ -1,39 +1,38 @@
 (** Constants. *)
 open Asttypes
 open SmartPrint
+open Monad.Notations
 
 (** A constant can be an integer, a natural number (used for the non-termination monad) *)
 type t =
   | Int of int
   | Char of char
   | String of string
-
-(** Pretty-print a constant. *)
-let pp (c : t) : SmartPrint.t =
-  match c with
-  | Int n -> !^ "Int" ^-^ parens (OCaml.int n)
-  | Char c -> !^ "Char" ^-^ parens (OCaml.string (Char.escaped c))
-  | String s -> !^ "String" ^-^ parens (OCaml.string s)
+  | Warn of t * string
 
 (** Import an OCaml constant. *)
-let of_constant (loc : Loc.t) (c : constant) : t =
+let of_constant (c : constant) : t Monad.t =
   match c with
-  | Const_int n -> Int n
-  | Const_char c -> Char c
-  | Const_string (s, _) -> String s
+  | Const_int n -> return (Int n)
+  | Const_char c -> return (Char c)
+  | Const_string (s, _) -> return (String s)
   | Const_float s ->
     let n = int_of_float (float_of_string s) in
-    Error.warn loc (Printf.sprintf "Float constant %s is approximated by the integer %d." s n);
-    Int n
+    let message = Printf.sprintf "Float constant %s is approximated by the integer %d" s n in
+    warn message >>
+    return (Warn (Int n, message))
   | Const_int32 n ->
-    Error.warn loc "Constant of type int32 is converted to int.";
-    Int (Int32.to_int n)
+    let message = "Constant of type int32 is converted to int" in
+    warn message >>
+    return (Warn (Int (Int32.to_int n), message))
   | Const_int64 n ->
-    Error.warn loc "Constant of type int64 is converted to int.";
-    Int (Int64.to_int n)
+    let message = "Constant of type int64 is converted to int" in
+    warn message >>
+    return (Warn (Int (Int64.to_int n), message))
   | Const_nativeint n ->
-    Error.warn loc "Constant of type nativeint is converted to int.";
-    Int (Nativeint.to_int n)
+    let message = "Constant of type nativeint is converted to int" in
+    warn message >>
+    return (Warn (Int (Nativeint.to_int n), message))
 
 (** Pretty-print a constant to Coq. *)
 let rec to_coq (c : t) : SmartPrint.t =
@@ -62,3 +61,4 @@ let rec to_coq (c : t) : SmartPrint.t =
       else
         Buffer.add_char b c);
     nest (double_quotes (!^ (Buffer.contents b)) ^^ !^ "%" ^^ !^ "string")
+  | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)

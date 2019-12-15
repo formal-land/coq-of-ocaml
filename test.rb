@@ -10,39 +10,42 @@ class Test
   end
 
   def base_name
-    File.basename(@source_file, '.ml')
+    File.basename(@source_file, '.*')
   end
 
-  def extension(ext)
-    File.join(File.dirname(@source_file), base_name + ext)
+  def generated_name
+    File.join(File.dirname(@source_file), base_name + '.v')
   end
 
-  def compile
-    cmd = ['ocamlc', '-bin-annot', @source_file]
-    print cmd.join(" ")
-    system(*cmd)
+  def coq_of_ocaml_cmd
+    coq_of_ocaml = '_build/default/src/coqOfOCaml.exe'
+    cmd = [coq_of_ocaml, '-output', '/dev/stdout', @source_file]
   end
 
-  def coq_of_ocaml_cmd(mode)
-    cmd = ['./coqOfOCaml.native', '-mode', mode, extension('.cmt')]
+  def coq_of_ocaml
+    # We remove the fist line which is a success message
+    IO.popen(coq_of_ocaml_cmd, :external_encoding => "utf-8").read.split("\n")[1..-1].join("\n") + "\n"
   end
 
-  def coq_of_ocaml(mode)
-    IO.popen(coq_of_ocaml_cmd(mode)).read
-  end
-
-  def reference(mode)
-    file_name = extension('.' + mode)
+  def reference
+    file_name = generated_name
     FileUtils.touch file_name unless File.exists?(file_name)
-    File.read(file_name)
+    File.read(file_name, :encoding => 'utf-8')
   end
 
-  def check(mode)
-    coq_of_ocaml(mode) == reference(mode)
+  # Update the reference snapshot file.
+  def update
+    output = coq_of_ocaml
+    file_name = generated_name
+    File.write(file_name, output)
+  end
+
+  def check
+    coq_of_ocaml == reference
   end
 
   def coq_cmd
-    "coqc #{extension('.v')} -R tests Tests"
+    "coqc #{generated_name} -R tests Tests -R OCaml OCaml"
   end
 
   def coq
@@ -77,14 +80,6 @@ class Tests
     @invalid_tests = 0
   end
 
-  def compile
-    puts "\e[1mCompiling:\e[0m"
-    for test in @tests do
-      test.compile
-      puts
-    end
-  end
-
   def print_result(result)
     if result
       @valid_tests += 1
@@ -95,11 +90,11 @@ class Tests
     end
   end
 
-  def check(mode)
-    puts "\e[1mChecking '-#{mode}':\e[0m"
+  def check
+    puts "\e[1mChecking '.v':\e[0m"
     for test in @tests do
-      print_result(test.check(mode))
-      puts test.coq_of_ocaml_cmd(mode).join(" ")
+      print_result(test.check)
+      puts test.coq_of_ocaml_cmd.join(" ")
     end
   end
 
@@ -114,8 +109,10 @@ class Tests
   def extraction
     puts "\e[1mCompiling and running the extracted programs:\e[0m"
     for test in @tests do
-      print_result(test.extraction)
-      puts test.extraction_cmd
+      if File.extname(test.source_file) != ".mli" then
+        print_result(test.extraction)
+        puts test.extraction_cmd
+      end
     end
   end
 
@@ -129,18 +126,11 @@ class Tests
   end
 end
 
-tests = Tests.new(Dir.glob('tests/ex*.ml'))
-tests.compile
-puts
-tests.check('exp')
-puts
-tests.check('effects')
-puts
-tests.check('monadise')
-puts
-tests.check('interface')
-puts
-tests.check('v')
+test_files = Dir.glob('tests/*.ml*').select do |file_name|
+  not file_name.include?("disabled")
+end
+tests = Tests.new(test_files)
+tests.check
 puts
 tests.coq
 puts

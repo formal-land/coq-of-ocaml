@@ -1,12 +1,6 @@
 (** Recursivity flag. *)
-open SmartPrint
 
 type t = New of bool
-
-let pp (r : t) : SmartPrint.t =
-  match r with
-  | New false -> !^ "non_rec"
-  | New true -> !^ "rec"
 
 (** Import an OCaml recursivity flag. *)
 let of_rec_flag (f : Asttypes.rec_flag) : t =

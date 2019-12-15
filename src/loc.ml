@@ -1,22 +1,27 @@
-open SmartPrint
+module Position = struct
+  type t = {
+    character : int;
+    line : int;
+  }
 
-type t =
-  | Unknown
-  | Known of Lexing.position * Lexing.position
+  let of_position (position : Lexing.position) : t = {
+    character = position.Lexing.pos_cnum;
+    line = position.Lexing.pos_lnum;
+  }
+end
 
-let pp (l : t) : SmartPrint.t =
-  match l with
-  | Unknown -> !^ "?"
-  | Known (start, _) ->
-    let (_, line, _) = Location.get_pos_info start in
-    OCaml.int line
+type t = {
+  end_ : Position.t;
+  start : Position.t;
+}
 
-let to_user (l : t) : SmartPrint.t =
-  match l with
-  | Unknown -> !^ "?"
-  | Known (start, _) ->
-    let (file_name, line, _) = Location.get_pos_info start in
-    !^ file_name ^-^ !^ "," ^^ !^ "line" ^^ OCaml.int line
+let to_string (file_name : string) (loc : t) : string =
+  file_name ^ "," ^ " line " ^ string_of_int loc.start.Position.line
 
-let of_location (l : Location.t) : t =
-  Known (l.Location.loc_start, l.Location.loc_end)
+let of_location (location : Location.t) : t =
+  let end_ = location.Location.loc_end in
+  let start = location.Location.loc_start in
+  {
+    end_ = Position.of_position end_;
+    start = Position.of_position start;
+  }

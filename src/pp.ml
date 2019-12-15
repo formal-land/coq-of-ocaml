@@ -1,7 +1,10 @@
 open SmartPrint
 
-let parens (b : bool) (d : SmartPrint.t) : SmartPrint.t =
+let parens (b : bool) (doc : SmartPrint.t) : SmartPrint.t =
   if b then
-    parens d
+    parens doc
   else
-    d
+    doc
+
+let to_string (doc : SmartPrint.t) : string =
+  SmartPrint.to_string 80 2 doc

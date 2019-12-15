@@ -1,8 +1,0 @@
-{
-  "version": "1",
-  "content": [
-    "Interface",
-    "Ex02",
-    [ [ "Var", "t0", [] ], [ "Var", "t1", [] ], [ "Var", "t2", [] ], [ "Var", "f", [] ], [ "Var", "t3", [] ] ]
-  ]
-}

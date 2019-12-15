@@ -1,0 +1,33 @@
+version: "dev"
+
+opam-version: "2.0"
+maintainer: "dev@clarus.me"
+homepage: "https://github.com/clarus/coq-of-ocaml"
+dev-repo: "git+https://github.com/clarus/coq-of-ocaml.git"
+bug-reports: "https://github.com/clarus/coq-of-ocaml/issues"
+authors: ["Guillaume Claret"]
+license: "MIT"
+build: [
+  ["sh" "-c" "cd OCaml && ./configure.sh"]
+  [make "-C" "OCaml" "-j%{jobs}%"]
+  [make "-j%{jobs}%"]
+  [make "test"] {with-test}
+]
+install: [
+  [make "-C" "OCaml" "install"]
+]
+depends: [
+  "conf-ruby" {with-test}
+  "coq" {>= "8.9"}
+  "dune" {build}
+  "menhir" {build}
+  "ocaml" {>= "4.05" & < "4.08"}
+  "smart-print"
+  "yojson" {>= "1.6.0"}
+]
+tags: [
+  "keyword:compilation"
+  "keyword:ocaml"
+  "logpath:OCaml"
+]
+synopsis: "Compile a subset of OCaml to Coq"

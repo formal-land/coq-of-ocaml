@@ -1,8 +1,0 @@
-{
-  "version": "1",
-  "content": [
-    "Interface",
-    "Ex22",
-    [ [ "Var", "op_plus_plus_plus", [] ], [ "Var", "op_tilde_tilde", [] ], [ "Var", "z", [] ] ]
-  ]
-}
