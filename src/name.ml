@@ -39,8 +39,8 @@ let escape_operator (s : string) : string =
 
 let escape_reserved_word (s : string) : string =
   match s with
-  | "exists" -> "_exists"
-  | "return" -> "_return"
+  | "exists" -> "__exists"
+  | "return" -> "__return"
   | _ -> s
 
 let convert (s : string) : string =
@@ -65,6 +65,10 @@ let to_string (name : t) : string =
 let prefix_by_single_quote (name : t) : t =
   let Make name = name in
   Make ("'" ^ name)
+
+let suffix_by_gadt (name : t) : t =
+  let Make name = name in
+  Make (name ^ "_gadt")
 
 let suffix_by_skeleton (name : t) : t =
   let Make name = name in

@@ -9,15 +9,27 @@ Inductive gre (a : Type) : Type :=
 
 Arguments Arg {_}.
 
-Inductive foo : forall (a b : Type), Type :=
-| Bar : forall {a b c : Type}, a -> Z -> b -> c -> foo b string
-| Other : forall {a b : Type}, Z -> foo a b.
+Reserved Notation "'foo".
 
-Inductive expr : forall (a : Type), Type :=
-| Int : Z -> expr Z
-| String : string -> expr string
-| Sum : (expr Z) -> (expr Z) -> expr Z
-| Pair : forall {a b : Type}, (expr a) -> (expr b) -> expr (a * b).
+Inductive foo_gadt : Type :=
+| Bar : forall {a b c : Type}, a -> Z -> b -> c -> foo_gadt
+| Other : Z -> foo_gadt
+
+where "'foo" := (fun (a b : Type) => foo_gadt).
+
+Definition foo := 'foo.
+
+Reserved Notation "'expr".
+
+Inductive expr_gadt : Type :=
+| Int : Z -> expr_gadt
+| String : string -> expr_gadt
+| Sum : expr_gadt -> expr_gadt -> expr_gadt
+| Pair : expr_gadt -> expr_gadt -> expr_gadt
+
+where "'expr" := (fun (a : Type) => expr_gadt).
+
+Definition expr := 'expr.
 
 Fixpoint proj_int (e : expr Z) : Z :=
   match e with
@@ -26,9 +38,15 @@ Fixpoint proj_int (e : expr Z) : Z :=
   | _ => 0
   end.
 
-Inductive one_case : forall (a : Type), Type :=
-| SingleCase : one_case Z
-| Impossible : one_case bool.
+Reserved Notation "'one_case".
+
+Inductive one_case_gadt : Type :=
+| SingleCase : one_case_gadt
+| Impossible : one_case_gadt
+
+where "'one_case" := (fun (a : Type) => one_case_gadt).
+
+Definition one_case := 'one_case.
 
 Definition x : Z :=
   match SingleCase with
