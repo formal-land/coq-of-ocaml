@@ -66,6 +66,6 @@ let rec to_coq (signature : t) : SmartPrint.t =
       | _ :: _ ->
         !^ "forall" ^^ braces (group (
           separate space (List.map Name.to_coq typ_vars) ^^
-          !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
+          !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
       Type.to_coq None None typ ^-^ !^ "." in
   separate (newline ^^ newline) (signature |> List.map to_coq_item)

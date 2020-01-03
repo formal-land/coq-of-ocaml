@@ -107,7 +107,7 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
     (match typ_args with
     | [] -> empty
     | _ ->
-      parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")
+      parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
     ) ^^ !^ ":=" ^^ Type.to_coq None None typ
   | Value (name, typ_args, typ) ->
     Name.to_coq name ^^ !^ ":" ^^
@@ -116,7 +116,7 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
     | _ :: _ ->
       !^ "forall" ^^ braces (group (
         separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
+        !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
     Type.to_coq None None typ
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
@@ -130,7 +130,7 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
       !^ "Record" ^^ !^ "signature" ^^
       (match typ_params with
       | [] -> empty
-      | _ -> braces (separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")
+      | _ -> braces (separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set)
       ) ^^
       !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate newline (List.map (fun item -> to_coq_item item ^-^ !^ ";") signature.items)) ^^ newline ^^

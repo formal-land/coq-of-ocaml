@@ -5,7 +5,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Module List2.
-  Inductive t (a : Type) : Type :=
+  Inductive t (a : Set) : Set :=
   | Nil : t a
   | Cons : a -> t a -> t a.
   
@@ -18,7 +18,7 @@ Module List2.
     | Cons x xs => Z.add x (sum xs)
     end.
   
-  Fixpoint of_list {A : Type} (function_parameter : list A) : t A :=
+  Fixpoint of_list {A : Set} (function_parameter : list A) : t A :=
     match function_parameter with
     | [] => Nil
     | cons x xs => Cons x (of_list xs)
@@ -29,7 +29,7 @@ Module List2.
   End Inside.
 End List2.
 
-Definition n {A : Type} (function_parameter : A) : Z :=
+Definition n {A : Set} (function_parameter : A) : Z :=
   let '_ := function_parameter in
   List2.sum (List2.of_list (cons 5 (cons 7 (cons 6 (cons List2.Inside.x []))))).
 

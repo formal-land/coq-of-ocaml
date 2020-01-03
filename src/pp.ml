@@ -8,3 +8,6 @@ let parens (b : bool) (doc : SmartPrint.t) : SmartPrint.t =
 
 let to_string (doc : SmartPrint.t) : string =
   SmartPrint.to_string 80 2 doc
+
+let set : SmartPrint.t =
+  !^ "Set"

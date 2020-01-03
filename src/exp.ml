@@ -514,7 +514,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         then empty
         else braces @@ group (
           separate space (List.map Name.to_coq header.Header.typ_vars) ^^
-          !^ ":" ^^ !^ "Type")) ^^
+          !^ ":" ^^ Pp.set)) ^^
         group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->
           parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None x_typ)))) ^^
         (match header.Header.typ with

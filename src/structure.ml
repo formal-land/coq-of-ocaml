@@ -27,7 +27,7 @@ module Value = struct
           | [] -> empty
           | _ :: _ ->
             braces @@ group (separate space (List.map Name.to_coq header.Exp.Header.typ_vars) ^^
-            !^ ":" ^^ !^ "Type")) ^^
+            !^ ":" ^^ Pp.set)) ^^
           group (separate space (header.Exp.Header.args |> List.map (fun (x, t) ->
             parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)))) ^^
           (match header.Exp.Header.typ with
@@ -173,7 +173,7 @@ let rec to_coq (defs : t list) : SmartPrint.t =
       | [] -> empty
       | _ :: _ ->
         !^ "forall" ^^
-        nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")) ^-^ !^ ","
+        nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
       ) ^^
       Type.to_coq None None typ ^-^ !^ "."
     | TypeDefinition typ_def -> TypeDefinition.to_coq typ_def

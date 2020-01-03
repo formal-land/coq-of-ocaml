@@ -43,7 +43,7 @@ Module Point.
     end.
 End Point.
 
-Record poly {first second : Type} := {
+Record poly {first second : Set} := {
   first : first;
   second : second }.
 Arguments poly : clear implicits.
