@@ -12,32 +12,34 @@
   <% 3.times do |i| %>
   <div class="col-md-4">
     <ul>
-      <% for ocaml_name, nb_errors, _, _, _, _, _ in conversions[i * column_size..(i + 1) * column_size - 1] do %>
-      <li><a href="#<%= u(ocaml_name) %>"><%= h(ocaml_name) %></a>&nbsp;<%= nb_errors == 0 ? "<span class=\"label label-success\">✓</span>" : "<span class=\"label label-danger\">#{nb_errors}</span>" %></li>
+      <% for conversion in conversions[i * column_size..(i + 1) * column_size - 1] do %>
+      <li>
+        <a href="#<%= u(conversion[:ocaml_name]) %>"><%= h(conversion[:ocaml_name]) %></a>&nbsp;<%= conversion[:nb_errors] == 0 ? "<span class=\"label label-success\">✓</span>" : "<span class=\"label label-danger\">#{conversion[:nb_errors]}</span>" %>
+      </li>
       <% end %>
     </ul>
   </div>
   <% end %>
 </div>
-<% for ocaml_name, nb_errors, global_errors, ocaml_content, coq_name, coq_content in conversions do %>
+<% for conversion in conversions do %>
 <hr />
-<div class="row conversion-row" id="<%= u(ocaml_name) %>">
+<div class="row conversion-row" id="<%= u(conversion[:ocaml_name]) %>">
   <div class="col-md-6">
-    <a href="#<%= u(ocaml_name) %>"><code><%= h(ocaml_name) %></code></a>&nbsp;<span class="label label-<%= nb_errors == 0 ? "success" : "danger" %>"><%= nb_errors == 0 ? "success" : "#{nb_errors} error#{nb_errors != 1 ? "s" : ""}" %></span>
-    <% if global_errors.size != 0 then %>
+    <a href="#<%= u(conversion[:ocaml_name]) %>"><code><%= h(conversion[:ocaml_name]) %></code></a>&nbsp;<span class="label label-<%= conversion[:nb_errors] == 0 ? "success" : "danger" %>"><%= conversion[:nb_errors] == 0 ? "success" : "#{conversion[:nb_errors]} error#{conversion[:nb_errors] != 1 ? "s" : ""}" %></span>
+    <% if conversion[:global_errors].size != 0 then %>
       <div class="alert alert-danger global-errors" role="alert">
         <ul>
-          <% for global_error in global_errors do %>
+          <% for global_error in conversion[:global_errors] do %>
             <li><%= h(global_error) %></li>
           <% end %>
         </ul>
       </div>
     <% end %>
-    <pre><%= ocaml_content %></pre>
+    <pre><%= conversion[:ocaml_content] %></pre>
   </div>
   <div class="col-md-6">
-    <a href="#<%= u(ocaml_name) %>"><code><%= h(coq_name) %></code></a>
-    <pre><%= h(coq_content) %></pre>
+    <a href="#<%= u(conversion[:ocaml_name]) %>"><code><%= h(conversion[:coq_name]) %></code></a>
+    <pre><%= h(conversion[:coq_content]) %></pre>
   </div>
 </div>
 <% end %>

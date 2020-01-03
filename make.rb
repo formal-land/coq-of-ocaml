@@ -64,14 +64,14 @@ def get_conversions(directory)
       global_errors, marked_ocaml_content = mark_text(ocaml_content, errors_json)
       coq_content = File.read(coq_file_name, :encoding => 'utf-8')
       if coq_content.valid_encoding? then
-        conversions << [
-          ocaml_name,
-          errors_json.size,
-          global_errors,
-          marked_ocaml_content,
-          coq_name,
-          coq_content
-        ]
+        conversions << {
+          ocaml_name: ocaml_name,
+          nb_errors: errors_json.size,
+          global_errors: global_errors,
+          ocaml_content: marked_ocaml_content,
+          coq_name: coq_name,
+          coq_content: coq_content
+        }
       end
     else
       puts
@@ -79,7 +79,7 @@ def get_conversions(directory)
     end
   end
   puts
-  conversions.sort_by {|ocaml_name, _, _, _| ocaml_name}
+  conversions.sort_by {|conversion| conversion[:ocaml_name]}
 end
 
 # Helpers.
@@ -91,27 +91,35 @@ def footer(root)
   ERB.new(File.read("template/footer.html.erb")).result(binding)
 end
 
+def project(name, title, intro, directory)
+  project_name = name
+  project_intro = <<END
+    <h2>#{title}</h2>
+    <p>#{intro}</p>
+END
+  conversions = get_conversions(directory)
+  ERB.new(File.read("template/project.html.erb")).result(binding)
+end
+
 # Generate the files.
 File.open("index.html", "w") do |file|
   file << ERB.new(File.read("index.html.erb")).result(binding)
 end
 
 File.open("kernel/index.html", "w") do |file|
-  project_name = :kernel
-  project_intro = <<END
-    <h2>Kernel of Coq</h2>
-    <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>.</p>
-END
-  conversions = get_conversions(kernel_directory)
-  file << ERB.new(File.read("template/project.html.erb")).result(binding)
+  file << project(
+    :kernel,
+    "Kernel of Coq",
+    "This is a demo of the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a> on the <a href=\"https://github.com/coq/coq/tree/master/kernel\">kernel</a> of <a =href=\"https://coq.inria.fr/\">Coq</a>. Coq is written in <a =href=\"https://ocaml.org/\">OCaml</a>.",
+    kernel_directory
+  )
 end
 
 File.open("tezos/index.html", "w") do |file|
-  project_name = :tezos
-  project_intro = <<END
-    <h2>Tezos</h2>
-    <p>These are the sources of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.</p>
-END
-  conversions = get_conversions(tezos_directory)
-  file << ERB.new(File.read("template/project.html.erb")).result(binding)
+  file << project(
+    :tezos,
+    "Protocol of Tezos",
+    "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
+    tezos_directory
+  )
 end
