@@ -107,6 +107,9 @@ END
   nb_coq_lines = conversions.reduce(0) {|sum, conversion|
     sum + conversion[:coq_content].split("\n").size
   }
+  nb_errors = conversions.reduce(0) {|sum, conversion|
+    sum + conversion[:nb_errors]
+  }
   ERB.new(File.read("template/project.html.erb")).result(binding)
 end
 
