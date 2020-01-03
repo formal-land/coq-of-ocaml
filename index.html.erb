@@ -7,14 +7,14 @@
     <h3>Demos</h3>
     <ul>
       <li><a href="kernel/">the kernel of Coq</a> (30.000 lines)</li>
-      <li><a href="tezos/">Tezos</a> (200.000 lines)</li>
+      <li><a href="tezos/">the protocol of Tezos</a> (35.000 lines)</li>
     </ul>
     
     <h3>Concepts</h3>
-    <p>We import the purely functional part of <a href="https://ocaml.org/">OCaml</a> to <a href="https://coq.inria.fr/">Coq</a>. We aim to generate readable and idiomatic Coq code with no encodings. The semantics of the source code may not be completely preserved. One should do manual reviews to assert that the generated Coq is a reasonable formalization of the sources. We always generate something, even in case of errors&nbsp;(which are explicitely notified).</p>
+    <p>We import the purely functional part of <a href="https://ocaml.org/">OCaml</a> to <a href="https://coq.inria.fr/">Coq</a>. We aim to generate readable and idiomatic Coq code without encodings. The semantics of the source code may not be completely preserved. One should do manual reviews to assert that the generated Coq is a reasonable formalization of the sources. We generate a dummy Coq term and an explicit error message in case of error, so that we always generate something.</p>
     <p>We compile OCaml projects by pluging into <a href="https://github.com/ocaml/merlin">Merlin</a>. This means that if you are using Merlin then you can run <code>coq-of-ocaml</code> with no additional configurations.</p>
-    <p>The method to verify the termination of generated fixpoints is praying. To help you start, you can use the package <a href="https://github.com/SimonBoulier/TypingFlags">coq-typing-flags</a> to locally disable termination checks in Coq. The generated code for pattern matching on <a href="https://caml.inria.fr/pub/docs/manual-ocaml/manual033.html">GADTs</a> may not type check in some cases.</p>
-    <p>We support modules and first-class modules. We do not support the functors. We generate either Coq modules or dependent records depending on the use case. We generate axioms for&nbsp;<code>.mli</code> files to help formalizations, but importing <code>.mli</code> files should be optional. We do not yet support cross-referencing between the generated Coq files.</p>
+    <p>We do not do special treatments for the termination of fixpoints. We convert the code of the fixpoints, then&nbsp; Coq may or may not validate the termination. It is possible to locally disable termination checks by installing the package <a href="https://github.com/SimonBoulier/TypingFlags">coq-typing-flags</a> from <a href="http://perso.eleves.ens-rennes.fr/people/Simon.Boulier/">Simon Boulier</a> (should be included in the comming Coq 8.11). We erase the type parameters for the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/manual033.html">GADTs</a>. This makes sure that the type definitions are accepted, but can render the pattern matchings incomplete. We did not find a way to represent&nbsp;GADTs in&nbsp;Coq yet. Indeed, the dependent pattern matching works well on type indicies which are values, but not so well with types.</p>
+    <p>We support modules and first-class modules. We do not support functors. We generate either Coq modules or dependent records depending on the use case. We generate axioms for&nbsp;<code>.mli</code> files to help formalizations, but importing <code>.mli</code> files should be optional. We do not yet support cross-referencing between the generated Coq files.</p>
 
     <h3>Related projects</h3>
     <p>In the <a href="http://www.crowdsafety.org/wp-content/uploads/2015/03/crowd2-1024x352.jpg">JavaScript</a> community:</p>

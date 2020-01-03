@@ -52,7 +52,10 @@ def get_conversions(directory)
     print "\r#{directory} (#{index + 1}/#{ocaml_file_names.size})"
     ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(directory)).to_s
     ocaml_content = File.read(ocaml_file_name, :encoding => 'utf-8')
-    coq_file_name = ocaml_file_name + ".v"
+    coq_file_name = File.join(
+      File.dirname(ocaml_file_name),
+      File.basename(ocaml_file_name, ".*") + File.extname(ocaml_file_name).sub(".", "_") + ".v"
+    )
     coq_name = File.basename(coq_file_name)
     errors_file_name = ocaml_file_name + ".errors"
     if File.exists?(coq_file_name) then
@@ -70,6 +73,9 @@ def get_conversions(directory)
           coq_content
         ]
       end
+    else
+      puts
+      puts "'#{coq_file_name}' not found"
     end
   end
   puts
@@ -94,7 +100,7 @@ File.open("kernel/index.html", "w") do |file|
   project_name = :kernel
   project_intro = <<END
     <h2>Kernel of Coq</h2>
-    <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>. We show the original source code on the left and the imported Coq code on the right. The imported code probably does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>.</p>
 END
   conversions = get_conversions(kernel_directory)
   file << ERB.new(File.read("template/project.html.erb")).result(binding)
@@ -104,7 +110,7 @@ File.open("tezos/index.html", "w") do |file|
   project_name = :tezos
   project_intro = <<END
     <h2>Tezos</h2>
-    <p>These are the sources <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. The market cap of Tezos is more than US $500 millions at the time of writting. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>These are the sources of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.</p>
 END
   conversions = get_conversions(tezos_directory)
   file << ERB.new(File.read("template/project.html.erb")).result(binding)
