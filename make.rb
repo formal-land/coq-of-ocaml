@@ -47,7 +47,9 @@ end
 
 def get_conversions(directory)
   conversions = []
-  ocaml_file_names = Dir.glob(File.join(directory, "**/*.ml{,i}")).to_a.sort
+  ocaml_file_names = Dir.glob(File.join(directory, "**/*.ml{,i}")).to_a.sort.select {|file_name|
+    not file_name.include?("test")
+  }
   ocaml_file_names.each_with_index do |ocaml_file_name, index|
     print "\r#{directory} (#{index + 1}/#{ocaml_file_names.size})"
     ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(directory)).to_s
