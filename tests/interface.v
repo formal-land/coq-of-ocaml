@@ -15,7 +15,7 @@ Parameter x : forall {a b : Type}, a -> b -> arg a b.
 Module M.
   Inductive l (a : Type) : Type :=
   | Nil : l a
-  | Cons : a -> (l a) -> l a.
+  | Cons : a -> l a -> l a.
   
   Arguments Nil {_}.
   Arguments Cons {_}.

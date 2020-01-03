@@ -29,10 +29,10 @@ module Value = struct
             braces @@ group (separate space (List.map Name.to_coq header.Exp.Header.typ_vars) ^^
             !^ ":" ^^ !^ "Type")) ^^
           group (separate space (header.Exp.Header.args |> List.map (fun (x, t) ->
-            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false t)))) ^^
+            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)))) ^^
           (match header.Exp.Header.typ with
           | None -> empty
-          | Some typ -> !^ ": " ^-^ Type.to_coq None false typ) ^-^
+          | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^
           !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
 end
 
@@ -175,7 +175,7 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         !^ "forall" ^^
         nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type")) ^-^ !^ ","
       ) ^^
-      Type.to_coq None false typ ^-^ !^ "."
+      Type.to_coq None None typ ^-^ !^ "."
     | TypeDefinition typ_def -> TypeDefinition.to_coq typ_def
     | Open o -> Open.to_coq o
     | Module (name, defs) ->

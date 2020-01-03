@@ -19,7 +19,7 @@ Definition m : bool :=
 
 Inductive t2 (a : Type) : Type :=
 | D1 : t2 a
-| D2 : a -> (t2 a) -> t2 a.
+| D2 : a -> t2 a -> t2 a.
 
 Arguments D1 {_}.
 Arguments D2 {_}.

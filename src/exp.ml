@@ -516,10 +516,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           separate space (List.map Name.to_coq header.Header.typ_vars) ^^
           !^ ":" ^^ !^ "Type")) ^^
         group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->
-          parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false x_typ)))) ^^
+          parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None x_typ)))) ^^
         (match header.Header.typ with
         | None -> empty
-        | Some typ -> !^ ": " ^-^ Type.to_coq None false typ) ^-^
+        | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^
         !^ " :=" ^^ newline ^^
         indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (e, cases, default_value) ->
@@ -579,7 +579,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | ModuleUnpack e -> Pp.parens paren @@ nest (!^ "projT2" ^^ to_coq true e)
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
-  | ErrorTyp typ -> Type.to_coq None paren typ
+  | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
   | ErrorSeq (e1, e2) ->
     Pp.parens paren @@ group (
       nest (!^ "let" ^^ !^ "_" ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in") ^^ newline ^^

@@ -7,7 +7,7 @@ Import ListNotations.
 Module List2.
   Inductive t (a : Type) : Type :=
   | Nil : t a
-  | Cons : a -> (t a) -> t a.
+  | Cons : a -> t a -> t a.
   
   Arguments Nil {_}.
   Arguments Cons {_}.
