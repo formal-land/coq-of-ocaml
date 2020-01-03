@@ -19,7 +19,7 @@ let to_coq_record
     ) ^^
     !^ ":=" ^^ !^ "{" ^^ newline ^^
     indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
-      nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None false typ)))) ^^
+      nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)))) ^^
     !^ "}." ^^
     (match typ_args with
     | [] -> empty
@@ -182,14 +182,17 @@ module Inductive = struct
               ) ^-^ !^ ","
             ) ^^
             separate space (param_typs |> List.map (fun param_typ ->
-              Type.to_coq subst true param_typ ^^ !^ "->"
-            )) ^^ Type.to_coq subst false (Type.Apply (MixedPath.of_name name, res_typ_params))
+              Type.to_coq subst (Some Type.Context.Arrow) param_typ ^^ !^ "->"
+            )) ^^ Type.to_coq subst None (Type.Apply (MixedPath.of_name name, res_typ_params))
           )
         )
       )
     )
 
-  let to_coq_notations_wheres (subst : (Name.t -> Name.t) option) (inductive : t) : SmartPrint.t list =
+  let to_coq_notations_wheres
+    (subst : (Name.t -> Name.t) option)
+    (inductive : t)
+    : SmartPrint.t list =
     inductive.notations |> List.mapi (fun index (name, typ_args, value) ->
       let is_first = index = 0 in
       nest (
@@ -203,7 +206,7 @@ module Inductive = struct
                 separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type"
               )
             ) ^^ !^ "=>" ^^ space
-          ) ^-^ Type.to_coq subst false value
+          ) ^-^ Type.to_coq subst None value
         )
       )
     )
@@ -363,10 +366,11 @@ let to_coq (def : t) : SmartPrint.t =
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
-      (match typ_args with
+      begin match typ_args with
       | [] -> empty
-      | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")) ^^
-      !^ ":=" ^^ Type.to_coq None false value ^-^ !^ "."
+      | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")
+      end ^^
+      !^ ":=" ^^ Type.to_coq None None value ^-^ !^ "."
     )
   | Abstract (name, typ_args) ->
     nest (

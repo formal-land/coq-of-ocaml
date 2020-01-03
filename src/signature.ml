@@ -108,7 +108,7 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
     | [] -> empty
     | _ ->
       parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")
-    ) ^^ !^ ":=" ^^ Type.to_coq None false typ
+    ) ^^ !^ ":=" ^^ Type.to_coq None None typ
   | Value (name, typ_args, typ) ->
     Name.to_coq name ^^ !^ ":" ^^
     (match typ_args with
@@ -117,7 +117,7 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
       !^ "forall" ^^ braces (group (
         separate space (List.map Name.to_coq typ_args) ^^
         !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
-    Type.to_coq None false typ
+    Type.to_coq None None typ
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
   let typ_params : Name.t list =

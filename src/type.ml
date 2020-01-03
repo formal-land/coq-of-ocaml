@@ -163,18 +163,57 @@ let rec open_type (typ : t) (n : int) : t list * t =
       (typ1 :: typs, typ)
     | _ -> failwith "Expected an arrow type."
 
-(** Pretty-print a type (inside parenthesis if the [paren] flag is set). *)
-let rec to_coq (subst : (Name.t -> Name.t) option) (paren : bool) (typ : t) : SmartPrint.t =
+(** The context to know if parenthesis are needed. *)
+module Context = struct
+  type t =
+    | Apply
+    | Arrow
+    | Tuple
+
+  let get_order (context : t) : int =
+    match context with
+    | Apply -> 0
+    | Arrow -> 2
+    | Tuple -> 1
+
+  let should_parens (context : t option) (current_context : t) : bool =
+    match context with
+    | None -> false
+    | Some context ->
+      let order = get_order context in
+      let current_order = get_order current_context in
+      order <= current_order
+
+  let parens
+    (context : t option)
+    (current_context : t)
+    (doc : SmartPrint.t)
+    : SmartPrint.t =
+    Pp.parens (should_parens context current_context) doc
+end
+
+(** Pretty-print a type. Use the [context] parameter to know if we should add
+    parenthesis. *)
+let rec to_coq
+  (subst : (Name.t -> Name.t) option)
+  (context : Context.t option)
+  (typ : t)
+  : SmartPrint.t =
   match typ with
   | Variable x -> Name.to_coq x
   | Arrow (typ_x, typ_y) ->
-    Pp.parens paren @@ nest (to_coq subst true typ_x ^^ !^ "->" ^^ to_coq subst false typ_y)
+    Context.parens context Context.Arrow @@ nest (
+      to_coq subst (Some Context.Arrow) typ_x ^^ !^ "->" ^^
+      to_coq subst None typ_y
+    )
   | Tuple typs ->
-    (match typs with
+    begin match typs with
     | [] -> !^ "unit"
     | _ ->
-      Pp.parens paren @@ nest @@ separate (space ^^ !^ "*" ^^ space)
-        (List.map (to_coq subst true) typs))
+      Context.parens context Context.Tuple @@ nest @@
+      separate (space ^^ !^ "*" ^^ space)
+        (List.map (to_coq subst (Some Context.Tuple)) typs)
+    end
   | Apply (path, typs) ->
     let path =
       match subst with
@@ -184,8 +223,9 @@ let rec to_coq (subst : (Name.t -> Name.t) option) (paren : bool) (typ : t) : Sm
         | MixedPath.PathName { path = []; base = name } -> MixedPath.of_name (subst name)
         | _ -> path
         end in
-    Pp.parens (paren && typs <> []) @@ nest @@ separate space
-      (MixedPath.to_coq path :: List.map (to_coq subst true) typs)
+    Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
+    nest @@ separate space
+      (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
   | Package (path_name, typ_params) ->
     let existential_typs =
       Tree.flatten typ_params |>
@@ -204,7 +244,7 @@ let rec to_coq (subst : (Name.t -> Name.t) option) (paren : bool) (typ : t) : Sm
         separate space (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
           match typ with
           | None -> Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
-          | Some typ -> to_coq subst true typ
+          | Some typ -> to_coq subst (Some Context.Apply) typ
         ))
       )
     ))

@@ -10,17 +10,17 @@ Reserved Notation "'simple".
 Reserved Notation "'double".
 
 Inductive tree (a : Type) : Type :=
-| Tree : (list (node a)) -> tree a
+| Tree : list (node a) -> tree a
 
 with node (a : Type) : Type :=
 | Leaf : string -> node a
-| Node : (tree a) -> node a
+| Node : tree a -> node a
 
 with unrelated (a : Type) : Type :=
-| Unrelated : ('double ('simple a)) -> unrelated a
+| Unrelated : 'double ('simple a) -> unrelated a
 
 where "'simple" := (fun (b : Type) => b)
-and "'double" := (fun (b : Type) => b * ('simple b)).
+and "'double" := (fun (b : Type) => b * 'simple b).
 
 Definition simple := 'simple.
 Definition double := 'double.
@@ -43,7 +43,7 @@ Record re_skeleton {payload message : Type} := {
 Arguments re_skeleton : clear implicits.
 
 Inductive ind : Type :=
-| Ind : ('re Z) -> ind
+| Ind : 're Z -> ind
 
 where "'re" := (fun (a : Type) => re_skeleton a string)
 and "'re_bis" := (re_bis_skeleton unit).

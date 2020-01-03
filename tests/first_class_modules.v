@@ -37,7 +37,7 @@ Module S.
       find_opt : elt -> t -> option elt;
       find_first_opt : (elt -> bool) -> t -> option elt;
       find_last_opt : (elt -> bool) -> t -> option elt;
-      of_list : (list elt) -> t;
+      of_list : list elt -> t;
     }.
     Arguments signature : clear implicits.
   End SET.
@@ -60,11 +60,11 @@ Inductive leaf : Type :=
 Reserved Notation "'comparable_struct".
 
 Inductive comparable_struct_gadt : Type :=
-| Int_key : (option type_annot) -> comparable_struct_gadt
-| String_key : (option type_annot) -> comparable_struct_gadt
-| Bool_key : (option type_annot) -> comparable_struct_gadt
-| Pair_key : (comparable_struct_gadt * (option field_annot)) ->
-  (comparable_struct_gadt * (option field_annot)) -> (option type_annot) ->
+| Int_key : option type_annot -> comparable_struct_gadt
+| String_key : option type_annot -> comparable_struct_gadt
+| Bool_key : option type_annot -> comparable_struct_gadt
+| Pair_key : comparable_struct_gadt * option field_annot ->
+  comparable_struct_gadt * option field_annot -> option type_annot ->
   comparable_struct_gadt
 
 where "'comparable_struct" := (fun (_ _ : Type) => comparable_struct_gadt).
