@@ -69,6 +69,7 @@ def get_conversions(directory)
           nb_errors: errors_json.size,
           global_errors: global_errors,
           ocaml_content: marked_ocaml_content,
+          raw_ocaml_content: ocaml_content,
           coq_name: coq_name,
           coq_content: coq_content
         }
@@ -98,6 +99,12 @@ def project(name, title, intro, directory)
     <p>#{intro}</p>
 END
   conversions = get_conversions(directory)
+  nb_ocaml_lines = conversions.reduce(0) {|sum, conversion|
+    sum + conversion[:raw_ocaml_content].split("\n").size
+  }
+  nb_coq_lines = conversions.reduce(0) {|sum, conversion|
+    sum + conversion[:coq_content].split("\n").size
+  }
   ERB.new(File.read("template/project.html.erb")).result(binding)
 end
 
