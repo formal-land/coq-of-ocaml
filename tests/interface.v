@@ -4,16 +4,16 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Parameter t : Type.
+Parameter t : Set.
 
 Parameter foo : t.
 
-Parameter arg : forall (a b : Type), Type.
+Parameter arg : forall (a b : Set), Set.
 
-Parameter x : forall {a b : Type}, a -> b -> arg a b.
+Parameter x : forall {a b : Set}, a -> b -> arg a b.
 
 Module M.
-  Inductive l (a : Type) : Type :=
+  Inductive l (a : Set) : Set :=
   | Nil : l a
   | Cons : a -> l a -> l a.
   

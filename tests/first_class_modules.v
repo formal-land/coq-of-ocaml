@@ -6,7 +6,7 @@ Import ListNotations.
 
 Module S.
   Module SET.
-    Record signature {elt t : Type} := {
+    Record signature {elt t : Set} := {
       elt := elt;
       t := t;
       empty : t;
@@ -23,7 +23,7 @@ Module S.
       subset : t -> t -> bool;
       iter : (elt -> unit) -> t -> unit;
       map : (elt -> elt) -> t -> t;
-      fold : forall {a : Type}, (elt -> a -> a) -> t -> a -> a;
+      fold : forall {a : Set}, (elt -> a -> a) -> t -> a -> a;
       for_all : (elt -> bool) -> t -> bool;
       __exists : (elt -> bool) -> t -> bool;
       filter : (elt -> bool) -> t -> t;
@@ -43,23 +43,23 @@ Module S.
   End SET.
 End S.
 
-Inductive type_annot : Type :=
+Inductive type_annot : Set :=
 | Type_annot : string -> type_annot.
 
-Inductive field_annot : Type :=
+Inductive field_annot : Set :=
 | Field_annot : string -> field_annot.
 
-Definition pair (a b : Type) := a * b.
+Definition pair (a b : Set) := a * b.
 
-Inductive comb : Type :=
+Inductive comb : Set :=
 | Comb : comb.
 
-Inductive leaf : Type :=
+Inductive leaf : Set :=
 | Leaf : leaf.
 
 Reserved Notation "'comparable_struct".
 
-Inductive comparable_struct_gadt : Type :=
+Inductive comparable_struct_gadt : Set :=
 | Int_key : option type_annot -> comparable_struct_gadt
 | String_key : option type_annot -> comparable_struct_gadt
 | Bool_key : option type_annot -> comparable_struct_gadt
@@ -67,14 +67,14 @@ Inductive comparable_struct_gadt : Type :=
   comparable_struct_gadt * option field_annot -> option type_annot ->
   comparable_struct_gadt
 
-where "'comparable_struct" := (fun (_ _ : Type) => comparable_struct_gadt).
+where "'comparable_struct" := (fun (_ _ : Set) => comparable_struct_gadt).
 
 Definition comparable_struct := 'comparable_struct.
 
-Definition comparable_ty (a : Type) := comparable_struct a comb.
+Definition comparable_ty (a : Set) := comparable_struct a comb.
 
 Module Boxed_set.
-  Record signature {elt OPS_t : Type} := {
+  Record signature {elt OPS_t : Set} := {
     elt := elt;
     elt_ty : comparable_ty elt;
     OPS : S.SET.signature elt OPS_t;
@@ -84,10 +84,10 @@ Module Boxed_set.
   Arguments signature : clear implicits.
 End Boxed_set.
 
-Definition set (elt : Type) := {OPS_t : _ & Boxed_set.signature elt OPS_t}.
+Definition set (elt : Set) := {OPS_t : _ & Boxed_set.signature elt OPS_t}.
 
 Module IncludedFoo.
-  Record signature {bar : Type} := {
+  Record signature {bar : Set} := {
     bar := bar;
     foo : bar;
   }.
@@ -95,7 +95,7 @@ Module IncludedFoo.
 End IncludedFoo.
 
 Module Triple.
-  Record signature {a b c bar : Type} := {
+  Record signature {a b c bar : Set} := {
     a := a;
     b := b;
     c := c;
@@ -118,17 +118,17 @@ Definition tripe : {'(a, b, c, bar) : _ & Triple.signature a b c bar} :=
       |}.
 
 Module UsingTriple.
-  Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Type} := {
+  Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Set} := {
     elt' := elt';
     T : Triple.signature T_a T_b T_c T_bar;
     OPS' : S.SET.signature OPS'_elt OPS'_t;
     OPS'' : S.SET.signature elt' (list string);
-    table (a : Type) := list a;
+    table (a : Set) := list a;
   }.
   Arguments signature : clear implicits.
 End UsingTriple.
 
-Definition set_update {a : Type} (v : a) (b : bool) (Box : set a) : set a :=
+Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
   let Box := projT2 Box in
   existT _ _
     {|
@@ -153,11 +153,11 @@ Definition set_update {a : Type} (v : a) (b : bool) (Box : set a) : set a :=
             Box.(Boxed_set.size)
       |}.
 
-Definition set_mem {elt : Type} (v : elt) (Box : set elt) : bool :=
+Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=
   let Box := projT2 Box in
   Box.(Boxed_set.OPS).(S.SET.mem) v Box.(Boxed_set.boxed).
 
-Definition set_fold {acc elt : Type} (f : elt -> acc -> acc) (Box : set elt)
+Definition set_fold {acc elt : Set} (f : elt -> acc -> acc) (Box : set elt)
   : acc -> acc :=
   let Box := projT2 Box in
   Box.(Boxed_set.OPS).(S.SET.fold) f Box.(Boxed_set.boxed).

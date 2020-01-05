@@ -4,7 +4,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Inductive set : Type :=
+Inductive set : Set :=
 | Empty : set
 | Node : set -> Z -> set -> set.
 

@@ -23,7 +23,7 @@ Definition b2 : bool := true.
 
 Definition u : unit := tt.
 
-Definition l1 {A : Type} : list A := [].
+Definition l1 {A : Set} : list A := [].
 
 Definition l2 : list Z := cons 0 (cons 1 (cons 2 (cons 3 []))).
 

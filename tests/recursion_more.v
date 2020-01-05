@@ -4,7 +4,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Fixpoint f_map {A B : Type} (f : A -> B) (l : list A) : list B :=
+Fixpoint f_map {A B : Set} (f : A -> B) (l : list A) : list B :=
   match l with
   | [] => []
   | cons x l => cons (f x) (f_map f l)

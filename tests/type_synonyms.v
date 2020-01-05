@@ -6,4 +6,4 @@ Import ListNotations.
 
 Definition t1 := string.
 
-Definition t2 (a b : Type) := a * b.
+Definition t2 (a b : Set) := a * b.

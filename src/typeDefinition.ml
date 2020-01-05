@@ -14,7 +14,7 @@ let to_coq_record
     | _ :: _ ->
       braces (nest (
         separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ !^ "Type"
+        !^ ":" ^^ Pp.set
       ))
     ) ^^
     !^ ":=" ^^ !^ "{" ^^ newline ^^
@@ -166,10 +166,10 @@ module Inductive = struct
         parens (
           nest (
             separate space (List.map Name.to_coq left_typ_args) ^^
-            !^ ":" ^^ !^ "Type"
+            !^ ":" ^^ Pp.set
           )
         )
-      ) ^^ !^ ":" ^^ !^ "Type" ^^ !^ ":=" ^-^
+      ) ^^ !^ ":" ^^ Pp.set ^^ !^ ":=" ^-^
       separate empty (
         constructors |> List.map (fun { Constructors.constructor_name; param_typs; res_typ_params; typ_vars } ->
           newline ^^ nest (
@@ -178,7 +178,7 @@ module Inductive = struct
             | [] -> empty
             | _ ->
               !^ "forall" ^^ braces (
-                separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ !^ "Type"
+                separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set
               ) ^-^ !^ ","
             ) ^^
             separate space (param_typs |> List.map (fun param_typ ->
@@ -203,7 +203,7 @@ module Inductive = struct
           | _ :: _ ->
             !^ "fun" ^^ parens (
               nest (
-                separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type"
+                separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set
               )
             ) ^^ !^ "=>" ^^ space
           ) ^-^ Type.to_coq subst None value
@@ -368,7 +368,7 @@ let to_coq (def : t) : SmartPrint.t =
       !^ "Definition" ^^ Name.to_coq name ^^
       begin match typ_args with
       | [] -> empty
-      | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ !^ "Type")
+      | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
       end ^^
       !^ ":=" ^^ Type.to_coq None None value ^-^ !^ "."
     )
@@ -380,5 +380,5 @@ let to_coq (def : t) : SmartPrint.t =
       | _ :: _ ->
         !^ "forall" ^^ parens (group (
           separate space (List.map Name.to_coq typ_args) ^^
-          !^ ":" ^^ !^ "Type")) ^-^ !^ ",") ^^
-      !^ "Type" ^-^ !^ ".")
+          !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
+      Pp.set ^-^ !^ ".")

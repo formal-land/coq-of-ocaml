@@ -6,13 +6,13 @@ Import ListNotations.
 
 Definition u : unit := tt.
 
-Definition l1 {A : Type} : list A := [].
+Definition l1 {A : Set} : list A := [].
 
 Definition l2 : list Z := cons 1 [].
 
 Definition l3 : list Z := cons 1 (cons 5 (cons 7 (cons 32 (cons 15 [])))).
 
-Definition o1 {A : Type} : option A := None.
+Definition o1 {A : Set} : option A := None.
 
 Definition o2 : option Z := Some 12.
 
