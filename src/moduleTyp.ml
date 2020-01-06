@@ -14,7 +14,7 @@ let of_ocaml_module_with_substitutions
   (long_ident_loc : Longident.t Asttypes.loc)
   (substitutions : (Path.t * Longident.t Asttypes.loc * with_constraint) list)
   : t Monad.t =
-  let signature_path_name = PathName.of_long_ident long_ident_loc.txt in
+  let signature_path_name = PathName.of_long_ident false long_ident_loc.txt in
   get_env >>= fun env ->
   let (_, module_typ) = Env.lookup_modtype long_ident_loc.txt env in
   ModuleTypParams.get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
@@ -25,7 +25,7 @@ let of_ocaml_module_with_substitutions
       | { type_kind = Type_abstract; type_manifest = Some typ; _ } ->
         set_loc (Loc.of_location typ_loc) (
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return (Some (PathName.of_path_without_convert path, typ)))
+        return (Some (PathName.of_path_without_convert false path, typ)))
       | _ ->
         raise None NotSupported (
           "Can only do `with` on types in module types using type expressions " ^

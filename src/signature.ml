@@ -18,12 +18,12 @@ let of_types_signature (signature : Types.signature) : item list Monad.t =
   let of_types_signature_item (signature_item : Types.signature_item) : item Monad.t =
     match signature_item with
     | Sig_value (ident, { val_type; _ }) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident true ident in
       Type.of_type_expr_without_free_vars val_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return (Value (name, typ_args, typ))
     | Sig_type (ident, { type_manifest = None; type_params = []; _ }, _) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident false ident in
       return (TypExistential name)
     | Sig_type (_, { type_manifest = None; type_params = _ :: _; _ }, _) ->
       raise
@@ -31,7 +31,7 @@ let of_types_signature (signature : Types.signature) : item list Monad.t =
         NotSupported
         "Polymorphic abstract types not handled in signatures."
     | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident false ident in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (TypSynonym (name, typ_args, typ))
@@ -63,7 +63,7 @@ let of_signature (signature : signature) : t Monad.t =
     | Tsig_modtype _ ->
       raise [Error "module_type"] NotSupported "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
-      let name = Name.of_ident md_id in
+      let name = Name.of_ident false md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
       return [Module (name, module_typ)]
     | Tsig_open _ ->
@@ -71,7 +71,7 @@ let of_signature (signature : signature) : t Monad.t =
     | Tsig_recmodule _ ->
       raise [Error "recursive_module"] NotSupported "Recursive module signatures are not handled."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params = []; _ }; _ } ]) ->
-      let name = Name.of_ident typ_id in
+      let name = Name.of_ident false typ_id in
       return [TypExistential name]
     | Tsig_type (_, [ { typ_type = { type_manifest = None; type_params = _ :: _; _ }; _ } ]) ->
       raise
@@ -79,7 +79,7 @@ let of_signature (signature : signature) : t Monad.t =
         NotSupported
         "Polymorphic abstract types not handled in signatures."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ]) ->
-      let name = Name.of_ident typ_id in
+      let name = Name.of_ident false typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return [TypSynonym (name, typ_args, typ)]
@@ -88,7 +88,7 @@ let of_signature (signature : signature) : t Monad.t =
     | Tsig_typext _ ->
       raise [Error "extensible_type"] NotSupported "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
-      let name = Name.of_ident val_id in
+      let name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_args, typ)])) in

@@ -72,7 +72,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
   | Texp_ident (path, loc, _) ->
-    MixedPath.of_path path (Some loc.txt) >>= fun x ->
+    MixedPath.of_path true path (Some loc.txt) >>= fun x ->
     return (Variable x)
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
@@ -101,7 +101,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       }];
       _
     } ->
-    let x = Name.of_ident x in
+    let x = Name.of_ident true x in
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
   | Texp_function { cases = cases; _ } ->
@@ -169,7 +169,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
       match x_e with
       | None -> return None
       | Some (x, e) ->
-        let x = PathName.of_long_ident x.txt in
+        let x = PathName.of_long_ident false x.txt in
         of_expression typ_vars e >>= fun e ->
         return (Some (x, e))
     )) >>= fun fields ->
@@ -177,7 +177,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_record { extended_expression = Some _; _ } ->
     error_message (Error "record_substitution") NotSupported "Record substitution not handled"
   | Texp_field (e, x, _) ->
-    let x = PathName.of_long_ident x.txt in
+    let x = PathName.of_long_ident false x.txt in
     of_expression typ_vars e >>= fun e ->
     return (Field (e, x))
   | Texp_ifthenelse (e1, e2, e3) ->
@@ -226,7 +226,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     error_message (Error "set_instance_variable") SideEffect "Setting an instance variable is not handled"
   | Texp_override _ -> error_message (Error "override") NotSupported "Overriding is not handled"
   | Texp_letmodule (x, _, module_expr, e) ->
-    let x = Name.of_ident x in
+    let x = Name.of_ident true x in
     of_module_expr typ_vars module_expr None >>= fun value ->
     of_expression typ_vars e >>= fun e ->
     return (LetVar (x, value, e))
@@ -255,7 +255,7 @@ and open_cases
     of_expression typ_vars e >>= fun e ->
     return (pattern, e)
   )) >>= fun cases ->
-  let name = Name.of_string "function_parameter" in
+  let name = Name.of_string false "function_parameter" in
   return (name, Match (Variable (MixedPath.of_name name), cases, None))
 
 and import_let_fun
@@ -304,7 +304,7 @@ and of_module_expr
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
   | Tmod_ident (path, loc) ->
-    MixedPath.of_path path (Some loc.txt) >>= fun path ->
+    MixedPath.of_path true path (Some loc.txt) >>= fun path ->
     return (Variable path)
   | Tmod_structure structure ->
     let module_type =
@@ -396,7 +396,7 @@ and of_structure
           "Mutual definitions not handled in first-class module values"
       end
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
-      let name = Name.of_ident val_id in
+      let name = Name.of_ident true val_id in
       Type.of_typ_expr true typ_vars val_type >>= fun (typ, _, _) ->
       error_message_in_module
         (Some name)
@@ -411,14 +411,14 @@ and of_structure
         NotSupported
         "Type extension not handled"
     | Tstr_exception { ext_id; _ } ->
-      let name = Name.of_ident ext_id in
+      let name = Name.of_ident false ext_id in
       error_message_in_module
         (Some name)
         (Error "exception")
         SideEffect
         "Exception not handled"
     | Tstr_module { mb_id; mb_expr; _ } ->
-      let name = Name.of_ident mb_id in
+      let name = Name.of_ident false mb_id in
       of_module_expr typ_vars mb_expr None >>= fun value ->
       return (Some (None, Some name, value))
     | Tstr_recmodule _ ->
@@ -428,7 +428,7 @@ and of_structure
         NotSupported
         "Recursive modules not handled"
     | Tstr_modtype { mtd_id; _ } ->
-      let name = Name.of_ident mtd_id in
+      let name = Name.of_ident false mtd_id in
       error_message_in_module
         (Some name)
         (Error "module_type")
@@ -463,7 +463,7 @@ and of_structure
   let fields = fields |> List.map (fun (error_message, name, field) ->
     let name =
       match name with
-      | None -> Name.of_string "_"
+      | None -> Name.of_string false "_"
       | Some name -> name in
     (error_message, PathName.of_path_and_name_without_convert signature_path name, field)
   ) in

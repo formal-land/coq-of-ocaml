@@ -27,8 +27,8 @@ let rec of_typ_expr
         raise ("_", "_") NotSupported "The placeholders `_` in types are not handled"
     | Some x -> return (x, x)
     ) >>= fun (source_name, generated_name) ->
-    let source_name = Name.of_string source_name in
-    let generated_name = Name.of_string generated_name in
+    let source_name = Name.of_string false source_name in
+    let generated_name = Name.of_string false generated_name in
     let (typ_vars, new_typ_vars, name) =
       if Name.Map.mem source_name typ_vars then (
         let name = Name.Map.find source_name typ_vars in
@@ -47,7 +47,7 @@ let rec of_typ_expr
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
-    MixedPath.of_path path None >>= fun mixed_path ->
+    MixedPath.of_path false path None >>= fun mixed_path ->
     return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
   | Tobject (typ, params) ->
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars) ->
@@ -68,11 +68,11 @@ let rec of_typ_expr
         Name.Set.union new_typ_vars1 new_typ_vars2
       )
       NotSupported "Field types are not handled"
-  | Tnil -> raise (Variable (Name.of_string "nil"), typ_vars, Name.Set.empty) NotSupported "Nil type is not handled"
+  | Tnil -> raise (Variable (Name.of_string false "nil"), typ_vars, Name.Set.empty) NotSupported "Nil type is not handled"
   | Tlink typ | Tsubst typ -> of_typ_expr with_free_vars typ_vars typ
   | Tvariant _ ->
     raise
-      (Variable (Name.of_string "variant"), typ_vars, Name.Set.empty)
+      (Variable (Name.of_string false "variant"), typ_vars, Name.Set.empty)
       NotSupported
       "Polymorphic variant types are not handled"
   | Tpoly (typ, []) -> of_typ_expr with_free_vars typ_vars typ
@@ -84,11 +84,11 @@ let rec of_typ_expr
       NotSupported
       "Forall quantifier is not handled"
   | Tpackage (path, idents, typs) ->
-      let path_name = PathName.of_path_without_convert path in
+      let path_name = PathName.of_path_without_convert false path in
       let typ_substitutions = List.map2 (fun ident typ -> (ident, typ)) idents typs in
       Monad.List.fold_left
         (fun (typ_substitutions, typ_vars, new_typ_vars) (ident, typ) ->
-          let path_name = PathName.of_long_ident ident in
+          let path_name = PathName.of_long_ident false ident in
           of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
           return (
             (path_name, typ) :: typ_substitutions,
@@ -130,8 +130,12 @@ let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
 
 let of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with
-  | Tvar (Some x) -> return (Name.of_string x)
-  | _ -> raise (Name.of_string "expected_variable") NotSupported "Only type variables are supported as parameters"
+  | Tvar (Some x) -> return (Name.of_string false x)
+  | _ ->
+    raise
+      (Name.of_string false "expected_variable")
+      NotSupported
+      "Only type variables are supported as parameters"
 
 (** The free variables of a type. *)
 let rec typ_args (typ : t) : Name.Set.t =

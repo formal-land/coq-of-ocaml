@@ -74,7 +74,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         vb_expr = e;
         _
       } ])
-      when PathName.is_unit (PathName.of_path_without_convert path) ->
+      when PathName.is_unit (PathName.of_path_without_convert true path) ->
       top_level_evaluation e
     | Tstr_eval (e, _) -> top_level_evaluation e
     | Tstr_value (is_rec, cases) ->
@@ -83,8 +83,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_type (_, typs) ->
       TypeDefinition.of_ocaml typs >>= fun def ->
       return (Some (TypeDefinition def))
-    | Tstr_exception _ ->
-      error_message (Error "exception") SideEffect (
+    | Tstr_exception { ext_id; _ } ->
+      error_message (Error ("(* exception " ^ Ident.name ext_id ^ " *)")) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
         "Alternative: using sum types (\"option\", \"result\", ...) to represent error cases."
       )
@@ -107,7 +107,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ->
-      let name = Name.of_ident name in
+      let name = Name.of_ident false name in
       of_structure structure >>= fun structures ->
       return (Some (Module (name, structures)))
     | Tstr_module {
@@ -118,8 +118,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ->
-      let name = Name.of_ident name in
-      let reference = PathName.of_long_ident long_ident.txt in
+      let name = Name.of_ident false name in
+      let reference = PathName.of_long_ident false long_ident.txt in
       return (Some (ModuleSynonym (name, reference)))
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
       error_message (Error "functor") NotSupported "Functors are not handled."
@@ -129,7 +129,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message (Error "abstract_module_type") NotSupported "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
-      let name = Name.of_ident mtd_id in
+      let name = Name.of_ident false mtd_id in
       begin
         match mty_desc with
         | Tmty_signature signature ->
@@ -138,7 +138,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         | _ -> error_message (Error "unhandled_module_type") NotSupported "This kind of signature is not handled."
       end
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
-      let name = Name.of_ident val_id in
+      let name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
       return (Some (AbstractValue (name, Name.Set.elements free_typ_vars, typ)))
     | Tstr_typext _ -> error_message (Error "type_extension") NotSupported "Structure item `typext` not handled."
@@ -153,7 +153,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ->
-      let reference = PathName.of_long_ident long_ident.txt in
+      let reference = PathName.of_long_ident false long_ident.txt in
       return (Some (ModuleInclude reference))
     | Tstr_include _ ->
       error_message (Error "include") NotSupported "Cannot include this kind of module expression"

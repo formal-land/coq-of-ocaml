@@ -51,7 +51,7 @@ module Constructors = struct
       : t Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
-      let constructor_name = Name.of_ident cd_id in
+      let constructor_name = Name.of_ident false cd_id in
       let typ_vars = Name.Map.empty in
       (match cd_args with
       | Cstr_tuple param_typs -> Type.of_typs_exprs true typ_vars param_typs
@@ -281,15 +281,15 @@ type t =
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
-    let name = Name.of_ident typ_id in
+    let name = Name.of_ident false typ_id in
     (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
     (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
-      return (Name.of_ident x, typ)
+      return (Name.of_ident false x, typ)
     )) >>= fun fields ->
     return (Record (name, typ_args, fields))
   | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params; _ }; _ } ] ->
-    let name = Name.of_ident typ_id in
+    let name = Name.of_ident false typ_id in
     (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
     begin match type_manifest with
     | Some typ ->
@@ -298,13 +298,13 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     | None -> return (Abstract (name, typ_args))
     end
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
-    let name = Name.of_ident typ_id in
-    let typ = Type.Apply (MixedPath.of_name (Name.of_string "False"), []) in
+    let name = Name.of_ident false typ_id in
+    let typ = Type.Apply (MixedPath.of_name (Name.of_string false "Empty_set"), []) in
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
   | _ ->
     (typs |> Monad.List.fold_left (fun (notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
-      let name = Name.of_ident typ.typ_id in
+      let name = Name.of_ident false typ.typ_id in
       (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       match typ with
       | { typ_type = { type_kind = Type_abstract; type_manifest = Some typ; _ }; _ } ->
@@ -318,7 +318,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       | { typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ->
         (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          return (Name.of_ident x, typ)
+          return (Name.of_ident false x, typ)
         )) >>= fun fields ->
         (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
         return (

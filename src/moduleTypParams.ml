@@ -9,14 +9,14 @@ let rec get_signature_typ_params (signature : Types.signature) : unit Tree.t Mon
     | Sig_type (ident, { type_manifest; _ }, _) ->
       begin match type_manifest with
       | None ->
-        let name = Name.of_ident ident in
+        let name = Name.of_ident false ident in
         return (Some (Tree.Item (name, ())))
       | Some _ -> return None
       end
     | Sig_typext _ ->
       raise None NotSupported "Type extensions are not handled"
     | Sig_module (ident, module_declaration, _) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident false ident in
       set_loc (Loc.of_location module_declaration.md_loc) (
       get_module_typ_typ_params module_declaration.md_type >>= fun typ_params ->
       return (Some (Tree.Module (name, typ_params))))
@@ -49,7 +49,9 @@ and get_module_typ_declaration_typ_params
     get_module_typ_typ_params module_typ)
 
 let get_typ_param_name (path_name : PathName.t) : Name.t =
-  Name.of_string (String.concat "_" ((path_name.path @ [path_name.base]) |> List.map Name.to_string))
+  Name.of_string
+    false
+    (String.concat "_" ((path_name.path @ [path_name.base]) |> List.map Name.to_string))
 
 let get_module_typ_nb_of_existential_variables (module_typ : Types.module_type) : int Monad.t =
   get_module_typ_typ_params module_typ >>= fun typ_params ->

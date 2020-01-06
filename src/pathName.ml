@@ -106,7 +106,7 @@ let try_convert (path_name : t) : t option =
     | "op_minus" -> make ["Z"] "sub"
     | "op_star" -> make ["Z"] "mul"
     | "op_div" -> make ["Z"] "div"
-    | "mod" -> make ["Z"] "modulo"
+    | "__mod" -> make ["Z"] "modulo"
     | "abs" -> make ["Z"] "abs"
     (* Bitwise operations *)
     | "land" -> make ["Z"] "land"
@@ -194,25 +194,28 @@ let of_name (path : Name.t list) (base : Name.t) : t =
   { path; base }
 
 (** Import an OCaml [Longident.t]. *)
-let of_long_ident (long_ident : Longident.t) : t =
+let of_long_ident (is_value : bool) (long_ident : Longident.t) : t =
   match List.rev (Longident.flatten long_ident) with
   | [] -> failwith "Unexpected Longident.t with an empty list"
-  | x :: xs -> of_name (xs |> List.rev |> List.map Name.of_string) (Name.of_string x)
+  | x :: xs ->
+    of_name
+      (xs |> List.rev |> List.map (Name.of_string is_value))
+      (Name.of_string is_value x)
 
 (** Import an OCaml [Path.t]. *)
-let of_path_without_convert (path : Path.t) : t =
+let of_path_without_convert (is_value : bool) (path : Path.t) : t =
   let rec aux path : (Name.t list * Name.t) =
     match path with
-    | Path.Pident x -> ([], Name.of_ident x)
+    | Path.Pident x -> ([], Name.of_ident is_value x)
     | Path.Pdot (path, s, _) ->
       let (path, base) = aux path in
-      (base :: path, Name.of_string s)
+      (base :: path, Name.of_string is_value s)
     | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
   of_name (List.rev path) base
 
-let of_path_with_convert (path : Path.t) : t =
-  let path_name = of_path_without_convert path in
+let of_path_with_convert (is_value : bool) (path : Path.t) : t =
+  let path_name = of_path_without_convert is_value path in
   match try_convert path_name with
   | None -> path_name
   | Some path_name -> path_name
@@ -220,10 +223,10 @@ let of_path_with_convert (path : Path.t) : t =
 let of_path_and_name_without_convert (path : Path.t) (name : Name.t) : t =
   let rec aux p : Name.t list * Name.t =
     match p with
-    | Path.Pident x -> ([Name.of_ident x], name)
+    | Path.Pident x -> ([Name.of_ident false x], name)
     | Path.Pdot (p, s, _) ->
       let (path, base) = aux p in
-      (Name.of_string s :: path, base)
+      (Name.of_string false s :: path, base)
     | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
   of_name (List.rev path) base
@@ -231,8 +234,8 @@ let of_path_and_name_without_convert (path : Path.t) (name : Name.t) : t =
 let of_constructor_description (constructor_description : Types.constructor_description) : t =
   match constructor_description with
   | { cstr_name; cstr_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
-    let { path; _ } = of_path_without_convert path in
-    let path_name = { path; base = Name.of_string cstr_name } in
+    let { path; _ } = of_path_without_convert false path in
+    let path_name = { path; base = Name.of_string false cstr_name } in
     begin match try_convert path_name with
     | None -> path_name
     | Some path_name -> path_name

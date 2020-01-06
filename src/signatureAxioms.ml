@@ -22,14 +22,14 @@ let rec of_signature (signature : signature) : t Monad.t =
       raise (Some (Error "class")) NotSupported "Signature item `class` not handled"
     | Tsig_class_type _ ->
       raise (Some (Error "class_type")) NotSupported "Signature item `class_type` not handled"
-    | Tsig_exception _ ->
-      raise (Some (Error "exception")) SideEffect "Signature item `exception` not handled"
+    | Tsig_exception { ext_id; _ } ->
+      raise (Some (Error ("(* exception " ^ Ident.name ext_id ^ " *)"))) SideEffect "Signature item `exception` not handled"
     | Tsig_include _ ->
       raise (Some (Error "include")) NotSupported "Signature item `include` not handled"
     | Tsig_modtype _ ->
       raise (Some (Error "module_type")) NotSupported "Signatures inside signatures are not handled"
     | Tsig_module { md_id; md_type = { mty_desc = Tmty_signature signature; _ }; _ } ->
-      let name = Name.of_ident md_id in
+      let name = Name.of_ident false md_id in
       of_signature signature >>= fun signature ->
       return (Some (Module (name, signature)))
     | Tsig_module _ ->
@@ -43,7 +43,7 @@ let rec of_signature (signature : signature) : t Monad.t =
     | Tsig_typext _ ->
       raise (Some (Error "extensible_type")) NotSupported "Extensible types are not handled"
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
-      let name = Name.of_ident val_id in
+      let name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_vars = Name.Set.elements (Type.typ_args typ) in
       return (Some (Value (name, typ_vars, typ))))) in

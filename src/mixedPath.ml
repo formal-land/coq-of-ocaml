@@ -34,23 +34,27 @@ let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t 
 
 (** The current environment must include the potential first-class module signature
     definition of the corresponding projection in the [path]. *)
-let of_path (path : Path.t) (long_ident : Longident.t option) : t Monad.t =
+let of_path
+  (is_value : bool)
+  (path : Path.t)
+  (long_ident : Longident.t option)
+  : t Monad.t =
   of_path_aux path >>= fun (path, fields) ->
-  let path_name = PathName.of_path_without_convert path in
+  let path_name = PathName.of_path_without_convert is_value path in
   match fields with
   | [] ->
     begin match PathName.try_convert path_name with
     | None ->
       begin match long_ident with
       | None -> return (PathName path_name)
-      | Some long_ident -> return (PathName (PathName.of_long_ident long_ident))
+      | Some long_ident -> return (PathName (PathName.of_long_ident is_value long_ident))
       end
     | Some path_name -> return (PathName path_name)
     end
   | _ :: _ ->
     return (List.fold_left
       (fun mixed_path (signature_path, field_string) ->
-        let field_name = Name.of_string field_string in
+        let field_name = Name.of_string is_value field_string in
         let field_path_name = PathName.of_path_and_name_without_convert signature_path field_name in
         Access (mixed_path, field_path_name))
       (PathName path_name)
