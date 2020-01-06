@@ -138,7 +138,7 @@ end
 
 File.open("tezos-interface/index.html", "w") do |file|
   file << project(
-    :tezos,
+    :tezos_interface,
     "Interface of the protocol of Tezos",
     "These are the sources of the interface of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
     tezos_interface_directory

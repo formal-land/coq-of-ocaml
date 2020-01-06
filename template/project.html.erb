@@ -10,6 +10,7 @@
     </ul>
   </div>
 </div>
+<% if conversions.size >= 2 then %>
 <hr />
 <div class="row">
   <% column_size = conversions.size / 3 %>
@@ -26,6 +27,7 @@
   </div>
   <% end %>
 </div>
+<% end %>
 <% for conversion in conversions do %>
 <hr />
 <div class="row conversion-row" id="<%= u(conversion[:ocaml_name]) %>">
