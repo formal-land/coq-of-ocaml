@@ -49,7 +49,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6164 lines</li>
-      <li>Coq size: 2185 lines (-65%)</li>
+      <li>Coq size: 2200 lines (-65%)</li>
       <li>errors: 281</li>
     </ul>
   </div>
@@ -7736,7 +7736,13 @@ Module Compare.
 End Compare.
 
 Module Data_encoding.
-  Definition json := variant.
+  Inductive json : Set :=
+  | Bool : bool -&gt; json
+  | Null : json
+  | O : list (string * json) -&gt; json
+  | Float : Z -&gt; json
+  | String : string -&gt; json
+  | A : list json -&gt; json.
   
   Parameter json_schema : Set.
   
@@ -7752,7 +7758,7 @@ Module Data_encoding.
   
   Parameter empty : encoding unit.
   
-  Parameter unit : encoding unit.
+  Parameter __unit_value : encoding unit.
   
   Parameter constant : string -&gt; encoding unit.
   
@@ -7778,38 +7784,38 @@ Module Data_encoding.
   
   Parameter __string_value : encoding string.
   
-  Parameter bytes : encoding MBytes.t.
+  Parameter __bytes_value : encoding MBytes.t.
   
   Parameter float : encoding Z.
   
-  Parameter option : forall {a : Set}, encoding a -&gt; encoding (option a).
+  Parameter __option_value : forall {a : Set}, encoding a -&gt; encoding (option a).
   
   Parameter string_enum : forall {a : Set}, list (string * a) -&gt; encoding a.
   
   Module Fixed.
     Parameter __string_value : Z -&gt; encoding string.
     
-    Parameter bytes : Z -&gt; encoding MBytes.t.
+    Parameter __bytes_value : Z -&gt; encoding MBytes.t.
     
     Parameter add_padding : forall {a : Set}, encoding a -&gt; Z -&gt; encoding a.
   End Fixed.
   
-  Module Variable.
+  Module __Variable.
     Parameter __string_value : encoding string.
     
-    Parameter bytes : encoding MBytes.t.
+    Parameter __bytes_value : encoding MBytes.t.
     
     Parameter array : forall {a : Set}, option Z -&gt;
       encoding a -&gt; encoding (array a).
     
-    Parameter list : forall {a : Set}, option Z -&gt;
+    Parameter __list_value : forall {a : Set}, option Z -&gt;
       encoding a -&gt; encoding (list a).
-  End Variable.
+  End __Variable.
   
   Module Bounded.
     Parameter __string_value : Z -&gt; encoding string.
     
-    Parameter bytes : Z -&gt; encoding MBytes.t.
+    Parameter __bytes_value : Z -&gt; encoding MBytes.t.
   End Bounded.
   
   Parameter dynamic_size : forall {a variant : Set}, option variant -&gt;
@@ -7967,7 +7973,8 @@ Module Data_encoding.
   Parameter array : forall {a : Set}, option Z -&gt;
     encoding a -&gt; encoding (array a).
   
-  Parameter list : forall {a : Set}, option Z -&gt; encoding a -&gt; encoding (list a).
+  Parameter __list_value : forall {a : Set}, option Z -&gt;
+    encoding a -&gt; encoding (list a).
   
   Parameter assoc : forall {a : Set}, encoding a -&gt; encoding (list (string * a)).
   
@@ -8074,7 +8081,10 @@ Module Data_encoding.
 End Data_encoding.
 
 Module Error_monad.
-  Definition error_category := variant.
+  Inductive error_category : Set :=
+  | Permanent : error_category
+  | Temporary : error_category
+  | Branch : error_category.
   
   Definition error := Empty_set.
   
@@ -8381,7 +8391,12 @@ Module RPC_query.
 End RPC_query.
 
 Module RPC_service.
-  Definition meth := variant.
+  Inductive meth : Set :=
+  | PUT : meth
+  | GET : meth
+  | DELETE : meth
+  | POST : meth
+  | PATCH : meth.
   
   Parameter t : forall
     (expected_variable prefix params query input output : Set), Set.
