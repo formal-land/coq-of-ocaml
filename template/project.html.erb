@@ -5,7 +5,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: <%= nb_ocaml_lines %> lines</li>
-      <li>Coq size: <%= nb_coq_lines %> lines (+<%= "#{100 * nb_coq_lines / nb_ocaml_lines - 100}%" %>)</li>
+      <li>Coq size: <%= nb_coq_lines %> lines (<%= "+" if nb_coq_lines >= nb_ocaml_lines %><%= "#{100 * nb_coq_lines / nb_ocaml_lines - 100}%" %>)</li>
       <li>errors: <%= nb_errors %></li>
     </ul>
   </div>
