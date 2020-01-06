@@ -49,7 +49,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6164 lines</li>
-      <li>Coq size: 2187 lines (-65%)</li>
+      <li>Coq size: 2185 lines (-65%)</li>
       <li>errors: 281</li>
     </ul>
   </div>
@@ -6883,8 +6883,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Require CamlinternalFormatBasics.
-
 Module Pervasives.
   Parameter raise : forall {a : Set}, exn -&gt; a.
   
@@ -6894,7 +6892,7 @@ Module Pervasives.
   
   Parameter failwith : forall {a : Set}, string -&gt; a.
   
-  exception
+  (* exception Exit *)
   
   Parameter not : bool -&gt; bool.
   
@@ -6938,7 +6936,7 @@ Module Pervasives.
   
   Parameter op_div : Z -&gt; Z -&gt; Z.
   
-  Parameter mod : Z -&gt; Z -&gt; Z.
+  Parameter __mod : Z -&gt; Z -&gt; Z.
   
   Parameter abs : Z -&gt; Z.
   
@@ -6986,7 +6984,7 @@ Module Pervasives.
     contents : a }.
   Arguments ref : clear implicits.
   
-  Parameter ref : forall {a : Set}, a -&gt; ref a.
+  Parameter __ref_value : forall {a : Set}, a -&gt; ref a.
   
   Parameter op_exclamation : forall {a : Set}, ref a -&gt; a.
   
@@ -7083,7 +7081,7 @@ Module List.
   Parameter for_all2 : forall {a b : Set}, (a -&gt; b -&gt; bool) -&gt;
     list a -&gt; list b -&gt; bool.
   
-  Parameter exists2 : forall {a b : Set}, (a -&gt; b -&gt; bool) -&gt;
+  Parameter __exists2 : forall {a b : Set}, (a -&gt; b -&gt; bool) -&gt;
     list a -&gt; list b -&gt; bool.
   
   Parameter mem : forall {a : Set}, a -&gt; list a -&gt; bool.
@@ -7778,7 +7776,7 @@ Module Data_encoding.
   
   Parameter bool : encoding bool.
   
-  Parameter string : encoding string.
+  Parameter __string_value : encoding string.
   
   Parameter bytes : encoding MBytes.t.
   
@@ -7789,7 +7787,7 @@ Module Data_encoding.
   Parameter string_enum : forall {a : Set}, list (string * a) -&gt; encoding a.
   
   Module Fixed.
-    Parameter string : Z -&gt; encoding string.
+    Parameter __string_value : Z -&gt; encoding string.
     
     Parameter bytes : Z -&gt; encoding MBytes.t.
     
@@ -7797,7 +7795,7 @@ Module Data_encoding.
   End Fixed.
   
   Module Variable.
-    Parameter string : encoding string.
+    Parameter __string_value : encoding string.
     
     Parameter bytes : encoding MBytes.t.
     
@@ -7809,7 +7807,7 @@ Module Data_encoding.
   End Variable.
   
   Module Bounded.
-    Parameter string : Z -&gt; encoding string.
+    Parameter __string_value : Z -&gt; encoding string.
     
     Parameter bytes : Z -&gt; encoding MBytes.t.
   End Bounded.
@@ -8027,17 +8025,17 @@ Module Data_encoding.
     Definition path := 'path.
     Definition path_item := 'path_item.
     
-    exception
+    (* exception Cannot_destruct *)
     
-    exception
+    (* exception Unexpected *)
     
-    exception
+    (* exception No_case_matched *)
     
-    exception
+    (* exception Bad_array_size *)
     
-    exception
+    (* exception Missing_field *)
     
-    exception
+    (* exception Unexpected_field *)
     
     Parameter print_error : option (Format.formatter -&gt; exn -&gt; unit) -&gt;
       Format.formatter -&gt; exn -&gt; unit.
@@ -8069,7 +8067,7 @@ Module Data_encoding.
     
     Parameter write_error : Set.
     
-    exception
+    (* exception Write_error *)
   End Binary.
   
   Parameter check_size : forall {a : Set}, Z -&gt; encoding a -&gt; encoding a.
@@ -8078,7 +8076,7 @@ End Data_encoding.
 Module Error_monad.
   Definition error_category := variant.
   
-  Definition error := False.
+  Definition error := Empty_set.
   
   Parameter pp : Format.formatter -&gt; error -&gt; unit.
   
@@ -8299,7 +8297,7 @@ Module RPC_arg.
   
   Parameter float : arg Z.
   
-  Parameter string : arg string.
+  Parameter __string_value : arg string.
   
   Parameter like : forall {a : Set}, arg a -&gt; option string -&gt; string -&gt; arg a.
   
@@ -8377,7 +8375,7 @@ Module RPC_query.
   
   Definition untyped := list (string * string).
   
-  exception
+  (* exception Invalid *)
   
   Parameter parse : forall {a : Set}, query a -&gt; untyped -&gt; a.
 End RPC_query.
@@ -8485,7 +8483,7 @@ Module RPC_directory.
   | CTypes : RPC_arg.descr -&gt; RPC_arg.descr -&gt; conflict
   | CType : RPC_arg.descr -&gt; list string -&gt; conflict.
   
-  exception
+  (* exception Conflict *)
   
   Parameter register : forall {input output params prefix query variant : Set}, directory
     prefix -&gt;
@@ -8647,7 +8645,7 @@ Module Base58.
   
   Parameter simple_encode : forall {a : Set}, encoding a -&gt; a -&gt; string.
   
-  Definition data := False.
+  Definition data := Empty_set.
   
   Parameter register_encoding : forall {a : Set}, string -&gt;
     Z -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt; (a -&gt; data) -&gt; encoding a.
