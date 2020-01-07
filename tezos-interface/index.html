@@ -49,8 +49,8 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6164 lines</li>
-      <li>Coq size: 2200 lines (-65%)</li>
-      <li>errors: 281</li>
+      <li>Coq size: 2815 lines (-55%)</li>
+      <li>errors: 271</li>
     </ul>
   </div>
 </div>
@@ -59,7 +59,7 @@
 <hr />
 <div class="row conversion-row" id="v1.mli">
   <div class="col-md-6">
-    <a href="#v1.mli"><code>v1.mli</code></a>&nbsp;<span class="label label-danger">281 errors</span>
+    <a href="#v1.mli"><code>v1.mli</code></a>&nbsp;<span class="label label-danger">271 errors</span>
     
       <div class="alert alert-danger global-errors" role="alert">
         <ul>
@@ -3210,13 +3210,13 @@ module Compare : sig
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type COMPARABLE = sig
+module type COMPARABLE = sig
   type t
 
   val compare : t -&gt; t -&gt; int
-end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type S = sig
+module type S = sig
   type t
 
   val ( = ) : t -&gt; t -&gt; bool
@@ -3238,29 +3238,29 @@ end</abbr>
   val max : t -&gt; t -&gt; t
 
   val min : t -&gt; t -&gt; t
-end</abbr>
+end
 
 <abbr class="mark-error" title="This kind of module is not supported in signatures">module Make (P : COMPARABLE) : S with type t := P.t</abbr>
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Char : S with type t = char</abbr>
+module Char : S with type t = char
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Bool : S with type t = bool</abbr>
+module Bool : S with type t = bool
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Int : S with type t = int</abbr>
+module Int : S with type t = int
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Int32 : S with type t = int32</abbr>
+module Int32 : S with type t = int32
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Uint32 : S with type t = int32</abbr>
+module Uint32 : S with type t = int32
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Int64 : S with type t = int64</abbr>
+module Int64 : S with type t = int64
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Uint64 : S with type t = int64</abbr>
+module Uint64 : S with type t = int64
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Float : S with type t = float</abbr>
+module Float : S with type t = float
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module String : S with type t = string</abbr>
+module String : S with type t = string
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Z : S with type t = Z.t</abbr>
+module Z : S with type t = Z.t
 
 <abbr class="mark-error" title="This kind of module is not supported in signatures">module List (P : COMPARABLE) : S with type t = P.t list</abbr>
 
@@ -4706,7 +4706,7 @@ module S : sig
 
 (** Generic interface for a datatype with comparison, pretty-printer
     and serialization functions. *)
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type T = sig
+module type T = sig
   type t
 
   include Compare.S with type t := t
@@ -4718,11 +4718,11 @@ module S : sig
   val to_bytes : t -&gt; MBytes.t
 
   val of_bytes : MBytes.t -&gt; t option
-end</abbr>
+end
 
 (** Generic interface for a datatype with comparison, pretty-printer,
     serialization functions and a hashing function. *)
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type HASHABLE = sig
+module type HASHABLE = sig
   include T
 
   type hash
@@ -4730,7 +4730,7 @@ end</abbr>
   val hash : t -&gt; hash
 
   val hash_raw : MBytes.t -&gt; hash
-end</abbr>
+end
 
 (** {2 Hash Types} *)
 
@@ -4740,7 +4740,7 @@ end</abbr>
     equipped with functions to use it as is of as keys in the database
     or in memory sets and maps. *)
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type MINIMAL_HASH = sig
+module type MINIMAL_HASH = sig
   type t
 
   val name : string
@@ -4758,9 +4758,9 @@ end</abbr>
   val hash_string : ?key:string -&gt; string list -&gt; t
 
   val zero : t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type RAW_DATA = sig
+module type RAW_DATA = sig
   type t
 
   val size : int (* in bytes *)
@@ -4770,9 +4770,9 @@ end</abbr>
   val of_bytes_opt : MBytes.t -&gt; t option
 
   val of_bytes_exn : MBytes.t -&gt; t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type B58_DATA = sig
+<abbr class="mark-error" title="Type extensions are not handled">module type B58_DATA = sig
   type t
 
   val to_b58check : t -&gt; string
@@ -4783,20 +4783,24 @@ end</abbr>
 
   val of_b58check_opt : string -&gt; t option
 
-  type Base58.data += Data of t
+  </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Extensible types are not handled.">type Base58.data += Data of t</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   val b58check_encoding : t Base58.encoding
 end</abbr>
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type ENCODER = sig
+module type ENCODER = sig
   type t
 
   val encoding : t Data_encoding.t
 
   val rpc_arg : t RPC_arg.t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type SET = sig
+module type SET = sig
   type elt
 
   type t
@@ -4858,12 +4862,12 @@ end</abbr>
   val find_last_opt : (elt -&gt; bool) -&gt; t -&gt; elt option
 
   val of_list : elt list -&gt; t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type MAP = sig
+module type MAP = sig
   type key
 
-  type +'a t
+  <abbr class="mark-error" title="Polymorphic abstract types not handled in signatures.">type +'a t</abbr>
 
   val empty : 'a t
 
@@ -4921,9 +4925,9 @@ end</abbr>
   val map : ('a -&gt; 'b) -&gt; 'a t -&gt; 'b t
 
   val mapi : (key -&gt; 'a -&gt; 'b) -&gt; 'a t -&gt; 'b t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type INDEXES = sig
+module type INDEXES = sig
   type t
 
   val to_path : t -&gt; string list -&gt; string list
@@ -4936,35 +4940,59 @@ end</abbr>
 
   val path_length : int
 
-  module Set : sig
+  module Set : <abbr class="mark-error" title="Anonymous definition of signatures is not handled.">sig
     include Stdlib.Set.S with type elt = t
 
     val encoding : t Data_encoding.t
-  end
+  end</abbr>
 
-  module Map : sig
+  module Map : <abbr class="mark-error" title="Anonymous definition of signatures is not handled.">sig
     include Stdlib.Map.S with type key = t
 
     val encoding : 'a Data_encoding.t -&gt; 'a t Data_encoding.t
-  end
-end</abbr>
+  end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type HASH = sig
+<abbr class="mark-error" title="Type extensions are not handled">module type HASH = sig
   include MINIMAL_HASH
 
   include RAW_DATA with type t := t
 
-  include B58_DATA with type t := t
+  </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Extensible type 'Data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   include ENCODER with type t := t
 
-  include INDEXES with type t := t
+  </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Module 'Map' in included signature not handled
+
+——————————
+
+Module 'Set' in included signature not handled">include INDEXES with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
 end</abbr>
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type MERKLE_TREE = sig
+<abbr class="mark-error" title="Type extensions are not handled">module type MERKLE_TREE = sig
   type elt
 
-  include HASH
+  </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Module 'Map' in included signature not handled
+
+——————————
+
+Module 'Set' in included signature not handled
+
+——————————
+
+Extensible type 'Data' not handled">include HASH</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   val compute : elt list -&gt; t
 
@@ -4979,8 +5007,20 @@ end</abbr>
   val path_encoding : path Data_encoding.t
 end</abbr>
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type SIGNATURE = sig
-  module Public_key_hash : sig
+<abbr class="mark-error" title="Type extensions are not handled">module type SIGNATURE = sig
+  </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Type extensions are not handled">module Public_key_hash : </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Type extensions are not handled
+
+——————————
+
+Anonymous definition of signatures is not handled.">sig
     type t
 
     val pp : Format.formatter -&gt; t -&gt; unit
@@ -4998,9 +5038,21 @@ end</abbr>
     include INDEXES with type t := t
 
     val zero : t
-  end
+  end</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
-  module Public_key : sig
+  </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Type extensions are not handled">module Public_key : </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Type extensions are not handled
+
+——————————
+
+Anonymous definition of signatures is not handled.">sig
     type t
 
     val pp : Format.formatter -&gt; t -&gt; unit
@@ -5012,7 +5064,7 @@ end</abbr>
     include ENCODER with type t := t
 
     val hash : t -&gt; Public_key_hash.t
-  end
+  end</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   type t
 
@@ -5022,7 +5074,11 @@ end</abbr>
 
   include Compare.S with type t := t
 
-  include B58_DATA with type t := t
+  </abbr><abbr class="mark-error" title="Type extensions are not handled
+
+——————————
+
+Extensible type 'Data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   include ENCODER with type t := t
 
@@ -5083,7 +5139,7 @@ module Set : sig
 *)
 
 (** Input signature of the functor {!Set.Make}. *)
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type OrderedType = sig
+module type OrderedType = sig
   (** The type of the set elements. *)
   type t
 
@@ -5095,7 +5151,7 @@ module Set : sig
       Example: a suitable ordering function is the generic structural
       comparison function {!Pervasives.compare}. *)
   val compare : t -&gt; t -&gt; int
-end</abbr>
+end
 
 (** Functor building an implementation of the set structure
     given a totally ordered type. *)
@@ -5149,7 +5205,7 @@ module Map : sig
 *)
 
 (** Input signature of the functor {!Map.Make}. *)
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type OrderedType = sig
+module type OrderedType = sig
   (** The type of the map keys. *)
   type t
 
@@ -5161,7 +5217,7 @@ module Map : sig
       Example: a suitable ordering function is the generic structural
       comparison function {!Pervasives.compare}. *)
   val compare : t -&gt; t -&gt; int
-end</abbr>
+end
 
 (** Functor building an implementation of the map structure
     given a totally ordered type. *)
@@ -5200,19 +5256,19 @@ module Blake2B : sig
     {!Make_Blake2B}. Both {!name} and {!title} are only informative,
     used in error messages and serializers. *)
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type Name = sig
+module type Name = sig
   val name : string
 
   val title : string
 
   val size : int option
-end</abbr>
+end
 
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type PrefixedName = sig
+module type PrefixedName = sig
   include Name
 
   val b58check_prefix : string
-end</abbr>
+end
 
 <abbr class="mark-error" title="This kind of module is not supported in signatures">module Make_minimal (Name : Name) : S.MINIMAL_HASH</abbr>
 
@@ -5954,7 +6010,7 @@ type rpc_context = {
 
 (** This is the signature of a Tezos protocol implementation. It has
     access to the standard library and the Environment module. *)
-<abbr class="mark-error" title="Signatures inside signatures are not handled">module type PROTOCOL = sig
+module type PROTOCOL = sig
   (** The maximum size of a block header in bytes. *)
   val max_block_length : int
 
@@ -6109,7 +6165,7 @@ type rpc_context = {
       receives the header of the block that triggered the amendment. *)
   val init :
     Context.t -&gt; Block_header.shell_header -&gt; validation_result tzresult Lwt.t
-end</abbr>
+end
 
 (** Activates a given protocol version from a given context. This
     means that the context used for the next block will use this
@@ -7704,31 +7760,272 @@ Module Raw_hashes.
 End Raw_hashes.
 
 Module Compare.
-  module_type
+  Module COMPARABLE.
+    Record signature {t : Set} := {
+      t := t;
+      compare : t -&gt; t -&gt; Z;
+    }.
+    Arguments signature : clear implicits.
+  End COMPARABLE.
   
-  module_type
+  Module S.
+    Record signature {t : Set} := {
+      t := t;
+      op_eq : t -&gt; t -&gt; bool;
+      op_ltgt : t -&gt; t -&gt; bool;
+      op_lt : t -&gt; t -&gt; bool;
+      op_lteq : t -&gt; t -&gt; bool;
+      op_gteq : t -&gt; t -&gt; bool;
+      op_gt : t -&gt; t -&gt; bool;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      max : t -&gt; t -&gt; t;
+      min : t -&gt; t -&gt; t;
+    }.
+    Arguments signature : clear implicits.
+  End S.
   
   unhandled_module
   
-  unhandled_module
+  Module Char.
+    Definition t := ascii.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Char.
   
-  unhandled_module
+  Module Bool.
+    Definition t := bool.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Bool.
   
-  unhandled_module
+  Module Int.
+    Definition t := Z.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Int.
   
-  unhandled_module
+  Module Int32.
+    Definition t := int32.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Int32.
   
-  unhandled_module
+  Module Uint32.
+    Definition t := int32.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Uint32.
   
-  unhandled_module
+  Module Int64.
+    Definition t := int64.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Int64.
   
-  unhandled_module
+  Module Uint64.
+    Definition t := int64.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Uint64.
   
-  unhandled_module
+  Module Float.
+    Definition t := Z.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Float.
   
-  unhandled_module
+  Module String.
+    Definition t := string.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End String.
   
-  unhandled_module
+  Module Z.
+    Definition t := Z.t.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+  End Z.
   
   unhandled_module
   
@@ -8672,47 +8969,368 @@ Module Base58.
 End Base58.
 
 Module S.
-  module_type
+  Module T.
+    Record signature {t : Set} := {
+      t := t;
+      op_eq : t -&gt; t -&gt; bool;
+      op_ltgt : t -&gt; t -&gt; bool;
+      op_lt : t -&gt; t -&gt; bool;
+      op_lteq : t -&gt; t -&gt; bool;
+      op_gteq : t -&gt; t -&gt; bool;
+      op_gt : t -&gt; t -&gt; bool;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      max : t -&gt; t -&gt; t;
+      min : t -&gt; t -&gt; t;
+      pp : Format.formatter -&gt; t -&gt; unit;
+      encoding : Data_encoding.t t;
+      to_bytes : t -&gt; MBytes.t;
+      of_bytes : MBytes.t -&gt; option t;
+    }.
+    Arguments signature : clear implicits.
+  End T.
   
-  module_type
+  Module HASHABLE.
+    Record signature {t hash : Set} := {
+      t := t;
+      op_eq : t -&gt; t -&gt; bool;
+      op_ltgt : t -&gt; t -&gt; bool;
+      op_lt : t -&gt; t -&gt; bool;
+      op_lteq : t -&gt; t -&gt; bool;
+      op_gteq : t -&gt; t -&gt; bool;
+      op_gt : t -&gt; t -&gt; bool;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      max : t -&gt; t -&gt; t;
+      min : t -&gt; t -&gt; t;
+      pp : Format.formatter -&gt; t -&gt; unit;
+      encoding : Data_encoding.t t;
+      to_bytes : t -&gt; MBytes.t;
+      of_bytes : MBytes.t -&gt; option t;
+      hash := hash;
+      hash : t -&gt; hash;
+      hash_raw : MBytes.t -&gt; hash;
+    }.
+    Arguments signature : clear implicits.
+  End HASHABLE.
   
-  module_type
+  Module MINIMAL_HASH.
+    Record signature {t : Set} := {
+      t := t;
+      name : string;
+      title : string;
+      pp : Format.formatter -&gt; t -&gt; unit;
+      pp_short : Format.formatter -&gt; t -&gt; unit;
+      op_eq : t -&gt; t -&gt; bool;
+      op_ltgt : t -&gt; t -&gt; bool;
+      op_lt : t -&gt; t -&gt; bool;
+      op_lteq : t -&gt; t -&gt; bool;
+      op_gteq : t -&gt; t -&gt; bool;
+      op_gt : t -&gt; t -&gt; bool;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      max : t -&gt; t -&gt; t;
+      min : t -&gt; t -&gt; t;
+      hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t;
+      hash_string : option string -&gt; list string -&gt; t;
+      zero : t;
+    }.
+    Arguments signature : clear implicits.
+  End MINIMAL_HASH.
   
-  module_type
+  Module RAW_DATA.
+    Record signature {t : Set} := {
+      t := t;
+      size : Z;
+      to_bytes : t -&gt; MBytes.t;
+      of_bytes_opt : MBytes.t -&gt; option t;
+      of_bytes_exn : MBytes.t -&gt; t;
+    }.
+    Arguments signature : clear implicits.
+  End RAW_DATA.
   
-  module_type
+  Module B58_DATA.
+    Record signature {t : Set} := {
+      t := t;
+      to_b58check : t -&gt; string;
+      to_short_b58check : t -&gt; string;
+      of_b58check_exn : string -&gt; t;
+      of_b58check_opt : string -&gt; option t;
+      extensible_type;
+      b58check_encoding : Base58.encoding t;
+    }.
+    Arguments signature : clear implicits.
+  End B58_DATA.
   
-  module_type
+  Module ENCODER.
+    Record signature {t : Set} := {
+      t := t;
+      encoding : Data_encoding.t t;
+      rpc_arg : RPC_arg.t t;
+    }.
+    Arguments signature : clear implicits.
+  End ENCODER.
   
-  module_type
+  Module SET.
+    Record signature {elt t : Set} := {
+      elt := elt;
+      t := t;
+      empty : t;
+      is_empty : t -&gt; bool;
+      mem : elt -&gt; t -&gt; bool;
+      add : elt -&gt; t -&gt; t;
+      singleton : elt -&gt; t;
+      remove : elt -&gt; t -&gt; t;
+      union : t -&gt; t -&gt; t;
+      inter : t -&gt; t -&gt; t;
+      diff : t -&gt; t -&gt; t;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      subset : t -&gt; t -&gt; bool;
+      iter : (elt -&gt; unit) -&gt; t -&gt; unit;
+      map : (elt -&gt; elt) -&gt; t -&gt; t;
+      fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a;
+      for_all : (elt -&gt; bool) -&gt; t -&gt; bool;
+      __exists : (elt -&gt; bool) -&gt; t -&gt; bool;
+      filter : (elt -&gt; bool) -&gt; t -&gt; t;
+      partition : (elt -&gt; bool) -&gt; t -&gt; t * t;
+      cardinal : t -&gt; Z;
+      elements : t -&gt; list elt;
+      min_elt_opt : t -&gt; option elt;
+      max_elt_opt : t -&gt; option elt;
+      choose_opt : t -&gt; option elt;
+      split : elt -&gt; t -&gt; t * bool * t;
+      find_opt : elt -&gt; t -&gt; option elt;
+      find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt;
+      find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt;
+      of_list : list elt -&gt; t;
+    }.
+    Arguments signature : clear implicits.
+  End SET.
   
-  module_type
+  Module MAP.
+    Record signature {key t : Set} := {
+      key := key;
+      polymorphic_abstract_type;
+      empty : forall {a : Set}, t a;
+      is_empty : forall {a : Set}, t a -&gt; bool;
+      mem : forall {a : Set}, key -&gt; t a -&gt; bool;
+      add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a;
+      update : forall {a : Set}, key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a;
+      singleton : forall {a : Set}, key -&gt; a -&gt; t a;
+      remove : forall {a : Set}, key -&gt; t a -&gt; t a;
+      merge : forall {a b c : Set}, (key -&gt; option a -&gt; option b -&gt; option c) -&gt;
+        t a -&gt; t b -&gt; t c;
+      union : forall {a : Set}, (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a;
+      compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z;
+      equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool;
+      iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit;
+      fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b;
+      for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool;
+      __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool;
+      filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a;
+      partition : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a;
+      cardinal : forall {a : Set}, t a -&gt; Z;
+      bindings : forall {a : Set}, t a -&gt; list (key * a);
+      min_binding_opt : forall {a : Set}, t a -&gt; option (key * a);
+      max_binding_opt : forall {a : Set}, t a -&gt; option (key * a);
+      choose_opt : forall {a : Set}, t a -&gt; option (key * a);
+      split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a;
+      find_opt : forall {a : Set}, key -&gt; t a -&gt; option a;
+      find_first_opt : forall {a : Set}, (key -&gt; bool) -&gt;
+        t a -&gt; option (key * a);
+      find_last_opt : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; option (key * a);
+      map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b;
+      mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b;
+    }.
+    Arguments signature : clear implicits.
+  End MAP.
   
-  module_type
+  Module INDEXES.
+    Record signature {t Set_t Map_t : Set} := {
+      t := t;
+      to_path : t -&gt; list string -&gt; list string;
+      of_path : list string -&gt; option t;
+      of_path_exn : list string -&gt; t;
+      prefix_path : string -&gt; list string;
+      path_length : Z;
+      Set : signature;
+      Map : signature;
+    }.
+    Arguments signature : clear implicits.
+  End INDEXES.
   
-  module_type
+  Module HASH.
+    Record signature {t Set_t Map_t : Set} := {
+      t := t;
+      name : string;
+      title : string;
+      pp : Format.formatter -&gt; t -&gt; unit;
+      pp_short : Format.formatter -&gt; t -&gt; unit;
+      op_eq : t -&gt; t -&gt; bool;
+      op_ltgt : t -&gt; t -&gt; bool;
+      op_lt : t -&gt; t -&gt; bool;
+      op_lteq : t -&gt; t -&gt; bool;
+      op_gteq : t -&gt; t -&gt; bool;
+      op_gt : t -&gt; t -&gt; bool;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      max : t -&gt; t -&gt; t;
+      min : t -&gt; t -&gt; t;
+      hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t;
+      hash_string : option string -&gt; list string -&gt; t;
+      zero : t;
+      size : Z;
+      to_bytes : t -&gt; MBytes.t;
+      of_bytes_opt : MBytes.t -&gt; option t;
+      of_bytes_exn : MBytes.t -&gt; t;
+      to_b58check : t -&gt; string;
+      to_short_b58check : t -&gt; string;
+      of_b58check_exn : string -&gt; t;
+      of_b58check_opt : string -&gt; option t;
+      extensible_type;
+      b58check_encoding : Base58.encoding t;
+      encoding : Data_encoding.t t;
+      rpc_arg : RPC_arg.t t;
+      to_path : t -&gt; list string -&gt; list string;
+      of_path : list string -&gt; option t;
+      of_path_exn : list string -&gt; t;
+      prefix_path : string -&gt; list string;
+      path_length : Z;
+      module;
+      module;
+    }.
+    Arguments signature : clear implicits.
+  End HASH.
   
-  module_type
+  Module MERKLE_TREE.
+    Record signature {elt t Set_t Map_t path : Set} := {
+      elt := elt;
+      t := t;
+      name : string;
+      title : string;
+      pp : Format.formatter -&gt; t -&gt; unit;
+      pp_short : Format.formatter -&gt; t -&gt; unit;
+      op_eq : t -&gt; t -&gt; bool;
+      op_ltgt : t -&gt; t -&gt; bool;
+      op_lt : t -&gt; t -&gt; bool;
+      op_lteq : t -&gt; t -&gt; bool;
+      op_gteq : t -&gt; t -&gt; bool;
+      op_gt : t -&gt; t -&gt; bool;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      max : t -&gt; t -&gt; t;
+      min : t -&gt; t -&gt; t;
+      hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t;
+      hash_string : option string -&gt; list string -&gt; t;
+      zero : t;
+      size : Z;
+      to_bytes : t -&gt; MBytes.t;
+      of_bytes_opt : MBytes.t -&gt; option t;
+      of_bytes_exn : MBytes.t -&gt; t;
+      to_b58check : t -&gt; string;
+      to_short_b58check : t -&gt; string;
+      of_b58check_exn : string -&gt; t;
+      of_b58check_opt : string -&gt; option t;
+      extensible_type;
+      b58check_encoding : Base58.encoding t;
+      encoding : Data_encoding.t t;
+      rpc_arg : RPC_arg.t t;
+      to_path : t -&gt; list string -&gt; list string;
+      of_path : list string -&gt; option t;
+      of_path_exn : list string -&gt; t;
+      prefix_path : string -&gt; list string;
+      path_length : Z;
+      module;
+      module;
+      compute : list elt -&gt; t;
+      empty : t;
+      path := path;
+      compute_path : list elt -&gt; Z -&gt; path;
+      check_path : path -&gt; elt -&gt; t * Z;
+      path_encoding : Data_encoding.t path;
+    }.
+    Arguments signature : clear implicits.
+  End MERKLE_TREE.
   
-  module_type
+  Module SIGNATURE.
+    Record signature {Public_key_hash_t Public_key_hash_Set_t
+      Public_key_hash_Map_t Public_key_t t watermark : Set} := {
+      Public_key_hash : signature;
+      Public_key : signature;
+      t := t;
+      pp : Format.formatter -&gt; t -&gt; unit;
+      size : Z;
+      to_bytes : t -&gt; MBytes.t;
+      of_bytes_opt : MBytes.t -&gt; option t;
+      of_bytes_exn : MBytes.t -&gt; t;
+      op_eq : t -&gt; t -&gt; bool;
+      op_ltgt : t -&gt; t -&gt; bool;
+      op_lt : t -&gt; t -&gt; bool;
+      op_lteq : t -&gt; t -&gt; bool;
+      op_gteq : t -&gt; t -&gt; bool;
+      op_gt : t -&gt; t -&gt; bool;
+      compare : t -&gt; t -&gt; Z;
+      equal : t -&gt; t -&gt; bool;
+      max : t -&gt; t -&gt; t;
+      min : t -&gt; t -&gt; t;
+      to_b58check : t -&gt; string;
+      to_short_b58check : t -&gt; string;
+      of_b58check_exn : string -&gt; t;
+      of_b58check_opt : string -&gt; option t;
+      extensible_type;
+      b58check_encoding : Base58.encoding t;
+      encoding : Data_encoding.t t;
+      rpc_arg : RPC_arg.t t;
+      zero : t;
+      watermark := watermark;
+      check : option watermark -&gt; Public_key.t -&gt; t -&gt; MBytes.t -&gt; bool;
+    }.
+    Arguments signature : clear implicits.
+  End SIGNATURE.
 End S.
 
 Module Set.
-  module_type
+  Module OrderedType.
+    Record signature {t : Set} := {
+      t := t;
+      compare : t -&gt; t -&gt; Z;
+    }.
+    Arguments signature : clear implicits.
+  End OrderedType.
   
   unhandled_module
 End Set.
 
 Module Map.
-  module_type
+  Module OrderedType.
+    Record signature {t : Set} := {
+      t := t;
+      compare : t -&gt; t -&gt; Z;
+    }.
+    Arguments signature : clear implicits.
+  End OrderedType.
   
   unhandled_module
 End Map.
 
 Module Blake2B.
-  module_type
+  Module Name.
+    Record signature := {
+      name : string;
+      title : string;
+      size : option Z;
+    }.
+  End Name.
   
-  module_type
+  Module PrefixedName.
+    Record signature := {
+      name : string;
+      title : string;
+      size : option Z;
+      b58check_prefix : string;
+    }.
+  End PrefixedName.
   
   unhandled_module
   
@@ -8943,7 +9561,60 @@ Module Updater.
     block_header : Block_header.shell_header;
     context : Context.t }.
   
-  module_type
+  Module PROTOCOL.
+    Record signature {block_header_data block_header block_header_metadata
+      operation_data operation_receipt operation validation_state : Set} := {
+      max_block_length : Z;
+      max_operation_data_length : Z;
+      validation_passes : list quota;
+      block_header_data := block_header_data;
+      block_header_data_encoding : Data_encoding.t block_header_data;
+      block_header := block_header;
+      block_header_metadata := block_header_metadata;
+      block_header_metadata_encoding : Data_encoding.t block_header_metadata;
+      operation_data := operation_data;
+      operation_receipt := operation_receipt;
+      operation := operation;
+      operation_data_encoding : Data_encoding.t operation_data;
+      operation_receipt_encoding : Data_encoding.t operation_receipt;
+      operation_data_and_receipt_encoding : Data_encoding.t
+        (operation_data * operation_receipt);
+      acceptable_passes : operation -&gt; list Z;
+      compare_operations : operation -&gt; operation -&gt; Z;
+      validation_state := validation_state;
+      current_context : validation_state -&gt;
+        Lwt.t (Error_monad.tzresult Context.t);
+      begin_partial_application : Chain_id.(S.HASH.t) -&gt;
+        Context.t -&gt;
+          Time.t -&gt;
+            Fitness.(S.T.t) -&gt;
+              block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
+      begin_application : Chain_id.(S.HASH.t) -&gt;
+        Context.t -&gt;
+          Time.t -&gt;
+            Fitness.(S.T.t) -&gt;
+              block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
+      begin_construction : Chain_id.(S.HASH.t) -&gt;
+        Context.t -&gt;
+          Time.t -&gt;
+            Int32.t -&gt;
+              Fitness.(S.T.t) -&gt;
+                Block_hash.(S.HASH.t) -&gt;
+                  Time.t -&gt;
+                    option block_header_data -&gt;
+                      unit -&gt; Lwt.t (Error_monad.tzresult validation_state);
+      apply_operation : validation_state -&gt;
+        operation -&gt;
+          Lwt.t (Error_monad.tzresult (validation_state * operation_receipt));
+      finalize_block : validation_state -&gt;
+        Lwt.t (Error_monad.tzresult (validation_result * block_header_metadata));
+      rpc_services : RPC_directory.t rpc_context;
+      init : Context.t -&gt;
+        Block_header.shell_header -&gt;
+          Lwt.t (Error_monad.tzresult validation_result);
+    }.
+    Arguments signature : clear implicits.
+  End PROTOCOL.
   
   Parameter activate : Context.t -&gt; Protocol_hash.(S.HASH.t) -&gt; Lwt.t Context.t.
   
