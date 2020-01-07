@@ -49,7 +49,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6164 lines</li>
-      <li>Coq size: 2815 lines (-55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2829 lines (-55% compared to&nbsp;OCaml)</li>
       <li>errors: 271</li>
     </ul>
   </div>
@@ -3240,7 +3240,7 @@ module type S = sig
   val min : t -&gt; t -&gt; t
 end
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Make (P : COMPARABLE) : S with type t := P.t</abbr>
+<abbr class="mark-error" title="Unhandled functor">module Make (P : COMPARABLE) : S with type t := P.t</abbr>
 
 module Char : S with type t = char
 
@@ -3262,9 +3262,9 @@ module String : S with type t = string
 
 module Z : S with type t = Z.t
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module List (P : COMPARABLE) : S with type t = P.t list</abbr>
+<abbr class="mark-error" title="Unhandled functor">module List (P : COMPARABLE) : S with type t = P.t list</abbr>
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Option (P : COMPARABLE) : S with type t = P.t option</abbr>
+<abbr class="mark-error" title="Unhandled functor">module Option (P : COMPARABLE) : S with type t = P.t option</abbr>
 end
 module Data_encoding : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/data_encoding.mli&quot;
@@ -5155,7 +5155,7 @@ end
 
 (** Functor building an implementation of the set structure
     given a totally ordered type. *)
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Make (Ord : OrderedType) : S.SET with type elt = Ord.t</abbr>
+<abbr class="mark-error" title="Unhandled functor">module Make (Ord : OrderedType) : S.SET with type elt = Ord.t</abbr>
 end
 module Map : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/map.mli&quot;
@@ -5221,7 +5221,7 @@ end
 
 (** Functor building an implementation of the map structure
     given a totally ordered type. *)
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Make (Ord : OrderedType) : S.MAP with type key = Ord.t</abbr>
+<abbr class="mark-error" title="Unhandled functor">module Make (Ord : OrderedType) : S.MAP with type key = Ord.t</abbr>
 end
 module Blake2B : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/blake2B.mli&quot;
@@ -5270,9 +5270,9 @@ module type PrefixedName = sig
   val b58check_prefix : string
 end
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Make_minimal (Name : Name) : S.MINIMAL_HASH</abbr>
+<abbr class="mark-error" title="Unhandled functor">module Make_minimal (Name : Name) : S.MINIMAL_HASH</abbr>
 
-<abbr class="mark-error" title="This kind of module is not supported in signatures">module Make (Register : sig
+<abbr class="mark-error" title="Unhandled functor">module Make (Register : sig
   val register_encoding :
     prefix:string -&gt;
     length:int -&gt;
@@ -7785,7 +7785,9 @@ Module Compare.
     Arguments signature : clear implicits.
   End S.
   
-  unhandled_module
+  Module Make.
+    (* Unhandled functor *)
+  End Make.
   
   Module Char.
     Definition t := ascii.
@@ -8027,9 +8029,13 @@ Module Compare.
     Parameter min : t -&gt; t -&gt; t.
   End Z.
   
-  unhandled_module
+  Module List.
+    (* Unhandled functor *)
+  End List.
   
-  unhandled_module
+  Module Option.
+    (* Unhandled functor *)
+  End Option.
 End Compare.
 
 Module Data_encoding.
@@ -9299,7 +9305,9 @@ Module Set.
     Arguments signature : clear implicits.
   End OrderedType.
   
-  unhandled_module
+  Module Make.
+    (* Unhandled functor *)
+  End Make.
 End Set.
 
 Module Map.
@@ -9311,7 +9319,9 @@ Module Map.
     Arguments signature : clear implicits.
   End OrderedType.
   
-  unhandled_module
+  Module Make.
+    (* Unhandled functor *)
+  End Make.
 End Map.
 
 Module Blake2B.
@@ -9332,9 +9342,13 @@ Module Blake2B.
     }.
   End PrefixedName.
   
-  unhandled_module
+  Module Make_minimal.
+    (* Unhandled functor *)
+  End Make_minimal.
   
-  unhandled_module
+  Module Make.
+    (* Unhandled functor *)
+  End Make.
 End Blake2B.
 
 Module Ed25519.
