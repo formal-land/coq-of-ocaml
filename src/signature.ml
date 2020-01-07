@@ -14,7 +14,7 @@ type t = {
   items: item list;
   typ_params: unit Tree.t }
 
-let of_types_signature (signature : Types.signature) : item list Monad.t =
+let items_of_types_signature (signature : Types.signature) : item list Monad.t =
   let of_types_signature_item (signature_item : Types.signature_item) : item Monad.t =
     match signature_item with
     | Sig_value (ident, { val_type; _ }) ->
@@ -47,7 +47,12 @@ let of_types_signature (signature : Types.signature) : item list Monad.t =
       raise (Error "class_type") NotSupported ("Class type '" ^ Ident.name ident ^ "' not handled.") in
   signature |> Monad.List.map of_types_signature_item
 
-let of_signature (signature : signature) : t Monad.t =
+let of_types_signature (signature : Types.signature) : t Monad.t =
+  items_of_types_signature signature >>= fun items ->
+  (ModuleTypParams.get_signature_typ_params signature) >>= fun typ_params ->
+  return { items; typ_params }
+
+let items_of_signature (signature : signature) : item list Monad.t =
   let of_signature_item (signature_item : signature_item) : item list Monad.t =
     set_env signature_item.sig_env (
     set_loc (Loc.of_location signature_item.sig_loc) (
@@ -59,7 +64,7 @@ let of_signature (signature : signature) : t Monad.t =
       raise [Error "class_type"] NotSupported "Signature item `class_type` not handled."
     | Tsig_exception _ ->
       raise [Error "exception"] SideEffect "Signature item `exception` not handled."
-    | Tsig_include { incl_type; _ } -> of_types_signature incl_type
+    | Tsig_include { incl_type; _ } -> items_of_types_signature incl_type
     | Tsig_modtype _ ->
       raise [Error "module_type"] NotSupported "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
@@ -93,8 +98,12 @@ let of_signature (signature : signature) : t Monad.t =
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_args, typ)])) in
   (signature.sig_items |> Monad.List.map of_signature_item) >>= fun items ->
+  return (List.flatten items)
+
+let of_signature (signature : signature) : t Monad.t =
+  items_of_signature signature >>= fun items ->
   (ModuleTypParams.get_signature_typ_params signature.sig_type) >>= fun typ_params ->
-  return { items = List.flatten items; typ_params }
+  return { items; typ_params }
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
