@@ -34,6 +34,8 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
 
 let is_black_list (path : Path.t) : bool =
   match PathName.of_path_without_convert false path with
+  (* Specific to Tezos. *)
+  | { PathName.path = Name.Make "Stdlib" :: _; _ } -> true
   | _ -> false
 
 let merge_similar_paths (paths : Path.t list) : Path.t list =

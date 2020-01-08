@@ -16,12 +16,15 @@ module Header = struct
     match header.args with
     | [] -> empty
     | (x, _) :: _ ->
-      let structs =
-        match header.structs with
-        | [] -> Name.to_coq x
-        | _ :: _ ->
-          separate space (List.map (fun s -> !^ s) header.structs) in
-      braces (nest (!^ "struct" ^^ structs))
+      if Recursivity.to_bool is_rec && !Configuration.is_guard_checking_disabled then
+        let structs =
+          match header.structs with
+          | [] -> Name.to_coq x
+          | _ :: _ ->
+            separate space (List.map (fun s -> !^ s) header.structs) in
+        braces (nest (!^ "struct" ^^ structs))
+      else
+        empty
   else
     empty
 end
@@ -1057,6 +1060,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       end
     end
   | Apply (e_f, e_xs) ->
+    (* Specific to Tezos. *)
+    let monadic_operators_table : (string * string) list = [
+      ("op_gtgteq", "let=");
+      ("op_gtgteqquestion", "let=?");
+      ("op_gtgtquestion", "let?");
+    ] in
     begin match (e_f, e_xs) with
     | (
         Variable (
@@ -1080,6 +1089,40 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         [x; f]
       ) when lib_name = PathName.stdlib_name ->
       to_coq paren (Apply (f, [x]))
+    (* Specific to Tezos. *)
+    | (
+        Variable (
+          MixedPath.PathName {
+            PathName.path = [Name.Make "Error_monad"];
+            base = Name.Make operator
+          },
+          []
+        ),
+        [e1; Function (x, e2)]
+      ) when List.mem_assoc operator monadic_operators_table ->
+      let let_symbol = List.assoc operator monadic_operators_table in
+      let get_default () =
+        Pp.parens paren @@ nest (
+          !^ let_symbol ^^ Name.to_coq x ^^ !^ ":=" ^^
+          to_coq false e1 ^^ !^ "in" ^^ newline ^^
+          to_coq false e2
+        ) in
+      begin match e2 with
+      | Match (
+          Variable (MixedPath.PathName { PathName.path = []; base = x' }, []),
+          cases,
+          is_with_default_case
+        ) when x = x' ->
+        let single_let =
+          to_coq_try_single_let_pattern
+            paren let_symbol
+            e1 cases is_with_default_case in
+        begin match single_let with
+        | Some single_let -> single_let
+        | None -> get_default ()
+        end
+      | _ -> get_default ()
+      end
     | _ ->
       Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
     end

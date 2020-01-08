@@ -91,6 +91,8 @@ Definition int64 := Z.
 
 Definition nativeint := Z.
 
+Definition bytes := string.
+
 Parameter try : forall {A : Set}, A -> A.
 
 Module Unit.

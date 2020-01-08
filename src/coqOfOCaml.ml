@@ -38,6 +38,10 @@ let exp
       env
       MonadEval.EnvStack.init
       loc in
+  (* Specific to Tezos; remove the error about some missing functor. *)
+  let errors = errors |> List.filter (fun error ->
+    error.Error.message <> "Error: Unbound module Tezos_protocol_alpha_functor"
+  ) in
   let error_message =
     Error.display_errors json_mode source_file_name source_file_content errors in
   let has_errors =
@@ -59,7 +63,7 @@ let of_ocaml
   : Output.t =
   let (ast, error_message, has_errors) =
     exp env loc typedtree typedtree_errors source_file_name source_file_content json_mode in
-  let document = Ast.to_coq ast in
+  let document = Ast.to_coq ast (Filename.basename source_file_name) in
   let generated_file_name =
     match output_file_name with
     | None ->

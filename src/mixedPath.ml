@@ -26,6 +26,12 @@ let get_signature_path (path : Path.t) : Path.t option Monad.t =
 let rec of_path_aux (path : Path.t)
   : (Path.t * (Path.t * string) list * Path.t option) Monad.t =
   get_signature_path path >>= fun signature_path ->
+  let signature_path =
+    (* Specific to Tezos; check if the path refers to a file which cannot be a
+       first-class module. *)
+    match Path.to_string_list path with
+    | "Tezos_raw_protocol_alpha" :: _ :: [] -> None
+    | _ -> signature_path in
   begin match path with
   | Papply _ -> failwith "Unexpected path application"
   | Pdot (path', field_string) ->
