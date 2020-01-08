@@ -14,16 +14,16 @@ type t = {
   items: item list;
   typ_params: unit Tree.t }
 
-let of_types_signature (signature : Types.signature) : item list Monad.t =
+let items_of_types_signature (signature : Types.signature) : item list Monad.t =
   let of_types_signature_item (signature_item : Types.signature_item) : item Monad.t =
     match signature_item with
     | Sig_value (ident, { val_type; _ }) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident true ident in
       Type.of_type_expr_without_free_vars val_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return (Value (name, typ_args, typ))
     | Sig_type (ident, { type_manifest = None; type_params = []; _ }, _) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident false ident in
       return (TypExistential name)
     | Sig_type (_, { type_manifest = None; type_params = _ :: _; _ }, _) ->
       raise
@@ -31,7 +31,7 @@ let of_types_signature (signature : Types.signature) : item list Monad.t =
         NotSupported
         "Polymorphic abstract types not handled in signatures."
     | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident false ident in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (TypSynonym (name, typ_args, typ))
@@ -47,7 +47,12 @@ let of_types_signature (signature : Types.signature) : item list Monad.t =
       raise (Error "class_type") NotSupported ("Class type '" ^ Ident.name ident ^ "' not handled.") in
   signature |> Monad.List.map of_types_signature_item
 
-let of_signature (signature : signature) : t Monad.t =
+let of_types_signature (signature : Types.signature) : t Monad.t =
+  items_of_types_signature signature >>= fun items ->
+  (ModuleTypParams.get_signature_typ_params signature) >>= fun typ_params ->
+  return { items; typ_params }
+
+let items_of_signature (signature : signature) : item list Monad.t =
   let of_signature_item (signature_item : signature_item) : item list Monad.t =
     set_env signature_item.sig_env (
     set_loc (Loc.of_location signature_item.sig_loc) (
@@ -59,11 +64,11 @@ let of_signature (signature : signature) : t Monad.t =
       raise [Error "class_type"] NotSupported "Signature item `class_type` not handled."
     | Tsig_exception _ ->
       raise [Error "exception"] SideEffect "Signature item `exception` not handled."
-    | Tsig_include { incl_type; _ } -> of_types_signature incl_type
+    | Tsig_include { incl_type; _ } -> items_of_types_signature incl_type
     | Tsig_modtype _ ->
       raise [Error "module_type"] NotSupported "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
-      let name = Name.of_ident md_id in
+      let name = Name.of_ident false md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
       return [Module (name, module_typ)]
     | Tsig_open _ ->
@@ -71,7 +76,7 @@ let of_signature (signature : signature) : t Monad.t =
     | Tsig_recmodule _ ->
       raise [Error "recursive_module"] NotSupported "Recursive module signatures are not handled."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params = []; _ }; _ } ]) ->
-      let name = Name.of_ident typ_id in
+      let name = Name.of_ident false typ_id in
       return [TypExistential name]
     | Tsig_type (_, [ { typ_type = { type_manifest = None; type_params = _ :: _; _ }; _ } ]) ->
       raise
@@ -79,7 +84,7 @@ let of_signature (signature : signature) : t Monad.t =
         NotSupported
         "Polymorphic abstract types not handled in signatures."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ]) ->
-      let name = Name.of_ident typ_id in
+      let name = Name.of_ident false typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return [TypSynonym (name, typ_args, typ)]
@@ -88,36 +93,45 @@ let of_signature (signature : signature) : t Monad.t =
     | Tsig_typext _ ->
       raise [Error "extensible_type"] NotSupported "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
-      let name = Name.of_ident val_id in
+      let name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_args, typ)])) in
   (signature.sig_items |> Monad.List.map of_signature_item) >>= fun items ->
+  return (List.flatten items)
+
+let of_signature (signature : signature) : t Monad.t =
+  items_of_signature signature >>= fun items ->
   (ModuleTypParams.get_signature_typ_params signature.sig_type) >>= fun typ_params ->
-  return { items = List.flatten items; typ_params }
+  return { items; typ_params }
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
   | Error message -> !^ message
   | Module (name, module_typ) ->
-    Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ
-  | TypExistential name -> Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name
+    nest (Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ)
+  | TypExistential name ->
+    nest (Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name)
   | TypSynonym (name, typ_args, typ) ->
-    Name.to_coq name ^^
-    (match typ_args with
-    | [] -> empty
-    | _ ->
-      parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
-    ) ^^ !^ ":=" ^^ Type.to_coq None None typ
+    nest (
+      Name.to_coq name ^^
+      (match typ_args with
+      | [] -> empty
+      | _ ->
+        parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
+      ) ^^ !^ ":=" ^^ Type.to_coq None None typ
+    )
   | Value (name, typ_args, typ) ->
-    Name.to_coq name ^^ !^ ":" ^^
-    (match typ_args with
-    | [] -> empty
-    | _ :: _ ->
-      !^ "forall" ^^ braces (group (
-        separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
-    Type.to_coq None None typ
+    nest (
+      Name.to_coq name ^^ !^ ":" ^^
+      (match typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        !^ "forall" ^^ braces (group (
+          separate space (List.map Name.to_coq typ_args) ^^
+          !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
+      Type.to_coq None None typ
+    )
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
   let typ_params : Name.t list =

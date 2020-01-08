@@ -11,6 +11,16 @@ Class OrderDec {A R} `(StrictOrder A R) := {
   compare_is_sound : forall x y,
     CompareSpec (x = y) (R x y) (R y x) (compare x y) }.
 
+Parameter array : forall (A : Set), Set.
+
+Parameter exn : Set.
+
+Parameter int32 : Set.
+
+Parameter int64 : Set.
+
+Parameter nativeint : Set.
+
 Module Unit.
   Definition lt (x y : unit) : Prop := False.
 
@@ -383,3 +393,7 @@ Module String.
         apply (ltb_spec _ _ (ltb_or_eqb_or_gtb _ _ H_lt H_eq)).
   Defined.
 End String.
+
+Module CamlinternalFormatBasics.
+  Parameter format6 : forall (A B C D E F : Set), Set.
+End CamlinternalFormatBasics.

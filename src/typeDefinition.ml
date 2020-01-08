@@ -47,11 +47,11 @@ module Constructors = struct
       param_typs : Type.t list; (** The parameters of the constructor. *)
     }
 
-    let of_ocaml (case : Types.constructor_declaration)
+    let of_ocaml_case (case : Types.constructor_declaration)
       : t Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
-      let constructor_name = Name.of_ident cd_id in
+      let constructor_name = Name.of_ident false cd_id in
       let typ_vars = Name.Map.empty in
       (match cd_args with
       | Cstr_tuple param_typs -> Type.of_typs_exprs true typ_vars param_typs
@@ -70,6 +70,16 @@ module Constructors = struct
         is_gadt;
         param_typs;
       })
+
+    let of_ocaml_row (row : Asttypes.label * Types.row_field) : t Monad.t =
+      let (label, field) = row in
+      let typs = Type.type_exprs_of_row_field field in
+      Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, _) ->
+      return {
+        constructor_name = Name.of_string false label;
+        is_gadt = false;
+        param_typs;
+      }
   end
 
   let gadt_typ (typ_name : Name.t) : Type.t =
@@ -83,6 +93,10 @@ module Constructors = struct
       Arrow (
         subst_gadt_typ_constructor typ_name typ_arg,
         subst_gadt_typ_constructor typ_name typ_res
+      )
+    | Sum typs ->
+      Sum (typs |> List.map (fun (name, typ) ->
+        (name, subst_gadt_typ_constructor typ_name typ))
       )
     | Tuple typs -> Tuple (List.map (subst_gadt_typ_constructor typ_name) typs)
     | Apply (path, typs) ->
@@ -100,9 +114,8 @@ module Constructors = struct
   let of_ocaml
     (typ_name : Name.t)
     (defined_typ_params : Name.t list)
-    (cases : Types.constructor_declaration list)
+    (single_constructors : Single.t list)
     : (t * bool) Monad.t =
-    Monad.List.map Single.of_ocaml cases >>= fun single_constructors ->
     let is_gadt =
       List.exists (fun { Single.is_gadt; _ } -> is_gadt) single_constructors in
     let constructors = single_constructors |> List.map (
@@ -181,8 +194,8 @@ module Inductive = struct
                 separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set
               ) ^-^ !^ ","
             ) ^^
-            separate space (param_typs |> List.map (fun param_typ ->
-              Type.to_coq subst (Some Type.Context.Arrow) param_typ ^^ !^ "->"
+            group @@ separate space (param_typs |> List.map (fun param_typ ->
+              group (Type.to_coq subst (Some Type.Context.Arrow) param_typ ^^ !^ "->")
             )) ^^ Type.to_coq subst None (Type.Apply (MixedPath.of_name name, res_typ_params))
           )
         )
@@ -281,35 +294,63 @@ type t =
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
-    let name = Name.of_ident typ_id in
+    let name = Name.of_ident false typ_id in
     (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
     (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
-      return (Name.of_ident x, typ)
+      return (Name.of_ident false x, typ)
     )) >>= fun fields ->
     return (Record (name, typ_args, fields))
   | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params; _ }; _ } ] ->
-    let name = Name.of_ident typ_id in
+    let name = Name.of_ident false typ_id in
     (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
     begin match type_manifest with
     | Some typ ->
-      Type.of_type_expr_without_free_vars typ >>= fun typ ->
-      return (Synonym (name, typ_args, typ))
+      begin match typ.Types.desc with
+      | Tvariant { row_fields; _ } ->
+        Monad.List.map Constructors.Single.of_ocaml_row row_fields >>= fun single_constructors ->
+        Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
+        raise
+          (Inductive {
+            notations = [];
+            records = [];
+            typs = [(name, typ_args, constructors)];
+          })
+          NotSupported
+          "Polymorphic variant types are not handled"
+      | _ ->
+        Type.of_type_expr_without_free_vars typ >>= fun typ ->
+        return (Synonym (name, typ_args, typ))
+      end
     | None -> return (Abstract (name, typ_args))
     end
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
-    let name = Name.of_ident typ_id in
-    let typ = Type.Apply (MixedPath.of_name (Name.of_string "False"), []) in
+    let name = Name.of_ident false typ_id in
+    let typ = Type.Apply (MixedPath.of_name (Name.of_string false "Empty_set"), []) in
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
   | _ ->
     (typs |> Monad.List.fold_left (fun (notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
-      let name = Name.of_ident typ.typ_id in
+      let name = Name.of_ident false typ.typ_id in
       (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       match typ with
       | { typ_type = { type_kind = Type_abstract; type_manifest = Some typ; _ }; _ } ->
-        Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return ((name, typ_args, typ) :: notations, records, typs)
+        begin match typ.Types.desc with
+        | Tvariant { row_fields; _ } ->
+          Monad.List.map Constructors.Single.of_ocaml_row row_fields >>= fun single_constructors ->
+          Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
+          raise
+            (
+              notations,
+              records,
+              (name, typ_args, constructors) :: typs
+            )
+            NotSupported
+            "Polymorphic variant types are not handled"
+        | _ ->
+          Type.of_type_expr_without_free_vars typ >>= fun typ ->
+          return ((name, typ_args, typ) :: notations, records, typs)
+        end
       | { typ_type = { type_kind = Type_abstract; type_manifest = None; _ }; _ } ->
         raise
           (notations, records, typs)
@@ -318,7 +359,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       | { typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ->
         (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          return (Name.of_ident x, typ)
+          return (Name.of_ident false x, typ)
         )) >>= fun fields ->
         (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
         return (
@@ -337,7 +378,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           typs
         )
       | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
-        Constructors.of_ocaml name typ_args cases >>= fun (constructors, is_gadt) ->
+        Monad.List.map Constructors.Single.of_ocaml_case cases >>= fun single_constructors ->
+        Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, is_gadt) ->
         let gadt_notation =
           if is_gadt then
             [(name, typ_args, Constructors.gadt_typ name)]

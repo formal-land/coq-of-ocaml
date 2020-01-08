@@ -37,26 +37,36 @@ let escape_operator (s : string) : string =
   );
   Buffer.contents b
 
-let escape_reserved_word (s : string) : string =
+let escape_reserved_word (is_value : bool) (s : string) : string =
   match s with
+  | "bytes" -> if is_value then "__bytes_value" else s
+  | "error" -> "__error"
   | "exists" -> "__exists"
+  | "exists2" -> "__exists2"
+  | "list" -> if is_value then "__list_value" else s
+  | "mod" -> "__mod"
+  | "option" -> if is_value then "__option_value" else s
+  | "ref" -> if is_value then "__ref_value" else s
   | "return" -> "__return"
+  | "string" -> if is_value then "__string_value" else s
+  | "unit" -> if is_value then "__unit_value" else s
+  | "Variable" -> "__Variable"
   | _ -> s
 
-let convert (s : string) : string =
+let convert (is_value : bool) (s : string) : string =
   let s_escaped_operator = escape_operator s in
   if s_escaped_operator <> s then
     "op_" ^ s_escaped_operator
   else
-    escape_reserved_word s
+    escape_reserved_word is_value s
 
 (** Lift a [string] to an identifier. *)
-let of_string (s : string) : t =
-  Make (convert s)
+let of_string (is_value : bool) (s : string) : t =
+  Make (convert is_value s)
 
 (** Import an OCaml identifier. *)
-let of_ident (i : Ident.t) : t =
-  of_string (Ident.name i)
+let of_ident (is_value : bool) (i : Ident.t) : t =
+  of_string is_value (Ident.name i)
 
 let to_string (name : t) : string =
   let Make name = name in

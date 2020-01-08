@@ -9,11 +9,13 @@ type t = unit Tree.t
 let rec of_signature (signature : Types.signature) : t =
   let of_signature_item (signature_item : Types.signature_item) =
     match signature_item with
-    | Sig_value (ident, _) | Sig_type (ident, _, _) ->
-      Some (Tree.Item (Name.of_ident ident, ()))
+    | Sig_value (ident, _) ->
+      Some (Tree.Item (Name.of_ident true ident, ()))
+    | Sig_type (ident, _, _) ->
+      Some (Tree.Item (Name.of_ident false ident, ()))
     | Sig_typext _ | Sig_modtype _ | Sig_class _ | Sig_class_type _ -> None
     | Sig_module (ident, module_declaration, _) ->
-      let name = Name.of_ident ident in
+      let name = Name.of_ident false ident in
       begin match module_declaration.md_type with
       | Mty_signature signature -> Some (Tree.Module (name, of_signature signature))
       | _ -> None

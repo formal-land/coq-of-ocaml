@@ -18,7 +18,7 @@ let rec of_pattern (p : pattern) : t Monad.t =
   set_loc (Loc.of_location p.pat_loc) (
   match p.pat_desc with
   | Tpat_any -> return Any
-  | Tpat_var (x, _) -> return (Variable (Name.of_ident x))
+  | Tpat_var (x, _) -> return (Variable (Name.of_ident true x))
   | Tpat_tuple ps ->
     Monad.List.map of_pattern ps >>= fun patterns ->
     return (Tuple patterns)
@@ -28,12 +28,12 @@ let rec of_pattern (p : pattern) : t Monad.t =
     return (Constructor (x, patterns))
   | Tpat_alias (p, x, _) ->
     of_pattern p >>= fun pattern ->
-    return (Alias (pattern, Name.of_ident x))
+    return (Alias (pattern, Name.of_ident true x))
   | Tpat_constant c ->
     Constant.of_constant c >>= fun constant ->
     return (Constant constant)
   | Tpat_variant (label, p, _) ->
-    let path_name = PathName.of_name [] (Name.of_string label) in
+    let path_name = PathName.of_name [] (Name.of_string false label) in
     (match p with
     | None -> return []
     | Some p -> of_pattern p >>= fun pattern -> return [pattern]
@@ -41,7 +41,7 @@ let rec of_pattern (p : pattern) : t Monad.t =
     raise (Constructor (path_name, patterns)) NotSupported "Patterns on variants are not supported"
   | Tpat_record (fields, _) ->
     (fields |> Monad.List.map (fun (x, _, p) ->
-      let x = PathName.of_long_ident x.Location.txt in
+      let x = PathName.of_long_ident false x.Location.txt in
       of_pattern p >>= fun pattern ->
       return (x, pattern)
     )) >>= fun fields ->
