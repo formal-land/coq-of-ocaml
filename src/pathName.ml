@@ -6,11 +6,12 @@ type t = {
   path : Name.t list;
   base : Name.t }
 
-let stdlib_name =
-  if Sys.ocaml_version >= "4.07" then
-    "Stdlib"
-  else
-    "Pervasives"
+let tezos_imports : string list ref = ref []
+
+let register_tezos_import (import : string) : unit =
+  tezos_imports := import :: !tezos_imports
+
+let stdlib_name = "Stdlib"
 
 (** Internal helper for this module. *)
 let __make (path : string list) (base : string) : t =
@@ -31,10 +32,10 @@ let try_convert (path_name : t) : t option =
   | [] ->
     begin match Name.to_string base with
     (* Built-in types *)
-    | "int" -> make [] "Z"
-    | "float" -> make [] "Z"
+    | "int" -> make [] "int"
+    | "float" -> make [] "float"
     | "char" -> make [] "ascii"
-    | "bytes" -> make [] "string"
+    | "bytes" -> make [] "bytes"
     | "string" -> make [] "string"
     | "bool" -> make [] "bool"
     | "false" -> make [] "false"
@@ -50,20 +51,6 @@ let try_convert (path_name : t) : t option =
     | "Ok" -> make [] "inl"
     | "Error" -> make [] "inr"
     | "exn" -> make [] "extensible_type"
-
-    (* Predefined exceptions *)
-    | "Match_failure" -> make ["OCaml"] "Match_failure"
-    | "Assert_failure" -> make ["OCaml"] "Assert_failure"
-    | "Invalid_argument" -> make ["OCaml"] "Invalid_argument"
-    | "Failure" -> make ["OCaml"] "Failure"
-    | "Not_found" -> make ["OCaml"] "Not_found"
-    | "Out_of_memory" -> make ["OCaml"] "Out_of_memory"
-    | "Stack_overflow" -> make ["OCaml"] "Stack_overflow"
-    | "Sys_error" -> make ["OCaml"] "Sys_error"
-    | "End_of_file" -> make ["OCaml"] "End_of_file"
-    | "Division_by_zero" -> make ["OCaml"] "Division_by_zero"
-    | "Sys_blocked_io" -> make ["OCaml"] "Sys_blocked_io"
-    | "Undefined_recursive_module" -> make ["OCaml"] "Undefined_recursive_module"
     | _ -> None
     end
 
@@ -75,127 +62,28 @@ let try_convert (path_name : t) : t option =
     | _ -> None
     end
 
-  (* Stdlib *)
-  | [lib_name] when lib_name = stdlib_name ->
-    begin match Name.to_string base with
-    (* Exceptions *)
-    | "invalid_arg" -> make ["OCaml"; "Stdlib"] "invalid_arg"
-    | "failwith" -> make ["OCaml"; "Stdlib"] "failwith"
-    | "Exit" -> make ["OCaml"; "Stdlib"] "Exit"
-    (* Comparisons *)
-    | "op_eq" -> make [] "equiv_decb"
-    | "op_ltgt" -> make [] "nequiv_decb"
-    | "op_lt" -> make ["OCaml"; "Stdlib"] "lt"
-    | "op_gt" -> make ["OCaml"; "Stdlib"] "gt"
-    | "op_lteq" -> make ["OCaml"; "Stdlib"] "le"
-    | "op_gteq" -> make ["OCaml"; "Stdlib"] "ge"
-    | "compare" -> make ["OCaml"; "Stdlib"] "compare"
-    | "min" -> make ["OCaml"; "Stdlib"] "min"
-    | "max" -> make ["OCaml"; "Stdlib"] "max"
-    (* Boolean operations *)
-    | "not" -> make [] "negb"
-    | "op_andand" -> make [] "andb"
-    | "op_and" -> make [] "andb"
-    | "op_pipepipe" -> make [] "orb"
-    | "or" -> make [] "orb"
-    (* Integer arithmetic *)
-    | "op_tildeminus" -> make ["Z"] "opp"
-    | "op_tildeplus" -> make []  ""
-    | "succ" -> make ["Z"] "succ"
-    | "pred" -> make ["Z"] "pred"
-    | "op_plus" -> make ["Z"] "add"
-    | "op_minus" -> make ["Z"] "sub"
-    | "op_star" -> make ["Z"] "mul"
-    | "op_div" -> make ["Z"] "div"
-    | "__mod" -> make ["Z"] "modulo"
-    | "abs" -> make ["Z"] "abs"
-    (* Bitwise operations *)
-    | "land" -> make ["Z"] "land"
-    | "lor" -> make ["Z"] "lor"
-    | "lxor" -> make ["Z"] "lxor"
-    | "lsl" -> make ["Z"] "shiftl"
-    | "lsr" -> make ["Z"] "shiftr"
-    (* Floating-point arithmetic *)
-    (* String operations *)
-    | "op_caret" -> make ["String"] "append"
-    (* Character operations *)
-    | "int_of_char" -> make ["OCaml"; "Stdlib"] "int_of_char"
-    | "char_of_int" -> make ["OCaml"; "Stdlib"] "char_of_int"
-    (* Unit operations *)
-    | "ignore" -> make ["OCaml"; "Stdlib"] "ignore"
-    (* String conversion functions *)
-    | "string_of_bool" -> make ["OCaml"; "Stdlib"] "string_of_bool"
-    | "bool_of_string" -> make ["OCaml"; "Stdlib"] "bool_of_string"
-    | "string_of_int" -> make ["OCaml"; "Stdlib"] "string_of_int"
-    | "int_of_string" -> make ["OCaml"; "Stdlib"] "int_of_string"
-    (* Pair operations *)
-    | "fst" -> make [] "fst"
-    | "snd" -> make [] "snd"
-    (* List operations *)
-    | "op_at" -> make ["OCaml"; "Stdlib"] "app"
-    (* Input/output *)
-    (* Output functions on standard output *)
-    | "print_char" -> make ["OCaml"; "Stdlib"] "print_char"
-    | "print_string" -> make ["OCaml"; "Stdlib"] "print_string"
-    | "print_int" -> make ["OCaml"; "Stdlib"] "print_int"
-    | "print_endline" -> make ["OCaml"; "Stdlib"] "print_endline"
-    | "print_newline" -> make ["OCaml"; "Stdlib"] "print_newline"
-    (* Output functions on standard error *)
-    | "prerr_char" -> make ["OCaml"; "Stdlib"] "prerr_char"
-    | "prerr_string" -> make ["OCaml"; "Stdlib"] "prerr_string"
-    | "prerr_int" -> make ["OCaml"; "Stdlib"] "prerr_int"
-    | "prerr_endline" -> make ["OCaml"; "Stdlib"] "prerr_endline"
-    | "prerr_newline" -> make ["OCaml"; "Stdlib"] "prerr_newline"
-    (* Input functions on standard input *)
-    | "read_line" -> make ["OCaml"; "Stdlib"] "read_line"
-    | "read_int" -> make ["OCaml"; "Stdlib"] "read_int"
-    (* General output functions *)
-    (* General input functions *)
-    (* Operations on large files *)
-    (* References *)
-    (* Result type *)
-    | "result" -> make [] "sum"
-    (* Operations on format strings *)
-    (* Program termination *)
-    | _ -> Some path_name
-    end
-
-  (* Bytes *)
-  | [lib_name; "Bytes"] when lib_name = stdlib_name ->
-    begin match Name.to_string base with
-    | "cat" -> make ["String"] "append"
-    | "concat" -> make ["String"] "concat"
-    | "length" -> make ["String"] "length"
-    | "sub" -> make ["String"] "sub"
-    | _ -> Some path_name
-    end
-
-  (* List *)
-  | [lib_name; "List"] when lib_name = stdlib_name ->
-    begin match Name.to_string base with
-    | "exists" -> make ["OCaml"; "List"] "_exists"
-    | "exists2" -> make ["OCaml"; "List"] "_exists2"
-    | "length" -> make ["OCaml"; "List"] "length"
-    | "map" -> make ["List"] "map"
-    | "rev" -> make ["List"] "rev"
-    | _ -> Some path_name
-    end
-
-  (* Seq *)
-  | [lib_name; "Seq"] when lib_name = stdlib_name ->
+  (* Specific to the Tezos protocol *)
+  | ["Stdlib"; "Seq"] ->
     begin match Name.to_string base with
     | "t" -> make ["OCaml"; "Seq"] "t"
     | _ -> Some path_name
     end
-
-  (* String *)
-  | [lib_name; "String"] when lib_name = stdlib_name ->
-    begin match Name.to_string base with
-    | "length" -> make ["OCaml"; "String"] "length"
-    | _ -> Some path_name
+  | "Tezos_raw_protocol_alpha" :: path ->
+    begin match path with
+    | [] -> register_tezos_import (Name.to_string base)
+    | library :: _ -> register_tezos_import library
+    end;
+    make path (Name.to_string base)
+  | "Tezos_protocol_environment_alpha__Environment" :: path
+  | "Tezos_protocol_environment_alpha" :: "Environment" :: path ->
+    make path (Name.to_string base)
+  | head :: path ->
+    begin match Util.String.is_prefix "Tezos_raw_protocol_alpha__" head with
+    | None -> None
+    | Some suffix ->
+      register_tezos_import suffix;
+      make (suffix :: path) (Name.to_string base)
     end
-
-  | _ -> None
 
 let convert (path_name : t) : t =
   match try_convert path_name with
@@ -208,6 +96,12 @@ let of_name (path : Name.t list) (base : Name.t) : t =
 
 (** Import an OCaml [Longident.t]. *)
 let of_long_ident (is_value : bool) (long_ident : Longident.t) : t =
+  (* Specific to Tezos *)
+  begin match Longident.flatten long_ident with
+  | ("Storage_description" as head) :: _
+  | ("Storage_sigs" as head) :: _ -> register_tezos_import head
+  | _ -> ()
+  end;
   match List.rev (Longident.flatten long_ident) with
   | [] -> failwith "Unexpected Longident.t with an empty list"
   | x :: xs ->
@@ -257,6 +151,9 @@ let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t =
 
 let map_constructor_name (cstr_name : string) (typ_ident : string) : string =
   match (cstr_name, typ_ident) with
+  | ("Ed25519", "public_key_hash") -> "Ed25519Hash"
+  | ("Secp256k1", "public_key_hash") -> "Secp256k1Hash"
+  | ("P256", "public_key_hash") -> "P256Hash"
   | _ -> cstr_name
 
 let of_constructor_description
@@ -282,6 +179,7 @@ let of_constructor_description
 
 let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
   let barrier_modules = [
+    "Tezos_protocol_environment_alpha__Environment";
   ] in
   let is_in_barrier_module (path : Path.t) : bool =
     List.mem (Ident.name (Path.head path)) barrier_modules in
@@ -312,8 +210,18 @@ let of_label_description (label_description : Types.label_description)
       "Unexpected label description without a type constructor"
 
 let constructor_of_variant (label : string) : t Monad.t =
+  let answer path base =
+    return (__make path base) in
   match label with
   (* Custom variants to add here. *)
+  | "Branch" -> answer ["Error_monad"] "Branch"
+  | "Dir" -> answer ["Context"] "Dir"
+  | "Hex" -> answer ["MBytes"] "Hex"
+  | "Key" -> answer ["Context"] "Key"
+  | "Permanent" -> answer ["Error_monad"] "Permanent"
+  | "Temporary" -> answer ["Error_monad"] "Temporary"
+  | "Uint16" -> answer ["Data_encoding"] "Uint16"
+  | "Uint8" -> answer ["Data_encoding"] "Uint8"
   | _ ->
     raise
       { path = []; base = Name.of_string false label }
@@ -358,8 +266,12 @@ let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
 
 let typ_of_variant (label : string) : t option =
+  let answer path base =
+    Some (__make path base) in
   match label with
   (* Custom variants to add here. *)
+  | "Dir" -> answer ["Context"] "dir_or_key"
+  | "Key" -> answer ["Context"] "dir_or_key"
   | _ -> None
 
 let typ_of_variants (labels : string list) : t option Monad.t =

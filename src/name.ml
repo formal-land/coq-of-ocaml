@@ -53,7 +53,6 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   match s with
   | "bool" -> escape_if_value s
   | "bytes" -> escape_if_value s
-  | "error" -> "__error"
   | "exists" -> "__exists"
   | "exists2" -> "__exists2"
   | "float" -> escape_if_value s
@@ -74,6 +73,45 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "string" -> escape_if_value s
   | "unit" -> escape_if_value s
   | "Variable" -> "__Variable"
+  (* Specific to the Tezos protocol *)
+  | "a" -> escape_if_value s
+  | "b" -> escape_if_value s
+  | "baking_rights_query" -> escape_if_value s
+  | "case" -> escape_if_value s
+  | "cons" -> escape_if_value s
+  | "descr" -> escape_if_value s
+  | "elt" -> escape_if_value s
+  | "endorsing_rights_query" -> escape_if_value s
+  | "eq" -> escape_if_value s
+  | "error" -> if is_value then "__error_value" else "__error"
+  | "field" -> escape_if_value s
+  | "fixed" -> escape_if_value s
+  | "frozen_balance" -> escape_if_value s
+  | "handler" -> escape_if_value s
+  | "hash" -> escape_if_value s
+  | "info" -> escape_if_value s
+  | "internal_gas" -> escape_if_value s
+  | "json" -> escape_if_value s
+  | "json_schema" -> escape_if_value s
+  | "judgement" -> escape_if_value s
+  | "key" -> escape_if_value s
+  | "lazy_expr" -> escape_if_value s
+  | "level_query" -> escape_if_value s
+  | "list_query" -> escape_if_value s
+  | "nonce" -> escape_if_value s
+  | "query" -> escape_if_value s
+  | "p" -> escape_if_value s
+  | "parametric" -> escape_if_value s
+  | "r" -> escape_if_value s
+  | "raw" -> escape_if_value s
+  | "seed" -> escape_if_value s
+  | "sequence" -> escape_if_value s
+  | "snapshot" -> escape_if_value s
+  | "stack" -> escape_if_value s
+  | "storage_error" -> escape_if_value s
+  | "t" -> escape_if_value s
+  | "tc_context" -> escape_if_value s
+  | "type_logger" -> escape_if_value s
   | _ -> s
 
 let substitute_first_dollar (s : string) : string =
