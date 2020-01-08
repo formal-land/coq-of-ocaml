@@ -6,9 +6,17 @@ open Monad.Notations
 type t =
   | Variable of Name.t
   | Arrow of t * t
+  | Sum of (string * t) list
   | Tuple of t list
   | Apply of MixedPath.t * t list
   | Package of PathName.t * t option Tree.t
+
+let type_exprs_of_row_field (row_field : Types.row_field) : Types.type_expr list =
+  match row_field with
+  | Rpresent None -> []
+  | Rpresent (Some typ) -> [typ]
+  | Reither (_, typs, _, _) -> typs
+  | Rabsent -> []
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
@@ -68,11 +76,27 @@ let rec of_typ_expr
         Name.Set.union new_typ_vars1 new_typ_vars2
       )
       NotSupported "Field types are not handled"
-  | Tnil -> raise (Variable (Name.of_string false "nil"), typ_vars, Name.Set.empty) NotSupported "Nil type is not handled"
-  | Tlink typ | Tsubst typ -> of_typ_expr with_free_vars typ_vars typ
-  | Tvariant _ ->
+  | Tnil ->
     raise
-      (Variable (Name.of_string false "variant"), typ_vars, Name.Set.empty)
+      (Variable (Name.of_string false "nil"), typ_vars, Name.Set.empty)
+      NotSupported
+      "Nil type is not handled"
+  | Tlink typ | Tsubst typ -> of_typ_expr with_free_vars typ_vars typ
+  | Tvariant { row_fields; _ } ->
+    Monad.List.fold_left
+      (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
+        let typs = type_exprs_of_row_field row_field in
+        of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
+        return (
+          (name, Tuple typs) :: fields,
+          typ_vars,
+          Name.Set.union new_typ_vars new_typ_vars'
+        )
+      )
+      ([], typ_vars, Name.Set.empty)
+      row_fields >>= fun (fields, typ_vars, new_typ_vars) ->
+    raise
+      (Sum (List.rev fields), typ_vars, new_typ_vars)
       NotSupported
       "Polymorphic variant types are not handled"
   | Tpoly (typ, []) -> of_typ_expr with_free_vars typ_vars typ
@@ -142,6 +166,7 @@ let rec typ_args (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
+  | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
   | Package (_, typ_params) ->
     Tree.flatten typ_params |>
@@ -172,12 +197,14 @@ module Context = struct
   type t =
     | Apply
     | Arrow
+    | Sum
     | Tuple
 
   let get_order (context : t) : int =
     match context with
     | Apply -> 0
-    | Arrow -> 2
+    | Arrow -> 3
+    | Sum -> 2
     | Tuple -> 1
 
   let should_parens (context : t option) (current_context : t) : bool =
@@ -220,9 +247,22 @@ let rec to_coq
       ))) ^^
       to_coq subst (Some Context.Arrow) typ_y
     )
+  | Sum typs ->
+    let typs = typs |> List.map (fun (name, typ) ->
+      let context = if List.length typs = 1 then context else Some Sum in
+      group (nest (!^ "(*" ^^ !^ ("`" ^ name) ^^ !^ "*)") ^^ to_coq subst context typ)
+    ) in
+    begin match typs with
+    | [] -> !^ "Empty_set"
+    | [typ] -> typ
+    | _ ->
+      Context.parens context Context.Sum @@ nest @@
+      separate (space ^^ !^ "+" ^^ space) typs
+    end
   | Tuple typs ->
     begin match typs with
     | [] -> !^ "unit"
+    | [typ] -> to_coq subst context typ
     | _ ->
       Context.parens context Context.Tuple @@ nest @@
       separate (space ^^ !^ "*" ^^ space)

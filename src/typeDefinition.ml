@@ -73,12 +73,7 @@ module Constructors = struct
 
     let of_ocaml_row (row : Asttypes.label * Types.row_field) : t Monad.t =
       let (label, field) = row in
-      let typs =
-        match field with
-        | Rpresent None -> []
-        | Rpresent (Some typ) -> [typ]
-        | Reither (_, typs, _, _) -> typs
-        | Rabsent -> [] in
+      let typs = Type.type_exprs_of_row_field field in
       Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, _) ->
       return {
         constructor_name = Name.of_string false label;
@@ -98,6 +93,10 @@ module Constructors = struct
       Arrow (
         subst_gadt_typ_constructor typ_name typ_arg,
         subst_gadt_typ_constructor typ_name typ_res
+      )
+    | Sum typs ->
+      Sum (typs |> List.map (fun (name, typ) ->
+        (name, subst_gadt_typ_constructor typ_name typ))
       )
     | Tuple typs -> Tuple (List.map (subst_gadt_typ_constructor typ_name) typs)
     | Apply (path, typs) ->
