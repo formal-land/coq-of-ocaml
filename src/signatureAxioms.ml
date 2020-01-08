@@ -71,31 +71,30 @@ and of_types_module_type (module_typ : Types.module_type) : t Monad.t =
     raise [Error ("(* " ^ error_message ^ " *)")] NotSupported error_message
 
 let rec of_signature (signature : signature) : t Monad.t =
-  let of_signature_item (signature_item : signature_item) : item option Monad.t =
+  let of_signature_item (signature_item : signature_item) : item list Monad.t =
     set_env signature_item.sig_env (
     set_loc (Loc.of_location signature_item.sig_loc) (
     match signature_item.sig_desc with
     | Tsig_attribute _ ->
-      raise (Some (Error "attribute")) NotSupported "Signature item `attribute` not handled"
+      raise [Error "attribute"] NotSupported "Signature item `attribute` not handled"
     | Tsig_class _ ->
-      raise (Some (Error "class")) NotSupported "Signature item `class` not handled"
+      raise [Error "class"] NotSupported "Signature item `class` not handled"
     | Tsig_class_type _ ->
-      raise (Some (Error "class_type")) NotSupported "Signature item `class_type` not handled"
+      raise [Error "class_type"] NotSupported "Signature item `class_type` not handled"
     | Tsig_exception { ext_id; _ } ->
-      raise (Some (Error ("(* exception " ^ Ident.name ext_id ^ " *)"))) SideEffect "Signature item `exception` not handled"
-    | Tsig_include _ ->
-      raise (Some (Error "include")) NotSupported "Signature item `include` not handled"
+      raise [Error ("(* exception " ^ Ident.name ext_id ^ " *)")] SideEffect "Signature item `exception` not handled"
+    | Tsig_include { incl_type; _} -> of_types_signature incl_type
     | Tsig_modtype { mtd_type = None; _ } ->
-      raise (Some (Error "abstract_module_type")) NotSupported "Abstract module type not handled"
+      raise [Error "abstract_module_type"] NotSupported "Abstract module type not handled"
     | Tsig_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
       let name = Name.of_ident false mtd_id in
       begin match mty_desc with
       | Tmty_signature signature ->
         Signature.of_signature signature >>= fun signature ->
-        return (Some (Signature (name, signature)))
+        return [Signature (name, signature)]
       | _ ->
         raise
-          (Some (Error "unhandled_module_type"))
+          [Error "unhandled_module_type"]
           NotSupported
           "Unhandled kind of module type"
       end
@@ -104,26 +103,26 @@ let rec of_signature (signature : signature) : t Monad.t =
       begin match mty_desc with
       | Tmty_signature signature ->
         of_signature signature >>= fun signature ->
-        return (Some (Module (name, signature)))
+        return [Module (name, signature)]
       | _ ->
         of_types_module_type mty_type >>= fun signature ->
-        return (Some (Module (name, signature)))
+        return [Module (name, signature)]
       end
-    | Tsig_open _ -> return None
+    | Tsig_open _ -> return []
     | Tsig_recmodule _ ->
-      raise (Some (Error "recursive_module")) NotSupported "Recursive module signatures are not handled"
+      raise [Error "recursive_module"] NotSupported "Recursive module signatures are not handled"
     | Tsig_type (_, typs) ->
       TypeDefinition.of_ocaml typs >>= fun typ_definition ->
-      return (Some (TypDefinition typ_definition))
+      return [TypDefinition typ_definition]
     | Tsig_typext _ ->
-      raise (Some (Error "extensible_type")) NotSupported "Extensible types are not handled"
+      raise [Error "extensible_type"] NotSupported "Extensible types are not handled"
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_vars = Name.Set.elements (Type.typ_args typ) in
-      return (Some (Value (name, typ_vars, typ))))) in
-  (signature.sig_items |> Monad.List.filter_map of_signature_item) >>= fun items ->
-  return items
+      return [Value (name, typ_vars, typ)])) in
+  (signature.sig_items |> Monad.List.map of_signature_item) >>= fun items ->
+  return (List.flatten items)
 
 let rec to_coq (signature : t) : SmartPrint.t =
   let to_coq_item (signature_item : item) : SmartPrint.t =
