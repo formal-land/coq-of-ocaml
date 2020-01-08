@@ -196,6 +196,13 @@ module Context = struct
     Pp.parens (should_parens context current_context) doc
 end
 
+let rec accumulate_nested_arrows (typ : t) : t list * t =
+  match typ with
+  | Arrow (typ_x, typ_y) ->
+    let (typ_xs, typ_y) = accumulate_nested_arrows typ_y in
+    (typ_x :: typ_xs, typ_y)
+  | _ -> ([], typ)
+
 (** Pretty-print a type. Use the [context] parameter to know if we should add
     parenthesis. *)
 let rec to_coq
@@ -205,10 +212,13 @@ let rec to_coq
   : SmartPrint.t =
   match typ with
   | Variable x -> Name.to_coq x
-  | Arrow (typ_x, typ_y) ->
-    Context.parens context Context.Arrow @@ nest (
-      to_coq subst (Some Context.Arrow) typ_x ^^ !^ "->" ^^
-      to_coq subst None typ_y
+  | Arrow _ ->
+    let (typ_xs, typ_y) = accumulate_nested_arrows typ in
+    Context.parens context Context.Arrow @@ group (
+      separate space (typ_xs |> List.map (fun typ_x ->
+        group (to_coq subst (Some Context.Arrow) typ_x ^^ !^ "->"
+      ))) ^^
+      to_coq subst (Some Context.Arrow) typ_y
     )
   | Tuple typs ->
     begin match typs with

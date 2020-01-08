@@ -63,7 +63,8 @@ Inductive comparable_struct_gadt : Set :=
 | Int_key : option type_annot -> comparable_struct_gadt
 | String_key : option type_annot -> comparable_struct_gadt
 | Bool_key : option type_annot -> comparable_struct_gadt
-| Pair_key : comparable_struct_gadt * option field_annot ->
+| Pair_key :
+  comparable_struct_gadt * option field_annot ->
   comparable_struct_gadt * option field_annot -> option type_annot ->
   comparable_struct_gadt
 

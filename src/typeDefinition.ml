@@ -195,8 +195,8 @@ module Inductive = struct
                 separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set
               ) ^-^ !^ ","
             ) ^^
-            separate space (param_typs |> List.map (fun param_typ ->
-              Type.to_coq subst (Some Type.Context.Arrow) param_typ ^^ !^ "->"
+            group @@ separate space (param_typs |> List.map (fun param_typ ->
+              group (Type.to_coq subst (Some Type.Context.Arrow) param_typ ^^ !^ "->")
             )) ^^ Type.to_coq subst None (Type.Apply (MixedPath.of_name name, res_typ_params))
           )
         )

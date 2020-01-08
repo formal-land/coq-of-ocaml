@@ -109,24 +109,29 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
   | Error message -> !^ message
   | Module (name, module_typ) ->
-    Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ
-  | TypExistential name -> Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name
+    nest (Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ)
+  | TypExistential name ->
+    nest (Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name)
   | TypSynonym (name, typ_args, typ) ->
-    Name.to_coq name ^^
-    (match typ_args with
-    | [] -> empty
-    | _ ->
-      parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
-    ) ^^ !^ ":=" ^^ Type.to_coq None None typ
+    nest (
+      Name.to_coq name ^^
+      (match typ_args with
+      | [] -> empty
+      | _ ->
+        parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
+      ) ^^ !^ ":=" ^^ Type.to_coq None None typ
+    )
   | Value (name, typ_args, typ) ->
-    Name.to_coq name ^^ !^ ":" ^^
-    (match typ_args with
-    | [] -> empty
-    | _ :: _ ->
-      !^ "forall" ^^ braces (group (
-        separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
-    Type.to_coq None None typ
+    nest (
+      Name.to_coq name ^^ !^ ":" ^^
+      (match typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        !^ "forall" ^^ braces (group (
+          separate space (List.map Name.to_coq typ_args) ^^
+          !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
+      Type.to_coq None None typ
+    )
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
   let typ_params : Name.t list =

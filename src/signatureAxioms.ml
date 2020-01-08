@@ -136,12 +136,14 @@ let rec to_coq (signature : t) : SmartPrint.t =
     | Signature (name, signature) -> Signature.to_coq_definition name signature
     | TypDefinition typ_definition -> TypeDefinition.to_coq typ_definition
     | Value (name, typ_vars, typ) ->
-      !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
-      (match typ_vars with
-      | [] -> empty
-      | _ :: _ ->
-        !^ "forall" ^^ braces (group (
-          separate space (List.map Name.to_coq typ_vars) ^^
-          !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
-      Type.to_coq None None typ ^-^ !^ "." in
+      nest (
+        !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
+        (match typ_vars with
+        | [] -> empty
+        | _ :: _ ->
+          !^ "forall" ^^ braces (group (
+            separate space (List.map Name.to_coq typ_vars) ^^
+            !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
+        Type.to_coq None None typ ^-^ !^ "."
+      ) in
   separate (newline ^^ newline) (signature |> List.map to_coq_item)
