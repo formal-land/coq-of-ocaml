@@ -40,6 +40,7 @@ let escape_operator (s : string) : string =
 let escape_reserved_word (is_value : bool) (s : string) : string =
   match s with
   | "bytes" -> if is_value then "__bytes_value" else s
+  | "error" -> "__error"
   | "exists" -> "__exists"
   | "exists2" -> "__exists2"
   | "list" -> if is_value then "__list_value" else s
