@@ -32,3 +32,5 @@ end
 type ('first, 'second) poly = {
   first : 'first;
   second : 'second }
+
+let p = { first = 12; second = false }

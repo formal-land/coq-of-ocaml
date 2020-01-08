@@ -40,8 +40,8 @@ let rec of_pattern (p : pattern) : t Monad.t =
     ) >>= fun patterns ->
     raise (Constructor (path_name, patterns)) NotSupported "Patterns on variants are not supported"
   | Tpat_record (fields, _) ->
-    (fields |> Monad.List.map (fun (x, _, p) ->
-      let x = PathName.of_long_ident false x.Location.txt in
+    (fields |> Monad.List.map (fun (_, label_description, p) ->
+      let x = PathName.of_label_description label_description in
       of_pattern p >>= fun pattern ->
       return (x, pattern)
     )) >>= fun fields ->

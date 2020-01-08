@@ -161,23 +161,25 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     return (Constructor (x, es))
   | Texp_variant _ -> error_message (Error "variant") NotSupported "Variants not supported"
   | Texp_record { fields = fields; extended_expression = None; _ } ->
-    (Array.to_list fields |> Monad.List.filter_map (fun (_, definition) ->
-      (match definition with
+    (Array.to_list fields |> Monad.List.filter_map (fun (label_description, definition) ->
+      begin match definition with
       | Kept _ ->
         raise None NotSupported "Records with overwriting are not handled"
-      | Overridden (loc, e) -> return (Some (loc, e))) >>= fun x_e ->
+      | Overridden (_, e) ->
+        let x = PathName.of_label_description label_description in
+        return (Some (x, e))
+      end >>= fun x_e ->
       match x_e with
       | None -> return None
       | Some (x, e) ->
-        let x = PathName.of_long_ident false x.txt in
         of_expression typ_vars e >>= fun e ->
         return (Some (x, e))
     )) >>= fun fields ->
     return (Record fields)
   | Texp_record { extended_expression = Some _; _ } ->
     error_message (Error "record_substitution") NotSupported "Record substitution not handled"
-  | Texp_field (e, x, _) ->
-    let x = PathName.of_long_ident false x.txt in
+  | Texp_field (e, _, label_description) ->
+    let x = PathName.of_label_description label_description in
     of_expression typ_vars e >>= fun e ->
     return (Field (e, x))
   | Texp_ifthenelse (e1, e2, e3) ->

@@ -33,14 +33,20 @@ Arguments Unrelated {_}.
 Reserved Notation "'re".
 Reserved Notation "'re_bis".
 
-Record re_bis_skeleton {bis : Set} := {
-  bis : bis }.
-Arguments re_bis_skeleton : clear implicits.
+Module re_bis_skeleton.
+  Record record {bis : Set} := {
+    bis : bis }.
+  Arguments record : clear implicits.
+End re_bis_skeleton.
+Definition re_bis_skeleton := re_bis_skeleton.record.
 
-Record re_skeleton {payload message : Set} := {
-  payload : payload;
-  message : message }.
-Arguments re_skeleton : clear implicits.
+Module re_skeleton.
+  Record record {payload message : Set} := {
+    payload : payload;
+    message : message }.
+  Arguments record : clear implicits.
+End re_skeleton.
+Definition re_skeleton := re_skeleton.record.
 
 Inductive ind : Set :=
 | Ind : 're Z -> ind

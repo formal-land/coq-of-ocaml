@@ -8,23 +8,31 @@ let to_coq_record
   (fields : (Name.t * Type.t) list)
   : SmartPrint.t =
   nest (
-    !^ "Record" ^^ Name.to_coq name ^^
-    (match typ_args with
-    | [] -> empty
-    | _ :: _ ->
-      braces (nest (
-        separate space (List.map Name.to_coq typ_args) ^^
-        !^ ":" ^^ Pp.set
-      ))
-    ) ^^
-    !^ ":=" ^^ !^ "{" ^^ newline ^^
-    indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
-      nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)))) ^^
-    !^ "}." ^^
-    (match typ_args with
-    | [] -> empty
-    | _ :: _ ->
-      newline ^^ !^ "Arguments" ^^ Name.to_coq name ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
+    !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+    indent (
+      !^ "Record" ^^ !^ "record" ^^
+      begin match typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        braces (nest (
+          separate space (List.map Name.to_coq typ_args) ^^
+          !^ ":" ^^ Pp.set
+        ))
+      end ^^
+      !^ ":=" ^^ !^ "{" ^^ newline ^^
+      indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
+        nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)))) ^^
+      !^ "}." ^^
+      begin match typ_args with
+      | [] -> empty
+      | _ :: _ ->
+        newline ^^ !^ "Arguments" ^^ !^ "record" ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
+      end
+    ) ^^ newline ^^
+    !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+    nest (
+      !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+      Name.to_coq name ^-^ !^ ".record" ^-^ !^ "."
     )
   )
 
