@@ -74,7 +74,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         vb_expr = e;
         _
       } ])
-      when PathName.is_unit (PathName.of_path_without_convert true path) ->
+      when PathName.is_unit (PathName.of_path_without_convert false path) ->
       top_level_evaluation e
     | Tstr_eval (e, _) -> top_level_evaluation e
     | Tstr_value (is_rec, cases) ->
