@@ -49,7 +49,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6164 lines</li>
-      <li>Coq size: 2829 lines (-55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2743 lines (-56% compared to&nbsp;OCaml)</li>
       <li>errors: 271</li>
     </ul>
   </div>
@@ -7064,14 +7064,14 @@ Module Pervasives.
   
   Definition format (a b c : Set) := format4 a b c c.
   
-  Parameter string_of_format : forall {a b c d e f : Set}, format6 a b c d e f
-    -&gt; string.
+  Parameter string_of_format : forall {a b c d e f : Set},
+    format6 a b c d e f -&gt; string.
   
-  Parameter format_of_string : forall {a b c d e f : Set}, format6 a b c d e f
-    -&gt; format6 a b c d e f.
+  Parameter format_of_string : forall {a b c d e f : Set},
+    format6 a b c d e f -&gt; format6 a b c d e f.
   
-  Parameter op_caretcaret : forall {a b c d e f g h : Set}, format6 a b c d e f
-    -&gt; format6 f b c e g h -&gt; format6 a b c d g h.
+  Parameter op_caretcaret : forall {a b c d e f g h : Set},
+    format6 a b c d e f -&gt; format6 f b c e g h -&gt; format6 a b c d g h.
 End Pervasives.
 
 Module List.
@@ -7115,30 +7115,30 @@ Module List.
   
   Parameter fold_right : forall {a b : Set}, (a -&gt; b -&gt; b) -&gt; list a -&gt; b -&gt; b.
   
-  Parameter iter2 : forall {a b : Set}, (a -&gt; b -&gt; unit) -&gt;
-    list a -&gt; list b -&gt; unit.
+  Parameter iter2 : forall {a b : Set},
+    (a -&gt; b -&gt; unit) -&gt; list a -&gt; list b -&gt; unit.
   
-  Parameter map2 : forall {a b c : Set}, (a -&gt; b -&gt; c) -&gt;
-    list a -&gt; list b -&gt; list c.
+  Parameter map2 : forall {a b c : Set},
+    (a -&gt; b -&gt; c) -&gt; list a -&gt; list b -&gt; list c.
   
-  Parameter rev_map2 : forall {a b c : Set}, (a -&gt; b -&gt; c) -&gt;
-    list a -&gt; list b -&gt; list c.
+  Parameter rev_map2 : forall {a b c : Set},
+    (a -&gt; b -&gt; c) -&gt; list a -&gt; list b -&gt; list c.
   
-  Parameter fold_left2 : forall {a b c : Set}, (a -&gt; b -&gt; c -&gt; a) -&gt;
-    a -&gt; list b -&gt; list c -&gt; a.
+  Parameter fold_left2 : forall {a b c : Set},
+    (a -&gt; b -&gt; c -&gt; a) -&gt; a -&gt; list b -&gt; list c -&gt; a.
   
-  Parameter fold_right2 : forall {a b c : Set}, (a -&gt; b -&gt; c -&gt; c) -&gt;
-    list a -&gt; list b -&gt; c -&gt; c.
+  Parameter fold_right2 : forall {a b c : Set},
+    (a -&gt; b -&gt; c -&gt; c) -&gt; list a -&gt; list b -&gt; c -&gt; c.
   
   Parameter for_all : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; bool.
   
   Parameter __exists : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; bool.
   
-  Parameter for_all2 : forall {a b : Set}, (a -&gt; b -&gt; bool) -&gt;
-    list a -&gt; list b -&gt; bool.
+  Parameter for_all2 : forall {a b : Set},
+    (a -&gt; b -&gt; bool) -&gt; list a -&gt; list b -&gt; bool.
   
-  Parameter __exists2 : forall {a b : Set}, (a -&gt; b -&gt; bool) -&gt;
-    list a -&gt; list b -&gt; bool.
+  Parameter __exists2 : forall {a b : Set},
+    (a -&gt; b -&gt; bool) -&gt; list a -&gt; list b -&gt; bool.
   
   Parameter mem : forall {a : Set}, a -&gt; list a -&gt; bool.
   
@@ -7150,8 +7150,8 @@ Module List.
   
   Parameter find_all : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; list a.
   
-  Parameter partition : forall {a : Set}, (a -&gt; bool) -&gt;
-    list a -&gt; list a * list a.
+  Parameter partition : forall {a : Set},
+    (a -&gt; bool) -&gt; list a -&gt; list a * list a.
   
   Parameter assoc_opt : forall {a b : Set}, a -&gt; list (a * b) -&gt; option b.
   
@@ -7161,7 +7161,8 @@ Module List.
   
   Parameter mem_assq : forall {a b : Set}, a -&gt; list (a * b) -&gt; bool.
   
-  Parameter remove_assoc : forall {a b : Set}, a -&gt; list (a * b) -&gt; list (a * b).
+  Parameter remove_assoc : forall {a b : Set},
+    a -&gt; list (a * b) -&gt; list (a * b).
   
   Parameter remove_assq : forall {a b : Set}, a -&gt; list (a * b) -&gt; list (a * b).
   
@@ -7177,8 +7178,8 @@ Module List.
   
   Parameter sort_uniq : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; list a -&gt; list a.
   
-  Parameter merge : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt;
-    list a -&gt; list a -&gt; list a.
+  Parameter merge : forall {a : Set},
+    (a -&gt; a -&gt; Z) -&gt; list a -&gt; list a -&gt; list a.
 End List.
 
 Module String.
@@ -7492,33 +7493,34 @@ Module Format.
   
   Parameter pp_get_mark_tags : formatter -&gt; unit -&gt; bool.
   
-  Parameter pp_print_list : forall {a : Set}, option (formatter -&gt; unit -&gt; unit)
-    -&gt; (formatter -&gt; a -&gt; unit) -&gt; formatter -&gt; list a -&gt; unit.
+  Parameter pp_print_list : forall {a : Set},
+    option (formatter -&gt; unit -&gt; unit) -&gt; (formatter -&gt; a -&gt; unit) -&gt;
+    formatter -&gt; list a -&gt; unit.
   
   Parameter pp_print_text : formatter -&gt; string -&gt; unit.
   
-  Parameter fprintf : forall {a : Set}, formatter -&gt;
-    Pervasives.format a formatter unit -&gt; a.
+  Parameter fprintf : forall {a : Set},
+    formatter -&gt; Pervasives.format a formatter unit -&gt; a.
   
   Parameter sprintf : forall {a : Set}, Pervasives.format a unit string -&gt; a.
   
-  Parameter asprintf : forall {a : Set}, Pervasives.format4 a formatter unit
-    string -&gt; a.
+  Parameter asprintf : forall {a : Set},
+    Pervasives.format4 a formatter unit string -&gt; a.
   
-  Parameter ifprintf : forall {a : Set}, formatter -&gt;
-    Pervasives.format a formatter unit -&gt; a.
+  Parameter ifprintf : forall {a : Set},
+    formatter -&gt; Pervasives.format a formatter unit -&gt; a.
   
-  Parameter kfprintf : forall {a b : Set}, (formatter -&gt; a) -&gt;
-    formatter -&gt; Pervasives.format4 b formatter unit a -&gt; b.
+  Parameter kfprintf : forall {a b : Set},
+    (formatter -&gt; a) -&gt; formatter -&gt; Pervasives.format4 b formatter unit a -&gt; b.
   
-  Parameter ikfprintf : forall {a b : Set}, (formatter -&gt; a) -&gt;
-    formatter -&gt; Pervasives.format4 b formatter unit a -&gt; b.
+  Parameter ikfprintf : forall {a b : Set},
+    (formatter -&gt; a) -&gt; formatter -&gt; Pervasives.format4 b formatter unit a -&gt; b.
   
-  Parameter ksprintf : forall {a b : Set}, (string -&gt; a) -&gt;
-    Pervasives.format4 b unit string a -&gt; b.
+  Parameter ksprintf : forall {a b : Set},
+    (string -&gt; a) -&gt; Pervasives.format4 b unit string a -&gt; b.
   
-  Parameter kasprintf : forall {a b : Set}, (string -&gt; a) -&gt;
-    Pervasives.format4 b formatter unit a -&gt; b.
+  Parameter kasprintf : forall {a b : Set},
+    (string -&gt; a) -&gt; Pervasives.format4 b formatter unit a -&gt; b.
 End Format.
 
 Module MBytes.
@@ -7694,61 +7696,61 @@ Module Lwt.
 End Lwt.
 
 Module Lwt_list.
-  Parameter map_s : forall {a b : Set}, (a -&gt; Lwt.t b) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter map_s : forall {a b : Set},
+    (a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter map_p : forall {a b : Set}, (a -&gt; Lwt.t b) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter map_p : forall {a b : Set},
+    (a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter mapi_s : forall {a b : Set}, (Z -&gt; a -&gt; Lwt.t b) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter mapi_s : forall {a b : Set},
+    (Z -&gt; a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter mapi_p : forall {a b : Set}, (Z -&gt; a -&gt; Lwt.t b) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter mapi_p : forall {a b : Set},
+    (Z -&gt; a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter rev_map_s : forall {a b : Set}, (a -&gt; Lwt.t b) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter rev_map_s : forall {a b : Set},
+    (a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter rev_map_p : forall {a b : Set}, (a -&gt; Lwt.t b) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter rev_map_p : forall {a b : Set},
+    (a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter fold_left_s : forall {a b : Set}, (a -&gt; b -&gt; Lwt.t a) -&gt;
-    a -&gt; list b -&gt; Lwt.t a.
+  Parameter fold_left_s : forall {a b : Set},
+    (a -&gt; b -&gt; Lwt.t a) -&gt; a -&gt; list b -&gt; Lwt.t a.
   
-  Parameter fold_right_s : forall {a b : Set}, (a -&gt; b -&gt; Lwt.t b) -&gt;
-    list a -&gt; b -&gt; Lwt.t b.
+  Parameter fold_right_s : forall {a b : Set},
+    (a -&gt; b -&gt; Lwt.t b) -&gt; list a -&gt; b -&gt; Lwt.t b.
   
-  Parameter for_all_s : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t bool.
+  Parameter for_all_s : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t bool.
   
-  Parameter for_all_p : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t bool.
+  Parameter for_all_p : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t bool.
   
-  Parameter exists_s : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t bool.
+  Parameter exists_s : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t bool.
   
-  Parameter exists_p : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t bool.
+  Parameter exists_p : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t bool.
   
   Parameter find_s : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t a.
   
-  Parameter filter_s : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t (list a).
+  Parameter filter_s : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t (list a).
   
-  Parameter filter_p : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t (list a).
+  Parameter filter_p : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t (list a).
   
-  Parameter filter_map_s : forall {a b : Set}, (a -&gt; Lwt.t (option b)) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter filter_map_s : forall {a b : Set},
+    (a -&gt; Lwt.t (option b)) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter filter_map_p : forall {a b : Set}, (a -&gt; Lwt.t (option b)) -&gt;
-    list a -&gt; Lwt.t (list b).
+  Parameter filter_map_p : forall {a b : Set},
+    (a -&gt; Lwt.t (option b)) -&gt; list a -&gt; Lwt.t (list b).
   
-  Parameter partition_s : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t (list a * list a).
+  Parameter partition_s : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t (list a * list a).
   
-  Parameter partition_p : forall {a : Set}, (a -&gt; Lwt.t bool) -&gt;
-    list a -&gt; Lwt.t (list a * list a).
+  Parameter partition_p : forall {a : Set},
+    (a -&gt; Lwt.t bool) -&gt; list a -&gt; Lwt.t (list a * list a).
 End Lwt_list.
 
 Module Raw_hashes.
@@ -8091,7 +8093,8 @@ Module Data_encoding.
   
   Parameter float : encoding Z.
   
-  Parameter __option_value : forall {a : Set}, encoding a -&gt; encoding (option a).
+  Parameter __option_value : forall {a : Set},
+    encoding a -&gt; encoding (option a).
   
   Parameter string_enum : forall {a : Set}, list (string * a) -&gt; encoding a.
   
@@ -8108,11 +8111,11 @@ Module Data_encoding.
     
     Parameter __bytes_value : encoding MBytes.t.
     
-    Parameter array : forall {a : Set}, option Z -&gt;
-      encoding a -&gt; encoding (array a).
+    Parameter array : forall {a : Set},
+      option Z -&gt; encoding a -&gt; encoding (array a).
     
-    Parameter __list_value : forall {a : Set}, option Z -&gt;
-      encoding a -&gt; encoding (list a).
+    Parameter __list_value : forall {a : Set},
+      option Z -&gt; encoding a -&gt; encoding (list a).
   End __Variable.
   
   Module Bounded.
@@ -8121,8 +8124,8 @@ Module Data_encoding.
     Parameter __bytes_value : Z -&gt; encoding MBytes.t.
   End Bounded.
   
-  Parameter dynamic_size : forall {a variant : Set}, option variant -&gt;
-    encoding a -&gt; encoding a.
+  Parameter dynamic_size : forall {a variant : Set},
+    option variant -&gt; encoding a -&gt; encoding a.
   
   Parameter json : encoding json.
   
@@ -8130,156 +8133,108 @@ Module Data_encoding.
   
   Parameter field : forall (a : Set), Set.
   
-  Parameter req : forall {t : Set}, option string -&gt;
-    option string -&gt; string -&gt; encoding t -&gt; field t.
+  Parameter req : forall {t : Set},
+    option string -&gt; option string -&gt; string -&gt; encoding t -&gt; field t.
   
-  Parameter opt : forall {t : Set}, option string -&gt;
-    option string -&gt; string -&gt; encoding t -&gt; field (option t).
+  Parameter opt : forall {t : Set},
+    option string -&gt; option string -&gt; string -&gt; encoding t -&gt; field (option t).
   
-  Parameter varopt : forall {t : Set}, option string -&gt;
-    option string -&gt; string -&gt; encoding t -&gt; field (option t).
+  Parameter varopt : forall {t : Set},
+    option string -&gt; option string -&gt; string -&gt; encoding t -&gt; field (option t).
   
-  Parameter dft : forall {t : Set}, option string -&gt;
-    option string -&gt; string -&gt; encoding t -&gt; t -&gt; field t.
+  Parameter dft : forall {t : Set},
+    option string -&gt; option string -&gt; string -&gt; encoding t -&gt; t -&gt; field t.
   
   Parameter obj1 : forall {f1 : Set}, field f1 -&gt; encoding f1.
   
-  Parameter obj2 : forall {f1 f2 : Set}, field f1 -&gt;
-    field f2 -&gt; encoding (f1 * f2).
+  Parameter obj2 : forall {f1 f2 : Set},
+    field f1 -&gt; field f2 -&gt; encoding (f1 * f2).
   
-  Parameter obj3 : forall {f1 f2 f3 : Set}, field f1 -&gt;
-    field f2 -&gt; field f3 -&gt; encoding (f1 * f2 * f3).
+  Parameter obj3 : forall {f1 f2 f3 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; encoding (f1 * f2 * f3).
   
-  Parameter obj4 : forall {f1 f2 f3 f4 : Set}, field f1 -&gt;
-    field f2 -&gt; field f3 -&gt; field f4 -&gt; encoding (f1 * f2 * f3 * f4).
+  Parameter obj4 : forall {f1 f2 f3 f4 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; field f4 -&gt; encoding (f1 * f2 * f3 * f4).
   
-  Parameter obj5 : forall {f1 f2 f3 f4 f5 : Set}, field f1 -&gt;
-    field f2 -&gt;
-      field f3 -&gt; field f4 -&gt; field f5 -&gt; encoding (f1 * f2 * f3 * f4 * f5).
+  Parameter obj5 : forall {f1 f2 f3 f4 f5 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; field f4 -&gt; field f5 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5).
   
-  Parameter obj6 : forall {f1 f2 f3 f4 f5 f6 : Set}, field f1 -&gt;
-    field f2 -&gt;
-      field f3 -&gt;
-        field f4 -&gt;
-          field f5 -&gt; field f6 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6).
+  Parameter obj6 : forall {f1 f2 f3 f4 f5 f6 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; field f4 -&gt; field f5 -&gt; field f6 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5 * f6).
   
-  Parameter obj7 : forall {f1 f2 f3 f4 f5 f6 f7 : Set}, field f1 -&gt;
-    field f2 -&gt;
-      field f3 -&gt;
-        field f4 -&gt;
-          field f5 -&gt;
-            field f6 -&gt; field f7 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7).
+  Parameter obj7 : forall {f1 f2 f3 f4 f5 f6 f7 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; field f4 -&gt; field f5 -&gt; field f6 -&gt;
+    field f7 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7).
   
-  Parameter obj8 : forall {f1 f2 f3 f4 f5 f6 f7 f8 : Set}, field f1 -&gt;
-    field f2 -&gt;
-      field f3 -&gt;
-        field f4 -&gt;
-          field f5 -&gt;
-            field f6 -&gt;
-              field f7 -&gt;
-                field f8 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8).
+  Parameter obj8 : forall {f1 f2 f3 f4 f5 f6 f7 f8 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; field f4 -&gt; field f5 -&gt; field f6 -&gt;
+    field f7 -&gt; field f8 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8).
   
-  Parameter obj9 : forall {f1 f2 f3 f4 f5 f6 f7 f8 f9 : Set}, field f1 -&gt;
-    field f2 -&gt;
-      field f3 -&gt;
-        field f4 -&gt;
-          field f5 -&gt;
-            field f6 -&gt;
-              field f7 -&gt;
-                field f8 -&gt;
-                  field f9 -&gt;
-                    encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9).
+  Parameter obj9 : forall {f1 f2 f3 f4 f5 f6 f7 f8 f9 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; field f4 -&gt; field f5 -&gt; field f6 -&gt;
+    field f7 -&gt; field f8 -&gt; field f9 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9).
   
-  Parameter obj10 : forall {f1 f10 f2 f3 f4 f5 f6 f7 f8 f9 : Set}, field f1 -&gt;
-    field f2 -&gt;
-      field f3 -&gt;
-        field f4 -&gt;
-          field f5 -&gt;
-            field f6 -&gt;
-              field f7 -&gt;
-                field f8 -&gt;
-                  field f9 -&gt;
-                    field f10 -&gt;
-                      encoding
-                        (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9 * f10).
+  Parameter obj10 : forall {f1 f10 f2 f3 f4 f5 f6 f7 f8 f9 : Set},
+    field f1 -&gt; field f2 -&gt; field f3 -&gt; field f4 -&gt; field f5 -&gt; field f6 -&gt;
+    field f7 -&gt; field f8 -&gt; field f9 -&gt; field f10 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9 * f10).
   
   Parameter tup1 : forall {f1 : Set}, encoding f1 -&gt; encoding f1.
   
-  Parameter tup2 : forall {f1 f2 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt; encoding (f1 * f2).
+  Parameter tup2 : forall {f1 f2 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding (f1 * f2).
   
-  Parameter tup3 : forall {f1 f2 f3 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt; encoding f3 -&gt; encoding (f1 * f2 * f3).
+  Parameter tup3 : forall {f1 f2 f3 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding (f1 * f2 * f3).
   
-  Parameter tup4 : forall {f1 f2 f3 f4 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt; encoding (f1 * f2 * f3 * f4).
+  Parameter tup4 : forall {f1 f2 f3 f4 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt;
+    encoding (f1 * f2 * f3 * f4).
   
-  Parameter tup5 : forall {f1 f2 f3 f4 f5 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt;
-      encoding f3 -&gt;
-        encoding f4 -&gt; encoding f5 -&gt; encoding (f1 * f2 * f3 * f4 * f5).
+  Parameter tup5 : forall {f1 f2 f3 f4 f5 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt; encoding f5 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5).
   
-  Parameter tup6 : forall {f1 f2 f3 f4 f5 f6 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt;
-      encoding f3 -&gt;
-        encoding f4 -&gt;
-          encoding f5 -&gt; encoding f6 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6).
+  Parameter tup6 : forall {f1 f2 f3 f4 f5 f6 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt; encoding f5 -&gt;
+    encoding f6 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6).
   
-  Parameter tup7 : forall {f1 f2 f3 f4 f5 f6 f7 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt;
-      encoding f3 -&gt;
-        encoding f4 -&gt;
-          encoding f5 -&gt;
-            encoding f6 -&gt;
-              encoding f7 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7).
+  Parameter tup7 : forall {f1 f2 f3 f4 f5 f6 f7 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt; encoding f5 -&gt;
+    encoding f6 -&gt; encoding f7 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7).
   
-  Parameter tup8 : forall {f1 f2 f3 f4 f5 f6 f7 f8 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt;
-      encoding f3 -&gt;
-        encoding f4 -&gt;
-          encoding f5 -&gt;
-            encoding f6 -&gt;
-              encoding f7 -&gt;
-                encoding f8 -&gt; encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8).
+  Parameter tup8 : forall {f1 f2 f3 f4 f5 f6 f7 f8 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt; encoding f5 -&gt;
+    encoding f6 -&gt; encoding f7 -&gt; encoding f8 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8).
   
-  Parameter tup9 : forall {f1 f2 f3 f4 f5 f6 f7 f8 f9 : Set}, encoding f1 -&gt;
-    encoding f2 -&gt;
-      encoding f3 -&gt;
-        encoding f4 -&gt;
-          encoding f5 -&gt;
-            encoding f6 -&gt;
-              encoding f7 -&gt;
-                encoding f8 -&gt;
-                  encoding f9 -&gt;
-                    encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9).
+  Parameter tup9 : forall {f1 f2 f3 f4 f5 f6 f7 f8 f9 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt; encoding f5 -&gt;
+    encoding f6 -&gt; encoding f7 -&gt; encoding f8 -&gt; encoding f9 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9).
   
-  Parameter tup10 : forall {f1 f10 f2 f3 f4 f5 f6 f7 f8 f9 : Set}, encoding f1
-    -&gt;
-    encoding f2 -&gt;
-      encoding f3 -&gt;
-        encoding f4 -&gt;
-          encoding f5 -&gt;
-            encoding f6 -&gt;
-              encoding f7 -&gt;
-                encoding f8 -&gt;
-                  encoding f9 -&gt;
-                    encoding f10 -&gt;
-                      encoding
-                        (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9 * f10).
+  Parameter tup10 : forall {f1 f10 f2 f3 f4 f5 f6 f7 f8 f9 : Set},
+    encoding f1 -&gt; encoding f2 -&gt; encoding f3 -&gt; encoding f4 -&gt; encoding f5 -&gt;
+    encoding f6 -&gt; encoding f7 -&gt; encoding f8 -&gt; encoding f9 -&gt; encoding f10 -&gt;
+    encoding (f1 * f2 * f3 * f4 * f5 * f6 * f7 * f8 * f9 * f10).
   
-  Parameter merge_objs : forall {o1 o2 : Set}, encoding o1 -&gt;
-    encoding o2 -&gt; encoding (o1 * o2).
+  Parameter merge_objs : forall {o1 o2 : Set},
+    encoding o1 -&gt; encoding o2 -&gt; encoding (o1 * o2).
   
-  Parameter merge_tups : forall {a1 a2 : Set}, encoding a1 -&gt;
-    encoding a2 -&gt; encoding (a1 * a2).
+  Parameter merge_tups : forall {a1 a2 : Set},
+    encoding a1 -&gt; encoding a2 -&gt; encoding (a1 * a2).
   
-  Parameter array : forall {a : Set}, option Z -&gt;
-    encoding a -&gt; encoding (array a).
+  Parameter array : forall {a : Set},
+    option Z -&gt; encoding a -&gt; encoding (array a).
   
-  Parameter __list_value : forall {a : Set}, option Z -&gt;
-    encoding a -&gt; encoding (list a).
+  Parameter __list_value : forall {a : Set},
+    option Z -&gt; encoding a -&gt; encoding (list a).
   
-  Parameter assoc : forall {a : Set}, encoding a -&gt; encoding (list (string * a)).
+  Parameter assoc : forall {a : Set},
+    encoding a -&gt; encoding (list (string * a)).
   
   Inductive case_tag : Set :=
   | Tag : Z -&gt; case_tag
@@ -8287,21 +8242,22 @@ Module Data_encoding.
   
   Parameter case : forall (t : Set), Set.
   
-  Parameter case : forall {a t : Set}, string -&gt;
-    option string -&gt;
-      case_tag -&gt; encoding a -&gt; (t -&gt; option a) -&gt; (a -&gt; t) -&gt; case t.
+  Parameter case : forall {a t : Set},
+    string -&gt; option string -&gt; case_tag -&gt; encoding a -&gt; (t -&gt; option a) -&gt;
+    (a -&gt; t) -&gt; case t.
   
-  Parameter union : forall {t variant : Set}, option variant -&gt;
-    list (case t) -&gt; encoding t.
+  Parameter union : forall {t variant : Set},
+    option variant -&gt; list (case t) -&gt; encoding t.
   
-  Parameter def : forall {t : Set}, string -&gt;
-    option string -&gt; option string -&gt; encoding t -&gt; encoding t.
+  Parameter def : forall {t : Set},
+    string -&gt; option string -&gt; option string -&gt; encoding t -&gt; encoding t.
   
-  Parameter conv : forall {a b : Set}, (a -&gt; b) -&gt;
-    (b -&gt; a) -&gt; option json_schema -&gt; encoding b -&gt; encoding a.
+  Parameter conv : forall {a b : Set},
+    (a -&gt; b) -&gt; (b -&gt; a) -&gt; option json_schema -&gt; encoding b -&gt; encoding a.
   
-  Parameter mu : forall {a : Set}, string -&gt;
-    option string -&gt; option string -&gt; (encoding a -&gt; encoding a) -&gt; encoding a.
+  Parameter mu : forall {a : Set},
+    string -&gt; option string -&gt; option string -&gt; (encoding a -&gt; encoding a) -&gt;
+    encoding a.
   
   Parameter lazy_t : forall (a : Set), Set.
   
@@ -8313,12 +8269,12 @@ Module Data_encoding.
   
   Parameter make_lazy : forall {a : Set}, encoding a -&gt; a -&gt; lazy_t a.
   
-  Parameter apply_lazy : forall {a b : Set}, (a -&gt; b) -&gt;
-    (MBytes.t -&gt; b) -&gt; (b -&gt; b -&gt; b) -&gt; lazy_t a -&gt; b.
+  Parameter apply_lazy : forall {a b : Set},
+    (a -&gt; b) -&gt; (MBytes.t -&gt; b) -&gt; (b -&gt; b -&gt; b) -&gt; lazy_t a -&gt; b.
   
   Module Json.
-    Parameter schema : forall {a : Set}, option string -&gt;
-      encoding a -&gt; json_schema.
+    Parameter schema : forall {a : Set},
+      option string -&gt; encoding a -&gt; json_schema.
     
     Parameter construct : forall {t : Set}, encoding t -&gt; t -&gt; json.
     
@@ -8347,11 +8303,12 @@ Module Data_encoding.
     
     (* exception Unexpected_field *)
     
-    Parameter print_error : option (Format.formatter -&gt; exn -&gt; unit) -&gt;
-      Format.formatter -&gt; exn -&gt; unit.
+    Parameter print_error :
+      option (Format.formatter -&gt; exn -&gt; unit) -&gt; Format.formatter -&gt; exn -&gt;
+      unit.
     
-    Parameter cannot_destruct : forall {a b : Set}, Pervasives.format4 a
-      Format.formatter unit b -&gt; a.
+    Parameter cannot_destruct : forall {a b : Set},
+      Pervasives.format4 a Format.formatter unit b -&gt; a.
     
     Parameter wrap_error : forall {a b : Set}, (a -&gt; b) -&gt; a -&gt; b.
     
@@ -8363,11 +8320,11 @@ Module Data_encoding.
     
     Parameter fixed_length : forall {a : Set}, encoding a -&gt; option Z.
     
-    Parameter read : forall {a : Set}, encoding a -&gt;
-      MBytes.t -&gt; Z -&gt; Z -&gt; option (Z * a).
+    Parameter read : forall {a : Set},
+      encoding a -&gt; MBytes.t -&gt; Z -&gt; Z -&gt; option (Z * a).
     
-    Parameter write : forall {a : Set}, encoding a -&gt;
-      a -&gt; MBytes.t -&gt; Z -&gt; Z -&gt; option Z.
+    Parameter write : forall {a : Set},
+      encoding a -&gt; a -&gt; MBytes.t -&gt; Z -&gt; Z -&gt; option Z.
     
     Parameter to_bytes : forall {a : Set}, encoding a -&gt; a -&gt; option MBytes.t.
     
@@ -8410,20 +8367,17 @@ Module Error_monad.
   
   Parameter get_registered_errors : unit -&gt; list error_info.
   
-  Parameter register_error_kind : forall {err : Set}, error_category -&gt;
-    string -&gt;
-      string -&gt;
-        string -&gt;
-          option (Format.formatter -&gt; err -&gt; unit) -&gt;
-            Data_encoding.t err -&gt;
-              (error -&gt; option err) -&gt; (err -&gt; error) -&gt; unit.
+  Parameter register_error_kind : forall {err : Set},
+    error_category -&gt; string -&gt; string -&gt; string -&gt;
+    option (Format.formatter -&gt; err -&gt; unit) -&gt; Data_encoding.t err -&gt;
+    (error -&gt; option err) -&gt; (err -&gt; error) -&gt; unit.
   
   Parameter classify_errors : list error -&gt; error_category.
   
   Definition tzresult (a : Set) := Pervasives.result a (list error).
   
-  Parameter result_encoding : forall {a : Set}, Data_encoding.t a -&gt;
-    Data_encoding.encoding (tzresult a).
+  Parameter result_encoding : forall {a : Set},
+    Data_encoding.t a -&gt; Data_encoding.encoding (tzresult a).
   
   Parameter ok : forall {a : Set}, a -&gt; tzresult a.
   
@@ -8445,63 +8399,65 @@ Module Error_monad.
   
   Parameter fail : forall {a : Set}, error -&gt; Lwt.t (tzresult a).
   
-  Parameter op_gtgtquestion : forall {a b : Set}, tzresult a -&gt;
-    (a -&gt; tzresult b) -&gt; tzresult b.
+  Parameter op_gtgtquestion : forall {a b : Set},
+    tzresult a -&gt; (a -&gt; tzresult b) -&gt; tzresult b.
   
-  Parameter op_gtgteqquestion : forall {a b : Set}, Lwt.t (tzresult a) -&gt;
-    (a -&gt; Lwt.t (tzresult b)) -&gt; Lwt.t (tzresult b).
+  Parameter op_gtgteqquestion : forall {a b : Set},
+    Lwt.t (tzresult a) -&gt; (a -&gt; Lwt.t (tzresult b)) -&gt; Lwt.t (tzresult b).
   
-  Parameter op_gtgteq : forall {a b : Set}, Lwt.t a -&gt; (a -&gt; Lwt.t b) -&gt; Lwt.t b.
+  Parameter op_gtgteq : forall {a b : Set},
+    Lwt.t a -&gt; (a -&gt; Lwt.t b) -&gt; Lwt.t b.
   
   Parameter op_gtpipeeq : forall {a b : Set}, Lwt.t a -&gt; (a -&gt; b) -&gt; Lwt.t b.
   
-  Parameter op_gtgtpipequestion : forall {a b : Set}, Lwt.t (tzresult a) -&gt;
-    (a -&gt; b) -&gt; Lwt.t (tzresult b).
+  Parameter op_gtgtpipequestion : forall {a b : Set},
+    Lwt.t (tzresult a) -&gt; (a -&gt; b) -&gt; Lwt.t (tzresult b).
   
-  Parameter op_gtpipequestion : forall {a b : Set}, tzresult a -&gt;
-    (a -&gt; b) -&gt; tzresult b.
+  Parameter op_gtpipequestion : forall {a b : Set},
+    tzresult a -&gt; (a -&gt; b) -&gt; tzresult b.
   
   Parameter record_trace : forall {a : Set}, error -&gt; tzresult a -&gt; tzresult a.
   
-  Parameter trace : forall {b : Set}, error -&gt;
-    Lwt.t (tzresult b) -&gt; Lwt.t (tzresult b).
+  Parameter trace : forall {b : Set},
+    error -&gt; Lwt.t (tzresult b) -&gt; Lwt.t (tzresult b).
   
-  Parameter record_trace_eval : forall {a : Set}, (unit -&gt; tzresult error) -&gt;
-    tzresult a -&gt; tzresult a.
+  Parameter record_trace_eval : forall {a : Set},
+    (unit -&gt; tzresult error) -&gt; tzresult a -&gt; tzresult a.
   
-  Parameter trace_eval : forall {b : Set}, (unit -&gt; Lwt.t (tzresult error)) -&gt;
-    Lwt.t (tzresult b) -&gt; Lwt.t (tzresult b).
+  Parameter trace_eval : forall {b : Set},
+    (unit -&gt; Lwt.t (tzresult error)) -&gt; Lwt.t (tzresult b) -&gt; Lwt.t (tzresult b).
   
   Parameter fail_unless : bool -&gt; error -&gt; Lwt.t (tzresult unit).
   
   Parameter fail_when : bool -&gt; error -&gt; Lwt.t (tzresult unit).
   
-  Parameter iter_s : forall {a : Set}, (a -&gt; Lwt.t (tzresult unit)) -&gt;
-    list a -&gt; Lwt.t (tzresult unit).
+  Parameter iter_s : forall {a : Set},
+    (a -&gt; Lwt.t (tzresult unit)) -&gt; list a -&gt; Lwt.t (tzresult unit).
   
-  Parameter iter_p : forall {a : Set}, (a -&gt; Lwt.t (tzresult unit)) -&gt;
-    list a -&gt; Lwt.t (tzresult unit).
+  Parameter iter_p : forall {a : Set},
+    (a -&gt; Lwt.t (tzresult unit)) -&gt; list a -&gt; Lwt.t (tzresult unit).
   
-  Parameter map_s : forall {a b : Set}, (a -&gt; Lwt.t (tzresult b)) -&gt;
-    list a -&gt; Lwt.t (tzresult (list b)).
+  Parameter map_s : forall {a b : Set},
+    (a -&gt; Lwt.t (tzresult b)) -&gt; list a -&gt; Lwt.t (tzresult (list b)).
   
-  Parameter map_p : forall {a b : Set}, (a -&gt; Lwt.t (tzresult b)) -&gt;
-    list a -&gt; Lwt.t (tzresult (list b)).
+  Parameter map_p : forall {a b : Set},
+    (a -&gt; Lwt.t (tzresult b)) -&gt; list a -&gt; Lwt.t (tzresult (list b)).
   
-  Parameter map2 : forall {a b c : Set}, (a -&gt; b -&gt; tzresult c) -&gt;
-    list a -&gt; list b -&gt; tzresult (list c).
+  Parameter map2 : forall {a b c : Set},
+    (a -&gt; b -&gt; tzresult c) -&gt; list a -&gt; list b -&gt; tzresult (list c).
   
-  Parameter map2_s : forall {a b c : Set}, (a -&gt; b -&gt; Lwt.t (tzresult c)) -&gt;
-    list a -&gt; list b -&gt; Lwt.t (tzresult (list c)).
+  Parameter map2_s : forall {a b c : Set},
+    (a -&gt; b -&gt; Lwt.t (tzresult c)) -&gt; list a -&gt; list b -&gt;
+    Lwt.t (tzresult (list c)).
   
-  Parameter filter_map_s : forall {a b : Set}, (a -&gt; Lwt.t (tzresult (option b)))
-    -&gt; list a -&gt; Lwt.t (tzresult (list b)).
+  Parameter filter_map_s : forall {a b : Set},
+    (a -&gt; Lwt.t (tzresult (option b))) -&gt; list a -&gt; Lwt.t (tzresult (list b)).
   
-  Parameter fold_left_s : forall {a b : Set}, (a -&gt; b -&gt; Lwt.t (tzresult a)) -&gt;
-    a -&gt; list b -&gt; Lwt.t (tzresult a).
+  Parameter fold_left_s : forall {a b : Set},
+    (a -&gt; b -&gt; Lwt.t (tzresult a)) -&gt; a -&gt; list b -&gt; Lwt.t (tzresult a).
   
-  Parameter fold_right_s : forall {a b : Set}, (a -&gt; b -&gt; Lwt.t (tzresult b)) -&gt;
-    list a -&gt; b -&gt; Lwt.t (tzresult b).
+  Parameter fold_right_s : forall {a b : Set},
+    (a -&gt; b -&gt; Lwt.t (tzresult b)) -&gt; list a -&gt; b -&gt; Lwt.t (tzresult b).
   
   Parameter shell_error : Set.
   
@@ -8509,38 +8465,38 @@ Module Error_monad.
 End Error_monad.
 
 Module Logging.
-  Parameter debug : forall {a : Set}, Pervasives.format4 a Format.formatter unit
-    unit -&gt; a.
+  Parameter debug : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit unit -&gt; a.
   
-  Parameter log_info : forall {a : Set}, Pervasives.format4 a Format.formatter
-    unit unit -&gt; a.
+  Parameter log_info : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit unit -&gt; a.
   
-  Parameter log_notice : forall {a : Set}, Pervasives.format4 a Format.formatter
-    unit unit -&gt; a.
+  Parameter log_notice : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit unit -&gt; a.
   
-  Parameter warn : forall {a : Set}, Pervasives.format4 a Format.formatter unit
-    unit -&gt; a.
+  Parameter warn : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit unit -&gt; a.
   
-  Parameter log_error : forall {a : Set}, Pervasives.format4 a Format.formatter
-    unit unit -&gt; a.
+  Parameter log_error : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit unit -&gt; a.
   
-  Parameter fatal_error : forall {a : Set}, Pervasives.format4 a
-    Format.formatter unit unit -&gt; a.
+  Parameter fatal_error : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit unit -&gt; a.
   
-  Parameter lwt_debug : forall {a : Set}, Pervasives.format4 a Format.formatter
-    unit (Lwt.t unit) -&gt; a.
+  Parameter lwt_debug : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit (Lwt.t unit) -&gt; a.
   
-  Parameter lwt_log_info : forall {a : Set}, Pervasives.format4 a
-    Format.formatter unit (Lwt.t unit) -&gt; a.
+  Parameter lwt_log_info : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit (Lwt.t unit) -&gt; a.
   
-  Parameter lwt_log_notice : forall {a : Set}, Pervasives.format4 a
-    Format.formatter unit (Lwt.t unit) -&gt; a.
+  Parameter lwt_log_notice : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit (Lwt.t unit) -&gt; a.
   
-  Parameter lwt_warn : forall {a : Set}, Pervasives.format4 a Format.formatter
-    unit (Lwt.t unit) -&gt; a.
+  Parameter lwt_warn : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit (Lwt.t unit) -&gt; a.
   
-  Parameter lwt_log_error : forall {a : Set}, Pervasives.format4 a
-    Format.formatter unit (Lwt.t unit) -&gt; a.
+  Parameter lwt_log_error : forall {a : Set},
+    Pervasives.format4 a Format.formatter unit (Lwt.t unit) -&gt; a.
 End Logging.
 
 Module Time.
@@ -8592,9 +8548,9 @@ Module RPC_arg.
   
   Definition arg (a : Set) := t a.
   
-  Parameter make : forall {a : Set}, option string -&gt;
-    string -&gt;
-      (string -&gt; Pervasives.result a string) -&gt; (a -&gt; string) -&gt; unit -&gt; arg a.
+  Parameter make : forall {a : Set},
+    option string -&gt; string -&gt; (string -&gt; Pervasives.result a string) -&gt;
+    (a -&gt; string) -&gt; unit -&gt; arg a.
   
   Record descr := {
     name : string;
@@ -8637,23 +8593,23 @@ Module RPC_path.
   
   Parameter open_root : forall {a : Set}, context a.
   
-  Parameter add_suffix : forall {params prefix : Set}, path prefix params -&gt;
-    string -&gt; path prefix params.
+  Parameter add_suffix : forall {params prefix : Set},
+    path prefix params -&gt; string -&gt; path prefix params.
   
-  Parameter op_div : forall {params prefix : Set}, path prefix params -&gt;
-    string -&gt; path prefix params.
+  Parameter op_div : forall {params prefix : Set},
+    path prefix params -&gt; string -&gt; path prefix params.
   
-  Parameter add_arg : forall {a params prefix : Set}, path prefix params -&gt;
-    RPC_arg.t a -&gt; path prefix (params * a).
+  Parameter add_arg : forall {a params prefix : Set},
+    path prefix params -&gt; RPC_arg.t a -&gt; path prefix (params * a).
   
-  Parameter op_divcolon : forall {a params prefix : Set}, path prefix params -&gt;
-    RPC_arg.t a -&gt; path prefix (params * a).
+  Parameter op_divcolon : forall {a params prefix : Set},
+    path prefix params -&gt; RPC_arg.t a -&gt; path prefix (params * a).
   
-  Parameter add_final_args : forall {a params prefix : Set}, path prefix params
-    -&gt; RPC_arg.t a -&gt; path prefix (params * list a).
+  Parameter add_final_args : forall {a params prefix : Set},
+    path prefix params -&gt; RPC_arg.t a -&gt; path prefix (params * list a).
   
-  Parameter op_divcolonstar : forall {a params prefix : Set}, path prefix params
-    -&gt; RPC_arg.t a -&gt; path prefix (params * list a).
+  Parameter op_divcolonstar : forall {a params prefix : Set},
+    path prefix params -&gt; RPC_arg.t a -&gt; path prefix (params * list a).
 End RPC_path.
 
 Module RPC_query.
@@ -8665,24 +8621,25 @@ Module RPC_query.
   
   Parameter field : forall (a b : Set), Set.
   
-  Parameter field : forall {a b : Set}, option string -&gt;
-    string -&gt; RPC_arg.t a -&gt; a -&gt; (b -&gt; a) -&gt; field b a.
+  Parameter field : forall {a b : Set},
+    option string -&gt; string -&gt; RPC_arg.t a -&gt; a -&gt; (b -&gt; a) -&gt; field b a.
   
-  Parameter opt_field : forall {a b : Set}, option string -&gt;
-    string -&gt; RPC_arg.t a -&gt; (b -&gt; option a) -&gt; field b (option a).
+  Parameter opt_field : forall {a b : Set},
+    option string -&gt; string -&gt; RPC_arg.t a -&gt; (b -&gt; option a) -&gt;
+    field b (option a).
   
-  Parameter flag : forall {b : Set}, option string -&gt;
-    string -&gt; (b -&gt; bool) -&gt; field b bool.
+  Parameter flag : forall {b : Set},
+    option string -&gt; string -&gt; (b -&gt; bool) -&gt; field b bool.
   
-  Parameter multi_field : forall {a b : Set}, option string -&gt;
-    string -&gt; RPC_arg.t a -&gt; (b -&gt; list a) -&gt; field b (list a).
+  Parameter multi_field : forall {a b : Set},
+    option string -&gt; string -&gt; RPC_arg.t a -&gt; (b -&gt; list a) -&gt; field b (list a).
   
   Parameter open_query : forall (a b c : Set), Set.
   
   Parameter query : forall {a b : Set}, b -&gt; open_query a b b.
   
-  Parameter op_pipeplus : forall {a b c d : Set}, open_query a b (c -&gt; d) -&gt;
-    field a c -&gt; open_query a b d.
+  Parameter op_pipeplus : forall {a b c d : Set},
+    open_query a b (c -&gt; d) -&gt; field a c -&gt; open_query a b d.
   
   Parameter seal : forall {a b : Set}, open_query a b a -&gt; t a.
   
@@ -8707,43 +8664,31 @@ Module RPC_service.
   Definition service (expected_variable prefix params query input output : Set)
     := t variant prefix params query input output.
   
-  Parameter get_service : forall {output params prefix query variant : Set}, option
-    string -&gt;
-    RPC_query.t query -&gt;
-      Data_encoding.t output -&gt;
-        RPC_path.t prefix params -&gt;
-          service variant prefix params query unit output.
+  Parameter get_service : forall {output params prefix query variant : Set},
+    option string -&gt; RPC_query.t query -&gt; Data_encoding.t output -&gt;
+    RPC_path.t prefix params -&gt; service variant prefix params query unit output.
   
-  Parameter post_service : forall {input output params prefix query variant :
-  Set}, option string -&gt;
-    RPC_query.t query -&gt;
-      Data_encoding.t input -&gt;
-        Data_encoding.t output -&gt;
-          RPC_path.t prefix params -&gt;
-            service variant prefix params query input output.
+  Parameter post_service : forall
+    {input output params prefix query variant : Set},
+    option string -&gt; RPC_query.t query -&gt; Data_encoding.t input -&gt;
+    Data_encoding.t output -&gt; RPC_path.t prefix params -&gt;
+    service variant prefix params query input output.
   
-  Parameter delete_service : forall {output params prefix query variant : Set}, option
-    string -&gt;
-    RPC_query.t query -&gt;
-      Data_encoding.t output -&gt;
-        RPC_path.t prefix params -&gt;
-          service variant prefix params query unit output.
+  Parameter delete_service : forall {output params prefix query variant : Set},
+    option string -&gt; RPC_query.t query -&gt; Data_encoding.t output -&gt;
+    RPC_path.t prefix params -&gt; service variant prefix params query unit output.
   
-  Parameter patch_service : forall {input output params prefix query variant :
-  Set}, option string -&gt;
-    RPC_query.t query -&gt;
-      Data_encoding.t input -&gt;
-        Data_encoding.t output -&gt;
-          RPC_path.t prefix params -&gt;
-            service variant prefix params query input output.
+  Parameter patch_service : forall
+    {input output params prefix query variant : Set},
+    option string -&gt; RPC_query.t query -&gt; Data_encoding.t input -&gt;
+    Data_encoding.t output -&gt; RPC_path.t prefix params -&gt;
+    service variant prefix params query input output.
   
-  Parameter put_service : forall {input output params prefix query variant : Set}, option
-    string -&gt;
-    RPC_query.t query -&gt;
-      Data_encoding.t input -&gt;
-        Data_encoding.t output -&gt;
-          RPC_path.t prefix params -&gt;
-            service variant prefix params query input output.
+  Parameter put_service : forall
+    {input output params prefix query variant : Set},
+    option string -&gt; RPC_query.t query -&gt; Data_encoding.t input -&gt;
+    Data_encoding.t output -&gt; RPC_path.t prefix params -&gt;
+    service variant prefix params query input output.
 End RPC_service.
 
 Module RPC_answer.
@@ -8780,11 +8725,11 @@ Module RPC_directory.
   
   Parameter empty : forall {prefix : Set}, directory prefix.
   
-  Parameter map : forall {a b : Set}, (a -&gt; Lwt.t b) -&gt;
-    directory b -&gt; directory a.
+  Parameter map : forall {a b : Set},
+    (a -&gt; Lwt.t b) -&gt; directory b -&gt; directory a.
   
-  Parameter prefix : forall {p pr : Set}, RPC_path.path pr p -&gt;
-    directory p -&gt; directory pr.
+  Parameter prefix : forall {p pr : Set},
+    RPC_path.path pr p -&gt; directory p -&gt; directory pr.
   
   Parameter merge : forall {a : Set}, directory a -&gt; directory a -&gt; directory a.
   
@@ -8803,157 +8748,149 @@ Module RPC_directory.
   
   (* exception Conflict *)
   
-  Parameter register : forall {input output params prefix query variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix params query input output -&gt;
-      (params -&gt; query -&gt; input -&gt; Lwt.t (Error_monad.tzresult output)) -&gt;
-        directory prefix.
-  
-  Parameter opt_register : forall {input output params prefix query variant :
-  Set}, directory prefix -&gt;
-    RPC_service.t variant prefix params query input output -&gt;
-      (params -&gt; query -&gt; input -&gt; Lwt.t (Error_monad.tzresult (option output)))
-        -&gt; directory prefix.
-  
-  Parameter gen_register : forall {input output params prefix query variant :
-  Set}, directory prefix -&gt;
-    RPC_service.t variant prefix params query input output -&gt;
-      (params -&gt; query -&gt; input -&gt; Lwt.t variant) -&gt; directory prefix.
-  
-  Parameter lwt_register : forall {input output params prefix query variant :
-  Set}, directory prefix -&gt;
-    RPC_service.t variant prefix params query input output -&gt;
-      (params -&gt; query -&gt; input -&gt; Lwt.t output) -&gt; directory prefix.
-  
-  Parameter register0 : forall {i o q variant : Set}, directory unit -&gt;
-    RPC_service.t variant unit unit q i o -&gt;
-      (q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory unit.
-  
-  Parameter register1 : forall {a i o prefix q variant : Set}, directory prefix
-    -&gt;
-    RPC_service.t variant prefix (unit * a) q i o -&gt;
-      (a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory prefix.
-  
-  Parameter register2 : forall {a b i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
-      (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory prefix.
-  
-  Parameter register3 : forall {a b c i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
-        directory prefix.
-  
-  Parameter register4 : forall {a b c d i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
-        directory prefix.
-  
-  Parameter register5 : forall {a b c d e i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
-        directory prefix.
-  
-  Parameter opt_register0 : forall {i o q variant : Set}, directory unit -&gt;
-    RPC_service.t variant unit unit q i o -&gt;
-      (q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt; directory unit.
-  
-  Parameter opt_register1 : forall {a i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (unit * a) q i o -&gt;
-      (a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
-        directory prefix.
-  
-  Parameter opt_register2 : forall {a b i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
-      (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
-        directory prefix.
-  
-  Parameter opt_register3 : forall {a b c i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
-        directory prefix.
-  
-  Parameter opt_register4 : forall {a b c d i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
-        directory prefix.
-  
-  Parameter opt_register5 : forall {a b c d e i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
-      (a -&gt;
-        b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o)))
-        -&gt; directory prefix.
-  
-  Parameter gen_register0 : forall {i o q variant : Set}, directory unit -&gt;
-    RPC_service.t variant unit unit q i o -&gt;
-      (q -&gt; i -&gt; Lwt.t variant) -&gt; directory unit.
-  
-  Parameter gen_register1 : forall {a i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (unit * a) q i o -&gt;
-      (a -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
-  
-  Parameter gen_register2 : forall {a b i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
-      (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
-  
-  Parameter gen_register3 : forall {a b c i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
-  
-  Parameter gen_register4 : forall {a b c d i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
-  
-  Parameter gen_register5 : forall {a b c d e i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
-  
-  Parameter lwt_register0 : forall {i o q variant : Set}, directory unit -&gt;
-    RPC_service.t variant unit unit q i o -&gt;
-      (q -&gt; i -&gt; Lwt.t o) -&gt; directory unit.
-  
-  Parameter lwt_register1 : forall {a i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (unit * a) q i o -&gt;
-      (a -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
-  
-  Parameter lwt_register2 : forall {a b i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
-      (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
-  
-  Parameter lwt_register3 : forall {a b c i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
-  
-  Parameter lwt_register4 : forall {a b c d i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
-  
-  Parameter lwt_register5 : forall {a b c d e i o prefix q variant : Set}, directory
-    prefix -&gt;
-    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
-      (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
-  
-  Parameter register_dynamic_directory : forall {a prefix : Set}, option string
-    -&gt;
+  Parameter register : forall {input output params prefix query variant : Set},
     directory prefix -&gt;
-      RPC_path.t prefix a -&gt; (a -&gt; Lwt.t (directory a)) -&gt; directory prefix.
+    RPC_service.t variant prefix params query input output -&gt;
+    (params -&gt; query -&gt; input -&gt; Lwt.t (Error_monad.tzresult output)) -&gt;
+    directory prefix.
+  
+  Parameter opt_register : forall
+    {input output params prefix query variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix params query input output -&gt;
+    (params -&gt; query -&gt; input -&gt; Lwt.t (Error_monad.tzresult (option output)))
+    -&gt; directory prefix.
+  
+  Parameter gen_register : forall
+    {input output params prefix query variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix params query input output -&gt;
+    (params -&gt; query -&gt; input -&gt; Lwt.t variant) -&gt; directory prefix.
+  
+  Parameter lwt_register : forall
+    {input output params prefix query variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix params query input output -&gt;
+    (params -&gt; query -&gt; input -&gt; Lwt.t output) -&gt; directory prefix.
+  
+  Parameter register0 : forall {i o q variant : Set},
+    directory unit -&gt; RPC_service.t variant unit unit q i o -&gt;
+    (q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory unit.
+  
+  Parameter register1 : forall {a i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix (unit * a) q i o -&gt;
+    (a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory prefix.
+  
+  Parameter register2 : forall {a b i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
+    (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory prefix.
+  
+  Parameter register3 : forall {a b c i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
+    directory prefix.
+  
+  Parameter register4 : forall {a b c d i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
+    directory prefix.
+  
+  Parameter register5 : forall {a b c d e i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
+    directory prefix.
+  
+  Parameter opt_register0 : forall {i o q variant : Set},
+    directory unit -&gt; RPC_service.t variant unit unit q i o -&gt;
+    (q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt; directory unit.
+  
+  Parameter opt_register1 : forall {a i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix (unit * a) q i o -&gt;
+    (a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt; directory prefix.
+  
+  Parameter opt_register2 : forall {a b i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
+    (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
+    directory prefix.
+  
+  Parameter opt_register3 : forall {a b c i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
+    directory prefix.
+  
+  Parameter opt_register4 : forall {a b c d i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
+    directory prefix.
+  
+  Parameter opt_register5 : forall {a b c d e i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o)))
+    -&gt; directory prefix.
+  
+  Parameter gen_register0 : forall {i o q variant : Set},
+    directory unit -&gt; RPC_service.t variant unit unit q i o -&gt;
+    (q -&gt; i -&gt; Lwt.t variant) -&gt; directory unit.
+  
+  Parameter gen_register1 : forall {a i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix (unit * a) q i o -&gt;
+    (a -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
+  
+  Parameter gen_register2 : forall {a b i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
+    (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
+  
+  Parameter gen_register3 : forall {a b c i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
+  
+  Parameter gen_register4 : forall {a b c d i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
+  
+  Parameter gen_register5 : forall {a b c d e i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t variant) -&gt; directory prefix.
+  
+  Parameter lwt_register0 : forall {i o q variant : Set},
+    directory unit -&gt; RPC_service.t variant unit unit q i o -&gt;
+    (q -&gt; i -&gt; Lwt.t o) -&gt; directory unit.
+  
+  Parameter lwt_register1 : forall {a i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix (unit * a) q i o -&gt;
+    (a -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
+  
+  Parameter lwt_register2 : forall {a b i o prefix q variant : Set},
+    directory prefix -&gt; RPC_service.t variant prefix ((unit * a) * b) q i o -&gt;
+    (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
+  
+  Parameter lwt_register3 : forall {a b c i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((unit * a) * b) * c) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
+  
+  Parameter lwt_register4 : forall {a b c d i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
+  
+  Parameter lwt_register5 : forall {a b c d e i o prefix q variant : Set},
+    directory prefix -&gt;
+    RPC_service.t variant prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
+  
+  Parameter register_dynamic_directory : forall {a prefix : Set},
+    option string -&gt; directory prefix -&gt; RPC_path.t prefix a -&gt;
+    (a -&gt; Lwt.t (directory a)) -&gt; directory prefix.
 End RPC_directory.
 
 Module Base58.
@@ -8965,11 +8902,12 @@ Module Base58.
   
   Definition data := Empty_set.
   
-  Parameter register_encoding : forall {a : Set}, string -&gt;
-    Z -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt; (a -&gt; data) -&gt; encoding a.
+  Parameter register_encoding : forall {a : Set},
+    string -&gt; Z -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt; (a -&gt; data) -&gt;
+    encoding a.
   
-  Parameter check_encoded_prefix : forall {a : Set}, encoding a -&gt;
-    string -&gt; Z -&gt; unit.
+  Parameter check_encoded_prefix : forall {a : Set},
+    encoding a -&gt; string -&gt; Z -&gt; unit.
   
   Parameter decode : string -&gt; option data.
 End Base58.
@@ -9125,8 +9063,8 @@ Module S.
       update : forall {a : Set}, key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a;
       singleton : forall {a : Set}, key -&gt; a -&gt; t a;
       remove : forall {a : Set}, key -&gt; t a -&gt; t a;
-      merge : forall {a b c : Set}, (key -&gt; option a -&gt; option b -&gt; option c) -&gt;
-        t a -&gt; t b -&gt; t c;
+      merge : forall {a b c : Set},
+        (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c;
       union : forall {a : Set}, (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a;
       compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z;
       equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool;
@@ -9143,8 +9081,8 @@ Module S.
       choose_opt : forall {a : Set}, t a -&gt; option (key * a);
       split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a;
       find_opt : forall {a : Set}, key -&gt; t a -&gt; option a;
-      find_first_opt : forall {a : Set}, (key -&gt; bool) -&gt;
-        t a -&gt; option (key * a);
+      find_first_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a);
       find_last_opt : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; option (key * a);
       map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b;
       mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b;
@@ -9433,14 +9371,14 @@ Module Micheline.
   
   Parameter root : forall {p : Set}, canonical p -&gt; node canonical_location p.
   
-  Parameter canonical_location_encoding : Data_encoding.encoding
-    canonical_location.
+  Parameter canonical_location_encoding :
+    Data_encoding.encoding canonical_location.
   
-  Parameter canonical_encoding : forall {l : Set}, string -&gt;
-    Data_encoding.encoding l -&gt; Data_encoding.encoding (canonical l).
+  Parameter canonical_encoding : forall {l : Set},
+    string -&gt; Data_encoding.encoding l -&gt; Data_encoding.encoding (canonical l).
   
-  Parameter canonical_encoding_v1 : forall {l : Set}, string -&gt;
-    Data_encoding.encoding l -&gt; Data_encoding.encoding (canonical l).
+  Parameter canonical_encoding_v1 : forall {l : Set},
+    string -&gt; Data_encoding.encoding l -&gt; Data_encoding.encoding (canonical l).
   
   Parameter location : forall {l p : Set}, node l p -&gt; l.
   
@@ -9448,11 +9386,11 @@ Module Micheline.
   
   Parameter strip_locations : forall {_ p : Set}, node _ p -&gt; canonical p.
   
-  Parameter extract_locations : forall {l p : Set}, node l p -&gt;
-    canonical p * list (canonical_location * l).
+  Parameter extract_locations : forall {l p : Set},
+    node l p -&gt; canonical p * list (canonical_location * l).
   
-  Parameter inject_locations : forall {l p : Set}, (canonical_location -&gt; l) -&gt;
-    canonical p -&gt; node l p.
+  Parameter inject_locations : forall {l p : Set},
+    (canonical_location -&gt; l) -&gt; canonical p -&gt; node l p.
 End Micheline.
 
 Module Block_header.
@@ -9544,16 +9482,16 @@ Module Context.
   
   Parameter remove_rec : t -&gt; key -&gt; Lwt.t t.
   
-  Parameter fold : forall {a variant : Set}, t -&gt;
-    key -&gt; a -&gt; (variant -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a.
+  Parameter fold : forall {a variant : Set},
+    t -&gt; key -&gt; a -&gt; (variant -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a.
   
   Parameter keys : t -&gt; key -&gt; Lwt.t (list key).
   
-  Parameter fold_keys : forall {a : Set}, t -&gt;
-    key -&gt; a -&gt; (key -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a.
+  Parameter fold_keys : forall {a : Set},
+    t -&gt; key -&gt; a -&gt; (key -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a.
   
-  Parameter register_resolver : forall {a : Set}, Base58.encoding a -&gt;
-    (t -&gt; string -&gt; Lwt.t (list a)) -&gt; unit.
+  Parameter register_resolver : forall {a : Set},
+    Base58.encoding a -&gt; (t -&gt; string -&gt; Lwt.t (list a)) -&gt; unit.
   
   Parameter complete : t -&gt; string -&gt; Lwt.t (list string).
 End Context.
@@ -9591,49 +9529,42 @@ Module Updater.
       operation := operation;
       operation_data_encoding : Data_encoding.t operation_data;
       operation_receipt_encoding : Data_encoding.t operation_receipt;
-      operation_data_and_receipt_encoding : Data_encoding.t
-        (operation_data * operation_receipt);
+      operation_data_and_receipt_encoding :
+        Data_encoding.t (operation_data * operation_receipt);
       acceptable_passes : operation -&gt; list Z;
       compare_operations : operation -&gt; operation -&gt; Z;
       validation_state := validation_state;
-      current_context : validation_state -&gt;
-        Lwt.t (Error_monad.tzresult Context.t);
-      begin_partial_application : Chain_id.(S.HASH.t) -&gt;
-        Context.t -&gt;
-          Time.t -&gt;
-            Fitness.(S.T.t) -&gt;
-              block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
-      begin_application : Chain_id.(S.HASH.t) -&gt;
-        Context.t -&gt;
-          Time.t -&gt;
-            Fitness.(S.T.t) -&gt;
-              block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
-      begin_construction : Chain_id.(S.HASH.t) -&gt;
-        Context.t -&gt;
-          Time.t -&gt;
-            Int32.t -&gt;
-              Fitness.(S.T.t) -&gt;
-                Block_hash.(S.HASH.t) -&gt;
-                  Time.t -&gt;
-                    option block_header_data -&gt;
-                      unit -&gt; Lwt.t (Error_monad.tzresult validation_state);
-      apply_operation : validation_state -&gt;
-        operation -&gt;
-          Lwt.t (Error_monad.tzresult (validation_state * operation_receipt));
-      finalize_block : validation_state -&gt;
+      current_context :
+        validation_state -&gt; Lwt.t (Error_monad.tzresult Context.t);
+      begin_partial_application :
+        Chain_id.(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; Fitness.(S.T.t) -&gt;
+        block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
+      begin_application :
+        Chain_id.(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; Fitness.(S.T.t) -&gt;
+        block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
+      begin_construction :
+        Chain_id.(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; Int32.t -&gt;
+        Fitness.(S.T.t) -&gt; Block_hash.(S.HASH.t) -&gt; Time.t -&gt;
+        option block_header_data -&gt; unit -&gt;
+        Lwt.t (Error_monad.tzresult validation_state);
+      apply_operation :
+        validation_state -&gt; operation -&gt;
+        Lwt.t (Error_monad.tzresult (validation_state * operation_receipt));
+      finalize_block :
+        validation_state -&gt;
         Lwt.t (Error_monad.tzresult (validation_result * block_header_metadata));
       rpc_services : RPC_directory.t rpc_context;
-      init : Context.t -&gt;
-        Block_header.shell_header -&gt;
-          Lwt.t (Error_monad.tzresult validation_result);
+      init :
+        Context.t -&gt; Block_header.shell_header -&gt;
+        Lwt.t (Error_monad.tzresult validation_result);
     }.
     Arguments signature : clear implicits.
   End PROTOCOL.
   
   Parameter activate : Context.t -&gt; Protocol_hash.(S.HASH.t) -&gt; Lwt.t Context.t.
   
-  Parameter fork_test_chain : Context.t -&gt;
-    Protocol_hash.(S.HASH.t) -&gt; Time.t -&gt; Lwt.t Context.t.
+  Parameter fork_test_chain :
+    Context.t -&gt; Protocol_hash.(S.HASH.t) -&gt; Time.t -&gt; Lwt.t Context.t.
 End Updater.
 
 Module RPC_context.
@@ -9641,126 +9572,109 @@ Module RPC_context.
   
   class_type
   
-  Parameter make_call0 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t t q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call0 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t t q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call1 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t (t * a) q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call1 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t (t * a) q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; a -&gt; q -&gt;
+    i -&gt; Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call2 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t ((t * a) * b) q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call2 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t ((t * a) * b) q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; a -&gt; b -&gt;
+    q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call3 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t (((t * a) * b) * c) q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call3 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; a -&gt; b -&gt;
+    c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_opt_call0 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t t q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call0 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t t q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call1 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t (t * a) q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call1 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t (t * a) q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; a -&gt; q -&gt;
+    i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call2 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t ((t * a) * b) q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call2 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t ((t * a) * b) q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; a -&gt; b -&gt;
+    q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call3 : forall {_ a b c i o pr q variant : Set}, RPC_service.t
-    variant t (((t * a) * b) * c) q i o -&gt;
-    (((RPC_service.t variant t t q i o -&gt;
-      pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
-      (((RPC_service.t variant t (t * a) q i o -&gt;
-        pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        (_ * a * q * i * o)) *
-        (((RPC_service.t variant t ((t * a) * b) q i o -&gt;
-          pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          (_ * a * b * q * i * o)) *
-          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
-            pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt;
-      pr -&gt;
-        a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call3 : forall {_ a b c i o pr q variant : Set},
+    RPC_service.t variant t (((t * a) * b) * c) q i o -&gt;
+    (((RPC_service.t variant t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    Lwt.t (Error_monad.shell_tzresult o)) * (_ * q * i * o)) *
+      (((RPC_service.t variant t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * q * i * o)) *
+        (((RPC_service.t variant t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt;
+        i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * (_ * a * b * q * i * o)) *
+          (((RPC_service.t variant t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt;
+          b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
+            (_ * a * b * c * q * i * o)) * _)))) * _ * pr -&gt; pr -&gt; a -&gt; b -&gt;
+    c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
 End RPC_context.
 </pre>
   </div>
