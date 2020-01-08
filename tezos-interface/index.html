@@ -49,8 +49,8 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6164 lines</li>
-      <li>Coq size: 2984 lines (-52% compared to&nbsp;OCaml)</li>
-      <li>errors: 271</li>
+      <li>Coq size: 6226 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>errors: 282</li>
     </ul>
   </div>
 </div>
@@ -59,7 +59,7 @@
 <hr />
 <div class="row conversion-row" id="v1.mli">
   <div class="col-md-6">
-    <a href="#v1.mli"><code>v1.mli</code></a>&nbsp;<span class="label label-danger">271 errors</span>
+    <a href="#v1.mli"><code>v1.mli</code></a>&nbsp;<span class="label label-danger">282 errors</span>
     
       <div class="alert alert-danger global-errors" role="alert">
         <ul>
@@ -3969,7 +3969,7 @@ module Time : sig
 
 type t
 
-<abbr class="mark-error" title="Signature item `include` not handled">include Compare.S with type t := t</abbr>
+include Compare.S with type t := t
 
 val add : t -&gt; int64 -&gt; t
 
@@ -5312,7 +5312,23 @@ module Ed25519 : sig
 
 (** Tezos - Ed25519 cryptography *)
 
-<abbr class="mark-error" title="Signature item `include` not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
+<abbr class="mark-error" title="Module 'Public_key.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Module 'Public_key_hash.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Extensible types are not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
 end
 module Secp256k1 : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/secp256k1.mli&quot;
@@ -5343,7 +5359,23 @@ module Secp256k1 : sig
 
 (** Tezos - Secp256k1 cryptography *)
 
-<abbr class="mark-error" title="Signature item `include` not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
+<abbr class="mark-error" title="Module 'Public_key.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Module 'Public_key_hash.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Extensible types are not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
 end
 module P256 : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/p256.mli&quot;
@@ -5374,7 +5406,23 @@ module P256 : sig
 
 (** Tezos - P256 cryptography *)
 
-<abbr class="mark-error" title="Signature item `include` not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
+<abbr class="mark-error" title="Module 'Public_key.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Module 'Public_key_hash.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Extensible types are not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
 end
 module Chain_id : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/chain_id.mli&quot;
@@ -5403,7 +5451,7 @@ module Chain_id : sig
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
 end
 module Signature : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/signature.mli&quot;
@@ -5448,7 +5496,23 @@ type watermark =
   | Generic_operation
   | Custom of MBytes.t
 
-<abbr class="mark-error" title="Signature item `include` not handled">include
+<abbr class="mark-error" title="Module 'Public_key.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Module 'Public_key_hash.t' not found
+
+——————————
+
+Extensible types are not handled
+
+——————————
+
+Extensible types are not handled">include
   S.SIGNATURE
     with type Public_key_hash.t = public_key_hash
      and type Public_key.t = public_key
@@ -5482,7 +5546,7 @@ module Block_hash : sig
 (*****************************************************************************)
 
 (** Blocks hashes / IDs. *)
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
 end
 module Operation_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/operation_hash.mli&quot;
@@ -5512,7 +5576,7 @@ module Operation_hash : sig
 (*****************************************************************************)
 
 (** Operations hashes / IDs. *)
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
 end
 module Operation_list_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/operation_list_hash.mli&quot;
@@ -5542,7 +5606,7 @@ module Operation_list_hash : sig
 (*****************************************************************************)
 
 (** Blocks hashes / IDs. *)
-<abbr class="mark-error" title="Signature item `include` not handled">include
+<abbr class="mark-error" title="Extensible types are not handled">include
   S.MERKLE_TREE with type elt = Operation_hash.t</abbr>
 end
 module Operation_list_list_hash : sig
@@ -5573,7 +5637,7 @@ module Operation_list_list_hash : sig
 (*****************************************************************************)
 
 (** Blocks hashes / IDs. *)
-<abbr class="mark-error" title="Signature item `include` not handled">include
+<abbr class="mark-error" title="Extensible types are not handled">include
   S.MERKLE_TREE with type elt = Operation_list_hash.t</abbr>
 end
 module Protocol_hash : sig
@@ -5604,7 +5668,7 @@ module Protocol_hash : sig
 (*****************************************************************************)
 
 (** Protocol hashes / IDs. *)
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
 end
 module Context_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/context_hash.mli&quot;
@@ -5634,7 +5698,7 @@ module Context_hash : sig
 (*****************************************************************************)
 
 (** Commited context hashes / IDs. *)
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
 end
 module Micheline : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/micheline.mli&quot;
@@ -5752,7 +5816,7 @@ val shell_header_encoding : shell_header Data_encoding.t
 
 type t = {shell : shell_header; protocol_data : MBytes.t}
 
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASHABLE with type t := t and type hash := Block_hash.t</abbr>
+include S.HASHABLE with type t := t and type hash := Block_hash.t
 end
 module Fitness : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/fitness.mli&quot;
@@ -5783,8 +5847,8 @@ module Fitness : sig
 
 (** The fitness of a block is defined as a list of bytes,
     compared in a lexicographical order (longer list are greater). *)
-<abbr class="mark-error" title="Signature item `include` not handled">include
-  S.T with type t = MBytes.t list</abbr>
+include
+  S.T with type t = MBytes.t list
 end
 module Operation : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/operation.mli&quot;
@@ -5825,7 +5889,7 @@ val shell_header_encoding : shell_header Data_encoding.t
 
 type t = {shell : shell_header; proto : MBytes.t}
 
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASHABLE with type t := t and type hash := Operation_hash.t</abbr>
+include S.HASHABLE with type t := t and type hash := Operation_hash.t
 end
 module Protocol : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/protocol.mli&quot;
@@ -5872,7 +5936,7 @@ val component_encoding : component Data_encoding.t
 
 val env_version_encoding : env_version Data_encoding.t
 
-<abbr class="mark-error" title="Signature item `include` not handled">include S.HASHABLE with type t := t and type hash := Protocol_hash.t</abbr>
+include S.HASHABLE with type t := t and type hash := Protocol_hash.t
 end
 module Context : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/context.mli&quot;
@@ -8508,7 +8572,25 @@ End Logging.
 Module Time.
   Parameter t : Set.
   
-  include
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
   
   Parameter add : t -&gt; int64 -&gt; t.
   
@@ -9442,19 +9524,1282 @@ Module Blake2B.
 End Blake2B.
 
 Module Ed25519.
-  include
+  Module Public_key_hash.
+    Parameter t : Set.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter size : Z.
+    
+    Parameter to_bytes : t -&gt; MBytes.t.
+    
+    Parameter of_bytes_opt : MBytes.t -&gt; option t.
+    
+    Parameter of_bytes_exn : MBytes.t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter to_path : t -&gt; list string -&gt; list string.
+    
+    Parameter of_path : list string -&gt; option t.
+    
+    Parameter of_path_exn : list string -&gt; t.
+    
+    Parameter prefix_path : string -&gt; list string.
+    
+    Parameter path_length : Z.
+    
+    Module Set.
+      Definition elt := t.
+      
+      Parameter t : Set.
+      
+      Parameter empty : t.
+      
+      Parameter is_empty : t -&gt; bool.
+      
+      Parameter mem : elt -&gt; t -&gt; bool.
+      
+      Parameter add : elt -&gt; t -&gt; t.
+      
+      Parameter singleton : elt -&gt; t.
+      
+      Parameter remove : elt -&gt; t -&gt; t.
+      
+      Parameter union : t -&gt; t -&gt; t.
+      
+      Parameter inter : t -&gt; t -&gt; t.
+      
+      Parameter diff : t -&gt; t -&gt; t.
+      
+      Parameter compare : t -&gt; t -&gt; Z.
+      
+      Parameter equal : t -&gt; t -&gt; bool.
+      
+      Parameter subset : t -&gt; t -&gt; bool.
+      
+      Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+      
+      Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+      
+      Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+      
+      Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+      
+      Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+      
+      Parameter cardinal : t -&gt; Z.
+      
+      Parameter elements : t -&gt; list elt.
+      
+      Parameter min_elt : t -&gt; elt.
+      
+      Parameter min_elt_opt : t -&gt; option elt.
+      
+      Parameter max_elt : t -&gt; elt.
+      
+      Parameter max_elt_opt : t -&gt; option elt.
+      
+      Parameter choose : t -&gt; elt.
+      
+      Parameter choose_opt : t -&gt; option elt.
+      
+      Parameter split : elt -&gt; t -&gt; t * bool * t.
+      
+      Parameter find : elt -&gt; t -&gt; elt.
+      
+      Parameter find_opt : elt -&gt; t -&gt; option elt.
+      
+      Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter of_list : list elt -&gt; t.
+      
+      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      
+      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      
+      Parameter encoding : Data_encoding.t t.
+    End Set.
+    
+    Module Map.
+      Definition key := t.
+      
+      Parameter t : forall (a : Set), Set.
+      
+      Parameter empty : forall {a : Set}, t a.
+      
+      Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+      
+      Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+      
+      Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+      
+      Parameter update : forall {a : Set},
+        key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+      
+      Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+      
+      Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+      
+      Parameter merge : forall {a b c : Set},
+        (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+      
+      Parameter union : forall {a : Set},
+        (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+      
+      Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+      
+      Parameter equal : forall {a : Set},
+        (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+      
+      Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+      
+      Parameter fold : forall {a b : Set},
+        (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+      
+      Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+      
+      Parameter partition : forall {a : Set},
+        (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+      
+      Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+      
+      Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+      
+      Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter choose : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+      
+      Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+      
+      Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+      
+      Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_first_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_last_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter to_seq_from : forall {a : Set},
+        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter add_seq : forall {a : Set},
+        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      
+      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      
+      Parameter encoding : forall {a : Set},
+        Data_encoding.t a -&gt; Data_encoding.t (t a).
+    End Map.
+    
+    Parameter zero : t.
+  End Public_key_hash.
+  
+  Module Public_key.
+    Parameter t : Set.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter hash : t -&gt; Public_key_hash.t.
+  End Public_key.
+  
+  Parameter t : Set.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter zero : t.
+  
+  Parameter check : option MBytes.t -&gt; Public_key.t -&gt; t -&gt; MBytes.t -&gt; bool.
 End Ed25519.
 
 Module Secp256k1.
-  include
+  Module Public_key_hash.
+    Parameter t : Set.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter size : Z.
+    
+    Parameter to_bytes : t -&gt; MBytes.t.
+    
+    Parameter of_bytes_opt : MBytes.t -&gt; option t.
+    
+    Parameter of_bytes_exn : MBytes.t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter to_path : t -&gt; list string -&gt; list string.
+    
+    Parameter of_path : list string -&gt; option t.
+    
+    Parameter of_path_exn : list string -&gt; t.
+    
+    Parameter prefix_path : string -&gt; list string.
+    
+    Parameter path_length : Z.
+    
+    Module Set.
+      Definition elt := t.
+      
+      Parameter t : Set.
+      
+      Parameter empty : t.
+      
+      Parameter is_empty : t -&gt; bool.
+      
+      Parameter mem : elt -&gt; t -&gt; bool.
+      
+      Parameter add : elt -&gt; t -&gt; t.
+      
+      Parameter singleton : elt -&gt; t.
+      
+      Parameter remove : elt -&gt; t -&gt; t.
+      
+      Parameter union : t -&gt; t -&gt; t.
+      
+      Parameter inter : t -&gt; t -&gt; t.
+      
+      Parameter diff : t -&gt; t -&gt; t.
+      
+      Parameter compare : t -&gt; t -&gt; Z.
+      
+      Parameter equal : t -&gt; t -&gt; bool.
+      
+      Parameter subset : t -&gt; t -&gt; bool.
+      
+      Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+      
+      Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+      
+      Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+      
+      Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+      
+      Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+      
+      Parameter cardinal : t -&gt; Z.
+      
+      Parameter elements : t -&gt; list elt.
+      
+      Parameter min_elt : t -&gt; elt.
+      
+      Parameter min_elt_opt : t -&gt; option elt.
+      
+      Parameter max_elt : t -&gt; elt.
+      
+      Parameter max_elt_opt : t -&gt; option elt.
+      
+      Parameter choose : t -&gt; elt.
+      
+      Parameter choose_opt : t -&gt; option elt.
+      
+      Parameter split : elt -&gt; t -&gt; t * bool * t.
+      
+      Parameter find : elt -&gt; t -&gt; elt.
+      
+      Parameter find_opt : elt -&gt; t -&gt; option elt.
+      
+      Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter of_list : list elt -&gt; t.
+      
+      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      
+      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      
+      Parameter encoding : Data_encoding.t t.
+    End Set.
+    
+    Module Map.
+      Definition key := t.
+      
+      Parameter t : forall (a : Set), Set.
+      
+      Parameter empty : forall {a : Set}, t a.
+      
+      Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+      
+      Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+      
+      Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+      
+      Parameter update : forall {a : Set},
+        key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+      
+      Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+      
+      Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+      
+      Parameter merge : forall {a b c : Set},
+        (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+      
+      Parameter union : forall {a : Set},
+        (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+      
+      Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+      
+      Parameter equal : forall {a : Set},
+        (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+      
+      Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+      
+      Parameter fold : forall {a b : Set},
+        (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+      
+      Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+      
+      Parameter partition : forall {a : Set},
+        (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+      
+      Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+      
+      Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+      
+      Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter choose : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+      
+      Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+      
+      Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+      
+      Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_first_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_last_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter to_seq_from : forall {a : Set},
+        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter add_seq : forall {a : Set},
+        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      
+      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      
+      Parameter encoding : forall {a : Set},
+        Data_encoding.t a -&gt; Data_encoding.t (t a).
+    End Map.
+    
+    Parameter zero : t.
+  End Public_key_hash.
+  
+  Module Public_key.
+    Parameter t : Set.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter hash : t -&gt; Public_key_hash.t.
+  End Public_key.
+  
+  Parameter t : Set.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter zero : t.
+  
+  Parameter check : option MBytes.t -&gt; Public_key.t -&gt; t -&gt; MBytes.t -&gt; bool.
 End Secp256k1.
 
 Module P256.
-  include
+  Module Public_key_hash.
+    Parameter t : Set.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter size : Z.
+    
+    Parameter to_bytes : t -&gt; MBytes.t.
+    
+    Parameter of_bytes_opt : MBytes.t -&gt; option t.
+    
+    Parameter of_bytes_exn : MBytes.t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter to_path : t -&gt; list string -&gt; list string.
+    
+    Parameter of_path : list string -&gt; option t.
+    
+    Parameter of_path_exn : list string -&gt; t.
+    
+    Parameter prefix_path : string -&gt; list string.
+    
+    Parameter path_length : Z.
+    
+    Module Set.
+      Definition elt := t.
+      
+      Parameter t : Set.
+      
+      Parameter empty : t.
+      
+      Parameter is_empty : t -&gt; bool.
+      
+      Parameter mem : elt -&gt; t -&gt; bool.
+      
+      Parameter add : elt -&gt; t -&gt; t.
+      
+      Parameter singleton : elt -&gt; t.
+      
+      Parameter remove : elt -&gt; t -&gt; t.
+      
+      Parameter union : t -&gt; t -&gt; t.
+      
+      Parameter inter : t -&gt; t -&gt; t.
+      
+      Parameter diff : t -&gt; t -&gt; t.
+      
+      Parameter compare : t -&gt; t -&gt; Z.
+      
+      Parameter equal : t -&gt; t -&gt; bool.
+      
+      Parameter subset : t -&gt; t -&gt; bool.
+      
+      Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+      
+      Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+      
+      Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+      
+      Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+      
+      Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+      
+      Parameter cardinal : t -&gt; Z.
+      
+      Parameter elements : t -&gt; list elt.
+      
+      Parameter min_elt : t -&gt; elt.
+      
+      Parameter min_elt_opt : t -&gt; option elt.
+      
+      Parameter max_elt : t -&gt; elt.
+      
+      Parameter max_elt_opt : t -&gt; option elt.
+      
+      Parameter choose : t -&gt; elt.
+      
+      Parameter choose_opt : t -&gt; option elt.
+      
+      Parameter split : elt -&gt; t -&gt; t * bool * t.
+      
+      Parameter find : elt -&gt; t -&gt; elt.
+      
+      Parameter find_opt : elt -&gt; t -&gt; option elt.
+      
+      Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter of_list : list elt -&gt; t.
+      
+      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      
+      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      
+      Parameter encoding : Data_encoding.t t.
+    End Set.
+    
+    Module Map.
+      Definition key := t.
+      
+      Parameter t : forall (a : Set), Set.
+      
+      Parameter empty : forall {a : Set}, t a.
+      
+      Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+      
+      Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+      
+      Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+      
+      Parameter update : forall {a : Set},
+        key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+      
+      Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+      
+      Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+      
+      Parameter merge : forall {a b c : Set},
+        (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+      
+      Parameter union : forall {a : Set},
+        (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+      
+      Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+      
+      Parameter equal : forall {a : Set},
+        (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+      
+      Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+      
+      Parameter fold : forall {a b : Set},
+        (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+      
+      Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+      
+      Parameter partition : forall {a : Set},
+        (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+      
+      Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+      
+      Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+      
+      Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter choose : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+      
+      Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+      
+      Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+      
+      Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_first_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_last_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter to_seq_from : forall {a : Set},
+        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter add_seq : forall {a : Set},
+        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      
+      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      
+      Parameter encoding : forall {a : Set},
+        Data_encoding.t a -&gt; Data_encoding.t (t a).
+    End Map.
+    
+    Parameter zero : t.
+  End Public_key_hash.
+  
+  Module Public_key.
+    Parameter t : Set.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter hash : t -&gt; Public_key_hash.t.
+  End Public_key.
+  
+  Parameter t : Set.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter zero : t.
+  
+  Parameter check : option MBytes.t -&gt; Public_key.t -&gt; t -&gt; MBytes.t -&gt; bool.
 End P256.
 
 Module Chain_id.
-  include
+  Parameter t : Set.
+  
+  Parameter name : string.
+  
+  Parameter title : string.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t.
+  
+  Parameter hash_string : option string -&gt; list string -&gt; t.
+  
+  Parameter zero : t.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter to_path : t -&gt; list string -&gt; list string.
+  
+  Parameter of_path : list string -&gt; option t.
+  
+  Parameter of_path_exn : list string -&gt; t.
+  
+  Parameter prefix_path : string -&gt; list string.
+  
+  Parameter path_length : Z.
+  
+  Module Set.
+    Definition elt := t.
+    
+    Parameter t : Set.
+    
+    Parameter empty : t.
+    
+    Parameter is_empty : t -&gt; bool.
+    
+    Parameter mem : elt -&gt; t -&gt; bool.
+    
+    Parameter add : elt -&gt; t -&gt; t.
+    
+    Parameter singleton : elt -&gt; t.
+    
+    Parameter remove : elt -&gt; t -&gt; t.
+    
+    Parameter union : t -&gt; t -&gt; t.
+    
+    Parameter inter : t -&gt; t -&gt; t.
+    
+    Parameter diff : t -&gt; t -&gt; t.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter subset : t -&gt; t -&gt; bool.
+    
+    Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+    
+    Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+    
+    Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+    
+    Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+    
+    Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+    
+    Parameter cardinal : t -&gt; Z.
+    
+    Parameter elements : t -&gt; list elt.
+    
+    Parameter min_elt : t -&gt; elt.
+    
+    Parameter min_elt_opt : t -&gt; option elt.
+    
+    Parameter max_elt : t -&gt; elt.
+    
+    Parameter max_elt_opt : t -&gt; option elt.
+    
+    Parameter choose : t -&gt; elt.
+    
+    Parameter choose_opt : t -&gt; option elt.
+    
+    Parameter split : elt -&gt; t -&gt; t * bool * t.
+    
+    Parameter find : elt -&gt; t -&gt; elt.
+    
+    Parameter find_opt : elt -&gt; t -&gt; option elt.
+    
+    Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter of_list : list elt -&gt; t.
+    
+    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    
+    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    
+    Parameter encoding : Data_encoding.t t.
+  End Set.
+  
+  Module Map.
+    Definition key := t.
+    
+    Parameter t : forall (a : Set), Set.
+    
+    Parameter empty : forall {a : Set}, t a.
+    
+    Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+    
+    Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+    
+    Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+    
+    Parameter update : forall {a : Set},
+      key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+    
+    Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+    
+    Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+    
+    Parameter merge : forall {a b c : Set},
+      (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+    
+    Parameter union : forall {a : Set},
+      (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+    
+    Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+    
+    Parameter equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+    
+    Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+    
+    Parameter fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+    
+    Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+    
+    Parameter partition : forall {a : Set},
+      (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+    
+    Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+    
+    Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+    
+    Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter choose : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+    
+    Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+    
+    Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+    
+    Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_first_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_last_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter to_seq_from : forall {a : Set},
+      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    
+    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    
+    Parameter encoding : forall {a : Set},
+      Data_encoding.t a -&gt; Data_encoding.t (t a).
+  End Map.
 End Chain_id.
 
 Module Signature.
@@ -9474,31 +10819,1874 @@ Module Signature.
   | Generic_operation : watermark
   | Custom : MBytes.t -&gt; watermark.
   
-  include
+  Module Public_key_hash.
+    Definition t := public_key_hash.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter size : Z.
+    
+    Parameter to_bytes : t -&gt; MBytes.t.
+    
+    Parameter of_bytes_opt : MBytes.t -&gt; option t.
+    
+    Parameter of_bytes_exn : MBytes.t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter to_path : t -&gt; list string -&gt; list string.
+    
+    Parameter of_path : list string -&gt; option t.
+    
+    Parameter of_path_exn : list string -&gt; t.
+    
+    Parameter prefix_path : string -&gt; list string.
+    
+    Parameter path_length : Z.
+    
+    Module Set.
+      Definition elt := t.
+      
+      Parameter t : Set.
+      
+      Parameter empty : t.
+      
+      Parameter is_empty : t -&gt; bool.
+      
+      Parameter mem : elt -&gt; t -&gt; bool.
+      
+      Parameter add : elt -&gt; t -&gt; t.
+      
+      Parameter singleton : elt -&gt; t.
+      
+      Parameter remove : elt -&gt; t -&gt; t.
+      
+      Parameter union : t -&gt; t -&gt; t.
+      
+      Parameter inter : t -&gt; t -&gt; t.
+      
+      Parameter diff : t -&gt; t -&gt; t.
+      
+      Parameter compare : t -&gt; t -&gt; Z.
+      
+      Parameter equal : t -&gt; t -&gt; bool.
+      
+      Parameter subset : t -&gt; t -&gt; bool.
+      
+      Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+      
+      Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+      
+      Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+      
+      Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+      
+      Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+      
+      Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+      
+      Parameter cardinal : t -&gt; Z.
+      
+      Parameter elements : t -&gt; list elt.
+      
+      Parameter min_elt : t -&gt; elt.
+      
+      Parameter min_elt_opt : t -&gt; option elt.
+      
+      Parameter max_elt : t -&gt; elt.
+      
+      Parameter max_elt_opt : t -&gt; option elt.
+      
+      Parameter choose : t -&gt; elt.
+      
+      Parameter choose_opt : t -&gt; option elt.
+      
+      Parameter split : elt -&gt; t -&gt; t * bool * t.
+      
+      Parameter find : elt -&gt; t -&gt; elt.
+      
+      Parameter find_opt : elt -&gt; t -&gt; option elt.
+      
+      Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+      
+      Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+      
+      Parameter of_list : list elt -&gt; t.
+      
+      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      
+      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      
+      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      
+      Parameter encoding : Data_encoding.t t.
+    End Set.
+    
+    Module Map.
+      Definition key := t.
+      
+      Parameter t : forall (a : Set), Set.
+      
+      Parameter empty : forall {a : Set}, t a.
+      
+      Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+      
+      Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+      
+      Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+      
+      Parameter update : forall {a : Set},
+        key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+      
+      Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+      
+      Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+      
+      Parameter merge : forall {a b c : Set},
+        (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+      
+      Parameter union : forall {a : Set},
+        (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+      
+      Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+      
+      Parameter equal : forall {a : Set},
+        (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+      
+      Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+      
+      Parameter fold : forall {a b : Set},
+        (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+      
+      Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+      
+      Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+      
+      Parameter partition : forall {a : Set},
+        (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+      
+      Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+      
+      Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+      
+      Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter choose : forall {a : Set}, t a -&gt; key * a.
+      
+      Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+      
+      Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+      
+      Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+      
+      Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+      
+      Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_first_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+      
+      Parameter find_last_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+      
+      Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+      
+      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter to_seq_from : forall {a : Set},
+        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      
+      Parameter add_seq : forall {a : Set},
+        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      
+      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      
+      Parameter encoding : forall {a : Set},
+        Data_encoding.t a -&gt; Data_encoding.t (t a).
+    End Map.
+    
+    Parameter zero : t.
+  End Public_key_hash.
+  
+  Module Public_key.
+    Definition t := public_key.
+    
+    Parameter pp : Format.formatter -&gt; t -&gt; unit.
+    
+    Parameter op_eq : t -&gt; t -&gt; bool.
+    
+    Parameter op_ltgt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lt : t -&gt; t -&gt; bool.
+    
+    Parameter op_lteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gteq : t -&gt; t -&gt; bool.
+    
+    Parameter op_gt : t -&gt; t -&gt; bool.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter max : t -&gt; t -&gt; t.
+    
+    Parameter min : t -&gt; t -&gt; t.
+    
+    Parameter to_b58check : t -&gt; string.
+    
+    Parameter to_short_b58check : t -&gt; string.
+    
+    Parameter of_b58check_exn : string -&gt; t.
+    
+    Parameter of_b58check_opt : string -&gt; option t.
+    
+    extensible_type
+    
+    Parameter b58check_encoding : Base58.encoding t.
+    
+    Parameter encoding : Data_encoding.t t.
+    
+    Parameter rpc_arg : RPC_arg.t t.
+    
+    Parameter hash : t -&gt; Public_key_hash.t.
+  End Public_key.
+  
+  Parameter t : Set.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter zero : t.
+  
+  Parameter check : option watermark -&gt; Public_key.t -&gt; t -&gt; MBytes.t -&gt; bool.
 End Signature.
 
 Module Block_hash.
-  include
+  Parameter t : Set.
+  
+  Parameter name : string.
+  
+  Parameter title : string.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t.
+  
+  Parameter hash_string : option string -&gt; list string -&gt; t.
+  
+  Parameter zero : t.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter to_path : t -&gt; list string -&gt; list string.
+  
+  Parameter of_path : list string -&gt; option t.
+  
+  Parameter of_path_exn : list string -&gt; t.
+  
+  Parameter prefix_path : string -&gt; list string.
+  
+  Parameter path_length : Z.
+  
+  Module Set.
+    Definition elt := t.
+    
+    Parameter t : Set.
+    
+    Parameter empty : t.
+    
+    Parameter is_empty : t -&gt; bool.
+    
+    Parameter mem : elt -&gt; t -&gt; bool.
+    
+    Parameter add : elt -&gt; t -&gt; t.
+    
+    Parameter singleton : elt -&gt; t.
+    
+    Parameter remove : elt -&gt; t -&gt; t.
+    
+    Parameter union : t -&gt; t -&gt; t.
+    
+    Parameter inter : t -&gt; t -&gt; t.
+    
+    Parameter diff : t -&gt; t -&gt; t.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter subset : t -&gt; t -&gt; bool.
+    
+    Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+    
+    Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+    
+    Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+    
+    Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+    
+    Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+    
+    Parameter cardinal : t -&gt; Z.
+    
+    Parameter elements : t -&gt; list elt.
+    
+    Parameter min_elt : t -&gt; elt.
+    
+    Parameter min_elt_opt : t -&gt; option elt.
+    
+    Parameter max_elt : t -&gt; elt.
+    
+    Parameter max_elt_opt : t -&gt; option elt.
+    
+    Parameter choose : t -&gt; elt.
+    
+    Parameter choose_opt : t -&gt; option elt.
+    
+    Parameter split : elt -&gt; t -&gt; t * bool * t.
+    
+    Parameter find : elt -&gt; t -&gt; elt.
+    
+    Parameter find_opt : elt -&gt; t -&gt; option elt.
+    
+    Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter of_list : list elt -&gt; t.
+    
+    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    
+    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    
+    Parameter encoding : Data_encoding.t t.
+  End Set.
+  
+  Module Map.
+    Definition key := t.
+    
+    Parameter t : forall (a : Set), Set.
+    
+    Parameter empty : forall {a : Set}, t a.
+    
+    Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+    
+    Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+    
+    Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+    
+    Parameter update : forall {a : Set},
+      key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+    
+    Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+    
+    Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+    
+    Parameter merge : forall {a b c : Set},
+      (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+    
+    Parameter union : forall {a : Set},
+      (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+    
+    Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+    
+    Parameter equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+    
+    Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+    
+    Parameter fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+    
+    Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+    
+    Parameter partition : forall {a : Set},
+      (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+    
+    Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+    
+    Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+    
+    Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter choose : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+    
+    Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+    
+    Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+    
+    Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_first_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_last_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter to_seq_from : forall {a : Set},
+      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    
+    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    
+    Parameter encoding : forall {a : Set},
+      Data_encoding.t a -&gt; Data_encoding.t (t a).
+  End Map.
 End Block_hash.
 
 Module Operation_hash.
-  include
+  Parameter t : Set.
+  
+  Parameter name : string.
+  
+  Parameter title : string.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t.
+  
+  Parameter hash_string : option string -&gt; list string -&gt; t.
+  
+  Parameter zero : t.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter to_path : t -&gt; list string -&gt; list string.
+  
+  Parameter of_path : list string -&gt; option t.
+  
+  Parameter of_path_exn : list string -&gt; t.
+  
+  Parameter prefix_path : string -&gt; list string.
+  
+  Parameter path_length : Z.
+  
+  Module Set.
+    Definition elt := t.
+    
+    Parameter t : Set.
+    
+    Parameter empty : t.
+    
+    Parameter is_empty : t -&gt; bool.
+    
+    Parameter mem : elt -&gt; t -&gt; bool.
+    
+    Parameter add : elt -&gt; t -&gt; t.
+    
+    Parameter singleton : elt -&gt; t.
+    
+    Parameter remove : elt -&gt; t -&gt; t.
+    
+    Parameter union : t -&gt; t -&gt; t.
+    
+    Parameter inter : t -&gt; t -&gt; t.
+    
+    Parameter diff : t -&gt; t -&gt; t.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter subset : t -&gt; t -&gt; bool.
+    
+    Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+    
+    Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+    
+    Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+    
+    Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+    
+    Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+    
+    Parameter cardinal : t -&gt; Z.
+    
+    Parameter elements : t -&gt; list elt.
+    
+    Parameter min_elt : t -&gt; elt.
+    
+    Parameter min_elt_opt : t -&gt; option elt.
+    
+    Parameter max_elt : t -&gt; elt.
+    
+    Parameter max_elt_opt : t -&gt; option elt.
+    
+    Parameter choose : t -&gt; elt.
+    
+    Parameter choose_opt : t -&gt; option elt.
+    
+    Parameter split : elt -&gt; t -&gt; t * bool * t.
+    
+    Parameter find : elt -&gt; t -&gt; elt.
+    
+    Parameter find_opt : elt -&gt; t -&gt; option elt.
+    
+    Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter of_list : list elt -&gt; t.
+    
+    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    
+    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    
+    Parameter encoding : Data_encoding.t t.
+  End Set.
+  
+  Module Map.
+    Definition key := t.
+    
+    Parameter t : forall (a : Set), Set.
+    
+    Parameter empty : forall {a : Set}, t a.
+    
+    Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+    
+    Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+    
+    Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+    
+    Parameter update : forall {a : Set},
+      key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+    
+    Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+    
+    Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+    
+    Parameter merge : forall {a b c : Set},
+      (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+    
+    Parameter union : forall {a : Set},
+      (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+    
+    Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+    
+    Parameter equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+    
+    Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+    
+    Parameter fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+    
+    Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+    
+    Parameter partition : forall {a : Set},
+      (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+    
+    Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+    
+    Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+    
+    Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter choose : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+    
+    Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+    
+    Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+    
+    Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_first_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_last_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter to_seq_from : forall {a : Set},
+      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    
+    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    
+    Parameter encoding : forall {a : Set},
+      Data_encoding.t a -&gt; Data_encoding.t (t a).
+  End Map.
 End Operation_hash.
 
 Module Operation_list_hash.
-  include
+  Definition elt := Operation_hash.(S.HASH.t).
+  
+  Parameter t : Set.
+  
+  Parameter name : string.
+  
+  Parameter title : string.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t.
+  
+  Parameter hash_string : option string -&gt; list string -&gt; t.
+  
+  Parameter zero : t.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter to_path : t -&gt; list string -&gt; list string.
+  
+  Parameter of_path : list string -&gt; option t.
+  
+  Parameter of_path_exn : list string -&gt; t.
+  
+  Parameter prefix_path : string -&gt; list string.
+  
+  Parameter path_length : Z.
+  
+  Module Set.
+    Definition elt := t.
+    
+    Parameter t : Set.
+    
+    Parameter empty : t.
+    
+    Parameter is_empty : t -&gt; bool.
+    
+    Parameter mem : elt -&gt; t -&gt; bool.
+    
+    Parameter add : elt -&gt; t -&gt; t.
+    
+    Parameter singleton : elt -&gt; t.
+    
+    Parameter remove : elt -&gt; t -&gt; t.
+    
+    Parameter union : t -&gt; t -&gt; t.
+    
+    Parameter inter : t -&gt; t -&gt; t.
+    
+    Parameter diff : t -&gt; t -&gt; t.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter subset : t -&gt; t -&gt; bool.
+    
+    Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+    
+    Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+    
+    Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+    
+    Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+    
+    Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+    
+    Parameter cardinal : t -&gt; Z.
+    
+    Parameter elements : t -&gt; list elt.
+    
+    Parameter min_elt : t -&gt; elt.
+    
+    Parameter min_elt_opt : t -&gt; option elt.
+    
+    Parameter max_elt : t -&gt; elt.
+    
+    Parameter max_elt_opt : t -&gt; option elt.
+    
+    Parameter choose : t -&gt; elt.
+    
+    Parameter choose_opt : t -&gt; option elt.
+    
+    Parameter split : elt -&gt; t -&gt; t * bool * t.
+    
+    Parameter find : elt -&gt; t -&gt; elt.
+    
+    Parameter find_opt : elt -&gt; t -&gt; option elt.
+    
+    Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter of_list : list elt -&gt; t.
+    
+    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    
+    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    
+    Parameter encoding : Data_encoding.t t.
+  End Set.
+  
+  Module Map.
+    Definition key := t.
+    
+    Parameter t : forall (a : Set), Set.
+    
+    Parameter empty : forall {a : Set}, t a.
+    
+    Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+    
+    Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+    
+    Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+    
+    Parameter update : forall {a : Set},
+      key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+    
+    Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+    
+    Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+    
+    Parameter merge : forall {a b c : Set},
+      (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+    
+    Parameter union : forall {a : Set},
+      (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+    
+    Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+    
+    Parameter equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+    
+    Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+    
+    Parameter fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+    
+    Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+    
+    Parameter partition : forall {a : Set},
+      (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+    
+    Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+    
+    Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+    
+    Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter choose : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+    
+    Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+    
+    Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+    
+    Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_first_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_last_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter to_seq_from : forall {a : Set},
+      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    
+    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    
+    Parameter encoding : forall {a : Set},
+      Data_encoding.t a -&gt; Data_encoding.t (t a).
+  End Map.
+  
+  Parameter compute : list elt -&gt; t.
+  
+  Parameter empty : t.
+  
+  Parameter path : Set.
+  
+  Parameter compute_path : list elt -&gt; Z -&gt; path.
+  
+  Parameter check_path : path -&gt; elt -&gt; t * Z.
+  
+  Parameter path_encoding : Data_encoding.t path.
 End Operation_list_hash.
 
 Module Operation_list_list_hash.
-  include
+  Definition elt := Operation_list_hash.(S.MERKLE_TREE.t).
+  
+  Parameter t : Set.
+  
+  Parameter name : string.
+  
+  Parameter title : string.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t.
+  
+  Parameter hash_string : option string -&gt; list string -&gt; t.
+  
+  Parameter zero : t.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter to_path : t -&gt; list string -&gt; list string.
+  
+  Parameter of_path : list string -&gt; option t.
+  
+  Parameter of_path_exn : list string -&gt; t.
+  
+  Parameter prefix_path : string -&gt; list string.
+  
+  Parameter path_length : Z.
+  
+  Module Set.
+    Definition elt := t.
+    
+    Parameter t : Set.
+    
+    Parameter empty : t.
+    
+    Parameter is_empty : t -&gt; bool.
+    
+    Parameter mem : elt -&gt; t -&gt; bool.
+    
+    Parameter add : elt -&gt; t -&gt; t.
+    
+    Parameter singleton : elt -&gt; t.
+    
+    Parameter remove : elt -&gt; t -&gt; t.
+    
+    Parameter union : t -&gt; t -&gt; t.
+    
+    Parameter inter : t -&gt; t -&gt; t.
+    
+    Parameter diff : t -&gt; t -&gt; t.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter subset : t -&gt; t -&gt; bool.
+    
+    Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+    
+    Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+    
+    Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+    
+    Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+    
+    Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+    
+    Parameter cardinal : t -&gt; Z.
+    
+    Parameter elements : t -&gt; list elt.
+    
+    Parameter min_elt : t -&gt; elt.
+    
+    Parameter min_elt_opt : t -&gt; option elt.
+    
+    Parameter max_elt : t -&gt; elt.
+    
+    Parameter max_elt_opt : t -&gt; option elt.
+    
+    Parameter choose : t -&gt; elt.
+    
+    Parameter choose_opt : t -&gt; option elt.
+    
+    Parameter split : elt -&gt; t -&gt; t * bool * t.
+    
+    Parameter find : elt -&gt; t -&gt; elt.
+    
+    Parameter find_opt : elt -&gt; t -&gt; option elt.
+    
+    Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter of_list : list elt -&gt; t.
+    
+    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    
+    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    
+    Parameter encoding : Data_encoding.t t.
+  End Set.
+  
+  Module Map.
+    Definition key := t.
+    
+    Parameter t : forall (a : Set), Set.
+    
+    Parameter empty : forall {a : Set}, t a.
+    
+    Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+    
+    Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+    
+    Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+    
+    Parameter update : forall {a : Set},
+      key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+    
+    Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+    
+    Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+    
+    Parameter merge : forall {a b c : Set},
+      (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+    
+    Parameter union : forall {a : Set},
+      (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+    
+    Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+    
+    Parameter equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+    
+    Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+    
+    Parameter fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+    
+    Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+    
+    Parameter partition : forall {a : Set},
+      (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+    
+    Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+    
+    Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+    
+    Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter choose : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+    
+    Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+    
+    Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+    
+    Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_first_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_last_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter to_seq_from : forall {a : Set},
+      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    
+    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    
+    Parameter encoding : forall {a : Set},
+      Data_encoding.t a -&gt; Data_encoding.t (t a).
+  End Map.
+  
+  Parameter compute : list elt -&gt; t.
+  
+  Parameter empty : t.
+  
+  Parameter path : Set.
+  
+  Parameter compute_path : list elt -&gt; Z -&gt; path.
+  
+  Parameter check_path : path -&gt; elt -&gt; t * Z.
+  
+  Parameter path_encoding : Data_encoding.t path.
 End Operation_list_list_hash.
 
 Module Protocol_hash.
-  include
+  Parameter t : Set.
+  
+  Parameter name : string.
+  
+  Parameter title : string.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t.
+  
+  Parameter hash_string : option string -&gt; list string -&gt; t.
+  
+  Parameter zero : t.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter to_path : t -&gt; list string -&gt; list string.
+  
+  Parameter of_path : list string -&gt; option t.
+  
+  Parameter of_path_exn : list string -&gt; t.
+  
+  Parameter prefix_path : string -&gt; list string.
+  
+  Parameter path_length : Z.
+  
+  Module Set.
+    Definition elt := t.
+    
+    Parameter t : Set.
+    
+    Parameter empty : t.
+    
+    Parameter is_empty : t -&gt; bool.
+    
+    Parameter mem : elt -&gt; t -&gt; bool.
+    
+    Parameter add : elt -&gt; t -&gt; t.
+    
+    Parameter singleton : elt -&gt; t.
+    
+    Parameter remove : elt -&gt; t -&gt; t.
+    
+    Parameter union : t -&gt; t -&gt; t.
+    
+    Parameter inter : t -&gt; t -&gt; t.
+    
+    Parameter diff : t -&gt; t -&gt; t.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter subset : t -&gt; t -&gt; bool.
+    
+    Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+    
+    Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+    
+    Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+    
+    Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+    
+    Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+    
+    Parameter cardinal : t -&gt; Z.
+    
+    Parameter elements : t -&gt; list elt.
+    
+    Parameter min_elt : t -&gt; elt.
+    
+    Parameter min_elt_opt : t -&gt; option elt.
+    
+    Parameter max_elt : t -&gt; elt.
+    
+    Parameter max_elt_opt : t -&gt; option elt.
+    
+    Parameter choose : t -&gt; elt.
+    
+    Parameter choose_opt : t -&gt; option elt.
+    
+    Parameter split : elt -&gt; t -&gt; t * bool * t.
+    
+    Parameter find : elt -&gt; t -&gt; elt.
+    
+    Parameter find_opt : elt -&gt; t -&gt; option elt.
+    
+    Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter of_list : list elt -&gt; t.
+    
+    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    
+    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    
+    Parameter encoding : Data_encoding.t t.
+  End Set.
+  
+  Module Map.
+    Definition key := t.
+    
+    Parameter t : forall (a : Set), Set.
+    
+    Parameter empty : forall {a : Set}, t a.
+    
+    Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+    
+    Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+    
+    Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+    
+    Parameter update : forall {a : Set},
+      key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+    
+    Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+    
+    Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+    
+    Parameter merge : forall {a b c : Set},
+      (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+    
+    Parameter union : forall {a : Set},
+      (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+    
+    Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+    
+    Parameter equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+    
+    Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+    
+    Parameter fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+    
+    Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+    
+    Parameter partition : forall {a : Set},
+      (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+    
+    Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+    
+    Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+    
+    Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter choose : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+    
+    Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+    
+    Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+    
+    Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_first_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_last_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter to_seq_from : forall {a : Set},
+      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    
+    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    
+    Parameter encoding : forall {a : Set},
+      Data_encoding.t a -&gt; Data_encoding.t (t a).
+  End Map.
 End Protocol_hash.
 
 Module Context_hash.
-  include
+  Parameter t : Set.
+  
+  Parameter name : string.
+  
+  Parameter title : string.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t.
+  
+  Parameter hash_string : option string -&gt; list string -&gt; t.
+  
+  Parameter zero : t.
+  
+  Parameter size : Z.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  
+  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  
+  Parameter to_b58check : t -&gt; string.
+  
+  Parameter to_short_b58check : t -&gt; string.
+  
+  Parameter of_b58check_exn : string -&gt; t.
+  
+  Parameter of_b58check_opt : string -&gt; option t.
+  
+  extensible_type
+  
+  Parameter b58check_encoding : Base58.encoding t.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter rpc_arg : RPC_arg.t t.
+  
+  Parameter to_path : t -&gt; list string -&gt; list string.
+  
+  Parameter of_path : list string -&gt; option t.
+  
+  Parameter of_path_exn : list string -&gt; t.
+  
+  Parameter prefix_path : string -&gt; list string.
+  
+  Parameter path_length : Z.
+  
+  Module Set.
+    Definition elt := t.
+    
+    Parameter t : Set.
+    
+    Parameter empty : t.
+    
+    Parameter is_empty : t -&gt; bool.
+    
+    Parameter mem : elt -&gt; t -&gt; bool.
+    
+    Parameter add : elt -&gt; t -&gt; t.
+    
+    Parameter singleton : elt -&gt; t.
+    
+    Parameter remove : elt -&gt; t -&gt; t.
+    
+    Parameter union : t -&gt; t -&gt; t.
+    
+    Parameter inter : t -&gt; t -&gt; t.
+    
+    Parameter diff : t -&gt; t -&gt; t.
+    
+    Parameter compare : t -&gt; t -&gt; Z.
+    
+    Parameter equal : t -&gt; t -&gt; bool.
+    
+    Parameter subset : t -&gt; t -&gt; bool.
+    
+    Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
+    
+    Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
+    
+    Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
+    
+    Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
+    
+    Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
+    
+    Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
+    
+    Parameter cardinal : t -&gt; Z.
+    
+    Parameter elements : t -&gt; list elt.
+    
+    Parameter min_elt : t -&gt; elt.
+    
+    Parameter min_elt_opt : t -&gt; option elt.
+    
+    Parameter max_elt : t -&gt; elt.
+    
+    Parameter max_elt_opt : t -&gt; option elt.
+    
+    Parameter choose : t -&gt; elt.
+    
+    Parameter choose_opt : t -&gt; option elt.
+    
+    Parameter split : elt -&gt; t -&gt; t * bool * t.
+    
+    Parameter find : elt -&gt; t -&gt; elt.
+    
+    Parameter find_opt : elt -&gt; t -&gt; option elt.
+    
+    Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
+    
+    Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
+    
+    Parameter of_list : list elt -&gt; t.
+    
+    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    
+    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    
+    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    
+    Parameter encoding : Data_encoding.t t.
+  End Set.
+  
+  Module Map.
+    Definition key := t.
+    
+    Parameter t : forall (a : Set), Set.
+    
+    Parameter empty : forall {a : Set}, t a.
+    
+    Parameter is_empty : forall {a : Set}, t a -&gt; bool.
+    
+    Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
+    
+    Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
+    
+    Parameter update : forall {a : Set},
+      key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
+    
+    Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
+    
+    Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
+    
+    Parameter merge : forall {a b c : Set},
+      (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
+    
+    Parameter union : forall {a : Set},
+      (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
+    
+    Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
+    
+    Parameter equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
+    
+    Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
+    
+    Parameter fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
+    
+    Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
+    
+    Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
+    
+    Parameter partition : forall {a : Set},
+      (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
+    
+    Parameter cardinal : forall {a : Set}, t a -&gt; Z.
+    
+    Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
+    
+    Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter choose : forall {a : Set}, t a -&gt; key * a.
+    
+    Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
+    
+    Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
+    
+    Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
+    
+    Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
+    
+    Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_first_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
+    
+    Parameter find_last_opt : forall {a : Set},
+      (key -&gt; bool) -&gt; t a -&gt; option (key * a).
+    
+    Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
+    
+    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter to_seq_from : forall {a : Set},
+      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+    
+    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    
+    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    
+    Parameter encoding : forall {a : Set},
+      Data_encoding.t a -&gt; Data_encoding.t (t a).
+  End Map.
 End Context_hash.
 
 Module Micheline.
@@ -9562,11 +12750,69 @@ Module Block_header.
     shell : shell_header;
     protocol_data : MBytes.t }.
   
-  include
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes : MBytes.t -&gt; option t.
+  
+  Parameter hash : t -&gt; Block_hash.(S.HASH.t).
+  
+  Parameter hash_raw : MBytes.t -&gt; Block_hash.(S.HASH.t).
 End Block_header.
 
 Module Fitness.
-  include
+  Definition t := list MBytes.t.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes : MBytes.t -&gt; option t.
 End Fitness.
 
 Module Operation.
@@ -9579,7 +12825,37 @@ Module Operation.
     shell : shell_header;
     proto : MBytes.t }.
   
-  include
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes : MBytes.t -&gt; option t.
+  
+  Parameter hash : t -&gt; Operation_hash.(S.HASH.t).
+  
+  Parameter hash_raw : MBytes.t -&gt; Operation_hash.(S.HASH.t).
 End Operation.
 
 Module Protocol.
@@ -9610,7 +12886,37 @@ Module Protocol.
   
   Parameter env_version_encoding : Data_encoding.t env_version.
   
-  include
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes : MBytes.t -&gt; option t.
+  
+  Parameter hash : t -&gt; Protocol_hash.(S.HASH.t).
+  
+  Parameter hash_raw : MBytes.t -&gt; Protocol_hash.(S.HASH.t).
 End Protocol.
 
 Module Context.
