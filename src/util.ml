@@ -30,3 +30,16 @@ module Option = struct
         )
       )
 end
+
+module String = struct
+  let is_prefix (prefix : string) (s : string) : string option =
+    let prefix_length = String.length prefix in
+    let is_prefix =
+      String.equal
+        (String.sub s 0 (min prefix_length (String.length s)))
+        prefix in
+    if is_prefix then
+      Some (String.sub s prefix_length (String.length s - prefix_length))
+    else
+      None
+end

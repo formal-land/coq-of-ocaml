@@ -59,7 +59,7 @@ let of_ocaml
   : Output.t =
   let (ast, error_message) =
     exp env loc typedtree typedtree_errors source_file_name source_file_content json_mode in
-  let document = Ast.to_coq ast in
+  let document = Ast.to_coq ast (Filename.basename source_file_name) in
   let generated_file_name =
     match output_file_name with
     | None ->

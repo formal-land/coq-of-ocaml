@@ -177,6 +177,14 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       of_expression typ_vars e >>= fun e ->
       return (Apply (constructor, [e]))
     end >>= fun e ->
+    let e =
+      match label with
+      | "Branch" -> Variable (MixedPath.of_name (Name.Make "Error_monad.Branch"))
+      | "Permanent" -> Variable (MixedPath.of_name (Name.Make "Error_monad.Permanent"))
+      | "Temporary" -> Variable (MixedPath.of_name (Name.Make "Error_monad.Temporary"))
+      | "Uint8" -> Variable (MixedPath.of_name (Name.Make "Data_encoding.Uint8"))
+      | "Uint16" -> Variable (MixedPath.of_name (Name.Make "Data_encoding.Uint16"))
+      | _ -> e in
     error_message
       (ErrorMessage (e, "`" ^ label))
       NotSupported

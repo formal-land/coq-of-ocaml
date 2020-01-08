@@ -9,6 +9,8 @@ type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
 
+let tezos_imports : string list ref = ref []
+
 let stdlib_name =
   if Sys.ocaml_version >= "4.07" then
     "Stdlib"
@@ -200,7 +202,22 @@ let try_convert (path_name : t) : t option =
     | _ -> Some path_name
     end
 
-  | _ -> None
+  (* Specific to the Tezos protocol *)
+  | "Tezos_raw_protocol_alpha" :: path ->
+    begin match path with
+    | [] -> ()
+    | library :: _ -> tezos_imports := library :: !tezos_imports
+    end;
+    make path (Name.to_string base)
+  | "Tezos_protocol_environment_alpha__Environment" :: path ->
+    make path (Name.to_string base)
+  | head :: path ->
+    begin match Util.String.is_prefix "Tezos_raw_protocol_alpha__" head with
+    | None -> None
+    | Some suffix ->
+      tezos_imports := suffix :: !tezos_imports;
+      make (suffix :: path) (Name.to_string base)
+    end
 
 let convert (path_name : t) : t =
   match try_convert path_name with
@@ -213,6 +230,11 @@ let of_name (path : Name.t list) (base : Name.t) : t =
 
 (** Import an OCaml [Longident.t]. *)
 let of_long_ident (is_value : bool) (long_ident : Longident.t) : t =
+  begin match Longident.flatten long_ident with
+  | "Storage_description" as head :: _ ->
+    tezos_imports := head :: !tezos_imports
+  | _ -> ()
+  end;
   match List.rev (Longident.flatten long_ident) with
   | [] -> failwith "Unexpected Longident.t with an empty list"
   | x :: xs ->
@@ -269,6 +291,12 @@ let of_label_description (label_description : Types.label_description) : t =
 let of_variant (label : string) : t =
   match label with
   (* Custom variants to add here. *)
+  | "Hex" -> __make ["MBytes"] "Hex"
+  | "Branch" -> __make ["Error_monad"] "Branch"
+  | "Permanent" -> __make ["Error_monad"] "Permanent"
+  | "Temporary" -> __make ["Error_monad"] "Temporary"
+  | "Uint8" -> __make ["Data_encoding"] "Uint8"
+  | "Uint16" -> __make ["Data_encoding"] "Uint16"
   | _ -> { path = []; base = Name.of_string false label }
 
 let get_head_and_tail (path_name : t) : Name.t * t option =
