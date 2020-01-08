@@ -8129,9 +8129,9 @@ Module Data_encoding.
     option ((* `Uint16 *) unit + (* `Uint8 *) unit + (* `Uint30 *) unit) -&gt;
     encoding a -&gt; encoding a.
   
-  Parameter json : encoding json.
+  Parameter __json_value : encoding json.
   
-  Parameter json_schema : encoding json_schema.
+  Parameter __json_schema_value : encoding json_schema.
   
   Parameter field : forall (a : Set), Set.
   
@@ -8244,7 +8244,7 @@ Module Data_encoding.
   
   Parameter case : forall (t : Set), Set.
   
-  Parameter case : forall {a t : Set},
+  Parameter __case_value : forall {a t : Set},
     string -&gt; option string -&gt; case_tag -&gt; encoding a -&gt; (t -&gt; option a) -&gt;
     (a -&gt; t) -&gt; case t.
   
@@ -8399,7 +8399,7 @@ Module Error_monad.
   
   Parameter return_false : Lwt.t (tzresult bool).
   
-  Parameter __error : forall {a : Set}, __error -&gt; tzresult a.
+  Parameter __error_value : forall {a : Set}, __error -&gt; tzresult a.
   
   Parameter fail : forall {a : Set}, __error -&gt; Lwt.t (tzresult a).
   
