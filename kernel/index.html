@@ -49,8 +49,8 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 32391 lines</li>
-      <li>Coq size: 43385 lines (+33% compared to&nbsp;OCaml)</li>
-      <li>errors: 1576</li>
+      <li>Coq size: 43507 lines (+34% compared to&nbsp;OCaml)</li>
+      <li>errors: 1603</li>
     </ul>
   </div>
 </div>
@@ -456,7 +456,7 @@
       </li>
       
       <li>
-        <a href="#uint63_31.ml">uint63_31.ml</a>&nbsp;<span class="label label-danger">26</span>
+        <a href="#uint63_31.ml">uint63_31.ml</a>&nbsp;<span class="label label-danger">53</span>
       </li>
       
       <li>
@@ -26021,12 +26021,12 @@ let is_float64 t =
 
 (*** Test at runtime that no harmful double rounding seems to
    be performed with an intermediate 80 bits representation (x87). *)
-let <abbr class="mark-error" title="A variable name instead of a pattern was expected.">()</abbr> =
+<abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () =
   let b = ldexp 1. 53 in
   let s = add 1. (ldexp 1. (-52)) in
   if add b s &lt;= b || add b 1. &lt;&gt; b || ldexp 1. (-1074) &lt;= 0. then
     failwith &quot;Detected non IEEE-754 compliant architecture (or wrong \
-              rounding mode). Use of Float is thus unsafe.&quot;
+              rounding mode). Use of Float is thus unsafe.&quot;</abbr>
 </pre>
   </div>
   <div class="col-md-6">
@@ -26259,7 +26259,37 @@ Definition total_compare (f1 : Z) (f2 : Z) : Z :=
 Definition is_float64 (t : Stdlib.Obj.t) : bool :=
   equiv_decb (Obj.tag t) Obj.double_tag.
 
-
+(* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
+Compute
+  let b :=
+    Stdlib.ldexp
+      (* ❌ Float constant 1. is approximated by the integer 1 *)
+      1 53 in
+  let s :=
+    add
+      (* ❌ Float constant 1. is approximated by the integer 1 *)
+      1
+      (Stdlib.ldexp
+        (* ❌ Float constant 1. is approximated by the integer 1 *)
+        1 (-52)) in
+  if
+    orb (OCaml.Stdlib.le (add b s) b)
+      (orb
+        (nequiv_decb
+          (add b
+            (* ❌ Float constant 1. is approximated by the integer 1 *)
+            1) b)
+        (OCaml.Stdlib.le
+          (Stdlib.ldexp
+            (* ❌ Float constant 1. is approximated by the integer 1 *)
+            1 (-1074))
+          (* ❌ Float constant 0. is approximated by the integer 0 *)
+          0)) then
+    OCaml.Stdlib.failwith
+      &quot;Detected non IEEE-754 compliant architecture (or wrong rounding mode). Use of Float is thus unsafe.&quot;
+        % string
+  else
+    tt.
 </pre>
   </div>
 </div>
@@ -26725,7 +26755,7 @@ let main () =
 
 Only the special case `| exception _ when false -&gt; ...` is supported for default value of GADT pattern-matching">Invalid_argument _</abbr> -&gt; usage ()
 
-let <abbr class="mark-error" title="A variable name instead of a pattern was expected.">()</abbr> = main ()
+<abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () = main ()</abbr>
 </pre>
   </div>
   <div class="col-md-6">
@@ -27006,7 +27036,8 @@ Definition main (function_parameter : unit) : unit :=
   | _ =&gt; usage tt
   end.
 
-
+(* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
+Compute main tt.
 </pre>
   </div>
 </div>
@@ -69021,9 +69052,18 @@ Definition close_section (senv : safe_environment) : safe_environment :=
   let env0 := env senv in
   let '(sections, entries, cstrs, revert) := Section.close_section sections0 in
   let fix pop_revstruct
-    (accu : list variant) (entries : list Section.section_entry) (revstruct :
+    (accu :
+    list
+      ((* `Definition *)
+      Names.Constant.t * Declarations.constant_body Opaqueproof.opaque +
+        (* `Inductive *) Names.MutInd.t * Declarations.mutual_inductive_body))
+    (entries : list Section.section_entry) (revstruct :
     list (Names.Label.t * Declarations.structure_field_body))
-    : list variant * list (Names.Label.t * Declarations.structure_field_body) :=
+    : list
+      ((* `Definition *)
+      Names.Constant.t * Declarations.constant_body Opaqueproof.opaque +
+        (* `Inductive *) Names.MutInd.t * Declarations.mutual_inductive_body) *
+      list (Names.Label.t * Declarations.structure_field_body) :=
     match (entries, revstruct) with
     | ([], revstruct) =&gt; (accu, revstruct)
     | (cons _ _, []) =&gt;
@@ -69071,7 +69111,10 @@ Definition close_section (senv : safe_environment) : safe_environment :=
         |} := seg in
     let abstract := (abstr_ctx, abstr_subst, abstr_uctx) in
     {| Opaqueproof.modlist := modlist; Opaqueproof.abstract := abstract |} in
-  let fold (senv : safe_environment) (function_parameter : variant)
+  let fold
+    (senv : safe_environment) (function_parameter :
+    (* `Definition *)
+    Names.Constant.t * Declarations.constant_body Opaqueproof.opaque)
     : safe_environment :=
     match function_parameter with
     | Definition (kn, cb) =&gt;
@@ -74673,10 +74716,21 @@ Definition effect_handler (a : Set) :=
   Environ.env -&gt; Constr.t -&gt; a -&gt; Constr.t * Univ.ContextSet.t * Z.
 
 Definition skip_trusted_seff (sl : Int.t) (b : Constr.constr) (e : Environ.env)
-  : Constr.constr * Environ.env * list variant :=
+  : Constr.constr * Environ.env *
+    list
+      ((* `Let *)
+      Context.binder_annot Names.Name.t * Constr.constr * Constr.types +
+        (* `Cut *)
+        Context.binder_annot Names.Name.t * Constr.types * array Constr.constr) :=
   let fix aux
-    (sl : Int.t) (b : Constr.constr) (e : Environ.env) (acc : list variant)
-    : Constr.constr * Environ.env * list variant :=
+    (sl : Int.t) (b : Constr.constr) (e : Environ.env) (acc :
+    list
+      (* `Let *)
+      (Context.binder_annot Names.Name.t * Constr.constr * Constr.types))
+    : Constr.constr * Environ.env *
+      list
+        (* `Let *)
+        (Context.binder_annot Names.Name.t * Constr.constr * Constr.types) :=
     if Int.equal sl 0 then
       (b, e, acc)
     else
@@ -74706,7 +74760,11 @@ Definition skip_trusted_seff (sl : Int.t) (b : Constr.constr) (e : Environ.env)
   aux sl b e [].
 
 Fixpoint unzip {A : Set}
-  (ctx : list variant) (j : Environ.punsafe_judgment Constr.constr A)
+  (ctx :
+    list
+      (* `Let *)
+      (Context.binder_annot Names.Name.t * Constr.constr * Constr.types))
+  (j : Environ.punsafe_judgment Constr.constr A)
   : Environ.punsafe_judgment Constr.constr A :=
   match ctx with
   | [] =&gt; j
@@ -80422,7 +80480,7 @@ Parameter subcarryc : t -&gt; t -&gt; carry t.
 <hr />
 <div class="row conversion-row" id="uint63_31.ml">
   <div class="col-md-6">
-    <a href="#uint63_31.ml"><code>uint63_31.ml</code></a>&nbsp;<span class="label label-danger">26 errors</span>
+    <a href="#uint63_31.ml"><code>uint63_31.ml</code></a>&nbsp;<span class="label label-danger">53 errors</span>
     
     <pre>(************************************************************************)
 (*         *   The Coq Proof Assistant / The Coq Development Team       *)
@@ -81275,35 +81333,2303 @@ let subcarryc x y =
 
 (* Register all exported functions so that they can be called from C code *)
 
-let <abbr class="mark-error" title="A variable name instead of a pattern was expected.">()</abbr> =
-  Callback.register &quot;uint63 add&quot; add;
-  Callback.register &quot;uint63 addcarry&quot; addcarry;
-  Callback.register &quot;uint63 addmuldiv&quot; addmuldiv;
-  Callback.register &quot;uint63 div&quot; div;
-  Callback.register &quot;uint63 div21_ml&quot; div21;
-  Callback.register &quot;uint63 eq&quot; equal;
-  Callback.register &quot;uint63 eq0&quot; (equal Int64.zero);
-  Callback.register &quot;uint63 head0&quot; head0;
-  Callback.register &quot;uint63 land&quot; l_and;
-  Callback.register &quot;uint63 leq&quot; le;
-  Callback.register &quot;uint63 lor&quot; l_or;
-  Callback.register &quot;uint63 lsl&quot; l_sl;
-  Callback.register &quot;uint63 lsl1&quot; (fun x -&gt; l_sl x Int64.one);
-  Callback.register &quot;uint63 lsr&quot; l_sr;
-  Callback.register &quot;uint63 lsr1&quot; (fun x -&gt; l_sr x Int64.one);
-  Callback.register &quot;uint63 lt&quot; lt;
-  Callback.register &quot;uint63 lxor&quot; l_xor;
-  Callback.register &quot;uint63 mod&quot; rem;
-  Callback.register &quot;uint63 mul&quot; mul;
-  Callback.register &quot;uint63 mulc_ml&quot; mulc;
-  Callback.register &quot;uint63 one&quot; one;
-  Callback.register &quot;uint63 sub&quot; sub;
-  Callback.register &quot;uint63 subcarry&quot; subcarry;
-  Callback.register &quot;uint63 tail0&quot; tail0;
-  Callback.register &quot;uint63 of_float&quot; of_float;
-  Callback.register &quot;uint63 to_float&quot; to_float;
-  Callback.register &quot;uint63 of_int&quot; of_int;
-  Callback.register &quot;uint63 to_int_min&quot; to_int_min
+<abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () =
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 add&quot; add;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 addcarry&quot; addcarry;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 addmuldiv&quot; addmuldiv;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 div&quot; div;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 div21_ml&quot; div21;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 eq&quot; equal;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 eq0&quot; (equal Int64.zero);
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 head0&quot; head0;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 land&quot; l_and;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 leq&quot; le;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lor&quot; l_or;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsl&quot; l_sl;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsl1&quot; (fun x -&gt; l_sl x Int64.one);
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsr&quot; l_sr;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lsr1&quot; (fun x -&gt; l_sr x Int64.one);
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lt&quot; lt;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 lxor&quot; l_xor;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 mod&quot; rem;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 mul&quot; mul;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 mulc_ml&quot; mulc;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 one&quot; one;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 sub&quot; sub;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 subcarry&quot; subcarry;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 tail0&quot; tail0;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 of_float&quot; of_float;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 to_float&quot; to_float;
+  </abbr><abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">Callback.register &quot;uint63 of_int&quot; of_int;
+  Callback.register &quot;uint63 to_int_min&quot; to_int_min</abbr>
 </pre>
   </div>
   <div class="col-md-6">
@@ -81741,7 +84067,65 @@ Definition subcarryc (x : Stdlib.Int64.t) (y : Stdlib.Int64.t) : carry int64 :=
   else
     C1 r.
 
-
+(* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
+Compute
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 add&quot; % string add in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 addcarry&quot; % string addcarry in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 addmuldiv&quot; % string addmuldiv in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 div&quot; % string div in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 div21_ml&quot; % string div21 in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 eq&quot; % string equal in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 eq0&quot; % string (equal Int64.zero) in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 head0&quot; % string head0 in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 land&quot; % string l_and in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 leq&quot; % string le in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lor&quot; % string l_or in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsl&quot; % string l_sl in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsl1&quot; % string (fun x =&gt; l_sl x Int64.one)
+    in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsr&quot; % string l_sr in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lsr1&quot; % string (fun x =&gt; l_sr x Int64.one)
+    in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lt&quot; % string lt in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 lxor&quot; % string l_xor in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 mod&quot; % string rem in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 mul&quot; % string mul in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 mulc_ml&quot; % string mulc in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 one&quot; % string one in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 sub&quot; % string sub in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 subcarry&quot; % string subcarry in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 tail0&quot; % string tail0 in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 of_float&quot; % string of_float in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 to_float&quot; % string to_float in
+  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  let _ := Callback.register &quot;uint63 of_int&quot; % string of_int in
+  Callback.register &quot;uint63 to_int_min&quot; % string to_int_min.
 </pre>
   </div>
 </div>
