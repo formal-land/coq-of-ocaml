@@ -335,8 +335,22 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       match typ with
       | { typ_type = { type_kind = Type_abstract; type_manifest = Some typ; _ }; _ } ->
-        Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return ((name, typ_args, typ) :: notations, records, typs)
+        begin match typ.Types.desc with
+        | Tvariant { row_fields; _ } ->
+          Monad.List.map Constructors.Single.of_ocaml_row row_fields >>= fun single_constructors ->
+          Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
+          raise
+            (
+              notations,
+              records,
+              (name, typ_args, constructors) :: typs
+            )
+            NotSupported
+            "Polymorphic variant types are not handled"
+        | _ ->
+          Type.of_type_expr_without_free_vars typ >>= fun typ ->
+          return ((name, typ_args, typ) :: notations, records, typs)
+        end
       | { typ_type = { type_kind = Type_abstract; type_manifest = None; _ }; _ } ->
         raise
           (notations, records, typs)
