@@ -102,16 +102,16 @@ let items_of_signature (signature : signature) : item list Monad.t =
 
 let of_signature (signature : signature) : t Monad.t =
   items_of_signature signature >>= fun items ->
-  (ModuleTypParams.get_signature_typ_params signature.sig_type) >>= fun typ_params ->
+  ModuleTypParams.get_signature_typ_params signature.sig_type >>= fun typ_params ->
   return { items; typ_params }
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
-  | Error message -> !^ message
+  | Error message -> !^ ("(* " ^ message ^ " *)")
   | Module (name, module_typ) ->
-    nest (Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ)
+    nest (Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ ^-^ !^ ";")
   | TypExistential name ->
-    nest (Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name)
+    nest (Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name ^-^ !^ ";")
   | TypSynonym (name, typ_args, typ) ->
     nest (
       Name.to_coq name ^^
@@ -119,7 +119,7 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
       | [] -> empty
       | _ ->
         parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
-      ) ^^ !^ ":=" ^^ Type.to_coq None None typ
+      ) ^^ !^ ":=" ^^ Type.to_coq None None typ ^-^ !^ ";"
     )
   | Value (name, typ_args, typ) ->
     nest (
@@ -130,7 +130,7 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
         !^ "forall" ^^ braces (group (
           separate space (List.map Name.to_coq typ_args) ^^
           !^ ":" ^^ Pp.set)) ^-^ !^ ",") ^^
-      Type.to_coq None None typ
+      Type.to_coq None None typ ^-^ !^ ";"
     )
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
@@ -147,7 +147,7 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
       | _ -> braces (separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set)
       ) ^^
       !^ ":=" ^^ !^ "{" ^^ newline ^^
-      indent (separate newline (List.map (fun item -> to_coq_item item ^-^ !^ ";") signature.items)) ^^ newline ^^
+      indent (separate newline (List.map to_coq_item signature.items)) ^^ newline ^^
       !^ "}" ^-^ !^ "."
     ) ^^
     (match typ_params with
