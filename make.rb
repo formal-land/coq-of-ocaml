@@ -94,10 +94,10 @@ def footer(root)
   ERB.new(File.read("template/footer.html.erb")).result(binding)
 end
 
-def project(name, title, intro, directory)
+def project(name, title, intro, directory, does_compile)
   project_name = name
   project_intro = <<END
-    <h2>#{title}</h2>
+    <h2>#{title}#{" <small><span class=\"label label-success\">Does compile</span></small>" if does_compile}</h2>
     <p>#{intro}</p>
 END
   conversions = get_conversions(directory)
@@ -123,7 +123,8 @@ File.open("kernel/index.html", "w") do |file|
     :kernel,
     "Kernel of Coq",
     "This is a demo of the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a> on the <a href=\"https://github.com/coq/coq/tree/master/kernel\">kernel</a> of <a =href=\"https://coq.inria.fr/\">Coq</a>. Coq is written in <a =href=\"https://ocaml.org/\">OCaml</a>.",
-    kernel_directory
+    kernel_directory,
+    false
   )
 end
 
@@ -132,7 +133,8 @@ File.open("tezos/index.html", "w") do |file|
     :tezos,
     "Protocol of Tezos",
     "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
-    tezos_directory
+    tezos_directory,
+    false
   )
 end
 
@@ -141,6 +143,7 @@ File.open("tezos-interface/index.html", "w") do |file|
     :tezos_interface,
     "Interface of the protocol of Tezos",
     "These are the sources of the interface of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
-    tezos_interface_directory
+    tezos_interface_directory,
+    true
   )
 end
