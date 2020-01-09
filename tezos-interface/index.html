@@ -49,7 +49,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6174 lines</li>
-      <li>Coq size: 6441 lines (+4% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 6443 lines (+4% compared to&nbsp;OCaml)</li>
       <li>errors: 236</li>
     </ul>
   </div>
@@ -9493,10 +9493,12 @@ Module S.
   Module SIGNATURE.
     Record signature {Public_key_hash_t Public_key_hash___Set_t : Set}
       {Public_key_hash_Map_t : Set -&gt; Set} {Public_key_t t watermark : Set} := {
-      Public_key_hash : SIGNATURE_Public_key_hash.signature Public_key_hash_t
-        Public_key_hash___Set_t Public_key_hash_Map_t;
-      Public_key : SIGNATURE_Public_key.signature Public_key_t
-        Public_key_hash.(SIGNATURE_Public_key_hash.t);
+      Public_key_hash :
+        SIGNATURE_Public_key_hash.signature Public_key_hash_t
+          Public_key_hash___Set_t Public_key_hash_Map_t;
+      Public_key :
+        SIGNATURE_Public_key.signature Public_key_t
+          Public_key_hash.(SIGNATURE_Public_key_hash.t);
       t := t;
       pp : Format.formatter -&gt; t -&gt; unit;
       size : Z;
