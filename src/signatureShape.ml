@@ -42,6 +42,14 @@ let rec are_equal (shape1 : t) (shape2 : t) : bool =
     shape1
     shape2
 
+let rec is_included (shape1 : t) (shape2 : t) : bool =
+  are_equal shape1 shape2 ||
+  match shape2 with
+  | [] -> false
+  | Item _ :: shape2 -> is_included shape1 shape2
+  | Module (_, sub_shape2) :: shape2 ->
+    is_included shape1 sub_shape2 || is_included shape1 shape2
+
 let rec pretty_print (shape : t) : SmartPrint.t =
   shape |> OCaml.list (fun item ->
     match item with

@@ -180,6 +180,13 @@ let try_convert (path_name : t) : t option =
     | _ -> Some path_name
     end
 
+  (* Seq *)
+  | [lib_name; "Seq"] when lib_name = stdlib_name ->
+    begin match Name.to_string base with
+    | "t" -> make ["OCaml"; "Seq"] "t"
+    | _ -> Some path_name
+    end
+
   (* String *)
   | [lib_name; "String"] when lib_name = stdlib_name ->
     begin match Name.to_string base with
@@ -231,7 +238,9 @@ let of_path_and_name_without_convert (path : Path.t) (name : Name.t) : t =
   let (path, base) = aux path in
   of_name (List.rev path) base
 
-let of_constructor_description (constructor_description : Types.constructor_description) : t =
+let of_constructor_description
+  (constructor_description : Types.constructor_description)
+  : t =
   match constructor_description with
   | { cstr_name; cstr_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
     let { path; _ } = of_path_without_convert false path in
@@ -240,7 +249,20 @@ let of_constructor_description (constructor_description : Types.constructor_desc
     | None -> path_name
     | Some path_name -> path_name
     end
-  | _ -> failwith "Unexpected constructor description without a constructor type"
+  | _ -> failwith "Unexpected constructor description without a type constructor"
+
+let of_label_description (label_description : Types.label_description) : t =
+  match label_description with
+  | { lbl_name; lbl_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
+    let { path; base } = of_path_without_convert false path in
+    let path_name = {
+      path = path @ [base];
+      base = Name.of_string false lbl_name } in
+    begin match try_convert path_name with
+    | None -> path_name
+    | Some path_name -> path_name
+    end
+  | _ -> failwith "Unexpected label description without a type constructor"
 
 let get_head_and_tail (path_name : t) : Name.t * t option =
   let { path; base } = path_name in

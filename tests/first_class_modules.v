@@ -162,3 +162,14 @@ Definition set_fold {acc elt : Set} (f : elt -> acc -> acc) (Box : set elt)
   : acc -> acc :=
   let Box := projT2 Box in
   Box.(Boxed_set.OPS).(S.SET.fold) f Box.(Boxed_set.boxed).
+
+Module MAP.
+  Record signature {key : Set} {t : Set -> Set} := {
+    key := key;
+    t := t;
+    empty : forall {a : Set}, t a;
+    is_empty : forall {a : Set}, t a -> bool;
+    mem : forall {a : Set}, key -> t a -> bool;
+  }.
+  Arguments signature : clear implicits.
+End MAP.

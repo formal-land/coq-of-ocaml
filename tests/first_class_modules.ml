@@ -125,3 +125,11 @@ let set_fold
   : type elt acc. (elt -> acc -> acc) -> elt set -> acc -> acc
   = fun f (module Box) ->
     Box.OPS.fold f Box.boxed
+
+module type MAP = sig
+  type key
+  type +'a t
+  val empty : 'a t
+  val is_empty : 'a t -> bool
+  val mem : key -> 'a t -> bool
+end

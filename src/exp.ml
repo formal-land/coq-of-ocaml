@@ -161,23 +161,25 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     return (Constructor (x, es))
   | Texp_variant _ -> error_message (Error "variant") NotSupported "Variants not supported"
   | Texp_record { fields = fields; extended_expression = None; _ } ->
-    (Array.to_list fields |> Monad.List.filter_map (fun (_, definition) ->
-      (match definition with
+    (Array.to_list fields |> Monad.List.filter_map (fun (label_description, definition) ->
+      begin match definition with
       | Kept _ ->
         raise None NotSupported "Records with overwriting are not handled"
-      | Overridden (loc, e) -> return (Some (loc, e))) >>= fun x_e ->
+      | Overridden (_, e) ->
+        let x = PathName.of_label_description label_description in
+        return (Some (x, e))
+      end >>= fun x_e ->
       match x_e with
       | None -> return None
       | Some (x, e) ->
-        let x = PathName.of_long_ident false x.txt in
         of_expression typ_vars e >>= fun e ->
         return (Some (x, e))
     )) >>= fun fields ->
     return (Record fields)
   | Texp_record { extended_expression = Some _; _ } ->
     error_message (Error "record_substitution") NotSupported "Record substitution not handled"
-  | Texp_field (e, x, _) ->
-    let x = PathName.of_long_ident false x.txt in
+  | Texp_field (e, _, label_description) ->
+    let x = PathName.of_label_description label_description in
     of_expression typ_vars e >>= fun e ->
     return (Field (e, x))
   | Texp_ifthenelse (e1, e2, e3) ->
@@ -311,7 +313,7 @@ and of_module_expr
       match module_type with
       | Some module_type -> module_type
       | None -> mod_type in
-    IsFirstClassModule.is_module_typ_first_class module_type >>= fun is_first_class ->
+    IsFirstClassModule.is_module_typ_first_class false module_type >>= fun is_first_class ->
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
       ModuleTypParams.get_module_typ_nb_of_existential_variables module_type >>= fun nb_of_existential_variables ->
@@ -346,8 +348,9 @@ and of_module_expr
       | Some _ -> module_type
       | None -> Some mod_type in
     of_module_expr typ_vars module_expr module_type
-  | Tmod_unpack (e, _) ->
+  | Tmod_unpack (e, module_typ) ->
     of_expression typ_vars e >>= fun e ->
+    add_local_module module_typ >>= fun () ->
     return (ModuleUnpack e)
   ))
 
