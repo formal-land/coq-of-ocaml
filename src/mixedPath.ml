@@ -22,7 +22,7 @@ let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t 
     begin match Env.find_module path' env with
     | module_declaration ->
       let { Types.md_type; _ } = module_declaration in
-      IsFirstClassModule.is_module_typ_first_class md_type >>= fun is_first_class ->
+      IsFirstClassModule.is_module_typ_first_class true md_type >>= fun is_first_class ->
       begin match is_first_class with
       | IsFirstClassModule.Found signature_path ->
         return (namespace_path, (signature_path, field_string) :: fields)

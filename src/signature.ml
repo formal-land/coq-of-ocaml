@@ -89,6 +89,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
     | Tsig_module { md_id; md_type; _ } ->
       let name = Name.of_ident false md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
+      add_local_module md_type.mty_type >>= fun () ->
       return [Module (name, module_typ)]
     | Tsig_open _ ->
       raise [Error "open"] NotSupported "Signature item `open` not handled."
@@ -116,9 +117,10 @@ let items_of_signature (signature : signature) : item list Monad.t =
   return (List.flatten items)
 
 let of_signature (signature : signature) : t Monad.t =
+  local_modules_open_scope (
   items_of_signature signature >>= fun items ->
   ModuleTypParams.get_signature_typ_params signature.sig_type >>= fun typ_params ->
-  return { items; typ_params }
+  return { items; typ_params })
 
 let to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with

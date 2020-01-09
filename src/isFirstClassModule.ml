@@ -39,32 +39,47 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
     exactly one. There may be more than one result if two signatures have the same
     or similar definitions. In this case we will fail later with an explicit
     error message. *)
-let find_similar_signatures (env : Env.t) (signature : Types.signature) : Path.t list * unit Tree.t =
+let find_similar_signatures
+  (env : Env.t)
+  (local_modules : Types.signature list)
+  (should_be_local : bool)
+  (signature : Types.signature)
+  : Path.t list * unit Tree.t =
   let shape = SignatureShape.of_signature signature in
-  (* We explore signatures in the current namespace. *)
-  let similar_signature_paths =
-    Env.fold_modtypes
-      (fun _ signature_path modtype_declaration signature_paths ->
-        if is_modtype_declaration_similar_to_shape modtype_declaration shape then
-          signature_path :: signature_paths
-        else
+  (* We check if the signature is in the list of locally opened modules. *)
+  let shapes_of_local_modules =
+    local_modules |> List.map SignatureShape.of_signature in
+  let is_locally_opened = not should_be_local ||
+    shapes_of_local_modules |> List.exists (fun local_module ->
+      SignatureShape.is_included shape local_module
+    ) in
+  if is_locally_opened || not should_be_local then
+    (* We explore signatures in the current namespace. *)
+    let similar_signature_paths =
+      Env.fold_modtypes
+        (fun _ signature_path modtype_declaration signature_paths ->
+          if is_modtype_declaration_similar_to_shape modtype_declaration shape then
+            signature_path :: signature_paths
+          else
+            signature_paths
+        )
+        None env [] in
+    (* We explore signatures in modules in the current namespace. *)
+    let similar_signature_paths_in_modules =
+      Env.fold_modules
+        (fun _ module_path module_declaration signature_paths ->
+          let modtype_declarations = get_modtype_declarations_of_module_declaration module_declaration in
+          let similar_modtype_declarations =
+            modtype_declarations |> List.filter (fun (_, modtype_declaration) ->
+              is_modtype_declaration_similar_to_shape modtype_declaration shape
+            ) in
+          (similar_modtype_declarations |> List.map (fun (idents, _) -> apply_idents_on_path module_path idents)) @
           signature_paths
-      )
-      None env [] in
-  (* We explore signatures in modules in the current namespace. *)
-  let similar_signature_paths_in_modules =
-    Env.fold_modules
-      (fun _ module_path module_declaration signature_paths ->
-        let modtype_declarations = get_modtype_declarations_of_module_declaration module_declaration in
-        let similar_modtype_declarations =
-          modtype_declarations |> List.filter (fun (_, modtype_declaration) ->
-            is_modtype_declaration_similar_to_shape modtype_declaration shape
-          ) in
-        (similar_modtype_declarations |> List.map (fun (idents, _) -> apply_idents_on_path module_path idents)) @
-        signature_paths
-      )
-      None env [] in
-  (similar_signature_paths @ similar_signature_paths_in_modules, shape)
+        )
+        None env [] in
+    (similar_signature_paths @ similar_signature_paths_in_modules, shape)
+  else
+    ([], shape)
 
 type maybe_found =
   | Found of Path.t
@@ -72,13 +87,17 @@ type maybe_found =
 
 (** Get the path of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. *)
-let is_module_typ_first_class (module_typ : Types.module_type) : maybe_found Monad.t =
+let is_module_typ_first_class
+  (should_be_local : bool)
+  (module_typ : Types.module_type)
+  : maybe_found Monad.t =
   get_env >>= fun env ->
-  match module_typ with
-  | Mty_alias (_, _) -> return (Not_found None)
-  | Mty_ident path -> return (Found path)
+  match Mtype.scrape env module_typ with
+  | Mty_alias _ | Mty_ident _ -> return (Not_found None)
   | Mty_signature signature ->
-    let (signature_paths, shape) = find_similar_signatures env signature in
+    get_local_modules >>= fun local_modules ->
+    let (signature_paths, shape) =
+      find_similar_signatures env local_modules should_be_local signature in
     begin match signature_paths with
     | [] ->
       return (

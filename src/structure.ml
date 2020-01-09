@@ -54,11 +54,12 @@ let error_message (structure : t) (category : Error.Category.t) (message : strin
   raise (Some (ErrorMessage (message, structure))) category message
 
 let top_level_evaluation (e : expression) : t option Monad.t =
+  local_modules_open_scope (
   Exp.of_expression Name.Map.empty e >>= fun e ->
     error_message
       (Eval e)
       SideEffect
-      "Top-level evaluations are considered as an error as sources of side-effects"
+      "Top-level evaluations are considered as an error as sources of side-effects")
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -78,8 +79,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
       top_level_evaluation e
     | Tstr_eval (e, _) -> top_level_evaluation e
     | Tstr_value (is_rec, cases) ->
+      local_modules_open_scope (
       Exp.import_let_fun Name.Map.empty is_rec cases >>= fun def ->
-      return (Some (Value def))
+      return (Some (Value def)))
     | Tstr_type (_, typs) ->
       TypeDefinition.of_ocaml typs >>= fun def ->
       return (Some (TypeDefinition def))
