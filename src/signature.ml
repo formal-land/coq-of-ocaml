@@ -32,15 +32,38 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (TypSynonym (name, typ_args, typ))
     | Sig_typext (ident, _, _) ->
-      raise (Error "extensible_type") NotSupported ("Extensible type '" ^ Ident.name ident ^ "' not handled")
+      let name = Ident.name ident in
+      raise
+        (Error ("extensible_type " ^ name))
+        NotSupported
+        ("Extensible type '" ^ name ^ "' not handled")
     | Sig_module (ident, _, _) ->
-      raise (Error "module") NotSupported ("Module '" ^ Ident.name ident ^ "' in included signature not handled")
+      let name = Ident.name ident in
+      raise
+        (Error ("module " ^ name))
+        NotSupported
+        (
+          "Module '" ^ name ^ "' in included signature not handled.\n\n" ^
+          "You may try to use a sub-module instead of an `include`."
+        )
     | Sig_modtype (ident, _) ->
-      raise (Error "module_type") NotSupported ("Signatures '" ^ Ident.name ident ^ "' inside signature is not handled")
+      let name = Ident.name ident in
+      raise
+        (Error ("module_type" ^ name))
+        NotSupported
+        ("Signatures '" ^ name ^ "' inside signature is not handled")
     | Sig_class (ident, _, _) ->
-      raise (Error "class") NotSupported ("Class '" ^ Ident.name ident ^ "' not handled.")
+      let name = Ident.name ident in
+      raise
+        (Error ("class" ^ name))
+        NotSupported
+        ("Class '" ^ name ^ "' not handled.")
     | Sig_class_type (ident, _, _) ->
-      raise (Error "class_type") NotSupported ("Class type '" ^ Ident.name ident ^ "' not handled.") in
+      let name = Ident.name ident in
+      raise
+        (Error ("class_type" ^ name))
+        NotSupported
+        ("Class type '" ^ name ^ "' not handled.") in
   signature |> Monad.List.map of_types_signature_item
 
 let of_types_signature (signature : Types.signature) : t Monad.t =
