@@ -49,7 +49,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6164 lines</li>
-      <li>Coq size: 6226 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 6263 lines (+1% compared to&nbsp;OCaml)</li>
       <li>errors: 282</li>
     </ul>
   </div>
@@ -7100,9 +7100,12 @@ Module Pervasives.
   
   Parameter op_at : forall {a : Set}, list a -&gt; list a -&gt; list a.
   
-  Record ref {a : Set} := {
-    contents : a }.
-  Arguments ref : clear implicits.
+  Module ref.
+    Record record {a : Set} := {
+      contents : a }.
+    Arguments record : clear implicits.
+  End ref.
+  Definition ref := ref.record.
   
   Parameter __ref_value : forall {a : Set}, a -&gt; ref a.
   
@@ -8424,12 +8427,15 @@ Module Error_monad.
   
   Parameter error_of_json : Data_encoding.json -&gt; __error.
   
-  Record error_info := {
-    category : error_category;
-    id : string;
-    title : string;
-    description : string;
-    schema : Data_encoding.json_schema }.
+  Module error_info.
+    Record record := {
+      category : error_category;
+      id : string;
+      title : string;
+      description : string;
+      schema : Data_encoding.json_schema }.
+  End error_info.
+  Definition error_info := error_info.record.
   
   Parameter pp_info : Format.formatter -&gt; error_info -&gt; unit.
   
@@ -8640,11 +8646,14 @@ Module RPC_arg.
     option string -&gt; string -&gt; (string -&gt; Pervasives.result a string) -&gt;
     (a -&gt; string) -&gt; unit -&gt; arg a.
   
-  Record descr := {
-    name : string;
-    descr : option string }.
+  Module descr.
+    Record record := {
+      name : string;
+      descr : option string }.
+  End descr.
+  Definition descr := descr.record.
   
-  Parameter descr : forall {a : Set}, arg a -&gt; descr.
+  Parameter __descr_value : forall {a : Set}, arg a -&gt; descr.
   
   Parameter int : arg Z.
   
@@ -8667,7 +8676,7 @@ Module RPC_arg.
   
   Definition eq := 'eq.
   
-  Parameter eq : forall {a b : Set}, arg a -&gt; arg b -&gt; option (eq a b).
+  Parameter __eq_value : forall {a b : Set}, arg a -&gt; arg b -&gt; option (eq a b).
 End RPC_arg.
 
 Module RPC_path.
@@ -8709,7 +8718,7 @@ Module RPC_query.
   
   Parameter field : forall (a b : Set), Set.
   
-  Parameter field : forall {a b : Set},
+  Parameter __field_value : forall {a b : Set},
     option string -&gt; string -&gt; RPC_arg.t a -&gt; a -&gt; (b -&gt; a) -&gt; field b a.
   
   Parameter opt_field : forall {a b : Set},
@@ -8724,7 +8733,7 @@ Module RPC_query.
   
   Parameter open_query : forall (a b c : Set), Set.
   
-  Parameter query : forall {a b : Set}, b -&gt; open_query a b b.
+  Parameter __query_value : forall {a b : Set}, b -&gt; open_query a b b.
   
   Parameter op_pipeplus : forall {a b c d : Set},
     open_query a b (c -&gt; d) -&gt; field a c -&gt; open_query a b d.
@@ -8784,10 +8793,13 @@ End RPC_service.
 Module RPC_answer.
   Reserved Notation &quot;'stream&quot;.
   
-  Record stream_skeleton {next shutdown : Set} := {
-    next : next;
-    shutdown : shutdown }.
-  Arguments stream_skeleton : clear implicits.
+  Module stream_skeleton.
+    Record record {next shutdown : Set} := {
+      next : next;
+      shutdown : shutdown }.
+    Arguments record : clear implicits.
+  End stream_skeleton.
+  Definition stream_skeleton := stream_skeleton.record.
   
   Inductive t (o : Set) : Set :=
   | OkStream : 'stream o -&gt; t o
@@ -9186,7 +9198,7 @@ Module S.
       to_bytes : t -&gt; MBytes.t;
       of_bytes : MBytes.t -&gt; option t;
       hash := hash;
-      hash : t -&gt; hash;
+      __hash_value : t -&gt; hash;
       hash_raw : MBytes.t -&gt; hash;
     }.
     Arguments signature : clear implicits.
@@ -9234,7 +9246,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      extensible_type;
+      (* extensible_type *)
       b58check_encoding : Base58.encoding t;
     }.
     Arguments signature : clear implicits.
@@ -9289,7 +9301,7 @@ Module S.
   Module MAP.
     Record signature {key t : Set} := {
       key := key;
-      polymorphic_abstract_type;
+      (* polymorphic_abstract_type *)
       empty : forall {a : Set}, t a;
       is_empty : forall {a : Set}, t a -&gt; bool;
       mem : forall {a : Set}, key -&gt; t a -&gt; bool;
@@ -9299,7 +9311,8 @@ Module S.
       remove : forall {a : Set}, key -&gt; t a -&gt; t a;
       merge : forall {a b c : Set},
         (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c;
-      union : forall {a : Set}, (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a;
+      union : forall {a : Set},
+        (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a;
       compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z;
       equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool;
       iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit;
@@ -9317,7 +9330,8 @@ Module S.
       find_opt : forall {a : Set}, key -&gt; t a -&gt; option a;
       find_first_opt : forall {a : Set},
         (key -&gt; bool) -&gt; t a -&gt; option (key * a);
-      find_last_opt : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; option (key * a);
+      find_last_opt : forall {a : Set},
+        (key -&gt; bool) -&gt; t a -&gt; option (key * a);
       map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b;
       mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b;
     }.
@@ -9325,21 +9339,21 @@ Module S.
   End MAP.
   
   Module INDEXES.
-    Record signature {t Set_t Map_t : Set} := {
+    Record signature {t __Set_t Map_t : Set} := {
       t := t;
       to_path : t -&gt; list string -&gt; list string;
       of_path : list string -&gt; option t;
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
       path_length : Z;
-      Set : signature;
+      __Set : signature;
       Map : signature;
     }.
     Arguments signature : clear implicits.
   End INDEXES.
   
   Module HASH.
-    Record signature {t Set_t Map_t : Set} := {
+    Record signature {t __Set_t Map_t : Set} := {
       t := t;
       name : string;
       title : string;
@@ -9366,7 +9380,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      extensible_type;
+      (* extensible_type *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9375,14 +9389,14 @@ Module S.
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
       path_length : Z;
-      module;
-      module;
+      (* module *)
+      (* module *)
     }.
     Arguments signature : clear implicits.
   End HASH.
   
   Module MERKLE_TREE.
-    Record signature {elt t Set_t Map_t path : Set} := {
+    Record signature {elt t __Set_t Map_t path : Set} := {
       elt := elt;
       t := t;
       name : string;
@@ -9410,7 +9424,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      extensible_type;
+      (* extensible_type *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9419,8 +9433,8 @@ Module S.
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
       path_length : Z;
-      module;
-      module;
+      (* module *)
+      (* module *)
       compute : list elt -&gt; t;
       empty : t;
       path := path;
@@ -9432,7 +9446,7 @@ Module S.
   End MERKLE_TREE.
   
   Module SIGNATURE.
-    Record signature {Public_key_hash_t Public_key_hash_Set_t
+    Record signature {Public_key_hash_t Public_key_hash___Set_t
       Public_key_hash_Map_t Public_key_t t watermark : Set} := {
       Public_key_hash : signature;
       Public_key : signature;
@@ -9456,7 +9470,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      extensible_type;
+      (* extensible_type *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9468,7 +9482,7 @@ Module S.
   End SIGNATURE.
 End S.
 
-Module Set.
+Module __Set.
   Module OrderedType.
     Record signature {t : Set} := {
       t := t;
@@ -9480,7 +9494,7 @@ Module Set.
   Module Make.
     (* Unhandled functor *)
   End Make.
-End Set.
+End __Set.
 
 Module Map.
   Module OrderedType.
@@ -9567,7 +9581,7 @@ Module Ed25519.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -9585,7 +9599,7 @@ Module Ed25519.
     
     Parameter path_length : Z.
     
-    Module Set.
+    Module __Set.
       Definition elt := t.
       
       Parameter t : Set.
@@ -9660,16 +9674,16 @@ Module Ed25519.
       
       Parameter of_list : list elt -&gt; t.
       
-      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
       
-      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq : t -&gt; OCaml.Seq.t elt.
       
-      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
       
-      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      Parameter of_seq : OCaml.Seq.t elt -&gt; t.
       
       Parameter encoding : Data_encoding.t t.
-    End Set.
+    End __Set.
     
     Module Map.
       Definition key := t.
@@ -9752,15 +9766,14 @@ Module Ed25519.
       
       Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
       
-      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
       
       Parameter to_seq_from : forall {a : Set},
-        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+        key -&gt; t a -&gt; OCaml.Seq.t (key * a).
       
-      Parameter add_seq : forall {a : Set},
-        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
       
-      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
       
       Parameter encoding : forall {a : Set},
         Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -9802,7 +9815,7 @@ Module Ed25519.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -9810,7 +9823,7 @@ Module Ed25519.
     
     Parameter rpc_arg : RPC_arg.t t.
     
-    Parameter hash : t -&gt; Public_key_hash.t.
+    Parameter __hash_value : t -&gt; Public_key_hash.t.
   End Public_key.
   
   Parameter t : Set.
@@ -9853,7 +9866,7 @@ Module Ed25519.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -9910,7 +9923,7 @@ Module Secp256k1.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -9928,7 +9941,7 @@ Module Secp256k1.
     
     Parameter path_length : Z.
     
-    Module Set.
+    Module __Set.
       Definition elt := t.
       
       Parameter t : Set.
@@ -10003,16 +10016,16 @@ Module Secp256k1.
       
       Parameter of_list : list elt -&gt; t.
       
-      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
       
-      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq : t -&gt; OCaml.Seq.t elt.
       
-      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
       
-      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      Parameter of_seq : OCaml.Seq.t elt -&gt; t.
       
       Parameter encoding : Data_encoding.t t.
-    End Set.
+    End __Set.
     
     Module Map.
       Definition key := t.
@@ -10095,15 +10108,14 @@ Module Secp256k1.
       
       Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
       
-      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
       
       Parameter to_seq_from : forall {a : Set},
-        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+        key -&gt; t a -&gt; OCaml.Seq.t (key * a).
       
-      Parameter add_seq : forall {a : Set},
-        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
       
-      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
       
       Parameter encoding : forall {a : Set},
         Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -10145,7 +10157,7 @@ Module Secp256k1.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10153,7 +10165,7 @@ Module Secp256k1.
     
     Parameter rpc_arg : RPC_arg.t t.
     
-    Parameter hash : t -&gt; Public_key_hash.t.
+    Parameter __hash_value : t -&gt; Public_key_hash.t.
   End Public_key.
   
   Parameter t : Set.
@@ -10196,7 +10208,7 @@ Module Secp256k1.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -10253,7 +10265,7 @@ Module P256.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10271,7 +10283,7 @@ Module P256.
     
     Parameter path_length : Z.
     
-    Module Set.
+    Module __Set.
       Definition elt := t.
       
       Parameter t : Set.
@@ -10346,16 +10358,16 @@ Module P256.
       
       Parameter of_list : list elt -&gt; t.
       
-      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
       
-      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq : t -&gt; OCaml.Seq.t elt.
       
-      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
       
-      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      Parameter of_seq : OCaml.Seq.t elt -&gt; t.
       
       Parameter encoding : Data_encoding.t t.
-    End Set.
+    End __Set.
     
     Module Map.
       Definition key := t.
@@ -10438,15 +10450,14 @@ Module P256.
       
       Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
       
-      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
       
       Parameter to_seq_from : forall {a : Set},
-        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+        key -&gt; t a -&gt; OCaml.Seq.t (key * a).
       
-      Parameter add_seq : forall {a : Set},
-        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
       
-      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
       
       Parameter encoding : forall {a : Set},
         Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -10488,7 +10499,7 @@ Module P256.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10496,7 +10507,7 @@ Module P256.
     
     Parameter rpc_arg : RPC_arg.t t.
     
-    Parameter hash : t -&gt; Public_key_hash.t.
+    Parameter __hash_value : t -&gt; Public_key_hash.t.
   End Public_key.
   
   Parameter t : Set.
@@ -10539,7 +10550,7 @@ Module P256.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -10605,7 +10616,7 @@ Module Chain_id.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -10623,7 +10634,7 @@ Module Chain_id.
   
   Parameter path_length : Z.
   
-  Module Set.
+  Module __Set.
     Definition elt := t.
     
     Parameter t : Set.
@@ -10698,16 +10709,16 @@ Module Chain_id.
     
     Parameter of_list : list elt -&gt; t.
     
-    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
     
-    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq : t -&gt; OCaml.Seq.t elt.
     
-    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
     
-    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    Parameter of_seq : OCaml.Seq.t elt -&gt; t.
     
     Parameter encoding : Data_encoding.t t.
-  End Set.
+  End __Set.
   
   Module Map.
     Definition key := t.
@@ -10788,14 +10799,14 @@ Module Chain_id.
     
     Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
     
-    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
     
     Parameter to_seq_from : forall {a : Set},
-      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      key -&gt; t a -&gt; OCaml.Seq.t (key * a).
     
-    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
     
-    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
     
     Parameter encoding : forall {a : Set},
       Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -10862,7 +10873,7 @@ Module Signature.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10880,7 +10891,7 @@ Module Signature.
     
     Parameter path_length : Z.
     
-    Module Set.
+    Module __Set.
       Definition elt := t.
       
       Parameter t : Set.
@@ -10955,16 +10966,16 @@ Module Signature.
       
       Parameter of_list : list elt -&gt; t.
       
-      Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
       
-      Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+      Parameter to_seq : t -&gt; OCaml.Seq.t elt.
       
-      Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+      Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
       
-      Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+      Parameter of_seq : OCaml.Seq.t elt -&gt; t.
       
       Parameter encoding : Data_encoding.t t.
-    End Set.
+    End __Set.
     
     Module Map.
       Definition key := t.
@@ -11047,15 +11058,14 @@ Module Signature.
       
       Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
       
-      Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+      Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
       
       Parameter to_seq_from : forall {a : Set},
-        key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+        key -&gt; t a -&gt; OCaml.Seq.t (key * a).
       
-      Parameter add_seq : forall {a : Set},
-        Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+      Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
       
-      Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+      Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
       
       Parameter encoding : forall {a : Set},
         Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -11097,7 +11107,7 @@ Module Signature.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    extensible_type
+    (* extensible_type *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -11105,7 +11115,7 @@ Module Signature.
     
     Parameter rpc_arg : RPC_arg.t t.
     
-    Parameter hash : t -&gt; Public_key_hash.t.
+    Parameter __hash_value : t -&gt; Public_key_hash.t.
   End Public_key.
   
   Parameter t : Set.
@@ -11148,7 +11158,7 @@ Module Signature.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11214,7 +11224,7 @@ Module Block_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11232,7 +11242,7 @@ Module Block_hash.
   
   Parameter path_length : Z.
   
-  Module Set.
+  Module __Set.
     Definition elt := t.
     
     Parameter t : Set.
@@ -11307,16 +11317,16 @@ Module Block_hash.
     
     Parameter of_list : list elt -&gt; t.
     
-    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
     
-    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq : t -&gt; OCaml.Seq.t elt.
     
-    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
     
-    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    Parameter of_seq : OCaml.Seq.t elt -&gt; t.
     
     Parameter encoding : Data_encoding.t t.
-  End Set.
+  End __Set.
   
   Module Map.
     Definition key := t.
@@ -11397,14 +11407,14 @@ Module Block_hash.
     
     Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
     
-    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
     
     Parameter to_seq_from : forall {a : Set},
-      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      key -&gt; t a -&gt; OCaml.Seq.t (key * a).
     
-    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
     
-    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
     
     Parameter encoding : forall {a : Set},
       Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -11464,7 +11474,7 @@ Module Operation_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11482,7 +11492,7 @@ Module Operation_hash.
   
   Parameter path_length : Z.
   
-  Module Set.
+  Module __Set.
     Definition elt := t.
     
     Parameter t : Set.
@@ -11557,16 +11567,16 @@ Module Operation_hash.
     
     Parameter of_list : list elt -&gt; t.
     
-    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
     
-    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq : t -&gt; OCaml.Seq.t elt.
     
-    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
     
-    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    Parameter of_seq : OCaml.Seq.t elt -&gt; t.
     
     Parameter encoding : Data_encoding.t t.
-  End Set.
+  End __Set.
   
   Module Map.
     Definition key := t.
@@ -11647,14 +11657,14 @@ Module Operation_hash.
     
     Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
     
-    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
     
     Parameter to_seq_from : forall {a : Set},
-      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      key -&gt; t a -&gt; OCaml.Seq.t (key * a).
     
-    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
     
-    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
     
     Parameter encoding : forall {a : Set},
       Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -11716,7 +11726,7 @@ Module Operation_list_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11734,7 +11744,7 @@ Module Operation_list_hash.
   
   Parameter path_length : Z.
   
-  Module Set.
+  Module __Set.
     Definition elt := t.
     
     Parameter t : Set.
@@ -11809,16 +11819,16 @@ Module Operation_list_hash.
     
     Parameter of_list : list elt -&gt; t.
     
-    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
     
-    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq : t -&gt; OCaml.Seq.t elt.
     
-    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
     
-    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    Parameter of_seq : OCaml.Seq.t elt -&gt; t.
     
     Parameter encoding : Data_encoding.t t.
-  End Set.
+  End __Set.
   
   Module Map.
     Definition key := t.
@@ -11899,14 +11909,14 @@ Module Operation_list_hash.
     
     Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
     
-    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
     
     Parameter to_seq_from : forall {a : Set},
-      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      key -&gt; t a -&gt; OCaml.Seq.t (key * a).
     
-    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
     
-    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
     
     Parameter encoding : forall {a : Set},
       Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -11980,7 +11990,7 @@ Module Operation_list_list_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11998,7 +12008,7 @@ Module Operation_list_list_hash.
   
   Parameter path_length : Z.
   
-  Module Set.
+  Module __Set.
     Definition elt := t.
     
     Parameter t : Set.
@@ -12073,16 +12083,16 @@ Module Operation_list_list_hash.
     
     Parameter of_list : list elt -&gt; t.
     
-    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
     
-    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq : t -&gt; OCaml.Seq.t elt.
     
-    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
     
-    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    Parameter of_seq : OCaml.Seq.t elt -&gt; t.
     
     Parameter encoding : Data_encoding.t t.
-  End Set.
+  End __Set.
   
   Module Map.
     Definition key := t.
@@ -12163,14 +12173,14 @@ Module Operation_list_list_hash.
     
     Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
     
-    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
     
     Parameter to_seq_from : forall {a : Set},
-      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      key -&gt; t a -&gt; OCaml.Seq.t (key * a).
     
-    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
     
-    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
     
     Parameter encoding : forall {a : Set},
       Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -12242,7 +12252,7 @@ Module Protocol_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -12260,7 +12270,7 @@ Module Protocol_hash.
   
   Parameter path_length : Z.
   
-  Module Set.
+  Module __Set.
     Definition elt := t.
     
     Parameter t : Set.
@@ -12335,16 +12345,16 @@ Module Protocol_hash.
     
     Parameter of_list : list elt -&gt; t.
     
-    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
     
-    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq : t -&gt; OCaml.Seq.t elt.
     
-    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
     
-    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    Parameter of_seq : OCaml.Seq.t elt -&gt; t.
     
     Parameter encoding : Data_encoding.t t.
-  End Set.
+  End __Set.
   
   Module Map.
     Definition key := t.
@@ -12425,14 +12435,14 @@ Module Protocol_hash.
     
     Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
     
-    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
     
     Parameter to_seq_from : forall {a : Set},
-      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      key -&gt; t a -&gt; OCaml.Seq.t (key * a).
     
-    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
     
-    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
     
     Parameter encoding : forall {a : Set},
       Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -12492,7 +12502,7 @@ Module Context_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  extensible_type
+  (* extensible_type *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -12510,7 +12520,7 @@ Module Context_hash.
   
   Parameter path_length : Z.
   
-  Module Set.
+  Module __Set.
     Definition elt := t.
     
     Parameter t : Set.
@@ -12585,16 +12595,16 @@ Module Context_hash.
     
     Parameter of_list : list elt -&gt; t.
     
-    Parameter to_seq_from : elt -&gt; t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
     
-    Parameter to_seq : t -&gt; Stdlib.Seq.t elt.
+    Parameter to_seq : t -&gt; OCaml.Seq.t elt.
     
-    Parameter add_seq : Stdlib.Seq.t elt -&gt; t -&gt; t.
+    Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
     
-    Parameter of_seq : Stdlib.Seq.t elt -&gt; t.
+    Parameter of_seq : OCaml.Seq.t elt -&gt; t.
     
     Parameter encoding : Data_encoding.t t.
-  End Set.
+  End __Set.
   
   Module Map.
     Definition key := t.
@@ -12675,14 +12685,14 @@ Module Context_hash.
     
     Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
     
-    Parameter to_seq : forall {a : Set}, t a -&gt; Stdlib.Seq.t (key * a).
+    Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
     
     Parameter to_seq_from : forall {a : Set},
-      key -&gt; t a -&gt; Stdlib.Seq.t (key * a).
+      key -&gt; t a -&gt; OCaml.Seq.t (key * a).
     
-    Parameter add_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a -&gt; t a.
+    Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
     
-    Parameter of_seq : forall {a : Set}, Stdlib.Seq.t (key * a) -&gt; t a.
+    Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
     
     Parameter encoding : forall {a : Set},
       Data_encoding.t a -&gt; Data_encoding.t (t a).
@@ -12734,21 +12744,27 @@ Module Micheline.
 End Micheline.
 
 Module Block_header.
-  Record shell_header := {
-    level : Int32.t;
-    proto_level : Z;
-    predecessor : Block_hash.(S.HASH.t);
-    timestamp : Time.t;
-    validation_passes : Z;
-    operations_hash : Operation_list_list_hash.(S.MERKLE_TREE.t);
-    fitness : list MBytes.t;
-    context : Context_hash.(S.HASH.t) }.
+  Module shell_header.
+    Record record := {
+      level : Int32.t;
+      proto_level : Z;
+      predecessor : Block_hash.(S.HASH.t);
+      timestamp : Time.t;
+      validation_passes : Z;
+      operations_hash : Operation_list_list_hash.(S.MERKLE_TREE.t);
+      fitness : list MBytes.t;
+      context : Context_hash.(S.HASH.t) }.
+  End shell_header.
+  Definition shell_header := shell_header.record.
   
   Parameter shell_header_encoding : Data_encoding.t shell_header.
   
-  Record t := {
-    shell : shell_header;
-    protocol_data : MBytes.t }.
+  Module t.
+    Record record := {
+      shell : shell_header;
+      protocol_data : MBytes.t }.
+  End t.
+  Definition t := t.record.
   
   Parameter op_eq : t -&gt; t -&gt; bool.
   
@@ -12778,7 +12794,7 @@ Module Block_header.
   
   Parameter of_bytes : MBytes.t -&gt; option t.
   
-  Parameter hash : t -&gt; Block_hash.(S.HASH.t).
+  Parameter __hash_value : t -&gt; Block_hash.(S.HASH.t).
   
   Parameter hash_raw : MBytes.t -&gt; Block_hash.(S.HASH.t).
 End Block_header.
@@ -12816,14 +12832,20 @@ Module Fitness.
 End Fitness.
 
 Module Operation.
-  Record shell_header := {
-    branch : Block_hash.(S.HASH.t) }.
+  Module shell_header.
+    Record record := {
+      branch : Block_hash.(S.HASH.t) }.
+  End shell_header.
+  Definition shell_header := shell_header.record.
   
   Parameter shell_header_encoding : Data_encoding.t shell_header.
   
-  Record t := {
-    shell : shell_header;
-    proto : MBytes.t }.
+  Module t.
+    Record record := {
+      shell : shell_header;
+      proto : MBytes.t }.
+  End t.
+  Definition t := t.record.
   
   Parameter op_eq : t -&gt; t -&gt; bool.
   
@@ -12853,7 +12875,7 @@ Module Operation.
   
   Parameter of_bytes : MBytes.t -&gt; option t.
   
-  Parameter hash : t -&gt; Operation_hash.(S.HASH.t).
+  Parameter __hash_value : t -&gt; Operation_hash.(S.HASH.t).
   
   Parameter hash_raw : MBytes.t -&gt; Operation_hash.(S.HASH.t).
 End Operation.
@@ -12862,16 +12884,22 @@ Module Protocol.
   Reserved Notation &quot;'t&quot;.
   Reserved Notation &quot;'component&quot;.
   
-  Record component_skeleton {name interface implementation : Set} := {
-    name : name;
-    interface : interface;
-    implementation : implementation }.
-  Arguments component_skeleton : clear implicits.
+  Module component_skeleton.
+    Record record {name interface implementation : Set} := {
+      name : name;
+      interface : interface;
+      implementation : implementation }.
+    Arguments record : clear implicits.
+  End component_skeleton.
+  Definition component_skeleton := component_skeleton.record.
   
-  Record t_skeleton {expected_env components : Set} := {
-    expected_env : expected_env;
-    components : components }.
-  Arguments t_skeleton : clear implicits.
+  Module t_skeleton.
+    Record record {expected_env components : Set} := {
+      expected_env : expected_env;
+      components : components }.
+    Arguments record : clear implicits.
+  End t_skeleton.
+  Definition t_skeleton := t_skeleton.record.
   
   Inductive env_version : Set :=
   | V1 : env_version
@@ -12914,7 +12942,7 @@ Module Protocol.
   
   Parameter of_bytes : MBytes.t -&gt; option t.
   
-  Parameter hash : t -&gt; Protocol_hash.(S.HASH.t).
+  Parameter __hash_value : t -&gt; Protocol_hash.(S.HASH.t).
   
   Parameter hash_raw : MBytes.t -&gt; Protocol_hash.(S.HASH.t).
 End Protocol.
@@ -12956,21 +12984,30 @@ Module Context.
 End Context.
 
 Module Updater.
-  Record validation_result := {
-    context : Context.t;
-    fitness : Fitness.(S.T.t);
-    message : option string;
-    max_operations_ttl : Z;
-    last_allowed_fork_level : Int32.t }.
+  Module validation_result.
+    Record record := {
+      context : Context.t;
+      fitness : Fitness.(S.T.t);
+      message : option string;
+      max_operations_ttl : Z;
+      last_allowed_fork_level : Int32.t }.
+  End validation_result.
+  Definition validation_result := validation_result.record.
   
-  Record quota := {
-    max_size : Z;
-    max_op : option Z }.
+  Module quota.
+    Record record := {
+      max_size : Z;
+      max_op : option Z }.
+  End quota.
+  Definition quota := quota.record.
   
-  Record rpc_context := {
-    block_hash : Block_hash.(S.HASH.t);
-    block_header : Block_header.shell_header;
-    context : Context.t }.
+  Module rpc_context.
+    Record record := {
+      block_hash : Block_hash.(S.HASH.t);
+      block_header : Block_header.shell_header;
+      context : Context.t }.
+  End rpc_context.
+  Definition rpc_context := rpc_context.record.
   
   Module PROTOCOL.
     Record signature {block_header_data block_header block_header_metadata
@@ -13029,7 +13066,7 @@ End Updater.
 Module RPC_context.
   Definition t := Updater.rpc_context.
   
-  class_type
+  (* class_type *)
   
   Parameter make_call0 : forall {_ a b c i o pr q : Set},
     RPC_service.t
