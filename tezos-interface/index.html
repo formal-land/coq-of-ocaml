@@ -49,7 +49,7 @@
     <p>We show the original source code on the left and the imported Coq code on the right. The imported code does not compile. This is due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6174 lines</li>
-      <li>Coq size: 6445 lines (+4% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 6441 lines (+4% compared to&nbsp;OCaml)</li>
       <li>errors: 285</li>
     </ul>
   </div>
@@ -5551,9 +5551,9 @@ module Signature : sig
 (*****************************************************************************)
 
 type public_key_hash =
-  | Ed25519 of Ed25519.Public_key_hash.t
-  | Secp256k1 of Secp256k1.Public_key_hash.t
-  | P256 of P256.Public_key_hash.t
+  | Ed25519Hash of Ed25519.Public_key_hash.t
+  | Secp256k1Hash of Secp256k1.Public_key_hash.t
+  | P256Hash of P256.Public_key_hash.t
 
 type public_key =
   | Ed25519 of Ed25519.Public_key.t
@@ -5988,10 +5988,8 @@ module Protocol : sig
 (*                                                                           *)
 (*****************************************************************************)
 
-type t = {expected_env : env_version; components : component list}
-
 (** An OCaml source component of a protocol implementation. *)
-and component = {
+type component = {
   (* The OCaml module name. *)
   name : string;
   (* The OCaml interface source code *)
@@ -5999,6 +5997,8 @@ and component = {
   (* The OCaml source code *)
   implementation : string;
 }
+
+and t = {expected_env : env_version; components : component list}
 
 and env_version = V1
 
@@ -11062,21 +11062,18 @@ End Chain_id.
 
 Module Signature.
   Inductive public_key_hash : Set :=
-  | Ed25519 :
-    Ed25519.Public_key_hash.(S.SIGNATURE_Public_key_hash.t) -&gt; public_key_hash
-  | Secp256k1 :
-    Secp256k1.Public_key_hash.(S.SIGNATURE_Public_key_hash.t) -&gt; public_key_hash
-  | P256 :
-    P256.Public_key_hash.(S.SIGNATURE_Public_key_hash.t) -&gt; public_key_hash.
+  | Ed25519Hash : Ed25519.Public_key_hash.t -&gt; public_key_hash
+  | Secp256k1Hash : Secp256k1.Public_key_hash.t -&gt; public_key_hash
+  | P256Hash : P256.Public_key_hash.t -&gt; public_key_hash.
   
   Inductive public_key : Set :=
-  | Ed25519 : Ed25519.Public_key.(S.SIGNATURE_Public_key.t) -&gt; public_key
-  | Secp256k1 : Secp256k1.Public_key.(S.SIGNATURE_Public_key.t) -&gt; public_key
-  | P256 : P256.Public_key.(S.SIGNATURE_Public_key.t) -&gt; public_key.
+  | Ed25519 : Ed25519.Public_key.t -&gt; public_key
+  | Secp256k1 : Secp256k1.Public_key.t -&gt; public_key
+  | P256 : P256.Public_key.t -&gt; public_key.
   
   Inductive watermark : Set :=
-  | Block_header : Chain_id.(S.HASH.t) -&gt; watermark
-  | Endorsement : Chain_id.(S.HASH.t) -&gt; watermark
+  | Block_header : Chain_id.t -&gt; watermark
+  | Endorsement : Chain_id.t -&gt; watermark
   | Generic_operation : watermark
   | Custom : MBytes.t -&gt; watermark.
   
@@ -11924,7 +11921,7 @@ Module Operation_hash.
 End Operation_hash.
 
 Module Operation_list_hash.
-  Definition elt := Operation_hash.(S.HASH.t).
+  Definition elt := Operation_hash.t.
   
   Parameter t : Set.
   
@@ -12188,7 +12185,7 @@ Module Operation_list_hash.
 End Operation_list_hash.
 
 Module Operation_list_list_hash.
-  Definition elt := Operation_list_hash.(S.MERKLE_TREE.t).
+  Definition elt := Operation_list_hash.t.
   
   Parameter t : Set.
   
@@ -13000,12 +12997,12 @@ Module Block_header.
     Record record := {
       level : Int32.t;
       proto_level : Z;
-      predecessor : Block_hash.(S.HASH.t);
+      predecessor : Block_hash.t;
       timestamp : Time.t;
       validation_passes : Z;
-      operations_hash : Operation_list_list_hash.(S.MERKLE_TREE.t);
+      operations_hash : Operation_list_list_hash.t;
       fitness : list MBytes.t;
-      context : Context_hash.(S.HASH.t) }.
+      context : Context_hash.t }.
   End shell_header.
   Definition shell_header := shell_header.record.
   
@@ -13046,9 +13043,9 @@ Module Block_header.
   
   Parameter of_bytes : MBytes.t -&gt; option t.
   
-  Parameter __hash_value : t -&gt; Block_hash.(S.HASH.t).
+  Parameter __hash_value : t -&gt; Block_hash.t.
   
-  Parameter hash_raw : MBytes.t -&gt; Block_hash.(S.HASH.t).
+  Parameter hash_raw : MBytes.t -&gt; Block_hash.t.
 End Block_header.
 
 Module Fitness.
@@ -13086,7 +13083,7 @@ End Fitness.
 Module Operation.
   Module shell_header.
     Record record := {
-      branch : Block_hash.(S.HASH.t) }.
+      branch : Block_hash.t }.
   End shell_header.
   Definition shell_header := shell_header.record.
   
@@ -13127,14 +13124,22 @@ Module Operation.
   
   Parameter of_bytes : MBytes.t -&gt; option t.
   
-  Parameter __hash_value : t -&gt; Operation_hash.(S.HASH.t).
+  Parameter __hash_value : t -&gt; Operation_hash.t.
   
-  Parameter hash_raw : MBytes.t -&gt; Operation_hash.(S.HASH.t).
+  Parameter hash_raw : MBytes.t -&gt; Operation_hash.t.
 End Operation.
 
 Module Protocol.
-  Reserved Notation &quot;'t&quot;.
   Reserved Notation &quot;'component&quot;.
+  Reserved Notation &quot;'t&quot;.
+  
+  Module t_skeleton.
+    Record record {expected_env components : Set} := {
+      expected_env : expected_env;
+      components : components }.
+    Arguments record : clear implicits.
+  End t_skeleton.
+  Definition t_skeleton := t_skeleton.record.
   
   Module component_skeleton.
     Record record {name interface implementation : Set} := {
@@ -13145,22 +13150,14 @@ Module Protocol.
   End component_skeleton.
   Definition component_skeleton := component_skeleton.record.
   
-  Module t_skeleton.
-    Record record {expected_env components : Set} := {
-      expected_env : expected_env;
-      components : components }.
-    Arguments record : clear implicits.
-  End t_skeleton.
-  Definition t_skeleton := t_skeleton.record.
-  
   Inductive env_version : Set :=
   | V1 : env_version
   
-  where &quot;'t&quot; := (t_skeleton env_version (list 'component))
-  and &quot;'component&quot; := (component_skeleton string (option string) string).
+  where &quot;'component&quot; := (component_skeleton string (option string) string)
+  and &quot;'t&quot; := (t_skeleton env_version (list 'component)).
   
-  Definition t := 't.
   Definition component := 'component.
+  Definition t := 't.
   
   Parameter component_encoding : Data_encoding.t component.
   
@@ -13194,9 +13191,9 @@ Module Protocol.
   
   Parameter of_bytes : MBytes.t -&gt; option t.
   
-  Parameter __hash_value : t -&gt; Protocol_hash.(S.HASH.t).
+  Parameter __hash_value : t -&gt; Protocol_hash.t.
   
-  Parameter hash_raw : MBytes.t -&gt; Protocol_hash.(S.HASH.t).
+  Parameter hash_raw : MBytes.t -&gt; Protocol_hash.t.
 End Protocol.
 
 Module Context.
@@ -13239,7 +13236,7 @@ Module Updater.
   Module validation_result.
     Record record := {
       context : Context.t;
-      fitness : Fitness.(S.T.t);
+      fitness : Fitness.t;
       message : option string;
       max_operations_ttl : Z;
       last_allowed_fork_level : Int32.t }.
@@ -13255,7 +13252,7 @@ Module Updater.
   
   Module rpc_context.
     Record record := {
-      block_hash : Block_hash.(S.HASH.t);
+      block_hash : Block_hash.t;
       block_header : Block_header.shell_header;
       context : Context.t }.
   End rpc_context.
@@ -13285,15 +13282,14 @@ Module Updater.
       current_context :
         validation_state -&gt; Lwt.t (Error_monad.tzresult Context.t);
       begin_partial_application :
-        Chain_id.(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; Fitness.(S.T.t) -&gt;
-        block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
+        Chain_id.t -&gt; Context.t -&gt; Time.t -&gt; Fitness.t -&gt; block_header -&gt;
+        Lwt.t (Error_monad.tzresult validation_state);
       begin_application :
-        Chain_id.(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; Fitness.(S.T.t) -&gt;
-        block_header -&gt; Lwt.t (Error_monad.tzresult validation_state);
+        Chain_id.t -&gt; Context.t -&gt; Time.t -&gt; Fitness.t -&gt; block_header -&gt;
+        Lwt.t (Error_monad.tzresult validation_state);
       begin_construction :
-        Chain_id.(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; Int32.t -&gt;
-        Fitness.(S.T.t) -&gt; Block_hash.(S.HASH.t) -&gt; Time.t -&gt;
-        option block_header_data -&gt; unit -&gt;
+        Chain_id.t -&gt; Context.t -&gt; Time.t -&gt; Int32.t -&gt; Fitness.t -&gt;
+        Block_hash.t -&gt; Time.t -&gt; option block_header_data -&gt; unit -&gt;
         Lwt.t (Error_monad.tzresult validation_state);
       apply_operation :
         validation_state -&gt; operation -&gt;
@@ -13309,10 +13305,10 @@ Module Updater.
     Arguments signature : clear implicits.
   End PROTOCOL.
   
-  Parameter activate : Context.t -&gt; Protocol_hash.(S.HASH.t) -&gt; Lwt.t Context.t.
+  Parameter activate : Context.t -&gt; Protocol_hash.t -&gt; Lwt.t Context.t.
   
   Parameter fork_test_chain :
-    Context.t -&gt; Protocol_hash.(S.HASH.t) -&gt; Time.t -&gt; Lwt.t Context.t.
+    Context.t -&gt; Protocol_hash.t -&gt; Time.t -&gt; Lwt.t Context.t.
 End Updater.
 
 Module RPC_context.
