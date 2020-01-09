@@ -6,13 +6,13 @@ open Monad.Notations
 type item =
   | Error of string
   | Module of Name.t * ModuleTyp.t
-  | TypExistential of Name.t
+  | TypExistential of Name.t * Name.t list
   | TypSynonym of Name.t * Name.t list * Type.t
   | Value of Name.t * Name.t list * Type.t
 
 type t = {
   items: item list;
-  typ_params: unit Tree.t }
+  typ_params: ModuleTypParams.t }
 
 let items_of_types_signature (signature : Types.signature) : item list Monad.t =
   let of_types_signature_item (signature_item : Types.signature_item) : item Monad.t =
@@ -22,14 +22,10 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
       Type.of_type_expr_without_free_vars val_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return (Value (name, typ_args, typ))
-    | Sig_type (ident, { type_manifest = None; type_params = []; _ }, _) ->
+    | Sig_type (ident, { type_manifest = None; type_params; _ }, _) ->
       let name = Name.of_ident false ident in
-      return (TypExistential name)
-    | Sig_type (_, { type_manifest = None; type_params = _ :: _; _ }, _) ->
-      raise
-        (Error "polymorphic_abstract_type")
-        NotSupported
-        "Polymorphic abstract types not handled in signatures."
+      (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+      return (TypExistential (name, typ_args))
     | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _) ->
       let name = Name.of_ident false ident in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
@@ -75,14 +71,10 @@ let items_of_signature (signature : signature) : item list Monad.t =
       raise [Error "open"] NotSupported "Signature item `open` not handled."
     | Tsig_recmodule _ ->
       raise [Error "recursive_module"] NotSupported "Recursive module signatures are not handled."
-    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params = []; _ }; _ } ]) ->
+    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params; _ }; _ } ]) ->
       let name = Name.of_ident false typ_id in
-      return [TypExistential name]
-    | Tsig_type (_, [ { typ_type = { type_manifest = None; type_params = _ :: _; _ }; _ } ]) ->
-      raise
-        [Error "polymorphic_abstract_type"]
-        NotSupported
-        "Polymorphic abstract types not handled in signatures."
+      (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+      return [TypExistential (name, typ_args)]
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ]) ->
       let name = Name.of_ident false typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
@@ -110,7 +102,7 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
   | Error message -> !^ ("(* " ^ message ^ " *)")
   | Module (name, module_typ) ->
     nest (Name.to_coq name ^^ !^ ":" ^^ ModuleTyp.to_coq name module_typ ^-^ !^ ";")
-  | TypExistential name ->
+  | TypExistential (name, _) ->
     nest (Name.to_coq name ^^ !^ ":=" ^^ Name.to_coq name ^-^ !^ ";")
   | TypSynonym (name, typ_args, typ) ->
     nest (
@@ -133,19 +125,44 @@ let to_coq_item (signature_item : item) : SmartPrint.t =
       Type.to_coq None None typ ^-^ !^ ";"
     )
 
+let rec to_coq_type_kind (arity : int) : SmartPrint.t =
+  if arity = 0 then
+    Pp.set
+  else
+    Pp.set ^^ !^ "->" ^^ to_coq_type_kind (arity - 1)
+
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
-  let typ_params : Name.t list =
-    Tree.flatten signature.typ_params |> List.map (fun (path_name, _) ->
-      ModuleTypParams.get_typ_param_name path_name
+  let typ_params : (Name.t * int) list =
+    Tree.flatten signature.typ_params |> List.map (fun (path_name, arity) ->
+      (ModuleTypParams.get_typ_param_name path_name, arity)
     ) in
+  let reversed_grouped_typ_params : (Name.t list * int) list =
+    List.fold_left
+      (fun grouped (typ_param, arity) ->
+        match grouped with
+        | [] -> [([typ_param], arity)]
+        | (typ_params, arity') :: grouped' ->
+          if arity = arity' then
+            (typ_param :: typ_params, arity') :: grouped'
+          else
+            ([typ_param], arity) :: grouped
+      )
+      []
+      typ_params in
+  let grouped_typ_params =
+    reversed_grouped_typ_params |>
+    List.map (fun (typ_params, arity) -> (List.rev typ_params, arity)) |>
+    List.rev in
   !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
   indent (
     nest (
       !^ "Record" ^^ !^ "signature" ^^
-      (match typ_params with
-      | [] -> empty
-      | _ -> braces (separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set)
-      ) ^^
+      separate space (grouped_typ_params |> List.map (fun (typ_params, arity) ->
+        braces (
+          separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^
+          to_coq_type_kind arity
+        )
+      )) ^^
       !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate newline (List.map to_coq_item signature.items)) ^^ newline ^^
       !^ "}" ^-^ !^ "."

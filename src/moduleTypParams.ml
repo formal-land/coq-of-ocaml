@@ -1,16 +1,19 @@
 open Monad.Notations
 
-let rec get_signature_typ_params (signature : Types.signature) : unit Tree.t Monad.t =
+type t = int Tree.t
+
+let rec get_signature_typ_params (signature : Types.signature) : t Monad.t =
   let get_signature_item_typ_params
     (signature_item : Types.signature_item)
-    : unit Tree.item option Monad.t =
+    : int Tree.item option Monad.t =
     match signature_item with
     | Sig_value _ -> return None
-    | Sig_type (ident, { type_manifest; _ }, _) ->
+    | Sig_type (ident, { type_manifest; type_params; _ }, _) ->
       begin match type_manifest with
       | None ->
         let name = Name.of_ident false ident in
-        return (Some (Tree.Item (name, ())))
+        let arity = List.length type_params in
+        return (Some (Tree.Item (name, arity)))
       | Some _ -> return None
       end
     | Sig_typext _ ->
@@ -28,7 +31,7 @@ let rec get_signature_typ_params (signature : Types.signature) : unit Tree.t Mon
       raise None NotSupported "Class types are not handled" in
   signature |> Monad.List.filter_map get_signature_item_typ_params
 
-and get_module_typ_typ_params (module_typ : Types.module_type) : unit Tree.t Monad.t =
+and get_module_typ_typ_params (module_typ : Types.module_type) : t Monad.t =
   match module_typ with
   | Mty_signature signature ->
     get_signature_typ_params signature
@@ -40,7 +43,7 @@ and get_module_typ_typ_params (module_typ : Types.module_type) : unit Tree.t Mon
 
 and get_module_typ_declaration_typ_params
   (module_typ_declaration : Types.modtype_declaration)
-  : unit Tree.t Monad.t =
+  : t Monad.t =
   set_loc (Loc.of_location module_typ_declaration.mtd_loc) (
   match module_typ_declaration.mtd_type with
   | None ->
