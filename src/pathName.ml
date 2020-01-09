@@ -180,6 +180,13 @@ let try_convert (path_name : t) : t option =
     | _ -> Some path_name
     end
 
+  (* Seq *)
+  | [lib_name; "Seq"] when lib_name = stdlib_name ->
+    begin match Name.to_string base with
+    | "t" -> make ["OCaml"; "Seq"] "t"
+    | _ -> Some path_name
+    end
+
   (* String *)
   | [lib_name; "String"] when lib_name = stdlib_name ->
     begin match Name.to_string base with

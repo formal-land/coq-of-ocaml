@@ -228,6 +228,21 @@ Module Char.
   Defined.
 End Char.
 
+Module Seq.
+  Reserved Notation "'t".
+
+  Inductive node (A : Set) : Set :=
+  | Nil : node A
+  | Cons : A -> 't A -> node A
+
+  where "'t" := (fun (T : Set) => unit -> node T).
+
+  Definition t := 't.
+
+  Arguments Nil {_}.
+  Arguments Cons {_}.
+End Seq.
+
 Module String.
   Definition length (s : string) : Z :=
     Z.of_nat (String.length s).
