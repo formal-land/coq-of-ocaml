@@ -53,7 +53,7 @@ let rec of_types_signature (signature : Types.signature) : t Monad.t =
       raise (Error "extensible_type") NotSupported "Extensible types are not handled"
     | Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
-      Type.of_type_expr_without_free_vars val_type >>= fun typ ->
+      Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, _) ->
       let typ_vars = Name.Set.elements (Type.typ_args typ) in
       return (Value (name, typ_vars, typ)) in
   Monad.List.map of_types_signature_item signature
@@ -118,7 +118,7 @@ let rec of_signature (signature : signature) : t Monad.t =
       raise [Error "extensible_type"] NotSupported "Extensible types are not handled"
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
-      Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
+      Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->
       let typ_vars = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_vars, typ)])) in
   (signature.sig_items |> Monad.List.map of_signature_item) >>= fun items ->
