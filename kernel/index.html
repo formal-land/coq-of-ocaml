@@ -49,7 +49,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 32391 lines</li>
-      <li>Coq size: 44451 lines (+37% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 44453 lines (+37% compared to&nbsp;OCaml)</li>
       <li>errors: 1559</li>
     </ul>
   </div>
@@ -72715,13 +72715,13 @@ Definition check_section_variables
     tt.
 
 Definition build_constant_declaration {A : Set}
-  (env : Environ.env) (result : Cooking.result A)
+  (env : Environ.env) (__result_value : Cooking.result A)
   : Declarations.constant_body A :=
-  let typ := Cooking.result.cook_type result in
+  let typ := Cooking.result.cook_type __result_value in
   let '(hyps, def) :=
     let context_ids := List.map NamedDecl.get_id (named_context env) in
-    let def := Cooking.result.cook_body result in
-    match Cooking.result.cook_context result with
+    let def := Cooking.result.cook_body __result_value in
+    match Cooking.result.cook_context __result_value with
     | None =&gt;
       if List.is_empty context_ids then
         (Id.__Set.empty, def)
@@ -72754,7 +72754,7 @@ Definition build_constant_declaration {A : Set}
           x
         end)
     end in
-  let univs := Cooking.result.cook_universes result in
+  let univs := Cooking.result.cook_universes __result_value in
   let hyps :=
     List.filter (fun d =&gt; Id.__Set.mem (NamedDecl.get_id d) hyps)
       (Environ.named_context env) in
@@ -72765,11 +72765,11 @@ Definition build_constant_declaration {A : Set}
     Declarations.constant_body.const_body := def;
     Declarations.constant_body.const_type := typ;
     Declarations.constant_body.const_relevance :=
-      Cooking.result.cook_relevance result;
+      Cooking.result.cook_relevance __result_value;
     Declarations.constant_body.const_body_code := tps;
     Declarations.constant_body.const_universes := univs;
     Declarations.constant_body.const_inline_code :=
-      Cooking.result.cook_inline result;
+      Cooking.result.cook_inline __result_value;
     Declarations.constant_body.const_typing_flags := Environ.typing_flags env |}.
 
 Definition check_delayed {A : Set}
@@ -72834,25 +72834,27 @@ Definition translate_local_assum (env : Environ.env) (t : Constr.constr)
 Definition translate_recipe {A : Set}
   (env : Environ.env) (_kn : A) (r : Cooking.recipe)
   : Declarations.constant_body Opaqueproof.opaque :=
-  let result := Cooking.cook_constant r in
-  let univs := Cooking.result.cook_universes result in
+  let __result_value := Cooking.cook_constant r in
+  let univs := Cooking.result.cook_universes __result_value in
   let res :=
     Cbytegen.compile_constant_body false env univs
-      (Cooking.result.cook_body result) in
+      (Cooking.result.cook_body __result_value) in
   let tps := Option.map Cemitcodes.from_val res in
-  let hyps := Option.get (Cooking.result.cook_context result) in
+  let hyps := Option.get (Cooking.result.cook_context __result_value) in
   let hyps :=
     List.filter (fun d =&gt; Id.__Set.mem (NamedDecl.get_id d) hyps)
       (Environ.named_context env) in
   {| Declarations.constant_body.const_hyps := hyps;
-    Declarations.constant_body.const_body := Cooking.result.cook_body result;
-    Declarations.constant_body.const_type := Cooking.result.cook_type result;
+    Declarations.constant_body.const_body :=
+      Cooking.result.cook_body __result_value;
+    Declarations.constant_body.const_type :=
+      Cooking.result.cook_type __result_value;
     Declarations.constant_body.const_relevance :=
-      Cooking.result.cook_relevance result;
+      Cooking.result.cook_relevance __result_value;
     Declarations.constant_body.const_body_code := tps;
     Declarations.constant_body.const_universes := univs;
     Declarations.constant_body.const_inline_code :=
-      Cooking.result.cook_inline result;
+      Cooking.result.cook_inline __result_value;
     Declarations.constant_body.const_typing_flags := Environ.typing_flags env |}.
 
 Definition translate_local_def {A : Set}
