@@ -50,7 +50,7 @@
     <ul>
       <li>OCaml size: 6174 lines</li>
       <li>Coq size: 6443 lines (+4% compared to&nbsp;OCaml)</li>
-      <li>errors: 236</li>
+      <li>errors: 226</li>
     </ul>
   </div>
 </div>
@@ -59,7 +59,7 @@
 <hr />
 <div class="row conversion-row" id="v1.mli">
   <div class="col-md-6">
-    <a href="#v1.mli"><code>v1.mli</code></a>&nbsp;<span class="label label-danger">236 errors</span>
+    <a href="#v1.mli"><code>v1.mli</code></a>&nbsp;<span class="label label-danger">226 errors</span>
     
       <div class="alert alert-danger global-errors" role="alert">
         <ul>
@@ -4772,7 +4772,7 @@ module type RAW_DATA = sig
   val of_bytes_exn : MBytes.t -&gt; t
 end
 
-<abbr class="mark-error" title="Type extensions are not handled">module type B58_DATA = sig
+module type B58_DATA = sig
   type t
 
   val to_b58check : t -&gt; string
@@ -4783,14 +4783,10 @@ end
 
   val of_b58check_opt : string -&gt; t option
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Extensible types are not handled.">type Base58.data += Data of t</abbr><abbr class="mark-error" title="Type extensions are not handled">
+  <abbr class="mark-error" title="Extensible types are not handled.">type Base58.data += Data of t</abbr>
 
   val b58check_encoding : t Base58.encoding
-end</abbr>
+end
 
 module type ENCODER = sig
   type t
@@ -4957,24 +4953,16 @@ module type INDEXES = sig
   module Map : INDEXES_Map with type key = t
 end
 
-<abbr class="mark-error" title="Type extensions are not handled">module type HASH = sig
+module type HASH = sig
   include MINIMAL_HASH
 
   include RAW_DATA with type t := t
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
+  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Module 'Map' in included signature not handled.
+  <abbr class="mark-error" title="Module 'Map' in included signature not handled.
 
 You may try to use a sub-module instead of an `include`.
 
@@ -4982,17 +4970,13 @@ You may try to use a sub-module instead of an `include`.
 
 Module 'Set' in included signature not handled.
 
-You may try to use a sub-module instead of an `include`.">include INDEXES with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
-end</abbr>
+You may try to use a sub-module instead of an `include`.">include INDEXES with type t := t</abbr>
+end
 
-<abbr class="mark-error" title="Type extensions are not handled">module type MERKLE_TREE = sig
+module type MERKLE_TREE = sig
   type elt
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Module 'Map' in included signature not handled.
+  <abbr class="mark-error" title="Module 'Map' in included signature not handled.
 
 You may try to use a sub-module instead of an `include`.
 
@@ -5004,7 +4988,7 @@ You may try to use a sub-module instead of an `include`.
 
 ——————————
 
-Extensible type 'Base58.data' not handled">include HASH</abbr><abbr class="mark-error" title="Type extensions are not handled">
+Extensible type 'Base58.data' not handled">include HASH</abbr>
 
   val compute : elt list -&gt; t
 
@@ -5017,17 +5001,9 @@ Extensible type 'Base58.data' not handled">include HASH</abbr><abbr class="mark-
   val check_path : path -&gt; elt -&gt; t * int
 
   val path_encoding : path Data_encoding.t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Type extensions are not handled">module type SIGNATURE_Public_key_hash = sig
+module type SIGNATURE_Public_key_hash = sig
   type t
 
   val pp : Format.formatter -&gt; t -&gt; unit
@@ -5038,43 +5014,11 @@ Type extensions are not handled">module type SIGNATURE_Public_key_hash = sig
 
   include RAW_DATA with type t := t
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Type extensions are not handled">
+  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Module 'Map' in included signature not handled.
+  <abbr class="mark-error" title="Module 'Map' in included signature not handled.
 
 You may try to use a sub-module instead of an `include`.
 
@@ -5082,59 +5026,31 @@ You may try to use a sub-module instead of an `include`.
 
 Module 'Set' in included signature not handled.
 
-You may try to use a sub-module instead of an `include`.">include INDEXES with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Type extensions are not handled">
+You may try to use a sub-module instead of an `include`.">include INDEXES with type t := t</abbr>
 
   val zero : t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled">module type SIGNATURE_Public_key = sig
+module type SIGNATURE_Public_key = sig
   type t
 
   val pp : Format.formatter -&gt; t -&gt; unit
 
   include Compare.S with type t := t
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled
-
-——————————
-
-Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled">
+  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
   type public_key_hash_t
 
   val hash : t -&gt; public_key_hash_t
-end</abbr>
+end
 
-<abbr class="mark-error" title="Type extensions are not handled">module type SIGNATURE = sig
+module type SIGNATURE = sig
   module Public_key_hash : SIGNATURE_Public_key_hash
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Type extensions are not handled">module Public_key : SIGNATURE_Public_key with type public_key_hash_t = Public_key_hash.t</abbr><abbr class="mark-error" title="Type extensions are not handled">
+  module Public_key : SIGNATURE_Public_key with type public_key_hash_t = Public_key_hash.t
 
   type t
 
@@ -5144,11 +5060,7 @@ Type extensions are not handled">module Public_key : SIGNATURE_Public_key with t
 
   include Compare.S with type t := t
 
-  </abbr><abbr class="mark-error" title="Type extensions are not handled
-
-——————————
-
-Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
+  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
@@ -5158,7 +5070,7 @@ Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</ab
 
   (** Check a signature *)
   val check : ?watermark:watermark -&gt; Public_key.t -&gt; t -&gt; MBytes.t -&gt; bool
-end</abbr>
+end
 end
 module Set : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/set.mli&quot;
