@@ -49,8 +49,12 @@ let rec of_types_signature (signature : Types.signature) : t Monad.t =
         Type.of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
         return (TypDefinition (TypeDefinition.Synonym (name, typ_args, typ)))
       end
-    | Sig_typext _ ->
-      raise (Error "extensible_type") NotSupported "Extensible types are not handled"
+    | Sig_typext (_, { ext_type_path; _ }, _) ->
+      let name = Path.name ext_type_path in
+      raise
+        (Error ("extensible_type " ^ name))
+        NotSupported
+        ("Extensible type '" ^ name ^ "' not handled")
     | Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, _) ->
@@ -114,8 +118,11 @@ let rec of_signature (signature : signature) : t Monad.t =
     | Tsig_type (_, typs) ->
       TypeDefinition.of_ocaml typs >>= fun typ_definition ->
       return [TypDefinition typ_definition]
-    | Tsig_typext _ ->
-      raise [Error "extensible_type"] NotSupported "Extensible types are not handled"
+    | Tsig_typext { tyext_path; _ } ->
+      raise
+        [Error ("extensible_type " ^ Path.name tyext_path)]
+        NotSupported
+        "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->
