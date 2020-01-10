@@ -8023,21 +8023,21 @@ Module Data_encoding.
   
   Parameter int31 : encoding Z.
   
-  Parameter int32 : encoding int32.
+  Parameter __int32_value : encoding int32.
   
-  Parameter int64 : encoding int64.
+  Parameter __int64_value : encoding int64.
   
   Parameter n : encoding Z.t.
   
   Parameter z : encoding Z.t.
   
-  Parameter bool : encoding bool.
+  Parameter __bool_value : encoding bool.
   
   Parameter __string_value : encoding string.
   
   Parameter __bytes_value : encoding MBytes.t.
   
-  Parameter float : encoding Z.
+  Parameter __float_value : encoding Z.
   
   Parameter __option_value : forall {a : Set},
     encoding a -&gt; encoding (option a).
@@ -8535,11 +8535,11 @@ Module RPC_arg.
   
   Parameter int : arg Z.
   
-  Parameter int32 : arg int32.
+  Parameter __int32_value : arg int32.
   
-  Parameter int64 : arg int64.
+  Parameter __int64_value : arg int64.
   
-  Parameter float : arg Z.
+  Parameter __float_value : arg Z.
   
   Parameter __string_value : arg string.
   
