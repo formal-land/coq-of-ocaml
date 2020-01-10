@@ -4966,7 +4966,7 @@ end
 
 ——————————
 
-Extensible type 'Data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
+Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   include ENCODER with type t := t
 
@@ -5004,7 +5004,7 @@ You may try to use a sub-module instead of an `include`.
 
 ——————————
 
-Extensible type 'Data' not handled">include HASH</abbr><abbr class="mark-error" title="Type extensions are not handled">
+Extensible type 'Base58.data' not handled">include HASH</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   val compute : elt list -&gt; t
 
@@ -5050,7 +5050,7 @@ Type extensions are not handled
 
 ——————————
 
-Extensible type 'Data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled
+Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled
 
 ——————————
 
@@ -5114,7 +5114,7 @@ Type extensions are not handled
 
 ——————————
 
-Extensible type 'Data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled
+Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled
 
 ——————————
 
@@ -5148,7 +5148,7 @@ Type extensions are not handled">module Public_key : SIGNATURE_Public_key with t
 
 ——————————
 
-Extensible type 'Data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
+Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr><abbr class="mark-error" title="Type extensions are not handled">
 
   include ENCODER with type t := t
 
@@ -5386,7 +5386,7 @@ module Ed25519 : sig
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
@@ -5394,11 +5394,11 @@ Module 'Public_key_hash.t' not found
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
-Extensible types are not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
+Extensible type 'Base58.data' not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
 end
 module Secp256k1 : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/secp256k1.mli&quot;
@@ -5433,7 +5433,7 @@ module Secp256k1 : sig
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
@@ -5441,11 +5441,11 @@ Module 'Public_key_hash.t' not found
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
-Extensible types are not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
+Extensible type 'Base58.data' not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
 end
 module P256 : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/p256.mli&quot;
@@ -5480,7 +5480,7 @@ module P256 : sig
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
@@ -5488,11 +5488,11 @@ Module 'Public_key_hash.t' not found
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
-Extensible types are not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
+Extensible type 'Base58.data' not handled">include S.SIGNATURE with type watermark := MBytes.t</abbr>
 end
 module Chain_id : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/chain_id.mli&quot;
@@ -5521,7 +5521,7 @@ module Chain_id : sig
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include S.HASH</abbr>
 end
 module Signature : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/signature.mli&quot;
@@ -5570,7 +5570,7 @@ type watermark =
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
@@ -5578,11 +5578,11 @@ Module 'Public_key_hash.t' not found
 
 ——————————
 
-Extensible types are not handled
+Extensible type 'Base58.data' not handled
 
 ——————————
 
-Extensible types are not handled">include
+Extensible type 'Base58.data' not handled">include
   S.SIGNATURE
     with type Public_key_hash.t = public_key_hash
      and type Public_key.t = public_key
@@ -5616,7 +5616,7 @@ module Block_hash : sig
 (*****************************************************************************)
 
 (** Blocks hashes / IDs. *)
-<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include S.HASH</abbr>
 end
 module Operation_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/operation_hash.mli&quot;
@@ -5646,7 +5646,7 @@ module Operation_hash : sig
 (*****************************************************************************)
 
 (** Operations hashes / IDs. *)
-<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include S.HASH</abbr>
 end
 module Operation_list_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/operation_list_hash.mli&quot;
@@ -5676,7 +5676,7 @@ module Operation_list_hash : sig
 (*****************************************************************************)
 
 (** Blocks hashes / IDs. *)
-<abbr class="mark-error" title="Extensible types are not handled">include
+<abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include
   S.MERKLE_TREE with type elt = Operation_hash.t</abbr>
 end
 module Operation_list_list_hash : sig
@@ -5707,7 +5707,7 @@ module Operation_list_list_hash : sig
 (*****************************************************************************)
 
 (** Blocks hashes / IDs. *)
-<abbr class="mark-error" title="Extensible types are not handled">include
+<abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include
   S.MERKLE_TREE with type elt = Operation_list_hash.t</abbr>
 end
 module Protocol_hash : sig
@@ -5738,7 +5738,7 @@ module Protocol_hash : sig
 (*****************************************************************************)
 
 (** Protocol hashes / IDs. *)
-<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include S.HASH</abbr>
 end
 module Context_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/context_hash.mli&quot;
@@ -5768,7 +5768,7 @@ module Context_hash : sig
 (*****************************************************************************)
 
 (** Commited context hashes / IDs. *)
-<abbr class="mark-error" title="Extensible types are not handled">include S.HASH</abbr>
+<abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include S.HASH</abbr>
 end
 module Micheline : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/micheline.mli&quot;
@@ -8295,7 +8295,7 @@ Module Error_monad.
   | Temporary : error_category
   | Branch : error_category.
   
-  Definition __error := Empty_set.
+  Definition __error := extensible_type.
   
   Parameter pp : Format.formatter -&gt; __error -&gt; unit.
   
@@ -9024,7 +9024,7 @@ Module Base58.
   
   Parameter simple_encode : forall {a : Set}, encoding a -&gt; a -&gt; string.
   
-  Definition data := Empty_set.
+  Definition data := extensible_type.
   
   Parameter register_encoding : forall {a : Set},
     string -&gt; Z -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt; (a -&gt; data) -&gt;
@@ -9124,7 +9124,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      (* extensible_type *)
+      (* extensible_type Base58.data *)
       b58check_encoding : Base58.encoding t;
     }.
     Arguments signature : clear implicits.
@@ -9357,7 +9357,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      (* extensible_type Data *)
+      (* extensible_type Base58.data *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9402,7 +9402,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      (* extensible_type Data *)
+      (* extensible_type Base58.data *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9446,7 +9446,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      (* extensible_type Data *)
+      (* extensible_type Base58.data *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9480,7 +9480,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      (* extensible_type Data *)
+      (* extensible_type Base58.data *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9519,7 +9519,7 @@ Module S.
       to_short_b58check : t -&gt; string;
       of_b58check_exn : string -&gt; t;
       of_b58check_opt : string -&gt; option t;
-      (* extensible_type Data *)
+      (* extensible_type Base58.data *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -9632,7 +9632,7 @@ Module Ed25519.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -9866,7 +9866,7 @@ Module Ed25519.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -9919,7 +9919,7 @@ Module Ed25519.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -9976,7 +9976,7 @@ Module Secp256k1.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10210,7 +10210,7 @@ Module Secp256k1.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10263,7 +10263,7 @@ Module Secp256k1.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -10320,7 +10320,7 @@ Module P256.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10554,7 +10554,7 @@ Module P256.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -10607,7 +10607,7 @@ Module P256.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -10673,7 +10673,7 @@ Module Chain_id.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -10930,7 +10930,7 @@ Module Signature.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -11164,7 +11164,7 @@ Module Signature.
     
     Parameter of_b58check_opt : string -&gt; option t.
     
-    (* extensible_type *)
+    (* extensible_type Base58.data *)
     
     Parameter b58check_encoding : Base58.encoding t.
     
@@ -11217,7 +11217,7 @@ Module Signature.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11283,7 +11283,7 @@ Module Block_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11533,7 +11533,7 @@ Module Operation_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -11785,7 +11785,7 @@ Module Operation_list_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -12049,7 +12049,7 @@ Module Operation_list_list_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -12311,7 +12311,7 @@ Module Protocol_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
@@ -12561,7 +12561,7 @@ Module Context_hash.
   
   Parameter of_b58check_opt : string -&gt; option t.
   
-  (* extensible_type *)
+  (* extensible_type Base58.data *)
   
   Parameter b58check_encoding : Base58.encoding t.
   
