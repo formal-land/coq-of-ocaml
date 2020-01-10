@@ -11,7 +11,7 @@ Class OrderDec {A R} `(StrictOrder A R) := {
   compare_is_sound : forall x y,
     CompareSpec (x = y) (R x y) (R y x) (compare x y) }.
 
-Definition array := list.
+Definition array (A : Set) : Set := list A.
 
 Parameter exn : Set.
 
