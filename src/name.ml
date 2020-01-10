@@ -41,14 +41,20 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   let escape_if_value s =
     if is_value then "__" ^ s ^ "_value" else s in
   match s with
+  | "bool" -> escape_if_value s
   | "bytes" -> escape_if_value s
   | "error" -> "__error"
   | "exists" -> "__exists"
   | "exists2" -> "__exists2"
+  | "float" -> escape_if_value s
+  | "int32" -> escape_if_value s
+  | "int64" -> escape_if_value s
   | "list" -> escape_if_value s
   | "mod" -> "__mod"
+  | "nativeint" -> escape_if_value s
   | "option" -> escape_if_value s
   | "ref" -> escape_if_value s
+  | "result" -> escape_if_value s
   | "return" -> "__return"
   | "Set" -> "__Set"
   | "string" -> escape_if_value s
