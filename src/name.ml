@@ -38,18 +38,21 @@ let escape_operator (s : string) : string =
   Buffer.contents b
 
 let escape_reserved_word (is_value : bool) (s : string) : string =
+  let escape_if_value s =
+    if is_value then "__" ^ s ^ "_value" else s in
   match s with
-  | "bytes" -> if is_value then "__bytes_value" else s
+  | "bytes" -> escape_if_value s
   | "error" -> "__error"
   | "exists" -> "__exists"
   | "exists2" -> "__exists2"
-  | "list" -> if is_value then "__list_value" else s
+  | "list" -> escape_if_value s
   | "mod" -> "__mod"
-  | "option" -> if is_value then "__option_value" else s
-  | "ref" -> if is_value then "__ref_value" else s
+  | "option" -> escape_if_value s
+  | "ref" -> escape_if_value s
   | "return" -> "__return"
-  | "string" -> if is_value then "__string_value" else s
-  | "unit" -> if is_value then "__unit_value" else s
+  | "Set" -> "__Set"
+  | "string" -> escape_if_value s
+  | "unit" -> escape_if_value s
   | "Variable" -> "__Variable"
   | _ -> s
 
