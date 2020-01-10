@@ -31,8 +31,8 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (TypSynonym (name, typ_args, typ))
-    | Sig_typext (ident, _, _) ->
-      let name = Ident.name ident in
+    | Sig_typext (_, { ext_type_path; _ }, _) ->
+      let name = Path.name ext_type_path in
       raise
         (Error ("extensible_type " ^ name))
         NotSupported
@@ -106,8 +106,11 @@ let items_of_signature (signature : signature) : item list Monad.t =
       return [TypSynonym (name, typ_args, typ)]
     | Tsig_type (_, _) ->
       raise [Error "mutual_type"] NotSupported "Mutual type definitions in signatures not handled."
-    | Tsig_typext _ ->
-      raise [Error "extensible_type"] NotSupported "Extensible types are not handled."
+    | Tsig_typext { tyext_path; _ } ->
+      raise
+      [Error ("extensible_type " ^ Path.name tyext_path)]
+        NotSupported
+        "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->

@@ -11,15 +11,17 @@ Class OrderDec {A R} `(StrictOrder A R) := {
   compare_is_sound : forall x y,
     CompareSpec (x = y) (R x y) (R y x) (compare x y) }.
 
-Parameter array : forall (A : Set), Set.
+Definition array (A : Set) : Set := list A.
 
 Parameter exn : Set.
 
-Parameter int32 : Set.
+Parameter extensible_type : Set.
 
-Parameter int64 : Set.
+Definition int32 := Z.
 
-Parameter nativeint : Set.
+Definition int64 := Z.
+
+Definition nativeint := Z.
 
 Module Unit.
   Definition lt (x y : unit) : Prop := False.

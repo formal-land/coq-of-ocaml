@@ -2,6 +2,8 @@ open Monad.Notations
 
 type t = int Tree.t
 
+(* We do not report user errors in this code as this would create duplicates
+   with errors generated during the translation of the signatures themselves. *)
 let rec get_signature_typ_params (signature : Types.signature) : t Monad.t =
   let get_signature_item_typ_params
     (signature_item : Types.signature_item)
@@ -16,19 +18,12 @@ let rec get_signature_typ_params (signature : Types.signature) : t Monad.t =
         return (Some (Tree.Item (name, arity)))
       | Some _ -> return None
       end
-    | Sig_typext _ ->
-      raise None NotSupported "Type extensions are not handled"
+    | Sig_typext _ -> return None
     | Sig_module (ident, module_declaration, _) ->
       let name = Name.of_ident false ident in
-      set_loc (Loc.of_location module_declaration.md_loc) (
       get_module_typ_typ_params module_declaration.md_type >>= fun typ_params ->
-      return (Some (Tree.Module (name, typ_params))))
-    | Sig_modtype _ ->
-      raise None NotSupported "Nested signatures are not handled in signatures"
-    | Sig_class _ ->
-      raise None NotSupported "Classes are not handled"
-    | Sig_class_type _ ->
-      raise None NotSupported "Class types are not handled" in
+      return (Some (Tree.Module (name, typ_params)))
+    | Sig_modtype _ | Sig_class _ | Sig_class_type _ -> return None in
   signature |> Monad.List.filter_map get_signature_item_typ_params
 
 and get_module_typ_typ_params (module_typ : Types.module_type) : t Monad.t =
@@ -38,18 +33,15 @@ and get_module_typ_typ_params (module_typ : Types.module_type) : t Monad.t =
   | Mty_alias (_, path) | Mty_ident path ->
     get_env >>= fun env ->
     get_module_typ_declaration_typ_params (Env.find_modtype path env)
-  | Mty_functor _ ->
-    raise [] NotSupported "Cannot instantiate functors"
+  | Mty_functor _ -> return []
 
 and get_module_typ_declaration_typ_params
   (module_typ_declaration : Types.modtype_declaration)
   : t Monad.t =
-  set_loc (Loc.of_location module_typ_declaration.mtd_loc) (
   match module_typ_declaration.mtd_type with
-  | None ->
-    raise [] NotSupported "Cannot instantiate an abstract signature"
+  | None -> return []
   | Some module_typ ->
-    get_module_typ_typ_params module_typ)
+    get_module_typ_typ_params module_typ
 
 let get_typ_param_name (path_name : PathName.t) : Name.t =
   Name.of_string
