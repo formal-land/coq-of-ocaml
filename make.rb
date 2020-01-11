@@ -68,8 +68,8 @@ def get_conversions(directory)
       if coq_content.valid_encoding? then
         conversions << {
           ocaml_name: ocaml_name,
-          nb_errors: errors_json.size,
-          global_errors: global_errors,
+          nb_errors: errors_json.size - global_errors.size,
+          global_errors: [],
           ocaml_content: marked_ocaml_content,
           raw_ocaml_content: ocaml_content,
           coq_name: coq_name,
