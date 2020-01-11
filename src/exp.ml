@@ -313,9 +313,9 @@ and of_module_expr
       match module_type with
       | Some module_type -> module_type
       | None -> mod_type in
-    IsFirstClassModule.is_module_typ_first_class false module_type >>= fun is_first_class ->
+    IsFirstClassModule.is_module_typ_first_class module_type >>= fun is_first_class ->
     begin match is_first_class with
-    | IsFirstClassModule.Found signature_path ->
+    | IsFirstClassModule.Found (signature_path, _) ->
       ModuleTypParams.get_module_typ_nb_of_existential_variables module_type >>= fun nb_of_existential_variables ->
       of_structure typ_vars signature_path nb_of_existential_variables structure
     | IsFirstClassModule.Not_found reason ->

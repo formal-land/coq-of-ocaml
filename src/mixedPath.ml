@@ -4,14 +4,16 @@ open Monad.Notations
 
 (** [Access] corresponds to projections from first-class modules. *)
 type t =
-  | Access of t * PathName.t
+  | Access of t * PathName.t * bool
   | PathName of PathName.t
 
 (** Shortcut to introduce new local variables for example. *)
 let of_name (name : Name.t) : t =
   PathName (PathName.of_name [] name)
 
-let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t =
+let rec of_path_aux
+  (path : Path.t)
+  : (Path.t * (Path.t * string * bool) list) Monad.t =
   match path with
   | Papply _ -> failwith "Unexpected path application"
   | Pdot (path', field_string, _) ->
@@ -22,13 +24,16 @@ let rec of_path_aux (path : Path.t) : (Path.t * (Path.t * string) list) Monad.t 
     begin match Env.find_module path' env with
     | module_declaration ->
       let { Types.md_type; _ } = module_declaration in
-      IsFirstClassModule.is_module_typ_first_class true md_type >>= fun is_first_class ->
+      IsFirstClassModule.is_module_typ_first_class md_type >>= fun is_first_class ->
       begin match is_first_class with
-      | IsFirstClassModule.Found signature_path ->
-        return (namespace_path, (signature_path, field_string) :: fields)
+      | IsFirstClassModule.Found (signature_path, is_locally_opened) ->
+        return (
+          namespace_path,
+          (signature_path, field_string, is_locally_opened) :: fields
+        )
       | IsFirstClassModule.Not_found _ -> return (path, [])
       end
-    | exception _ -> raise (path, []) NotFound ("Module '" ^ Path.name path ^ "' not found")
+    | exception _ -> raise (path, []) NotFound ("Module '" ^ Path.name path' ^ "' not found")
     end
   | Pident _ -> return (path, [])
 
@@ -53,16 +58,21 @@ let of_path
     end
   | _ :: _ ->
     return (List.fold_left
-      (fun mixed_path (signature_path, field_string) ->
+      (fun mixed_path (signature_path, field_string, is_locally_opened) ->
         let field_name = Name.of_string is_value field_string in
         let field_path_name = PathName.of_path_and_name_without_convert signature_path field_name in
-        Access (mixed_path, field_path_name))
+        Access (mixed_path, field_path_name, is_locally_opened))
       (PathName path_name)
       (List.rev fields)
     )
 
 let rec to_coq (path : t) : SmartPrint.t =
   match path with
-  | Access (path, field_path_name) ->
-    to_coq path ^-^ !^ "." ^-^ parens (PathName.to_coq field_path_name)
+  | Access (path, field_path_name, is_locally_opened) ->
+    let record =
+      if is_locally_opened then
+        to_coq path
+      else
+        parens (!^ "projT2" ^^ to_coq path) in
+    record ^-^ !^ "." ^-^ parens (PathName.to_coq field_path_name)
   | PathName path_name -> PathName.to_coq path_name

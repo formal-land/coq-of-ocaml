@@ -102,15 +102,16 @@ let rec of_signature (signature : signature) : t Monad.t =
           NotSupported
           "Unhandled kind of module type"
       end
-    | Tsig_module { md_id; md_type = { mty_desc; mty_type; _ }; _ } ->
+    | Tsig_module { md_id; md_type = { mty_desc; _ }; _ } ->
       let name = Name.of_ident false md_id in
       begin match mty_desc with
       | Tmty_signature signature ->
         of_signature signature >>= fun signature ->
         return [Module (name, signature)]
       | _ ->
-        of_types_module_type mty_type >>= fun signature ->
-        return [Module (name, signature)]
+        ModuleTyp.of_ocaml_desc mty_desc >>= fun module_typ ->
+        let typ = ModuleTyp.to_typ module_typ in
+        return [Value (name, [], typ)]
       end
     | Tsig_open _ -> return []
     | Tsig_recmodule _ ->
