@@ -39,19 +39,9 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
     exactly one. There may be more than one result if two signatures have the same
     or similar definitions. In this case we will fail later with an explicit
     error message. *)
-let find_similar_signatures
-  (env : Env.t)
-  (local_modules : Types.signature list)
-  (signature : Types.signature)
-  : Path.t list * unit Tree.t * bool =
+let find_similar_signatures (env : Env.t) (signature : Types.signature)
+  : Path.t list * unit Tree.t =
   let shape = SignatureShape.of_signature signature in
-  (* We check if the signature is in the list of locally opened modules. *)
-  let shapes_of_local_modules =
-    local_modules |> List.map SignatureShape.of_signature in
-  let is_locally_opened =
-    shapes_of_local_modules |> List.exists (fun local_module ->
-      SignatureShape.is_included shape local_module
-    ) in
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
     Env.fold_modtypes
@@ -75,14 +65,10 @@ let find_similar_signatures
         signature_paths
       )
       None env [] in
-  (
-    similar_signature_paths @ similar_signature_paths_in_modules,
-    shape,
-    is_locally_opened
-  )
+  (similar_signature_paths @ similar_signature_paths_in_modules, shape)
 
 type maybe_found =
-  | Found of Path.t * bool
+  | Found of Path.t
   | Not_found of string option
 
 (** Get the path of the signature definition of the [module_typ]
@@ -94,9 +80,7 @@ let is_module_typ_first_class
   match Mtype.scrape env module_typ with
   | Mty_alias _ | Mty_ident _ -> return (Not_found None)
   | Mty_signature signature ->
-    get_local_modules >>= fun local_modules ->
-    let (signature_paths, shape, is_locally_opened) =
-      find_similar_signatures env local_modules signature in
+    let (signature_paths, shape) = find_similar_signatures env signature in
     begin match signature_paths with
     | [] ->
       return (
@@ -105,20 +89,20 @@ let is_module_typ_first_class
             "Did not find a module signature name for the following shape:\n" ^
             Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
             "(a shape is a list of names of types and values)\n\n" ^
-            "We use the concept of shape to find a name of a signature for Coq."
+            "We use the concept of shape to find the name of a signature for Coq."
           )
         )
       )
-    | [signature_path] -> return (Found (signature_path, is_locally_opened))
+    | [signature_path] -> return (Found signature_path)
     | signature_path :: (_ :: _) ->
-      raise (Found (signature_path, is_locally_opened)) FirstClassModule (
+      raise (Found signature_path) FirstClassModule (
         "It is unclear which first-class module this projection is from. At least two similar\n" ^
         "module signatures found, namely:\n" ^
         String.concat ", " (signature_paths |> List.map Path.name) ^ "\n\n" ^
         "We were looking for a module signature name for the following shape:\n" ^
         Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
         "(a shape is a list of names of types and values)\n\n" ^
-        "We use the concept of shape to find a name of a signature for Coq."
+        "We use the concept of shape to find the name of a signature for Coq."
       )
     end
   | Mty_functor _ ->

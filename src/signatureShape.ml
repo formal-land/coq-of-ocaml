@@ -17,7 +17,8 @@ let rec of_signature (signature : Types.signature) : t =
     | Sig_module (ident, module_declaration, _) ->
       let name = Name.of_ident false ident in
       begin match module_declaration.md_type with
-      | Mty_signature signature -> Some (Tree.Module (name, of_signature signature))
+      | Mty_signature signature ->
+        Some (Tree.Module (name, of_signature signature))
       | _ -> None
       end in
   signature |> Util.List.filter_map of_signature_item
@@ -35,7 +36,8 @@ let rec are_equal (shape1 : t) (shape2 : t) : bool =
   List.for_all2
     (fun item1 item2 ->
       match (item1, item2) with
-      | Tree.Module (name1, shape1), Tree.Module (name2, shape2) -> name1 = name2 && are_equal shape1 shape2
+      | Tree.Module (name1, shape1), Tree.Module (name2, shape2) ->
+        name1 = name2 && are_equal shape1 shape2
       | Tree.Item (name1, ()), Tree.Item (name2, ()) -> name1 = name2
       | Tree.Module _, Tree.Item _ | Tree.Item _, Tree.Module _ -> false
     )
@@ -54,5 +56,6 @@ let rec pretty_print (shape : t) : SmartPrint.t =
   shape |> OCaml.list (fun item ->
     match item with
     | Tree.Item (name, _) -> Name.to_coq name
-    | Tree.Module (name, shape) -> OCaml.tuple [Name.to_coq name; pretty_print shape]
+    | Tree.Module (name, shape) ->
+      OCaml.tuple [Name.to_coq name; pretty_print shape]
   )

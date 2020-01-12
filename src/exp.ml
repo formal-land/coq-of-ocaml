@@ -39,7 +39,6 @@ type t =
     (** The value of a first-class module. There may be error messages. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module (no existentials). There may be error messages. *)
-  | ModuleUnpack of t (** Open a first-class module *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
   | ErrorTyp of Type.t (** An error composed of a type. *)
@@ -315,7 +314,7 @@ and of_module_expr
       | None -> mod_type in
     IsFirstClassModule.is_module_typ_first_class module_type >>= fun is_first_class ->
     begin match is_first_class with
-    | IsFirstClassModule.Found (signature_path, _) ->
+    | IsFirstClassModule.Found signature_path ->
       ModuleTypParams.get_module_typ_nb_of_existential_variables module_type >>= fun nb_of_existential_variables ->
       of_structure typ_vars signature_path nb_of_existential_variables structure
     | IsFirstClassModule.Not_found reason ->
@@ -348,10 +347,7 @@ and of_module_expr
       | Some _ -> module_type
       | None -> Some mod_type in
     of_module_expr typ_vars module_expr module_type
-  | Tmod_unpack (e, module_typ) ->
-    of_expression typ_vars e >>= fun e ->
-    add_local_module module_typ >>= fun () ->
-    return (ModuleUnpack e)
+  | Tmod_unpack (e, _) -> of_expression typ_vars e
   ))
 
 and of_structure
@@ -500,8 +496,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (x, e1, e2) ->
-    Pp.parens paren @@ nest (
-      !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
+    begin match e1 with
+    | Variable (PathName { path = []; base }) when Name.equal base x ->
+      to_coq paren e2
+    | _ ->
+      Pp.parens paren @@ nest (
+        !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^
+        newline ^^ to_coq false e2
+      )
+    end
   | LetFun (def, e) ->
     (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
     Pp.parens paren @@ nest (separate newline
@@ -579,7 +582,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )) ^^ newline ^^
       !^ "|}"
     )
-  | ModuleUnpack e -> Pp.parens paren @@ nest (!^ "projT2" ^^ to_coq true e)
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ

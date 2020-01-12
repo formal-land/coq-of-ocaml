@@ -1,5 +1,4 @@
 open SmartPrint
-open Typedtree
 open Monad.Notations
 
 type t =
@@ -9,7 +8,8 @@ type t =
 
 let of_ocaml_module_with_substitutions
   (long_ident_loc : Longident.t Asttypes.loc)
-  (substitutions : (Path.t * Longident.t Asttypes.loc * with_constraint) list)
+  (substitutions :
+    (Path.t * Longident.t Asttypes.loc * Typedtree.with_constraint) list)
   : t Monad.t =
   let signature_path_name = PathName.of_long_ident false long_ident_loc.txt in
   get_env >>= fun env ->
@@ -17,8 +17,8 @@ let of_ocaml_module_with_substitutions
   ModuleTypParams.get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
   (substitutions |> Monad.List.filter_map (fun (path, _, with_constraint) ->
     begin match with_constraint with
-    | Twith_type typ_declaration | Twith_typesubst typ_declaration ->
-      let { typ_loc; typ_type; _ } = typ_declaration in
+    | Typedtree.Twith_type typ_declaration | Twith_typesubst typ_declaration ->
+      let { Typedtree.typ_loc; typ_type; _ } = typ_declaration in
       begin match typ_type with
       | { type_kind = Type_abstract; type_manifest = Some typ; _ } ->
         set_loc (Loc.of_location typ_loc) (
@@ -69,7 +69,7 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
       NotSupported
       "Operator 'with' on something else than a signature name is not handled"
 
-and of_ocaml (module_typ : module_type) : t Monad.t =
+and of_ocaml (module_typ : Typedtree.module_type) : t Monad.t =
   set_env module_typ.mty_env (
   set_loc (Loc.of_location module_typ.mty_loc) (
   of_ocaml_desc module_typ.mty_desc))

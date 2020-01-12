@@ -1,6 +1,5 @@
 (** A signature represented by axioms for a [.mli] file. *)
 open SmartPrint
-open Typedtree
 open Monad.Notations
 
 type item =
@@ -18,11 +17,20 @@ let rec of_types_signature (signature : Types.signature) : t Monad.t =
     : item Monad.t =
     match signature_item with
     | Sig_class _ ->
-      raise (Error "class") NotSupported "Signature item `class` not handled"
+      raise
+        (Error "class")
+        NotSupported
+        "Signature item `class` not handled"
     | Sig_class_type _ ->
-      raise (Error "class_type") NotSupported "Signature item `class_type` not handled"
+      raise
+        (Error "class_type")
+        NotSupported
+        "Signature item `class_type` not handled"
     | Sig_modtype (_, { mtd_type = None; _ }) ->
-      raise (Error "abstract_module_type") NotSupported "Abstract module type not handled"
+      raise
+        (Error "abstract_module_type")
+        NotSupported
+        "Abstract module type not handled"
     | Sig_modtype (ident, { mtd_type = Some module_typ; _ }) ->
       let name = Name.of_ident false ident in
       begin match module_typ with
@@ -41,7 +49,7 @@ let rec of_types_signature (signature : Types.signature) : t Monad.t =
       return (Module (name, signature))
     | Sig_type (ident, { type_manifest; type_params; _}, _) ->
       let name = Name.of_ident false ident in
-      (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+      Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
       begin match type_manifest with
       | None ->
         return (TypDefinition (TypeDefinition.Abstract (name, typ_args)))
@@ -74,22 +82,38 @@ and of_types_module_type (module_typ : Types.module_type) : t Monad.t =
     let error_message = "Unhandled functor" in
     raise [Error error_message] NotSupported error_message
 
-let rec of_signature (signature : signature) : t Monad.t =
-  let of_signature_item (signature_item : signature_item) : item list Monad.t =
+let rec of_signature (signature : Typedtree.signature) : t Monad.t =
+  let of_signature_item (signature_item : Typedtree.signature_item)
+    : item list Monad.t =
     set_env signature_item.sig_env (
     set_loc (Loc.of_location signature_item.sig_loc) (
     match signature_item.sig_desc with
     | Tsig_attribute _ ->
-      raise [Error "attribute"] NotSupported "Signature item `attribute` not handled"
+      raise
+        [Error "attribute"]
+        NotSupported
+        "Signature item `attribute` not handled"
     | Tsig_class _ ->
-      raise [Error "class"] NotSupported "Signature item `class` not handled"
+      raise
+        [Error "class"]
+        NotSupported
+        "Signature item `class` not handled"
     | Tsig_class_type _ ->
-      raise [Error "class_type"] NotSupported "Signature item `class_type` not handled"
+      raise
+        [Error "class_type"]
+        NotSupported
+        "Signature item `class_type` not handled"
     | Tsig_exception { ext_id; _ } ->
-      raise [Error ("exception " ^ Ident.name ext_id)] SideEffect "Signature item `exception` not handled"
+      raise
+        [Error ("exception " ^ Ident.name ext_id)]
+        SideEffect
+        "Signature item `exception` not handled"
     | Tsig_include { incl_type; _} -> of_types_signature incl_type
     | Tsig_modtype { mtd_type = None; _ } ->
-      raise [Error "abstract_module_type"] NotSupported "Abstract module type not handled"
+      raise
+        [Error "abstract_module_type"]
+        NotSupported
+        "Abstract module type not handled"
     | Tsig_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
       let name = Name.of_ident false mtd_id in
       begin match mty_desc with
@@ -115,7 +139,10 @@ let rec of_signature (signature : signature) : t Monad.t =
       end
     | Tsig_open _ -> return []
     | Tsig_recmodule _ ->
-      raise [Error "recursive_module"] NotSupported "Recursive module signatures are not handled"
+      raise
+        [Error "recursive_module"]
+        NotSupported
+        "Recursive module signatures are not handled"
     | Tsig_type (_, typs) ->
       TypeDefinition.of_ocaml typs >>= fun typ_definition ->
       return [TypDefinition typ_definition]

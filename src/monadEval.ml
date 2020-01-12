@@ -7,32 +7,22 @@ end
 
 module Interpret = struct
   type 'a t =
-    Env.t -> Loc.t -> Monad.LocalModules.t -> 'a Result.t * Monad.LocalModules.t
+    Env.t -> Loc.t -> Env.t option -> 'a Result.t
 end
 
 module Command = struct
   open Monad.Command
 
   let eval (type a) (file_name : string) (command : a t) : a Interpret.t =
-    fun env loc local_modules ->
+    fun env loc scoping_env ->
       match command with
-      | AddLocalModule module_typ ->
-        let local_modules =
-          match Mtype.scrape env module_typ with
-          | Mty_alias _ | Mty_ident _ | Mty_functor _ -> local_modules
-          | Mty_signature signature -> signature :: local_modules in
-        ({ errors = []; value = () }, local_modules)
-      | GetEnv -> ({ Result.errors = []; value = env }, local_modules)
-      | GetLoc -> ({ errors = []; value = loc }, local_modules)
-      | GetLocalModules ->
-        ({ errors = []; value = local_modules }, local_modules)
+      | GetEnv -> { Result.errors = []; value = env }
+      | GetLoc -> { errors = []; value = loc }
+      | GetScopingEnv -> { errors = []; value = scoping_env }
       | Raise (value, category, message) ->
-        ({ errors = [{ category; loc; message }]; value }, local_modules)
+        { errors = [{ category; loc; message }]; value }
       | Warn message ->
-        (
-          { errors = []; value = Error.warn file_name loc message },
-          local_modules
-        )
+        { errors = []; value = Error.warn file_name loc message }
 end
 
 module Wrapper = struct
@@ -40,26 +30,24 @@ module Wrapper = struct
     (wrapper : Monad.Wrapper.t)
     (interpret : 'a Interpret.t)
     : 'a Interpret.t =
-    fun env loc local_modules ->
+    fun env loc scoping_env ->
       match wrapper with
-      | Env env -> interpret env loc local_modules
-      | Loc loc -> interpret env loc local_modules
-      | LocalModulesOpenScope ->
-        let (result, _) = interpret env loc [] in
-        (result, [])
+      | Env env -> interpret env loc scoping_env
+      | Loc loc -> interpret env loc scoping_env
+      | ScopingEnv -> interpret env loc (Some env)
 end
 
 let rec eval : type a. string -> a Monad.t -> a Interpret.t =
-  fun file_name x env loc local_modules ->
+  fun file_name x env loc scoping_env ->
     match x with
     | Monad.Bind (x, f) ->
-      let ({ Result.errors = errors_x; value = value_x }, local_modules) =
-        eval file_name x env loc local_modules in
-      let ({ Result.errors = errors_y; value = value_y }, local_modules) =
-        eval file_name (f value_x) env loc local_modules in
-      ({ errors = errors_y @ errors_x; value = value_y }, local_modules)
+      let { Result.errors = errors_x; value = value_x } =
+        eval file_name x env loc scoping_env in
+      let { Result.errors = errors_y; value = value_y } =
+        eval file_name (f value_x) env loc scoping_env in
+      { errors = errors_y @ errors_x; value = value_y }
     | Monad.Command command ->
-      Command.eval file_name command env loc local_modules
-    | Monad.Return value -> ({ errors = []; value }, local_modules)
+      Command.eval file_name command env loc scoping_env
+    | Monad.Return value -> { errors = []; value }
     | Monad.Wrapper (wrapper, x) ->
-      Wrapper.eval wrapper (eval file_name x) env loc local_modules
+      Wrapper.eval wrapper (eval file_name x) env loc scoping_env

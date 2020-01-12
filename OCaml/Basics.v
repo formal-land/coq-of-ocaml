@@ -5,6 +5,8 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
+Notation "record .[ field ]" := (field (projT2 record)) (at level 5).
+
 (* TODO: add floats, add the different integer types (int32, int64, ...). *)
 Class OrderDec {A R} `(StrictOrder A R) := {
   compare : A -> A -> comparison;

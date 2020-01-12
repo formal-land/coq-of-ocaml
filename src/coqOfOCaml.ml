@@ -33,13 +33,13 @@ let exp
   (source_file_content : string)
   (json_mode : bool)
   : Ast.t * string option =
-  let ({ MonadEval.Result.errors; value}, _) =
+  let { MonadEval.Result.errors; value} =
     MonadEval.eval
       source_file_name
       (Ast.of_typedtree typedtree typedtree_errors)
       env
       loc
-      [] in
+      None in
   let error_message =
     match errors with
     | [] -> None
