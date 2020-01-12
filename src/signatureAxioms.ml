@@ -11,6 +11,18 @@ type item =
 
 and t = item list
 
+let rec flatten_single_include (module_typ_desc : Typedtree.module_type_desc)
+  : Typedtree.module_type_desc =
+  match module_typ_desc with
+  | Tmty_signature {
+      sig_items = [{
+        sig_desc = Tsig_include { incl_mod = { mty_desc; _ }; _ };
+        _
+      }];
+      _
+    } -> flatten_single_include mty_desc
+  | _ -> module_typ_desc
+
 let rec of_types_signature (signature : Types.signature) : t Monad.t =
   let of_types_signature_item
     (signature_item : Types.signature_item)
@@ -128,6 +140,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       end
     | Tsig_module { md_id; md_type = { mty_desc; _ }; _ } ->
       let name = Name.of_ident false md_id in
+      let mty_desc = flatten_single_include mty_desc in
       begin match mty_desc with
       | Tmty_signature signature ->
         of_signature signature >>= fun signature ->
