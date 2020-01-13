@@ -298,7 +298,7 @@ let rec to_coq
       (match existential_typs with
       | [] -> !^ "_" ^^ !^ ":" ^^ !^ "unit"
       | [typ] -> typ ^^ !^ ":" ^^ !^ "_"
-      | _ -> !^ "'" ^-^ OCaml.tuple existential_typs ^^ !^ ":" ^^ !^ "_"
+      | _ -> !^ "'" ^-^ brakets (separate (!^ "," ^^ space) existential_typs) ^^ !^ ":" ^^ !^ "_"
       ) ^^ !^ "&" ^^
       nest (
         nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^

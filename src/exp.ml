@@ -468,11 +468,11 @@ and of_structure
   ) in
   return (Module (nb_of_existential_variables, fields))
 
-let rec to_coq_n_uplet_of_underscores (n : int) : SmartPrint.t =
-  match n with
-  | 0 -> !^ "unit"
-  | 1 -> !^ "_"
-  | _ -> OCaml.tuple [to_coq_n_uplet_of_underscores (n - 1); !^ "_"]
+let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
+  if n = 0 then
+    []
+  else
+    (!^ "_") :: to_coq_n_underscores (n - 1)
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
@@ -559,7 +559,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e3))
   | Module (nb_of_existential_variables, fields) ->
     Pp.parens paren @@ nest (
-      !^ "existT" ^^ !^ "_" ^^ to_coq_n_uplet_of_underscores nb_of_existential_variables ^^
+      !^ "existT" ^^ !^ "_" ^^
+      begin match to_coq_n_underscores nb_of_existential_variables with
+      | [] -> !^ "unit"
+      | [_] -> !^ "_"
+      | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
+      end ^^
       nest (
         !^ "{|" ^^ newline ^^
         indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (error_message, x, e) ->

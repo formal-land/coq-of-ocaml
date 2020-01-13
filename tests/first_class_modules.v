@@ -110,8 +110,8 @@ Module Triple.
   Arguments signature : clear implicits.
 End Triple.
 
-Definition tripe : {'(a, b, c, bar) : _ & Triple.signature a b c bar} :=
-  existT _ (((_, _), _), _)
+Definition tripe : {'[a, b, c, bar] : _ & Triple.signature a b c bar} :=
+  existT _ [_, _, _, _]
     {|
       Triple.va := 0;
       Triple.vb := false;

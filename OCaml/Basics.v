@@ -7,6 +7,21 @@ Set Implicit Arguments.
 
 Notation "record .[ field ]" := (field (projT2 record)) (at level 5).
 
+Module Primitive.
+  Set Primitive Projections.
+
+  Record prod {A B : Type} : Type := pair {
+    fst : A;
+    snd : B;
+  }.
+  Arguments prod : clear implicits.
+
+  Unset Primitive Projections.
+End Primitive.
+
+Notation "[ X * Y * .. * Z ]" := (Primitive.prod .. (Primitive.prod X Y) .. Z).
+Notation "[ x , y , .. , z ]" := (Primitive.pair .. (Primitive.pair x y) .. z).
+
 (* TODO: add floats, add the different integer types (int32, int64, ...). *)
 Class OrderDec {A R} `(StrictOrder A R) := {
   compare : A -> A -> comparison;
