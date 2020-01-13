@@ -17,7 +17,7 @@ let of_ocaml_module_with_substitutions
   ModuleTypParams.get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
   (substitutions |> Monad.List.filter_map (fun (path, _, with_constraint) ->
     begin match with_constraint with
-    | Typedtree.Twith_type typ_declaration | Twith_typesubst typ_declaration ->
+    | Typedtree.Twith_type typ_declaration ->
       let { Typedtree.typ_loc; typ_type; _ } = typ_declaration in
       begin match typ_type with
       | { type_kind = Type_abstract; type_manifest = Some typ; _ } ->
@@ -30,6 +30,11 @@ let of_ocaml_module_with_substitutions
           "rather than type definitions"
         )
       end
+    | Twith_typesubst _ ->
+      raise None NotSupported (
+        "Destructive type substitutions are not handled to reference records of signatures.\n\n" ^
+        "Use a normal constraint `with ... = ...` instead of `with ... := ...`."
+      )
     | _ -> raise None NotSupported "Can only do `with` on types in module types"
     end
   )) >>= fun (typ_substitutions : (PathName.t * Type.t) list) ->
