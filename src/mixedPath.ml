@@ -61,7 +61,7 @@ let of_path
       match scoping_env with
       | None -> false
       | Some scoping_env ->
-        begin match Env.find_module path scoping_env with
+        begin match Env.find_module path' scoping_env with
         | _ -> false
         | exception _ -> true
         end in
