@@ -88,7 +88,7 @@ let is_module_typ_first_class
           Some (
             "Did not find a module signature name for the following shape:\n" ^
             Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
-            "(a shape is a list of names of types and values)\n\n" ^
+            "(a shape is a list of names of values)\n\n" ^
             "We use the concept of shape to find the name of a signature for Coq."
           )
         )
@@ -101,7 +101,7 @@ let is_module_typ_first_class
         String.concat ", " (signature_paths |> List.map Path.name) ^ "\n\n" ^
         "We were looking for a module signature name for the following shape:\n" ^
         Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
-        "(a shape is a list of names of types and values)\n\n" ^
+        "(a shape is a list of names of values)\n\n" ^
         "We use the concept of shape to find the name of a signature for Coq."
       )
     end
