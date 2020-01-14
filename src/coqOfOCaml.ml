@@ -65,10 +65,16 @@ let of_ocaml
     | None ->
       let source_file_name_without_extension = Filename.remove_extension source_file_name in
       let extension = Filename.extension source_file_name in
-      let extension_without_dot = extension |> String.map (fun c ->
-        if c = '.' then '_' else c
-      ) in
-      source_file_name_without_extension ^ extension_without_dot ^ ".v"
+      let new_extension =
+        match extension with
+        | ".ml" -> ".v"
+        | ".mli" -> "_mli.v"
+        | _ ->
+          failwith (
+            "Unexpected extension " ^ extension ^ " for the file " ^
+            source_file_name
+          ) in
+      source_file_name_without_extension ^ new_extension
     | Some output_file_name -> output_file_name in
   let generated_file_content = SmartPrint.to_string 80 2 document in
   let success_message =
@@ -141,7 +147,7 @@ let main () =
     let initial_loc = Ast.get_initial_loc typedtree in
     let initial_env = Mtyper.get_env typing in
     let output =
-        of_ocaml initial_env initial_loc typedtree typedtree_errors file_name file_content !output_file_name !json_mode in
+      of_ocaml initial_env initial_loc typedtree typedtree_errors file_name file_content !output_file_name !json_mode in
     Output.write output
 
 ;;main ()
