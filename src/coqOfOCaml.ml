@@ -63,7 +63,8 @@ let of_ocaml
   let generated_file_name =
     match output_file_name with
     | None ->
-      let source_file_name_without_extension = Filename.remove_extension source_file_name in
+      let without_extension =
+        Filename.remove_extension source_file_name in
       let extension = Filename.extension source_file_name in
       let new_extension =
         match extension with
@@ -74,7 +75,10 @@ let of_ocaml
             "Unexpected extension " ^ extension ^ " for the file " ^
             source_file_name
           ) in
-      source_file_name_without_extension ^ new_extension
+      Filename.concat
+        (Filename.dirname without_extension)
+        (String.capitalize_ascii (Filename.basename without_extension)) ^
+      new_extension
     | Some output_file_name -> output_file_name in
   let generated_file_content = SmartPrint.to_string 80 2 document in
   let success_message =
