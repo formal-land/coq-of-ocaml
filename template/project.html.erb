@@ -8,6 +8,14 @@
       <li>Coq size: <%= nb_coq_lines %> lines (<%= "+" if nb_coq_lines >= nb_ocaml_lines %><%= "#{100 * nb_coq_lines / nb_ocaml_lines - 100}%" %> compared to&nbsp;OCaml)</li>
       <li>errors: <%= nb_errors %></li>
     </ul>
+    <% if chart_data then %>
+      <canvas id="chart" width="400" height="400"></canvas>
+      <script>
+        window.chart = <%= chart_data %>;
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+      <script src="../js/display-chart.js"></script>
+    <% end %>
   </div>
 </div>
 <% if conversions.size >= 2 then %>

@@ -54,9 +54,12 @@ def get_conversions(directory)
     print "\r#{directory} (#{index + 1}/#{ocaml_file_names.size})"
     ocaml_name = Pathname.new(ocaml_file_name).relative_path_from(Pathname.new(directory)).to_s
     ocaml_content = File.read(ocaml_file_name, :encoding => 'utf-8')
+    coq_extension = File.extname(ocaml_file_name) == ".ml" ? ".v" : "_mli.v"
+    ocaml_base_name = File.basename(ocaml_file_name, ".*")
+    capitalized_base_name = ocaml_base_name[0].capitalize + ocaml_base_name[1..-1]
     coq_file_name = File.join(
       File.dirname(ocaml_file_name),
-      File.basename(ocaml_file_name, ".*") + File.extname(ocaml_file_name).sub(".", "_") + ".v"
+      capitalized_base_name + coq_extension
     )
     coq_name = File.basename(coq_file_name)
     errors_file_name = ocaml_file_name + ".errors"
@@ -94,12 +97,23 @@ def footer(root)
   ERB.new(File.read("template/footer.html.erb")).result(binding)
 end
 
-def project(name, title, intro, directory, does_compile)
+def project(name, title, intro, directory, does_compile, chart_data)
   project_name = name
-  project_intro = <<END
-    <h2>#{title}#{" <small><span class=\"label label-success\">Does compile</span></small>" if does_compile}</h2>
+  project_intro = <<-END
+    <h2>
+      #{title}
+      <small>
+      #{
+        if does_compile then
+          "<span class=\"label label-success\">Does compile</span>"
+        else
+          "<span class=\"label label-danger\">Does not compile</span>"
+        end
+      }
+      </small>
+    </h2>
     <p>#{intro}</p>
-END
+  END
   conversions = get_conversions(directory)
   nb_ocaml_lines = conversions.reduce(0) {|sum, conversion|
     sum + conversion[:raw_ocaml_content].split("\n").size
@@ -124,7 +138,8 @@ File.open("kernel/index.html", "w") do |file|
     "Kernel of Coq",
     "This is a demo of the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a> on the <a href=\"https://github.com/coq/coq/tree/master/kernel\">kernel</a> of <a =href=\"https://coq.inria.fr/\">Coq</a>. Coq is written in <a =href=\"https://ocaml.org/\">OCaml</a>.",
     kernel_directory,
-    false
+    false,
+    nil
   )
 end
 
@@ -134,7 +149,23 @@ File.open("tezos/index.html", "w") do |file|
     "Protocol of Tezos",
     "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
     tezos_directory,
-    false
+    false,
+    <<-END
+      {
+        compiling: [
+          13,
+          13,
+        ],
+        generated: [
+          47563,
+          47563,
+        ],
+        labels: [
+          "01-14",
+          "01-15",
+        ]
+      }
+    END
   )
 end
 
@@ -144,6 +175,31 @@ File.open("tezos-interface/index.html", "w") do |file|
     "Interface of the protocol of Tezos",
     "These are the sources of the interface of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
     tezos_interface_directory,
-    true
+    true,
+    <<-END
+      {
+        compiling: [
+          7,
+          826,
+          1190,
+          2184,
+          6443,
+        ],
+        generated: [
+          2185,
+          2200,
+          2829,
+          6265,
+          6443,
+        ],
+        labels: [
+          "01-05",
+          "01-06",
+          "01-07",
+          "01-08",
+          "01-09",
+        ]
+      }
+    END
   )
 end
