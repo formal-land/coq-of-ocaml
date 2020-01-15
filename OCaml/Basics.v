@@ -40,7 +40,7 @@ Definition int64 := Z.
 
 Definition nativeint := Z.
 
-Parameter try : forall {A B : Set}, A -> B.
+Parameter try : forall {A : Set}, A -> A.
 
 Module Unit.
   Definition lt (x y : unit) : Prop := False.

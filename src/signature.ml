@@ -125,8 +125,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_args, typ)])) in
-  (signature.sig_items |> Monad.List.map of_signature_item) >>= fun items ->
-  return (List.flatten items)
+  signature.sig_items |> Monad.List.flatten_map of_signature_item
 
 let of_signature (signature : signature) : t Monad.t =
   set_scoping_env (

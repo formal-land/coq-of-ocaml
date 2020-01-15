@@ -169,8 +169,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->
       let typ_vars = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_vars, typ)])) in
-  (signature.sig_items |> Monad.List.map of_signature_item) >>= fun items ->
-  return (List.flatten items)
+  signature.sig_items |> Monad.List.flatten_map of_signature_item
 
 let rec to_coq (signature : t) : SmartPrint.t =
   let to_coq_item (signature_item : item) : SmartPrint.t =
