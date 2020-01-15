@@ -69,10 +69,10 @@ let of_path
       List.fold_left
         (fun (mixed_path, is_local) (signature_path, field_string) ->
           let field_name = Name.of_string is_value field_string in
-          let field_path_name = PathName.of_path_and_name_without_convert signature_path field_name in
+          let field_path_name = PathName.of_path_and_name_with_convert signature_path field_name in
           (Access (mixed_path, field_path_name, is_local), true)
         )
-        (PathName path_name, is_local)
+        (PathName (PathName.convert path_name), is_local)
         (List.rev fields) in
     return mixed_path
 

@@ -196,6 +196,11 @@ let try_convert (path_name : t) : t option =
 
   | _ -> None
 
+let convert (path_name : t) : t =
+  match try_convert path_name with
+  | None -> path_name
+  | Some path_name -> path_name
+
 (** Lift a local name to a global name. *)
 let of_name (path : Name.t list) (base : Name.t) : t =
   { path; base }
@@ -222,12 +227,9 @@ let of_path_without_convert (is_value : bool) (path : Path.t) : t =
   of_name (List.rev path) base
 
 let of_path_with_convert (is_value : bool) (path : Path.t) : t =
-  let path_name = of_path_without_convert is_value path in
-  match try_convert path_name with
-  | None -> path_name
-  | Some path_name -> path_name
+  convert (of_path_without_convert is_value path)
 
-let of_path_and_name_without_convert (path : Path.t) (name : Name.t) : t =
+let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t =
   let rec aux p : Name.t list * Name.t =
     match p with
     | Path.Pident x -> ([Name.of_ident false x], name)
@@ -236,7 +238,7 @@ let of_path_and_name_without_convert (path : Path.t) (name : Name.t) : t =
       (Name.of_string false s :: path, base)
     | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
-  of_name (List.rev path) base
+  convert (of_name (List.rev path) base)
 
 let of_constructor_description
   (constructor_description : Types.constructor_description)
@@ -245,10 +247,7 @@ let of_constructor_description
   | { cstr_name; cstr_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
     let { path; _ } = of_path_without_convert false path in
     let path_name = { path; base = Name.of_string false cstr_name } in
-    begin match try_convert path_name with
-    | None -> path_name
-    | Some path_name -> path_name
-    end
+    convert path_name
   | _ -> failwith "Unexpected constructor description without a type constructor"
 
 let of_label_description (label_description : Types.label_description) : t =
@@ -258,10 +257,7 @@ let of_label_description (label_description : Types.label_description) : t =
     let path_name = {
       path = path @ [base];
       base = Name.of_string false lbl_name } in
-    begin match try_convert path_name with
-    | None -> path_name
-    | Some path_name -> path_name
-    end
+    convert path_name
   | _ -> failwith "Unexpected label description without a type constructor"
 
 let get_head_and_tail (path_name : t) : Name.t * t option =

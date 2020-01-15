@@ -4,20 +4,16 @@ open Monad.Notations
 
 (** Recursively get all the module type declarations inside a module declaration.
     We retreive the path and definition of each. *)
-let rec get_modtype_declarations_of_module_declaration
+let get_modtype_declarations_of_module_declaration
   (module_declaration : Types.module_declaration)
   : (Ident.t list * Types.modtype_declaration) list =
   match module_declaration.md_type with
   | Mty_signature signature ->
-    List.flatten (signature |> List.map (function
-      | Types.Sig_module (module_ident, module_declaration, _) ->
-        let signatures = get_modtype_declarations_of_module_declaration module_declaration in
-        signatures |> List.map (fun (signature_path_prefix, signature) ->
-          (module_ident :: signature_path_prefix, signature)
-        )
-      | Sig_modtype (module_type_ident, module_type) -> [([module_type_ident], module_type)]
-      | _ -> []
-    ))
+    signature |> Util.List.filter_map (function
+      | Types.Sig_modtype (module_type_ident, module_type) ->
+        Some ([module_type_ident], module_type)
+      | _ -> None
+    )
   | _ -> []
 
 let is_modtype_declaration_similar_to_shape
@@ -31,7 +27,9 @@ let is_modtype_declaration_similar_to_shape
   | _ -> false
 
 let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
-  List.fold_left (fun path ident -> Path.Pdot (path, Ident.name ident, 0)) path (List.rev idents)
+  List.fold_left (fun path ident ->
+    Path.Pdot (path, Ident.name ident, 0)
+  ) path idents
 
 (** Find the [Path.t] of all the signature definitions which are found to be similar
     to [signature]. If the signature is the one of a module used as a namespace there
@@ -61,8 +59,9 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature)
           modtype_declarations |> List.filter (fun (_, modtype_declaration) ->
             is_modtype_declaration_similar_to_shape modtype_declaration shape
           ) in
-        (similar_modtype_declarations |> List.map (fun (idents, _) -> apply_idents_on_path module_path idents)) @
-        signature_paths
+        (similar_modtype_declarations |> List.map (fun (idents, _) ->
+          apply_idents_on_path module_path idents
+        )) @ signature_paths
       )
       None env [] in
   (similar_signature_paths @ similar_signature_paths_in_modules, shape)

@@ -464,7 +464,7 @@ and of_structure
       match name with
       | None -> Name.of_string false "_"
       | Some name -> name in
-    (error_message, PathName.of_path_and_name_without_convert signature_path name, field)
+    (error_message, PathName.of_path_and_name_with_convert signature_path name, field)
   ) in
   return (Module (nb_of_existential_variables, fields))
 
