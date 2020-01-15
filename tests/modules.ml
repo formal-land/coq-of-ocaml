@@ -22,7 +22,3 @@ let n _ = List2.sum (List2.of_list [5; 7; 6; List2.Inside.x])
 module Syn = List2.Inside
 
 let xx = Syn.x
-
-include Syn
-
-let y = x
