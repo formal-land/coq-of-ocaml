@@ -101,7 +101,7 @@ def project(name, title, intro, directory, does_compile, chart_data)
   project_name = name
   project_intro = <<-END
     <h2>
-      #{title}
+      #{title} in&nbsp;Coq
       <small>
       #{
         if does_compile then
