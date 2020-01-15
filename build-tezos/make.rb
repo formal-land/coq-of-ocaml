@@ -10,6 +10,8 @@ system("cp #{protocol_folder}/*.v ./")
 
 files = [
   environment_file,
+  "Script_int_repr_mli.v",
+  "Script_int_repr.v",
   "Raw_level_repr.v"
 ]
 

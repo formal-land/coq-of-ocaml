@@ -67,11 +67,12 @@ def get_conversions(directory)
       errors_content = File.read(errors_file_name)
       errors_json = errors_content != "" ? JSON.parse(errors_content) : []
       global_errors, marked_ocaml_content = mark_text(ocaml_content, errors_json)
+      nb_errors = errors_json.size - global_errors.size
       coq_content = File.read(coq_file_name, :encoding => 'utf-8')
       if coq_content.valid_encoding? then
         conversions << {
           ocaml_name: ocaml_name,
-          nb_errors: errors_json.size - global_errors.size,
+          nb_errors: nb_errors,
           global_errors: [],
           ocaml_content: marked_ocaml_content,
           raw_ocaml_content: ocaml_content,
@@ -154,11 +155,11 @@ File.open("tezos/index.html", "w") do |file|
       {
         compiling: [
           13,
-          43,
+          292,
         ],
         generated: [
           47563,
-          43955,
+          42930,
         ],
         labels: [
           "01-14",
