@@ -42,7 +42,6 @@ type t =
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
   | ErrorTyp of Type.t (** An error composed of a type. *)
-  | ErrorSeq of t * t (** A sequence of two expressions (an error in Coq). *)
   | ErrorMessage of t * string (** An expression together with an error message. *)
 
 (** Take a function expression and make explicit the list of arguments and
@@ -188,11 +187,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     | None -> return (Tuple [])
     | Some e3 -> of_expression typ_vars e3) >>= fun e3 ->
     return (IfThenElse (e1, e2, e3))
-  | Texp_sequence (e1, e2) ->
-    of_expression typ_vars e1 >>= fun e1 ->
+  | Texp_sequence (_, e2) ->
     of_expression typ_vars e2 >>= fun e2 ->
     error_message
-      (ErrorSeq (e1, e2))
+      (ErrorMessage (e2, "instruction_sequence \";\""))
       SideEffect
       (
         "Sequences of instructions are not handled (operator \";\")\n\n" ^
@@ -590,9 +588,4 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
-  | ErrorSeq (e1, e2) ->
-    Pp.parens paren @@ group (
-      nest (!^ "let" ^^ !^ "_" ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in") ^^ newline ^^
-      to_coq false e2
-    )
   | ErrorMessage (e, error_message) -> group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
