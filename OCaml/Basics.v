@@ -40,6 +40,8 @@ Definition int64 := Z.
 
 Definition nativeint := Z.
 
+Parameter try : forall {A B : Set}, A -> B.
+
 Module Unit.
   Definition lt (x y : unit) : Prop := False.
 
@@ -430,4 +432,14 @@ End String.
 
 Module CamlinternalFormatBasics.
   Parameter format6 : forall (A B C D E F : Set), Set.
+
+  Parameter Any : Set.
+
+  Parameter Format : forall {A : Set}, Any -> string -> A.
+  Parameter Int32 : Any -> Any -> Any -> Any -> Any.
+
+  Parameter End_of_format : Any.
+  Parameter Int_d : Any.
+  Parameter No_padding : Any.
+  Parameter No_precision : Any.
 End CamlinternalFormatBasics.
