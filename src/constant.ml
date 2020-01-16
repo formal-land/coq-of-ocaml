@@ -15,7 +15,7 @@ let of_constant (c : constant) : t Monad.t =
   match c with
   | Const_int n -> return (Int n)
   | Const_char c -> return (Char c)
-  | Const_string (s, _) -> return (String s)
+  | Const_string (s, _) -> return (String (String.escaped s))
   | Const_float s ->
     let n = int_of_float (float_of_string s) in
     let message = Printf.sprintf "Float constant %s is approximated by the integer %d" s n in

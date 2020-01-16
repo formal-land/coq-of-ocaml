@@ -21,4 +21,4 @@ Definition c : ascii := "g" % char.
 
 Definition s1 : string := "bla" % string.
 
-Definition s2 : string := """" % string.
+Definition s2 : string := "\""" % string.
