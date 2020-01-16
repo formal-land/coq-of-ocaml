@@ -156,12 +156,12 @@ File.open("tezos/index.html", "w") do |file|
         compiling: [
           13,
           292,
-          1857,
+          1784,
         ],
         generated: [
           47563,
           41904,
-          42276,
+          43481,
         ],
         labels: [
           "01-14",

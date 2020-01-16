@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35763 lines</li>
-      <li>Coq size: 42276 lines (+18% compared to&nbsp;OCaml)</li>
-      <li>errors: 2617</li>
+      <li>OCaml size: 35799 lines</li>
+      <li>Coq size: 43481 lines (+21% compared to&nbsp;OCaml)</li>
+      <li>errors: 2615</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -64,12 +64,12 @@
         compiling: [
           13,
           292,
-          1857,
+          1784,
         ],
         generated: [
           47563,
           41904,
-          42276,
+          43481,
         ],
         labels: [
           "01-14",
@@ -138,7 +138,7 @@
       </li>
       
       <li>
-        <a href="#blinded_public_key_hash.ml">blinded_public_key_hash.ml</a>&nbsp;<span class="label label-danger">4</span>
+        <a href="#blinded_public_key_hash.ml">blinded_public_key_hash.ml</a>&nbsp;<span class="label label-danger">3</span>
       </li>
       
       <li>
@@ -222,7 +222,7 @@
       </li>
       
       <li>
-        <a href="#cycle_repr.ml">cycle_repr.ml</a>&nbsp;<span class="label label-danger">5</span>
+        <a href="#cycle_repr.ml">cycle_repr.ml</a>&nbsp;<span class="label label-danger">4</span>
       </li>
       
       <li>
@@ -392,7 +392,7 @@
       </li>
       
       <li>
-        <a href="#raw_context.ml">raw_context.ml</a>&nbsp;<span class="label label-danger">68</span>
+        <a href="#raw_context.ml">raw_context.ml</a>&nbsp;<span class="label label-danger">67</span>
       </li>
       
       <li>
@@ -458,7 +458,7 @@
       </li>
       
       <li>
-        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">98</span>
+        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">103</span>
       </li>
       
       <li>
@@ -514,7 +514,11 @@
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">68</span>
+        <a href="#state_hash.ml">state_hash.ml</a>&nbsp;<span class="label label-danger">2</span>
+      </li>
+      
+      <li>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">62</span>
       </li>
       
       <li>
@@ -10620,9 +10624,7 @@ Definition error_encoding : Data_encoding.encoding Error_monad.__error :=
         (* ❌ expected an argument *)
         expected_argument
         (Some
-          &quot;The full list of RPC errors would be too long to include.
-It is available at RPC `/errors` (GET).
-Errors specific to protocol Alpha have an id that starts with `proto.alpha`.&quot;
+          &quot;The full list of RPC errors would be too long to include.\nIt is available at RPC `/errors` (GET).\nErrors specific to protocol Alpha have an id that starts with `proto.alpha`.&quot;
             % string) in
     fun eta =&gt; arg None eta)
     (Data_encoding.splitted
@@ -13827,7 +13829,7 @@ Parameter minimal_valid_time :
 <hr />
 <div class="row conversion-row" id="blinded_public_key_hash.ml">
   <div class="col-md-6">
-    <a href="#blinded_public_key_hash.ml"><code>blinded_public_key_hash.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
+    <a href="#blinded_public_key_hash.ml"><code>blinded_public_key_hash.ml</code></a>&nbsp;<span class="label label-danger">3 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -13854,7 +13856,7 @@ Parameter minimal_valid_time :
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module H =
+module H =
   Blake2B.Make
     (Base58)
     (struct
@@ -13865,7 +13867,7 @@ Parameter minimal_valid_time :
       let b58check_prefix = &quot;\001\002\049\223&quot;
 
       let size = Some Ed25519.Public_key_hash.size
-    end)</abbr>
+    end)
 
 include H
 
@@ -13907,8 +13909,23 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition H :=
+  (Blake2B.Make
+    (existT _ tt
+      {|
+        Blake2B.SRegister.register_encoding := Base58.register_encoding
+        |}))
+    (let name := &quot;Blinded public key hash&quot; % string in
+    let title := &quot;A blinded public key hash&quot; % string in
+    let b58check_prefix := &quot;\001\0021\223&quot; % string in
+    let size := Some Ed25519.Public_key_hash.[S.SPublic_key_hash.size] in
+    existT _ tt
+      {|
+        Blake2B.PrefixedName.name := name;
+        Blake2B.PrefixedName.title := title;
+        Blake2B.PrefixedName.size := size;
+        Blake2B.PrefixedName.b58check_prefix := b58check_prefix
+        |}).
 
 Export H.
 
@@ -13972,10 +13989,6 @@ Module Index := H.
 (*****************************************************************************)
 
 <abbr class="mark-error" title="Extensible type 'Tezos_protocol_environment_alpha__Environment.Base58.data' not handled">include S.HASH</abbr>
-
-val encoding : t Data_encoding.t
-
-val rpc_arg : t RPC_arg.t
 
 type activation_code
 
@@ -14245,10 +14258,6 @@ Module Map.
   Parameter encoding : forall {a : Set},
     Data_encoding.t a -&gt; Data_encoding.t (t a).
 End Map.
-
-Parameter encoding : Data_encoding.t t.
-
-Parameter rpc_arg : RPC_arg.t t.
 
 Parameter activation_code : Set.
 
@@ -15737,9 +15746,9 @@ Require Import Tezos.Environment.
 Require Tezos.Period_repr.
 Require Tezos.Tez_repr.
 
-Definition version_number_004 : string := &quot; &quot; % string.
+Definition version_number_004 : string := &quot;\000&quot; % string.
 
-Definition version_number : string := &quot;&quot; % string.
+Definition version_number : string := &quot;\001&quot; % string.
 
 Definition proof_of_work_nonce_size : Z := 8.
 
@@ -16764,7 +16773,7 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 
-Definition contract_hash : string := &quot;Zy&quot; % string.
+Definition contract_hash : string := &quot;\002Zy&quot; % string.
 
 (* ❌ Cannot include this kind of module expression *)
 (* include *)
@@ -22884,7 +22893,7 @@ Parameter set_paid_storage_space_and_return_fees_to_pay :
 <hr />
 <div class="row conversion-row" id="cycle_repr.ml">
   <div class="col-md-6">
-    <a href="#cycle_repr.ml"><code>cycle_repr.ml</code></a>&nbsp;<span class="label label-danger">5 errors</span>
+    <a href="#cycle_repr.ml"><code>cycle_repr.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -22939,7 +22948,7 @@ let pp ppf cycle = Format.fprintf ppf &quot;%ld&quot; cycle
 
 include (Compare.Int32 : Compare.S with type t := t)
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Map = Map.Make (Compare.Int32)</abbr>
+module Map = Map.Make (Compare.Int32)
 
 let root = 0l
 
@@ -23043,8 +23052,7 @@ Definition max := Compare.Int32.[Compare.S.max].
 
 Definition min := Compare.Int32.[Compare.S.min].
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Map := Map.Make Compare.Int32.
 
 Definition root : int32 :=
   (* ❌ Constant of type int32 is converted to int *)
@@ -25602,10 +25610,7 @@ Module Baking_rights.
         Updater.rpc_context baking_rights_query unit (list t) :=
       RPC_service.get_service
         (Some
-          &quot;Retrieves the list of delegates allowed to bake a block.
-By default, it gives the best baking priorities for bakers that have at least one opportunity below the 64th priority for the next block.
-Parameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the baking rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates. If parameter `all` is set, all the baking opportunities for each baker at each level are returned, instead of just the first one.
-Returns the list of baking slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.&quot;
+          &quot;Retrieves the list of delegates allowed to bake a block.\nBy default, it gives the best baking priorities for bakers that have at least one opportunity below the 64th priority for the next block.\nParameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the baking rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates. If parameter `all` is set, all the baking opportunities for each baker at each level are returned, instead of just the first one.\nReturns the list of baking slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.&quot;
             % string) baking_rights_query
         (Data_encoding.__list_value None encoding) custom_root.
   End S.
@@ -25841,10 +25846,7 @@ Module Endorsing_rights.
         Updater.rpc_context endorsing_rights_query unit (list t) :=
       RPC_service.get_service
         (Some
-          &quot;Retrieves the delegates allowed to endorse a block.
-By default, it gives the endorsement slots for delegates that have at least one in the next block.
-Parameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the endorsement rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates.
-Returns the list of endorsement slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.&quot;
+          &quot;Retrieves the delegates allowed to endorse a block.\nBy default, it gives the endorsement slots for delegates that have at least one in the next block.\nParameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the endorsement rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates.\nReturns the list of endorsement slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.&quot;
             % string) endorsing_rights_query
         (Data_encoding.__list_value None encoding) custom_root.
   End S.
@@ -45946,7 +45948,7 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 
-Definition nonce_hash : string := &quot;Eܩ&quot; % string.
+Definition nonce_hash : string := &quot;E\220\169&quot; % string.
 
 (* ❌ Cannot include this kind of module expression *)
 (* include *)
@@ -50099,7 +50101,7 @@ End S.
 <hr />
 <div class="row conversion-row" id="raw_context.ml">
   <div class="col-md-6">
-    <a href="#raw_context.ml"><code>raw_context.ml</code></a>&nbsp;<span class="label label-danger">68 errors</span>
+    <a href="#raw_context.ml"><code>raw_context.ml</code></a>&nbsp;<span class="label label-danger">67 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -50126,7 +50128,7 @@ End S.
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Int_set = Set.Make (Compare.Int)</abbr>
+module Int_set = Set.Make (Compare.Int)
 
 type t = {
   context : Context.t;
@@ -50877,8 +50879,7 @@ Require Tezos.Raw_level_repr.
 Require Tezos.Storage_description.
 Require Tezos.Tez_repr.
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Int_set := __Set.Make Compare.Int.
 
 Module t.
   Record record := {
@@ -54633,7 +54634,7 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 
-Definition script_expr_hash : string := &quot;,@&quot; % string.
+Definition script_expr_hash : string := &quot;\r,@\027&quot; % string.
 
 (* ❌ Cannot include this kind of module expression *)
 (* include *)
@@ -60578,7 +60579,7 @@ Parameter parse_var_type_annot :
 <hr />
 <div class="row conversion-row" id="script_ir_translator.ml">
   <div class="col-md-6">
-    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">98 errors</span>
+    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">103 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -61206,11 +61207,19 @@ let rec compare_comparable :
 
 let empty_set : type a. a comparable_ty -&gt; a set =
  fun ty -&gt;
-  let module OPS = <abbr class="mark-error" title="Applications of functors are not supported for first-class module values">Set.Make (struct
+  let module OPS = Set.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
+
+We were looking for a module signature name for the following shape:
+[ compare ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">struct
     type t = a
 
     let compare = compare_comparable ty
-  end)</abbr> in
+  end</abbr>) in
   ( module <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
@@ -61260,7 +61269,99 @@ We use the concept of shape to find the name of a signature for Coq.">struct
 
     let elt_ty = ty
 
-    module OPS = OPS
+    module OPS = </abbr><abbr class="mark-error" title="Cannot get the fields of the abstract module type `OPS`
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
+
+We were looking for a module signature name for the following shape:
+[
+  elt_ty;
+  (OPS,
+    [
+      empty;
+      is_empty;
+      mem;
+      add;
+      singleton;
+      remove;
+      union;
+      inter;
+      diff;
+      compare;
+      equal;
+      subset;
+      iter;
+      map;
+      fold;
+      for_all;
+      __exists;
+      filter;
+      partition;
+      cardinal;
+      elements;
+      min_elt_opt;
+      max_elt_opt;
+      choose_opt;
+      split;
+      find_opt;
+      find_first_opt;
+      find_last_opt;
+      of_list
+    ]);
+  boxed;
+  size
+]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">OPS</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
+
+We were looking for a module signature name for the following shape:
+[
+  elt_ty;
+  (OPS,
+    [
+      empty;
+      is_empty;
+      mem;
+      add;
+      singleton;
+      remove;
+      union;
+      inter;
+      diff;
+      compare;
+      equal;
+      subset;
+      iter;
+      map;
+      fold;
+      for_all;
+      __exists;
+      filter;
+      partition;
+      cardinal;
+      elements;
+      min_elt_opt;
+      max_elt_opt;
+      choose_opt;
+      split;
+      find_opt;
+      find_first_opt;
+      find_last_opt;
+      of_list
+    ]);
+  boxed;
+  size
+]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">
 
     let boxed = OPS.empty
 
@@ -61454,7 +61555,11 @@ We were looking for a module signature name for the following shape:
 
 We use the concept of shape to find the name of a signature for Coq.">
 
-    module OPS = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+    module OPS = </abbr><abbr class="mark-error" title="Cannot get the fields of the abstract module type `Box.OPS`
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
 
@@ -63238,11 +63343,19 @@ We use the concept of shape to find the name of a signature for Coq.">Box.key_ty
 
 let empty_map : type a b. a comparable_ty -&gt; (a, b) map =
  fun ty -&gt;
-  let module OPS = <abbr class="mark-error" title="Applications of functors are not supported for first-class module values">Map.Make (struct
+  let module OPS = Map.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
+
+We were looking for a module signature name for the following shape:
+[ compare ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">struct
     type t = a
 
     let compare = compare_comparable ty
-  end)</abbr> in
+  end</abbr>) in
   ( module <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
@@ -63292,7 +63405,95 @@ We use the concept of shape to find the name of a signature for Coq.">struct
 
     let key_ty = ty
 
-    module OPS = OPS
+    module OPS = </abbr><abbr class="mark-error" title="Cannot get the fields of the abstract module type `OPS`
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
+
+We were looking for a module signature name for the following shape:
+[
+  key_ty;
+  (OPS,
+    [
+      empty;
+      is_empty;
+      mem;
+      add;
+      update;
+      singleton;
+      remove;
+      merge;
+      union;
+      compare;
+      equal;
+      iter;
+      fold;
+      for_all;
+      __exists;
+      filter;
+      partition;
+      cardinal;
+      bindings;
+      min_binding_opt;
+      max_binding_opt;
+      choose_opt;
+      split;
+      find_opt;
+      find_first_opt;
+      find_last_opt;
+      map;
+      mapi
+    ]);
+  boxed
+]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">OPS</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
+
+We were looking for a module signature name for the following shape:
+[
+  key_ty;
+  (OPS,
+    [
+      empty;
+      is_empty;
+      mem;
+      add;
+      update;
+      singleton;
+      remove;
+      merge;
+      union;
+      compare;
+      equal;
+      iter;
+      fold;
+      for_all;
+      __exists;
+      filter;
+      partition;
+      cardinal;
+      bindings;
+      min_binding_opt;
+      max_binding_opt;
+      choose_opt;
+      split;
+      find_opt;
+      find_first_opt;
+      find_last_opt;
+      map;
+      mapi
+    ]);
+  boxed
+]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">
 
     let boxed = (OPS.empty, 0)
   end</abbr> )
@@ -63565,7 +63766,11 @@ We were looking for a module signature name for the following shape:
 
 We use the concept of shape to find the name of a signature for Coq.">
 
-    module OPS = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+    module OPS = </abbr><abbr class="mark-error" title="Cannot get the fields of the abstract module type `Box.OPS`
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
 
@@ -64408,7 +64613,11 @@ We were looking for a module signature name for the following shape:
 
 We use the concept of shape to find the name of a signature for Coq.">
 
-    module OPS = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+    module OPS = </abbr><abbr class="mark-error" title="Cannot get the fields of the abstract module type `Box.OPS`
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
 
@@ -66502,7 +66711,15 @@ let find_entrypoint_for_type (type full exp) ~(full : full ty)
       ty_eq ctxt expected ty
       &gt;&gt;? fun (Eq, ctxt) -&gt; ok (ctxt, entrypoint, (ty : exp ty))
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Entrypoints = Set.Make (String)</abbr>
+module Entrypoints = Set.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
+
+We were looking for a module signature name for the following shape:
+[ compare ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">String</abbr>)
 
 <abbr class="mark-error" title="The definition of exceptions is not handled.
 
@@ -69685,7 +69902,15 @@ let typecheck_data :
     (parse_data ?type_logger ctxt ~legacy exp_ty (root data))
   &gt;&gt;=? fun (_, ctxt) -&gt; return ctxt
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Entrypoints_map = Map.Make (String)</abbr>
+module Entrypoints_map = Map.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
+
+We were looking for a module signature name for the following shape:
+[ compare ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">String</abbr>)
 
 let list_entrypoints (type full) (full : full ty) ctxt ~root_name =
   let <abbr class="mark-error" title="Polymorphic variant types are not handled">merge</abbr> path annot (type t) (ty : t ty) reachable
@@ -70297,7 +70522,7 @@ let big_map_get ctxt key {id; diff; key_type; value_type} =
 let big_map_update key value ({diff; _} as map) =
   <abbr class="mark-error" title="Record substitution not handled">{map with diff = map_set key value diff}</abbr>
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Ids = Set.Make (Compare.Z)</abbr>
+module Ids = Set.Make (Compare.Z)
 
 type big_map_ids = Ids.t
 
@@ -70618,7 +70843,49 @@ We use the concept of shape to find the name of a signature for Coq.">struct
       end</abbr> in
       return
         ( ctxt,
-          (module M : Boxed_map with type key = M.key and type value = M.value),
+          (module <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
+
+We were looking for a module signature name for the following shape:
+[
+  key_ty;
+  (OPS,
+    [
+      empty;
+      is_empty;
+      mem;
+      add;
+      update;
+      singleton;
+      remove;
+      merge;
+      union;
+      compare;
+      equal;
+      iter;
+      fold;
+      for_all;
+      __exists;
+      filter;
+      partition;
+      cardinal;
+      bindings;
+      min_binding_opt;
+      max_binding_opt;
+      choose_opt;
+      split;
+      find_opt;
+      find_first_opt;
+      find_last_opt;
+      map;
+      mapi
+    ]);
+  boxed
+]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">M</abbr> : Boxed_map with type key = M.key and type value = M.value),
           ids,
           acc )
   | (Option_t (_, _, true), None) -&gt;
@@ -71237,9 +71504,16 @@ Fixpoint compare_comparable {a s : Set}
 Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty a)
   : Script_typed_ir.set a :=
   let OPS :=
-    (* ❌ Applications of functors are not supported for first-class module values *)
-    unsupported_functor_application in
+    __Set.Make
+      (let compare := compare_comparable ty in
+      existT _ _
+        {|
+          __Set.OrderedType.compare := compare
+          |}) in
   let elt_ty := ty in
+  let OPS :=
+    (* ❌ module_with_abstract_module_type *)
+    OPS in
   let boxed := OPS.empty in
   let size := 0 in
   existT _ _
@@ -71252,7 +71526,9 @@ Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty a)
 Definition set_update {a : Set} (v : a) (b : bool) (Box : Script_typed_ir.set a)
   : Script_typed_ir.set a :=
   let elt_ty := Box.[Script_typed_ir.Boxed_set.elt_ty] in
-  let OPS := Box.[Script_typed_ir.Boxed_set.OPS] in
+  let OPS :=
+    (* ❌ module_with_abstract_module_type *)
+    Box.[Script_typed_ir.Boxed_set.OPS] in
   let boxed :=
     if b then
       Box.[Script_typed_ir.Boxed_set.OPS].(S.SET.add) v
@@ -71302,9 +71578,16 @@ Definition map_key_ty {a b : Set} (Box : Script_typed_ir.map a b)
 Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty a)
   : Script_typed_ir.map a b :=
   let OPS :=
-    (* ❌ Applications of functors are not supported for first-class module values *)
-    unsupported_functor_application in
+    Map.Make
+      (let compare := compare_comparable ty in
+      existT _ _
+        {|
+          __Set.OrderedType.compare := compare
+          |}) in
   let key_ty := ty in
+  let OPS :=
+    (* ❌ module_with_abstract_module_type *)
+    OPS in
   let boxed := (OPS.empty, 0) in
   existT _ _
     {|
@@ -71321,7 +71604,9 @@ Definition map_update {a b : Set}
   (k : a) (v : option b) (Box : Script_typed_ir.map a b)
   : Script_typed_ir.map a b :=
   let key_ty := Box.[Script_typed_ir.Boxed_map.key_ty] in
-  let OPS := Box.[Script_typed_ir.Boxed_map.OPS] in
+  let OPS :=
+    (* ❌ module_with_abstract_module_type *)
+    Box.[Script_typed_ir.Boxed_map.OPS] in
   let boxed :=
     let '(map, size) := Box.[Script_typed_ir.Boxed_map.boxed] in
     let contains := Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.mem) k map in
@@ -71350,7 +71635,9 @@ Definition map_update {a b : Set}
 Definition map_set {a b : Set} (k : a) (v : b) (Box : Script_typed_ir.map a b)
   : Script_typed_ir.map a b :=
   let key_ty := Box.[Script_typed_ir.Boxed_map.key_ty] in
-  let OPS := Box.[Script_typed_ir.Boxed_map.OPS] in
+  let OPS :=
+    (* ❌ module_with_abstract_module_type *)
+    Box.[Script_typed_ir.Boxed_map.OPS] in
   let boxed :=
     let '(map, size) := Box.[Script_typed_ir.Boxed_map.boxed] in
     ((Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.add) k v map),
@@ -73090,8 +73377,12 @@ Definition find_entrypoint_for_type {A B : Set}
             Error_monad.ok (ctxt, entrypoint, ty)))
   end.
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Entrypoints :=
+  __Set.Make
+    (existT _ _
+      {|
+        __Set.OrderedType.compare := String.compare
+        |}).
 
 (* ❌ The definition of exceptions is not handled. *)
 (* exception Duplicate *)
@@ -78021,8 +78312,12 @@ Definition typecheck_data
           let '(_, ctxt) := function_parameter in
           Error_monad.__return ctxt)).
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Entrypoints_map :=
+  Map.Make
+    (existT _ _
+      {|
+        __Set.OrderedType.compare := String.compare
+        |}).
 
 Definition list_entrypoints {A : Set}
   (full : Script_typed_ir.ty A) (ctxt : Alpha_context.context)
@@ -78630,7 +78925,8 @@ Definition pack_data {A : Set}
         (fun ctxt =&gt;
           let __bytes_value :=
             MBytes.concat &quot;&quot; % string
-              (cons (MBytes.of_string &quot;&quot; % string) (cons __bytes_value [])) in
+              (cons (MBytes.of_string &quot;\005&quot; % string) (cons __bytes_value []))
+            in
           Error_monad.op_gtgteqquestion
             (Pervasives.op_atat Lwt.__return
               (Alpha_context.Gas.consume ctxt
@@ -78724,8 +79020,7 @@ Definition big_map_update {A B : Set}
   (* ❌ Record substitution not handled *)
   record_substitution.
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Ids := __Set.Make Compare.Z.
 
 Definition big_map_ids := Ids.[S.SET.t].
 
@@ -78961,7 +79256,13 @@ Fixpoint extract_big_map_updates {a : Set}
             let M :=
               (* ❌ The signature name of this module could not be found *)
               first_class_module_value_of_unknown_signature in
-            Error_monad.__return (ctxt, M, ids, acc)))
+            Error_monad.__return
+              (ctxt,
+                (existT _ _
+                  {|
+                    Script_typed_ir.Boxed_map.key_ty := M.key_ty;
+                    Script_typed_ir.Boxed_map.boxed := M.boxed
+                    |}), ids, acc)))
   | (Script_typed_ir.Option_t _ _ true, None) =&gt;
     Error_monad.__return (ctxt, None, ids, acc)
   | (Script_typed_ir.List_t _ _ false, v) =&gt;
@@ -83610,9 +83911,78 @@ Definition get_rpc_services (function_parameter : unit)
 </div>
 
 <hr />
+<div class="row conversion-row" id="state_hash.ml">
+  <div class="col-md-6">
+    <a href="#state_hash.ml"><code>state_hash.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    
+    <pre>(*****************************************************************************)
+(*                                                                           *)
+(* Open Source License                                                       *)
+(* Copyright (c) 2018 Dynamic Ledger Solutions, Inc. &lt;contact@tezos.com&gt;     *)
+(*                                                                           *)
+(* Permission is hereby granted, free of charge, to any person obtaining a   *)
+(* copy of this software and associated documentation files (the &quot;Software&quot;),*)
+(* to deal in the Software without restriction, including without limitation *)
+(* the rights to use, copy, modify, merge, publish, distribute, sublicense,  *)
+(* and/or sell copies of the Software, and to permit persons to whom the     *)
+(* Software is furnished to do so, subject to the following conditions:      *)
+(*                                                                           *)
+(* The above copyright notice and this permission notice shall be included   *)
+(* in all copies or substantial portions of the Software.                    *)
+(*                                                                           *)
+(* THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR*)
+(* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  *)
+(* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL   *)
+(* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER*)
+(* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING   *)
+(* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER       *)
+(* DEALINGS IN THE SOFTWARE.                                                 *)
+(*                                                                           *)
+(*****************************************************************************)
+
+let random_state_hash = &quot;\076\064\204&quot; (* rng(53): never used... *)
+
+<abbr class="mark-error" title="Cannot include this kind of module expression">include Blake2B.Make
+          (Base58)
+          (struct
+            let name = &quot;random&quot;
+
+            let title = &quot;A random generation state&quot;
+
+            let b58check_prefix = random_state_hash
+
+            let size = None
+          end)</abbr>
+
+<abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () = Base58.check_encoded_prefix b58check_encoding &quot;rng&quot; 53</abbr>
+</pre>
+  </div>
+  <div class="col-md-6">
+    <a href="#state_hash.ml"><code>State_hash.v</code></a>
+    <pre>(** Generated by coq-of-ocaml *)
+Require Import OCaml.OCaml.
+
+Local Open Scope Z_scope.
+Local Open Scope type_scope.
+Import ListNotations.
+
+Require Import Tezos.Environment.
+
+Definition random_state_hash : string := &quot;L@\204&quot; % string.
+
+(* ❌ Cannot include this kind of module expression *)
+(* include *)
+
+(* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
+(* top_level_evaluation *)
+</pre>
+  </div>
+</div>
+
+<hr />
 <div class="row conversion-row" id="storage.ml">
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">68 errors</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">62 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -83692,119 +84062,119 @@ end
   let args = Storage_description.One {rpc_arg; encoding; compare}
 end</abbr>
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Block_priority =
+module Block_priority =
   Make_single_data_storage (Registered) (Raw_context)
     (struct
       let name = [&quot;block_priority&quot;]
     end)
-    (Int)</abbr>
+    (Int)
 
 (** Contracts handling *)
 
 module Contract = struct
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Raw_context =
+  module Raw_context =
     Make_subcontext (Registered) (Raw_context)
       (struct
         let name = [&quot;contracts&quot;]
-      end)</abbr>
+      end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Global_counter =
+  module Global_counter =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;global_counter&quot;]
       end)
-      (Z)</abbr>
+      (Z)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Indexed_context =
+  module Indexed_context =
     Make_indexed_subcontext
       (Make_subcontext (Registered) (Raw_context)
          (struct
            let name = [&quot;index&quot;]
          end))
-         (Make_index (Contract_repr.Index))</abbr>
+         (Make_index (Contract_repr.Index))
 
   let fold = Indexed_context.fold_keys
 
   let list = Indexed_context.keys
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Balance =
+  module Balance =
     Indexed_context.Make_map
       (struct
         let name = [&quot;balance&quot;]
       end)
-      (Tez_repr)</abbr>
+      (Tez_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Frozen_balance_index =
+  module Frozen_balance_index =
     Make_indexed_subcontext
       (Make_subcontext (Registered) (Indexed_context.Raw_context)
          (struct
            let name = [&quot;frozen_balance&quot;]
          end))
-         (Make_index (Cycle_repr.Index))</abbr>
+         (Make_index (Cycle_repr.Index))
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Frozen_deposits =
+  module Frozen_deposits =
     Frozen_balance_index.Make_map
       (struct
         let name = [&quot;deposits&quot;]
       end)
-      (Tez_repr)</abbr>
+      (Tez_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Frozen_fees =
+  module Frozen_fees =
     Frozen_balance_index.Make_map
       (struct
         let name = [&quot;fees&quot;]
       end)
-      (Tez_repr)</abbr>
+      (Tez_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Frozen_rewards =
+  module Frozen_rewards =
     Frozen_balance_index.Make_map
       (struct
         let name = [&quot;rewards&quot;]
       end)
-      (Tez_repr)</abbr>
+      (Tez_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Manager =
+  module Manager =
     Indexed_context.Make_map
       (struct
         let name = [&quot;manager&quot;]
       end)
-      (Manager_repr)</abbr>
+      (Manager_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Delegate =
+  module Delegate =
     Indexed_context.Make_map
       (struct
         let name = [&quot;delegate&quot;]
       end)
-      (Signature.Public_key_hash)</abbr>
+      (Signature.Public_key_hash)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Inactive_delegate =
+  module Inactive_delegate =
     Indexed_context.Make_set
       (Registered)
       (struct
         let name = [&quot;inactive_delegate&quot;]
-      end)</abbr>
+      end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Delegate_desactivation =
+  module Delegate_desactivation =
     Indexed_context.Make_map
       (struct
         let name = [&quot;delegate_desactivation&quot;]
       end)
-      (Cycle_repr)</abbr>
+      (Cycle_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Delegated =
+  module Delegated =
     Make_data_set_storage
       (Make_subcontext (Registered) (Indexed_context.Raw_context)
          (struct
            let name = [&quot;delegated&quot;]
          end))
-         (Make_index (Contract_repr.Index))</abbr>
+         (Make_index (Contract_repr.Index))
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Counter =
+  module Counter =
     Indexed_context.Make_map
       (struct
         let name = [&quot;counter&quot;]
       end)
-      (Z)</abbr>
+      (Z)
 
   (* Consume gas for serilization and deserialization of expr in this
      module *)
@@ -83881,51 +84251,51 @@ module Contract = struct
       &gt;&gt;=? fun ctxt -&gt; I.init_set ctxt contract value
   end</abbr>
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Code = Make_carbonated_map_expr (struct
+  module Code = Make_carbonated_map_expr (struct
     let name = [&quot;code&quot;]
-  end)</abbr>
+  end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Storage = Make_carbonated_map_expr (struct
+  module Storage = Make_carbonated_map_expr (struct
     let name = [&quot;storage&quot;]
-  end)</abbr>
+  end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Paid_storage_space =
+  module Paid_storage_space =
     Indexed_context.Make_map
       (struct
         let name = [&quot;paid_bytes&quot;]
       end)
-      (Z)</abbr>
+      (Z)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Used_storage_space =
+  module Used_storage_space =
     Indexed_context.Make_map
       (struct
         let name = [&quot;used_bytes&quot;]
       end)
-      (Z)</abbr>
+      (Z)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Roll_list =
+  module Roll_list =
     Indexed_context.Make_map
       (struct
         let name = [&quot;roll_list&quot;]
       end)
-      (Roll_repr)</abbr>
+      (Roll_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Change =
+  module Change =
     Indexed_context.Make_map
       (struct
         let name = [&quot;change&quot;]
       end)
-      (Tez_repr)</abbr>
+      (Tez_repr)
 end
 
 (** Big maps handling *)
 
 module Big_map = struct
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Raw_context =
+  module Raw_context =
     Make_subcontext (Registered) (Raw_context)
       (struct
         let name = [&quot;big_maps&quot;]
-      end)</abbr>
+      end)
 
   module Next = struct
     <abbr class="mark-error" title="Cannot include this kind of module expression">include Make_single_data_storage (Registered) (Raw_context)
@@ -83949,6 +84319,12 @@ module Big_map = struct
       let destruct hash =
         match Z.of_string hash with
         | exception <abbr class="mark-error" title="Pattern-matching on exceptions not supported
+
+Only the special case `| exception _ when false -&gt; ...` is supported for default value of GADT pattern-matching
+
+——————————
+
+Pattern-matching on exceptions not supported
 
 Only the special case `| exception _ when false -&gt; ...` is supported for default value of GADT pattern-matching">_</abbr> -&gt;
             Error &quot;Cannot parse big map id&quot;
@@ -83975,7 +84351,11 @@ Only the special case `| exception _ when false -&gt; ...` is supported for defa
 
     let to_path c l =
       let raw_key = Data_encoding.Binary.to_bytes_exn encoding c in
-      let <abbr class="mark-error" title="Patterns on variants are not supported">(`Hex index_key)</abbr> = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
+      let <abbr class="mark-error" title="Patterns on variants are not supported
+
+——————————
+
+Patterns on variants are not supported">(`Hex index_key)</abbr> = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
       String.sub index_key 0 2 :: String.sub index_key 2 2
       :: String.sub index_key 4 2 :: String.sub index_key 6 2
       :: String.sub index_key 8 2 :: String.sub index_key 10 2 :: Z.to_string c
@@ -83994,8 +84374,18 @@ Only the special case `| exception _ when false -&gt; ...` is supported for defa
       | [index1; index2; index3; index4; index5; index6; key] -&gt;
           let c = Z.of_string key in
           let raw_key = Data_encoding.Binary.to_bytes_exn encoding c in
-          let <abbr class="mark-error" title="Patterns on variants are not supported">(`Hex index_key)</abbr> = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
+          let <abbr class="mark-error" title="Patterns on variants are not supported
+
+——————————
+
+Patterns on variants are not supported">(`Hex index_key)</abbr> = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
           <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 0 2 = index1)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
@@ -84006,8 +84396,38 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 2 2 = index2)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
@@ -84042,8 +84462,62 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 6 2 = index4)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
@@ -84102,17 +84576,53 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.
+
+——————————
+
+Sequences of instructions are not handled (operator &quot;;&quot;)
+
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 10 2 = index6)) ;
           Some c</abbr>
   end
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Indexed_context =
+  module Indexed_context =
     Make_indexed_subcontext
       (Make_subcontext (Registered) (Raw_context)
          (struct
            let name = [&quot;index&quot;]
          end))
-         (Make_index (Index))</abbr>
+         (Make_index (Index))
 
   let rpc_arg = Index.rpc_arg
 
@@ -84126,14 +84636,14 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
 
   type key = Raw_context.t * Z.t
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Total_bytes =
+  module Total_bytes =
     Indexed_context.Make_map
       (struct
         let name = [&quot;total_bytes&quot;]
       end)
-      (Z)</abbr>
+      (Z)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Key_type =
+  module Key_type =
     Indexed_context.Make_map
       (struct
         let name = [&quot;key_type&quot;]
@@ -84142,9 +84652,9 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
         type t = Script_repr.expr
 
         let encoding = Script_repr.expr_encoding
-      end)</abbr>
+      end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Value_type =
+  module Value_type =
     Indexed_context.Make_map
       (struct
         let name = [&quot;value_type&quot;]
@@ -84153,10 +84663,10 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
         type t = Script_repr.expr
 
         let encoding = Script_repr.expr_encoding
-      end)</abbr>
+      end)
 
   module Contents = struct
-    <abbr class="mark-error" title="Applications of functors are not handled.">module I =
+    module I =
       Storage_functors.Make_indexed_carbonated_data_storage
         (Make_subcontext (Registered) (Indexed_context.Raw_context)
            (struct
@@ -84167,39 +84677,387 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
              type t = Script_repr.expr
 
              let encoding = Script_repr.expr_encoding
-           end)</abbr>
+           end)
 
-    type context = I.context
+    <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
 
-    type key = I.key
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
 
-    type value = I.value
+We use the concept of shape to find the name of a signature for Coq.">type context = I.context</abbr>
 
-    let mem = I.mem
+    <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
 
-    let delete = I.delete
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
 
-    let remove = I.remove
+We use the concept of shape to find the name of a signature for Coq.">type key = I.key</abbr>
 
-    let set = I.set
+    <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
 
-    let set_option = I.set_option
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
 
-    let init = I.init
+We use the concept of shape to find the name of a signature for Coq.">type value = I.value</abbr>
 
-    let init_set = I.init_set
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">mem</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.mem</abbr>
+
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">delete</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.delete</abbr>
+
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">remove</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.remove</abbr>
+
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">set</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.set</abbr>
+
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">set_option</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.set_option</abbr>
+
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">init</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.init</abbr>
+
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">init_set</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.init_set</abbr>
 
     let consume_deserialize_gas ctxt value =
       Lwt.return
       @@ Raw_context.consume_gas ctxt (Script_repr.deserialized_cost value)
 
-    let get ctxt contract =
-      I.get ctxt contract
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">get</abbr> ctxt contract =
+      <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.get</abbr> ctxt contract
       &gt;&gt;=? fun (ctxt, value) -&gt;
       consume_deserialize_gas ctxt value &gt;&gt;|? fun ctxt -&gt; (ctxt, value)
 
-    let get_option ctxt contract =
-      I.get_option ctxt contract
+    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">get_option</abbr> ctxt contract =
+      <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">I.get_option</abbr> ctxt contract
       &gt;&gt;=? fun (ctxt, value_opt) -&gt;
       match value_opt with
       | None -&gt;
@@ -84209,61 +85067,61 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
   end
 end
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Delegates =
+module Delegates =
   Make_data_set_storage
     (Make_subcontext (Registered) (Raw_context)
        (struct
          let name = [&quot;delegates&quot;]
        end))
-       (Make_index (Signature.Public_key_hash))</abbr>
+       (Make_index (Signature.Public_key_hash))
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Active_delegates_with_rolls =
+module Active_delegates_with_rolls =
   Make_data_set_storage
     (Make_subcontext (Registered) (Raw_context)
        (struct
          let name = [&quot;active_delegates_with_rolls&quot;]
        end))
-       (Make_index (Signature.Public_key_hash))</abbr>
+       (Make_index (Signature.Public_key_hash))
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Delegates_with_frozen_balance_index =
+module Delegates_with_frozen_balance_index =
   Make_indexed_subcontext
     (Make_subcontext (Registered) (Raw_context)
        (struct
          let name = [&quot;delegates_with_frozen_balance&quot;]
        end))
-       (Make_index (Cycle_repr.Index))</abbr>
+       (Make_index (Cycle_repr.Index))
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Delegates_with_frozen_balance =
+module Delegates_with_frozen_balance =
   Make_data_set_storage
     (Delegates_with_frozen_balance_index.Raw_context)
-    (Make_index (Signature.Public_key_hash))</abbr>
+    (Make_index (Signature.Public_key_hash))
 
 (** Rolls *)
 
 module Cycle = struct
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Indexed_context =
+  module Indexed_context =
     Make_indexed_subcontext
       (Make_subcontext (Registered) (Raw_context)
          (struct
            let name = [&quot;cycle&quot;]
          end))
-         (Make_index (Cycle_repr.Index))</abbr>
+         (Make_index (Cycle_repr.Index))
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Last_roll =
+  module Last_roll =
     Make_indexed_data_storage
       (Make_subcontext (Registered) (Indexed_context.Raw_context)
          (struct
            let name = [&quot;last_roll&quot;]
          end))
          (Int_index)
-      (Roll_repr)</abbr>
+      (Roll_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Roll_snapshot =
+  module Roll_snapshot =
     Indexed_context.Make_map
       (struct
         let name = [&quot;roll_snapshot&quot;]
       end)
-      (Int)</abbr>
+      (Int)
 
   type unrevealed_nonce = {
     nonce_hash : Nonce_hash.t;
@@ -84301,7 +85159,7 @@ module Cycle = struct
           (function Revealed nonce -&gt; Some nonce | _ -&gt; None)
           (fun nonce -&gt; Revealed nonce) ]
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Nonce =
+  module Nonce =
     Make_indexed_data_storage
       (Make_subcontext (Registered) (Indexed_context.Raw_context)
          (struct
@@ -84312,9 +85170,9 @@ module Cycle = struct
            type t = nonce_status
 
            let encoding = nonce_status_encoding
-         end)</abbr>
+         end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Seed =
+  module Seed =
     Indexed_context.Make_map
       (struct
         let name = [&quot;random_seed&quot;]
@@ -84323,66 +85181,80 @@ module Cycle = struct
         type t = Seed_repr.seed
 
         let encoding = Seed_repr.seed_encoding
-      end)</abbr>
+      end)
 end
 
 module Roll = struct
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Raw_context =
+  module Raw_context =
     Make_subcontext (Registered) (Raw_context)
       (struct
         let name = [&quot;rolls&quot;]
-      end)</abbr>
+      end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Indexed_context =
+  module Indexed_context =
     Make_indexed_subcontext
       (Make_subcontext (Registered) (Raw_context)
          (struct
            let name = [&quot;index&quot;]
          end))
-         (Make_index (Roll_repr.Index))</abbr>
+         (Make_index (Roll_repr.Index))
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Next =
+  module Next =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;next&quot;]
       end)
-      (Roll_repr)</abbr>
+      (Roll_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Limbo =
+  module Limbo =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;limbo&quot;]
       end)
-      (Roll_repr)</abbr>
+      (Roll_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Delegate_roll_list =
+  module Delegate_roll_list =
     Wrap_indexed_data_storage
       (Contract.Roll_list)
-      (struct
+      (<abbr class="mark-error" title="The signature name of this module could not be found
+
+Reason:
+Did not find a module signature name for the following shape:
+[ wrap; unwrap ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">struct
         type t = Signature.Public_key_hash.t
 
         let wrap = Contract_repr.implicit_contract
 
         let unwrap = Contract_repr.is_implicit
-      end)</abbr>
+      end</abbr>)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Successor =
+  module Successor =
     Indexed_context.Make_map
       (struct
         let name = [&quot;successor&quot;]
       end)
-      (Roll_repr)</abbr>
+      (Roll_repr)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Delegate_change =
+  module Delegate_change =
     Wrap_indexed_data_storage
       (Contract.Change)
-      (struct
+      (<abbr class="mark-error" title="The signature name of this module could not be found
+
+Reason:
+Did not find a module signature name for the following shape:
+[ wrap; unwrap ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">struct
         type t = Signature.Public_key_hash.t
 
         let wrap = Contract_repr.implicit_contract
 
         let unwrap = Contract_repr.is_implicit
-      end)</abbr>
+      end</abbr>)
 
   module Snapshoted_owner_index = struct
     type t = Cycle_repr.t * int
@@ -84423,15 +85295,23 @@ module Roll = struct
     let args = Storage_description.(Pair (left_args, right_args))
   end
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Owner =
+  module Owner =
     Make_indexed_data_snapshotable_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
            let name = [&quot;owner&quot;]
          end))
-         (Snapshoted_owner_index)
+         (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Storage_functors.INDEX, Tezos_raw_protocol_alpha__Storage_functors.INDEX
+
+We were looking for a module signature name for the following shape:
+[ path_length; to_path; of_path; args ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">Snapshoted_owner_index</abbr>)
       (Make_index (Roll_repr.Index))
-      (Signature.Public_key)</abbr>
+      (Signature.Public_key)
 
   module Snapshot_for_cycle = Cycle.Roll_snapshot
   module Last_for_snapshot = Cycle.Last_roll
@@ -84442,13 +85322,13 @@ end
 (** Votes *)
 
 module Vote = struct
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Raw_context =
+  module Raw_context =
     Make_subcontext (Registered) (Raw_context)
       (struct
         let name = [&quot;votes&quot;]
-      end)</abbr>
+      end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Current_period_kind =
+  module Current_period_kind =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;current_period_kind&quot;]
@@ -84457,39 +85337,39 @@ module Vote = struct
         type t = Voting_period_repr.kind
 
         let encoding = Voting_period_repr.kind_encoding
-      end)</abbr>
+      end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Participation_ema =
+  module Participation_ema =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;participation_ema&quot;]
       end)
-      (Int32)</abbr>
+      (Int32)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Current_proposal =
+  module Current_proposal =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;current_proposal&quot;]
       end)
-      (Protocol_hash)</abbr>
+      (Protocol_hash)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Listings_size =
+  module Listings_size =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;listings_size&quot;]
       end)
-      (Int32)</abbr>
+      (Int32)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Listings =
+  module Listings =
     Make_indexed_data_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
            let name = [&quot;listings&quot;]
          end))
          (Make_index (Signature.Public_key_hash))
-         (Int32)</abbr>
+         (Int32)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Proposals =
+  module Proposals =
     Make_data_set_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
@@ -84498,18 +85378,18 @@ module Vote = struct
          (Pair
             (Make_index
                (Protocol_hash))
-               (Make_index (Signature.Public_key_hash)))</abbr>
+               (Make_index (Signature.Public_key_hash)))
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Proposals_count =
+  module Proposals_count =
     Make_indexed_data_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
            let name = [&quot;proposals_count&quot;]
          end))
          (Make_index (Signature.Public_key_hash))
-         (Int)</abbr>
+         (Int)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Ballots =
+  module Ballots =
     Make_indexed_data_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
@@ -84520,7 +85400,7 @@ module Vote = struct
            type t = Vote_repr.ballot
 
            let encoding = Vote_repr.ballot_encoding
-         end)</abbr>
+         end)
 end
 
 (** Seed *)
@@ -84537,8 +85417,36 @@ module Seed = struct
     | Unrevealed of unrevealed_nonce
     | Revealed of Seed_repr.nonce
 
-  module Nonce = struct
-    open Level_repr
+  <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">module Nonce = struct
+    </abbr><abbr class="mark-error" title="Open not handled in module with a named signature
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">open Level_repr</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; set; init; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">
 
     type context = Raw_context.t
 
@@ -84559,26 +85467,26 @@ module Seed = struct
     let delete ctxt l = Cycle.Nonce.delete (ctxt, l.cycle) l.level
 
     let remove ctxt l = Cycle.Nonce.remove (ctxt, l.cycle) l.level
-  end
+  end</abbr>
 
   module For_cycle = Cycle.Seed
 end
 
 (** Commitments *)
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module Commitments =
+module Commitments =
   Make_indexed_data_storage
     (Make_subcontext (Registered) (Raw_context)
        (struct
          let name = [&quot;commitments&quot;]
        end))
        (Make_index (Blinded_public_key_hash.Index))
-       (Tez_repr)</abbr>
+       (Tez_repr)
 
 (** Ramp up security deposits... *)
 
 module Ramp_up = struct
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Rewards =
+  module Rewards =
     Make_indexed_data_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
@@ -84590,9 +85498,9 @@ module Ramp_up = struct
 
            let encoding =
              Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding
-         end)</abbr>
+         end)
 
-  <abbr class="mark-error" title="Applications of functors are not handled.">module Security_deposits =
+  module Security_deposits =
     Make_indexed_data_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
@@ -84604,7 +85512,7 @@ module Ramp_up = struct
 
            let encoding =
              Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding
-         end)</abbr>
+         end)
 end
 </pre>
   </div>
@@ -84618,16 +85526,25 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
+Require Tezos.Manager_repr.
 Require Tezos.Misc.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
+Require Tezos.Raw_level_repr.
+Require Tezos.Roll_repr.
+Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_description.
 Require Tezos.Storage_functors.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
+Require Tezos.Vote_repr.
+Require Tezos.Voting_period_repr.
 
 Import Storage_functors.
 
@@ -84665,7 +85582,7 @@ Definition Int_index :=
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare := Compare.Int.[Compare.S.compare]
         |} in
-  existT _ unit
+  existT _ tt
     {|
       Storage_functors.INDEX.path_length := path_length;
       Storage_functors.INDEX.to_path := to_path;
@@ -84676,85 +85593,386 @@ Definition Int_index :=
 (* ❌ Functors are not handled. *)
 (* functor *)
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Block_priority :=
+  (((Storage_functors.Make_single_data_storage
+    (existT _ tt
+      {|
+        Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+        |}))
+    (existT _ _
+      {|
+        Raw_context.T.mem := Raw_context.mem;
+        Raw_context.T.dir_mem := Raw_context.dir_mem;
+        Raw_context.T.get := Raw_context.get;
+        Raw_context.T.get_option := Raw_context.get_option;
+        Raw_context.T.init := Raw_context.init;
+        Raw_context.T.set := Raw_context.set;
+        Raw_context.T.init_set := Raw_context.init_set;
+        Raw_context.T.set_option := Raw_context.set_option;
+        Raw_context.T.delete := Raw_context.delete;
+        Raw_context.T.remove := Raw_context.remove;
+        Raw_context.T.remove_rec := Raw_context.remove_rec;
+        Raw_context.T.copy := Raw_context.copy;
+        Raw_context.T.fold := Raw_context.fold;
+        Raw_context.T.keys := Raw_context.keys;
+        Raw_context.T.fold_keys := Raw_context.fold_keys;
+        Raw_context.T.project := Raw_context.project;
+        Raw_context.T.absolute_key := Raw_context.absolute_key;
+        Raw_context.T.consume_gas := Raw_context.consume_gas;
+        Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+        Raw_context.T.description := Raw_context.description
+        |}))
+    (let name := cons &quot;block_priority&quot; % string [] in
+    existT _ tt
+      {|
+        Storage_sigs.NAME.name := name
+        |})) Int.
 
 Module Contract.
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Raw_context :=
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;contracts&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Global_counter :=
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |})) Raw_context)
+      (let name := cons &quot;global_counter&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Z.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Indexed_context :=
+    (Storage_functors.Make_indexed_subcontext
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;index&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Contract_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Contract_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Contract_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Contract_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Contract_repr.Index.encoding;
+            Storage_description.INDEX.compare := Contract_repr.Index.compare
+            |})).
   
   Definition fold {A : Set}
-    : Indexed_context.context -&gt; A -&gt; (Indexed_context.key -&gt; A -&gt; Lwt.t A) -&gt;
-    Lwt.t A := Indexed_context.fold_keys.
+    : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt; A -&gt;
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.key] -&gt; A -&gt; Lwt.t A) -&gt;
+    Lwt.t A := Indexed_context.[Storage_sigs.Indexed_raw_context.fold_keys].
   
   Definition __list_value
-    : Indexed_context.context -&gt; Lwt.t (list Indexed_context.key) :=
-    Indexed_context.keys.
+    : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt;
+    Lwt.t (list Indexed_context.[Storage_sigs.Indexed_raw_context.key]) :=
+    Indexed_context.[Storage_sigs.Indexed_raw_context.keys].
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Balance :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;balance&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Tez_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Frozen_balance_index :=
+    (Storage_functors.Make_indexed_subcontext
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+        (let name := cons &quot;frozen_balance&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
+            Storage_description.INDEX.compare := Cycle_repr.Index.compare
+            |})).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Frozen_deposits :=
+    (Frozen_balance_index.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;deposits&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Tez_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Frozen_fees :=
+    (Frozen_balance_index.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;fees&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Tez_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Frozen_rewards :=
+    (Frozen_balance_index.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;rewards&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Tez_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Manager :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;manager&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Manager_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Delegate :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;delegate&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Signature.Public_key_hash.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Inactive_delegate :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_set]
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (let name := cons &quot;inactive_delegate&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Delegate_desactivation :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;delegate_desactivation&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Cycle_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Delegated :=
+    (Storage_functors.Make_data_set_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+        (let name := cons &quot;delegated&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Contract_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Contract_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Contract_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Contract_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Contract_repr.Index.encoding;
+            Storage_description.INDEX.compare := Contract_repr.Index.compare
+            |})).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Counter :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;counter&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Z.encoding
+          |}).
   
   (* ❌ Functors are not handled. *)
   (* functor *)
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Code :=
+    Make_carbonated_map_expr
+      (let name := cons &quot;code&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Storage :=
+    Make_carbonated_map_expr
+      (let name := cons &quot;storage&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Paid_storage_space :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;paid_bytes&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Z.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Used_storage_space :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;used_bytes&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Z.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Roll_list :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;roll_list&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Roll_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Change :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;change&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Tez_repr.encoding
+          |}).
 End Contract.
 
 Module Big_map.
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Raw_context :=
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;big_maps&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}).
   
   Module Next.
     (* ❌ Cannot include this kind of module expression *)
@@ -84771,29 +85989,21 @@ Module Big_map.
       : Lwt.t (Error_monad.tzresult Raw_context.t) := init ctxt Z.zero.
   End Next.
   
-  Module Index.
-    Definition t := Z.t.
-    
-    Definition rpc_arg : RPC_arg.arg Z.t :=
+  Definition Index :=
+    let rpc_arg :=
       let construct := Z.to_string in
       let destruct (__hash_value : string) : Pervasives.result Z.t string :=
         let 'id := Z.of_string __hash_value in
         Pervasives.Ok id in
       RPC_arg.make (Some &quot;A big map identifier&quot; % string) &quot;big_map_id&quot; % string
-        destruct construct tt.
-    
-    Definition encoding : Data_encoding.encoding Z.t :=
+        destruct construct tt in
+    let encoding :=
       Data_encoding.def &quot;big_map_id&quot; % string
         (Some &quot;Big map identifier&quot; % string)
-        (Some &quot;A big map identifier&quot; % string) Z.encoding.
-    
-    Definition compare
-      : Compare.Z.[Compare.S.t] -&gt; Compare.Z.[Compare.S.t] -&gt; Z :=
-      Compare.Z.[Compare.S.compare].
-    
-    Definition path_length : Z := 7.
-    
-    Definition to_path (c : Z.t) (l : list string) : list string :=
+        (Some &quot;A big map identifier&quot; % string) Z.encoding in
+    let compare := Compare.Z.[Compare.S.compare] in
+    let path_length := 7 in
+    let to_path (c : Z.t) (l : list string) : list string :=
       let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
       let 'Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
       cons (String.sub index_key 0 2)
@@ -84801,9 +86011,9 @@ Module Big_map.
           (cons (String.sub index_key 4 2)
             (cons (String.sub index_key 6 2)
               (cons (String.sub index_key 8 2)
-                (cons (String.sub index_key 10 2) (cons (Z.to_string c) l)))))).
-    
-    Definition of_path (function_parameter : list Compare.String.[Compare.S.t])
+                (cons (String.sub index_key 10 2) (cons (Z.to_string c) l))))))
+      in
+    let of_path (function_parameter : list Compare.String.[Compare.S.t])
       : option Z.t :=
       match function_parameter with
       |
@@ -84835,98 +86045,210 @@ Module Big_map.
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
         Some c
-      end.
-  End Index.
+      end in
+    existT _ tt
+      {|
+        Storage_description.INDEX.rpc_arg := rpc_arg;
+        Storage_description.INDEX.encoding := encoding;
+        Storage_description.INDEX.compare := compare;
+        Storage_description.INDEX.path_length := path_length;
+        Storage_description.INDEX.to_path := to_path;
+        Storage_description.INDEX.of_path := of_path
+        |}.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Indexed_context :=
+    (Storage_functors.Make_indexed_subcontext
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;index&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |}))) (Make_index Index).
   
-  Definition rpc_arg : RPC_arg.arg Z.t := Index.rpc_arg.
+  Definition rpc_arg : RPC_arg.arg Z.t :=
+    Index.[Storage_description.INDEX.rpc_arg].
   
   Definition fold {A : Set}
-    : Indexed_context.context -&gt; A -&gt; (Indexed_context.key -&gt; A -&gt; Lwt.t A) -&gt;
-    Lwt.t A := Indexed_context.fold_keys.
+    : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt; A -&gt;
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.key] -&gt; A -&gt; Lwt.t A) -&gt;
+    Lwt.t A := Indexed_context.[Storage_sigs.Indexed_raw_context.fold_keys].
   
   Definition __list_value
-    : Indexed_context.context -&gt; Lwt.t (list Indexed_context.key) :=
-    Indexed_context.keys.
+    : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt;
+    Lwt.t (list Indexed_context.[Storage_sigs.Indexed_raw_context.key]) :=
+    Indexed_context.[Storage_sigs.Indexed_raw_context.keys].
   
   Definition remove_rec
-    (ctxt : Indexed_context.context) (n : Indexed_context.key)
-    : Lwt.t Indexed_context.context := Indexed_context.remove_rec ctxt n.
+    (ctxt : Indexed_context.[Storage_sigs.Indexed_raw_context.context])
+    (n : Indexed_context.[Storage_sigs.Indexed_raw_context.key])
+    : Lwt.t Indexed_context.[Storage_sigs.Indexed_raw_context.context] :=
+    Indexed_context.[Storage_sigs.Indexed_raw_context.remove_rec] ctxt n.
   
   Definition copy
-    (ctxt : Indexed_context.context) (from : Indexed_context.key)
-    (to_ : Indexed_context.key)
-    : Lwt.t (Error_monad.tzresult Indexed_context.context) :=
-    Indexed_context.copy ctxt from to_.
+    (ctxt : Indexed_context.[Storage_sigs.Indexed_raw_context.context])
+    (from : Indexed_context.[Storage_sigs.Indexed_raw_context.key])
+    (to_ : Indexed_context.[Storage_sigs.Indexed_raw_context.key])
+    : Lwt.t
+      (Error_monad.tzresult
+        Indexed_context.[Storage_sigs.Indexed_raw_context.context]) :=
+    Indexed_context.[Storage_sigs.Indexed_raw_context.copy] ctxt from to_.
   
-  Definition key := Raw_context.t * Z.t.
+  Definition key := Raw_context.[Raw_context.T.t] * Z.t.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Total_bytes :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;total_bytes&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Z.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Key_type :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;key_type&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (let encoding := Script_repr.expr_encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Value_type :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;value_type&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (let encoding := Script_repr.expr_encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
   
   Module Contents.
-    (* ❌ Applications of functors are not handled. *)
-    (* functor_application *)
+    Definition I :=
+      ((Storage_functors.Make_indexed_carbonated_data_storage
+        (((Storage_functors.Make_subcontext
+          (existT _ tt
+            {|
+              Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+              |}))
+          Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+          (let name := cons &quot;contents&quot; % string [] in
+          existT _ tt
+            {|
+              Storage_sigs.NAME.name := name
+              |})))
+        (Make_index
+          (existT _ _
+            {|
+              Storage_description.INDEX.path_length :=
+                Script_expr_hash.path_length;
+              Storage_description.INDEX.to_path := Script_expr_hash.to_path;
+              Storage_description.INDEX.of_path := Script_expr_hash.of_path;
+              Storage_description.INDEX.rpc_arg := Script_expr_hash.rpc_arg;
+              Storage_description.INDEX.encoding := Script_expr_hash.encoding;
+              Storage_description.INDEX.compare := Script_expr_hash.compare
+              |})))
+        (let encoding := Script_repr.expr_encoding in
+        existT _ _
+          {|
+            Storage_sigs.VALUE.encoding := encoding
+            |}).
     
-    Definition context := I.context.
+    Definition context := I.[Storage_sigs.Single_data_storage.context].
     
-    Definition key := I.key.
+    Definition key := I.[Storage_sigs.Single_data_storage.key].
     
-    Definition value := I.value.
+    Definition value := I.[Storage_sigs.Single_data_storage.value].
     
     Definition mem
-      : I.context -&gt; I.key -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * bool)) := I.mem.
+      : I.[Storage_sigs.Single_data_storage.context] -&gt;
+      I.[Storage_sigs.Single_data_storage.key] -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * bool)) :=
+      I.[Storage_sigs.Single_data_storage.mem].
     
     Definition delete
-      : I.context -&gt; I.key -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
-      I.delete.
+      : I.[Storage_sigs.Single_data_storage.context] -&gt;
+      I.[Storage_sigs.Single_data_storage.key] -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      I.[Storage_sigs.Single_data_storage.delete].
     
     Definition remove
-      : I.context -&gt; I.key -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) := I.remove.
+      : I.[Storage_sigs.Single_data_storage.context] -&gt;
+      I.[Storage_sigs.Single_data_storage.key] -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      I.[Storage_sigs.Single_data_storage.remove].
     
     Definition set
-      : I.context -&gt; I.key -&gt; I.value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) := I.set.
+      : I.[Storage_sigs.Single_data_storage.context] -&gt;
+      I.[Storage_sigs.Single_data_storage.key] -&gt;
+      I.[Storage_sigs.Single_data_storage.value] -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      I.[Storage_sigs.Single_data_storage.set].
     
     Definition set_option
-      : I.context -&gt; I.key -&gt; option I.value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) := I.set_option.
+      : I.[Storage_sigs.Single_data_storage.context] -&gt;
+      I.[Storage_sigs.Single_data_storage.key] -&gt;
+      option I.[Storage_sigs.Single_data_storage.value] -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      I.[Storage_sigs.Single_data_storage.set_option].
     
     Definition init
-      : I.context -&gt; I.key -&gt; I.value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) := I.init.
+      : I.[Storage_sigs.Single_data_storage.context] -&gt;
+      I.[Storage_sigs.Single_data_storage.key] -&gt;
+      I.[Storage_sigs.Single_data_storage.value] -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      I.[Storage_sigs.Single_data_storage.init].
     
     Definition init_set
-      : I.context -&gt; I.key -&gt; I.value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) := I.init_set.
+      : I.[Storage_sigs.Single_data_storage.context] -&gt;
+      I.[Storage_sigs.Single_data_storage.key] -&gt;
+      I.[Storage_sigs.Single_data_storage.value] -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      I.[Storage_sigs.Single_data_storage.init_set].
     
     Definition consume_deserialize_gas
-      (ctxt : Raw_context.context) (value : Script_repr.expr)
-      : Lwt.t (Error_monad.tzresult Raw_context.context) :=
+      (ctxt : Raw_context.[Raw_context.T.context]) (value : Script_repr.expr)
+      : Lwt.t (Error_monad.tzresult Raw_context.[Raw_context.T.context]) :=
       Pervasives.op_atat Lwt.__return
-        (Raw_context.consume_gas ctxt (Script_repr.deserialized_cost value)).
+        (Raw_context.[Raw_context.T.consume_gas] ctxt
+          (Script_repr.deserialized_cost value)).
     
-    Definition get (ctxt : I.context) (contract : I.key)
-      : Lwt.t (Error_monad.tzresult (Raw_context.context * I.value)) :=
-      Error_monad.op_gtgteqquestion (I.get ctxt contract)
+    Definition get
+      (ctxt : I.[Storage_sigs.Single_data_storage.context])
+      (contract : I.[Storage_sigs.Single_data_storage.key])
+      : Lwt.t
+        (Error_monad.tzresult
+          (Raw_context.[Raw_context.T.context] *
+            I.[Storage_sigs.Single_data_storage.value])) :=
+      Error_monad.op_gtgteqquestion
+        (I.[Storage_sigs.Single_data_storage.get] ctxt contract)
         (fun function_parameter =&gt;
           let '(ctxt, value) := function_parameter in
           Error_monad.op_gtgtpipequestion (consume_deserialize_gas ctxt value)
             (fun ctxt =&gt; (ctxt, value))).
     
-    Definition get_option (ctxt : I.context) (contract : I.key)
-      : Lwt.t (Error_monad.tzresult (Raw_context.t * option I.value)) :=
-      Error_monad.op_gtgteqquestion (I.get_option ctxt contract)
+    Definition get_option
+      (ctxt : I.[Storage_sigs.Single_data_storage.context])
+      (contract : I.[Storage_sigs.Single_data_storage.key])
+      : Lwt.t
+        (Error_monad.tzresult
+          (Raw_context.t * option I.[Storage_sigs.Single_data_storage.value])) :=
+      Error_monad.op_gtgteqquestion
+        (I.[Storage_sigs.Single_data_storage.get_option] ctxt contract)
         (fun function_parameter =&gt;
           let '(ctxt, value_opt) := function_parameter in
           match value_opt with
@@ -84938,27 +86260,236 @@ Module Big_map.
   End Contents.
 End Big_map.
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Delegates :=
+  (Storage_functors.Make_data_set_storage
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;delegates&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Signature.Public_key_hash.path_length;
+          Storage_description.INDEX.to_path := Signature.Public_key_hash.to_path;
+          Storage_description.INDEX.of_path := Signature.Public_key_hash.of_path;
+          Storage_description.INDEX.rpc_arg := Signature.Public_key_hash.rpc_arg;
+          Storage_description.INDEX.encoding :=
+            Signature.Public_key_hash.encoding;
+          Storage_description.INDEX.compare := Signature.Public_key_hash.compare
+          |})).
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Active_delegates_with_rolls :=
+  (Storage_functors.Make_data_set_storage
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;active_delegates_with_rolls&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Signature.Public_key_hash.path_length;
+          Storage_description.INDEX.to_path := Signature.Public_key_hash.to_path;
+          Storage_description.INDEX.of_path := Signature.Public_key_hash.of_path;
+          Storage_description.INDEX.rpc_arg := Signature.Public_key_hash.rpc_arg;
+          Storage_description.INDEX.encoding :=
+            Signature.Public_key_hash.encoding;
+          Storage_description.INDEX.compare := Signature.Public_key_hash.compare
+          |})).
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Delegates_with_frozen_balance_index :=
+  (Storage_functors.Make_indexed_subcontext
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;delegates_with_frozen_balance&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length := Cycle_repr.Index.path_length;
+          Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
+          Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
+          Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
+          Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
+          Storage_description.INDEX.compare := Cycle_repr.Index.compare
+          |})).
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Delegates_with_frozen_balance :=
+  (Storage_functors.Make_data_set_storage
+    Delegates_with_frozen_balance_index.[Storage_sigs.Indexed_raw_context.Raw_context])
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Signature.Public_key_hash.path_length;
+          Storage_description.INDEX.to_path := Signature.Public_key_hash.to_path;
+          Storage_description.INDEX.of_path := Signature.Public_key_hash.of_path;
+          Storage_description.INDEX.rpc_arg := Signature.Public_key_hash.rpc_arg;
+          Storage_description.INDEX.encoding :=
+            Signature.Public_key_hash.encoding;
+          Storage_description.INDEX.compare := Signature.Public_key_hash.compare
+          |})).
 
 Module Cycle.
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Indexed_context :=
+    (Storage_functors.Make_indexed_subcontext
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.mem;
+            Raw_context.T.dir_mem := Raw_context.dir_mem;
+            Raw_context.T.get := Raw_context.get;
+            Raw_context.T.get_option := Raw_context.get_option;
+            Raw_context.T.init := Raw_context.init;
+            Raw_context.T.set := Raw_context.set;
+            Raw_context.T.init_set := Raw_context.init_set;
+            Raw_context.T.set_option := Raw_context.set_option;
+            Raw_context.T.delete := Raw_context.delete;
+            Raw_context.T.remove := Raw_context.remove;
+            Raw_context.T.remove_rec := Raw_context.remove_rec;
+            Raw_context.T.copy := Raw_context.copy;
+            Raw_context.T.fold := Raw_context.fold;
+            Raw_context.T.keys := Raw_context.keys;
+            Raw_context.T.fold_keys := Raw_context.fold_keys;
+            Raw_context.T.project := Raw_context.project;
+            Raw_context.T.absolute_key := Raw_context.absolute_key;
+            Raw_context.T.consume_gas := Raw_context.consume_gas;
+            Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+            Raw_context.T.description := Raw_context.description
+            |}))
+        (let name := cons &quot;cycle&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
+            Storage_description.INDEX.compare := Cycle_repr.Index.compare
+            |})).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Last_roll :=
+    ((Storage_functors.Make_indexed_data_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+        (let name := cons &quot;last_roll&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |}))) Int_index)
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Roll_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Roll_snapshot :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;roll_snapshot&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |})) Int.
   
   Module unrevealed_nonce.
     Record record := {
@@ -85008,34 +86539,161 @@ Module Cycle.
               | _ =&gt; None
               end) (fun nonce =&gt; Revealed nonce)) [])).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Nonce :=
+    ((Storage_functors.Make_indexed_data_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+        (let name := cons &quot;nonces&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Raw_level_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Raw_level_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Raw_level_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Raw_level_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Raw_level_repr.Index.encoding;
+            Storage_description.INDEX.compare := Raw_level_repr.Index.compare
+            |})))
+      (let encoding := nonce_status_encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Seed :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;random_seed&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (let encoding := Seed_repr.seed_encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
 End Cycle.
 
 Module Roll.
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Raw_context :=
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;rolls&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Indexed_context :=
+    (Storage_functors.Make_indexed_subcontext
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;index&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length := Roll_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Roll_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Roll_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Roll_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Roll_repr.Index.encoding;
+            Storage_description.INDEX.compare := Roll_repr.Index.compare
+            |})).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Next :=
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |})) Raw_context)
+      (let name := cons &quot;next&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Roll_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Limbo :=
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |})) Raw_context)
+      (let name := cons &quot;limbo&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Roll_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Delegate_roll_list :=
+    (Storage_functors.Wrap_indexed_data_storage Contract.Roll_list)
+      (* ❌ The signature name of this module could not be found *)
+      first_class_module_value_of_unknown_signature.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Successor :=
+    (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
+      (let name := cons &quot;successor&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Roll_repr.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Delegate_change :=
+    (Storage_functors.Wrap_indexed_data_storage Contract.Change)
+      (* ❌ The signature name of this module could not be found *)
+      first_class_module_value_of_unknown_signature.
   
   Module Snapshoted_owner_index.
     Definition t := Cycle_repr.t * Z.
@@ -85084,44 +86742,271 @@ Module Roll.
       Storage_description.Pair left_args right_args.
   End Snapshoted_owner_index.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Owner :=
+    (((Storage_functors.Make_indexed_data_snapshotable_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;owner&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (existT _ [_, _]
+        {|
+          Storage_functors.INDEX.path_length :=
+            Snapshoted_owner_index.path_length;
+          Storage_functors.INDEX.to_path := Snapshoted_owner_index.to_path;
+          Storage_functors.INDEX.of_path := Snapshoted_owner_index.of_path;
+          Storage_functors.INDEX.args := Snapshoted_owner_index.args
+          |}))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length := Roll_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Roll_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Roll_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Roll_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Roll_repr.Index.encoding;
+            Storage_description.INDEX.compare := Roll_repr.Index.compare
+            |}))) Signature.Public_key.
   
   Module Snapshot_for_cycle := Cycle.Roll_snapshot.
   
   Module Last_for_snapshot := Cycle.Last_roll.
   
-  Definition clear : Indexed_context.context -&gt; Lwt.t Raw_context.t :=
-    Indexed_context.clear.
+  Definition clear
+    : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt;
+    Lwt.t Raw_context.t :=
+    Indexed_context.[Storage_sigs.Indexed_raw_context.clear].
 End Roll.
 
 Module Vote.
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Raw_context :=
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;votes&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Current_period_kind :=
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |})) Raw_context)
+      (let name := cons &quot;current_period_kind&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (let encoding := Voting_period_repr.kind_encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Participation_ema :=
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |})) Raw_context)
+      (let name := cons &quot;participation_ema&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |})) Int32.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Current_proposal :=
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |})) Raw_context)
+      (let name := cons &quot;current_proposal&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Protocol_hash.encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Listings_size :=
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |})) Raw_context)
+      (let name := cons &quot;listings_size&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |})) Int32.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Listings :=
+    ((Storage_functors.Make_indexed_data_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;listings&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Signature.Public_key_hash.path_length;
+            Storage_description.INDEX.to_path :=
+              Signature.Public_key_hash.to_path;
+            Storage_description.INDEX.of_path :=
+              Signature.Public_key_hash.of_path;
+            Storage_description.INDEX.rpc_arg :=
+              Signature.Public_key_hash.rpc_arg;
+            Storage_description.INDEX.encoding :=
+              Signature.Public_key_hash.encoding;
+            Storage_description.INDEX.compare :=
+              Signature.Public_key_hash.compare
+            |}))) Int32.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Proposals :=
+    (Storage_functors.Make_data_set_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;proposals&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      ((Storage_functors.Pair
+        (Make_index
+          (existT _ _
+            {|
+              Storage_description.INDEX.path_length := Protocol_hash.path_length;
+              Storage_description.INDEX.to_path := Protocol_hash.to_path;
+              Storage_description.INDEX.of_path := Protocol_hash.of_path;
+              Storage_description.INDEX.rpc_arg := Protocol_hash.rpc_arg;
+              Storage_description.INDEX.encoding := Protocol_hash.encoding;
+              Storage_description.INDEX.compare := Protocol_hash.compare
+              |})))
+        (Make_index
+          (existT _ _
+            {|
+              Storage_description.INDEX.path_length :=
+                Signature.Public_key_hash.path_length;
+              Storage_description.INDEX.to_path :=
+                Signature.Public_key_hash.to_path;
+              Storage_description.INDEX.of_path :=
+                Signature.Public_key_hash.of_path;
+              Storage_description.INDEX.rpc_arg :=
+                Signature.Public_key_hash.rpc_arg;
+              Storage_description.INDEX.encoding :=
+                Signature.Public_key_hash.encoding;
+              Storage_description.INDEX.compare :=
+                Signature.Public_key_hash.compare
+              |}))).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Proposals_count :=
+    ((Storage_functors.Make_indexed_data_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;proposals_count&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Signature.Public_key_hash.path_length;
+            Storage_description.INDEX.to_path :=
+              Signature.Public_key_hash.to_path;
+            Storage_description.INDEX.of_path :=
+              Signature.Public_key_hash.of_path;
+            Storage_description.INDEX.rpc_arg :=
+              Signature.Public_key_hash.rpc_arg;
+            Storage_description.INDEX.encoding :=
+              Signature.Public_key_hash.encoding;
+            Storage_description.INDEX.compare :=
+              Signature.Public_key_hash.compare
+            |}))) Int.
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Ballots :=
+    ((Storage_functors.Make_indexed_data_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |})) Raw_context)
+        (let name := cons &quot;ballots&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Signature.Public_key_hash.path_length;
+            Storage_description.INDEX.to_path :=
+              Signature.Public_key_hash.to_path;
+            Storage_description.INDEX.of_path :=
+              Signature.Public_key_hash.of_path;
+            Storage_description.INDEX.rpc_arg :=
+              Signature.Public_key_hash.rpc_arg;
+            Storage_description.INDEX.encoding :=
+              Signature.Public_key_hash.encoding;
+            Storage_description.INDEX.compare :=
+              Signature.Public_key_hash.compare
+            |})))
+      (let encoding := Vote_repr.ballot_encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
 End Vote.
 
 Module Seed.
@@ -85138,67 +87023,240 @@ Module Seed.
   | Unrevealed : unrevealed_nonce -&gt; nonce_status
   | Revealed : Seed_repr.nonce -&gt; nonce_status.
   
-  Module Nonce.
-    Import Level_repr.
-    
-    Definition context := Raw_context.t.
-    
-    Definition mem (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
-      : Lwt.t bool :=
-      Cycle.Nonce.mem (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l).
-    
-    Definition get (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
-      : Lwt.t (Error_monad.tzresult Cycle.Nonce.value) :=
-      Cycle.Nonce.get (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l).
-    
-    Definition get_option (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
-      : Lwt.t (Error_monad.tzresult (option Cycle.Nonce.value)) :=
-      Cycle.Nonce.get_option (ctxt, (Level_repr.t.cycle l))
-        (Level_repr.t.level l).
-    
-    Definition set
-      (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
-      (v : Cycle.Nonce.value) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-      Cycle.Nonce.set (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) v.
-    
-    Definition init
-      (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
-      (v : Cycle.Nonce.value) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-      Cycle.Nonce.init (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) v.
-    
-    Definition init_set
-      (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
-      (v : Cycle.Nonce.value) : Lwt.t Raw_context.t :=
-      Cycle.Nonce.init_set (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l)
-        v.
-    
-    Definition set_option
-      (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
-      (v : option Cycle.Nonce.value) : Lwt.t Raw_context.t :=
-      Cycle.Nonce.set_option (ctxt, (Level_repr.t.cycle l))
-        (Level_repr.t.level l) v.
-    
-    Definition delete (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
+  Definition Nonce :=
+    (* ❌ open *)
+    let mem
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t) : Lwt.t bool :=
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.mem]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) in
+    let get
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t)
+      : Lwt.t
+        (Error_monad.tzresult
+          Cycle.Nonce.[Storage_sigs.Indexed_data_storage.value]) :=
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.get]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) in
+    let get_option
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t)
+      : Lwt.t
+        (Error_monad.tzresult
+          (option Cycle.Nonce.[Storage_sigs.Indexed_data_storage.value])) :=
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.get_option]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) in
+    let set
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t) (v : Cycle.Nonce.[Storage_sigs.Indexed_data_storage.value])
       : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-      Cycle.Nonce.delete (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l).
-    
-    Definition remove (ctxt : Cycle.Indexed_context.t) (l : Level_repr.t)
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.set]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) v in
+    let init
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t) (v : Cycle.Nonce.[Storage_sigs.Indexed_data_storage.value])
+      : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.init]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) v in
+    let init_set
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t) (v : Cycle.Nonce.[Storage_sigs.Indexed_data_storage.value])
       : Lwt.t Raw_context.t :=
-      Cycle.Nonce.remove (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l).
-  End Nonce.
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.init_set]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) v in
+    let set_option
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t) (v :
+      option Cycle.Nonce.[Storage_sigs.Indexed_data_storage.value])
+      : Lwt.t Raw_context.t :=
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.set_option]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) v in
+    let delete
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.delete]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) in
+    let remove
+      (ctxt : Cycle.Indexed_context.[Storage_sigs.Indexed_raw_context.t]) (l :
+      Level_repr.t) : Lwt.t Raw_context.t :=
+      Cycle.Nonce.[Storage_sigs.Indexed_data_storage.remove]
+        (ctxt, (Level_repr.t.cycle l)) (Level_repr.t.level l) in
+    existT _ tt
+      {|
+        Storage_sigs.Single_data_storage.mem := mem;
+        Storage_sigs.Single_data_storage.get := get;
+        Storage_sigs.Single_data_storage.get_option := get_option;
+        Storage_sigs.Single_data_storage.set := set;
+        Storage_sigs.Single_data_storage.init := init;
+        Storage_sigs.Single_data_storage.init_set := init_set;
+        Storage_sigs.Single_data_storage.set_option := set_option;
+        Storage_sigs.Single_data_storage.delete := delete;
+        Storage_sigs.Single_data_storage.remove := remove
+        |}.
   
   Module For_cycle := Cycle.Seed.
 End Seed.
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition Commitments :=
+  ((Storage_functors.Make_indexed_data_storage
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.mem;
+          Raw_context.T.dir_mem := Raw_context.dir_mem;
+          Raw_context.T.get := Raw_context.get;
+          Raw_context.T.get_option := Raw_context.get_option;
+          Raw_context.T.init := Raw_context.init;
+          Raw_context.T.set := Raw_context.set;
+          Raw_context.T.init_set := Raw_context.init_set;
+          Raw_context.T.set_option := Raw_context.set_option;
+          Raw_context.T.delete := Raw_context.delete;
+          Raw_context.T.remove := Raw_context.remove;
+          Raw_context.T.remove_rec := Raw_context.remove_rec;
+          Raw_context.T.copy := Raw_context.copy;
+          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.keys := Raw_context.keys;
+          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.project := Raw_context.project;
+          Raw_context.T.absolute_key := Raw_context.absolute_key;
+          Raw_context.T.consume_gas := Raw_context.consume_gas;
+          Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+          Raw_context.T.description := Raw_context.description
+          |}))
+      (let name := cons &quot;commitments&quot; % string [] in
+      existT _ tt
+        {|
+          Storage_sigs.NAME.name := name
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Blinded_public_key_hash.Index.path_length;
+          Storage_description.INDEX.to_path :=
+            Blinded_public_key_hash.Index.to_path;
+          Storage_description.INDEX.of_path :=
+            Blinded_public_key_hash.Index.of_path;
+          Storage_description.INDEX.rpc_arg :=
+            Blinded_public_key_hash.Index.rpc_arg;
+          Storage_description.INDEX.encoding :=
+            Blinded_public_key_hash.Index.encoding;
+          Storage_description.INDEX.compare :=
+            Blinded_public_key_hash.Index.compare
+          |})))
+    (existT _ _
+      {|
+        Storage_sigs.VALUE.encoding := Tez_repr.encoding
+        |}).
 
 Module Ramp_up.
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Rewards :=
+    ((Storage_functors.Make_indexed_data_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.mem;
+            Raw_context.T.dir_mem := Raw_context.dir_mem;
+            Raw_context.T.get := Raw_context.get;
+            Raw_context.T.get_option := Raw_context.get_option;
+            Raw_context.T.init := Raw_context.init;
+            Raw_context.T.set := Raw_context.set;
+            Raw_context.T.init_set := Raw_context.init_set;
+            Raw_context.T.set_option := Raw_context.set_option;
+            Raw_context.T.delete := Raw_context.delete;
+            Raw_context.T.remove := Raw_context.remove;
+            Raw_context.T.remove_rec := Raw_context.remove_rec;
+            Raw_context.T.copy := Raw_context.copy;
+            Raw_context.T.fold := Raw_context.fold;
+            Raw_context.T.keys := Raw_context.keys;
+            Raw_context.T.fold_keys := Raw_context.fold_keys;
+            Raw_context.T.project := Raw_context.project;
+            Raw_context.T.absolute_key := Raw_context.absolute_key;
+            Raw_context.T.consume_gas := Raw_context.consume_gas;
+            Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+            Raw_context.T.description := Raw_context.description
+            |}))
+        (let name := cons &quot;ramp_up&quot; % string (cons &quot;rewards&quot; % string []) in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
+            Storage_description.INDEX.compare := Cycle_repr.Index.compare
+            |})))
+      (let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
   
-  (* ❌ Applications of functors are not handled. *)
-  (* functor_application *)
+  Definition Security_deposits :=
+    ((Storage_functors.Make_indexed_data_storage
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.mem;
+            Raw_context.T.dir_mem := Raw_context.dir_mem;
+            Raw_context.T.get := Raw_context.get;
+            Raw_context.T.get_option := Raw_context.get_option;
+            Raw_context.T.init := Raw_context.init;
+            Raw_context.T.set := Raw_context.set;
+            Raw_context.T.init_set := Raw_context.init_set;
+            Raw_context.T.set_option := Raw_context.set_option;
+            Raw_context.T.delete := Raw_context.delete;
+            Raw_context.T.remove := Raw_context.remove;
+            Raw_context.T.remove_rec := Raw_context.remove_rec;
+            Raw_context.T.copy := Raw_context.copy;
+            Raw_context.T.fold := Raw_context.fold;
+            Raw_context.T.keys := Raw_context.keys;
+            Raw_context.T.fold_keys := Raw_context.fold_keys;
+            Raw_context.T.project := Raw_context.project;
+            Raw_context.T.absolute_key := Raw_context.absolute_key;
+            Raw_context.T.consume_gas := Raw_context.consume_gas;
+            Raw_context.T.check_enough_gas := Raw_context.check_enough_gas;
+            Raw_context.T.description := Raw_context.description
+            |}))
+        (let name := cons &quot;ramp_up&quot; % string (cons &quot;deposits&quot; % string []) in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.path_length;
+            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
+            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
+            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
+            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
+            Storage_description.INDEX.compare := Cycle_repr.Index.compare
+            |})))
+      (let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
+      existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := encoding
+          |}).
 End Ramp_up.
 </pre>
   </div>
@@ -85935,7 +87993,15 @@ End Ramp_up.
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-error" title="Applications of functors are not handled.">module StringMap = Map.Make (String)</abbr>
+module StringMap = Map.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
+
+We were looking for a module signature name for the following shape:
+[ compare ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">String</abbr>)
 
 type 'key t = 'key description ref
 
@@ -86276,8 +88342,12 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 
-(* ❌ Applications of functors are not handled. *)
-(* functor_application *)
+Definition StringMap :=
+  Map.Make
+    (existT _ _
+      {|
+        __Set.OrderedType.compare := String.compare
+        |}).
 
 Reserved Notation &quot;'t&quot;.
 Reserved Notation &quot;'description&quot;.
@@ -88091,14 +90161,14 @@ Import Storage_sigs.
 
 Definition Registered :=
   let ghost := false in
-  existT _ unit
+  existT _ tt
     {|
       Storage_sigs.REGISTER.ghost := ghost
       |}.
 
 Definition Ghost :=
   let ghost := true in
-  existT _ unit
+  existT _ tt
     {|
       Storage_sigs.REGISTER.ghost := ghost
       |}.
