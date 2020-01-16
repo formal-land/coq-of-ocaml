@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35763 lines</li>
-      <li>Coq size: 41904 lines (+17% compared to&nbsp;OCaml)</li>
-      <li>errors: 2632</li>
+      <li>Coq size: 42270 lines (+18% compared to&nbsp;OCaml)</li>
+      <li>errors: 2631</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -64,14 +64,17 @@
         compiling: [
           13,
           292,
+          1857,
         ],
         generated: [
           47563,
           41904,
+          42270,
         ],
         labels: [
           "01-14",
           "01-15",
+          "01-16",
         ]
       }
 ;
@@ -293,7 +296,7 @@
       </li>
       
       <li>
-        <a href="#level_repr.ml">level_repr.ml</a>&nbsp;<span class="label label-danger">2</span>
+        <a href="#level_repr.ml">level_repr.ml</a>&nbsp;<span class="label label-danger">1</span>
       </li>
       
       <li>
@@ -888,6 +891,17 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Contract_repr.
+Require Tezos.Contract_storage.
+Require Tezos.Gas_limit_repr.
+Require Tezos.Init_storage.
+Require Tezos.Period_repr.
+Require Tezos.Raw_context.
+Require Tezos.Script_repr.
+Require Tezos.Storage.
+Require Tezos.Storage_description.
+Require Tezos.Tez_repr.
 
 Definition t := Raw_context.t.
 
@@ -2705,6 +2719,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Contract_repr.
+Require Tezos.Nonce_hash.
+Require Tezos.Script_expr_hash.
+Require Tezos.Storage_description.
 
 Module BASIC_DATA.
   Record signature {t : Set} := {
@@ -4774,6 +4793,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Nonce_hash.
+Require Tezos.Services_registration.
 
 Import Alpha_context.
 
@@ -5118,6 +5140,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Nonce_hash.
 
 Module Seed.
   Parameter get : forall {E F H J K a b c i o q : Set},
@@ -5533,6 +5557,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -5955,6 +5980,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
 
 Parameter may_start_new_voting_period :
   Alpha_context.context -&gt; Lwt.t (Error_monad.tzresult Alpha_context.context).
@@ -7482,6 +7508,15 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Amendment.
+Require Tezos.Apply_results.
+Require Tezos.Baking.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Michelson_v1_gas.
+Require Tezos.Script_interpreter.
+Require Tezos.Script_ir_translator.
+Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
@@ -10571,6 +10606,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Nonce_hash.
 
 Import Alpha_context.
 
@@ -12460,6 +12497,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Nonce_hash.
 
 Reserved Notation &quot;'operation_metadata&quot;.
 Reserved Notation &quot;'packed_operation_metadata&quot;.
@@ -13078,6 +13117,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Misc.
 
 Import Alpha_context.
 
@@ -13699,6 +13740,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Misc.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -14368,6 +14411,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Fitness_repr.
+Require Tezos.Nonce_hash.
 
 Reserved Notation &quot;'t&quot;.
 Reserved Notation &quot;'protocol_data&quot;.
@@ -14614,6 +14660,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Nonce_hash.
 
 Reserved Notation &quot;'t&quot;.
 Reserved Notation &quot;'protocol_data&quot;.
@@ -14853,6 +14900,17 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Contract_repr.
+Require Tezos.Contract_storage.
+Require Tezos.Cycle_repr.
+Require Tezos.Delegate_storage.
+Require Tezos.Misc.
+Require Tezos.Parameters_repr.
+Require Tezos.Raw_context.
+Require Tezos.Script_repr.
+Require Tezos.Storage.
+Require Tezos.Tez_repr.
 
 Import Misc.
 
@@ -15100,6 +15158,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_storage.
+Require Tezos.Cycle_repr.
+Require Tezos.Parameters_repr.
+Require Tezos.Raw_context.
+Require Tezos.Script_repr.
 
 Parameter init :
   Raw_context.t -&gt;
@@ -15172,6 +15235,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Tez_repr.
 
 Module t.
   Record record := {
@@ -15245,6 +15310,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Tez_repr.
 
 Module t.
   Record record := {
@@ -15309,6 +15376,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Commitment_repr.
+Require Tezos.Raw_context.
+Require Tezos.Storage.
 
 Definition get_opt
   : Storage.Commitments.context -&gt; Storage.Commitments.key -&gt;
@@ -15389,6 +15459,10 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Commitment_repr.
+Require Tezos.Raw_context.
+Require Tezos.Tez_repr.
 
 Parameter init :
   Raw_context.t -&gt; list Commitment_repr.t -&gt;
@@ -15660,6 +15734,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Period_repr.
+Require Tezos.Tez_repr.
 
 Definition version_number_004 : string := &quot; &quot; % string.
 
@@ -16070,6 +16146,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Services_registration.
 
 Import Alpha_context.
 
@@ -16312,6 +16390,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
 
 Parameter errors : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -16509,6 +16588,10 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Period_repr.
+Require Tezos.Raw_context.
+Require Tezos.Tez_repr.
 
 Definition preserved_cycles (c : Raw_context.context) : Z :=
   let constants := Raw_context.constants c in
@@ -17051,6 +17134,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_hash.
 
 Inductive t : Set :=
 | Implicit : Signature.Public_key_hash.[S.SPublic_key_hash.t] -&gt; t
@@ -17400,6 +17484,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_hash.
 
 Inductive t : Set :=
 | Implicit : Signature.Public_key_hash.[S.SPublic_key_hash.t] -&gt; t
@@ -18998,6 +19083,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Script_expr_hash.
+Require Tezos.Script_ir_translator.
+Require Tezos.Services_registration.
 
 Import Alpha_context.
 
@@ -20602,6 +20692,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Script_expr_hash.
 
 Parameter __list_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -21722,6 +21815,15 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_repr.
+Require Tezos.Delegate_storage.
+Require Tezos.Manager_repr.
+Require Tezos.Raw_context.
+Require Tezos.Roll_storage.
+Require Tezos.Script_expr_hash.
+Require Tezos.Script_repr.
+Require Tezos.Storage.
+Require Tezos.Tez_repr.
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)
@@ -22664,6 +22766,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_repr.
+Require Tezos.Raw_context.
+Require Tezos.Script_expr_hash.
+Require Tezos.Script_repr.
+Require Tezos.Tez_repr.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -24869,6 +24976,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Baking.
+Require Tezos.Contract_repr.
+Require Tezos.Misc.
+Require Tezos.Services_registration.
 
 Import Alpha_context.
 
@@ -27086,6 +27198,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Contract_repr.
 
 Parameter __list_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -28243,6 +28357,17 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_storage.
+Require Tezos.Contract_repr.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Level_storage.
+Require Tezos.Manager_repr.
+Require Tezos.Nonce_storage.
+Require Tezos.Raw_context.
+Require Tezos.Roll_storage.
+Require Tezos.Storage.
+Require Tezos.Tez_repr.
 
 Inductive balance : Set :=
 | Contract : Contract_repr.t -&gt; balance
@@ -29418,6 +29543,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_repr.
+Require Tezos.Cycle_repr.
+Require Tezos.Nonce_storage.
+Require Tezos.Raw_context.
+Require Tezos.Tez_repr.
 
 Inductive balance : Set :=
 | Contract : Contract_repr.t -&gt; balance
@@ -29683,6 +29813,12 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Constants_storage.
+Require Tezos.Contract_repr.
+Require Tezos.Contract_storage.
+Require Tezos.Raw_context.
+Require Tezos.Tez_repr.
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)
@@ -29841,6 +29977,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_repr.
+Require Tezos.Raw_context.
+Require Tezos.Tez_repr.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -29948,6 +30087,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)
@@ -30036,6 +30176,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Raw_context.
 
 Definition current : Raw_context.context -&gt; Int64.t :=
   Raw_context.current_fitness.
@@ -33029,6 +33170,15 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Apply_results.
+Require Tezos.Constants_repr.
+Require Tezos.Contract_services.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Nonce_hash.
+Require Tezos.Script_ir_translator.
+Require Tezos.Script_tc_errors_registration.
+Require Tezos.Services_registration.
 
 Import Alpha_context.
 
@@ -35878,6 +36028,12 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Apply_results.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Nonce_hash.
+Require Tezos.Script_interpreter.
+Require Tezos.Script_tc_errors.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -36594,6 +36750,16 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Bootstrap_storage.
+Require Tezos.Commitment_storage.
+Require Tezos.Contract_storage.
+Require Tezos.Parameters_repr.
+Require Tezos.Raw_context.
+Require Tezos.Roll_storage.
+Require Tezos.Script_repr.
+Require Tezos.Seed_storage.
+Require Tezos.Storage.
+Require Tezos.Vote_storage.
 
 Definition prepare_first_block
   (ctxt : Context.t)
@@ -37501,6 +37667,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Script_repr.
 
 Definition manager_script_code : Script_repr.lazy_expr :=
   Pervasives.op_atat Script_repr.lazy_expr
@@ -38664,6 +38832,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Script_repr.
 
 Parameter manager_script_code : Script_repr.lazy_expr.
 
@@ -38688,7 +38857,7 @@ Parameter add_root_entrypoint :
 <hr />
 <div class="row conversion-row" id="level_repr.ml">
   <div class="col-md-6">
-    <a href="#level_repr.ml"><code>level_repr.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#level_repr.ml"><code>level_repr.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -38728,11 +38897,7 @@ type t = {
 <abbr class="mark-error" title="Cannot include this kind of module expression">include Compare.Make (struct
   type nonrec t = t
 
-  let compare {level = l1} {level = l2} = </abbr><abbr class="mark-error" title="Cannot include this kind of module expression
-
-——————————
-
-Error: Unbound value Raw_level_repr.compare">Raw_level_repr.compare</abbr><abbr class="mark-error" title="Cannot include this kind of module expression"> l1 l2
+  let compare {level = l1} {level = l2} = Raw_level_repr.compare l1 l2
 end)</abbr>
 
 type level = t
@@ -38891,6 +39056,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Cycle_repr.
+Require Tezos.Raw_level_repr.
+Require Tezos.Voting_period_repr.
 
 Module t.
   Record record := {
@@ -39133,6 +39301,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Cycle_repr.
+Require Tezos.Raw_level_repr.
+Require Tezos.Voting_period_repr.
 
 Module t.
   Record record := {
@@ -39319,6 +39490,12 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Constants_storage.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Raw_context.
+Require Tezos.Raw_level_repr.
 
 Import Level_repr.
 
@@ -39512,6 +39689,10 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Raw_context.
+Require Tezos.Raw_level_repr.
 
 Parameter current : Raw_context.t -&gt; Level_repr.t.
 
@@ -39942,6 +40123,12 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Apply.
+Require Tezos.Apply_results.
+Require Tezos.Script_ir_translator.
+Require Tezos.Script_typed_ir.
+Require Tezos.Services_registration.
 
 Definition block_header_data := Alpha_context.Block_header.protocol_data.
 
@@ -40562,6 +40749,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Apply_results.
 
 Inductive validation_mode : Set :=
 | Application :
@@ -41612,6 +41801,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
@@ -42808,6 +42999,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Script_typed_ir.
 
 Module Cost_of.
   Parameter manager_operation : Alpha_context.Gas.cost.
@@ -45915,6 +46108,14 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Level_storage.
+Require Tezos.Nonce_hash.
+Require Tezos.Raw_context.
+Require Tezos.Seed_repr.
+Require Tezos.Storage.
+Require Tezos.Tez_repr.
 
 Definition t := Seed_repr.nonce.
 
@@ -46077,6 +46278,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Level_repr.
+Require Tezos.Nonce_hash.
+Require Tezos.Raw_context.
+Require Tezos.Seed_repr.
+Require Tezos.Tez_repr.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -46991,6 +47197,15 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Block_header_repr.
+Require Tezos.Contract_repr.
+Require Tezos.Raw_level_repr.
+Require Tezos.Script_repr.
+Require Tezos.Seed_repr.
+Require Tezos.Tez_repr.
+Require Tezos.Vote_repr.
+Require Tezos.Voting_period_repr.
 
 Module Kind.
   Inductive seed_nonce_revelation : Set :=
@@ -48439,6 +48654,15 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Block_header_repr.
+Require Tezos.Contract_repr.
+Require Tezos.Raw_level_repr.
+Require Tezos.Script_repr.
+Require Tezos.Seed_repr.
+Require Tezos.Tez_repr.
+Require Tezos.Vote_repr.
+Require Tezos.Voting_period_repr.
 
 Module Kind.
   Inductive seed_nonce_revelation : Set :=
@@ -48904,6 +49128,10 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Commitment_repr.
+Require Tezos.Constants_repr.
+Require Tezos.Script_repr.
+Require Tezos.Tez_repr.
 
 Module bootstrap_account.
   Record record := {
@@ -49104,6 +49332,10 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Commitment_repr.
+Require Tezos.Constants_repr.
+Require Tezos.Script_repr.
+Require Tezos.Tez_repr.
 
 Module bootstrap_account.
   Record record := {
@@ -50635,6 +50867,15 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Contract_repr.
+Require Tezos.Fitness_repr.
+Require Tezos.Gas_limit_repr.
+Require Tezos.Level_repr.
+Require Tezos.Parameters_repr.
+Require Tezos.Raw_level_repr.
+Require Tezos.Storage_description.
+Require Tezos.Tez_repr.
 
 (* ❌ Applications of functors are not handled. *)
 (* functor_application *)
@@ -51857,6 +52098,14 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Contract_repr.
+Require Tezos.Gas_limit_repr.
+Require Tezos.Level_repr.
+Require Tezos.Parameters_repr.
+Require Tezos.Raw_level_repr.
+Require Tezos.Storage_description.
+Require Tezos.Tez_repr.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -52532,6 +52781,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Seed_repr.
 
 Definition t  := Compare.Int32.[Compare.S.t].
 
@@ -52666,6 +52916,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Seed_repr.
 
 Definition t := int32.
 
@@ -53313,6 +53564,19 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Constants_storage.
+Require Tezos.Contract_repr.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Manager_repr.
+Require Tezos.Misc.
+Require Tezos.Raw_context.
+Require Tezos.Roll_repr.
+Require Tezos.Seed_repr.
+Require Tezos.Seed_storage.
+Require Tezos.Storage.
+Require Tezos.Tez_repr.
 
 Import Misc.
 
@@ -54222,6 +54486,12 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Contract_repr.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Raw_context.
+Require Tezos.Roll_repr.
+Require Tezos.Tez_repr.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -56371,6 +56641,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Script_ir_annot.
+Require Tezos.Script_ir_translator.
+Require Tezos.Script_repr.
+Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
@@ -58402,6 +58677,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Script_ir_translator.
+Require Tezos.Script_typed_ir.
 
 Definition execution_trace :=
   list
@@ -59085,6 +59363,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
@@ -60135,6 +60415,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Script_typed_ir.
 
 Parameter default_now_annot : option Script_typed_ir.var_annot.
 
@@ -71773,6 +72055,12 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Michelson_v1_gas.
+Require Tezos.Script_expr_hash.
+Require Tezos.Script_ir_annot.
+Require Tezos.Script_tc_errors.
+Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
@@ -80394,6 +80682,11 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Script_expr_hash.
+Require Tezos.Script_tc_errors.
+Require Tezos.Script_typed_ir.
 
 Reserved Notation &quot;'eq&quot;.
 
@@ -80903,6 +81196,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Gas_limit_repr.
+Require Tezos.Michelson_v1_primitives.
 
 Definition location := Micheline.canonical_location.
 
@@ -81288,6 +81583,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Gas_limit_repr.
+Require Tezos.Michelson_v1_primitives.
 
 Definition location := Micheline.canonical_location.
 
@@ -81542,6 +81839,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -82375,6 +82673,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -82499,6 +82798,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Script_int_repr.
+Require Tezos.Time_repr.
 
 Definition t := Z.t.
 
@@ -82617,6 +82918,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Script_int_repr.
 
 Parameter t : Set.
 
@@ -83084,6 +83386,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -83603,6 +83906,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_repr.
+Require Tezos.Nonce_hash.
+Require Tezos.State_hash.
 
 Inductive seed : Set :=
 | B : State_hash.t -&gt; seed.
@@ -83852,6 +84158,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Nonce_hash.
 
 Parameter t : Set.
 
@@ -84061,6 +84368,14 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_storage.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Level_storage.
+Require Tezos.Misc.
+Require Tezos.Raw_context.
+Require Tezos.Seed_repr.
+Require Tezos.Storage.
 
 Import Misc.
 
@@ -84247,6 +84562,10 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Cycle_repr.
+Require Tezos.Nonce_storage.
+Require Tezos.Raw_context.
+Require Tezos.Seed_repr.
 
 (* extensible_type Tezos_protocol_environment_alpha__Environment.Error_monad.error *)
 
@@ -84373,6 +84692,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Storage_description.
 
 Import Alpha_context.
 
@@ -85568,6 +85889,15 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Misc.
+Require Tezos.Nonce_hash.
+Require Tezos.Raw_context.
+Require Tezos.Script_repr.
+Require Tezos.Seed_repr.
+Require Tezos.Storage_description.
+Require Tezos.Tez_repr.
 
 Import Storage_functors.
 
@@ -86560,6 +86890,20 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Blinded_public_key_hash.
+Require Tezos.Contract_repr.
+Require Tezos.Cycle_repr.
+Require Tezos.Level_repr.
+Require Tezos.Manager_repr.
+Require Tezos.Nonce_hash.
+Require Tezos.Raw_context.
+Require Tezos.Roll_repr.
+Require Tezos.Script_expr_hash.
+Require Tezos.Script_repr.
+Require Tezos.Seed_repr.
+Require Tezos.Tez_repr.
+Require Tezos.Vote_repr.
+Require Tezos.Voting_period_repr.
 
 Module Block_priority.
   Parameter get : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult Z).
@@ -89012,6 +89356,8 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Raw_context.
+Require Tezos.Storage_description.
 
 Import Storage_sigs.
 
@@ -89296,6 +89642,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Raw_context.
+Require Tezos.Storage_description.
+Require Tezos.Storage_sigs.
 
 Parameter Registered : {_ : unit &amp; REGISTER.signature }.
 
@@ -89810,6 +90159,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Raw_context.
 
 Module Single_data_storage.
   Record signature {t value : Set} := {
@@ -90327,6 +90677,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Period_repr.
 
 Export Time.
 
@@ -90421,6 +90772,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Period_repr.
 
 Definition t := Tezos_base__TzPervasives.Time.Protocol.t.
 
@@ -90809,6 +91161,12 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Constants_storage.
+Require Tezos.Raw_context.
+Require Tezos.Roll_storage.
+Require Tezos.Storage.
+Require Tezos.Vote_repr.
+Require Tezos.Voting_period_repr.
 
 Definition recorded_proposal_count_for_delegate
   (ctxt : Storage.Vote.Proposals_count.context)
@@ -91203,6 +91561,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Raw_context.
+Require Tezos.Vote_repr.
+Require Tezos.Voting_period_repr.
 
 Parameter record_proposal :
   Raw_context.t -&gt; Protocol_hash.[S.HASH.t] -&gt;
@@ -92231,6 +92592,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
+Require Tezos.Raw_context.
+Require Tezos.Services_registration.
 
 Import Alpha_context.
 
@@ -92931,6 +93295,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Alpha_context.
 
 Parameter ballots : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t

@@ -10,15 +10,44 @@ system("cp #{protocol_folder}/*.v ./")
 
 files = [
   environment_file,
-  "Script_int_repr_mli.v",
+
+  # files without dependencies
+  "Blinded_public_key_hash.v",
+  "Blinded_public_key_hash_mli.v",
+  "Contract_hash.v",
+  "Cycle_repr.v",
+  "Cycle_repr_mli.v",
+  "Gas_limit_repr.v",
+  "Gas_limit_repr_mli.v",
+  "Manager_repr.v",
+  "Manager_repr_mli.v",
+  "Michelson_v1_primitives.v",
+  "Michelson_v1_primitives_mli.v",
+  "Misc.v",
+  "Misc_mli.v",
+  "Nonce_hash.v",
+  "Period_repr.v",
+  "Period_repr_mli.v",
+  "Qty_repr.v",
+  "Raw_level_repr.v",
+  "Raw_level_repr_mli.v",
+  "Script_expr_hash.v",
   "Script_int_repr.v",
-  "Raw_level_repr.v"
+  "Script_int_repr_mli.v",
+  "Storage_description.v",
+  "Storage_description_mli.v",
+  "Tez_repr.v",
+  "Tez_repr_mli.v",
+  "Vote_repr.v",
+  "Vote_repr_mli.v",
+  "Voting_period_repr.v",
+  "Voting_period_repr_mli.v"
 ]
 
 nb_valid_lines = 0
 
 for file in files do
-  command = "coqc -R . Tezos #{file}"
+  command = "coqc -R . Tezos #{file} -impredicative-set"
   puts command
   output, status = Open3.capture2e(command)
   if status.to_i == 0 then
