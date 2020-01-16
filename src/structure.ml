@@ -161,8 +161,13 @@ let rec of_structure (structure : structure) : t list Monad.t =
       return [ModuleSynonym (name, reference)]
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
       error_message (Error "functor") NotSupported "Functors are not handled."
-    | Tstr_module { mb_expr = { mod_desc = Tmod_apply _; _ }; _ } ->
-      error_message (Error "functor_application") NotSupported "Applications of functors are not handled."
+    | Tstr_module { mb_id; mb_expr = { mod_desc = Tmod_apply _; _ } as mb_expr; _ } ->
+      let name = Name.of_ident false mb_id in
+      Exp.of_module_expr
+        Name.Map.empty
+        mb_expr
+        None >>= fun module_exp ->
+      return [simple_value name module_exp]
     | Tstr_module _ -> error_message (Error "unhandled_module") NotSupported "This kind of module is not handled."
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message (Error "abstract_module_type") NotSupported "Abstract module types not handled."

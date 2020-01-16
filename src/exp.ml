@@ -309,18 +309,56 @@ and of_module_expr
   (module_expr : Typedtree.module_expr)
   (module_type : Types.module_type option)
   : t Monad.t =
-  let { mod_desc; mod_env; mod_loc; mod_type; _ } = module_expr in
+  let { mod_desc; mod_env; mod_loc; mod_type = local_module_type; _ } = module_expr in
   set_env mod_env (
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
   | Tmod_ident (path, loc) ->
-    MixedPath.of_path true path (Some loc.txt) >>= fun path ->
-    return (Variable path)
+    let default_result =
+      MixedPath.of_path true path (Some loc.txt) >>= fun path ->
+      return (Variable path) in
+    IsFirstClassModule.is_module_typ_first_class local_module_type >>= fun is_first_class ->
+    begin match is_first_class with
+    | Found _ -> default_result
+    | Not_found _ ->
+      get_env >>= fun env ->
+      let module_type =
+        match module_type with
+        | Some module_type -> module_type
+        | None -> local_module_type in
+      begin match Mtype.scrape env module_type with
+      | Mty_ident _ | Mty_alias (_, _) -> default_result
+      | Mty_signature _ ->
+        IsFirstClassModule.is_module_typ_first_class
+          module_type >>= fun is_first_class ->
+        begin match is_first_class with
+        | Found module_type_path ->
+          ModuleTypParams.get_module_typ_nb_of_existential_variables
+            module_type >>= fun nb_of_existential_variables ->
+          ModuleTypParams.get_module_typ_values module_type >>= fun values ->
+          let fields =
+            values |> List.map (fun value ->
+              (
+                None,
+                PathName.of_path_and_name_with_convert module_type_path value,
+                Variable (
+                  MixedPath.PathName (
+                    PathName.of_path_and_name_with_convert path value
+                  )
+                )
+              )
+            ) in
+          return (Module (nb_of_existential_variables, fields))
+        | _ -> default_result
+        end
+      | Mty_functor _ -> default_result
+      end
+    end
   | Tmod_structure structure ->
     let module_type =
       match module_type with
       | Some module_type -> module_type
-      | None -> mod_type in
+      | None -> local_module_type in
     IsFirstClassModule.is_module_typ_first_class
       module_type >>= fun is_first_class ->
     begin match is_first_class with
@@ -342,11 +380,14 @@ and of_module_expr
       (Error "unsupported_functor")
       NotSupported
       "Functors are not supported for first-class module values"
-  | Tmod_apply _ ->
-    error_message
-      (Error "unsupported_functor_application")
-      NotSupported
-      "Applications of functors are not supported for first-class module values"
+  | Tmod_apply (e1, e2, _) ->
+    let expected_module_type_for_e2 =
+      match e1.mod_type with
+      | Mty_functor (_, mod_typ_arg, _) -> mod_typ_arg
+      | _ -> None in
+    of_module_expr typ_vars e1 None >>= fun e1 ->
+    of_module_expr typ_vars e2 expected_module_type_for_e2 >>= fun e2 ->
+    return (Apply (e1, [e2]))
   | Tmod_constraint (module_expr, mod_type, _, _) ->
     let module_type =
       match module_type with
@@ -533,7 +574,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "existT" ^^ !^ "_" ^^
       begin match to_coq_n_underscores nb_of_existential_variables with
-      | [] -> !^ "unit"
+      | [] -> !^ "tt"
       | [_] -> !^ "_"
       | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
       end ^^

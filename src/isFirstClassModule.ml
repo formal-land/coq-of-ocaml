@@ -104,5 +104,4 @@ let is_module_typ_first_class
         "We use the concept of shape to find the name of a signature for Coq."
       )
     end
-  | Mty_functor _ ->
-    raise (Not_found None) NotSupported "Functor module types are not handled"
+  | Mty_functor _ -> return (Not_found (Some "This is a functor type."))
