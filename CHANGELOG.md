@@ -1,4 +1,13 @@
 ## [Unreleased]
+* Add changelog file.
+* Add support for `include` of modules represented as a record.
+* Fix bug on ambiguous detection of first-class module signatures.
+* Ignore top-level `let () = ...` and the left-hand side of expression sequences `... ; ...`.
+* Capitalize generated file names.
+* Add the notation `record.[field]` to access to records with existential types.
+* Use tuples with primitive projections for the tuples of existential types in first-class modules (notation `[x, y, z]` for the values, `[X * Y * Z]` for the types).
+* Only use the value names to infer a module type name to handle destructive type substitutions (`:=` operator).
+* Add support for functor declarations.
 * Handle `include` in signatures of `.mli` files.
 * Wrap records into modules to prevent name collisions with projections.
 * Add support for polymorphic abstract types in modules.
