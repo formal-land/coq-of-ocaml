@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35763 lines</li>
-      <li>Coq size: 42270 lines (+18% compared to&nbsp;OCaml)</li>
-      <li>errors: 2631</li>
+      <li>Coq size: 42262 lines (+18% compared to&nbsp;OCaml)</li>
+      <li>errors: 2634</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -514,7 +514,7 @@
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">68</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">71</span>
       </li>
       
       <li>
@@ -1165,35 +1165,35 @@ End Seed.
 Module Fitness.
   Export Fitness_repr.
   
-  Definition t  := Fitness.[S.T.t].
+  Definition t := Fitness.[S.T.t].
   
-  Definition op_eq  := Fitness.[S.T.op_eq].
+  Definition op_eq := Fitness.[S.T.op_eq].
   
-  Definition op_ltgt  := Fitness.[S.T.op_ltgt].
+  Definition op_ltgt := Fitness.[S.T.op_ltgt].
   
-  Definition op_lt  := Fitness.[S.T.op_lt].
+  Definition op_lt := Fitness.[S.T.op_lt].
   
-  Definition op_lteq  := Fitness.[S.T.op_lteq].
+  Definition op_lteq := Fitness.[S.T.op_lteq].
   
-  Definition op_gteq  := Fitness.[S.T.op_gteq].
+  Definition op_gteq := Fitness.[S.T.op_gteq].
   
-  Definition op_gt  := Fitness.[S.T.op_gt].
+  Definition op_gt := Fitness.[S.T.op_gt].
   
-  Definition compare  := Fitness.[S.T.compare].
+  Definition compare := Fitness.[S.T.compare].
   
-  Definition equal  := Fitness.[S.T.equal].
+  Definition equal := Fitness.[S.T.equal].
   
-  Definition max  := Fitness.[S.T.max].
+  Definition max := Fitness.[S.T.max].
   
-  Definition min  := Fitness.[S.T.min].
+  Definition min := Fitness.[S.T.min].
   
-  Definition pp  := Fitness.[S.T.pp].
+  Definition pp := Fitness.[S.T.pp].
   
-  Definition encoding  := Fitness.[S.T.encoding].
+  Definition encoding := Fitness.[S.T.encoding].
   
-  Definition to_bytes  := Fitness.[S.T.to_bytes].
+  Definition to_bytes := Fitness.[S.T.to_bytes].
   
-  Definition of_bytes  := Fitness.[S.T.of_bytes].
+  Definition of_bytes := Fitness.[S.T.of_bytes].
   
   Definition fitness := t.
   
@@ -23023,25 +23023,25 @@ Definition pp (ppf : Format.formatter) (cycle : int32) : unit :=
         CamlinternalFormatBasics.No_precision
         CamlinternalFormatBasics.End_of_format) &quot;%ld&quot; % string) cycle.
 
-Definition op_eq  := Compare.Int32.[Compare.S.op_eq].
+Definition op_eq := Compare.Int32.[Compare.S.op_eq].
 
-Definition op_ltgt  := Compare.Int32.[Compare.S.op_ltgt].
+Definition op_ltgt := Compare.Int32.[Compare.S.op_ltgt].
 
-Definition op_lt  := Compare.Int32.[Compare.S.op_lt].
+Definition op_lt := Compare.Int32.[Compare.S.op_lt].
 
-Definition op_lteq  := Compare.Int32.[Compare.S.op_lteq].
+Definition op_lteq := Compare.Int32.[Compare.S.op_lteq].
 
-Definition op_gteq  := Compare.Int32.[Compare.S.op_gteq].
+Definition op_gteq := Compare.Int32.[Compare.S.op_gteq].
 
-Definition op_gt  := Compare.Int32.[Compare.S.op_gt].
+Definition op_gt := Compare.Int32.[Compare.S.op_gt].
 
-Definition compare  := Compare.Int32.[Compare.S.compare].
+Definition compare := Compare.Int32.[Compare.S.compare].
 
-Definition equal  := Compare.Int32.[Compare.S.equal].
+Definition equal := Compare.Int32.[Compare.S.equal].
 
-Definition max  := Compare.Int32.[Compare.S.max].
+Definition max := Compare.Int32.[Compare.S.max].
 
-Definition min  := Compare.Int32.[Compare.S.min].
+Definition min := Compare.Int32.[Compare.S.min].
 
 (* ❌ Applications of functors are not handled. *)
 (* functor_application *)
@@ -49478,25 +49478,25 @@ Definition t := Int64.t.
 
 Definition period := t.
 
-Definition op_eq  := Compare.Int64.[Compare.S.op_eq].
+Definition op_eq := Compare.Int64.[Compare.S.op_eq].
 
-Definition op_ltgt  := Compare.Int64.[Compare.S.op_ltgt].
+Definition op_ltgt := Compare.Int64.[Compare.S.op_ltgt].
 
-Definition op_lt  := Compare.Int64.[Compare.S.op_lt].
+Definition op_lt := Compare.Int64.[Compare.S.op_lt].
 
-Definition op_lteq  := Compare.Int64.[Compare.S.op_lteq].
+Definition op_lteq := Compare.Int64.[Compare.S.op_lteq].
 
-Definition op_gteq  := Compare.Int64.[Compare.S.op_gteq].
+Definition op_gteq := Compare.Int64.[Compare.S.op_gteq].
 
-Definition op_gt  := Compare.Int64.[Compare.S.op_gt].
+Definition op_gt := Compare.Int64.[Compare.S.op_gt].
 
-Definition compare  := Compare.Int64.[Compare.S.compare].
+Definition compare := Compare.Int64.[Compare.S.compare].
 
-Definition equal  := Compare.Int64.[Compare.S.equal].
+Definition equal := Compare.Int64.[Compare.S.equal].
 
-Definition max  := Compare.Int64.[Compare.S.max].
+Definition max := Compare.Int64.[Compare.S.max].
 
-Definition min  := Compare.Int64.[Compare.S.min].
+Definition min := Compare.Int64.[Compare.S.min].
 
 Definition encoding : Data_encoding.encoding int64 :=
   Data_encoding.__int64_value.
@@ -52469,25 +52469,25 @@ Definition t := int32.
 
 Definition raw_level := t.
 
-Definition op_eq  := Compare.Int32.[Compare.S.op_eq].
+Definition op_eq := Compare.Int32.[Compare.S.op_eq].
 
-Definition op_ltgt  := Compare.Int32.[Compare.S.op_ltgt].
+Definition op_ltgt := Compare.Int32.[Compare.S.op_ltgt].
 
-Definition op_lt  := Compare.Int32.[Compare.S.op_lt].
+Definition op_lt := Compare.Int32.[Compare.S.op_lt].
 
-Definition op_lteq  := Compare.Int32.[Compare.S.op_lteq].
+Definition op_lteq := Compare.Int32.[Compare.S.op_lteq].
 
-Definition op_gteq  := Compare.Int32.[Compare.S.op_gteq].
+Definition op_gteq := Compare.Int32.[Compare.S.op_gteq].
 
-Definition op_gt  := Compare.Int32.[Compare.S.op_gt].
+Definition op_gt := Compare.Int32.[Compare.S.op_gt].
 
-Definition compare  := Compare.Int32.[Compare.S.compare].
+Definition compare := Compare.Int32.[Compare.S.compare].
 
-Definition equal  := Compare.Int32.[Compare.S.equal].
+Definition equal := Compare.Int32.[Compare.S.equal].
 
-Definition max  := Compare.Int32.[Compare.S.max].
+Definition max := Compare.Int32.[Compare.S.max].
 
-Definition min  := Compare.Int32.[Compare.S.min].
+Definition min := Compare.Int32.[Compare.S.min].
 
 Definition encoding : Data_encoding.encoding int32 :=
   Data_encoding.__int32_value.
@@ -52783,27 +52783,27 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Require Tezos.Seed_repr.
 
-Definition t  := Compare.Int32.[Compare.S.t].
+Definition t := Compare.Int32.[Compare.S.t].
 
-Definition op_eq  := Compare.Int32.[Compare.S.op_eq].
+Definition op_eq := Compare.Int32.[Compare.S.op_eq].
 
-Definition op_ltgt  := Compare.Int32.[Compare.S.op_ltgt].
+Definition op_ltgt := Compare.Int32.[Compare.S.op_ltgt].
 
-Definition op_lt  := Compare.Int32.[Compare.S.op_lt].
+Definition op_lt := Compare.Int32.[Compare.S.op_lt].
 
-Definition op_lteq  := Compare.Int32.[Compare.S.op_lteq].
+Definition op_lteq := Compare.Int32.[Compare.S.op_lteq].
 
-Definition op_gteq  := Compare.Int32.[Compare.S.op_gteq].
+Definition op_gteq := Compare.Int32.[Compare.S.op_gteq].
 
-Definition op_gt  := Compare.Int32.[Compare.S.op_gt].
+Definition op_gt := Compare.Int32.[Compare.S.op_gt].
 
-Definition compare  := Compare.Int32.[Compare.S.compare].
+Definition compare := Compare.Int32.[Compare.S.compare].
 
-Definition equal  := Compare.Int32.[Compare.S.equal].
+Definition equal := Compare.Int32.[Compare.S.equal].
 
-Definition max  := Compare.Int32.[Compare.S.max].
+Definition max := Compare.Int32.[Compare.S.max].
 
-Definition min  := Compare.Int32.[Compare.S.min].
+Definition min := Compare.Int32.[Compare.S.min].
 
 Definition roll := t.
 
@@ -84883,7 +84883,7 @@ Definition get_rpc_services (function_parameter : unit)
 <hr />
 <div class="row conversion-row" id="storage.ml">
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">68 errors</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">71 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -84935,23 +84935,23 @@ module Int_index = struct
 
   let path_length = 1
 
-  let to_path c l = string_of_int c :: l
+  <abbr class="mark-error" title="This kind of definition of value for first-class modules is not handled">let to_path c l = string_of_int c :: l</abbr>
 
-  let of_path = function
+  <abbr class="mark-error" title="This kind of definition of value for first-class modules is not handled">let of_path = function
     | [] | _ :: _ :: _ -&gt;
         None
     | [c] -&gt;
-        int_of_string_opt c
+        int_of_string_opt c</abbr>
 
   type 'a ipath = 'a * t
 
-  let args =
+  <abbr class="mark-error" title="This kind of definition of value for first-class modules is not handled">let args =
     Storage_description.One
       {
         rpc_arg = RPC_arg.int;
         encoding = Data_encoding.int31;
         compare = Compare.Int.compare;
-      }
+      }</abbr>
 end
 
 <abbr class="mark-error" title="Functors are not handled.">module Make_index (H : Storage_description.INDEX) :
@@ -85897,6 +85897,7 @@ Require Tezos.Raw_context.
 Require Tezos.Script_repr.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_description.
+Require Tezos.Storage_functors.
 Require Tezos.Tez_repr.
 
 Import Storage_functors.
@@ -85920,31 +85921,17 @@ Module Z.
   Definition encoding : Data_encoding.encoding Z.t := Data_encoding.z.
 End Z.
 
-Module Int_index.
-  Definition t := Z.
-  
-  Definition path_length : Z := 1.
-  
-  Definition to_path (c : Z) (l : list string) : list string :=
-    cons (Pervasives.string_of_int c) l.
-  
-  Definition of_path (function_parameter : list string) : option Z :=
-    match function_parameter with
-    | [] | cons _ (cons _ _) =&gt; None
-    | cons c [] =&gt; Pervasives.int_of_string_opt c
-    end.
-  
-  Definition ipath (a : Set) := a * t.
-  
-  Definition args {A : Set}
-    : Storage_description.args A Compare.Int.[Compare.S.t]
-      (A * Compare.Int.[Compare.S.t]) :=
-    Storage_description.One
-      {| Storage_description.args.One.rpc_arg := RPC_arg.int;
-        Storage_description.args.One.encoding := Data_encoding.int31;
-        Storage_description.args.One.compare := Compare.Int.[Compare.S.compare]
-        |}.
-End Int_index.
+Definition Int_index :=
+  existT _ unit
+    {|
+      Storage_functors.INDEX.path_length := 1;
+      (* ❌ This kind of definition of value for first-class modules is not handled *)
+      Storage_functors.INDEX.to_path := unhandled;
+      (* ❌ This kind of definition of value for first-class modules is not handled *)
+      Storage_functors.INDEX.of_path := unhandled;
+      (* ❌ This kind of definition of value for first-class modules is not handled *)
+      Storage_functors.INDEX.args := unhandled
+      |}.
 
 (* ❌ Functors are not handled. *)
 (* functor *)
@@ -89358,16 +89345,21 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Require Tezos.Raw_context.
 Require Tezos.Storage_description.
+Require Tezos.Storage_sigs.
 
 Import Storage_sigs.
 
-Module Registered.
-  Definition ghost : bool := false.
-End Registered.
+Definition Registered :=
+  existT _ unit
+    {|
+      Storage_sigs.REGISTER.ghost := false
+      |}.
 
-Module Ghost.
-  Definition ghost : bool := true.
-End Ghost.
+Definition Ghost :=
+  existT _ unit
+    {|
+      Storage_sigs.REGISTER.ghost := true
+      |}.
 
 (* ❌ Functors are not handled. *)
 (* functor *)
@@ -91774,25 +91766,25 @@ Definition t := int32.
 
 Definition voting_period := t.
 
-Definition op_eq  := Compare.Int32.[Compare.S.op_eq].
+Definition op_eq := Compare.Int32.[Compare.S.op_eq].
 
-Definition op_ltgt  := Compare.Int32.[Compare.S.op_ltgt].
+Definition op_ltgt := Compare.Int32.[Compare.S.op_ltgt].
 
-Definition op_lt  := Compare.Int32.[Compare.S.op_lt].
+Definition op_lt := Compare.Int32.[Compare.S.op_lt].
 
-Definition op_lteq  := Compare.Int32.[Compare.S.op_lteq].
+Definition op_lteq := Compare.Int32.[Compare.S.op_lteq].
 
-Definition op_gteq  := Compare.Int32.[Compare.S.op_gteq].
+Definition op_gteq := Compare.Int32.[Compare.S.op_gteq].
 
-Definition op_gt  := Compare.Int32.[Compare.S.op_gt].
+Definition op_gt := Compare.Int32.[Compare.S.op_gt].
 
-Definition compare  := Compare.Int32.[Compare.S.compare].
+Definition compare := Compare.Int32.[Compare.S.compare].
 
-Definition equal  := Compare.Int32.[Compare.S.equal].
+Definition equal := Compare.Int32.[Compare.S.equal].
 
-Definition max  := Compare.Int32.[Compare.S.max].
+Definition max := Compare.Int32.[Compare.S.max].
 
-Definition min  := Compare.Int32.[Compare.S.min].
+Definition min := Compare.Int32.[Compare.S.min].
 
 Definition encoding : Data_encoding.encoding int32 :=
   Data_encoding.__int32_value.
