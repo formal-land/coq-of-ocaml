@@ -295,7 +295,7 @@ and import_let_fun
 
 and of_module_expr
   (typ_vars : Name.t Name.Map.t)
-  (module_expr : module_expr)
+  (module_expr : Typedtree.module_expr)
   (module_type : Types.module_type option)
   : t Monad.t =
   let { mod_desc; mod_env; mod_loc; mod_type; _ } = module_expr in
