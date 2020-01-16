@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35763 lines</li>
-      <li>Coq size: 42262 lines (+18% compared to&nbsp;OCaml)</li>
-      <li>errors: 2634</li>
+      <li>Coq size: 42276 lines (+18% compared to&nbsp;OCaml)</li>
+      <li>errors: 2617</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -69,7 +69,7 @@
         generated: [
           47563,
           41904,
-          42270,
+          42276,
         ],
         labels: [
           "01-14",
@@ -458,7 +458,7 @@
       </li>
       
       <li>
-        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">112</span>
+        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">98</span>
       </li>
       
       <li>
@@ -514,7 +514,7 @@
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">71</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">68</span>
       </li>
       
       <li>
@@ -60578,7 +60578,7 @@ Parameter parse_var_type_annot :
 <hr />
 <div class="row conversion-row" id="script_ir_translator.ml">
   <div class="col-md-6">
-    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">112 errors</span>
+    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">98 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -61316,143 +61316,7 @@ We were looking for a module signature name for the following shape:
 We use the concept of shape to find the name of a signature for Coq.">struct
     type elt = a
 
-    let </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
-
-We were looking for a module signature name for the following shape:
-[
-  elt_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      singleton;
-      remove;
-      union;
-      inter;
-      diff;
-      compare;
-      equal;
-      subset;
-      iter;
-      map;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      elements;
-      min_elt_opt;
-      max_elt_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      of_list
-    ]);
-  boxed;
-  size
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
-
-We were looking for a module signature name for the following shape:
-[
-  elt_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      singleton;
-      remove;
-      union;
-      inter;
-      diff;
-      compare;
-      equal;
-      subset;
-      iter;
-      map;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      elements;
-      min_elt_opt;
-      max_elt_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      of_list
-    ]);
-  boxed;
-  size
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">elt_ty</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
-
-We were looking for a module signature name for the following shape:
-[
-  elt_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      singleton;
-      remove;
-      union;
-      inter;
-      diff;
-      compare;
-      equal;
-      subset;
-      iter;
-      map;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      elements;
-      min_elt_opt;
-      max_elt_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      of_list
-    ]);
-  boxed;
-  size
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+    let elt_ty = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
 
@@ -61728,143 +61592,7 @@ We were looking for a module signature name for the following shape:
 
 We use the concept of shape to find the name of a signature for Coq.">
 
-    let </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
-
-We were looking for a module signature name for the following shape:
-[
-  elt_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      singleton;
-      remove;
-      union;
-      inter;
-      diff;
-      compare;
-      equal;
-      subset;
-      iter;
-      map;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      elements;
-      min_elt_opt;
-      max_elt_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      of_list
-    ]);
-  boxed;
-  size
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
-
-We were looking for a module signature name for the following shape:
-[
-  elt_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      singleton;
-      remove;
-      union;
-      inter;
-      diff;
-      compare;
-      equal;
-      subset;
-      iter;
-      map;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      elements;
-      min_elt_opt;
-      max_elt_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      of_list
-    ]);
-  boxed;
-  size
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">boxed</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
-
-We were looking for a module signature name for the following shape:
-[
-  elt_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      singleton;
-      remove;
-      union;
-      inter;
-      diff;
-      compare;
-      equal;
-      subset;
-      iter;
-      map;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      elements;
-      min_elt_opt;
-      max_elt_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      of_list
-    ]);
-  boxed;
-  size
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> =
+    let boxed =
       if b then </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_set, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_set
@@ -63566,95 +63294,7 @@ We use the concept of shape to find the name of a signature for Coq.">struct
 
     module OPS = OPS
 
-    </abbr><abbr class="mark-error" title="This kind of definition of value for first-class modules is not handled
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">let boxed = (OPS.empty, 0)</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">
+    let boxed = (OPS.empty, 0)
   end</abbr> )
 
 let map_get : type key value. key -&gt; (key, value) map -&gt; value option =
@@ -63793,137 +63433,7 @@ We use the concept of shape to find the name of a signature for Coq.">struct
 
     type value = b
 
-    let </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">key_ty</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+    let key_ty = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
 
@@ -64187,183 +63697,7 @@ We were looking for a module signature name for the following shape:
 
 We use the concept of shape to find the name of a signature for Coq.">
 
-    let </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">boxed</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> =
+    let boxed =
       let (map, size) = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
@@ -64942,137 +64276,7 @@ We use the concept of shape to find the name of a signature for Coq.">struct
 
     type value = b
 
-    let </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">key_ty</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+    let key_ty = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
 
@@ -65336,137 +64540,7 @@ We were looking for a module signature name for the following shape:
 
 We use the concept of shape to find the name of a signature for Coq.">
 
-    let </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">boxed</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> =
+    let boxed =
       let (map, size) = </abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
@@ -71532,361 +70606,15 @@ Did not find a module signature name for the following shape:
 (a shape is a list of names of values)
 
 We use the concept of shape to find the name of a signature for Coq.">struct
-        module OPS = </abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">M.OPS</abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">
+        module OPS = M.OPS
 
         type key = M.key
 
         type value = M.value
 
-        let </abbr><abbr class="mark-error" title="The signature name of this module could not be found
+        let key_ty = M.key_ty
 
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">key_ty</abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> = </abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">M.key_ty</abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">
-
-        let </abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">boxed</abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq."> = (m, snd </abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.
-
-——————————
-
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
-
-We were looking for a module signature name for the following shape:
-[
-  key_ty;
-  (OPS,
-    [
-      empty;
-      is_empty;
-      mem;
-      add;
-      update;
-      singleton;
-      remove;
-      merge;
-      union;
-      compare;
-      equal;
-      iter;
-      fold;
-      for_all;
-      __exists;
-      filter;
-      partition;
-      cardinal;
-      bindings;
-      min_binding_opt;
-      max_binding_opt;
-      choose_opt;
-      split;
-      find_opt;
-      find_first_opt;
-      find_last_opt;
-      map;
-      mapi
-    ]);
-  boxed
-]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">M.boxed</abbr><abbr class="mark-error" title="The signature name of this module could not be found
-
-Reason:
-Did not find a module signature name for the following shape:
-[ key_ty; boxed ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">)
+        let boxed = (m, snd M.boxed)
       end</abbr> in
       return
         ( ctxt,
@@ -72511,41 +71239,46 @@ Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty a)
   let OPS :=
     (* ❌ Applications of functors are not supported for first-class module values *)
     unsupported_functor_application in
+  let elt_ty := ty in
+  let boxed := OPS.empty in
+  let size := 0 in
   existT _ _
     {|
-      Script_typed_ir.Boxed_set.elt_ty := ty;
-      Script_typed_ir.Boxed_set.OPS := OPS;
-      Script_typed_ir.Boxed_set.boxed := OPS.empty;
-      Script_typed_ir.Boxed_set.size := 0
+      Script_typed_ir.Boxed_set.elt_ty := elt_ty;
+      Script_typed_ir.Boxed_set.boxed := boxed;
+      Script_typed_ir.Boxed_set.size := size
       |}.
 
 Definition set_update {a : Set} (v : a) (b : bool) (Box : Script_typed_ir.set a)
   : Script_typed_ir.set a :=
+  let elt_ty := Box.[Script_typed_ir.Boxed_set.elt_ty] in
+  let OPS := Box.[Script_typed_ir.Boxed_set.OPS] in
+  let boxed :=
+    if b then
+      Box.[Script_typed_ir.Boxed_set.OPS].(S.SET.add) v
+        Box.[Script_typed_ir.Boxed_set.boxed]
+    else
+      Box.[Script_typed_ir.Boxed_set.OPS].(S.SET.remove) v
+        Box.[Script_typed_ir.Boxed_set.boxed] in
+  let size :=
+    let mem :=
+      Box.[Script_typed_ir.Boxed_set.OPS].(S.SET.mem) v
+        Box.[Script_typed_ir.Boxed_set.boxed] in
+    if mem then
+      if b then
+        Box.[Script_typed_ir.Boxed_set.size]
+      else
+        Pervasives.op_minus Box.[Script_typed_ir.Boxed_set.size] 1
+    else
+      if b then
+        Pervasives.op_plus Box.[Script_typed_ir.Boxed_set.size] 1
+      else
+        Box.[Script_typed_ir.Boxed_set.size] in
   existT _ _
     {|
-      Script_typed_ir.Boxed_set.elt_ty := Box.[Script_typed_ir.Boxed_set.elt_ty];
-      Script_typed_ir.Boxed_set.OPS := Box.[Script_typed_ir.Boxed_set.OPS];
-      Script_typed_ir.Boxed_set.boxed :=
-        if b then
-          Box.[Script_typed_ir.Boxed_set.OPS].(S.SET.add) v
-            Box.[Script_typed_ir.Boxed_set.boxed]
-        else
-          Box.[Script_typed_ir.Boxed_set.OPS].(S.SET.remove) v
-            Box.[Script_typed_ir.Boxed_set.boxed];
-      Script_typed_ir.Boxed_set.size :=
-        let mem :=
-          Box.[Script_typed_ir.Boxed_set.OPS].(S.SET.mem) v
-            Box.[Script_typed_ir.Boxed_set.boxed] in
-        if mem then
-          if b then
-            Box.[Script_typed_ir.Boxed_set.size]
-          else
-            Pervasives.op_minus Box.[Script_typed_ir.Boxed_set.size] 1
-        else
-          if b then
-            Pervasives.op_plus Box.[Script_typed_ir.Boxed_set.size] 1
-          else
-            Box.[Script_typed_ir.Boxed_set.size]
+      Script_typed_ir.Boxed_set.elt_ty := elt_ty;
+      Script_typed_ir.Boxed_set.boxed := boxed;
+      Script_typed_ir.Boxed_set.size := size
       |}.
 
 Definition set_mem {elt : Set} (v : elt) (Box : Script_typed_ir.set elt)
@@ -72571,12 +71304,12 @@ Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty a)
   let OPS :=
     (* ❌ Applications of functors are not supported for first-class module values *)
     unsupported_functor_application in
+  let key_ty := ty in
+  let boxed := (OPS.empty, 0) in
   existT _ _
     {|
-      Script_typed_ir.Boxed_map.key_ty := ty;
-      Script_typed_ir.Boxed_map.OPS := OPS;
-      (* ❌ This kind of definition of value for first-class modules is not handled *)
-      Script_typed_ir.Boxed_map.boxed := unhandled
+      Script_typed_ir.Boxed_map.key_ty := key_ty;
+      Script_typed_ir.Boxed_map.boxed := boxed
       |}.
 
 Definition map_get {key value : Set}
@@ -72587,44 +71320,48 @@ Definition map_get {key value : Set}
 Definition map_update {a b : Set}
   (k : a) (v : option b) (Box : Script_typed_ir.map a b)
   : Script_typed_ir.map a b :=
+  let key_ty := Box.[Script_typed_ir.Boxed_map.key_ty] in
+  let OPS := Box.[Script_typed_ir.Boxed_map.OPS] in
+  let boxed :=
+    let '(map, size) := Box.[Script_typed_ir.Boxed_map.boxed] in
+    let contains := Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.mem) k map in
+    match v with
+    | Some v =&gt;
+      ((Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.add) k v map),
+        (Pervasives.op_plus size
+          (if contains then
+            0
+          else
+            1)))
+    | None =&gt;
+      ((Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.remove) k map),
+        (Pervasives.op_minus size
+          (if contains then
+            1
+          else
+            0)))
+    end in
   existT _ _
     {|
-      Script_typed_ir.Boxed_map.key_ty := Box.[Script_typed_ir.Boxed_map.key_ty];
-      Script_typed_ir.Boxed_map.OPS := Box.[Script_typed_ir.Boxed_map.OPS];
-      Script_typed_ir.Boxed_map.boxed :=
-        let '(map, size) := Box.[Script_typed_ir.Boxed_map.boxed] in
-        let contains := Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.mem) k map in
-        match v with
-        | Some v =&gt;
-          ((Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.add) k v map),
-            (Pervasives.op_plus size
-              (if contains then
-                0
-              else
-                1)))
-        | None =&gt;
-          ((Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.remove) k map),
-            (Pervasives.op_minus size
-              (if contains then
-                1
-              else
-                0)))
-        end
+      Script_typed_ir.Boxed_map.key_ty := key_ty;
+      Script_typed_ir.Boxed_map.boxed := boxed
       |}.
 
 Definition map_set {a b : Set} (k : a) (v : b) (Box : Script_typed_ir.map a b)
   : Script_typed_ir.map a b :=
+  let key_ty := Box.[Script_typed_ir.Boxed_map.key_ty] in
+  let OPS := Box.[Script_typed_ir.Boxed_map.OPS] in
+  let boxed :=
+    let '(map, size) := Box.[Script_typed_ir.Boxed_map.boxed] in
+    ((Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.add) k v map),
+      (if Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.mem) k map then
+        size
+      else
+        Pervasives.op_plus size 1)) in
   existT _ _
     {|
-      Script_typed_ir.Boxed_map.key_ty := Box.[Script_typed_ir.Boxed_map.key_ty];
-      Script_typed_ir.Boxed_map.OPS := Box.[Script_typed_ir.Boxed_map.OPS];
-      Script_typed_ir.Boxed_map.boxed :=
-        let '(map, size) := Box.[Script_typed_ir.Boxed_map.boxed] in
-        ((Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.add) k v map),
-          (if Box.[Script_typed_ir.Boxed_map.OPS].(S.MAP.mem) k map then
-            size
-          else
-            Pervasives.op_plus size 1))
+      Script_typed_ir.Boxed_map.key_ty := key_ty;
+      Script_typed_ir.Boxed_map.boxed := boxed
       |}.
 
 Definition map_mem {key value : Set}
@@ -80223,15 +78960,7 @@ Fixpoint extract_big_map_updates {a : Set}
             let '(ctxt, m, ids, acc) := function_parameter in
             let M :=
               (* ❌ The signature name of this module could not be found *)
-              existT _ _
-                {|
-                  unknown_signature_name.OPS :=
-                    M.[Script_typed_ir.Boxed_map.OPS];
-                  unknown_signature_name.key_ty :=
-                    M.[Script_typed_ir.Boxed_map.key_ty];
-                  unknown_signature_name.boxed :=
-                    (m, (Pervasives.snd M.[Script_typed_ir.Boxed_map.boxed]))
-                  |} in
+              first_class_module_value_of_unknown_signature in
             Error_monad.__return (ctxt, M, ids, acc)))
   | (Script_typed_ir.Option_t _ _ true, None) =&gt;
     Error_monad.__return (ctxt, None, ids, acc)
@@ -84883,7 +83612,7 @@ Definition get_rpc_services (function_parameter : unit)
 <hr />
 <div class="row conversion-row" id="storage.ml">
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">71 errors</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">68 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -84935,23 +83664,23 @@ module Int_index = struct
 
   let path_length = 1
 
-  <abbr class="mark-error" title="This kind of definition of value for first-class modules is not handled">let to_path c l = string_of_int c :: l</abbr>
+  let to_path c l = string_of_int c :: l
 
-  <abbr class="mark-error" title="This kind of definition of value for first-class modules is not handled">let of_path = function
+  let of_path = function
     | [] | _ :: _ :: _ -&gt;
         None
     | [c] -&gt;
-        int_of_string_opt c</abbr>
+        int_of_string_opt c
 
   type 'a ipath = 'a * t
 
-  <abbr class="mark-error" title="This kind of definition of value for first-class modules is not handled">let args =
+  let args =
     Storage_description.One
       {
         rpc_arg = RPC_arg.int;
         encoding = Data_encoding.int31;
         compare = Compare.Int.compare;
-      }</abbr>
+      }
 end
 
 <abbr class="mark-error" title="Functors are not handled.">module Make_index (H : Storage_description.INDEX) :
@@ -85922,15 +84651,26 @@ Module Z.
 End Z.
 
 Definition Int_index :=
+  let path_length := 1 in
+  let to_path (c : Z) (l : list string) : list string :=
+    cons (Pervasives.string_of_int c) l in
+  let of_path (function_parameter : list string) : option Z :=
+    match function_parameter with
+    | [] | cons _ (cons _ _) =&gt; None
+    | cons c [] =&gt; Pervasives.int_of_string_opt c
+    end in
+  let args :=
+    Storage_description.One
+      {| Storage_description.args.One.rpc_arg := RPC_arg.int;
+        Storage_description.args.One.encoding := Data_encoding.int31;
+        Storage_description.args.One.compare := Compare.Int.[Compare.S.compare]
+        |} in
   existT _ unit
     {|
-      Storage_functors.INDEX.path_length := 1;
-      (* ❌ This kind of definition of value for first-class modules is not handled *)
-      Storage_functors.INDEX.to_path := unhandled;
-      (* ❌ This kind of definition of value for first-class modules is not handled *)
-      Storage_functors.INDEX.of_path := unhandled;
-      (* ❌ This kind of definition of value for first-class modules is not handled *)
-      Storage_functors.INDEX.args := unhandled
+      Storage_functors.INDEX.path_length := path_length;
+      Storage_functors.INDEX.to_path := to_path;
+      Storage_functors.INDEX.of_path := of_path;
+      Storage_functors.INDEX.args := args
       |}.
 
 (* ❌ Functors are not handled. *)
@@ -89350,15 +88090,17 @@ Require Tezos.Storage_sigs.
 Import Storage_sigs.
 
 Definition Registered :=
+  let ghost := false in
   existT _ unit
     {|
-      Storage_sigs.REGISTER.ghost := false
+      Storage_sigs.REGISTER.ghost := ghost
       |}.
 
 Definition Ghost :=
+  let ghost := true in
   existT _ unit
     {|
-      Storage_sigs.REGISTER.ghost := true
+      Storage_sigs.REGISTER.ghost := ghost
       |}.
 
 (* ❌ Functors are not handled. *)
