@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35763 lines</li>
-      <li>Coq size: 42930 lines (+20% compared to&nbsp;OCaml)</li>
-      <li>errors: 2654</li>
+      <li>Coq size: 41904 lines (+17% compared to&nbsp;OCaml)</li>
+      <li>errors: 2632</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -67,7 +67,7 @@
         ],
         generated: [
           47563,
-          42930,
+          41904,
         ],
         labels: [
           "01-14",
@@ -115,7 +115,7 @@
       </li>
       
       <li>
-        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-danger">45</span>
+        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-danger">44</span>
       </li>
       
       <li>
@@ -195,7 +195,7 @@
       </li>
       
       <li>
-        <a href="#contract_repr.ml">contract_repr.ml</a>&nbsp;<span class="label label-danger">24</span>
+        <a href="#contract_repr.ml">contract_repr.ml</a>&nbsp;<span class="label label-danger">17</span>
       </li>
       
       <li>
@@ -203,7 +203,7 @@
       </li>
       
       <li>
-        <a href="#contract_services.ml">contract_services.ml</a>&nbsp;<span class="label label-danger">221</span>
+        <a href="#contract_services.ml">contract_services.ml</a>&nbsp;<span class="label label-danger">220</span>
       </li>
       
       <li>
@@ -211,7 +211,7 @@
       </li>
       
       <li>
-        <a href="#contract_storage.ml">contract_storage.ml</a>&nbsp;<span class="label label-danger">8</span>
+        <a href="#contract_storage.ml">contract_storage.ml</a>&nbsp;<span class="label label-danger">6</span>
       </li>
       
       <li>
@@ -219,7 +219,7 @@
       </li>
       
       <li>
-        <a href="#cycle_repr.ml">cycle_repr.ml</a>&nbsp;<span class="label label-danger">7</span>
+        <a href="#cycle_repr.ml">cycle_repr.ml</a>&nbsp;<span class="label label-danger">5</span>
       </li>
       
       <li>
@@ -273,7 +273,7 @@
       </li>
       
       <li>
-        <a href="#helpers_services.ml">helpers_services.ml</a>&nbsp;<span class="label label-danger">357</span>
+        <a href="#helpers_services.ml">helpers_services.ml</a>&nbsp;<span class="label label-danger">355</span>
       </li>
       
       <li>
@@ -369,7 +369,7 @@
       </li>
       
       <li>
-        <a href="#parameters_repr.ml">parameters_repr.ml</a>&nbsp;<span class="label label-danger">2</span>
+        <a href="#parameters_repr.ml">parameters_repr.ml</a>&nbsp;<span class="label label-danger">1</span>
       </li>
       
       <li>
@@ -511,7 +511,7 @@
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">74</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">68</span>
       </li>
       
       <li>
@@ -4944,15 +4944,15 @@ Module Voting := Voting_services.
 Definition register (function_parameter : unit) : unit :=
   let 'tt := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Contract.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Constants.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Delegate.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Helpers.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Nonce.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Voting.register tt.
 </pre>
   </div>
@@ -5979,7 +5979,7 @@ Parameter record_ballot :
 <hr />
 <div class="row conversion-row" id="apply.ml">
   <div class="col-md-6">
-    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-danger">45 errors</span>
+    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-danger">44 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -6669,13 +6669,7 @@ let apply_manager_operation_content :
       | Some contract -&gt;
           <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert internal</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert internal ;
           (* The preorigination field is only used to early return
                  the address of an originated contract in Michelson.
                  It cannot come from the outside. *)
@@ -7887,9 +7881,7 @@ Definition apply_manager_operation_content {kind : Set}
                                                   match preorigination with
                                                   | Some contract =&gt;
                                                     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-                                                    let _ :=
-                                                      (* ❌ Assert instruction is not handled. *)
-                                                      assert internal in
+                                                    (* ❌ instruction_sequence &quot;;&quot; *)
                                                     Error_monad.__return
                                                       (ctxt, contract)
                                                   | None =&gt;
@@ -13896,14 +13888,7 @@ Definition activation_code_encoding : Data_encoding.encoding MBytes.t :=
 
 Definition activation_code_of_hex (h : string) : MBytes.t :=
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    if
-      Compare.Int.[Compare.S.op_ltgt] (String.length h)
-        (Pervasives.op_star activation_code_size 2) then
-      Pervasives.invalid_arg
-        &quot;Blinded_public_key_hash.activation_code_of_hex&quot; % string
-    else
-      tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   MBytes.of_hex
     (* ❌ Variants not supported *)
     variant.
@@ -16113,14 +16098,7 @@ End S.
 Definition register (function_parameter : unit) : unit :=
   let 'tt := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0_noctxt S.errors
-      (fun function_parameter =&gt;
-        let 'tt := function_parameter in
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          Error_monad.__return
-            (Data_encoding.Json.schema None Error_monad.error_encoding)) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register0 S.all
     (fun ctxt =&gt;
       fun function_parameter =&gt;
@@ -16717,7 +16695,7 @@ Definition contract_hash : string := &quot;Zy&quot; % string.
 <hr />
 <div class="row conversion-row" id="contract_repr.ml">
   <div class="col-md-6">
-    <a href="#contract_repr.ml"><code>contract_repr.ml</code></a>&nbsp;<span class="label label-danger">24 errors</span>
+    <a href="#contract_repr.ml"><code>contract_repr.ml</code></a>&nbsp;<span class="label label-danger">17 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -16878,13 +16856,7 @@ let originated_contracts
            origination_nonce ) =
   <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Operation_hash.equal first_hash last_hash)</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Operation_hash.equal first_hash last_hash) ;
   let rec contracts acc origination_index =
     if Compare.Int32.(origination_index &lt; first) then acc
     else
@@ -16953,13 +16925,7 @@ module Index = struct
         let <abbr class="mark-error" title="Patterns on variants are not supported">(`Hex index_key)</abbr> = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
         <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 0 2 = index1))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 0 2 = index1)) ;
         </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -16968,19 +16934,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 2 2 = index2))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 2 2 = index2)) ;
         </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -16995,25 +16949,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 4 2 = index3))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 4 2 = index3)) ;
         </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -17034,31 +16970,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 6 2 = index4))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 6 2 = index4)) ;
         </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -17085,37 +16997,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 8 2 = index5))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 8 2 = index5)) ;
         </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -17148,43 +17030,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 10 2 = index6))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 10 2 = index6)) ;
         Data_encoding.Binary.of_bytes encoding raw_key</abbr>
 
   let rpc_arg = rpc_arg
@@ -17358,9 +17204,7 @@ Definition originated_contracts (function_parameter : origination_nonce)
           origination_nonce.origination_index := last
           |} as origination_nonce := function_parameter in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      (* ❌ Assert instruction is not handled. *)
-      assert (Operation_hash.[S.HASH.equal] first_hash last_hash) in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     let fix contracts
       (acc : list t) (origination_index : Compare.Int32.[Compare.S.t])
       : list t :=
@@ -17435,41 +17279,17 @@ Module Index.
           variant in
       let 'Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ :=
-        (* ❌ Assert instruction is not handled. *)
-        assert
-          (Compare.String.[Compare.S.op_eq] (String.sub index_key 0 2) index1)
-        in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ :=
-        (* ❌ Assert instruction is not handled. *)
-        assert
-          (Compare.String.[Compare.S.op_eq] (String.sub index_key 2 2) index2)
-        in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ :=
-        (* ❌ Assert instruction is not handled. *)
-        assert
-          (Compare.String.[Compare.S.op_eq] (String.sub index_key 4 2) index3)
-        in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ :=
-        (* ❌ Assert instruction is not handled. *)
-        assert
-          (Compare.String.[Compare.S.op_eq] (String.sub index_key 6 2) index4)
-        in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ :=
-        (* ❌ Assert instruction is not handled. *)
-        assert
-          (Compare.String.[Compare.S.op_eq] (String.sub index_key 8 2) index5)
-        in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ :=
-        (* ❌ Assert instruction is not handled. *)
-        assert
-          (Compare.String.[Compare.S.op_eq] (String.sub index_key 10 2) index6)
-        in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       Data_encoding.Binary.of_bytes encoding raw_key
     end.
   
@@ -17651,7 +17471,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
 <hr />
 <div class="row conversion-row" id="contract_services.ml">
   <div class="col-md-6">
-    <a href="#contract_services.ml"><code>contract_services.ml</code></a>&nbsp;<span class="label label-danger">221 errors</span>
+    <a href="#contract_services.ml"><code>contract_services.ml</code></a>&nbsp;<span class="label label-danger">220 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -18297,127 +18117,9 @@ Alternative: use a monad to sequence side-effects.">register1 S.contract_big_map
           let rec find = function
             | [] -&gt;
                 return_none
-            | (id : Z.t) :: ids -&gt; </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">(
+            | (id : Z.t) :: ids -&gt; (
               try do_big_map_get ctxt id key &gt;&gt;=? return_some
-              with Not_found -&gt; find ids )</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.">
+              with Not_found -&gt; find ids )
           in
           find ids) ;
   </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
@@ -19493,15 +19195,7 @@ End S.
 Definition register (function_parameter : unit) : unit :=
   let 'tt := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.__list_value
-      (fun ctxt =&gt;
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Error_monad.op_gtgteq (Alpha_context.Contract.__list_value ctxt)
-              Error_monad.__return) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   let register_field {A : Set}
     (s :
     RPC_service.t
@@ -19582,272 +19276,25 @@ Definition register (function_parameter : unit) : unit :=
                   end))
         end) in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := register_field S.balance Alpha_context.Contract.get_balance in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.manager_key
-      (fun ctxt =&gt;
-        fun contract =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              match Alpha_context.Contract.is_implicit contract with
-              | None =&gt; Pervasives.raise OCaml.Not_found
-              | Some mgr =&gt;
-                Error_monad.op_gtgteqquestion
-                  (Alpha_context.Contract.is_manager_key_revealed ctxt mgr)
-                  (fun function_parameter =&gt;
-                    match function_parameter with
-                    | false =&gt; Error_monad.return_none
-                    | true =&gt;
-                      Error_monad.op_gtgteqquestion
-                        (Alpha_context.Contract.get_manager_key ctxt mgr)
-                        Error_monad.return_some
-                    end)
-              end) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := register_opt_field S.delegate Alpha_context.Delegate.get in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.counter
-      (fun ctxt =&gt;
-        fun contract =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              match Alpha_context.Contract.is_implicit contract with
-              | None =&gt; Pervasives.raise OCaml.Not_found
-              | Some mgr =&gt; Alpha_context.Contract.get_counter ctxt mgr
-              end) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    register_opt_field S.script
-      (fun c =&gt;
-        fun v =&gt;
-          Error_monad.op_gtgteqquestion (Alpha_context.Contract.get_script c v)
-            (fun function_parameter =&gt;
-              let '(_, v) := function_parameter in
-              Error_monad.__return v)) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    register_opt_field S.storage
-      (fun ctxt =&gt;
-        fun contract =&gt;
-          Error_monad.op_gtgteqquestion
-            (Alpha_context.Contract.get_script ctxt contract)
-            (fun function_parameter =&gt;
-              let '(ctxt, script) := function_parameter in
-              match script with
-              | None =&gt; Error_monad.return_none
-              | Some script =&gt;
-                let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-                Error_monad.op_gtgteqquestion
-                  (Script_ir_translator.parse_script None ctxt true script)
-                  (fun function_parameter =&gt;
-                    let '(Script_ir_translator.Ex_script script, ctxt) :=
-                      function_parameter in
-                    Error_monad.op_gtgteqquestion
-                      (Script_ir_translator.unparse_script ctxt
-                        Script_ir_translator.Readable script)
-                      (fun function_parameter =&gt;
-                        let '(script, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (Alpha_context.Script.force_decode ctxt
-                            (Alpha_context.Script.t.storage script))
-                          (fun function_parameter =&gt;
-                            let '(storage, _ctxt) := function_parameter in
-                            Error_monad.return_some storage)))
-              end)) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register2 S.entrypoint_type
-      (fun ctxt =&gt;
-        fun v =&gt;
-          fun entrypoint =&gt;
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              fun function_parameter =&gt;
-                let 'tt := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Alpha_context.Contract.get_script_code ctxt v)
-                  (fun function_parameter =&gt;
-                    let '(_, expr) := function_parameter in
-                    match expr with
-                    | None =&gt; Pervasives.raise OCaml.Not_found
-                    | Some expr =&gt;
-                      let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-                      let legacy := true in
-                      Error_monad.op_gtgteqquestion
-                        (Alpha_context.Script.force_decode ctxt expr)
-                        (fun function_parameter =&gt;
-                          let '(expr, _) := function_parameter in
-                          Error_monad.op_gtgteq
-                            (Lwt.__return
-                              (Error_monad.op_gtgtquestion
-                                (Script_ir_translator.parse_toplevel legacy expr)
-                                (fun function_parameter =&gt;
-                                  let '(arg_type, _, _, root_name) :=
-                                    function_parameter in
-                                  Error_monad.op_gtgtquestion
-                                    (Script_ir_translator.parse_ty ctxt legacy
-                                      true false true arg_type)
-                                    (fun function_parameter =&gt;
-                                      let
-                                        '(Script_ir_translator.Ex_ty arg_type, _) :=
-                                        function_parameter in
-                                      Script_ir_translator.find_entrypoint
-                                        arg_type root_name entrypoint))))
-                            (fun function_parameter =&gt;
-                              match function_parameter with
-                              |
-                                Pervasives.Ok
-                                  (_f, Script_ir_translator.Ex_ty ty) =&gt;
-                                Error_monad.op_gtgteqquestion
-                                  (Script_ir_translator.unparse_ty ctxt ty)
-                                  (fun function_parameter =&gt;
-                                    let '(ty_node, _) := function_parameter in
-                                    Error_monad.__return
-                                      (Micheline.strip_locations ty_node))
-                              | Pervasives.Error _ =&gt;
-                                Pervasives.raise OCaml.Not_found
-                              end))
-                    end)) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.list_entrypoints
-      (fun ctxt =&gt;
-        fun v =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.Contract.get_script_code ctxt v)
-                (fun function_parameter =&gt;
-                  let '(_, expr) := function_parameter in
-                  match expr with
-                  | None =&gt; Pervasives.raise OCaml.Not_found
-                  | Some expr =&gt;
-                    let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-                    let legacy := true in
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Script.force_decode ctxt expr)
-                      (fun function_parameter =&gt;
-                        let '(expr, _) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (Lwt.__return
-                            (Error_monad.op_gtgtquestion
-                              (Script_ir_translator.parse_toplevel legacy expr)
-                              (fun function_parameter =&gt;
-                                let '(arg_type, _, _, root_name) :=
-                                  function_parameter in
-                                Error_monad.op_gtgtquestion
-                                  (Script_ir_translator.parse_ty ctxt legacy
-                                    true false true arg_type)
-                                  (fun function_parameter =&gt;
-                                    let
-                                      '(Script_ir_translator.Ex_ty arg_type, _) :=
-                                      function_parameter in
-                                    Script_ir_translator.list_entrypoints
-                                      arg_type ctxt root_name))))
-                          (fun function_parameter =&gt;
-                            let '(unreachable_entrypoint, map) :=
-                              function_parameter in
-                            Error_monad.__return
-                              (unreachable_entrypoint,
-                                (Script_ir_translator.Entrypoints_map.fold
-                                  (fun entry =&gt;
-                                    fun function_parameter =&gt;
-                                      let '(_, ty) := function_parameter in
-                                      fun acc =&gt;
-                                        cons
-                                          (entry, (Micheline.strip_locations ty))
-                                          acc) map []))))
-                  end)) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.contract_big_map_get_opt
-      (fun ctxt =&gt;
-        fun contract =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let '(key, key_type) := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.Contract.get_script ctxt contract)
-                (fun function_parameter =&gt;
-                  let '(ctxt, script) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return
-                      (Script_ir_translator.parse_packable_ty ctxt true
-                        (Micheline.root key_type)))
-                    (fun function_parameter =&gt;
-                      let '(Script_ir_translator.Ex_ty key_type, ctxt) :=
-                        function_parameter in
-                      Error_monad.op_gtgteqquestion
-                        (Script_ir_translator.parse_data None ctxt true key_type
-                          (Micheline.root key))
-                        (fun function_parameter =&gt;
-                          let '(key, ctxt) := function_parameter in
-                          Error_monad.op_gtgteqquestion
-                            (Script_ir_translator.hash_data ctxt key_type key)
-                            (fun function_parameter =&gt;
-                              let '(key, ctxt) := function_parameter in
-                              match script with
-                              | None =&gt; Pervasives.raise OCaml.Not_found
-                              | Some script =&gt;
-                                let ctxt := Alpha_context.Gas.set_unlimited ctxt
-                                  in
-                                Error_monad.op_gtgteqquestion
-                                  (Script_ir_translator.parse_script None ctxt
-                                    true script)
-                                  (fun function_parameter =&gt;
-                                    let
-                                      '(Script_ir_translator.Ex_script script,
-                                        ctxt) := function_parameter in
-                                    Error_monad.op_gtgteqquestion
-                                      (Script_ir_translator.collect_big_maps
-                                        ctxt
-                                        (Script_typed_ir.script.storage_type
-                                          script)
-                                        (Script_typed_ir.script.storage script))
-                                      (fun function_parameter =&gt;
-                                        let '(ids, _ctxt) := function_parameter
-                                          in
-                                        let ids :=
-                                          Script_ir_translator.list_of_big_map_ids
-                                            ids in
-                                        let fix find
-                                          (function_parameter : list Z.t)
-                                          : Lwt.t
-                                            (Error_monad.tzresult
-                                              (option
-                                                (Micheline.canonical
-                                                  Alpha_context.Script.prim))) :=
-                                          match function_parameter with
-                                          | [] =&gt; Error_monad.return_none
-                                          | cons (_ as id) ids =&gt;
-                                            (* ❌ Try-with are not handled *)
-                                            try
-                                              (Error_monad.op_gtgteqquestion
-                                                (do_big_map_get ctxt id key)
-                                                Error_monad.return_some)
-                                          end in
-                                        find ids))
-                              end))))) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register2 S.big_map_get
-      (fun ctxt =&gt;
-        fun id =&gt;
-          fun key =&gt;
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              fun function_parameter =&gt;
-                let 'tt := function_parameter in
-                do_big_map_get ctxt id key) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   register_field S.info
     (fun ctxt =&gt;
       fun contract =&gt;
@@ -21524,7 +20971,7 @@ Parameter register : unit -&gt; unit.
 <hr />
 <div class="row conversion-row" id="contract_storage.ml">
   <div class="col-md-6">
-    <a href="#contract_storage.ml"><code>contract_storage.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
+    <a href="#contract_storage.ml"><code>contract_storage.ml</code></a>&nbsp;<span class="label label-danger">6 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -21971,13 +21418,7 @@ let create_base c ?(prepaid_bootstrap_storage = false)
       in
       <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.Z.(total_size &gt;= Z.zero))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.Z.(total_size &gt;= Z.zero)) ;
       let prepaid_bootstrap_storage =
         if prepaid_bootstrap_storage then total_size else Z.zero
       in
@@ -22222,13 +21663,7 @@ let spend c contract amount =
                 (* Don't delete &quot;delegate&quot; contract *)
                 <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Signature.Public_key_hash.equal pkh pkh')</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Signature.Public_key_hash.equal pkh pkh') ;
                 return c</abbr>
             | None -&gt;
                 (* Delete empty implicit contract *)
@@ -22602,11 +22037,7 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                                                   (Z.of_int storage_size))
                                                 big_map_size in
                                             (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-                                            let _ :=
-                                              (* ❌ Assert instruction is not handled. *)
-                                              assert
-                                                (Compare.Z.[Compare.S.op_gteq]
-                                                  total_size Z.zero) in
+                                            (* ❌ instruction_sequence &quot;;&quot; *)
                                             let prepaid_bootstrap_storage :=
                                               if prepaid_bootstrap_storage then
                                                 total_size
@@ -22956,11 +22387,7 @@ Definition spend
                         match function_parameter with
                         | Some pkh' =&gt;
                           (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-                          let _ :=
-                            (* ❌ Assert instruction is not handled. *)
-                            assert
-                              (Signature.Public_key_hash.[S.SPublic_key_hash.equal]
-                                pkh pkh') in
+                          (* ❌ instruction_sequence &quot;;&quot; *)
                           Error_monad.__return c
                         | None =&gt; delete c contract
                         end)
@@ -23350,7 +22777,7 @@ Parameter set_paid_storage_space_and_return_fees_to_pay :
 <hr />
 <div class="row conversion-row" id="cycle_repr.ml">
   <div class="col-md-6">
-    <a href="#cycle_repr.ml"><code>cycle_repr.ml</code></a>&nbsp;<span class="label label-danger">7 errors</span>
+    <a href="#cycle_repr.ml"><code>cycle_repr.ml</code></a>&nbsp;<span class="label label-danger">5 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -23416,25 +22843,13 @@ let pred = function 0l -&gt; None | i -&gt; Some (Int32.pred i)
 let add c i =
   <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.Int.(i &gt; 0))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.Int.(i &gt; 0)) ;
   Int32.add c (Int32.of_int i)</abbr>
 
 let sub c i =
   <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.Int.(i &gt; 0))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.Int.(i &gt; 0)) ;
   let r = Int32.sub c (Int32.of_int i) in
   if Compare.Int32.(r &lt; 0l) then None else Some r</abbr>
 
@@ -23540,16 +22955,12 @@ Definition pred (function_parameter : int32) : option int32 :=
 
 Definition add (c : int32) (i : Compare.Int.[Compare.S.t]) : int32 :=
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    (* ❌ Assert instruction is not handled. *)
-    assert (Compare.Int.[Compare.S.op_gt] i 0) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Int32.add c (Int32.of_int i).
 
 Definition sub (c : int32) (i : Compare.Int.[Compare.S.t]) : option int32 :=
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    (* ❌ Assert instruction is not handled. *)
-    assert (Compare.Int.[Compare.S.op_gt] i 0) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   let r := Int32.sub c (Int32.of_int i) in
   if
     Compare.Int32.[Compare.S.op_lt] r
@@ -25655,169 +25066,23 @@ End S.
 Definition register (function_parameter : unit) : unit :=
   let 'tt := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.list_delegate
-      (fun ctxt =&gt;
-        fun q =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Error_monad.op_gtgteq (Alpha_context.Delegate.__list_value ctxt)
-              (fun delegates =&gt;
-                if
-                  Pervasives.op_andand (S.list_query.active q)
-                    (S.list_query.inactive q) then
-                  Error_monad.__return delegates
-                else
-                  if S.list_query.active q then
-                    Error_monad.filter_map_s
-                      (fun pkh =&gt;
-                        Error_monad.op_gtgteqquestion
-                          (Alpha_context.Delegate.deactivated ctxt pkh)
-                          (fun function_parameter =&gt;
-                            match function_parameter with
-                            | true =&gt; Error_monad.return_none
-                            | false =&gt; Error_monad.return_some pkh
-                            end)) delegates
-                  else
-                    if S.list_query.inactive q then
-                      Error_monad.filter_map_s
-                        (fun pkh =&gt;
-                          Error_monad.op_gtgteqquestion
-                            (Alpha_context.Delegate.deactivated ctxt pkh)
-                            (fun function_parameter =&gt;
-                              match function_parameter with
-                              | false =&gt; Error_monad.return_none
-                              | true =&gt; Error_monad.return_some pkh
-                              end)) delegates
-                    else
-                      Error_monad.return_nil)) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.info
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.Delegate.full_balance ctxt pkh)
-                (fun balance =&gt;
-                  Error_monad.op_gtgteqquestion
-                    (Alpha_context.Delegate.frozen_balance ctxt pkh)
-                    (fun frozen_balance =&gt;
-                      Error_monad.op_gtgteq
-                        (Alpha_context.Delegate.frozen_balance_by_cycle ctxt pkh)
-                        (fun frozen_balance_by_cycle =&gt;
-                          Error_monad.op_gtgteqquestion
-                            (Alpha_context.Delegate.staking_balance ctxt pkh)
-                            (fun staking_balance =&gt;
-                              Error_monad.op_gtgteq
-                                (Alpha_context.Delegate.delegated_contracts ctxt
-                                  pkh)
-                                (fun delegated_contracts =&gt;
-                                  Error_monad.op_gtgteqquestion
-                                    (Alpha_context.Delegate.delegated_balance
-                                      ctxt pkh)
-                                    (fun delegated_balance =&gt;
-                                      Error_monad.op_gtgteqquestion
-                                        (Alpha_context.Delegate.deactivated ctxt
-                                          pkh)
-                                        (fun deactivated =&gt;
-                                          Error_monad.op_gtgteqquestion
-                                            (Alpha_context.Delegate.grace_period
-                                              ctxt pkh)
-                                            (fun grace_period =&gt;
-                                              Error_monad.__return
-                                                {| info.balance := balance;
-                                                  info.frozen_balance :=
-                                                    frozen_balance;
-                                                  info.frozen_balance_by_cycle :=
-                                                    frozen_balance_by_cycle;
-                                                  info.staking_balance :=
-                                                    staking_balance;
-                                                  info.delegated_contracts :=
-                                                    delegated_contracts;
-                                                  info.delegated_balance :=
-                                                    delegated_balance;
-                                                  info.deactivated :=
-                                                    deactivated;
-                                                  info.grace_period :=
-                                                    grace_period |}))))))))) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.balance
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Alpha_context.Delegate.full_balance ctxt pkh) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.frozen_balance
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Alpha_context.Delegate.frozen_balance ctxt pkh) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.frozen_balance_by_cycle
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Error_monad.op_gtgteq
-                (Alpha_context.Delegate.frozen_balance_by_cycle ctxt pkh)
-                Error_monad.__return) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.staking_balance
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Alpha_context.Delegate.staking_balance ctxt pkh) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.delegated_contracts
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Error_monad.op_gtgteq
-                (Alpha_context.Delegate.delegated_contracts ctxt pkh)
-                Error_monad.__return) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.delegated_balance
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Alpha_context.Delegate.delegated_balance ctxt pkh) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register1 S.deactivated
-      (fun ctxt =&gt;
-        fun pkh =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Alpha_context.Delegate.deactivated ctxt pkh) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register1 S.grace_period
     (fun ctxt =&gt;
       fun pkh =&gt;
@@ -26800,15 +26065,15 @@ End Minimal_valid_time.
 Definition register (function_parameter : unit) : unit :=
   let 'tt := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Baking_rights.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Endorsing_rights.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Endorsing_power.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Required_endorsements.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Minimal_valid_time.register tt.
 
 Definition endorsement_rights
@@ -30693,7 +29958,7 @@ Require Import Tezos.Environment.
 Definition int64_to_bytes (i : int64) : MBytes.t :=
   let b := MBytes.create 8 in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := MBytes.set_int64 b 0 i in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   b.
 
 Definition int64_of_bytes (b : MBytes.t) : Error_monad.tzresult int64 :=
@@ -31472,7 +30737,7 @@ Parameter op_plusat : cost -&gt; cost -&gt; cost.
 <hr />
 <div class="row conversion-row" id="helpers_services.ml">
   <div class="col-md-6">
-    <a href="#helpers_services.ml"><code>helpers_services.ml</code></a>&nbsp;<span class="label label-danger">357 errors</span>
+    <a href="#helpers_services.ml"><code>helpers_services.ml</code></a>&nbsp;<span class="label label-danger">355 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -31960,75 +31225,7 @@ Alternative: use a monad to sequence side-effects.">register0
                 | Some arg -&gt;
                     arg
                 | None -&gt;
-                    </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert false</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.">
+                    assert false
               in
               (* Fail quickly if not enough gas for minimal deserialization cost *)
               Lwt.return
@@ -32051,75 +31248,7 @@ Alternative: use a monad to sequence side-effects.">
                 | Some script -&gt;
                     script
                 | None -&gt;
-                    </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert false</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.">
+                    assert false
               in
               (* Fail quickly if not enough gas for minimal deserialization cost *)
               Lwt.return
@@ -34179,461 +33308,19 @@ Module Scripts.
               (script, None) None)
             (fun ctxt =&gt; Error_monad.__return (ctxt, dummy_contract))) in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.run_code
-        (fun ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let
-                '(code, storage, parameter, amount, chain_id, source, payer,
-                  gas, entrypoint) := function_parameter in
-              let storage := Alpha_context.Script.lazy_expr storage in
-              let code := Alpha_context.Script.lazy_expr code in
-              Error_monad.op_gtgteqquestion
-                (originate_dummy_contract ctxt
-                  {| Alpha_context.Script.t.code := code;
-                    Alpha_context.Script.t.storage := storage |})
-                (fun function_parameter =&gt;
-                  let '(ctxt, dummy_contract) := function_parameter in
-                  let '(source, payer) :=
-                    match (source, payer) with
-                    | (Some source, Some payer) =&gt; (source, payer)
-                    | (Some source, None) =&gt; (source, source)
-                    | (None, Some payer) =&gt; (payer, payer)
-                    | (None, None) =&gt; (dummy_contract, dummy_contract)
-                    end in
-                  let gas :=
-                    match gas with
-                    | Some gas =&gt; gas
-                    | None =&gt;
-                      Alpha_context.Constants.hard_gas_limit_per_operation ctxt
-                    end in
-                  let ctxt := Alpha_context.Gas.set_limit ctxt gas in
-                  let step_constants :=
-                    {| Script_interpreter.step_constants.source := source;
-                      Script_interpreter.step_constants.payer := payer;
-                      Script_interpreter.step_constants.self := dummy_contract;
-                      Script_interpreter.step_constants.amount := amount;
-                      Script_interpreter.step_constants.chain_id := chain_id |}
-                    in
-                  Error_monad.op_gtgteqquestion
-                    (Script_interpreter.execute ctxt
-                      Script_ir_translator.Readable step_constants
-                      {| Alpha_context.Script.t.code := code;
-                        Alpha_context.Script.t.storage := storage |} entrypoint
-                      parameter)
-                    (fun function_parameter =&gt;
-                      let '{|
-                        Script_interpreter.execution_result.storage := storage;
-                          Script_interpreter.execution_result.big_map_diff :=
-                            big_map_diff;
-                          Script_interpreter.execution_result.operations :=
-                            operations
-                          |} := function_parameter in
-                      Error_monad.__return (storage, operations, big_map_diff))))
-      in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.trace_code
-        (fun ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let
-                '(code, storage, parameter, amount, chain_id, source, payer,
-                  gas, entrypoint) := function_parameter in
-              let storage := Alpha_context.Script.lazy_expr storage in
-              let code := Alpha_context.Script.lazy_expr code in
-              Error_monad.op_gtgteqquestion
-                (originate_dummy_contract ctxt
-                  {| Alpha_context.Script.t.code := code;
-                    Alpha_context.Script.t.storage := storage |})
-                (fun function_parameter =&gt;
-                  let '(ctxt, dummy_contract) := function_parameter in
-                  let '(source, payer) :=
-                    match (source, payer) with
-                    | (Some source, Some payer) =&gt; (source, payer)
-                    | (Some source, None) =&gt; (source, source)
-                    | (None, Some payer) =&gt; (payer, payer)
-                    | (None, None) =&gt; (dummy_contract, dummy_contract)
-                    end in
-                  let gas :=
-                    match gas with
-                    | Some gas =&gt; gas
-                    | None =&gt;
-                      Alpha_context.Constants.hard_gas_limit_per_operation ctxt
-                    end in
-                  let ctxt := Alpha_context.Gas.set_limit ctxt gas in
-                  let step_constants :=
-                    {| Script_interpreter.step_constants.source := source;
-                      Script_interpreter.step_constants.payer := payer;
-                      Script_interpreter.step_constants.self := dummy_contract;
-                      Script_interpreter.step_constants.amount := amount;
-                      Script_interpreter.step_constants.chain_id := chain_id |}
-                    in
-                  Error_monad.op_gtgteqquestion
-                    (Script_interpreter.trace ctxt Script_ir_translator.Readable
-                      step_constants
-                      {| Alpha_context.Script.t.code := code;
-                        Alpha_context.Script.t.storage := storage |} entrypoint
-                      parameter)
-                    (fun function_parameter =&gt;
-                      let
-                        '({|
-                          Script_interpreter.execution_result.storage := storage;
-                            Script_interpreter.execution_result.big_map_diff :=
-                              big_map_diff;
-                            Script_interpreter.execution_result.operations :=
-                              operations
-                            |}, trace) := function_parameter in
-                      Error_monad.__return
-                        (storage, operations, trace, big_map_diff)))) in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.typecheck_code
-        (fun ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let '(expr, maybe_gas) := function_parameter in
-              let ctxt :=
-                match maybe_gas with
-                | None =&gt; Alpha_context.Gas.set_unlimited ctxt
-                | Some gas =&gt; Alpha_context.Gas.set_limit ctxt gas
-                end in
-              Error_monad.op_gtgteqquestion
-                (Script_ir_translator.typecheck_code ctxt expr)
-                (fun function_parameter =&gt;
-                  let '(res, ctxt) := function_parameter in
-                  Error_monad.__return (res, (Alpha_context.Gas.level ctxt))))
-      in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.typecheck_data
-        (fun ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let '(data, ty, maybe_gas) := function_parameter in
-              let ctxt :=
-                match maybe_gas with
-                | None =&gt; Alpha_context.Gas.set_unlimited ctxt
-                | Some gas =&gt; Alpha_context.Gas.set_limit ctxt gas
-                end in
-              Error_monad.op_gtgteqquestion
-                (Script_ir_translator.typecheck_data None ctxt (data, ty))
-                (fun ctxt =&gt; Error_monad.__return (Alpha_context.Gas.level ctxt)))
-      in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.pack_data
-        (fun ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let '(expr, typ, maybe_gas) := function_parameter in
-              let ctxt :=
-                match maybe_gas with
-                | None =&gt; Alpha_context.Gas.set_unlimited ctxt
-                | Some gas =&gt; Alpha_context.Gas.set_limit ctxt gas
-                end in
-              Error_monad.op_gtgteqquestion
-                (Lwt.__return
-                  (Script_ir_translator.parse_packable_ty ctxt true
-                    (Micheline.root typ)))
-                (fun function_parameter =&gt;
-                  let '(Script_ir_translator.Ex_ty typ, ctxt) :=
-                    function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Script_ir_translator.parse_data None ctxt true typ
-                      (Micheline.root expr))
-                    (fun function_parameter =&gt;
-                      let '(data, ctxt) := function_parameter in
-                      Error_monad.op_gtgteqquestion
-                        (Script_ir_translator.pack_data ctxt typ data)
-                        (fun function_parameter =&gt;
-                          let '(__bytes_value, ctxt) := function_parameter in
-                          Error_monad.__return
-                            (__bytes_value, (Alpha_context.Gas.level ctxt))))))
-      in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.run_operation
-        (fun ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let
-                '({|
-                  Alpha_context.packed_operation.shell := shell;
-                    Alpha_context.packed_operation.protocol_data :=
-                      Alpha_context.Operation_data protocol_data
-                    |}, chain_id) := function_parameter in
-              let partial_precheck_manager_contents {A : Set}
-                (ctxt : Alpha_context.context) (op :
-                Alpha_context.contents (Alpha_context.Kind.manager A))
-                : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
-                let
-                  'Alpha_context.Manager_operation {|
-                    Alpha_context.contents.Manager_operation.source := source;
-                      Alpha_context.contents.Manager_operation.fee := fee;
-                      Alpha_context.contents.Manager_operation.counter :=
-                        counter;
-                      Alpha_context.contents.Manager_operation.operation :=
-                        operation;
-                      Alpha_context.contents.Manager_operation.gas_limit :=
-                        gas_limit;
-                      Alpha_context.contents.Manager_operation.storage_limit :=
-                        storage_limit
-                      |} := op in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit))
-                  (fun function_parameter =&gt;
-                    let 'tt := function_parameter in
-                    let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
-                    Error_monad.op_gtgteqquestion
-                      (Lwt.__return
-                        (Alpha_context.Fees.check_storage_limit ctxt
-                          storage_limit))
-                      (fun function_parameter =&gt;
-                        let 'tt := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (Alpha_context.Contract.must_be_allocated ctxt
-                            (Alpha_context.Contract.implicit_contract source))
-                          (fun function_parameter =&gt;
-                            let 'tt := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Alpha_context.Contract.check_counter_increment
-                                ctxt source counter)
-                              (fun function_parameter =&gt;
-                                let 'tt := function_parameter in
-                                Error_monad.op_gtgteqquestion
-                                  match operation with
-                                  | Alpha_context.Reveal pk =&gt;
-                                    Alpha_context.Contract.reveal_manager_key
-                                      ctxt source pk
-                                  |
-                                    Alpha_context.Transaction {|
-                                      Alpha_context.manager_operation.Transaction.parameters := parameters
-                                        |} =&gt;
-                                    let arg_bytes :=
-                                      Data_encoding.Binary.to_bytes_exn
-                                        Alpha_context.Script.lazy_expr_encoding
-                                        parameters in
-                                    let arg :=
-                                      match
-                                        Data_encoding.Binary.of_bytes
-                                          Alpha_context.Script.lazy_expr_encoding
-                                          arg_bytes with
-                                      | Some arg =&gt; arg
-                                      | None =&gt;
-                                        (* ❌ Assert instruction is not handled. *)
-                                        assert false
-                                      end in
-                                    Error_monad.op_gtgteqquestion
-                                      (Pervasives.op_atat Lwt.__return
-                                        (Pervasives.op_atat
-                                          (Error_monad.record_trace
-                                            Error_monad.Gas_quota_exceeded_init_deserialize)
-                                          (Alpha_context.Gas.check_enough ctxt
-                                            (Alpha_context.Script.minimal_deserialize_cost
-                                              arg))))
-                                      (fun function_parameter =&gt;
-                                        let 'tt := function_parameter in
-                                        Error_monad.op_gtgtpipequestion
-                                          (Pervasives.op_atat
-                                            (Error_monad.trace
-                                              Error_monad.Gas_quota_exceeded_init_deserialize)
-                                            (Alpha_context.Script.force_decode
-                                              ctxt arg))
-                                          (fun function_parameter =&gt;
-                                            let '(_arg, ctxt) :=
-                                              function_parameter in
-                                            ctxt))
-                                  |
-                                    Alpha_context.Origination {|
-                                      Alpha_context.manager_operation.Origination.script := script
-                                        |} =&gt;
-                                    let script_bytes :=
-                                      Data_encoding.Binary.to_bytes_exn
-                                        Alpha_context.Script.encoding script in
-                                    let script :=
-                                      match
-                                        Data_encoding.Binary.of_bytes
-                                          Alpha_context.Script.encoding
-                                          script_bytes with
-                                      | Some script =&gt; script
-                                      | None =&gt;
-                                        (* ❌ Assert instruction is not handled. *)
-                                        assert false
-                                      end in
-                                    Error_monad.op_gtgteqquestion
-                                      (Pervasives.op_atat Lwt.__return
-                                        (Pervasives.op_atat
-                                          (Error_monad.record_trace
-                                            Error_monad.Gas_quota_exceeded_init_deserialize)
-                                          (Error_monad.op_gtgtquestion
-                                            (Alpha_context.Gas.consume ctxt
-                                              (Alpha_context.Script.minimal_deserialize_cost
-                                                (Alpha_context.Script.t.code
-                                                  script)))
-                                            (fun ctxt =&gt;
-                                              Alpha_context.Gas.check_enough
-                                                ctxt
-                                                (Alpha_context.Script.minimal_deserialize_cost
-                                                  (Alpha_context.Script.t.storage
-                                                    script))))))
-                                      (fun function_parameter =&gt;
-                                        let 'tt := function_parameter in
-                                        Error_monad.op_gtgteqquestion
-                                          (Pervasives.op_atat
-                                            (Error_monad.trace
-                                              Error_monad.Gas_quota_exceeded_init_deserialize)
-                                            (Alpha_context.Script.force_decode
-                                              ctxt
-                                              (Alpha_context.Script.t.code
-                                                script)))
-                                          (fun function_parameter =&gt;
-                                            let '(_code, ctxt) :=
-                                              function_parameter in
-                                            Error_monad.op_gtgtpipequestion
-                                              (Pervasives.op_atat
-                                                (Error_monad.trace
-                                                  Error_monad.Gas_quota_exceeded_init_deserialize)
-                                                (Alpha_context.Script.force_decode
-                                                  ctxt
-                                                  (Alpha_context.Script.t.storage
-                                                    script)))
-                                              (fun function_parameter =&gt;
-                                                let '(_storage, ctxt) :=
-                                                  function_parameter in
-                                                ctxt)))
-                                  | _ =&gt; Error_monad.__return ctxt
-                                  end
-                                  (fun ctxt =&gt;
-                                    Error_monad.op_gtgteqquestion
-                                      (Alpha_context.Contract.get_manager_key
-                                        ctxt source)
-                                      (fun _public_key =&gt;
-                                        Error_monad.op_gtgteqquestion
-                                          (Alpha_context.Contract.increment_counter
-                                            ctxt source)
-                                          (fun ctxt =&gt;
-                                            Error_monad.op_gtgteqquestion
-                                              (Alpha_context.Contract.spend ctxt
-                                                (Alpha_context.Contract.implicit_contract
-                                                  source) fee)
-                                              (fun ctxt =&gt;
-                                                Error_monad.__return ctxt))))))))
-                in
-              let fix partial_precheck_manager_contents_list {kind : Set}
-                (ctxt : Alpha_context.t) (contents_list :
-                Alpha_context.contents_list (Alpha_context.Kind.manager kind))
-                : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
-                match contents_list with
-                |
-                  Alpha_context.Single
-                    ((Alpha_context.Manager_operation _) as op) =&gt;
-                  partial_precheck_manager_contents ctxt op
-                |
-                  Alpha_context.Cons ((Alpha_context.Manager_operation _) as op)
-                    rest =&gt;
-                  Error_monad.op_gtgteqquestion
-                    (partial_precheck_manager_contents ctxt op)
-                    (fun ctxt =&gt;
-                      partial_precheck_manager_contents_list ctxt rest)
-                end in
-              let __return {A : Set}
-                (contents : Apply_results.contents_result_list A)
-                : Lwt.t
-                  (Error_monad.tzresult
-                    (Alpha_context.packed_protocol_data *
-                      Apply_results.packed_operation_metadata)) :=
-                Error_monad.__return
-                  ((Alpha_context.Operation_data protocol_data),
-                    (Apply_results.Operation_metadata
-                      {| Apply_results.operation_metadata.contents := contents
-                        |})) in
-              let operation :=
-                {| Alpha_context.operation.shell := shell;
-                  Alpha_context.operation.protocol_data := protocol_data |} in
-              let __hash_value :=
-                Alpha_context.Operation.__hash_value
-                  {| Alpha_context.operation.shell := shell;
-                    Alpha_context.operation.protocol_data := protocol_data |} in
-              let ctxt :=
-                Alpha_context.Contract.init_origination_nonce ctxt __hash_value
-                in
-              let baker := Signature.Public_key_hash.[S.SPublic_key_hash.zero]
-                in
-              match Alpha_context.protocol_data.contents protocol_data with
-              | (Alpha_context.Single (Alpha_context.Manager_operation _)) as op
-                =&gt;
-                Error_monad.op_gtgteqquestion
-                  (partial_precheck_manager_contents_list ctxt op)
-                  (fun ctxt =&gt;
-                    Error_monad.op_gtgteq
-                      (Apply.apply_manager_contents_list ctxt
-                        Script_ir_translator.Optimized baker chain_id op)
-                      (fun function_parameter =&gt;
-                        let '(_ctxt, __result_value) := function_parameter in
-                        __return __result_value))
-              | (Alpha_context.Cons (Alpha_context.Manager_operation _) _) as op
-                =&gt;
-                Error_monad.op_gtgteqquestion
-                  (partial_precheck_manager_contents_list ctxt op)
-                  (fun ctxt =&gt;
-                    Error_monad.op_gtgteq
-                      (Apply.apply_manager_contents_list ctxt
-                        Script_ir_translator.Optimized baker chain_id op)
-                      (fun function_parameter =&gt;
-                        let '(_ctxt, __result_value) := function_parameter in
-                        __return __result_value))
-              | _ =&gt;
-                Error_monad.op_gtgteqquestion
-                  (Apply.apply_contents_list ctxt chain_id
-                    Script_ir_translator.Optimized
-                    (Operation.shell_header.branch shell) baker operation
-                    (Alpha_context.protocol_data.contents
-                      (Alpha_context.operation.protocol_data operation)))
-                  (fun function_parameter =&gt;
-                    let '(_ctxt, __result_value) := function_parameter in
-                    __return __result_value)
-              end) in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.entrypoint_type
-        (fun ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let '(expr, entrypoint) := function_parameter in
-              let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-              let legacy := false in
-              Error_monad.op_gtgteqquestion
-                (Lwt.__return
-                  (Error_monad.op_gtgtquestion
-                    (Script_ir_translator.parse_toplevel legacy expr)
-                    (fun function_parameter =&gt;
-                      let '(arg_type, _, _, root_name) := function_parameter in
-                      Error_monad.op_gtgtquestion
-                        (Script_ir_translator.parse_ty ctxt legacy true false
-                          true arg_type)
-                        (fun function_parameter =&gt;
-                          let '(Script_ir_translator.Ex_ty arg_type, _) :=
-                            function_parameter in
-                          Script_ir_translator.find_entrypoint arg_type
-                            root_name entrypoint))))
-                (fun function_parameter =&gt;
-                  let '(_f, Script_ir_translator.Ex_ty ty) := function_parameter
-                    in
-                  Error_monad.op_gtgteqquestion
-                    (Script_ir_translator.unparse_ty ctxt ty)
-                    (fun function_parameter =&gt;
-                      let '(ty_node, _) := function_parameter in
-                      Error_monad.__return (Micheline.strip_locations ty_node))))
-      in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0 S.list_entrypoints
       (fun ctxt =&gt;
         fun function_parameter =&gt;
@@ -34964,15 +33651,7 @@ Module Forge.
   Definition register (function_parameter : unit) : unit :=
     let 'tt := function_parameter in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0_noctxt S.operations
-        (fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let '(shell, proto) := function_parameter in
-            Error_monad.__return
-              (Data_encoding.Binary.to_bytes_exn
-                Alpha_context.Operation.unsigned_encoding (shell, proto))) in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0_noctxt S.protocol_data
       (fun function_parameter =&gt;
         let 'tt := function_parameter in
@@ -35550,26 +34229,7 @@ Module Parse.
   Definition register (function_parameter : unit) : unit :=
     let 'tt := function_parameter in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Services_registration.register0 S.operations
-        (fun _ctxt =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            fun function_parameter =&gt;
-              let '(operations, check) := function_parameter in
-              Error_monad.map_s
-                (fun raw =&gt;
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return (parse_operation raw))
-                    (fun op =&gt;
-                      Error_monad.op_gtgtpipequestion
-                        match check with
-                        | Some true =&gt; Error_monad.return_unit
-                        | Some false | None =&gt; Error_monad.return_unit
-                        end
-                        (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
-                          op))) operations) in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0_noctxt S.block
       (fun function_parameter =&gt;
         let 'tt := function_parameter in
@@ -35677,22 +34337,13 @@ End S.
 Definition register (function_parameter : unit) : unit :=
   let 'tt := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Scripts.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Forge.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Parse.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.current_level
-      (fun ctxt =&gt;
-        fun q =&gt;
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            let level := Alpha_context.Level.current ctxt in
-            Error_monad.__return
-              (Alpha_context.Level.from_raw ctxt (Some (S.level_query.offset q))
-                (Alpha_context.Level.t.level level))) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register0 S.levels_in_current_cycle
     (fun ctxt =&gt;
       fun q =&gt;
@@ -41381,7 +40032,7 @@ Definition validation_passes : list Updater.quota :=
 
 Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Alpha_services.register tt in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.get_rpc_services tt.
 
 Inductive validation_mode : Set :=
@@ -50110,7 +48761,7 @@ End Encoding.
 <hr />
 <div class="row conversion-row" id="parameters_repr.ml">
   <div class="col-md-6">
-    <a href="#parameters_repr.ml"><code>parameters_repr.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#parameters_repr.ml"><code>parameters_repr.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -50169,16 +48820,10 @@ let bootstrap_account_encoding =
           | {public_key_hash; public_key = Some public_key; amount} -&gt;
               <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (
+Alternative: use a monad to sequence side-effects.">assert (
                 Signature.Public_key_hash.equal
                   (Signature.Public_key.hash public_key)
-                  public_key_hash )</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+                  public_key_hash ) ;
               Some (public_key, amount)</abbr>
           | {public_key = None} -&gt;
               None)
@@ -50303,12 +48948,7 @@ Definition bootstrap_account_encoding
               bootstrap_account.amount := amount
               |} =&gt;
             (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-            let _ :=
-              (* ❌ Assert instruction is not handled. *)
-              assert
-                (Signature.Public_key_hash.[S.SPublic_key_hash.equal]
-                  (Signature.Public_key.[S.SPublic_key.__hash_value] public_key)
-                  public_key_hash) in
+            (* ❌ instruction_sequence &quot;;&quot; *)
             Some (public_key, amount)
           | {| bootstrap_account.public_key := None |} =&gt; None
           end)
@@ -54809,7 +53449,7 @@ Module Random.
   Definition int32_to_bytes (i : int32) : MBytes.t :=
     let b := MBytes.create 4 in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ := MBytes.set_int32 b 0 i in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     b.
   
   Definition level_random
@@ -57929,12 +56569,7 @@ Fixpoint step {a b : Set}
                   (ret, (Script_typed_ir.descr.aft __descr_value))))
               (fun stack =&gt;
                 (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-                let _ :=
-                  Pervasives.op_coloneq log
-                    (cons
-                      ((Script_typed_ir.descr.loc __descr_value),
-                        (Alpha_context.Gas.level ctxt), stack)
-                      (Pervasives.op_exclamation log)) in
+                (* ❌ instruction_sequence &quot;;&quot; *)
                 Error_monad.__return (ret, ctxt))
           end in
         let get_log (log : option (Pervasives.ref execution_trace))
@@ -59512,12 +58147,7 @@ with interp {p r : Set}
             (unparse_stack ctxt (stack, (Script_typed_ir.descr.bef code))))
           (fun stack =&gt;
             (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-            let _ :=
-              Pervasives.op_coloneq log
-                (cons
-                  ((Script_typed_ir.descr.loc code),
-                    (Alpha_context.Gas.level ctxt), stack)
-                  (Pervasives.op_exclamation log)) in
+            (* ❌ instruction_sequence &quot;;&quot; *)
             Error_monad.return_unit)
       end
       (fun function_parameter =&gt;
@@ -76820,7 +75450,7 @@ with parse_instr {bef : Set}
             (fun function_parameter =&gt;
               let '(aft, _) := function_parameter in
               (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-              let _ := log loc stack_ty aft in
+              (* ❌ instruction_sequence &quot;;&quot; *)
               Error_monad.return_unit))
     end in
   let outer_return := Error_monad.__return in
@@ -85025,7 +83655,7 @@ Definition xor_higher_bits (i : int32) (b : MBytes.t) : MBytes.t :=
   let r := Int32.logxor higher i in
   let res := MBytes.copy b in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := MBytes.set_int32 res 0 r in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   res.
 
 Definition sequence (function_parameter : t) : int32 -&gt; sequence :=
@@ -85932,7 +84562,7 @@ Definition get_rpc_services (function_parameter : unit)
 <hr />
 <div class="row conversion-row" id="storage.ml">
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">74 errors</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">68 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -86317,13 +84947,7 @@ Only the special case `| exception _ when false -&gt; ...` is supported for defa
           let <abbr class="mark-error" title="Patterns on variants are not supported">(`Hex index_key)</abbr> = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
           <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 0 2 = index1))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 0 2 = index1)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -86332,19 +84956,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 2 2 = index2))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 2 2 = index2)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -86359,25 +84971,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 4 2 = index3))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 4 2 = index3)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -86398,31 +84992,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 6 2 = index4))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 6 2 = index4)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -86449,37 +85019,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 8 2 = index5))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 8 2 = index5)) ;
           </abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
@@ -86512,43 +85052,7 @@ Alternative: use a monad to sequence side-effects.
 
 Sequences of instructions are not handled (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Assert instruction is not handled.">assert (Compare.String.(String.sub index_key 10 2 = index6))</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are not handled (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects."> ;
+Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 10 2 = index6)) ;
           Some c</abbr>
   end
 
@@ -87262,41 +85766,17 @@ Module Big_map.
         let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
         let 'Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-        let _ :=
-          (* ❌ Assert instruction is not handled. *)
-          assert
-            (Compare.String.[Compare.S.op_eq] (String.sub index_key 0 2) index1)
-          in
+        (* ❌ instruction_sequence &quot;;&quot; *)
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-        let _ :=
-          (* ❌ Assert instruction is not handled. *)
-          assert
-            (Compare.String.[Compare.S.op_eq] (String.sub index_key 2 2) index2)
-          in
+        (* ❌ instruction_sequence &quot;;&quot; *)
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-        let _ :=
-          (* ❌ Assert instruction is not handled. *)
-          assert
-            (Compare.String.[Compare.S.op_eq] (String.sub index_key 4 2) index3)
-          in
+        (* ❌ instruction_sequence &quot;;&quot; *)
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-        let _ :=
-          (* ❌ Assert instruction is not handled. *)
-          assert
-            (Compare.String.[Compare.S.op_eq] (String.sub index_key 6 2) index4)
-          in
+        (* ❌ instruction_sequence &quot;;&quot; *)
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-        let _ :=
-          (* ❌ Assert instruction is not handled. *)
-          assert
-            (Compare.String.[Compare.S.op_eq] (String.sub index_key 8 2) index5)
-          in
+        (* ❌ instruction_sequence &quot;;&quot; *)
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-        let _ :=
-          (* ❌ Assert instruction is not handled. *)
-          assert
-            (Compare.String.[Compare.S.op_eq] (String.sub index_key 10 2) index6)
-          in
+        (* ❌ instruction_sequence &quot;;&quot; *)
         Some c
       end.
   End Index.
@@ -88758,9 +87238,7 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
   | (Empty, cons name names) =&gt;
     let subdir := Pervasives.__ref_value Empty in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-    let _ :=
-      Pervasives.op_coloneq dir
-        (NamedDir (StringMap.[S.MAP.singleton] name subdir)) in
+    (* ❌ instruction_sequence &quot;;&quot; *)
     register_named_subcontext subdir names
   | (NamedDir map, cons name names) =&gt;
     let subdir :=
@@ -88769,9 +87247,7 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
       | None =&gt;
         let subdir := Pervasives.__ref_value Empty in
         (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-        let _ :=
-          Pervasives.op_coloneq dir
-            (NamedDir (StringMap.[S.MAP.add] name subdir map)) in
+        (* ❌ instruction_sequence &quot;;&quot; *)
         subdir
       end in
     register_named_subcontext subdir names
@@ -88879,13 +87355,7 @@ Fixpoint register_indexed_subcontext {a b r : Set}
     | Empty =&gt;
       let subdir := Pervasives.__ref_value Empty in
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ :=
-        Pervasives.op_coloneq dir
-          (IndexedDir
-            {| description.IndexedDir.arg := arg;
-              description.IndexedDir.arg_encoding := arg_encoding;
-              description.IndexedDir.list := __list_value;
-              description.IndexedDir.subdir := subdir |}) in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       subdir
     |
       IndexedDir {|
@@ -89110,7 +87580,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                   else
                     get k |} in
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ := register path handler in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       handler
     | NamedDir map =&gt;
       let fields := StringMap.[S.MAP.bindings] map in
@@ -89134,7 +87604,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                       ((handler.Handler.get handler) k (Pervasives.op_minus i 1))
                       (fun v =&gt; Error_monad.return_some v) |} in
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ := register path handler in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       handler
     |
       IndexedDir {|
@@ -89203,11 +87673,11 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                 (Data_encoding.dynamic_size None encoding);
             opt_handler.Opt_handler.get := get |} in
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      let _ := register path handler in
+      (* ❌ instruction_sequence &quot;;&quot; *)
       handler
     end in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ := Pervasives.ignore (build_handler dir RPC_path.open_root) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Pervasives.op_exclamation rpc_dir.
 </pre>
   </div>
@@ -93839,61 +92309,17 @@ End S.
 Definition register (function_parameter : unit) : unit :=
   let 'tt := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.ballots
-      (fun ctxt =&gt;
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Alpha_context.Vote.get_ballots ctxt) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.ballot_list
-      (fun ctxt =&gt;
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Error_monad.op_gtpipeeq (Alpha_context.Vote.get_ballot_list ctxt)
-              Error_monad.ok) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.current_period_kind
-      (fun ctxt =&gt;
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Alpha_context.Vote.get_current_period_kind ctxt) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.current_quorum
-      (fun ctxt =&gt;
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Alpha_context.Vote.get_current_quorum ctxt) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.proposals
-      (fun ctxt =&gt;
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Alpha_context.Vote.get_proposals ctxt) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  let _ :=
-    Services_registration.register0 S.listings
-      (fun ctxt =&gt;
-        fun function_parameter =&gt;
-          let 'tt := function_parameter in
-          fun function_parameter =&gt;
-            let 'tt := function_parameter in
-            Error_monad.op_gtpipeeq (Alpha_context.Vote.get_listings ctxt)
-              Error_monad.ok) in
+  (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register0 S.current_proposal
     (fun ctxt =&gt;
       fun function_parameter =&gt;
