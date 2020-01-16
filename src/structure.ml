@@ -140,12 +140,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | Found md_type_path ->
-        ModuleTypParams.get_module_typ_nb_of_existential_variables mod_type >>= fun nb_of_existential_variables ->
         Exp.of_structure
           Name.Map.empty
           md_type_path
-          nb_of_existential_variables
-          structure >>= fun module_exp ->
+          mod_type
+          structure.str_items >>= fun module_exp ->
         return [simple_value name module_exp]
       | Not_found _ -> return [Module (name, structures)]
       end

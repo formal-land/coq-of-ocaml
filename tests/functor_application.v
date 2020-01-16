@@ -22,7 +22,8 @@ Module Target.
 End Target.
 
 Definition M :=
+  let x := 12 in
   existT _ _
     {|
-      Source.x := 12
+      Source.x := x
       |}.

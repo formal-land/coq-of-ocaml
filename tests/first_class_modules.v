@@ -111,12 +111,16 @@ Module Triple.
 End Triple.
 
 Definition tripe : {'[a, b, c, bar] : _ & Triple.signature a b c bar} :=
+  let va := 0 in
+  let vb := false in
+  let vc := "" % string in
+  let foo := 12 in
   existT _ [_, _, _, _]
     {|
-      Triple.va := 0;
-      Triple.vb := false;
-      Triple.vc := "" % string;
-      Triple.foo := 12
+      Triple.va := va;
+      Triple.vb := vb;
+      Triple.vc := vc;
+      Triple.foo := foo
       |}.
 
 Module UsingTriple.
@@ -131,27 +135,30 @@ Module UsingTriple.
 End UsingTriple.
 
 Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
+  let elt_ty := Box.[Boxed_set.elt_ty] in
+  let OPS := Box.[Boxed_set.OPS] in
+  let boxed :=
+    if b then
+      Box.[Boxed_set.OPS].(S.SET.add) v Box.[Boxed_set.boxed]
+    else
+      Box.[Boxed_set.OPS].(S.SET.remove) v Box.[Boxed_set.boxed] in
+  let size :=
+    let mem := Box.[Boxed_set.OPS].(S.SET.mem) v Box.[Boxed_set.boxed] in
+    if mem then
+      if b then
+        Box.[Boxed_set.size]
+      else
+        Z.sub Box.[Boxed_set.size] 1
+    else
+      if b then
+        Z.add Box.[Boxed_set.size] 1
+      else
+        Box.[Boxed_set.size] in
   existT _ _
     {|
-      Boxed_set.elt_ty := Box.[Boxed_set.elt_ty];
-      Boxed_set.OPS := Box.[Boxed_set.OPS];
-      Boxed_set.boxed :=
-        if b then
-          Box.[Boxed_set.OPS].(S.SET.add) v Box.[Boxed_set.boxed]
-        else
-          Box.[Boxed_set.OPS].(S.SET.remove) v Box.[Boxed_set.boxed];
-      Boxed_set.size :=
-        let mem := Box.[Boxed_set.OPS].(S.SET.mem) v Box.[Boxed_set.boxed] in
-        if mem then
-          if b then
-            Box.[Boxed_set.size]
-          else
-            Z.sub Box.[Boxed_set.size] 1
-        else
-          if b then
-            Z.add Box.[Boxed_set.size] 1
-          else
-            Box.[Boxed_set.size]
+      Boxed_set.elt_ty := elt_ty;
+      Boxed_set.boxed := boxed;
+      Boxed_set.size := size
       |}.
 
 Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=

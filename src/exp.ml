@@ -65,7 +65,8 @@ let error_message_in_module
   raise (Some (Some message, field, e)) category message
 
 (** Import an OCaml expression. *)
-let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.t =
+let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
+  : t Monad.t =
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
@@ -75,21 +76,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
     return (Constant constant)
-  | Texp_let (_, [{ vb_pat = p; vb_expr = e1; _ }], e2)
-    when (match e1.exp_desc with
-    | Texp_function _ -> false
-    | _ -> true) ->
-    Pattern.of_pattern p >>= fun p ->
-    of_expression typ_vars e1 >>= fun e1 ->
+  | Texp_let (is_rec, cases, e2) ->
     of_expression typ_vars e2 >>= fun e2 ->
-    begin match p with
-    | Pattern.Variable x -> return (LetVar (x, e1, e2))
-    | _ -> return (Match (e1, [p, e2], None))
-    end
-  | Texp_let (is_rec, cases, e) ->
-    import_let_fun typ_vars is_rec cases >>= fun def ->
-    of_expression typ_vars e >>= fun e ->
-    return (LetFun (def, e))
+    of_let typ_vars is_rec cases e2
   | Texp_function { cases = [{c_lhs = {pat_desc = Tpat_var (x, _); _}; c_rhs = e; _}]; _ }
   | Texp_function {
       cases = [{
@@ -293,6 +282,28 @@ and import_let_fun
     cases = cases;
   }
 
+and of_let
+  (typ_vars : Name.t Name.Map.t)
+  (is_rec : Asttypes.rec_flag)
+  (cases : Typedtree.value_binding list)
+  (e2 : t)
+  : t Monad.t =
+  match cases with
+  | [{ vb_pat = p; vb_expr = e1; _ }] when
+    begin match e1.exp_desc with
+    | Texp_function _ -> false
+    | _ -> true
+    end ->
+    Pattern.of_pattern p >>= fun p ->
+    of_expression typ_vars e1 >>= fun e1 ->
+    begin match p with
+    | Pattern.Variable x -> return (LetVar (x, e1, e2))
+    | _ -> return (Match (e1, [p, e2], None))
+    end
+  | _ ->
+    import_let_fun typ_vars is_rec cases >>= fun def ->
+    return (LetFun (def, e2))
+
 and of_module_expr
   (typ_vars : Name.t Name.Map.t)
   (module_expr : Typedtree.module_expr)
@@ -310,17 +321,14 @@ and of_module_expr
       match module_type with
       | Some module_type -> module_type
       | None -> mod_type in
-    IsFirstClassModule.is_module_typ_first_class module_type >>= fun is_first_class ->
+    IsFirstClassModule.is_module_typ_first_class
+      module_type >>= fun is_first_class ->
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
-      ModuleTypParams.get_module_typ_nb_of_existential_variables module_type >>= fun nb_of_existential_variables ->
-      of_structure typ_vars signature_path nb_of_existential_variables structure
+      of_structure typ_vars signature_path module_type structure.str_items
     | IsFirstClassModule.Not_found reason ->
-      let signature_path = Path.Pident (Ident.create "unknown_signature_name") in
-      let nb_of_existential_variables = 1 in
-      of_structure typ_vars signature_path nb_of_existential_variables structure >>= fun value ->
       error_message
-        value
+        (Error "first_class_module_value_of_unknown_signature")
         FirstClassModule
         (
           "The signature name of this module could not be found" ^
@@ -351,120 +359,86 @@ and of_module_expr
 and of_structure
   (typ_vars : Name.t Name.Map.t)
   (signature_path : Path.t)
-  (nb_of_existential_variables : int)
-  (structure : structure)
+  (module_type : Types.module_type)
+  (items : Typedtree.structure_item list)
   : t Monad.t =
-  (structure.str_items |> Monad.List.filter_map (fun item ->
-    set_env item.str_env (
-    set_loc (Loc.of_location item.str_loc) (
-    match item.str_desc with
-    | Tstr_eval (e, _) ->
-      of_expression typ_vars e >>= fun e ->
-      error_message_in_module
-        None
-        e
-        SideEffect
-        "Top-level evaluation is not handled"
-    | Tstr_value (rec_flag, cases) ->
-      import_let_fun Name.Map.empty rec_flag cases >>= fun def ->
-      begin match def with
-      | { is_rec = Recursivity.New true; _ } ->
-        error_message_in_module
-          None
-          (Error "recursive")
+  ModuleTypParams.get_module_typ_nb_of_existential_variables
+    module_type >>= fun nb_of_existential_variables ->
+  ModuleTypParams.get_module_typ_values module_type >>= fun values ->
+  let fields =
+    values |> List.map (fun value ->
+      (
+        None,
+        PathName.of_path_and_name_with_convert signature_path value,
+        Variable (MixedPath.of_name value)
+      )
+    ) in
+  let e_next = Module (nb_of_existential_variables, fields) in
+  Monad.List.fold_right
+    (fun item e_next ->
+      set_env item.str_env (
+      set_loc (Loc.of_location item.str_loc) (
+      match item.str_desc with
+      | Tstr_eval _ ->
+        raise
+          (ErrorMessage (e_next, "top_level_evaluation"))
+          SideEffect
+          "Top-level evaluation is not handled"
+      | Tstr_value (rec_flag, cases) -> of_let typ_vars rec_flag cases e_next
+      | Tstr_primitive _ ->
+        raise
+          (ErrorMessage (e_next, "primitive"))
           NotSupported
-          "Recursivity not handled in first-class module values"
-      | { cases = [(header, value)]; _ } ->
-        begin match header with
-        | { name; typ_vars = []; args = []; _ } ->
-          return (Some (None, Some name, value))
-        | { name; _ } ->
-          error_message_in_module
-            (Some name)
-            (Error "unhandled")
-            NotSupported
-            "This kind of definition of value for first-class modules is not handled"
-        end
-      | _ ->
-        error_message_in_module
-          None
-          (Error "mutually_recursive")
+          "Primitive not handled"
+      | Tstr_type _ -> return e_next
+      | Tstr_typext _ ->
+        raise
+          (ErrorMessage (e_next, "type_extension"))
           NotSupported
-          "Mutual definitions not handled in first-class module values"
-      end
-    | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
-      let name = Name.of_ident true val_id in
-      Type.of_typ_expr true typ_vars val_type >>= fun (typ, _, _) ->
-      error_message_in_module
-        (Some name)
-        (ErrorTyp typ)
-        NotSupported
-        "Primitive not handled"
-    | Tstr_type _ -> return None
-    | Tstr_typext _ ->
-      error_message_in_module
-        None
-        (Error "type_extension")
-        NotSupported
-        "Type extension not handled"
-    | Tstr_exception { ext_id; _ } ->
-      let name = Name.of_ident false ext_id in
-      error_message_in_module
-        (Some name)
-        (Error "exception")
-        SideEffect
-        "Exception not handled"
-    | Tstr_module { mb_id; mb_expr; _ } ->
-      let name = Name.of_ident false mb_id in
-      of_module_expr typ_vars mb_expr None >>= fun value ->
-      return (Some (None, Some name, value))
-    | Tstr_recmodule _ ->
-      error_message_in_module
-        None
-        (Error "Recursive module")
-        NotSupported
-        "Recursive modules not handled"
-    | Tstr_modtype { mtd_id; _ } ->
-      let name = Name.of_ident false mtd_id in
-      error_message_in_module
-        (Some name)
-        (Error "module_type")
-        NotSupported
-        "Definition of signatures inside first-class module value is not handled"
-    | Tstr_open _ ->
-      error_message_in_module
-        None
-        (Error "open")
-        NotSupported
-        "Open not handled in first-class module value"
-    | Tstr_class _ ->
-      error_message_in_module
-        None
-        (Error "class")
-        NotSupported
-        "Object oriented programming not handled"
-    | Tstr_class_type _ ->
-      error_message_in_module
-        None
-        (Error "class_type")
-        NotSupported
-        "Object oriented programming not handled"
-    | Tstr_include _ ->
-      error_message_in_module
-        None
-        (Error "include")
-        NotSupported
-        "Include is not handled inside first-class module values"
-    | Tstr_attribute _ -> return None)
-  ))) >>= fun fields ->
-  let fields = fields |> List.map (fun (error_message, name, field) ->
-    let name =
-      match name with
-      | None -> Name.of_string false "_"
-      | Some name -> name in
-    (error_message, PathName.of_path_and_name_with_convert signature_path name, field)
-  ) in
-  return (Module (nb_of_existential_variables, fields))
+          "Type extension not handled"
+      | Tstr_exception _ ->
+        raise
+          (ErrorMessage (e_next, "exception"))
+          SideEffect
+          "Exception not handled"
+      | Tstr_module { mb_id; mb_expr; _ } ->
+        let name = Name.of_ident false mb_id in
+        of_module_expr typ_vars mb_expr None >>= fun value ->
+        return (LetVar (name, value, e_next))
+      | Tstr_recmodule _ ->
+        raise
+          (ErrorMessage (e_next, "recursive_module"))
+          NotSupported
+          "Recursive modules not handled"
+      | Tstr_modtype _ ->
+        raise
+          (ErrorMessage (e_next, "module_type"))
+          NotSupported
+          "Module type not handled in module with a named signature"
+      | Tstr_open _ ->
+        raise
+          (ErrorMessage (e_next, "open"))
+          NotSupported
+          "Open not handled in module with a named signature"
+      | Tstr_class _ ->
+        raise
+          (ErrorMessage (e_next, "class"))
+          NotSupported
+          "Class not handled"
+      | Tstr_class_type _ ->
+        raise
+          (ErrorMessage (e_next, "class_type"))
+          NotSupported
+          "Class type not handled"
+      | Tstr_include _ ->
+        raise
+          (ErrorMessage (e_next, "include"))
+          NotSupported
+          "Include not handled in module with a named signature"
+      | Tstr_attribute _ -> return e_next))
+    )
+    items
+    e_next
 
 let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
   if n = 0 then

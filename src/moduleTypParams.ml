@@ -48,8 +48,19 @@ let get_typ_param_name (path_name : PathName.t) : Name.t =
     false
     (String.concat "_" ((path_name.path @ [path_name.base]) |> List.map Name.to_string))
 
-let get_module_typ_nb_of_existential_variables
-  (module_typ : Types.module_type)
+let get_module_typ_nb_of_existential_variables (module_typ : Types.module_type)
   : int Monad.t =
   get_module_typ_typ_params module_typ >>= fun typ_params ->
   return (Tree.size typ_params)
+
+let get_module_typ_values (module_typ : Types.module_type)
+  : Name.t list Monad.t =
+  get_env >>= fun env ->
+  match Mtype.scrape env module_typ with
+  | Mty_signature signature ->
+    return (signature |> Util.List.filter_map (fun item ->
+      match item with
+      | Types.Sig_value (ident, _) -> Some (Name.of_ident true ident)
+      | _ -> None
+    ))
+  | _ -> return []
