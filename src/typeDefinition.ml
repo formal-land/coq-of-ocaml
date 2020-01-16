@@ -118,6 +118,16 @@ module Constructors = struct
         | None -> typ
         | Some typ -> Some (subst_gadt_typ_constructor typ_name typ)
       ))
+    | Forall (name, param, result) ->
+      Forall (
+        name,
+        subst_gadt_typ_constructor typ_name param,
+        if Name.equal typ_name name then
+          result
+        else
+          subst_gadt_typ_constructor typ_name result
+      )
+    | Error _ -> typ
 
   let of_ocaml
     (typ_name : Name.t)

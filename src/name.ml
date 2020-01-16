@@ -8,6 +8,10 @@ type t' = t
 module Set = Set.Make (struct type t = t' let compare = compare end)
 module Map = Map.Make (struct type t = t' let compare = compare end)
 
+let equal (name1 : t) (name2 : t) : bool =
+  match (name1, name2) with
+  | (Make name1, Make name2) -> String.equal name1 name2
+
 let escape_operator_character (c : char) : string =
   match c with
   | '=' -> "eq"

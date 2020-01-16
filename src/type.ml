@@ -10,6 +10,8 @@ type t =
   | Tuple of t list
   | Apply of MixedPath.t * t list
   | Package of PathName.t * t option Tree.t
+  | Forall of Name.t * t * t
+  | Error of string
 
 let type_exprs_of_row_field (row_field : Types.row_field) : Types.type_expr list =
   match row_field with
@@ -78,7 +80,7 @@ let rec of_typ_expr
       NotSupported "Field types are not handled"
   | Tnil ->
     raise
-      (Variable (Name.of_string false "nil"), typ_vars, Name.Set.empty)
+      (Error "nil", typ_vars, Name.Set.empty)
       NotSupported
       "Nil type is not handled"
   | Tlink typ | Tsubst typ -> of_typ_expr with_free_vars typ_vars typ
@@ -176,6 +178,9 @@ let rec typ_args (typ : t) : Name.Set.t =
       | Some typ -> Some (typ_args typ)
     ) |>
     List.fold_left Name.Set.union Name.Set.empty
+  | Forall (name, param, result) ->
+    Name.Set.union (typ_args param) (Name.Set.remove name (typ_args result))
+  | Error _ -> Name.Set.empty
 
 and typ_args_of_typs (typs : t list) : Name.Set.t =
   List.fold_left (fun args typ -> Name.Set.union args (typ_args typ))
@@ -199,6 +204,7 @@ module Context = struct
     | Arrow
     | Sum
     | Tuple
+    | Forall
 
   let get_order (context : t) : int =
     match context with
@@ -206,6 +212,7 @@ module Context = struct
     | Arrow -> 3
     | Sum -> 2
     | Tuple -> 1
+    | Forall -> 4
 
   let should_parens (context : t option) (current_context : t) : bool =
     match context with
@@ -291,7 +298,7 @@ let rec to_coq
       (match existential_typs with
       | [] -> !^ "_" ^^ !^ ":" ^^ !^ "unit"
       | [typ] -> typ ^^ !^ ":" ^^ !^ "_"
-      | _ -> !^ "'" ^-^ OCaml.tuple existential_typs ^^ !^ ":" ^^ !^ "_"
+      | _ -> !^ "'" ^-^ brakets (separate (!^ "," ^^ space) existential_typs) ^^ !^ ":" ^^ !^ "_"
       ) ^^ !^ "&" ^^
       nest (
         nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^
@@ -302,3 +309,11 @@ let rec to_coq
         ))
       )
     ))
+  | Forall (name, param, result) ->
+    Context.parens context Context.Forall @@ nest (
+      !^ "forall" ^^ parens (
+        Name.to_coq name ^^ !^ ":" ^^ to_coq subst None param
+      ) ^-^ !^ "," ^^
+      to_coq subst (Some Context.Forall) result
+    )
+  | Error message -> !^ message

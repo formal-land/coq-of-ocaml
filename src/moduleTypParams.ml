@@ -48,6 +48,8 @@ let get_typ_param_name (path_name : PathName.t) : Name.t =
     false
     (String.concat "_" ((path_name.path @ [path_name.base]) |> List.map Name.to_string))
 
-let get_module_typ_nb_of_existential_variables (module_typ : Types.module_type) : int Monad.t =
+let get_module_typ_nb_of_existential_variables
+  (module_typ : Types.module_type)
+  : int Monad.t =
   get_module_typ_typ_params module_typ >>= fun typ_params ->
   return (Tree.size typ_params)

@@ -6,16 +6,11 @@
     * handle the current position in the source [Loc.t];
     * handle the current environment [Env.t]. *)
 
-module LocalModules = struct
-  type t = Types.signature list
-end
-
 module Command = struct
   type 'a t =
-    | AddLocalModule : Types.module_type -> unit t
     | GetEnv : Env.t t
     | GetLoc : Loc.t t
-    | GetLocalModules : LocalModules.t t
+    | GetScopingEnv : Env.t option t
     | Raise : 'a * Error.Category.t * string -> 'a t
     | Warn : string -> unit t
 end
@@ -24,7 +19,7 @@ module Wrapper = struct
   type t =
     | Env of Env.t
     | Loc of Loc.t
-    | LocalModulesOpenScope
+    | ScopingEnv
 end
 
 type 'a t =
@@ -43,26 +38,23 @@ module Notations = struct
   let (>>) (x : 'a t) (y : 'b t) : 'b t =
     Bind (x, fun () -> y)
 
-  let add_local_module (module_typ : Types.module_type) : unit t =
-    Command (Command.AddLocalModule module_typ)
-
   let get_env : Env.t t =
     Command Command.GetEnv
 
   let get_loc : Loc.t t =
     Command Command.GetLoc
 
-  let get_local_modules : LocalModules.t t =
-    Command Command.GetLocalModules
-
-  let local_modules_open_scope (x : 'a t) : 'a t =
-    Wrapper (Wrapper.LocalModulesOpenScope, x)
+  let get_scoping_env : Env.t option t =
+    Command Command.GetScopingEnv
 
   let set_env (env : Env.t) (x : 'a t) : 'a t =
     Wrapper (Wrapper.Env env, x)
 
   let set_loc (loc : Loc.t) (x : 'a t) : 'a t =
     Wrapper (Wrapper.Loc loc, x)
+
+  let set_scoping_env (x : 'a t) : 'a t =
+    Wrapper (Wrapper.ScopingEnv, x)
 
   let raise (value : 'a) (category : Error.Category.t) (message : string) : 'a t =
     Command (Command.Raise (value, category, message))
@@ -84,6 +76,14 @@ module List = struct
       | None -> return l
       | Some x -> return (x :: l)
       end
+
+  let rec flatten_map (f : 'a -> 'b list t) (l : 'a list) : 'b list t =
+    match l with
+    | [] -> return []
+    | x :: l ->
+      f x >>= fun x ->
+      flatten_map f l >>= fun l ->
+      return (x @ l)
 
   let rec fold_left (f : 'a -> 'b -> 'a t) (accumulator : 'a) (l : 'b list) : 'a t =
     match l with

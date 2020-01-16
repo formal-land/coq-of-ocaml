@@ -15,7 +15,8 @@ type t = {
   typ_params: ModuleTypParams.t }
 
 let items_of_types_signature (signature : Types.signature) : item list Monad.t =
-  let of_types_signature_item (signature_item : Types.signature_item) : item Monad.t =
+  let of_types_signature_item (signature_item : Types.signature_item)
+    : item Monad.t =
     match signature_item with
     | Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
@@ -24,11 +25,11 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
       return (Value (name, typ_args, typ))
     | Sig_type (ident, { type_manifest = None; type_params; _ }, _) ->
       let name = Name.of_ident false ident in
-      (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+      Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
       return (TypExistential (name, typ_args))
     | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _) ->
       let name = Name.of_ident false ident in
-      (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+      Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (TypSynonym (name, typ_args, typ))
     | Sig_typext (_, { ext_type_path; _ }, _) ->
@@ -80,16 +81,24 @@ let items_of_signature (signature : signature) : item list Monad.t =
     | Tsig_class _ ->
       raise [Error "class"] NotSupported "Signature item `class` not handled."
     | Tsig_class_type _ ->
-      raise [Error "class_type"] NotSupported "Signature item `class_type` not handled."
+      raise
+        [Error "class_type"]
+        NotSupported
+        "Signature item `class_type` not handled."
     | Tsig_exception _ ->
-      raise [Error "exception"] SideEffect "Signature item `exception` not handled."
+      raise
+        [Error "exception"]
+        SideEffect
+        "Signature item `exception` not handled."
     | Tsig_include { incl_type; _ } -> items_of_types_signature incl_type
     | Tsig_modtype _ ->
-      raise [Error "module_type"] NotSupported "Signatures inside signatures are not handled."
+      raise
+        [Error "module_type"]
+        NotSupported
+        "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
       let name = Name.of_ident false md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
-      add_local_module md_type.mty_type >>= fun () ->
       return [Module (name, module_typ)]
     | Tsig_open _ ->
       raise [Error "open"] NotSupported "Signature item `open` not handled."
@@ -116,11 +125,10 @@ let items_of_signature (signature : signature) : item list Monad.t =
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_args, typ)])) in
-  (signature.sig_items |> Monad.List.map of_signature_item) >>= fun items ->
-  return (List.flatten items)
+  signature.sig_items |> Monad.List.flatten_map of_signature_item
 
 let of_signature (signature : signature) : t Monad.t =
-  local_modules_open_scope (
+  set_scoping_env (
   items_of_signature signature >>= fun items ->
   ModuleTypParams.get_signature_typ_params signature.sig_type >>= fun typ_params ->
   return { items; typ_params })

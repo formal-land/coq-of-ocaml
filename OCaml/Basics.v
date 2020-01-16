@@ -5,6 +5,23 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
+Notation "record .[ field ]" := (field (projT2 record)) (at level 5).
+
+Module Primitive.
+  Set Primitive Projections.
+
+  Record prod {A B : Type} : Type := pair {
+    fst : A;
+    snd : B;
+  }.
+  Arguments prod : clear implicits.
+
+  Unset Primitive Projections.
+End Primitive.
+
+Notation "[ X * Y * .. * Z ]" := (Primitive.prod .. (Primitive.prod X Y) .. Z).
+Notation "[ x , y , .. , z ]" := (Primitive.pair .. (Primitive.pair x y) .. z).
+
 (* TODO: add floats, add the different integer types (int32, int64, ...). *)
 Class OrderDec {A R} `(StrictOrder A R) := {
   compare : A -> A -> comparison;
@@ -22,6 +39,8 @@ Definition int32 := Z.
 Definition int64 := Z.
 
 Definition nativeint := Z.
+
+Parameter try : forall {A : Set}, A -> A.
 
 Module Unit.
   Definition lt (x y : unit) : Prop := False.
@@ -413,4 +432,14 @@ End String.
 
 Module CamlinternalFormatBasics.
   Parameter format6 : forall (A B C D E F : Set), Set.
+
+  Parameter Any : Set.
+
+  Parameter Format : forall {A : Set}, Any -> string -> A.
+  Parameter Int32 : Any -> Any -> Any -> Any -> Any.
+
+  Parameter End_of_format : Any.
+  Parameter Int_d : Any.
+  Parameter No_padding : Any.
+  Parameter No_precision : Any.
 End CamlinternalFormatBasics.

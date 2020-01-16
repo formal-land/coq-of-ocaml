@@ -37,7 +37,3 @@ Definition n {A : Set} (function_parameter : A) : Z :=
 Module Syn := List2.Inside.
 
 Definition xx : Z := Syn.x.
-
-Export Syn.
-
-Definition y : Z := x.

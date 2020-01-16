@@ -39,11 +39,9 @@ type t =
     (** The value of a first-class module. There may be error messages. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module (no existentials). There may be error messages. *)
-  | ModuleUnpack of t (** Open a first-class module *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
   | ErrorTyp of Type.t (** An error composed of a type. *)
-  | ErrorSeq of t * t (** A sequence of two expressions (an error in Coq). *)
   | ErrorMessage of t * string (** An expression together with an error message. *)
 
 (** Take a function expression and make explicit the list of arguments and
@@ -189,11 +187,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) : t Monad.
     | None -> return (Tuple [])
     | Some e3 -> of_expression typ_vars e3) >>= fun e3 ->
     return (IfThenElse (e1, e2, e3))
-  | Texp_sequence (e1, e2) ->
-    of_expression typ_vars e1 >>= fun e1 ->
+  | Texp_sequence (_, e2) ->
     of_expression typ_vars e2 >>= fun e2 ->
     error_message
-      (ErrorSeq (e1, e2))
+      (ErrorMessage (e2, "instruction_sequence \";\""))
       SideEffect
       (
         "Sequences of instructions are not handled (operator \";\")\n\n" ^
@@ -313,7 +310,7 @@ and of_module_expr
       match module_type with
       | Some module_type -> module_type
       | None -> mod_type in
-    IsFirstClassModule.is_module_typ_first_class false module_type >>= fun is_first_class ->
+    IsFirstClassModule.is_module_typ_first_class module_type >>= fun is_first_class ->
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
       ModuleTypParams.get_module_typ_nb_of_existential_variables module_type >>= fun nb_of_existential_variables ->
@@ -348,10 +345,7 @@ and of_module_expr
       | Some _ -> module_type
       | None -> Some mod_type in
     of_module_expr typ_vars module_expr module_type
-  | Tmod_unpack (e, module_typ) ->
-    of_expression typ_vars e >>= fun e ->
-    add_local_module module_typ >>= fun () ->
-    return (ModuleUnpack e)
+  | Tmod_unpack (e, _) -> of_expression typ_vars e
   ))
 
 and of_structure
@@ -468,15 +462,15 @@ and of_structure
       match name with
       | None -> Name.of_string false "_"
       | Some name -> name in
-    (error_message, PathName.of_path_and_name_without_convert signature_path name, field)
+    (error_message, PathName.of_path_and_name_with_convert signature_path name, field)
   ) in
   return (Module (nb_of_existential_variables, fields))
 
-let rec to_coq_n_uplet_of_underscores (n : int) : SmartPrint.t =
-  match n with
-  | 0 -> !^ "unit"
-  | 1 -> !^ "_"
-  | _ -> OCaml.tuple [to_coq_n_uplet_of_underscores (n - 1); !^ "_"]
+let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
+  if n = 0 then
+    []
+  else
+    (!^ "_") :: to_coq_n_underscores (n - 1)
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
@@ -500,8 +494,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (x, e1, e2) ->
-    Pp.parens paren @@ nest (
-      !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2)
+    begin match e1 with
+    | Variable (PathName { path = []; base }) when Name.equal base x ->
+      to_coq paren e2
+    | _ ->
+      Pp.parens paren @@ nest (
+        !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^
+        newline ^^ to_coq false e2
+      )
+    end
   | LetFun (def, e) ->
     (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
     Pp.parens paren @@ nest (separate newline
@@ -556,7 +557,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e3))
   | Module (nb_of_existential_variables, fields) ->
     Pp.parens paren @@ nest (
-      !^ "existT" ^^ !^ "_" ^^ to_coq_n_uplet_of_underscores nb_of_existential_variables ^^
+      !^ "existT" ^^ !^ "_" ^^
+      begin match to_coq_n_underscores nb_of_existential_variables with
+      | [] -> !^ "unit"
+      | [_] -> !^ "_"
+      | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
+      end ^^
       nest (
         !^ "{|" ^^ newline ^^
         indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (error_message, x, e) ->
@@ -579,13 +585,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )) ^^ newline ^^
       !^ "|}"
     )
-  | ModuleUnpack e -> Pp.parens paren @@ nest (!^ "projT2" ^^ to_coq true e)
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
-  | ErrorSeq (e1, e2) ->
-    Pp.parens paren @@ group (
-      nest (!^ "let" ^^ !^ "_" ^^ !^ ":=" ^^ to_coq false e1 ^^ !^ "in") ^^ newline ^^
-      to_coq false e2
-    )
   | ErrorMessage (e, error_message) -> group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
