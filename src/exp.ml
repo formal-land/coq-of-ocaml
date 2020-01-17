@@ -162,7 +162,16 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let x = PathName.of_constructor_description constuctor_description in
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Constructor (x, es))
-  | Texp_variant _ -> error_message (Error "variant") NotSupported "Variants not supported"
+  | Texp_variant (label, e) ->
+    begin match e with
+    | None ->
+      return (Constructor ({ PathName.path = []; base = Name.Make "tt" }, []))
+    | Some e -> of_expression typ_vars e
+    end >>= fun e ->
+    error_message
+      (ErrorMessage (e, "`" ^ label))
+      NotSupported
+      "Variants not supported"
   | Texp_record { fields = fields; extended_expression = None; _ } ->
     (Array.to_list fields |> Monad.List.filter_map (fun (label_description, definition) ->
       begin match definition with
