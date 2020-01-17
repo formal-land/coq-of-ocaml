@@ -35,8 +35,8 @@ type t =
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of int * (string option * PathName.t * t) list
-    (** The value of a first-class module. There may be error messages. *)
+  | Module of int * (PathName.t * int * t) list
+    (** The value of a first-class module. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module (no existentials). There may be error messages. *)
   | Error of string (** An error message for unhandled expressions. *)
@@ -63,6 +63,22 @@ let error_message_in_module
   (message : string)
   : (string option * Name.t option * t) option Monad.t =
   raise (Some (Some message, field, e)) category message
+
+let get_module_typ_values
+  (typ_vars : Name.t Name.Map.t)
+  (module_typ : Types.module_type)
+  : (Name.t * int) list Monad.t =
+  get_env >>= fun env ->
+  match Mtype.scrape env module_typ with
+  | Mty_signature signature ->
+    signature |> Monad.List.filter_map (fun item ->
+      match item with
+      | Types.Sig_value (ident, { val_type; _ }) ->
+        Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
+        return (Some (Name.of_ident true ident, Name.Set.cardinal new_typ_vars))
+      | _ -> return None
+    )
+  | _ -> return []
 
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
@@ -335,12 +351,12 @@ and of_module_expr
         | Found module_type_path ->
           ModuleTypParams.get_module_typ_nb_of_existential_variables
             module_type >>= fun nb_of_existential_variables ->
-          ModuleTypParams.get_module_typ_values module_type >>= fun values ->
+          get_module_typ_values typ_vars module_type >>= fun values ->
           let fields =
-            values |> List.map (fun value ->
+            values |> List.map (fun (value, nb_free_vars) ->
               (
-                None,
                 PathName.of_path_and_name_with_convert module_type_path value,
+                nb_free_vars,
                 Variable (
                   MixedPath.PathName (
                     PathName.of_path_and_name_with_convert path value
@@ -405,12 +421,12 @@ and of_structure
   : t Monad.t =
   ModuleTypParams.get_module_typ_nb_of_existential_variables
     module_type >>= fun nb_of_existential_variables ->
-  ModuleTypParams.get_module_typ_values module_type >>= fun values ->
+  get_module_typ_values typ_vars module_type >>= fun values ->
   let fields =
-    values |> List.map (fun value ->
+    values |> List.map (fun (value, nb_free_vars) ->
       (
-        None,
         PathName.of_path_and_name_with_convert signature_path value,
+        nb_free_vars,
         Variable (MixedPath.of_name value)
       )
     ) in
@@ -580,11 +596,20 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       end ^^
       nest (
         !^ "{|" ^^ newline ^^
-        indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (error_message, x, e) ->
-          (match error_message with
-          | None -> empty
-          | Some error_message -> Error.to_comment error_message ^^ newline) ^^
-          nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))
+        indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, nb_free_vars, e) ->
+          nest (
+            group (
+              nest (
+                PathName.to_coq x ^^
+                begin match nb_free_vars with
+                | 0 -> empty
+                | _ -> braces (nest (separate space (to_coq_n_underscores nb_free_vars)))
+                end
+              ) ^^
+              !^ ":="
+            ) ^^
+            to_coq false e)
+          )
         ) ^^ newline ^^
         !^ "|}"
       )
