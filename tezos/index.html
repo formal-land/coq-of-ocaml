@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35799 lines</li>
-      <li>Coq size: 43597 lines (+21% compared to&nbsp;OCaml)</li>
-      <li>errors: 2633</li>
+      <li>Coq size: 43399 lines (+21% compared to&nbsp;OCaml)</li>
+      <li>errors: 2634</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -65,13 +65,13 @@
           13,
           292,
           1784,
-          1893,
+          1895,
         ],
         generated: [
           47563,
           41904,
           43481,
-          43597,
+          43399,
         ],
         labels: [
           "01-14",
@@ -521,7 +521,7 @@
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">74</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">75</span>
       </li>
       
       <li>
@@ -8058,7 +8058,8 @@ Definition apply_internal_manager_operations
     | [] =&gt;
       Lwt.__return
         ((* ❌ Variants not supported *)
-        variant, (List.rev applied))
+        (* ❌ `Success *)
+        ctxt, (List.rev applied))
     |
       cons
         (Alpha_context.Internal_operation
@@ -8096,7 +8097,8 @@ Definition apply_internal_manager_operations
               in
             Lwt.__return
               ((* ❌ Variants not supported *)
-              variant,
+              (* ❌ `Failure *)
+              tt,
                 (List.rev
                   (Pervasives.op_at skipped (cons __result_value applied))))
           | Pervasives.Ok (ctxt, __result_value, emitted) =&gt;
@@ -8266,25 +8268,29 @@ Definition apply_manager_contents {A : Set}
                   | Pervasives.Ok ctxt =&gt;
                     Lwt.__return
                       ((* ❌ Variants not supported *)
-                      variant, (Apply_results.Applied operation_results),
+                      (* ❌ `Success *)
+                      ctxt, (Apply_results.Applied operation_results),
                         internal_operations_results)
                   | Pervasives.Error errors =&gt;
                     Lwt.__return
                       ((* ❌ Variants not supported *)
-                      variant,
+                      (* ❌ `Failure *)
+                      tt,
                         (Apply_results.Backtracked operation_results
                           (Some errors)), internal_operations_results)
                   end)
             | (Failure, internal_operations_results) =&gt;
               Lwt.__return
                 ((* ❌ Variants not supported *)
-                variant, (Apply_results.Applied operation_results),
+                (* ❌ `Failure *)
+                tt, (Apply_results.Applied operation_results),
                   internal_operations_results)
             end)
       | Pervasives.Error errors =&gt;
         Lwt.__return
           ((* ❌ Variants not supported *)
-          variant,
+          (* ❌ `Failure *)
+          tt,
             (Apply_results.Failed (Alpha_context.manager_kind operation) errors),
             [])
       end).
@@ -8440,7 +8446,8 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
                   internal_operation_results |} in
           Lwt.__return
             ((* ❌ Variants not supported *)
-            variant,
+            (* ❌ `Failure *)
+            tt,
               (Apply_results.Cons_result __result_value
                 (mark_skipped baker level rest)))
         | (Success ctxt, operation_result, internal_operation_results) =&gt;
@@ -10774,7 +10781,8 @@ Module Manager_result.
         (Data_encoding.union
           (Some
             (* ❌ Variants not supported *)
-            variant)
+            (* ❌ `Uint8 *)
+            tt)
           (cons
             (Data_encoding.__case_value &quot;Applied&quot; % string None
               (Data_encoding.Tag 0)
@@ -14051,9 +14059,10 @@ Definition activation_code_of_hex (h : string) : MBytes.t :=
   (* ❌ instruction_sequence &quot;;&quot; *)
   MBytes.of_hex
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Hex *)
+    h.
 
-Module Index := H.
+Definition Index := H.
 </pre>
   </div>
 </div>
@@ -14406,15 +14415,15 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
 
 (** Block header *)
 
-type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
-
-and protocol_data = {contents : contents; signature : Signature.t}
-
-and contents = {
+type contents = {
   priority : int;
   seed_nonce_hash : Nonce_hash.t option;
   proof_of_work_nonce : MBytes.t;
 }
+
+type protocol_data = {contents : contents; signature : Signature.t}
+
+type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
 
 type block_header = t
 
@@ -14525,45 +14534,27 @@ Require Tezos.Constants_repr.
 Require Tezos.Fitness_repr.
 Require Tezos.Nonce_hash.
 
-Reserved Notation &quot;'t&quot;.
-Reserved Notation &quot;'protocol_data&quot;.
-Reserved Notation &quot;'contents&quot;.
+Module contents.
+  Record record := {
+    priority : Z;
+    seed_nonce_hash : option Nonce_hash.t;
+    proof_of_work_nonce : MBytes.t }.
+End contents.
+Definition contents := contents.record.
 
-Module contents_skeleton.
-  Record record {priority seed_nonce_hash proof_of_work_nonce : Set} := {
-    priority : priority;
-    seed_nonce_hash : seed_nonce_hash;
-    proof_of_work_nonce : proof_of_work_nonce }.
-  Arguments record : clear implicits.
-End contents_skeleton.
-Definition contents_skeleton := contents_skeleton.record.
-
-Module protocol_data_skeleton.
-  Record record {contents signature : Set} := {
+Module protocol_data.
+  Record record := {
     contents : contents;
-    signature : signature }.
-  Arguments record : clear implicits.
-End protocol_data_skeleton.
-Definition protocol_data_skeleton := protocol_data_skeleton.record.
+    signature : Signature.[S.SIGNATURE.t] }.
+End protocol_data.
+Definition protocol_data := protocol_data.record.
 
-Module t_skeleton.
-  Record record {shell protocol_data : Set} := {
-    shell : shell;
+Module t.
+  Record record := {
+    shell : Block_header.shell_header;
     protocol_data : protocol_data }.
-  Arguments record : clear implicits.
-End t_skeleton.
-Definition t_skeleton := t_skeleton.record.
-
-
-
-where &quot;'t&quot; := (t_skeleton Block_header.shell_header 'protocol_data)
-and &quot;'protocol_data&quot; :=
-  (protocol_data_skeleton 'contents Signature.[S.SIGNATURE.t])
-and &quot;'contents&quot; := (contents_skeleton Z (option Nonce_hash.t) MBytes.t).
-
-Definition t := 't.
-Definition protocol_data := 'protocol_data.
-Definition contents := 'contents.
+End t.
+Definition t := t.record.
 
 Definition block_header := t.
 
@@ -14724,15 +14715,15 @@ Definition __hash_value (function_parameter : t) : Block_hash.[S.HASH.t] :=
 (*                                                                           *)
 (*****************************************************************************)
 
-type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
-
-and protocol_data = {contents : contents; signature : Signature.t}
-
-and contents = {
+type contents = {
   priority : int;
   seed_nonce_hash : Nonce_hash.t option;
   proof_of_work_nonce : MBytes.t;
 }
+
+type protocol_data = {contents : contents; signature : Signature.t}
+
+type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
 
 type block_header = t
 
@@ -14774,45 +14765,27 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Require Tezos.Nonce_hash.
 
-Reserved Notation &quot;'t&quot;.
-Reserved Notation &quot;'protocol_data&quot;.
-Reserved Notation &quot;'contents&quot;.
+Module contents.
+  Record record := {
+    priority : Z;
+    seed_nonce_hash : option Nonce_hash.t;
+    proof_of_work_nonce : MBytes.t }.
+End contents.
+Definition contents := contents.record.
 
-Module contents_skeleton.
-  Record record {priority seed_nonce_hash proof_of_work_nonce : Set} := {
-    priority : priority;
-    seed_nonce_hash : seed_nonce_hash;
-    proof_of_work_nonce : proof_of_work_nonce }.
-  Arguments record : clear implicits.
-End contents_skeleton.
-Definition contents_skeleton := contents_skeleton.record.
-
-Module protocol_data_skeleton.
-  Record record {contents signature : Set} := {
+Module protocol_data.
+  Record record := {
     contents : contents;
-    signature : signature }.
-  Arguments record : clear implicits.
-End protocol_data_skeleton.
-Definition protocol_data_skeleton := protocol_data_skeleton.record.
+    signature : Signature.[S.SIGNATURE.t] }.
+End protocol_data.
+Definition protocol_data := protocol_data.record.
 
-Module t_skeleton.
-  Record record {shell protocol_data : Set} := {
-    shell : shell;
+Module t.
+  Record record := {
+    shell : Block_header.shell_header;
     protocol_data : protocol_data }.
-  Arguments record : clear implicits.
-End t_skeleton.
-Definition t_skeleton := t_skeleton.record.
-
-
-
-where &quot;'t&quot; := (t_skeleton Block_header.shell_header 'protocol_data)
-and &quot;'protocol_data&quot; :=
-  (protocol_data_skeleton 'contents Signature.[S.SIGNATURE.t])
-and &quot;'contents&quot; := (contents_skeleton Z (option Nonce_hash.t) MBytes.t).
-
-Definition t := 't.
-Definition protocol_data := 'protocol_data.
-Definition contents := 'contents.
+End t.
+Definition t := t.record.
 
 Definition block_header := t.
 
@@ -17316,7 +17289,8 @@ Definition encoding : Data_encoding.encoding t :=
       (Data_encoding.union
         (Some
           (* ❌ Variants not supported *)
-          variant)
+          (* ❌ `Uint8 *)
+          tt)
         (cons
           (Data_encoding.__case_value &quot;Implicit&quot; % string None
             (Data_encoding.Tag 0)
@@ -17476,7 +17450,8 @@ Module Index.
       let raw_key :=
         MBytes.of_hex
           (* ❌ Variants not supported *)
-          variant in
+          (* ❌ `Hex *)
+          key in
       let 'Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
       (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
@@ -25119,7 +25094,7 @@ Module info.
     balance : Alpha_context.Tez.t;
     frozen_balance : Alpha_context.Tez.t;
     frozen_balance_by_cycle :
-      Alpha_context.Cycle.Map.t Alpha_context.Delegate.frozen_balance;
+      Alpha_context.Cycle.Map.[S.MAP.t] Alpha_context.Delegate.frozen_balance;
     staking_balance : Alpha_context.Tez.t;
     delegated_contracts : list Contract_repr.t;
     delegated_balance : Alpha_context.Tez.t;
@@ -27371,7 +27346,7 @@ Module info.
     balance : Alpha_context.Tez.t;
     frozen_balance : Alpha_context.Tez.t;
     frozen_balance_by_cycle :
-      Alpha_context.Cycle.Map.t Alpha_context.Delegate.frozen_balance;
+      Alpha_context.Cycle.Map.[S.MAP.t] Alpha_context.Delegate.frozen_balance;
     staking_balance : Alpha_context.Tez.t;
     delegated_contracts : list Contract_repr.t;
     delegated_balance : Alpha_context.Tez.t;
@@ -27478,7 +27453,7 @@ Parameter frozen_balance_by_cycle : forall {E F H J K a b c i o q : Set},
   Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
   Lwt.t
     (Error_monad.shell_tzresult
-      (Alpha_context.Cycle.Map.t Alpha_context.Delegate.frozen_balance)).
+      (Alpha_context.Cycle.Map.[S.MAP.t] Alpha_context.Delegate.frozen_balance)).
 
 Parameter staking_balance : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -29311,13 +29286,13 @@ Definition has_frozen_balance
                   Error_monad.__return (Tez_repr.op_ltgt rewards Tez_repr.zero)))).
 
 Definition frozen_balance_by_cycle_encoding
-  : Data_encoding.encoding (Cycle_repr.Map.t frozen_balance) :=
-  Data_encoding.conv Cycle_repr.Map.bindings
+  : Data_encoding.encoding (Cycle_repr.Map.[S.MAP.t] frozen_balance) :=
+  Data_encoding.conv Cycle_repr.Map.[S.MAP.bindings]
     (List.fold_left
       (fun m =&gt;
         fun function_parameter =&gt;
           let '(c, b) := function_parameter in
-          Cycle_repr.Map.add c b m) Cycle_repr.Map.empty) None
+          Cycle_repr.Map.[S.MAP.add] c b m) Cycle_repr.Map.[S.MAP.empty]) None
     (Data_encoding.__list_value None
       (Data_encoding.merge_objs
         (Data_encoding.obj1
@@ -29332,16 +29307,16 @@ Definition empty_frozen_balance : frozen_balance :=
 Definition frozen_balance_by_cycle
   (ctxt : Raw_context.t)
   (delegate : Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t))
-  : Lwt.t (Cycle_repr.Map.t frozen_balance) :=
+  : Lwt.t (Cycle_repr.Map.[S.MAP.t] frozen_balance) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let map := Cycle_repr.Map.empty in
+  let map := Cycle_repr.Map.[S.MAP.empty] in
   Error_monad.op_gtgteq
     (Storage.Contract.Frozen_deposits.fold (ctxt, contract) map
       (fun cycle =&gt;
         fun amount =&gt;
           fun map =&gt;
             Lwt.__return
-              (Cycle_repr.Map.add cycle
+              (Cycle_repr.Map.[S.MAP.add] cycle
                 (* ❌ Record substitution not handled *)
                 record_substitution map)))
     (fun map =&gt;
@@ -29351,12 +29326,12 @@ Definition frozen_balance_by_cycle
             fun amount =&gt;
               fun map =&gt;
                 let balance :=
-                  match Cycle_repr.Map.find_opt cycle map with
+                  match Cycle_repr.Map.[S.MAP.find_opt] cycle map with
                   | None =&gt; empty_frozen_balance
                   | Some balance =&gt; balance
                   end in
                 Lwt.__return
-                  (Cycle_repr.Map.add cycle
+                  (Cycle_repr.Map.[S.MAP.add] cycle
                     (* ❌ Record substitution not handled *)
                     record_substitution map)))
         (fun map =&gt;
@@ -29366,12 +29341,12 @@ Definition frozen_balance_by_cycle
                 fun amount =&gt;
                   fun map =&gt;
                     let balance :=
-                      match Cycle_repr.Map.find_opt cycle map with
+                      match Cycle_repr.Map.[S.MAP.find_opt] cycle map with
                       | None =&gt; empty_frozen_balance
                       | Some balance =&gt; balance
                       end in
                     Lwt.__return
-                      (Cycle_repr.Map.add cycle
+                      (Cycle_repr.Map.[S.MAP.add] cycle
                         (* ❌ Record substitution not handled *)
                         record_substitution map))) (fun map =&gt; Lwt.__return map))).
 
@@ -29808,12 +29783,12 @@ Parameter frozen_balance :
 Parameter frozen_balance_encoding : Data_encoding.t frozen_balance.
 
 Parameter frozen_balance_by_cycle_encoding :
-  Data_encoding.t (Cycle_repr.Map.t frozen_balance).
+  Data_encoding.t (Cycle_repr.Map.[S.MAP.t] frozen_balance).
 
 Parameter frozen_balance_by_cycle :
   Raw_context.t -&gt;
   Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Lwt.t (Cycle_repr.Map.t frozen_balance).
+  Lwt.t (Cycle_repr.Map.[S.MAP.t] frozen_balance).
 
 Parameter full_balance :
   Raw_context.t -&gt;
@@ -33669,7 +33644,7 @@ Module Scripts.
                 let '(unreachable_entrypoint, map) := function_parameter in
                 Error_monad.__return
                   (unreachable_entrypoint,
-                    (Script_ir_translator.Entrypoints_map.fold
+                    (Script_ir_translator.Entrypoints_map.[S.MAP.fold]
                       (fun entry =&gt;
                         fun function_parameter =&gt;
                           let '(_, ty) := function_parameter in
@@ -47849,7 +47824,8 @@ Module Encoding.
       Data_encoding.union
         (Some
           (* ❌ Variants not supported *)
-          variant)
+          (* ❌ `Uint8 *)
+          tt)
         (cons (make reveal_case)
           (cons (make transaction_case)
             (cons (make origination_case) (cons (make delegation_case) [])))).
@@ -51420,19 +51396,23 @@ Definition storage_error_encoding : Data_encoding.encoding storage_error :=
                 (cons
                   (&quot;get&quot; % string,
                     (* ❌ Variants not supported *)
-                    variant)
+                    (* ❌ `Get *)
+                    tt)
                   (cons
                     (&quot;set&quot; % string,
                       (* ❌ Variants not supported *)
-                      variant)
+                      (* ❌ `Set *)
+                      tt)
                     (cons
                       (&quot;del&quot; % string,
                         (* ❌ Variants not supported *)
-                        variant)
+                        (* ❌ `Del *)
+                        tt)
                       (cons
                         (&quot;copy&quot; % string,
                           (* ❌ Variants not supported *)
-                          variant) [])))))))
+                          (* ❌ `Copy *)
+                          tt) [])))))))
           (fun function_parameter =&gt;
             match function_parameter with
             | Missing_key key f =&gt; Some (key, f)
@@ -51570,7 +51550,8 @@ Definition get_first_level (ctxt : Context.t)
         storage_error
           (Missing_key first_level_key
             (* ❌ Variants not supported *)
-            variant)
+            (* ❌ `Get *)
+            tt)
       | Some __bytes_value =&gt;
         match
           Data_encoding.Binary.of_bytes Raw_level_repr.encoding __bytes_value
@@ -51851,7 +51832,8 @@ Definition get (ctxt : t) (k : Context.key)
         storage_error
           (Missing_key k
             (* ❌ Variants not supported *)
-            variant)
+            (* ❌ `Get *)
+            tt)
       | Some v =&gt; Error_monad.__return v
       end).
 
@@ -51867,7 +51849,8 @@ Definition set (ctxt : t) (k : Context.key) (v : Context.value)
         storage_error
           (Missing_key k
             (* ❌ Variants not supported *)
-            variant)
+            (* ❌ `Set *)
+            tt)
       | true =&gt;
         Error_monad.op_gtgteq (Context.set (t.context ctxt) k v)
           (fun context =&gt;
@@ -51907,7 +51890,8 @@ Definition delete (ctxt : t) (k : Context.key)
         storage_error
           (Missing_key k
             (* ❌ Variants not supported *)
-            variant)
+            (* ❌ `Del *)
+            tt)
       | true =&gt;
         Error_monad.op_gtgteq (Context.del (t.context ctxt) k)
           (fun context =&gt;
@@ -51947,7 +51931,8 @@ Definition copy (ctxt : t) (from : Context.key) (to_ : Context.key)
         storage_error
           (Missing_key from
             (* ❌ Variants not supported *)
-            variant)
+            (* ❌ `Copy *)
+            tt)
       | Some context =&gt;
         Error_monad.__return
           (* ❌ Record substitution not handled *)
@@ -58232,7 +58217,8 @@ Fixpoint step {a b : Set}
                       (Option.map
                         (fun n =&gt;
                           (* ❌ Variants not supported *)
-                          variant) root_name) None unparsed_param_type in
+                          (* ❌ `Field_annot *)
+                          n) root_name) None unparsed_param_type in
                   Error_monad.op_gtgteqquestion
                     (Script_ir_translator.unparse_ty ctxt storage_type)
                     (fun function_parameter =&gt;
@@ -58360,7 +58346,8 @@ Fixpoint step {a b : Set}
                       (Option.map
                         (fun n =&gt;
                           (* ❌ Variants not supported *)
-                          variant) root_name) None unparsed_param_type in
+                          (* ❌ `Field_annot *)
+                          n) root_name) None unparsed_param_type in
                   Error_monad.op_gtgteqquestion
                     (Script_ir_translator.unparse_ty ctxt storage_type)
                     (fun function_parameter =&gt;
@@ -59598,132 +59585,158 @@ Import Script_typed_ir.
 Definition default_now_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;now&quot; % string.
 
 Definition default_amount_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;amount&quot; % string.
 
 Definition default_balance_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;balance&quot; % string.
 
 Definition default_steps_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;steps&quot; % string.
 
 Definition default_source_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;source&quot; % string.
 
 Definition default_sender_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;sender&quot; % string.
 
 Definition default_self_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;self&quot; % string.
 
 Definition default_arg_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;arg&quot; % string.
 
 Definition default_param_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;parameter&quot; % string.
 
 Definition default_storage_annot : option (* `Var_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Var_annot *)
+    &quot;storage&quot; % string.
 
 Definition default_car_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;car&quot; % string.
 
 Definition default_cdr_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;cdr&quot; % string.
 
 Definition default_contract_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;contract&quot; % string.
 
 Definition default_addr_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;address&quot; % string.
 
 Definition default_manager_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;manager&quot; % string.
 
 Definition default_pack_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;packed&quot; % string.
 
 Definition default_unpack_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;unpacked&quot; % string.
 
 Definition default_slice_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;slice&quot; % string.
 
 Definition default_elt_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;elt&quot; % string.
 
 Definition default_key_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;key&quot; % string.
 
 Definition default_hd_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;hd&quot; % string.
 
 Definition default_tl_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;tl&quot; % string.
 
 Definition default_some_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;some&quot; % string.
 
 Definition default_left_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;left&quot; % string.
 
 Definition default_right_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;right&quot; % string.
 
 Definition default_binding_annot : option (* `Field_annot *) string :=
   Some
     (* ❌ Variants not supported *)
-    variant.
+    (* ❌ `Field_annot *)
+    &quot;bnd&quot; % string.
 
 Definition unparse_type_annot
   (function_parameter : option Script_typed_ir.type_annot) : list string :=
@@ -59754,7 +59767,8 @@ Definition field_to_var_annot
   | Some (Field_annot s) =&gt;
     Some
       (* ❌ Variants not supported *)
-      variant
+      (* ❌ `Var_annot *)
+      s
   end.
 
 Definition type_to_var_annot
@@ -59765,7 +59779,8 @@ Definition type_to_var_annot
   | Some (Type_annot s) =&gt;
     Some
       (* ❌ Variants not supported *)
-      variant
+      (* ❌ `Var_annot *)
+      s
   end.
 
 Definition var_to_field_annot
@@ -59776,7 +59791,8 @@ Definition var_to_field_annot
   | Some (Var_annot s) =&gt;
     Some
       (* ❌ Variants not supported *)
-      variant
+      (* ❌ `Field_annot *)
+      s
   end.
 
 Definition default_annot {A : Set}
@@ -59803,17 +59819,20 @@ Definition gen_access_annot
     | (None, Some (Field_annot f), _) =&gt;
       Some
         (* ❌ Variants not supported *)
-        variant
+        (* ❌ `Var_annot *)
+        f
     |
       (Some (Var_annot v), None | Some (Field_annot &quot;&quot; % string),
         Some (Field_annot f)) =&gt;
       Some
         (* ❌ Variants not supported *)
-        variant
+        (* ❌ `Var_annot *)
+        (String.concat &quot;.&quot; % string (cons v (cons f [])))
     | (Some (Var_annot v), Some (Field_annot f), _) =&gt;
       Some
         (* ❌ Variants not supported *)
-        variant
+        (* ❌ `Var_annot *)
+        (String.concat &quot;.&quot; % string (cons v (cons f [])))
     end.
 
 Definition merge_type_annot
@@ -59991,7 +60010,8 @@ Definition parse_annots
                       sub_or_wildcard []
                         (fun a =&gt;
                           (* ❌ Variants not supported *)
-                          variant) s acc
+                          (* ❌ `Type_annot *)
+                          a) s acc
                     | &quot;@&quot; % char =&gt;
                       sub_or_wildcard
                         (if allow_special_var then
@@ -60000,7 +60020,8 @@ Definition parse_annots
                           [])
                         (fun a =&gt;
                           (* ❌ Variants not supported *)
-                          variant) s acc
+                          (* ❌ `Var_annot *)
+                          a) s acc
                     | &quot;%&quot; % char =&gt;
                       sub_or_wildcard
                         (if allow_special_field then
@@ -60009,7 +60030,8 @@ Definition parse_annots
                           [])
                         (fun a =&gt;
                           (* ❌ Variants not supported *)
-                          variant) s acc
+                          (* ❌ `Field_annot *)
+                          a) s acc
                     | _ =&gt;
                       Error_monad.__error_value
                         (Error_monad.Unexpected_annotation loc)
@@ -60023,7 +60045,8 @@ Definition opt_var_of_var_opt {A : Set}
   | Var_annot (Some a) =&gt;
     Some
       (* ❌ Variants not supported *)
-      variant
+      (* ❌ `Var_annot *)
+      a
   end.
 
 Definition opt_field_of_field_opt {A : Set}
@@ -60034,7 +60057,8 @@ Definition opt_field_of_field_opt {A : Set}
   | Field_annot (Some a) =&gt;
     Some
       (* ❌ Variants not supported *)
-      variant
+      (* ❌ `Field_annot *)
+      a
   end.
 
 Definition opt_type_of_type_opt {A : Set}
@@ -60045,7 +60069,8 @@ Definition opt_type_of_type_opt {A : Set}
   | Type_annot (Some a) =&gt;
     Some
       (* ❌ Variants not supported *)
-      variant
+      (* ❌ `Type_annot *)
+      a
   end.
 
 Definition classify_annot
@@ -60188,7 +60213,9 @@ Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
       | Some field_annot =&gt;
         Some
           (* ❌ Variants not supported *)
-          variant
+          (* ❌ `Field_annot *)
+          (String.sub field_annot 1
+            (Pervasives.op_minus (String.length field_annot) 1))
       end in
     Error_monad.ok ((Micheline.Prim loc prim args annot), field_annot)
   | expr =&gt; Error_monad.ok (expr, None)
@@ -60246,7 +60273,8 @@ Definition split_last_dot
       (None,
         (Some
           (* ❌ Variants not supported *)
-          variant))
+          (* ❌ `Field_annot *)
+          s))
     | Some i =&gt;
       let s1 := String.sub s 0 i in
       let s2 :=
@@ -60261,10 +60289,12 @@ Definition split_last_dot
         else
           Some
             (* ❌ Variants not supported *)
-            variant in
+            (* ❌ `Field_annot *)
+            s2 in
       ((Some
         (* ❌ Variants not supported *)
-        variant), f)
+        (* ❌ `Var_annot *)
+        s1), f)
     end
   end.
 
@@ -68731,7 +68761,7 @@ Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty a)
           __Set.OrderedType.compare := compare
           |}) in
   let elt_ty := ty in
-  let boxed := OPS.empty in
+  let boxed := OPS.[S.SET.empty] in
   let size := 0 in
   existT _ _
     {|
@@ -68800,7 +68830,7 @@ Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty a)
           __Set.OrderedType.compare := compare
           |}) in
   let key_ty := ty in
-  let boxed := (OPS.empty, 0) in
+  let boxed := (OPS.[S.MAP.empty], 0) in
   existT _ _
     {|
       Script_typed_ir.Boxed_map.key_ty := key_ty;
@@ -71599,7 +71629,8 @@ Fixpoint parse_data {a : Set}
                 (ta,
                   (Some
                     (* ❌ Variants not supported *)
-                    variant)) tr script_instr))
+                    (* ❌ `Var_annot *)
+                    &quot;@arg&quot; % string)) tr script_instr))
       | (Script_typed_ir.Lambda_t _ _ _, expr) =&gt;
         traced
           (Error_monad.fail
@@ -76088,7 +76119,8 @@ Definition unparse_script {A B : Set}
                       (Option.map
                         (fun n =&gt;
                           (* ❌ Variants not supported *)
-                          variant) root_name) None arg_type in
+                          (* ❌ `Field_annot *)
+                          n) root_name) None arg_type in
                   let code :=
                     Micheline.Seq (-1)
                       (cons
@@ -81200,7 +81232,7 @@ Definition random_state_hash : string := &quot;L@\204&quot; % string.
 <hr />
 <div class="row conversion-row" id="storage.ml">
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">74 errors</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">75 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -82331,7 +82363,15 @@ module Cycle = struct
          (struct
            let name = [&quot;last_roll&quot;]
          end))
-         (Int_index)
+         (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Storage_functors.INDEX, Tezos_raw_protocol_alpha__Storage_functors.INDEX
+
+We were looking for a module signature name for the following shape:
+[ path_length; to_path; of_path; args ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">Int_index</abbr>)
       (Roll_repr)
 
   module Roll_snapshot =
@@ -82749,7 +82789,6 @@ Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Level_repr.
-Require Tezos.Manager_repr.
 Require Tezos.Misc.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
@@ -82813,11 +82852,7 @@ Definition Int_index :=
 (* functor *)
 
 Definition Block_priority :=
-  (((Storage_functors.Make_single_data_storage
-    (existT _ tt
-      {|
-        Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-        |}))
+  (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
     (existT _ _
       {|
         Raw_context.T.mem := Raw_context.mem;
@@ -82849,11 +82884,7 @@ Definition Block_priority :=
 
 Module Contract.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    ((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -82884,11 +82915,8 @@ Module Contract.
           |}).
   
   Definition Global_counter :=
-    (((Storage_functors.Make_single_data_storage
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |})) Raw_context)
+    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+      Raw_context)
       (let name := cons &quot;global_counter&quot; % string [] in
       existT _ tt
         {|
@@ -82901,27 +82929,13 @@ Module Contract.
   
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;index&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length :=
-              Contract_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Contract_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Contract_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Contract_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Contract_repr.Index.encoding;
-            Storage_description.INDEX.compare := Contract_repr.Index.compare
-            |})).
+            |}))) (Make_index Contract_repr.Index).
   
   Definition fold {A : Set}
     : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt; A -&gt;
@@ -82947,27 +82961,13 @@ Module Contract.
   
   Definition Frozen_balance_index :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
         (let name := cons &quot;frozen_balance&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length :=
-              Cycle_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
-            Storage_description.INDEX.compare := Cycle_repr.Index.compare
-            |})).
+            |}))) (Make_index Cycle_repr.Index).
   
   Definition Frozen_deposits :=
     (Frozen_balance_index.[Storage_sigs.Indexed_raw_context.Make_map]
@@ -83011,11 +83011,7 @@ Module Contract.
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |}))
-      (existT _ _
-        {|
-          Storage_sigs.VALUE.encoding := Manager_repr.encoding
-          |}).
+          |})) Manager_repr.
   
   Definition Delegate :=
     (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
@@ -83027,10 +83023,7 @@ Module Contract.
   
   Definition Inactive_delegate :=
     (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_set]
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+      Storage_functors.Registered)
       (let name := cons &quot;inactive_delegate&quot; % string [] in
       existT _ tt
         {|
@@ -83051,27 +83044,13 @@ Module Contract.
   
   Definition Delegated :=
     (Storage_functors.Make_data_set_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
         (let name := cons &quot;delegated&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length :=
-              Contract_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Contract_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Contract_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Contract_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Contract_repr.Index.encoding;
-            Storage_description.INDEX.compare := Contract_repr.Index.compare
-            |})).
+            |}))) (Make_index Contract_repr.Index).
   
   Definition Counter :=
     (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
@@ -83155,11 +83134,7 @@ End Contract.
 
 Module Big_map.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    ((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83273,11 +83248,8 @@ Module Big_map.
   
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;index&quot; % string [] in
         existT _ tt
           {|
@@ -83355,11 +83327,7 @@ Module Big_map.
   Module Contents.
     Definition I :=
       ((Storage_functors.Make_indexed_carbonated_data_storage
-        (((Storage_functors.Make_subcontext
-          (existT _ tt
-            {|
-              Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-              |}))
+        (((Storage_functors.Make_subcontext Storage_functors.Registered)
           Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
           (let name := cons &quot;contents&quot; % string [] in
           existT _ tt
@@ -83477,11 +83445,7 @@ End Big_map.
 
 Definition Delegates :=
   (Storage_functors.Make_data_set_storage
-    (((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    (((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83513,11 +83477,7 @@ Definition Delegates :=
 
 Definition Active_delegates_with_rolls :=
   (Storage_functors.Make_data_set_storage
-    (((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    (((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83549,11 +83509,7 @@ Definition Active_delegates_with_rolls :=
 
 Definition Delegates_with_frozen_balance_index :=
   (Storage_functors.Make_indexed_subcontext
-    (((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    (((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83581,17 +83537,7 @@ Definition Delegates_with_frozen_balance_index :=
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})))
-    (Make_index
-      (existT _ _
-        {|
-          Storage_description.INDEX.path_length := Cycle_repr.Index.path_length;
-          Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
-          Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
-          Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
-          Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
-          Storage_description.INDEX.compare := Cycle_repr.Index.compare
-          |})).
+          |}))) (Make_index Cycle_repr.Index).
 
 Definition Delegates_with_frozen_balance :=
   (Storage_functors.Make_data_set_storage
@@ -83601,11 +83547,7 @@ Definition Delegates_with_frozen_balance :=
 Module Cycle.
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |}))
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
         (existT _ _
           {|
             Raw_context.T.mem := Raw_context.mem;
@@ -83633,26 +83575,12 @@ Module Cycle.
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length :=
-              Cycle_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
-            Storage_description.INDEX.compare := Cycle_repr.Index.compare
-            |})).
+            |}))) (Make_index Cycle_repr.Index).
   
   Definition Last_roll :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
         (let name := cons &quot;last_roll&quot; % string [] in
         existT _ tt
           {|
@@ -83721,27 +83649,13 @@ Module Cycle.
   
   Definition Nonce :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
         (let name := cons &quot;nonces&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length :=
-              Raw_level_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Raw_level_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Raw_level_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Raw_level_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Raw_level_repr.Index.encoding;
-            Storage_description.INDEX.compare := Raw_level_repr.Index.compare
-            |})))
+            |}))) (Make_index Raw_level_repr.Index))
       (let encoding := nonce_status_encoding in
       existT _ _
         {|
@@ -83764,11 +83678,7 @@ End Cycle.
 
 Module Roll.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    ((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83800,33 +83710,17 @@ Module Roll.
   
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;index&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length := Roll_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Roll_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Roll_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Roll_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Roll_repr.Index.encoding;
-            Storage_description.INDEX.compare := Roll_repr.Index.compare
-            |})).
+            |}))) (Make_index Roll_repr.Index).
   
   Definition Next :=
-    (((Storage_functors.Make_single_data_storage
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |})) Raw_context)
+    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+      Raw_context)
       (let name := cons &quot;next&quot; % string [] in
       existT _ tt
         {|
@@ -83838,11 +83732,8 @@ Module Roll.
           |}).
   
   Definition Limbo :=
-    (((Storage_functors.Make_single_data_storage
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |})) Raw_context)
+    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+      Raw_context)
       (let name := cons &quot;limbo&quot; % string [] in
       existT _ tt
         {|
@@ -83879,19 +83770,26 @@ Module Roll.
     Definition t := Cycle_repr.t * Z.
     
     Definition path_length : Z :=
-      Pervasives.op_plus Cycle_repr.Index.path_length 1.
+      Pervasives.op_plus
+        Cycle_repr.Index.[Storage_description.INDEX.path_length] 1.
     
-    Definition to_path (function_parameter : Cycle_repr.Index.t * Z)
+    Definition to_path
+      (function_parameter : Cycle_repr.Index.[Storage_description.INDEX.t] * Z)
       : list string -&gt; list string :=
       let '(c, n) := function_parameter in
-      fun s =&gt; Cycle_repr.Index.to_path c (cons (Pervasives.string_of_int n) s).
+      fun s =&gt;
+        Cycle_repr.Index.[Storage_description.INDEX.to_path] c
+          (cons (Pervasives.string_of_int n) s).
     
-    Definition of_path (l : list string) : option (Cycle_repr.Index.t * Z) :=
-      match Misc.take Cycle_repr.Index.path_length l with
+    Definition of_path (l : list string)
+      : option (Cycle_repr.Index.[Storage_description.INDEX.t] * Z) :=
+      match Misc.take Cycle_repr.Index.[Storage_description.INDEX.path_length] l
+        with
       | None | Some (_, [] | cons _ (cons _ _)) =&gt; None
       | Some (l1, cons l2 []) =&gt;
-        match ((Cycle_repr.Index.of_path l1), (Pervasives.int_of_string_opt l2))
-          with
+        match
+          ((Cycle_repr.Index.[Storage_description.INDEX.of_path] l1),
+            (Pervasives.int_of_string_opt l2)) with
         | (None, _) | (_, None) =&gt; None
         | (Some c, Some i) =&gt; Some (c, i)
         end
@@ -83924,11 +83822,8 @@ Module Roll.
   
   Definition Owner :=
     (((Storage_functors.Make_indexed_data_snapshotable_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;owner&quot; % string [] in
         existT _ tt
           {|
@@ -83941,21 +83836,11 @@ Module Roll.
           Storage_functors.INDEX.to_path := Snapshoted_owner_index.to_path;
           Storage_functors.INDEX.of_path := Snapshoted_owner_index.of_path;
           Storage_functors.INDEX.args {_} := Snapshoted_owner_index.args
-          |}))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length := Roll_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Roll_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Roll_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Roll_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Roll_repr.Index.encoding;
-            Storage_description.INDEX.compare := Roll_repr.Index.compare
-            |}))) Signature.[S.SIGNATURE.Public_key].
+          |})) (Make_index Roll_repr.Index)) Signature.[S.SIGNATURE.Public_key].
   
-  Module Snapshot_for_cycle := Cycle.Roll_snapshot.
+  Definition Snapshot_for_cycle := Cycle.Roll_snapshot.
   
-  Module Last_for_snapshot := Cycle.Last_roll.
+  Definition Last_for_snapshot := Cycle.Last_roll.
   
   Definition clear
     : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt;
@@ -83965,11 +83850,7 @@ End Roll.
 
 Module Vote.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    ((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -84000,11 +83881,8 @@ Module Vote.
           |}).
   
   Definition Current_period_kind :=
-    (((Storage_functors.Make_single_data_storage
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |})) Raw_context)
+    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+      Raw_context)
       (let name := cons &quot;current_period_kind&quot; % string [] in
       existT _ tt
         {|
@@ -84017,11 +83895,8 @@ Module Vote.
           |}).
   
   Definition Participation_ema :=
-    (((Storage_functors.Make_single_data_storage
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |})) Raw_context)
+    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+      Raw_context)
       (let name := cons &quot;participation_ema&quot; % string [] in
       existT _ tt
         {|
@@ -84029,11 +83904,8 @@ Module Vote.
           |})) Int32.
   
   Definition Current_proposal :=
-    (((Storage_functors.Make_single_data_storage
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |})) Raw_context)
+    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+      Raw_context)
       (let name := cons &quot;current_proposal&quot; % string [] in
       existT _ tt
         {|
@@ -84041,11 +83913,8 @@ Module Vote.
           |})) Protocol_hash.
   
   Definition Listings_size :=
-    (((Storage_functors.Make_single_data_storage
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |})) Raw_context)
+    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+      Raw_context)
       (let name := cons &quot;listings_size&quot; % string [] in
       existT _ tt
         {|
@@ -84054,11 +83923,8 @@ Module Vote.
   
   Definition Listings :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;listings&quot; % string [] in
         existT _ tt
           {|
@@ -84067,11 +83933,8 @@ Module Vote.
   
   Definition Proposals :=
     (Storage_functors.Make_data_set_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;proposals&quot; % string [] in
         existT _ tt
           {|
@@ -84082,11 +83945,8 @@ Module Vote.
   
   Definition Proposals_count :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;proposals_count&quot; % string [] in
         existT _ tt
           {|
@@ -84095,11 +83955,8 @@ Module Vote.
   
   Definition Ballots :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |})) Raw_context)
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+        Raw_context)
         (let name := cons &quot;ballots&quot; % string [] in
         existT _ tt
           {|
@@ -84197,16 +84054,12 @@ Module Seed.
         Storage_sigs.Single_data_storage.remove := remove
         |}.
   
-  Module For_cycle := Cycle.Seed.
+  Definition For_cycle := Cycle.Seed.
 End Seed.
 
 Definition Commitments :=
   ((Storage_functors.Make_indexed_data_storage
-    (((Storage_functors.Make_subcontext
-      (existT _ tt
-        {|
-          Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-          |}))
+    (((Storage_functors.Make_subcontext Storage_functors.Registered)
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -84234,23 +84087,7 @@ Definition Commitments :=
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})))
-    (Make_index
-      (existT _ _
-        {|
-          Storage_description.INDEX.path_length :=
-            Blinded_public_key_hash.Index.path_length;
-          Storage_description.INDEX.to_path :=
-            Blinded_public_key_hash.Index.to_path;
-          Storage_description.INDEX.of_path :=
-            Blinded_public_key_hash.Index.of_path;
-          Storage_description.INDEX.rpc_arg :=
-            Blinded_public_key_hash.Index.rpc_arg;
-          Storage_description.INDEX.encoding :=
-            Blinded_public_key_hash.Index.encoding;
-          Storage_description.INDEX.compare :=
-            Blinded_public_key_hash.Index.compare
-          |})))
+          |}))) (Make_index Blinded_public_key_hash.Index))
     (existT _ _
       {|
         Storage_sigs.VALUE.encoding := Tez_repr.encoding
@@ -84259,11 +84096,7 @@ Definition Commitments :=
 Module Ramp_up.
   Definition Rewards :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |}))
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
         (existT _ _
           {|
             Raw_context.T.mem := Raw_context.mem;
@@ -84291,18 +84124,7 @@ Module Ramp_up.
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length :=
-              Cycle_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
-            Storage_description.INDEX.compare := Cycle_repr.Index.compare
-            |})))
+            |}))) (Make_index Cycle_repr.Index))
       (let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
       existT _ _
         {|
@@ -84311,11 +84133,7 @@ Module Ramp_up.
   
   Definition Security_deposits :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext
-        (existT _ tt
-          {|
-            Storage_sigs.REGISTER.ghost := Storage_functors.Registered.ghost
-            |}))
+      (((Storage_functors.Make_subcontext Storage_functors.Registered)
         (existT _ _
           {|
             Raw_context.T.mem := Raw_context.mem;
@@ -84343,18 +84161,7 @@ Module Ramp_up.
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |})))
-      (Make_index
-        (existT _ _
-          {|
-            Storage_description.INDEX.path_length :=
-              Cycle_repr.Index.path_length;
-            Storage_description.INDEX.to_path := Cycle_repr.Index.to_path;
-            Storage_description.INDEX.of_path := Cycle_repr.Index.of_path;
-            Storage_description.INDEX.rpc_arg := Cycle_repr.Index.rpc_arg;
-            Storage_description.INDEX.encoding := Cycle_repr.Index.encoding;
-            Storage_description.INDEX.compare := Cycle_repr.Index.compare
-            |})))
+            |}))) (Make_index Cycle_repr.Index))
       (let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
       existT _ _
         {|
@@ -84782,13 +84589,13 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
-Require Tezos.Manager_repr.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Roll_repr.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Seed_repr.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
@@ -84880,7 +84687,7 @@ Module Contract.
   Parameter Manager :
     {_ : unit &amp;
       Indexed_data_storage.signature Raw_context.t Contract_repr.t
-        Manager_repr.t}.
+        Manager_repr.[Storage_sigs.VALUE.t]}.
   
   Parameter Delegate :
     {_ : unit &amp;
@@ -87304,10 +87111,12 @@ Definition map_key {A B : Set} (f : A -&gt; B) (function_parameter : (* `Key *) 
   match function_parameter with
   | Key k =&gt;
     (* ❌ Variants not supported *)
-    variant
+    (* ❌ `Key *)
+    f k
   | Dir k =&gt;
     (* ❌ Variants not supported *)
-    variant
+    (* ❌ `Dir *)
+    f k
   end.
 
 (* ❌ Functors are not handled. *)
@@ -89761,7 +89570,8 @@ Definition kind_encoding : Data_encoding.encoding kind :=
   Data_encoding.union
     (Some
       (* ❌ Variants not supported *)
-      variant)
+      (* ❌ `Uint8 *)
+      tt)
     (cons
       (Data_encoding.__case_value &quot;Proposal&quot; % string None (Data_encoding.Tag 0)
         (Data_encoding.constant &quot;proposal&quot; % string)
