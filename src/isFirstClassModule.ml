@@ -72,12 +72,18 @@ type maybe_found =
 
 (** Get the path of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. *)
-let is_module_typ_first_class
+let rec is_module_typ_first_class
   (module_typ : Types.module_type)
   : maybe_found Monad.t =
   get_env >>= fun env ->
   match Mtype.scrape env module_typ with
-  | Mty_alias _ | Mty_ident _ -> return (Not_found None)
+  | Mty_alias (_, path) | Mty_ident path ->
+    begin match Env.find_module path env with
+    | { Types.md_type; _ } -> is_module_typ_first_class md_type
+    | exception Not_found ->
+      let reason = "Module " ^ Path.name path ^ " not found" in
+      return (Not_found (Some reason))
+    end
   | Mty_signature signature ->
     let (signature_paths, shape) = find_similar_signatures env signature in
     begin match signature_paths with

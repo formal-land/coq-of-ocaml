@@ -152,13 +152,19 @@ let rec of_structure (structure : structure) : t list Monad.t =
         mb_id = name;
         mb_expr = {
           mod_desc = Tmod_ident (_, long_ident);
+          mod_type;
           _
         };
         _
       } ->
       let name = Name.of_ident false name in
       let reference = PathName.of_long_ident false long_ident.txt in
-      return [ModuleSynonym (name, reference)]
+      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
+      begin match is_first_class with
+      | Found _ ->
+        return [simple_value name (Exp.Variable (MixedPath.PathName reference))]
+      | Not_found _ -> return [ModuleSynonym (name, reference)]
+      end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
       error_message (Error "functor") NotSupported "Functors are not handled."
     | Tstr_module { mb_id; mb_expr = { mod_desc = Tmod_apply _; _ } as mb_expr; _ } ->
