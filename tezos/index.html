@@ -65,13 +65,13 @@
           13,
           292,
           1784,
-          1784,
+          1893,
         ],
         generated: [
           47563,
           41904,
           43481,
-          43481,
+          43597,
         ],
         labels: [
           "01-14",
@@ -13944,7 +13944,7 @@ Definition H :=
   (Blake2B.Make
     (existT _ tt
       {|
-        Blake2B.SRegister.register_encoding := Base58.register_encoding
+        Blake2B.SRegister.register_encoding {_} := Base58.register_encoding
         |}))
     (let name := &quot;Blinded public key hash&quot; % string in
     let title := &quot;A blinded public key hash&quot; % string in
@@ -82806,7 +82806,7 @@ Definition Int_index :=
       Storage_functors.INDEX.path_length := path_length;
       Storage_functors.INDEX.to_path := to_path;
       Storage_functors.INDEX.of_path := of_path;
-      Storage_functors.INDEX.args := args
+      Storage_functors.INDEX.args {_} := args
       |}.
 
 (* ❌ Functors are not handled. *)
@@ -82832,9 +82832,9 @@ Definition Block_priority :=
         Raw_context.T.remove := Raw_context.remove;
         Raw_context.T.remove_rec := Raw_context.remove_rec;
         Raw_context.T.copy := Raw_context.copy;
-        Raw_context.T.fold := Raw_context.fold;
+        Raw_context.T.fold {_} := Raw_context.fold;
         Raw_context.T.keys := Raw_context.keys;
-        Raw_context.T.fold_keys := Raw_context.fold_keys;
+        Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
         Raw_context.T.project := Raw_context.project;
         Raw_context.T.absolute_key := Raw_context.absolute_key;
         Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -82868,9 +82868,9 @@ Module Contract.
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -83174,9 +83174,9 @@ Module Big_map.
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -83496,9 +83496,9 @@ Definition Delegates :=
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -83532,9 +83532,9 @@ Definition Active_delegates_with_rolls :=
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -83568,9 +83568,9 @@ Definition Delegates_with_frozen_balance_index :=
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -83620,9 +83620,9 @@ Module Cycle.
             Raw_context.T.remove := Raw_context.remove;
             Raw_context.T.remove_rec := Raw_context.remove_rec;
             Raw_context.T.copy := Raw_context.copy;
-            Raw_context.T.fold := Raw_context.fold;
+            Raw_context.T.fold {_} := Raw_context.fold;
             Raw_context.T.keys := Raw_context.keys;
-            Raw_context.T.fold_keys := Raw_context.fold_keys;
+            Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
             Raw_context.T.project := Raw_context.project;
             Raw_context.T.absolute_key := Raw_context.absolute_key;
             Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -83783,9 +83783,9 @@ Module Roll.
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -83940,7 +83940,7 @@ Module Roll.
             Snapshoted_owner_index.path_length;
           Storage_functors.INDEX.to_path := Snapshoted_owner_index.to_path;
           Storage_functors.INDEX.of_path := Snapshoted_owner_index.of_path;
-          Storage_functors.INDEX.args := Snapshoted_owner_index.args
+          Storage_functors.INDEX.args {_} := Snapshoted_owner_index.args
           |}))
       (Make_index
         (existT _ _
@@ -83984,9 +83984,9 @@ Module Vote.
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -84221,9 +84221,9 @@ Definition Commitments :=
           Raw_context.T.remove := Raw_context.remove;
           Raw_context.T.remove_rec := Raw_context.remove_rec;
           Raw_context.T.copy := Raw_context.copy;
-          Raw_context.T.fold := Raw_context.fold;
+          Raw_context.T.fold {_} := Raw_context.fold;
           Raw_context.T.keys := Raw_context.keys;
-          Raw_context.T.fold_keys := Raw_context.fold_keys;
+          Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
           Raw_context.T.project := Raw_context.project;
           Raw_context.T.absolute_key := Raw_context.absolute_key;
           Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -84278,9 +84278,9 @@ Module Ramp_up.
             Raw_context.T.remove := Raw_context.remove;
             Raw_context.T.remove_rec := Raw_context.remove_rec;
             Raw_context.T.copy := Raw_context.copy;
-            Raw_context.T.fold := Raw_context.fold;
+            Raw_context.T.fold {_} := Raw_context.fold;
             Raw_context.T.keys := Raw_context.keys;
-            Raw_context.T.fold_keys := Raw_context.fold_keys;
+            Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
             Raw_context.T.project := Raw_context.project;
             Raw_context.T.absolute_key := Raw_context.absolute_key;
             Raw_context.T.consume_gas := Raw_context.consume_gas;
@@ -84330,9 +84330,9 @@ Module Ramp_up.
             Raw_context.T.remove := Raw_context.remove;
             Raw_context.T.remove_rec := Raw_context.remove_rec;
             Raw_context.T.copy := Raw_context.copy;
-            Raw_context.T.fold := Raw_context.fold;
+            Raw_context.T.fold {_} := Raw_context.fold;
             Raw_context.T.keys := Raw_context.keys;
-            Raw_context.T.fold_keys := Raw_context.fold_keys;
+            Raw_context.T.fold_keys {_} := Raw_context.fold_keys;
             Raw_context.T.project := Raw_context.project;
             Raw_context.T.absolute_key := Raw_context.absolute_key;
             Raw_context.T.consume_gas := Raw_context.consume_gas;
