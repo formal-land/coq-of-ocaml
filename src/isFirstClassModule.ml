@@ -38,7 +38,7 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
     or similar definitions. In this case we will fail later with an explicit
     error message. *)
 let find_similar_signatures (env : Env.t) (signature : Types.signature)
-  : Path.t list * unit Tree.t =
+  : Path.t list * SignatureShape.t =
   let shape = SignatureShape.of_signature signature in
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =

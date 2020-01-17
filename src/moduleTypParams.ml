@@ -32,7 +32,10 @@ and get_module_typ_typ_params (module_typ : Types.module_type) : t Monad.t =
     get_signature_typ_params signature
   | Mty_alias (_, path) | Mty_ident path ->
     get_env >>= fun env ->
-    get_module_typ_declaration_typ_params (Env.find_modtype path env)
+    begin match Env.find_modtype path env with
+    | module_typ -> get_module_typ_declaration_typ_params module_typ
+    | exception Not_found -> return []
+    end
   | Mty_functor _ -> return []
 
 and get_module_typ_declaration_typ_params
