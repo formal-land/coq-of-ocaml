@@ -13,10 +13,8 @@ files = [
 
   # files without dependencies
   "Blinded_public_key_hash.v",
-  "Blinded_public_key_hash_mli.v",
   "Contract_hash.v",
   "Cycle_repr.v",
-  "Cycle_repr_mli.v",
   "Gas_limit_repr.v",
   "Gas_limit_repr_mli.v",
   "Manager_repr.v",
@@ -42,6 +40,10 @@ files = [
   "Vote_repr_mli.v",
   "Voting_period_repr.v",
   "Voting_period_repr_mli.v"
+
+  # files with one dependency
+  # "Blinded_public_key_hash_mli.v",
+  # "Cycle_repr_mli.v",
 ]
 
 nb_valid_lines = 0

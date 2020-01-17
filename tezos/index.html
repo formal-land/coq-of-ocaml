@@ -54,7 +54,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35799 lines</li>
-      <li>Coq size: 43399 lines (+21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 43404 lines (+21% compared to&nbsp;OCaml)</li>
       <li>errors: 2634</li>
     </ul>
     
@@ -65,13 +65,13 @@
           13,
           292,
           1784,
-          1895,
+          1529,
         ],
         generated: [
           47563,
           41904,
           43481,
-          43399,
+          43404,
         ],
         labels: [
           "01-14",
@@ -14120,6 +14120,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Storage_description.
 
 Parameter t : Set.
 
@@ -17576,6 +17577,7 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 Require Tezos.Contract_hash.
+Require Tezos.Storage_description.
 
 Inductive t : Set :=
 | Implicit : Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt; t
@@ -23291,6 +23293,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Storage_description.
 
 Parameter t : Set.
 
@@ -52839,6 +52842,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Require Import Tezos.Environment.
+Require Tezos.Storage_description.
 
 Parameter t : Set.
 
@@ -53109,6 +53113,7 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 Require Tezos.Seed_repr.
+Require Tezos.Storage_description.
 
 Definition t := int32.
 
