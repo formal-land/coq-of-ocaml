@@ -343,17 +343,13 @@ and of_module_expr
       MixedPath.of_path true path (Some loc.txt) >>= fun path ->
       return (Variable path) in
     IsFirstClassModule.is_module_typ_first_class local_module_type >>= fun is_first_class ->
-    begin match is_first_class with
-    | Found _ -> default_result
-    | Not_found _ ->
-      get_env >>= fun env ->
-      let module_type =
-        match module_type with
-        | Some module_type -> module_type
-        | None -> local_module_type in
-      begin match Mtype.scrape env module_type with
-      | Mty_ident _ | Mty_alias (_, _) -> default_result
-      | Mty_signature _ ->
+    let local_module_type_path =
+      match is_first_class with
+      | Found local_module_type_path -> Some local_module_type_path
+      | Not_found _ -> None in
+      begin match module_type with
+      | None -> default_result
+      | Some module_type ->
         IsFirstClassModule.is_module_typ_first_class
           module_type >>= fun is_first_class ->
         begin match is_first_class with
@@ -367,18 +363,27 @@ and of_module_expr
                 PathName.of_path_and_name_with_convert module_type_path value,
                 nb_free_vars,
                 Variable (
-                  MixedPath.PathName (
-                    PathName.of_path_and_name_with_convert path value
-                  )
+                  match local_module_type_path with
+                  | Some local_module_type_path ->
+                    MixedPath.Access (
+                      MixedPath.PathName
+                        (PathName.of_path_with_convert false path),
+                      PathName.of_path_and_name_with_convert
+                        local_module_type_path
+                        value,
+                      false
+                    )
+                  | None ->
+                    MixedPath.PathName (
+                      PathName.of_path_and_name_with_convert path value
+                    )
                 )
               )
             ) in
           return (Module (nb_of_existential_variables, fields))
-        | _ -> default_result
+        | Not_found _ -> default_result
         end
-      | Mty_functor _ -> default_result
       end
-    end
   | Tmod_structure structure ->
     let module_type =
       match module_type with
