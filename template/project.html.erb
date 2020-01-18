@@ -6,7 +6,7 @@
     <ul>
       <li>OCaml size: <%= nb_ocaml_lines %> lines</li>
       <li>Coq size: <%= nb_coq_lines %> lines (<%= "+" if nb_coq_lines >= nb_ocaml_lines %><%= "#{100 * nb_coq_lines / nb_ocaml_lines - 100}%" %> compared to&nbsp;OCaml)</li>
-      <li>errors: <%= nb_errors %></li>
+      <li>errors from coq-of-ocaml: <%= nb_errors %></li>
     </ul>
     <% if chart_data then %>
       <canvas id="chart" width="400" height="400"></canvas>
