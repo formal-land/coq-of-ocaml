@@ -14,7 +14,7 @@ files = [
   # files without dependencies
   "Blinded_public_key_hash.v",
   "Contract_hash.v",
-  # "Cycle_repr.v",
+  "Cycle_repr.v",
   # "Gas_limit_repr.v",
   "Gas_limit_repr_mli.v",
   # "Manager_repr.v",

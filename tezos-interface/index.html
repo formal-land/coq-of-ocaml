@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 6176 lines</li>
-      <li>Coq size: 3438 lines (-45% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 198</li>
+      <li>OCaml size: 6146 lines</li>
+      <li>Coq size: 3422 lines (-45% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 196</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -95,7 +95,7 @@
 <hr />
 <div class="row conversion-row" id="environment.mli">
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">198 errors</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">196 errors</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -5149,32 +5149,9 @@ module Set : sig
     of sets of [int * int].
 *)
 
-(** Input signature of the functor {!Set.Make}. *)
-module type OrderedType = sig
-  (** The type of the set elements. *)
-  type t
-
-  (** A total ordering function over the set elements.
-      This is a two-argument function [f] such that
-      [f e1 e2] is zero if the elements [e1] and [e2] are equal,
-      [f e1 e2] is strictly negative if [e1] is smaller than [e2],
-      and [f e1 e2] is strictly positive if [e1] is greater than [e2].
-      Example: a suitable ordering function is the generic structural
-      comparison function {!Pervasives.compare}. *)
-  val compare : t -&gt; t -&gt; int
-end
-
 (** Functor building an implementation of the set structure
     given a totally ordered type. *)
-module Make (Ord : OrderedType) : S.SET with <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-OrderedType, Compare.COMPARABLE
-
-We were looking for a module signature name for the following shape:
-[ compare ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">type elt = Ord.t</abbr>
+module Make (Ord : Compare.COMPARABLE) : S.SET with type elt = Ord.t
 end
 module Map : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/map.mli&quot;
@@ -5223,32 +5200,9 @@ module Map : sig
     values so its type is [string PairsMap.t].
 *)
 
-(** Input signature of the functor {!Map.Make}. *)
-module type OrderedType = sig
-  (** The type of the map keys. *)
-  type t
-
-  (** A total ordering function over the keys.
-      This is a two-argument function [f] such that
-      [f e1 e2] is zero if the keys [e1] and [e2] are equal,
-      [f e1 e2] is strictly negative if [e1] is smaller than [e2],
-      and [f e1 e2] is strictly positive if [e1] is greater than [e2].
-      Example: a suitable ordering function is the generic structural
-      comparison function {!Pervasives.compare}. *)
-  val compare : t -&gt; t -&gt; int
-end
-
 (** Functor building an implementation of the map structure
     given a totally ordered type. *)
-module Make (Ord : OrderedType) : S.MAP with <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-OrderedType, Compare.COMPARABLE, Set.OrderedType
-
-We were looking for a module signature name for the following shape:
-[ compare ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">type key = Ord.t</abbr>
+module Make (Ord : Compare.COMPARABLE) : S.MAP with type key = Ord.t
 end
 module Blake2B : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/blake2B.mli&quot;
@@ -9222,31 +9176,15 @@ Module S.
 End S.
 
 Module __Set.
-  Module OrderedType.
-    Record signature {t : Set} := {
-      t := t;
-      compare : t -&gt; t -&gt; Z;
-    }.
-    Arguments signature : clear implicits.
-  End OrderedType.
-  
   Parameter Make :
-    forall (Ord : {t : _ &amp; OrderedType.signature t}),
-      {t : _ &amp; S.SET.signature Ord.[OrderedType.t] t}.
+    forall (Ord : {t : _ &amp; Compare.COMPARABLE.signature t}),
+      {t : _ &amp; S.SET.signature Ord.[Compare.COMPARABLE.t] t}.
 End __Set.
 
 Module Map.
-  Module OrderedType.
-    Record signature {t : Set} := {
-      t := t;
-      compare : t -&gt; t -&gt; Z;
-    }.
-    Arguments signature : clear implicits.
-  End OrderedType.
-  
   Parameter Make :
-    forall (Ord : {t : _ &amp; OrderedType.signature t}),
-      {t : _ &amp; S.MAP.signature Ord.[OrderedType.t] t}.
+    forall (Ord : {t : _ &amp; Compare.COMPARABLE.signature t}),
+      {t : _ &amp; S.MAP.signature Ord.[Compare.COMPARABLE.t] t}.
 End Map.
 
 Module Blake2B.

@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35799 lines</li>
-      <li>Coq size: 43404 lines (+21% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 2634</li>
+      <li>Coq size: 44618 lines (+24% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 2653</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -66,14 +66,14 @@
           292,
           1784,
           1529,
-          1023,
+          1147,
         ],
         generated: [
           47563,
           41904,
           43481,
           43404,
-          43404,
+          44618,
         ],
         labels: [
           "01-14",
@@ -464,7 +464,7 @@
       </li>
       
       <li>
-        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">109</span>
+        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">107</span>
       </li>
       
       <li>
@@ -524,7 +524,7 @@
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">75</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">97</span>
       </li>
       
       <li>
@@ -532,7 +532,7 @@
       </li>
       
       <li>
-        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-danger">13</span>
+        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-danger">12</span>
       </li>
       
       <li>
@@ -23154,7 +23154,12 @@ Definition max := Compare.Int32.[Compare.S.max].
 
 Definition min := Compare.Int32.[Compare.S.min].
 
-Definition Map := Map.Make Compare.Int32.
+Definition Map :=
+  Map.Make
+    (existT _ _
+      {|
+        Compare.COMPARABLE.compare := Compare.Int32.[Compare.S.compare]
+        |}).
 
 Definition root : int32 :=
   (* ❌ Constant of type int32 is converted to int *)
@@ -51063,7 +51068,12 @@ Require Tezos.Raw_level_repr.
 Require Tezos.Storage_description.
 Require Tezos.Tez_repr.
 
-Definition Int_set := __Set.Make Compare.Int.
+Definition Int_set :=
+  __Set.Make
+    (existT _ _
+      {|
+        Compare.COMPARABLE.compare := Compare.Int.[Compare.S.compare]
+        |}).
 
 Module t.
   Record record := {
@@ -60837,7 +60847,7 @@ Parameter parse_var_type_annot :
 <hr />
 <div class="row conversion-row" id="script_ir_translator.ml">
   <div class="col-md-6">
-    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">109 errors</span>
+    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">107 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -61465,19 +61475,11 @@ let rec compare_comparable :
 
 let empty_set : type a. a comparable_ty -&gt; a set =
  fun ty -&gt;
-  let module OPS = Set.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
-
-We were looking for a module signature name for the following shape:
-[ compare ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">struct
+  let module OPS = Set.Make (struct
     type t = a
 
     let compare = compare_comparable ty
-  end</abbr>) in
+  end) in
   ( module <abbr class="mark-error" title="Module 'OPS' not found
 
 ——————————
@@ -62027,19 +62029,11 @@ We use the concept of shape to find the name of a signature for Coq.">Box.key_ty
 
 let empty_map : type a b. a comparable_ty -&gt; (a, b) map =
  fun ty -&gt;
-  let module OPS = Map.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
-
-We were looking for a module signature name for the following shape:
-[ compare ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">struct
+  let module OPS = Map.Make (struct
     type t = a
 
     let compare = compare_comparable ty
-  end</abbr>) in
+  end) in
   ( module <abbr class="mark-error" title="Module 'OPS' not found
 
 ——————————
@@ -63937,15 +63931,7 @@ let find_entrypoint_for_type (type full exp) ~(full : full ty)
       ty_eq ctxt expected ty
       &gt;&gt;? fun (Eq, ctxt) -&gt; ok (ctxt, entrypoint, (ty : exp ty))
 
-module Entrypoints = Set.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
-
-We were looking for a module signature name for the following shape:
-[ compare ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">String</abbr>)
+module Entrypoints = Set.Make (String)
 
 <abbr class="mark-error" title="The definition of exceptions is not handled.
 
@@ -67128,15 +67114,7 @@ let typecheck_data :
     (parse_data ?type_logger ctxt ~legacy exp_ty (root data))
   &gt;&gt;=? fun (_, ctxt) -&gt; return ctxt
 
-module Entrypoints_map = Map.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
-
-We were looking for a module signature name for the following shape:
-[ compare ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">String</abbr>)
+module Entrypoints_map = Map.Make (String)
 
 let list_entrypoints (type full) (full : full ty) ctxt ~root_name =
   let <abbr class="mark-error" title="Polymorphic variant types are not handled">merge</abbr> path annot (type t) (ty : t ty) reachable
@@ -68134,7 +68112,23 @@ We use the concept of shape to find the name of a signature for Coq.">)
       end</abbr> in
       return
         ( ctxt,
-          (module <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+          (module <abbr class="mark-error" title="Module 'OPS' not found
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
+
+We were looking for a module signature name for the following shape:
+[ key_ty; OPS; boxed ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Script_typed_ir.Boxed_map, Tezos_raw_protocol_alpha__Script_typed_ir.Boxed_map
 
@@ -68766,7 +68760,7 @@ Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty a)
       (let compare := compare_comparable ty in
       existT _ _
         {|
-          __Set.OrderedType.compare := compare
+          Compare.COMPARABLE.compare := compare
           |}) in
   let elt_ty := ty in
   let boxed := OPS.[S.SET.empty] in
@@ -68835,7 +68829,7 @@ Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty a)
       (let compare := compare_comparable ty in
       existT _ _
         {|
-          __Set.OrderedType.compare := compare
+          Compare.COMPARABLE.compare := compare
           |}) in
   let key_ty := ty in
   let boxed := (OPS.[S.MAP.empty], 0) in
@@ -70627,7 +70621,7 @@ Definition Entrypoints :=
   __Set.Make
     (existT _ _
       {|
-        __Set.OrderedType.compare := String.compare
+        Compare.COMPARABLE.compare := String.compare
         |}).
 
 (* ❌ The definition of exceptions is not handled. *)
@@ -75567,7 +75561,7 @@ Definition Entrypoints_map :=
   Map.Make
     (existT _ _
       {|
-        __Set.OrderedType.compare := String.compare
+        Compare.COMPARABLE.compare := String.compare
         |}).
 
 Definition list_entrypoints {A : Set}
@@ -76277,7 +76271,12 @@ Definition big_map_update {A B : Set}
   (* ❌ Record substitution not handled *)
   record_substitution.
 
-Definition Ids := __Set.Make Compare.Z.
+Definition Ids :=
+  __Set.Make
+    (existT _ _
+      {|
+        Compare.COMPARABLE.compare := Compare.Z.[Compare.S.compare]
+        |}).
 
 Definition big_map_ids := Ids.[S.SET.t].
 
@@ -76520,7 +76519,15 @@ Fixpoint extract_big_map_updates {a : Set}
                   Script_typed_ir.Boxed_map.key_ty := key_ty;
                   Script_typed_ir.Boxed_map.boxed := boxed
                   |} in
-            Error_monad.__return (ctxt, M, ids, acc)))
+            Error_monad.__return
+              (ctxt,
+                (existT _ _
+                  {|
+                    Script_typed_ir.Boxed_map.key_ty :=
+                      M.[Script_typed_ir.Boxed_map.key_ty];
+                    Script_typed_ir.Boxed_map.boxed :=
+                      M.[Script_typed_ir.Boxed_map.boxed]
+                    |}), ids, acc)))
   | (Script_typed_ir.Option_t _ _ true, None) =&gt;
     Error_monad.__return (ctxt, None, ids, acc)
   | (Script_typed_ir.List_t _ _ false, v) =&gt;
@@ -81240,7 +81247,7 @@ Definition random_state_hash : string := &quot;L@\204&quot; % string.
 <hr />
 <div class="row conversion-row" id="storage.ml">
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">75 errors</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">97 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -81337,7 +81344,7 @@ module Contract = struct
       end)
 
   module Global_counter =
-    Make_single_data_storage (Registered) (Raw_context)
+    Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
       (struct
         let name = [&quot;global_counter&quot;]
       end)
@@ -81345,7 +81352,7 @@ module Contract = struct
 
   module Indexed_context =
     Make_indexed_subcontext
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;index&quot;]
          end))
@@ -81364,7 +81371,7 @@ module Contract = struct
 
   module Frozen_balance_index =
     Make_indexed_subcontext
-      (Make_subcontext (Registered) (Indexed_context.Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Indexed_context.Raw_context</abbr>)
          (struct
            let name = [&quot;frozen_balance&quot;]
          end))
@@ -81421,7 +81428,7 @@ module Contract = struct
 
   module Delegated =
     Make_data_set_storage
-      (Make_subcontext (Registered) (Indexed_context.Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Indexed_context.Raw_context</abbr>)
          (struct
            let name = [&quot;delegated&quot;]
          end))
@@ -81876,7 +81883,7 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
 
   module Indexed_context =
     Make_indexed_subcontext
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;index&quot;]
          end))
@@ -81926,7 +81933,7 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
   module Contents = struct
     module I =
       Storage_functors.Make_indexed_carbonated_data_storage
-        (Make_subcontext (Registered) (Indexed_context.Raw_context)
+        (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Indexed_context.Raw_context</abbr>)
            (struct
              let name = [&quot;contents&quot;]
            end))
@@ -82351,7 +82358,7 @@ module Delegates_with_frozen_balance_index =
 
 module Delegates_with_frozen_balance =
   Make_data_set_storage
-    (Delegates_with_frozen_balance_index.Raw_context)
+    (<abbr class="mark-error" title="Polymorphic variant types are not handled">Delegates_with_frozen_balance_index.Raw_context</abbr>)
     (Make_index (Signature.Public_key_hash))
 
 (** Rolls *)
@@ -82367,11 +82374,23 @@ module Cycle = struct
 
   module Last_roll =
     Make_indexed_data_storage
-      (Make_subcontext (Registered) (Indexed_context.Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Indexed_context.Raw_context</abbr>)
          (struct
            let name = [&quot;last_roll&quot;]
          end))
          (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha.Storage_functors.INDEX, Tezos_raw_protocol_alpha__Storage_functors.INDEX
+
+We were looking for a module signature name for the following shape:
+[ path_length; to_path; of_path; args ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.
+
+——————————
+
+It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
 Tezos_raw_protocol_alpha.Storage_functors.INDEX, Tezos_raw_protocol_alpha__Storage_functors.INDEX
 
@@ -82427,7 +82446,7 @@ We use the concept of shape to find the name of a signature for Coq.">Int_index<
 
   module Nonce =
     Make_indexed_data_storage
-      (Make_subcontext (Registered) (Indexed_context.Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Indexed_context.Raw_context</abbr>)
          (struct
            let name = [&quot;nonces&quot;]
          end))
@@ -82459,21 +82478,21 @@ module Roll = struct
 
   module Indexed_context =
     Make_indexed_subcontext
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;index&quot;]
          end))
          (Make_index (Roll_repr.Index))
 
   module Next =
-    Make_single_data_storage (Registered) (Raw_context)
+    Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
       (struct
         let name = [&quot;next&quot;]
       end)
       (Roll_repr)
 
   module Limbo =
-    Make_single_data_storage (Registered) (Raw_context)
+    Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
       (struct
         let name = [&quot;limbo&quot;]
       end)
@@ -82563,7 +82582,7 @@ We use the concept of shape to find the name of a signature for Coq.">struct
 
   module Owner =
     Make_indexed_data_snapshotable_storage
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;owner&quot;]
          end))
@@ -82595,7 +82614,7 @@ module Vote = struct
       end)
 
   module Current_period_kind =
-    Make_single_data_storage (Registered) (Raw_context)
+    Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
       (struct
         let name = [&quot;current_period_kind&quot;]
       end)
@@ -82606,21 +82625,21 @@ module Vote = struct
       end)
 
   module Participation_ema =
-    Make_single_data_storage (Registered) (Raw_context)
+    Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
       (struct
         let name = [&quot;participation_ema&quot;]
       end)
       (Int32)
 
   module Current_proposal =
-    Make_single_data_storage (Registered) (Raw_context)
+    Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
       (struct
         let name = [&quot;current_proposal&quot;]
       end)
       (Protocol_hash)
 
   module Listings_size =
-    Make_single_data_storage (Registered) (Raw_context)
+    Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
       (struct
         let name = [&quot;listings_size&quot;]
       end)
@@ -82628,7 +82647,7 @@ module Vote = struct
 
   module Listings =
     Make_indexed_data_storage
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;listings&quot;]
          end))
@@ -82637,7 +82656,7 @@ module Vote = struct
 
   module Proposals =
     Make_data_set_storage
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;proposals&quot;]
          end))
@@ -82648,7 +82667,7 @@ module Vote = struct
 
   module Proposals_count =
     Make_indexed_data_storage
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;proposals_count&quot;]
          end))
@@ -82657,7 +82676,7 @@ module Vote = struct
 
   module Ballots =
     Make_indexed_data_storage
-      (Make_subcontext (Registered) (Raw_context)
+      (Make_subcontext (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
          (struct
            let name = [&quot;ballots&quot;]
          end))
@@ -82860,7 +82879,12 @@ Definition Int_index :=
 (* functor *)
 
 Definition Block_priority :=
-  (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
+  (((Storage_functors.Make_single_data_storage
+    (existT _ tt
+      {|
+        Storage_sigs.REGISTER.ghost :=
+          Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+        |}))
     (existT _ _
       {|
         Raw_context.T.mem := Raw_context.mem;
@@ -82888,11 +82912,20 @@ Definition Block_priority :=
     existT _ tt
       {|
         Storage_sigs.NAME.name := name
-        |})) Int.
+        |}))
+    (existT _ _
+      {|
+        Storage_sigs.VALUE.encoding := Int.[Storage_sigs.VALUE.encoding]
+        |}).
 
 Module Contract.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext Storage_functors.Registered)
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -82923,8 +82956,36 @@ Module Contract.
           |}).
   
   Definition Global_counter :=
-    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
-      Raw_context)
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+          Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+          Raw_context.T.get := Raw_context.[Raw_context.T.get];
+          Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+          Raw_context.T.init := Raw_context.[Raw_context.T.init];
+          Raw_context.T.set := Raw_context.[Raw_context.T.set];
+          Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+          Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+          Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+          Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+          Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+          Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+          Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+          Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+          Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+          Raw_context.T.project := Raw_context.[Raw_context.T.project];
+          Raw_context.T.absolute_key := Raw_context.[Raw_context.T.absolute_key];
+          Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+          Raw_context.T.check_enough_gas :=
+            Raw_context.[Raw_context.T.check_enough_gas];
+          Raw_context.T.description := Raw_context.[Raw_context.T.description]
+          |}))
       (let name := cons &quot;global_counter&quot; % string [] in
       existT _ tt
         {|
@@ -82937,13 +82998,58 @@ Module Contract.
   
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;index&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Contract_repr.Index).
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Contract_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Contract_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Contract_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Contract_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Contract_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Contract_repr.Index.[Storage_description.INDEX.compare]
+            |})).
   
   Definition fold {A : Set}
     : Indexed_context.[Storage_sigs.Indexed_raw_context.context] -&gt; A -&gt;
@@ -82969,13 +83075,73 @@ Module Contract.
   
   Definition Frozen_balance_index :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Indexed_context.Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem :=
+              Indexed_context.Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Indexed_context.Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option :=
+              Indexed_context.Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init :=
+              Indexed_context.Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Indexed_context.Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set :=
+              Indexed_context.Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option :=
+              Indexed_context.Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete :=
+              Indexed_context.Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove :=
+              Indexed_context.Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec :=
+              Indexed_context.Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy :=
+              Indexed_context.Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys :=
+              Indexed_context.Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project :=
+              Indexed_context.Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Indexed_context.Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description :=
+              Indexed_context.Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;frozen_balance&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Cycle_repr.Index).
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Cycle_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Cycle_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Cycle_repr.Index.[Storage_description.INDEX.compare]
+            |})).
   
   Definition Frozen_deposits :=
     (Frozen_balance_index.[Storage_sigs.Indexed_raw_context.Make_map]
@@ -83019,7 +83185,12 @@ Module Contract.
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})) Manager_repr.
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding :=
+            Manager_repr.[Storage_sigs.VALUE.encoding]
+          |}).
   
   Definition Delegate :=
     (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
@@ -83027,11 +83198,20 @@ Module Contract.
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})) Signature.[S.SIGNATURE.Public_key_hash].
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.encoding]
+          |}).
   
   Definition Inactive_delegate :=
     (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_set]
-      Storage_functors.Registered)
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (let name := cons &quot;inactive_delegate&quot; % string [] in
       existT _ tt
         {|
@@ -83052,13 +83232,73 @@ Module Contract.
   
   Definition Delegated :=
     (Storage_functors.Make_data_set_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Indexed_context.Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem :=
+              Indexed_context.Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Indexed_context.Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option :=
+              Indexed_context.Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init :=
+              Indexed_context.Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Indexed_context.Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set :=
+              Indexed_context.Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option :=
+              Indexed_context.Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete :=
+              Indexed_context.Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove :=
+              Indexed_context.Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec :=
+              Indexed_context.Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy :=
+              Indexed_context.Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys :=
+              Indexed_context.Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project :=
+              Indexed_context.Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Indexed_context.Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description :=
+              Indexed_context.Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;delegated&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Contract_repr.Index).
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Contract_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Contract_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Contract_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Contract_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Contract_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Contract_repr.Index.[Storage_description.INDEX.compare]
+            |})).
   
   Definition Counter :=
     (Indexed_context.[Storage_sigs.Indexed_raw_context.Make_map]
@@ -83142,7 +83382,12 @@ End Contract.
 
 Module Big_map.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext Storage_functors.Registered)
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83256,13 +83501,58 @@ Module Big_map.
   
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;index&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Index).
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Index.[Storage_description.INDEX.compare]
+            |})).
   
   Definition rpc_arg : RPC_arg.arg Z.t :=
     Index.[Storage_description.INDEX.rpc_arg].
@@ -83335,8 +83625,55 @@ Module Big_map.
   Module Contents.
     Definition I :=
       ((Storage_functors.Make_indexed_carbonated_data_storage
-        (((Storage_functors.Make_subcontext Storage_functors.Registered)
-          Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+        (((Storage_functors.Make_subcontext
+          (existT _ tt
+            {|
+              Storage_sigs.REGISTER.ghost :=
+                Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+              |}))
+          (existT _ _
+            {|
+              Raw_context.T.mem :=
+                Indexed_context.Raw_context.[Raw_context.T.mem];
+              Raw_context.T.dir_mem :=
+                Indexed_context.Raw_context.[Raw_context.T.dir_mem];
+              Raw_context.T.get :=
+                Indexed_context.Raw_context.[Raw_context.T.get];
+              Raw_context.T.get_option :=
+                Indexed_context.Raw_context.[Raw_context.T.get_option];
+              Raw_context.T.init :=
+                Indexed_context.Raw_context.[Raw_context.T.init];
+              Raw_context.T.set :=
+                Indexed_context.Raw_context.[Raw_context.T.set];
+              Raw_context.T.init_set :=
+                Indexed_context.Raw_context.[Raw_context.T.init_set];
+              Raw_context.T.set_option :=
+                Indexed_context.Raw_context.[Raw_context.T.set_option];
+              Raw_context.T.delete :=
+                Indexed_context.Raw_context.[Raw_context.T.delete];
+              Raw_context.T.remove :=
+                Indexed_context.Raw_context.[Raw_context.T.remove];
+              Raw_context.T.remove_rec :=
+                Indexed_context.Raw_context.[Raw_context.T.remove_rec];
+              Raw_context.T.copy :=
+                Indexed_context.Raw_context.[Raw_context.T.copy];
+              Raw_context.T.fold {_} :=
+                Indexed_context.Raw_context.[Raw_context.T.fold];
+              Raw_context.T.keys :=
+                Indexed_context.Raw_context.[Raw_context.T.keys];
+              Raw_context.T.fold_keys {_} :=
+                Indexed_context.Raw_context.[Raw_context.T.fold_keys];
+              Raw_context.T.project :=
+                Indexed_context.Raw_context.[Raw_context.T.project];
+              Raw_context.T.absolute_key :=
+                Indexed_context.Raw_context.[Raw_context.T.absolute_key];
+              Raw_context.T.consume_gas :=
+                Indexed_context.Raw_context.[Raw_context.T.consume_gas];
+              Raw_context.T.check_enough_gas :=
+                Indexed_context.Raw_context.[Raw_context.T.check_enough_gas];
+              Raw_context.T.description :=
+                Indexed_context.Raw_context.[Raw_context.T.description]
+              |}))
           (let name := cons &quot;contents&quot; % string [] in
           existT _ tt
             {|
@@ -83453,7 +83790,12 @@ End Big_map.
 
 Definition Delegates :=
   (Storage_functors.Make_data_set_storage
-    (((Storage_functors.Make_subcontext Storage_functors.Registered)
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83481,11 +83823,32 @@ Definition Delegates :=
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |}))) (Make_index Signature.[S.SIGNATURE.Public_key_hash]).
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.path_length];
+          Storage_description.INDEX.to_path :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.to_path];
+          Storage_description.INDEX.of_path :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.of_path];
+          Storage_description.INDEX.rpc_arg :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.rpc_arg];
+          Storage_description.INDEX.encoding :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.encoding];
+          Storage_description.INDEX.compare :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.compare]
+          |})).
 
 Definition Active_delegates_with_rolls :=
   (Storage_functors.Make_data_set_storage
-    (((Storage_functors.Make_subcontext Storage_functors.Registered)
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83513,11 +83876,32 @@ Definition Active_delegates_with_rolls :=
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |}))) (Make_index Signature.[S.SIGNATURE.Public_key_hash]).
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.path_length];
+          Storage_description.INDEX.to_path :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.to_path];
+          Storage_description.INDEX.of_path :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.of_path];
+          Storage_description.INDEX.rpc_arg :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.rpc_arg];
+          Storage_description.INDEX.encoding :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.encoding];
+          Storage_description.INDEX.compare :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.compare]
+          |})).
 
 Definition Delegates_with_frozen_balance_index :=
   (Storage_functors.Make_indexed_subcontext
-    (((Storage_functors.Make_subcontext Storage_functors.Registered)
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83545,17 +83929,95 @@ Definition Delegates_with_frozen_balance_index :=
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |}))) (Make_index Cycle_repr.Index).
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Cycle_repr.Index.[Storage_description.INDEX.path_length];
+          Storage_description.INDEX.to_path :=
+            Cycle_repr.Index.[Storage_description.INDEX.to_path];
+          Storage_description.INDEX.of_path :=
+            Cycle_repr.Index.[Storage_description.INDEX.of_path];
+          Storage_description.INDEX.rpc_arg :=
+            Cycle_repr.Index.[Storage_description.INDEX.rpc_arg];
+          Storage_description.INDEX.encoding :=
+            Cycle_repr.Index.[Storage_description.INDEX.encoding];
+          Storage_description.INDEX.compare :=
+            Cycle_repr.Index.[Storage_description.INDEX.compare]
+          |})).
 
 Definition Delegates_with_frozen_balance :=
   (Storage_functors.Make_data_set_storage
-    Delegates_with_frozen_balance_index.[Storage_sigs.Indexed_raw_context.Raw_context])
-    (Make_index Signature.[S.SIGNATURE.Public_key_hash]).
+    (existT _ _
+      {|
+        Raw_context.T.mem :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.mem];
+        Raw_context.T.dir_mem :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.dir_mem];
+        Raw_context.T.get :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.get];
+        Raw_context.T.get_option :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.get_option];
+        Raw_context.T.init :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.init];
+        Raw_context.T.set :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.set];
+        Raw_context.T.init_set :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.init_set];
+        Raw_context.T.set_option :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.set_option];
+        Raw_context.T.delete :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.delete];
+        Raw_context.T.remove :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.remove];
+        Raw_context.T.remove_rec :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.remove_rec];
+        Raw_context.T.copy :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.copy];
+        Raw_context.T.fold {_} :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.fold];
+        Raw_context.T.keys :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.keys];
+        Raw_context.T.fold_keys {_} :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.fold_keys];
+        Raw_context.T.project :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.project];
+        Raw_context.T.absolute_key :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.absolute_key];
+        Raw_context.T.consume_gas :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.consume_gas];
+        Raw_context.T.check_enough_gas :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.check_enough_gas];
+        Raw_context.T.description :=
+          Delegates_with_frozen_balance_index.Raw_context.[Raw_context.T.description]
+        |}))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.path_length];
+          Storage_description.INDEX.to_path :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.to_path];
+          Storage_description.INDEX.of_path :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.of_path];
+          Storage_description.INDEX.rpc_arg :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.rpc_arg];
+          Storage_description.INDEX.encoding :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.encoding];
+          Storage_description.INDEX.compare :=
+            Signature.Public_key_hash.[S.SPublic_key_hash.compare]
+          |})).
 
 Module Cycle.
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
         (existT _ _
           {|
             Raw_context.T.mem := Raw_context.mem;
@@ -83583,17 +84045,88 @@ Module Cycle.
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Cycle_repr.Index).
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Cycle_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Cycle_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Cycle_repr.Index.[Storage_description.INDEX.compare]
+            |})).
   
   Definition Last_roll :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Indexed_context.Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem :=
+              Indexed_context.Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Indexed_context.Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option :=
+              Indexed_context.Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init :=
+              Indexed_context.Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Indexed_context.Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set :=
+              Indexed_context.Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option :=
+              Indexed_context.Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete :=
+              Indexed_context.Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove :=
+              Indexed_context.Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec :=
+              Indexed_context.Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy :=
+              Indexed_context.Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys :=
+              Indexed_context.Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project :=
+              Indexed_context.Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Indexed_context.Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description :=
+              Indexed_context.Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;last_roll&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) Int_index)
+            |})))
+      (existT _ [_, _]
+        {|
+          Storage_functors.INDEX.path_length :=
+            Int_index.[Storage_functors.INDEX.path_length];
+          Storage_functors.INDEX.to_path :=
+            Int_index.[Storage_functors.INDEX.to_path];
+          Storage_functors.INDEX.of_path :=
+            Int_index.[Storage_functors.INDEX.of_path];
+          Storage_functors.INDEX.args {_} :=
+            Int_index.[Storage_functors.INDEX.args]
+          |}))
       (existT _ _
         {|
           Storage_sigs.VALUE.encoding := Roll_repr.encoding
@@ -83605,7 +84138,11 @@ Module Cycle.
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})) Int.
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Int.[Storage_sigs.VALUE.encoding]
+          |}).
   
   Module unrevealed_nonce.
     Record record := {
@@ -83657,13 +84194,73 @@ Module Cycle.
   
   Definition Nonce :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Indexed_context.[Storage_sigs.Indexed_raw_context.Raw_context])
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Indexed_context.Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem :=
+              Indexed_context.Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Indexed_context.Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option :=
+              Indexed_context.Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init :=
+              Indexed_context.Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Indexed_context.Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set :=
+              Indexed_context.Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option :=
+              Indexed_context.Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete :=
+              Indexed_context.Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove :=
+              Indexed_context.Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec :=
+              Indexed_context.Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy :=
+              Indexed_context.Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys :=
+              Indexed_context.Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} :=
+              Indexed_context.Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project :=
+              Indexed_context.Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Indexed_context.Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Indexed_context.Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description :=
+              Indexed_context.Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;nonces&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Raw_level_repr.Index))
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Raw_level_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Raw_level_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Raw_level_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Raw_level_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Raw_level_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Raw_level_repr.Index.[Storage_description.INDEX.compare]
+            |})))
       (let encoding := nonce_status_encoding in
       existT _ _
         {|
@@ -83686,7 +84283,12 @@ End Cycle.
 
 Module Roll.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext Storage_functors.Registered)
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83718,17 +84320,90 @@ Module Roll.
   
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;index&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Roll_repr.Index).
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Roll_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Roll_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Roll_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Roll_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Roll_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Roll_repr.Index.[Storage_description.INDEX.compare]
+            |})).
   
   Definition Next :=
-    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
-      Raw_context)
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+          Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+          Raw_context.T.get := Raw_context.[Raw_context.T.get];
+          Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+          Raw_context.T.init := Raw_context.[Raw_context.T.init];
+          Raw_context.T.set := Raw_context.[Raw_context.T.set];
+          Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+          Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+          Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+          Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+          Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+          Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+          Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+          Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+          Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+          Raw_context.T.project := Raw_context.[Raw_context.T.project];
+          Raw_context.T.absolute_key := Raw_context.[Raw_context.T.absolute_key];
+          Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+          Raw_context.T.check_enough_gas :=
+            Raw_context.[Raw_context.T.check_enough_gas];
+          Raw_context.T.description := Raw_context.[Raw_context.T.description]
+          |}))
       (let name := cons &quot;next&quot; % string [] in
       existT _ tt
         {|
@@ -83740,8 +84415,36 @@ Module Roll.
           |}).
   
   Definition Limbo :=
-    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
-      Raw_context)
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+          Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+          Raw_context.T.get := Raw_context.[Raw_context.T.get];
+          Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+          Raw_context.T.init := Raw_context.[Raw_context.T.init];
+          Raw_context.T.set := Raw_context.[Raw_context.T.set];
+          Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+          Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+          Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+          Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+          Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+          Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+          Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+          Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+          Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+          Raw_context.T.project := Raw_context.[Raw_context.T.project];
+          Raw_context.T.absolute_key := Raw_context.[Raw_context.T.absolute_key];
+          Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+          Raw_context.T.check_enough_gas :=
+            Raw_context.[Raw_context.T.check_enough_gas];
+          Raw_context.T.description := Raw_context.[Raw_context.T.description]
+          |}))
       (let name := cons &quot;limbo&quot; % string [] in
       existT _ tt
         {|
@@ -83753,7 +84456,38 @@ Module Roll.
           |}).
   
   Definition Delegate_roll_list :=
-    (Storage_functors.Wrap_indexed_data_storage Contract.Roll_list)
+    (Storage_functors.Wrap_indexed_data_storage
+      (existT _ [_, _, _]
+        {|
+          Storage_sigs.Indexed_data_storage.mem :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.mem];
+          Storage_sigs.Indexed_data_storage.get :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.get];
+          Storage_sigs.Indexed_data_storage.get_option :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.get_option];
+          Storage_sigs.Indexed_data_storage.set :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.set];
+          Storage_sigs.Indexed_data_storage.init :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.init];
+          Storage_sigs.Indexed_data_storage.init_set :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.init_set];
+          Storage_sigs.Indexed_data_storage.set_option :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.set_option];
+          Storage_sigs.Indexed_data_storage.delete :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.delete];
+          Storage_sigs.Indexed_data_storage.remove :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.remove];
+          Storage_sigs.Indexed_data_storage.clear :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.clear];
+          Storage_sigs.Indexed_data_storage.keys :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.keys];
+          Storage_sigs.Indexed_data_storage.bindings :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.bindings];
+          Storage_sigs.Indexed_data_storage.fold {_} :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.fold];
+          Storage_sigs.Indexed_data_storage.fold_keys {_} :=
+            Contract.Roll_list.[Storage_sigs.Indexed_data_storage.fold_keys]
+          |}))
       (* ❌ The signature name of this module could not be found *)
       first_class_module_value_of_unknown_signature.
   
@@ -83770,7 +84504,38 @@ Module Roll.
           |}).
   
   Definition Delegate_change :=
-    (Storage_functors.Wrap_indexed_data_storage Contract.Change)
+    (Storage_functors.Wrap_indexed_data_storage
+      (existT _ [_, _, _]
+        {|
+          Storage_sigs.Indexed_data_storage.mem :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.mem];
+          Storage_sigs.Indexed_data_storage.get :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.get];
+          Storage_sigs.Indexed_data_storage.get_option :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.get_option];
+          Storage_sigs.Indexed_data_storage.set :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.set];
+          Storage_sigs.Indexed_data_storage.init :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.init];
+          Storage_sigs.Indexed_data_storage.init_set :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.init_set];
+          Storage_sigs.Indexed_data_storage.set_option :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.set_option];
+          Storage_sigs.Indexed_data_storage.delete :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.delete];
+          Storage_sigs.Indexed_data_storage.remove :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.remove];
+          Storage_sigs.Indexed_data_storage.clear :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.clear];
+          Storage_sigs.Indexed_data_storage.keys :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.keys];
+          Storage_sigs.Indexed_data_storage.bindings :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.bindings];
+          Storage_sigs.Indexed_data_storage.fold {_} :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.fold];
+          Storage_sigs.Indexed_data_storage.fold_keys {_} :=
+            Contract.Change.[Storage_sigs.Indexed_data_storage.fold_keys]
+          |}))
       (* ❌ The signature name of this module could not be found *)
       first_class_module_value_of_unknown_signature.
   
@@ -83830,8 +84595,37 @@ Module Roll.
   
   Definition Owner :=
     (((Storage_functors.Make_indexed_data_snapshotable_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;owner&quot; % string [] in
         existT _ tt
           {|
@@ -83844,7 +84638,28 @@ Module Roll.
           Storage_functors.INDEX.to_path := Snapshoted_owner_index.to_path;
           Storage_functors.INDEX.of_path := Snapshoted_owner_index.of_path;
           Storage_functors.INDEX.args {_} := Snapshoted_owner_index.args
-          |})) (Make_index Roll_repr.Index)) Signature.[S.SIGNATURE.Public_key].
+          |}))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Roll_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Roll_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Roll_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Roll_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Roll_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Roll_repr.Index.[Storage_description.INDEX.compare]
+            |})))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding :=
+            Signature.Public_key.[S.SPublic_key.encoding]
+          |}).
   
   Definition Snapshot_for_cycle := Cycle.Roll_snapshot.
   
@@ -83858,7 +84673,12 @@ End Roll.
 
 Module Vote.
   Definition Raw_context :=
-    ((Storage_functors.Make_subcontext Storage_functors.Registered)
+    ((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -83889,8 +84709,36 @@ Module Vote.
           |}).
   
   Definition Current_period_kind :=
-    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
-      Raw_context)
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+          Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+          Raw_context.T.get := Raw_context.[Raw_context.T.get];
+          Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+          Raw_context.T.init := Raw_context.[Raw_context.T.init];
+          Raw_context.T.set := Raw_context.[Raw_context.T.set];
+          Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+          Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+          Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+          Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+          Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+          Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+          Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+          Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+          Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+          Raw_context.T.project := Raw_context.[Raw_context.T.project];
+          Raw_context.T.absolute_key := Raw_context.[Raw_context.T.absolute_key];
+          Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+          Raw_context.T.check_enough_gas :=
+            Raw_context.[Raw_context.T.check_enough_gas];
+          Raw_context.T.description := Raw_context.[Raw_context.T.description]
+          |}))
       (let name := cons &quot;current_period_kind&quot; % string [] in
       existT _ tt
         {|
@@ -83903,73 +84751,372 @@ Module Vote.
           |}).
   
   Definition Participation_ema :=
-    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
-      Raw_context)
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+          Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+          Raw_context.T.get := Raw_context.[Raw_context.T.get];
+          Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+          Raw_context.T.init := Raw_context.[Raw_context.T.init];
+          Raw_context.T.set := Raw_context.[Raw_context.T.set];
+          Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+          Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+          Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+          Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+          Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+          Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+          Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+          Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+          Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+          Raw_context.T.project := Raw_context.[Raw_context.T.project];
+          Raw_context.T.absolute_key := Raw_context.[Raw_context.T.absolute_key];
+          Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+          Raw_context.T.check_enough_gas :=
+            Raw_context.[Raw_context.T.check_enough_gas];
+          Raw_context.T.description := Raw_context.[Raw_context.T.description]
+          |}))
       (let name := cons &quot;participation_ema&quot; % string [] in
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})) Int32.
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Int32.[Storage_sigs.VALUE.encoding]
+          |}).
   
   Definition Current_proposal :=
-    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
-      Raw_context)
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+          Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+          Raw_context.T.get := Raw_context.[Raw_context.T.get];
+          Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+          Raw_context.T.init := Raw_context.[Raw_context.T.init];
+          Raw_context.T.set := Raw_context.[Raw_context.T.set];
+          Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+          Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+          Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+          Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+          Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+          Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+          Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+          Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+          Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+          Raw_context.T.project := Raw_context.[Raw_context.T.project];
+          Raw_context.T.absolute_key := Raw_context.[Raw_context.T.absolute_key];
+          Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+          Raw_context.T.check_enough_gas :=
+            Raw_context.[Raw_context.T.check_enough_gas];
+          Raw_context.T.description := Raw_context.[Raw_context.T.description]
+          |}))
       (let name := cons &quot;current_proposal&quot; % string [] in
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})) Protocol_hash.
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Protocol_hash.[S.HASH.encoding]
+          |}).
   
   Definition Listings_size :=
-    (((Storage_functors.Make_single_data_storage Storage_functors.Registered)
-      Raw_context)
+    (((Storage_functors.Make_single_data_storage
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
+      (existT _ _
+        {|
+          Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+          Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+          Raw_context.T.get := Raw_context.[Raw_context.T.get];
+          Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+          Raw_context.T.init := Raw_context.[Raw_context.T.init];
+          Raw_context.T.set := Raw_context.[Raw_context.T.set];
+          Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+          Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+          Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+          Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+          Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+          Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+          Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+          Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+          Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+          Raw_context.T.project := Raw_context.[Raw_context.T.project];
+          Raw_context.T.absolute_key := Raw_context.[Raw_context.T.absolute_key];
+          Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+          Raw_context.T.check_enough_gas :=
+            Raw_context.[Raw_context.T.check_enough_gas];
+          Raw_context.T.description := Raw_context.[Raw_context.T.description]
+          |}))
       (let name := cons &quot;listings_size&quot; % string [] in
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |})) Int32.
+          |}))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Int32.[Storage_sigs.VALUE.encoding]
+          |}).
   
   Definition Listings :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;listings&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Signature.[S.SIGNATURE.Public_key_hash])) Int32.
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.path_length];
+            Storage_description.INDEX.to_path :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.to_path];
+            Storage_description.INDEX.of_path :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.encoding];
+            Storage_description.INDEX.compare :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.compare]
+            |})))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Int32.[Storage_sigs.VALUE.encoding]
+          |}).
   
   Definition Proposals :=
     (Storage_functors.Make_data_set_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;proposals&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
             |})))
-      ((Storage_functors.Pair (Make_index Protocol_hash))
-        (Make_index Signature.[S.SIGNATURE.Public_key_hash])).
+      ((Storage_functors.Pair
+        (Make_index
+          (existT _ _
+            {|
+              Storage_description.INDEX.path_length :=
+                Protocol_hash.[S.HASH.path_length];
+              Storage_description.INDEX.to_path :=
+                Protocol_hash.[S.HASH.to_path];
+              Storage_description.INDEX.of_path :=
+                Protocol_hash.[S.HASH.of_path];
+              Storage_description.INDEX.rpc_arg :=
+                Protocol_hash.[S.HASH.rpc_arg];
+              Storage_description.INDEX.encoding :=
+                Protocol_hash.[S.HASH.encoding];
+              Storage_description.INDEX.compare :=
+                Protocol_hash.[S.HASH.compare]
+              |})))
+        (Make_index
+          (existT _ _
+            {|
+              Storage_description.INDEX.path_length :=
+                Signature.Public_key_hash.[S.SPublic_key_hash.path_length];
+              Storage_description.INDEX.to_path :=
+                Signature.Public_key_hash.[S.SPublic_key_hash.to_path];
+              Storage_description.INDEX.of_path :=
+                Signature.Public_key_hash.[S.SPublic_key_hash.of_path];
+              Storage_description.INDEX.rpc_arg :=
+                Signature.Public_key_hash.[S.SPublic_key_hash.rpc_arg];
+              Storage_description.INDEX.encoding :=
+                Signature.Public_key_hash.[S.SPublic_key_hash.encoding];
+              Storage_description.INDEX.compare :=
+                Signature.Public_key_hash.[S.SPublic_key_hash.compare]
+              |}))).
   
   Definition Proposals_count :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;proposals_count&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Signature.[S.SIGNATURE.Public_key_hash])) Int.
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.path_length];
+            Storage_description.INDEX.to_path :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.to_path];
+            Storage_description.INDEX.of_path :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.encoding];
+            Storage_description.INDEX.compare :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.compare]
+            |})))
+      (existT _ _
+        {|
+          Storage_sigs.VALUE.encoding := Int.[Storage_sigs.VALUE.encoding]
+          |}).
   
   Definition Ballots :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
-        Raw_context)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
         (let name := cons &quot;ballots&quot; % string [] in
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Signature.[S.SIGNATURE.Public_key_hash]))
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.path_length];
+            Storage_description.INDEX.to_path :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.to_path];
+            Storage_description.INDEX.of_path :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.encoding];
+            Storage_description.INDEX.compare :=
+              Signature.Public_key_hash.[S.SPublic_key_hash.compare]
+            |})))
       (let encoding := Vote_repr.ballot_encoding in
       existT _ _
         {|
@@ -84067,7 +85214,12 @@ End Seed.
 
 Definition Commitments :=
   ((Storage_functors.Make_indexed_data_storage
-    (((Storage_functors.Make_subcontext Storage_functors.Registered)
+    (((Storage_functors.Make_subcontext
+      (existT _ tt
+        {|
+          Storage_sigs.REGISTER.ghost :=
+            Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+          |}))
       (existT _ _
         {|
           Raw_context.T.mem := Raw_context.mem;
@@ -84095,7 +85247,23 @@ Definition Commitments :=
       existT _ tt
         {|
           Storage_sigs.NAME.name := name
-          |}))) (Make_index Blinded_public_key_hash.Index))
+          |})))
+    (Make_index
+      (existT _ _
+        {|
+          Storage_description.INDEX.path_length :=
+            Blinded_public_key_hash.Index.[Storage_description.INDEX.path_length];
+          Storage_description.INDEX.to_path :=
+            Blinded_public_key_hash.Index.[Storage_description.INDEX.to_path];
+          Storage_description.INDEX.of_path :=
+            Blinded_public_key_hash.Index.[Storage_description.INDEX.of_path];
+          Storage_description.INDEX.rpc_arg :=
+            Blinded_public_key_hash.Index.[Storage_description.INDEX.rpc_arg];
+          Storage_description.INDEX.encoding :=
+            Blinded_public_key_hash.Index.[Storage_description.INDEX.encoding];
+          Storage_description.INDEX.compare :=
+            Blinded_public_key_hash.Index.[Storage_description.INDEX.compare]
+          |})))
     (existT _ _
       {|
         Storage_sigs.VALUE.encoding := Tez_repr.encoding
@@ -84104,7 +85272,12 @@ Definition Commitments :=
 Module Ramp_up.
   Definition Rewards :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
         (existT _ _
           {|
             Raw_context.T.mem := Raw_context.mem;
@@ -84132,7 +85305,23 @@ Module Ramp_up.
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Cycle_repr.Index))
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Cycle_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Cycle_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Cycle_repr.Index.[Storage_description.INDEX.compare]
+            |})))
       (let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
       existT _ _
         {|
@@ -84141,7 +85330,12 @@ Module Ramp_up.
   
   Definition Security_deposits :=
     ((Storage_functors.Make_indexed_data_storage
-      (((Storage_functors.Make_subcontext Storage_functors.Registered)
+      (((Storage_functors.Make_subcontext
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
         (existT _ _
           {|
             Raw_context.T.mem := Raw_context.mem;
@@ -84169,7 +85363,23 @@ Module Ramp_up.
         existT _ tt
           {|
             Storage_sigs.NAME.name := name
-            |}))) (Make_index Cycle_repr.Index))
+            |})))
+      (Make_index
+        (existT _ _
+          {|
+            Storage_description.INDEX.path_length :=
+              Cycle_repr.Index.[Storage_description.INDEX.path_length];
+            Storage_description.INDEX.to_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.to_path];
+            Storage_description.INDEX.of_path :=
+              Cycle_repr.Index.[Storage_description.INDEX.of_path];
+            Storage_description.INDEX.rpc_arg :=
+              Cycle_repr.Index.[Storage_description.INDEX.rpc_arg];
+            Storage_description.INDEX.encoding :=
+              Cycle_repr.Index.[Storage_description.INDEX.encoding];
+            Storage_description.INDEX.compare :=
+              Cycle_repr.Index.[Storage_description.INDEX.compare]
+            |})))
       (let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
       existT _ _
         {|
@@ -84887,7 +86097,7 @@ End Ramp_up.
 <hr />
 <div class="row conversion-row" id="storage_description.ml">
   <div class="col-md-6">
-    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-danger">13 errors</span>
+    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-danger">12 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -84914,15 +86124,7 @@ End Ramp_up.
 (*                                                                           *)
 (*****************************************************************************)
 
-module StringMap = Map.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
-Tezos_protocol_environment_alpha__Environment.Set.OrderedType, Tezos_protocol_environment_alpha__Environment.Map.OrderedType, Tezos_protocol_environment_alpha__Environment.Compare.COMPARABLE
-
-We were looking for a module signature name for the following shape:
-[ compare ]
-(a shape is a list of names of values)
-
-We use the concept of shape to find the name of a signature for Coq.">String</abbr>)
+module StringMap = Map.Make (String)
 
 type 'key t = 'key description ref
 
@@ -85267,7 +86469,7 @@ Definition StringMap :=
   Map.Make
     (existT _ _
       {|
-        __Set.OrderedType.compare := String.compare
+        Compare.COMPARABLE.compare := String.compare
         |}).
 
 Reserved Notation &quot;'t&quot;.
