@@ -59,3 +59,58 @@ End poly.
 Definition poly := poly.record.
 
 Definition p : poly Z bool := {| poly.first := 12; poly.second := false |}.
+
+Module ConstructorWithRecords.
+  Module t.
+    Module Foo.
+      Record record {name size : Set} := {
+        name : name;
+        size : size }.
+      Arguments record : clear implicits.
+    End Foo.
+    Definition Foo := Foo.record.
+  End t.
+  
+  Module gadt.
+    Module Ex.
+      Record record {x : Set} := {
+        x : x }.
+      Arguments record : clear implicits.
+    End Ex.
+    Definition Ex := Ex.record.
+  End gadt.
+  
+  Reserved Notation "'gadt".
+  Reserved Notation "'loc".
+  
+  Module loc.
+    Record record {x y : Set} := {
+      x : x;
+      y : y }.
+    Arguments record : clear implicits.
+  End loc.
+  Definition loc_skeleton := loc.record.
+  
+  Inductive t : Set :=
+  | Foo : t.Foo string Z -> t
+  | Bar : 'loc -> t
+  
+  with gadt_gadt : Set :=
+  | Ex : forall {a : Set}, gadt.Ex a -> gadt_gadt
+  
+  where "'gadt" := (fun (a : Set) => gadt_gadt)
+  and "'loc" := (loc_skeleton Z Z).
+  
+  Definition gadt := 'gadt.
+  Definition loc := 'loc.
+  
+  Definition l : loc := {| loc.x := 12; loc.y := 23 |}.
+  
+  Definition foo : t := Foo {| t.Foo.name := "foo" % string; t.Foo.size := 12 |}.
+  
+  Definition f (x : t) : Z :=
+    match x with
+    | Foo {| t.Foo.size := size |} => size
+    | Bar {| loc.y := y |} => y
+    end.
+End ConstructorWithRecords.

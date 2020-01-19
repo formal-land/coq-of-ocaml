@@ -3,12 +3,13 @@ open SmartPrint
 open Monad.Notations
 
 let to_coq_record
-  (name : Name.t)
+  (module_name : Name.t)
+  (typ_name : Name.t)
   (typ_args : Name.t list)
   (fields : (Name.t * Type.t) list)
   : SmartPrint.t =
   nest (
-    !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+    !^ "Module" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
     indent (
       !^ "Record" ^^ !^ "record" ^^
       begin match typ_args with
@@ -29,12 +30,26 @@ let to_coq_record
         newline ^^ !^ "Arguments" ^^ !^ "record" ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
       end
     ) ^^ newline ^^
-    !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+    !^ "End" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
     nest (
-      !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
-      Name.to_coq name ^-^ !^ ".record" ^-^ !^ "."
+      !^ "Definition" ^^ Name.to_coq typ_name ^^ !^ ":=" ^^
+      Name.to_coq module_name ^-^ !^ ".record" ^-^ !^ "."
     )
   )
+
+module RecordSkeleton = struct
+  type t = {
+    fields : Name.t list;
+    module_name : Name.t;
+    typ_name : Name.t;
+  }
+
+  let to_coq (record_skeleton : t) : SmartPrint.t =
+    let { fields; module_name; typ_name } = record_skeleton in
+    to_coq_record module_name typ_name fields (fields |>
+      List.map (fun field -> (field, Type.Variable field))
+    )
+end
 
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
@@ -55,29 +70,52 @@ module Constructors = struct
       param_typs : Type.t list; (** The parameters of the constructor. *)
     }
 
-    let of_ocaml_case (case : Types.constructor_declaration)
-      : t Monad.t =
+    let of_ocaml_case (typ_name : Name.t) (case : Types.constructor_declaration)
+      : (t * RecordSkeleton.t option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
       let constructor_name = Name.of_ident false cd_id in
       let typ_vars = Name.Map.empty in
-      (match cd_args with
-      | Cstr_tuple param_typs -> Type.of_typs_exprs true typ_vars param_typs
+      begin match cd_args with
+      | Cstr_tuple param_typs ->
+        Type.of_typs_exprs true typ_vars param_typs >>= fun (param_typs, _, _) ->
+        return (param_typs, None)
       | Cstr_record labeled_typs ->
         set_loc (Loc.of_location cd_loc) (
         (
           labeled_typs |>
           List.map (fun { Types.ld_type; _ } -> ld_type) |>
           Type.of_typs_exprs true typ_vars
-        ) >>= fun result ->
-        raise result NotSupported "Unhandled named constructor parameters.")
-      ) >>= fun (param_typs, _, _) ->
+        ) >>= fun (record_params, _, _) ->
+        let record_fields = labeled_typs |> List.map ( fun { Types.ld_id; _ } ->
+          Name.of_ident false ld_id
+        ) in
+        return (
+          [
+            Type.Apply (
+              MixedPath.PathName {
+                path = [typ_name];
+                base = constructor_name;
+              },
+              record_params
+            )
+          ],
+          Some {
+            RecordSkeleton.fields = record_fields;
+            module_name = constructor_name;
+            typ_name = constructor_name;
+          }
+        ))
+      end >>= fun (param_typs, records) ->
       let is_gadt = match cd_res with None -> false | Some _ -> true in
-      return {
-        constructor_name;
-        is_gadt;
-        param_typs;
-      })
+      return (
+        {
+          constructor_name;
+          is_gadt;
+          param_typs;
+        },
+        records
+      ))
 
     let of_ocaml_row (row : Asttypes.label * Types.row_field) : t Monad.t =
       let (label, field) = row in
@@ -166,10 +204,20 @@ end
 
 module Inductive = struct
   type t = {
+    constructor_records : (Name.t * RecordSkeleton.t list) list;
     notations : (Name.t * Name.t list * Type.t) list;
-    records : (Name.t * Name.t list) list;
+    records : RecordSkeleton.t list;
     typs : (Name.t * Name.t list * Constructors.t) list;
   }
+
+  let to_coq_constructor_records (inductive : t) : SmartPrint.t list =
+    inductive.constructor_records |> List.map (fun (name, records) ->
+      !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+      indent (
+        separate (newline ^^ newline) (List.map RecordSkeleton.to_coq records)
+      ) ^^ newline ^^
+      !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+    )
 
   let to_coq_notations_reserved (inductive : t) : SmartPrint.t list =
     inductive.notations |> List.map (fun (name, _, _) ->
@@ -177,9 +225,7 @@ module Inductive = struct
     )
 
   let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
-    inductive.records |> List.map (fun (name, fields) ->
-      to_coq_record name fields (fields |> List.map (fun field -> (field, Type.Variable field)))
-    )
+    inductive.records |> List.map RecordSkeleton.to_coq
 
   let to_coq_typs
     (subst : (Name.t -> Name.t) option)
@@ -270,6 +316,7 @@ module Inductive = struct
       | None -> name
       | Some (name', _, _) -> Name.prefix_by_single_quote name'
     ) in
+    let constructor_records = to_coq_constructor_records inductive in
     let reserved_notations = to_coq_notations_reserved inductive in
     let record_skeletons = to_coq_record_skeletons inductive in
     let notation_wheres = to_coq_notations_wheres subst inductive in
@@ -279,6 +326,9 @@ module Inductive = struct
         to_coq_typs_implicits left_typ_args constructors
       )) in
     nest (
+      (match constructor_records with
+      | [] -> empty
+      | _ :: _ -> separate (newline ^^ newline) constructor_records ^^ newline ^^ newline) ^^
       (match reserved_notations with
       | [] -> empty
       | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
@@ -330,6 +380,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
         raise
           (Inductive {
+            constructor_records = [];
             notations = [];
             records = [];
             typs = [(name, typ_args, constructors)];
@@ -347,7 +398,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     let typ = Type.Apply (MixedPath.of_name (Name.of_string false "extensible_type"), []) in
     raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
   | _ ->
-    (typs |> Monad.List.fold_left (fun (notations, records, typs) typ ->
+    (typs |> Monad.List.fold_left (fun (constructor_records, notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
       let name = Name.of_ident false typ.typ_id in
       (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
@@ -359,6 +410,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
           raise
             (
+              constructor_records,
               notations,
               records,
               (name, typ_args, constructors) :: typs
@@ -367,11 +419,16 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             "Polymorphic variant types are not handled"
         | _ ->
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          return ((name, typ_args, typ) :: notations, records, typs)
+          return (
+            constructor_records,
+            (name, typ_args, typ) :: notations,
+            records,
+            typs
+          )
         end
       | { typ_type = { type_kind = Type_abstract; type_manifest = None; _ }; _ } ->
         raise
-          (notations, records, typs)
+          (constructor_records, notations, records, typs)
           NotSupported
           "Abstract types not supported in mutually recursive definitions"
       | { typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ->
@@ -381,6 +438,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         )) >>= fun fields ->
         (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
         return (
+          constructor_records,
           (
             name,
             typ_args,
@@ -389,14 +447,22 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
               fields |> List.map snd
             )
           ) :: notations,
-          (
-            Name.suffix_by_skeleton name,
-            fields |> List.map fst
-          ) :: records,
+          {
+            RecordSkeleton.fields = fields |> List.map fst;
+            module_name = name;
+            typ_name = Name.suffix_by_skeleton name;
+           } :: records,
           typs
         )
       | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
-        Monad.List.map Constructors.Single.of_ocaml_case cases >>= fun single_constructors ->
+        Monad.List.map (Constructors.Single.of_ocaml_case name) cases >>= fun cases ->
+        let (single_constructors, new_constructor_records) = List.split cases in
+        let new_constructor_records =
+          new_constructor_records |> Util.List.filter_map (fun x -> x) in
+        let constructor_records =
+          match new_constructor_records with
+          | [] -> constructor_records
+          | _ :: _ -> (name, new_constructor_records) :: constructor_records in
         Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, is_gadt) ->
         let gadt_notation =
           if is_gadt then
@@ -406,23 +472,31 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         let name = if is_gadt then Name.suffix_by_gadt name else name in
         let typ_args = if is_gadt then [] else typ_args in
         return (
+          constructor_records,
           gadt_notation @ notations,
           records,
           (name, typ_args, constructors) :: typs
         )
       | { typ_type = { type_kind = Type_open; _ }; _ } ->
         raise
-          (notations, records, typs)
+          (constructor_records, notations, records, typs)
           NotSupported
           "Extensible types are not handled"
       )
-    ) ([], [], [])) >>= fun (notations, records, typs) ->
-    return (Inductive { notations = List.rev notations; records; typs = List.rev typs })
+    ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
+    return (
+      Inductive {
+        constructor_records = List.rev constructor_records;
+        notations = List.rev notations;
+        records;
+        typs = List.rev typs
+      }
+    )
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq inductive
-  | Record (name, typ_args, fields) -> to_coq_record name typ_args fields
+  | Record (name, typ_args, fields) -> to_coq_record name name typ_args fields
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
