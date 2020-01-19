@@ -438,6 +438,8 @@ Module CamlinternalFormatBasics.
   Parameter Format : forall {A : Set}, Any -> string -> A.
   Parameter Int32 : Any -> Any -> Any -> Any -> Any.
   Parameter Int64 : Any -> Any -> Any -> Any -> Any.
+  Parameter String_literal : string -> Any -> Any.
+  Parameter String : Any -> Any -> Any.
 
   Parameter End_of_format : Any.
   Parameter Int_d : Any.
