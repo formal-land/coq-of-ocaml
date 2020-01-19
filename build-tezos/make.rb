@@ -5,6 +5,7 @@ protocol_folder = "#{tezos_folder}/src/proto_alpha/lib_protocol"
 interface_file = "#{tezos_folder}/generated/Environment_mli.v"
 environment_file = "Environment.v"
 
+system("rm *.glob *.v *.vo")
 system("cp #{interface_file} #{environment_file}")
 system("cp #{protocol_folder}/*.v ./")
 
@@ -15,7 +16,7 @@ files = [
   "Blinded_public_key_hash.v",
   "Contract_hash.v",
   "Cycle_repr.v",
-  # "Gas_limit_repr.v",
+  "Gas_limit_repr.v",
   "Gas_limit_repr_mli.v",
   # "Manager_repr.v",
   # "Manager_repr_mli.v",
@@ -24,7 +25,7 @@ files = [
   # "Misc.v",
   # "Misc_mli.v",
   "Nonce_hash.v",
-  # "Period_repr.v",
+  "Period_repr.v",
   "Period_repr_mli.v",
   "Qty_repr.v",
   "Raw_level_repr.v",
