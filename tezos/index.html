@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35799 lines</li>
-      <li>Coq size: 44618 lines (+24% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 2653</li>
+      <li>Coq size: 45462 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 2576</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -67,6 +67,7 @@
           1784,
           1529,
           1147,
+          1167,
         ],
         generated: [
           47563,
@@ -74,6 +75,7 @@
           43481,
           43404,
           44618,
+          45462,
         ],
         labels: [
           "01-14",
@@ -81,6 +83,7 @@
           "01-16",
           "01-17",
           "01-18",
+          "01-19",
         ]
       }
 ;
@@ -104,7 +107,7 @@
       </li>
       
       <li>
-        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-danger">26</span>
+        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-danger">11</span>
       </li>
       
       <li>
@@ -128,11 +131,11 @@
       </li>
       
       <li>
-        <a href="#apply_results.ml">apply_results.ml</a>&nbsp;<span class="label label-danger">21</span>
+        <a href="#apply_results.ml">apply_results.ml</a>&nbsp;<span class="label label-danger">13</span>
       </li>
       
       <li>
-        <a href="#apply_results.mli">apply_results.mli</a>&nbsp;<span class="label label-danger">6</span>
+        <a href="#apply_results.mli">apply_results.mli</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -220,11 +223,11 @@
       </li>
       
       <li>
-        <a href="#contract_storage.ml">contract_storage.ml</a>&nbsp;<span class="label label-danger">6</span>
+        <a href="#contract_storage.ml">contract_storage.ml</a>&nbsp;<span class="label label-danger">4</span>
       </li>
       
       <li>
-        <a href="#contract_storage.mli">contract_storage.mli</a>&nbsp;<span class="label label-danger">3</span>
+        <a href="#contract_storage.mli">contract_storage.mli</a>&nbsp;<span class="label label-danger">1</span>
       </li>
       
       <li>
@@ -274,11 +277,11 @@
       </li>
       
       <li>
-        <a href="#gas_limit_repr.ml">gas_limit_repr.ml</a>&nbsp;<span class="label label-danger">4</span>
+        <a href="#gas_limit_repr.ml">gas_limit_repr.ml</a>&nbsp;<span class="label label-danger">3</span>
       </li>
       
       <li>
-        <a href="#gas_limit_repr.mli">gas_limit_repr.mli</a>&nbsp;<span class="label label-danger">3</span>
+        <a href="#gas_limit_repr.mli">gas_limit_repr.mli</a>&nbsp;<span class="label label-danger">2</span>
       </li>
       
       <li>
@@ -318,11 +321,11 @@
       </li>
       
       <li>
-        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-danger">9</span>
+        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-danger">5</span>
       </li>
       
       <li>
-        <a href="#main.mli">main.mli</a>&nbsp;<span class="label label-danger">4</span>
+        <a href="#main.mli">main.mli</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -370,11 +373,11 @@
       </li>
       
       <li>
-        <a href="#operation_repr.ml">operation_repr.ml</a>&nbsp;<span class="label label-danger">18</span>
+        <a href="#operation_repr.ml">operation_repr.ml</a>&nbsp;<span class="label label-danger">6</span>
       </li>
       
       <li>
-        <a href="#operation_repr.mli">operation_repr.mli</a>&nbsp;<span class="label label-danger">14</span>
+        <a href="#operation_repr.mli">operation_repr.mli</a>&nbsp;<span class="label label-danger">2</span>
       </li>
       
       <li>
@@ -464,11 +467,11 @@
       </li>
       
       <li>
-        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">107</span>
+        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">105</span>
       </li>
       
       <li>
-        <a href="#script_ir_translator.mli">script_ir_translator.mli</a>&nbsp;<span class="label label-danger">5</span>
+        <a href="#script_ir_translator.mli">script_ir_translator.mli</a>&nbsp;<span class="label label-danger">3</span>
       </li>
       
       <li>
@@ -532,11 +535,11 @@
       </li>
       
       <li>
-        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-danger">12</span>
+        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-danger">7</span>
       </li>
       
       <li>
-        <a href="#storage_description.mli">storage_description.mli</a>&nbsp;<span class="label label-danger">1</span>
+        <a href="#storage_description.mli">storage_description.mli</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -1329,7 +1332,7 @@ Definition description : Storage_description.t Raw_context.context :=
 <hr />
 <div class="row conversion-row" id="alpha_context.mli">
   <div class="col-md-6">
-    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-danger">26 errors</span>
+    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-danger">11 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -1493,7 +1496,7 @@ module Cycle : sig
 end
 
 module Gas : sig
-  type t = private Unaccounted <abbr class="mark-error" title="Unhandled named constructor parameters.">| Limited of {remaining : Z.t}</abbr>
+  type t = private Unaccounted | Limited of {remaining : Z.t}
 
   val encoding : t Data_encoding.encoding
 
@@ -2092,19 +2095,19 @@ module Contract : sig
     since:context -&gt; until:context -&gt; contract list tzresult Lwt.t
 
   type big_map_diff_item =
-    <abbr class="mark-error" title="Unhandled named constructor parameters.">| Update of {
+    | Update of {
         big_map : Big_map.id;
         diff_key : Script.expr;
         diff_key_hash : Script_expr_hash.t;
         diff_value : Script.expr option;
-      }</abbr>
+      }
     | Clear of Big_map.id
     | Copy of Big_map.id * Big_map.id
-    <abbr class="mark-error" title="Unhandled named constructor parameters.">| Alloc of {
+    | Alloc of {
         big_map : Big_map.id;
         key_type : Script.expr;
         value_type : Script.expr;
-      }</abbr>
+      }
 
   type big_map_diff = big_map_diff_item list
 
@@ -2378,41 +2381,41 @@ and _ contents_list =
       -&gt; ('kind * 'rest) Kind.manager contents_list
 
 and _ contents =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Endorsement : {level : Raw_level.t} -&gt; Kind.endorsement contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Seed_nonce_revelation : {
+  | Endorsement : {level : Raw_level.t} -&gt; Kind.endorsement contents
+  | Seed_nonce_revelation : {
       level : Raw_level.t;
       nonce : Nonce.t;
     }
-      -&gt; Kind.seed_nonce_revelation contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Double_endorsement_evidence : {
+      -&gt; Kind.seed_nonce_revelation contents
+  | Double_endorsement_evidence : {
       op1 : Kind.endorsement operation;
       op2 : Kind.endorsement operation;
     }
-      -&gt; Kind.double_endorsement_evidence contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Double_baking_evidence : {
+      -&gt; Kind.double_endorsement_evidence contents
+  | Double_baking_evidence : {
       bh1 : Block_header.t;
       bh2 : Block_header.t;
     }
-      -&gt; Kind.double_baking_evidence contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Activate_account : {
+      -&gt; Kind.double_baking_evidence contents
+  | Activate_account : {
       id : Ed25519.Public_key_hash.t;
       activation_code : Blinded_public_key_hash.activation_code;
     }
-      -&gt; Kind.activate_account contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Proposals : {
+      -&gt; Kind.activate_account contents
+  | Proposals : {
       source : Signature.Public_key_hash.t;
       period : Voting_period.t;
       proposals : Protocol_hash.t list;
     }
-      -&gt; Kind.proposals contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Ballot : {
+      -&gt; Kind.proposals contents
+  | Ballot : {
       source : Signature.Public_key_hash.t;
       period : Voting_period.t;
       proposal : Protocol_hash.t;
       ballot : Vote.ballot;
     }
-      -&gt; Kind.ballot contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Manager_operation : {
+      -&gt; Kind.ballot contents
+  | Manager_operation : {
       source : Signature.Public_key_hash.t;
       fee : Tez.tez;
       counter : counter;
@@ -2420,24 +2423,24 @@ and _ contents =
       gas_limit : Z.t;
       storage_limit : Z.t;
     }
-      -&gt; 'kind Kind.manager contents</abbr>
+      -&gt; 'kind Kind.manager contents
 
 and _ manager_operation =
   | Reveal : Signature.Public_key.t -&gt; Kind.reveal manager_operation
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Transaction : {
+  | Transaction : {
       amount : Tez.tez;
       parameters : Script.lazy_expr;
       entrypoint : string;
       destination : Contract.contract;
     }
-      -&gt; Kind.transaction manager_operation</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Origination : {
+      -&gt; Kind.transaction manager_operation
+  | Origination : {
       delegate : Signature.Public_key_hash.t option;
       script : Script.t;
       credit : Tez.tez;
       preorigination : Contract.t option;
     }
-      -&gt; Kind.origination manager_operation</abbr>
+      -&gt; Kind.origination manager_operation
   | Delegation :
       Signature.Public_key_hash.t option
       -&gt; Kind.delegation manager_operation
@@ -2552,7 +2555,7 @@ module Operation : sig
 
   module Encoding : sig
     type 'b case =
-      <abbr class="mark-error" title="Unhandled named constructor parameters.">| Case : {
+      | Case : {
           tag : int;
           name : string;
           encoding : 'a Data_encoding.t;
@@ -2560,7 +2563,7 @@ module Operation : sig
           proj : 'b contents -&gt; 'a;
           inj : 'a -&gt; 'b contents;
         }
-          -&gt; 'b case</abbr>
+          -&gt; 'b case
 
     val endorsement_case : Kind.endorsement case
 
@@ -2587,7 +2590,7 @@ module Operation : sig
 
     module Manager_operations : sig
       type 'b case =
-        <abbr class="mark-error" title="Unhandled named constructor parameters.">| MCase : {
+        | MCase : {
             tag : int;
             name : string;
             encoding : 'a Data_encoding.t;
@@ -2596,7 +2599,7 @@ module Operation : sig
             proj : 'kind manager_operation -&gt; 'a;
             inj : 'a -&gt; 'kind manager_operation;
           }
-            -&gt; 'kind case</abbr>
+            -&gt; 'kind case
 
       val reveal_case : Kind.reveal case
 
@@ -3006,9 +3009,18 @@ Module Cycle.
 End Cycle.
 
 Module Gas.
+  Module t.
+    Module Limited.
+      Record record {remaining : Set} := {
+        remaining : remaining }.
+      Arguments record : clear implicits.
+    End Limited.
+    Definition Limited := Limited.record.
+  End t.
+  
   Inductive t : Set :=
   | Unaccounted : t
-  | Limited : Z.t -&gt; t.
+  | Limited : t.Limited Z.t -&gt; t.
   
   Parameter encoding : Data_encoding.encoding t.
   
@@ -3736,13 +3748,36 @@ Module Contract.
   Parameter originated_from_current_nonce :
     context -&gt; context -&gt; Lwt.t (Error_monad.tzresult (list contract)).
   
+  Module big_map_diff_item.
+    Module Update.
+      Record record {big_map diff_key diff_key_hash diff_value : Set} := {
+        big_map : big_map;
+        diff_key : diff_key;
+        diff_key_hash : diff_key_hash;
+        diff_value : diff_value }.
+      Arguments record : clear implicits.
+    End Update.
+    Definition Update := Update.record.
+    
+    Module Alloc.
+      Record record {big_map key_type value_type : Set} := {
+        big_map : big_map;
+        key_type : key_type;
+        value_type : value_type }.
+      Arguments record : clear implicits.
+    End Alloc.
+    Definition Alloc := Alloc.record.
+  End big_map_diff_item.
+  
   Inductive big_map_diff_item : Set :=
   | Update :
-    Big_map.id -&gt; Script.expr -&gt; Script_expr_hash.t -&gt; option Script.expr -&gt;
-    big_map_diff_item
+    big_map_diff_item.Update Big_map.id Script.expr Script_expr_hash.t
+      (option Script.expr) -&gt; big_map_diff_item
   | Clear : Big_map.id -&gt; big_map_diff_item
   | Copy : Big_map.id -&gt; Big_map.id -&gt; big_map_diff_item
-  | Alloc : Big_map.id -&gt; Script.expr -&gt; Script.expr -&gt; big_map_diff_item.
+  | Alloc :
+    big_map_diff_item.Alloc Big_map.id Script.expr Script.expr -&gt;
+    big_map_diff_item.
   
   Definition big_map_diff := list big_map_diff_item.
   
@@ -3977,30 +4012,30 @@ Module Block_header.
   Reserved Notation &quot;'protocol_data&quot;.
   Reserved Notation &quot;'contents&quot;.
   
-  Module contents_skeleton.
+  Module contents.
     Record record {priority seed_nonce_hash proof_of_work_nonce : Set} := {
       priority : priority;
       seed_nonce_hash : seed_nonce_hash;
       proof_of_work_nonce : proof_of_work_nonce }.
     Arguments record : clear implicits.
-  End contents_skeleton.
-  Definition contents_skeleton := contents_skeleton.record.
+  End contents.
+  Definition contents_skeleton := contents.record.
   
-  Module protocol_data_skeleton.
+  Module protocol_data.
     Record record {contents signature : Set} := {
       contents : contents;
       signature : signature }.
     Arguments record : clear implicits.
-  End protocol_data_skeleton.
-  Definition protocol_data_skeleton := protocol_data_skeleton.record.
+  End protocol_data.
+  Definition protocol_data_skeleton := protocol_data.record.
   
-  Module t_skeleton.
+  Module t.
     Record record {shell protocol_data : Set} := {
       shell : shell;
       protocol_data : protocol_data }.
     Arguments record : clear implicits.
-  End t_skeleton.
-  Definition t_skeleton := t_skeleton.record.
+  End t.
+  Definition t_skeleton := t.record.
   
   
   
@@ -4087,6 +4122,100 @@ Module Kind.
   Definition manager := 'manager.
 End Kind.
 
+Module contents.
+  Module Endorsement.
+    Record record {level : Set} := {
+      level : level }.
+    Arguments record : clear implicits.
+  End Endorsement.
+  Definition Endorsement := Endorsement.record.
+  
+  Module Seed_nonce_revelation.
+    Record record {level nonce : Set} := {
+      level : level;
+      nonce : nonce }.
+    Arguments record : clear implicits.
+  End Seed_nonce_revelation.
+  Definition Seed_nonce_revelation := Seed_nonce_revelation.record.
+  
+  Module Double_endorsement_evidence.
+    Record record {op1 op2 : Set} := {
+      op1 : op1;
+      op2 : op2 }.
+    Arguments record : clear implicits.
+  End Double_endorsement_evidence.
+  Definition Double_endorsement_evidence := Double_endorsement_evidence.record.
+  
+  Module Double_baking_evidence.
+    Record record {bh1 bh2 : Set} := {
+      bh1 : bh1;
+      bh2 : bh2 }.
+    Arguments record : clear implicits.
+  End Double_baking_evidence.
+  Definition Double_baking_evidence := Double_baking_evidence.record.
+  
+  Module Activate_account.
+    Record record {id activation_code : Set} := {
+      id : id;
+      activation_code : activation_code }.
+    Arguments record : clear implicits.
+  End Activate_account.
+  Definition Activate_account := Activate_account.record.
+  
+  Module Proposals.
+    Record record {source period proposals : Set} := {
+      source : source;
+      period : period;
+      proposals : proposals }.
+    Arguments record : clear implicits.
+  End Proposals.
+  Definition Proposals := Proposals.record.
+  
+  Module Ballot.
+    Record record {source period proposal ballot : Set} := {
+      source : source;
+      period : period;
+      proposal : proposal;
+      ballot : ballot }.
+    Arguments record : clear implicits.
+  End Ballot.
+  Definition Ballot := Ballot.record.
+  
+  Module Manager_operation.
+    Record record {source fee counter operation gas_limit storage_limit : Set} := {
+      source : source;
+      fee : fee;
+      counter : counter;
+      operation : operation;
+      gas_limit : gas_limit;
+      storage_limit : storage_limit }.
+    Arguments record : clear implicits.
+  End Manager_operation.
+  Definition Manager_operation := Manager_operation.record.
+End contents.
+
+Module manager_operation.
+  Module Transaction.
+    Record record {amount parameters entrypoint destination : Set} := {
+      amount : amount;
+      parameters : parameters;
+      entrypoint : entrypoint;
+      destination : destination }.
+    Arguments record : clear implicits.
+  End Transaction.
+  Definition Transaction := Transaction.record.
+  
+  Module Origination.
+    Record record {delegate script credit preorigination : Set} := {
+      delegate : delegate;
+      script : script;
+      credit : credit;
+      preorigination : preorigination }.
+    Arguments record : clear implicits.
+  End Origination.
+  Definition Origination := Origination.record.
+End manager_operation.
+
 Reserved Notation &quot;'operation&quot;.
 Reserved Notation &quot;'protocol_data&quot;.
 Reserved Notation &quot;'contents_list&quot;.
@@ -4094,21 +4223,21 @@ Reserved Notation &quot;'contents&quot;.
 Reserved Notation &quot;'manager_operation&quot;.
 Reserved Notation &quot;'counter&quot;.
 
-Module protocol_data_skeleton.
+Module protocol_data.
   Record record {contents signature : Set} := {
     contents : contents;
     signature : signature }.
   Arguments record : clear implicits.
-End protocol_data_skeleton.
-Definition protocol_data_skeleton := protocol_data_skeleton.record.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
 
-Module operation_skeleton.
+Module operation.
   Record record {shell protocol_data : Set} := {
     shell : shell;
     protocol_data : protocol_data }.
   Arguments record : clear implicits.
-End operation_skeleton.
-Definition operation_skeleton := operation_skeleton.record.
+End operation.
+Definition operation_skeleton := operation.record.
 
 Inductive contents_list_gadt : Set :=
 | Single : forall {kind : Set}, 'contents kind -&gt; contents_list_gadt
@@ -4116,33 +4245,40 @@ Inductive contents_list_gadt : Set :=
   'contents (Kind.manager kind) -&gt; contents_list_gadt -&gt; contents_list_gadt
 
 with contents_gadt : Set :=
-| Endorsement : Raw_level.t -&gt; contents_gadt
-| Seed_nonce_revelation : Raw_level.t -&gt; Nonce.t -&gt; contents_gadt
+| Endorsement : contents.Endorsement Raw_level.t -&gt; contents_gadt
+| Seed_nonce_revelation :
+  contents.Seed_nonce_revelation Raw_level.t Nonce.t -&gt; contents_gadt
 | Double_endorsement_evidence :
-  'operation Kind.endorsement -&gt; 'operation Kind.endorsement -&gt; contents_gadt
-| Double_baking_evidence : Block_header.t -&gt; Block_header.t -&gt; contents_gadt
+  contents.Double_endorsement_evidence ('operation Kind.endorsement)
+    ('operation Kind.endorsement) -&gt; contents_gadt
+| Double_baking_evidence :
+  contents.Double_baking_evidence Block_header.t Block_header.t -&gt; contents_gadt
 | Activate_account :
-  Ed25519.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Blinded_public_key_hash.activation_code -&gt; contents_gadt
+  contents.Activate_account
+    Ed25519.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Blinded_public_key_hash.activation_code -&gt; contents_gadt
 | Proposals :
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Voting_period.t -&gt; list Protocol_hash.[S.HASH.t] -&gt; contents_gadt
+  contents.Proposals
+    Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Voting_period.t (list Protocol_hash.[S.HASH.t]) -&gt; contents_gadt
 | Ballot :
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Voting_period.t -&gt; Protocol_hash.[S.HASH.t] -&gt; Vote.ballot -&gt; contents_gadt
+  contents.Ballot Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Voting_period.t Protocol_hash.[S.HASH.t] Vote.ballot -&gt; contents_gadt
 | Manager_operation : forall {kind : Set},
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt; Tez.tez -&gt;
-  'counter -&gt; 'manager_operation kind -&gt; Z.t -&gt; Z.t -&gt; contents_gadt
+  contents.Manager_operation
+    Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) Tez.tez
+    'counter ('manager_operation kind) Z.t Z.t -&gt; contents_gadt
 
 with manager_operation_gadt : Set :=
 | Reveal :
   Signature.[S.SIGNATURE.Public_key].(S.SPublic_key.t) -&gt; manager_operation_gadt
 | Transaction :
-  Tez.tez -&gt; Script.lazy_expr -&gt; string -&gt; Contract.contract -&gt;
-  manager_operation_gadt
+  manager_operation.Transaction Tez.tez Script.lazy_expr string
+    Contract.contract -&gt; manager_operation_gadt
 | Origination :
-  option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Script.t -&gt; Tez.tez -&gt; option Contract.t -&gt; manager_operation_gadt
+  manager_operation.Origination
+    (option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t))
+    Script.t Tez.tez (option Contract.t) -&gt; manager_operation_gadt
 | Delegation :
   option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
   manager_operation_gadt
@@ -4334,13 +4470,27 @@ Module Operation.
     operation a -&gt; operation b -&gt; option (eq a b).
   
   Module Encoding.
+    Module case.
+      Module Case.
+        Record record {tag name encoding select proj inj : Set} := {
+          tag : tag;
+          name : name;
+          encoding : encoding;
+          select : select;
+          proj : proj;
+          inj : inj }.
+        Arguments record : clear implicits.
+      End Case.
+      Definition Case := Case.record.
+    End case.
+    
     Reserved Notation &quot;'case&quot;.
     
     Inductive case_gadt : Set :=
     | Case : forall {a b : Set},
-      Z -&gt; string -&gt; Data_encoding.t a -&gt;
-      (packed_contents -&gt; option (contents b)) -&gt; (contents b -&gt; a) -&gt;
-      (a -&gt; contents b) -&gt; case_gadt
+      case.Case Z string (Data_encoding.t a)
+        (packed_contents -&gt; option (contents b)) (contents b -&gt; a)
+        (a -&gt; contents b) -&gt; case_gadt
     
     where &quot;'case&quot; := (fun (b : Set) =&gt; case_gadt).
     
@@ -4370,13 +4520,27 @@ Module Operation.
     Parameter delegation_case : case (Kind.manager Kind.delegation).
     
     Module Manager_operations.
+      Module case.
+        Module MCase.
+          Record record {tag name encoding select proj inj : Set} := {
+            tag : tag;
+            name : name;
+            encoding : encoding;
+            select : select;
+            proj : proj;
+            inj : inj }.
+          Arguments record : clear implicits.
+        End MCase.
+        Definition MCase := MCase.record.
+      End case.
+      
       Reserved Notation &quot;'case&quot;.
       
       Inductive case_gadt : Set :=
       | MCase : forall {a kind : Set},
-        Z -&gt; string -&gt; Data_encoding.t a -&gt;
-        (packed_manager_operation -&gt; option (manager_operation kind)) -&gt;
-        (manager_operation kind -&gt; a) -&gt; (a -&gt; manager_operation kind) -&gt;
+        case.MCase Z string (Data_encoding.t a)
+          (packed_manager_operation -&gt; option (manager_operation kind))
+          (manager_operation kind -&gt; a) (a -&gt; manager_operation kind) -&gt;
         case_gadt
       
       where &quot;'case&quot; := (fun (b : Set) =&gt; case_gadt).
@@ -9441,7 +9605,7 @@ Definition finalize_application
 <hr />
 <div class="row conversion-row" id="apply_results.ml">
   <div class="col-md-6">
-    <a href="#apply_results.ml"><code>apply_results.ml</code></a>&nbsp;<span class="label label-danger">21 errors</span>
+    <a href="#apply_results.ml"><code>apply_results.ml</code></a>&nbsp;<span class="label label-danger">13 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -9490,11 +9654,11 @@ let error_encoding =
        ~binary:Error_monad.error_encoding
 
 type _ successful_manager_operation_result =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Reveal_result : {
+  | Reveal_result : {
       consumed_gas : Z.t;
     }
-      -&gt; Kind.reveal successful_manager_operation_result</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Transaction_result : {
+      -&gt; Kind.reveal successful_manager_operation_result
+  | Transaction_result : {
       storage : Script.expr option;
       big_map_diff : Contract.big_map_diff option;
       balance_updates : Delegate.balance_updates;
@@ -9504,8 +9668,8 @@ type _ successful_manager_operation_result =
       paid_storage_size_diff : Z.t;
       allocated_destination_contract : bool;
     }
-      -&gt; Kind.transaction successful_manager_operation_result</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Origination_result : {
+      -&gt; Kind.transaction successful_manager_operation_result
+  | Origination_result : {
       big_map_diff : Contract.big_map_diff option;
       balance_updates : Delegate.balance_updates;
       originated_contracts : Contract.t list;
@@ -9513,11 +9677,11 @@ type _ successful_manager_operation_result =
       storage_size : Z.t;
       paid_storage_size_diff : Z.t;
     }
-      -&gt; Kind.origination successful_manager_operation_result</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Delegation_result : {
+      -&gt; Kind.origination successful_manager_operation_result
+  | Delegation_result : {
       consumed_gas : Z.t;
     }
-      -&gt; Kind.delegation successful_manager_operation_result</abbr>
+      -&gt; Kind.delegation successful_manager_operation_result
 
 type packed_successful_manager_operation_result =
   | Successful_manager_result :
@@ -9538,7 +9702,7 @@ type packed_internal_operation_result =
 
 module Manager_result = struct
   type 'kind case =
-    <abbr class="mark-error" title="Unhandled named constructor parameters.">| MCase : {
+    | MCase : {
         op_case : 'kind Operation.Encoding.Manager_operations.case;
         encoding : 'a Data_encoding.t;
         kind : 'kind Kind.manager;
@@ -9552,7 +9716,7 @@ module Manager_result = struct
         inj : 'a -&gt; 'kind successful_manager_operation_result;
         t : 'kind manager_operation_result Data_encoding.t;
       }
-        -&gt; 'kind case</abbr>
+        -&gt; 'kind case
 
   let make ~op_case ~encoding ~kind ~iselect ~select ~proj ~inj =
     let (Operation.Encoding.Manager_operations.MCase {name; _}) = op_case in
@@ -9801,12 +9965,12 @@ let internal_operation_result_encoding :
          make Manager_result.delegation_case ]
 
 type 'kind contents_result =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Endorsement_result : {
+  | Endorsement_result : {
       balance_updates : Delegate.balance_updates;
       delegate : Signature.Public_key_hash.t;
       slots : int list;
     }
-      -&gt; Kind.endorsement contents_result</abbr>
+      -&gt; Kind.endorsement contents_result
   | Seed_nonce_revelation_result :
       Delegate.balance_updates
       -&gt; Kind.seed_nonce_revelation contents_result
@@ -9821,12 +9985,12 @@ type 'kind contents_result =
       -&gt; Kind.activate_account contents_result
   | Proposals_result : Kind.proposals contents_result
   | Ballot_result : Kind.ballot contents_result
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Manager_operation_result : {
+  | Manager_operation_result : {
       balance_updates : Delegate.balance_updates;
       operation_result : 'kind manager_operation_result;
       internal_operation_results : packed_internal_operation_result list;
     }
-      -&gt; 'kind Kind.manager contents_result</abbr>
+      -&gt; 'kind Kind.manager contents_result
 
 type packed_contents_result =
   | Contents_result : 'kind contents_result -&gt; packed_contents_result
@@ -9861,7 +10025,7 @@ let equal_manager_kind :
 
 module Encoding = struct
   type 'kind case =
-    <abbr class="mark-error" title="Unhandled named constructor parameters.">| Case : {
+    | Case : {
         op_case : 'kind Operation.Encoding.case;
         encoding : 'a Data_encoding.t;
         select : packed_contents_result -&gt; 'kind contents_result option;
@@ -9871,7 +10035,7 @@ module Encoding = struct
         proj : 'kind contents_result -&gt; 'a;
         inj : 'a -&gt; 'kind contents_result;
       }
-        -&gt; 'kind case</abbr>
+        -&gt; 'kind case
 
   let tagged_case tag name args proj inj =
     let open Data_encoding in
@@ -10666,20 +10830,71 @@ Definition error_encoding : Data_encoding.encoding Error_monad.__error :=
           Data_encoding.Json.destruct Error_monad.error_encoding __json_value)
         None Data_encoding.__json_value) Error_monad.error_encoding).
 
+Module successful_manager_operation_result.
+  Module Reveal_result.
+    Record record {consumed_gas : Set} := {
+      consumed_gas : consumed_gas }.
+    Arguments record : clear implicits.
+  End Reveal_result.
+  Definition Reveal_result := Reveal_result.record.
+  
+  Module Transaction_result.
+    Record record {storage big_map_diff balance_updates originated_contracts
+      consumed_gas storage_size paid_storage_size_diff
+      allocated_destination_contract : Set} := {
+      storage : storage;
+      big_map_diff : big_map_diff;
+      balance_updates : balance_updates;
+      originated_contracts : originated_contracts;
+      consumed_gas : consumed_gas;
+      storage_size : storage_size;
+      paid_storage_size_diff : paid_storage_size_diff;
+      allocated_destination_contract : allocated_destination_contract }.
+    Arguments record : clear implicits.
+  End Transaction_result.
+  Definition Transaction_result := Transaction_result.record.
+  
+  Module Origination_result.
+    Record record {big_map_diff balance_updates originated_contracts
+      consumed_gas storage_size paid_storage_size_diff : Set} := {
+      big_map_diff : big_map_diff;
+      balance_updates : balance_updates;
+      originated_contracts : originated_contracts;
+      consumed_gas : consumed_gas;
+      storage_size : storage_size;
+      paid_storage_size_diff : paid_storage_size_diff }.
+    Arguments record : clear implicits.
+  End Origination_result.
+  Definition Origination_result := Origination_result.record.
+  
+  Module Delegation_result.
+    Record record {consumed_gas : Set} := {
+      consumed_gas : consumed_gas }.
+    Arguments record : clear implicits.
+  End Delegation_result.
+  Definition Delegation_result := Delegation_result.record.
+End successful_manager_operation_result.
+
 Reserved Notation &quot;'successful_manager_operation_result&quot;.
 
 Inductive successful_manager_operation_result_gadt : Set :=
-| Reveal_result : Z.t -&gt; successful_manager_operation_result_gadt
+| Reveal_result :
+  successful_manager_operation_result.Reveal_result Z.t -&gt;
+  successful_manager_operation_result_gadt
 | Transaction_result :
-  option Alpha_context.Script.expr -&gt;
-  option Alpha_context.Contract.big_map_diff -&gt;
-  Alpha_context.Delegate.balance_updates -&gt; list Alpha_context.Contract.t -&gt;
-  Z.t -&gt; Z.t -&gt; Z.t -&gt; bool -&gt; successful_manager_operation_result_gadt
+  successful_manager_operation_result.Transaction_result
+    (option Alpha_context.Script.expr)
+    (option Alpha_context.Contract.big_map_diff)
+    Alpha_context.Delegate.balance_updates (list Alpha_context.Contract.t) Z.t
+    Z.t Z.t bool -&gt; successful_manager_operation_result_gadt
 | Origination_result :
-  option Alpha_context.Contract.big_map_diff -&gt;
-  Alpha_context.Delegate.balance_updates -&gt; list Alpha_context.Contract.t -&gt;
-  Z.t -&gt; Z.t -&gt; Z.t -&gt; successful_manager_operation_result_gadt
-| Delegation_result : Z.t -&gt; successful_manager_operation_result_gadt
+  successful_manager_operation_result.Origination_result
+    (option Alpha_context.Contract.big_map_diff)
+    Alpha_context.Delegate.balance_updates (list Alpha_context.Contract.t) Z.t
+    Z.t Z.t -&gt; successful_manager_operation_result_gadt
+| Delegation_result :
+  successful_manager_operation_result.Delegation_result Z.t -&gt;
+  successful_manager_operation_result_gadt
 
 where &quot;'successful_manager_operation_result&quot; := (fun (_ : Set) =&gt;
   successful_manager_operation_result_gadt).
@@ -10733,21 +10948,36 @@ Definition packed_internal_operation_result :=
   'packed_internal_operation_result.
 
 Module Manager_result.
+  Module case.
+    Module MCase.
+      Record record {op_case encoding kind iselect select proj inj t : Set} := {
+        op_case : op_case;
+        encoding : encoding;
+        kind : kind;
+        iselect : iselect;
+        select : select;
+        proj : proj;
+        inj : inj;
+        t : t }.
+      Arguments record : clear implicits.
+    End MCase.
+    Definition MCase := MCase.record.
+  End case.
+  
   Reserved Notation &quot;'case&quot;.
   
   Inductive case_gadt : Set :=
   | MCase : forall {a kind : Set},
-    Alpha_context.Operation.Encoding.Manager_operations.case kind -&gt;
-    Data_encoding.t a -&gt; Alpha_context.Kind.manager kind -&gt;
-    (packed_internal_operation_result -&gt;
-    option
-      (Alpha_context.internal_operation kind * manager_operation_result kind))
-    -&gt;
-    (packed_successful_manager_operation_result -&gt;
-    option (successful_manager_operation_result kind)) -&gt;
-    (successful_manager_operation_result kind -&gt; a) -&gt;
-    (a -&gt; successful_manager_operation_result kind) -&gt;
-    Data_encoding.t (manager_operation_result kind) -&gt; case_gadt
+    case.MCase (Alpha_context.Operation.Encoding.Manager_operations.case kind)
+      (Data_encoding.t a) (Alpha_context.Kind.manager kind)
+      (packed_internal_operation_result -&gt;
+      option
+        (Alpha_context.internal_operation kind * manager_operation_result kind))
+      (packed_successful_manager_operation_result -&gt;
+      option (successful_manager_operation_result kind))
+      (successful_manager_operation_result kind -&gt; a)
+      (a -&gt; successful_manager_operation_result kind)
+      (Data_encoding.t (manager_operation_result kind)) -&gt; case_gadt
   
   where &quot;'case&quot; := (fun (kind : Set) =&gt; case_gadt).
   
@@ -11130,12 +11360,33 @@ Definition internal_operation_result_encoding
           (cons (make Manager_result.origination_case)
             (cons (make Manager_result.delegation_case) []))))).
 
+Module contents_result.
+  Module Endorsement_result.
+    Record record {balance_updates delegate slots : Set} := {
+      balance_updates : balance_updates;
+      delegate : delegate;
+      slots : slots }.
+    Arguments record : clear implicits.
+  End Endorsement_result.
+  Definition Endorsement_result := Endorsement_result.record.
+  
+  Module Manager_operation_result.
+    Record record {balance_updates operation_result internal_operation_results :
+      Set} := {
+      balance_updates : balance_updates;
+      operation_result : operation_result;
+      internal_operation_results : internal_operation_results }.
+    Arguments record : clear implicits.
+  End Manager_operation_result.
+  Definition Manager_operation_result := Manager_operation_result.record.
+End contents_result.
+
 Reserved Notation &quot;'contents_result&quot;.
 
 Inductive contents_result_gadt : Set :=
 | Endorsement_result :
-  Alpha_context.Delegate.balance_updates -&gt;
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt; list Z -&gt;
+  contents_result.Endorsement_result Alpha_context.Delegate.balance_updates
+    Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) (list Z) -&gt;
   contents_result_gadt
 | Seed_nonce_revelation_result :
   Alpha_context.Delegate.balance_updates -&gt; contents_result_gadt
@@ -11148,8 +11399,9 @@ Inductive contents_result_gadt : Set :=
 | Proposals_result : contents_result_gadt
 | Ballot_result : contents_result_gadt
 | Manager_operation_result : forall {kind : Set},
-  Alpha_context.Delegate.balance_updates -&gt; manager_operation_result kind -&gt;
-  list packed_internal_operation_result -&gt; contents_result_gadt
+  contents_result.Manager_operation_result
+    Alpha_context.Delegate.balance_updates (manager_operation_result kind)
+    (list packed_internal_operation_result) -&gt; contents_result_gadt
 
 where &quot;'contents_result&quot; := (fun (kind : Set) =&gt; contents_result_gadt).
 
@@ -11208,15 +11460,29 @@ Definition equal_manager_kind {a b : Set}
   end.
 
 Module Encoding.
+  Module case.
+    Module Case.
+      Record record {op_case encoding select mselect proj inj : Set} := {
+        op_case : op_case;
+        encoding : encoding;
+        select : select;
+        mselect : mselect;
+        proj : proj;
+        inj : inj }.
+      Arguments record : clear implicits.
+    End Case.
+    Definition Case := Case.record.
+  End case.
+  
   Reserved Notation &quot;'case&quot;.
   
   Inductive case_gadt : Set :=
   | Case : forall {a kind : Set},
-    Alpha_context.Operation.Encoding.case kind -&gt; Data_encoding.t a -&gt;
-    (packed_contents_result -&gt; option (contents_result kind)) -&gt;
-    (packed_contents_and_result -&gt;
-    option (Alpha_context.contents kind * contents_result kind)) -&gt;
-    (contents_result kind -&gt; a) -&gt; (a -&gt; contents_result kind) -&gt; case_gadt
+    case.Case (Alpha_context.Operation.Encoding.case kind) (Data_encoding.t a)
+      (packed_contents_result -&gt; option (contents_result kind))
+      (packed_contents_and_result -&gt;
+      option (Alpha_context.contents kind * contents_result kind))
+      (contents_result kind -&gt; a) (a -&gt; contents_result kind) -&gt; case_gadt
   
   where &quot;'case&quot; := (fun (kind : Set) =&gt; case_gadt).
   
@@ -12330,7 +12596,7 @@ Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
 <hr />
 <div class="row conversion-row" id="apply_results.mli">
   <div class="col-md-6">
-    <a href="#apply_results.mli"><code>apply_results.mli</code></a>&nbsp;<span class="label label-danger">6 errors</span>
+    <a href="#apply_results.mli"><code>apply_results.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -12386,12 +12652,12 @@ and packed_contents_result_list =
 
 (** Result of applying an {!Operation.contents}. Follows the same structure. *)
 and 'kind contents_result =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Endorsement_result : {
+  | Endorsement_result : {
       balance_updates : Delegate.balance_updates;
       delegate : Signature.Public_key_hash.t;
       slots : int list;
     }
-      -&gt; Kind.endorsement contents_result</abbr>
+      -&gt; Kind.endorsement contents_result
   | Seed_nonce_revelation_result :
       Delegate.balance_updates
       -&gt; Kind.seed_nonce_revelation contents_result
@@ -12406,12 +12672,12 @@ and 'kind contents_result =
       -&gt; Kind.activate_account contents_result
   | Proposals_result : Kind.proposals contents_result
   | Ballot_result : Kind.ballot contents_result
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Manager_operation_result : {
+  | Manager_operation_result : {
       balance_updates : Delegate.balance_updates;
       operation_result : 'kind manager_operation_result;
       internal_operation_results : packed_internal_operation_result list;
     }
-      -&gt; 'kind Kind.manager contents_result</abbr>
+      -&gt; 'kind Kind.manager contents_result
 
 and packed_contents_result =
   | Contents_result : 'kind contents_result -&gt; packed_contents_result
@@ -12428,11 +12694,11 @@ and 'kind manager_operation_result =
 (** Result of applying a {!manager_operation_content}, either internal
     or external. *)
 and _ successful_manager_operation_result =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Reveal_result : {
+  | Reveal_result : {
       consumed_gas : Z.t;
     }
-      -&gt; Kind.reveal successful_manager_operation_result</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Transaction_result : {
+      -&gt; Kind.reveal successful_manager_operation_result
+  | Transaction_result : {
       storage : Script.expr option;
       big_map_diff : Contract.big_map_diff option;
       balance_updates : Delegate.balance_updates;
@@ -12442,8 +12708,8 @@ and _ successful_manager_operation_result =
       paid_storage_size_diff : Z.t;
       allocated_destination_contract : bool;
     }
-      -&gt; Kind.transaction successful_manager_operation_result</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Origination_result : {
+      -&gt; Kind.transaction successful_manager_operation_result
+  | Origination_result : {
       big_map_diff : Contract.big_map_diff option;
       balance_updates : Delegate.balance_updates;
       originated_contracts : Contract.t list;
@@ -12451,11 +12717,11 @@ and _ successful_manager_operation_result =
       storage_size : Z.t;
       paid_storage_size_diff : Z.t;
     }
-      -&gt; Kind.origination successful_manager_operation_result</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Delegation_result : {
+      -&gt; Kind.origination successful_manager_operation_result
+  | Delegation_result : {
       consumed_gas : Z.t;
     }
-      -&gt; Kind.delegation successful_manager_operation_result</abbr>
+      -&gt; Kind.delegation successful_manager_operation_result
 
 and packed_successful_manager_operation_result =
   | Successful_manager_result :
@@ -12537,6 +12803,72 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Nonce_hash.
 
+Module contents_result.
+  Module Endorsement_result.
+    Record record {balance_updates delegate slots : Set} := {
+      balance_updates : balance_updates;
+      delegate : delegate;
+      slots : slots }.
+    Arguments record : clear implicits.
+  End Endorsement_result.
+  Definition Endorsement_result := Endorsement_result.record.
+  
+  Module Manager_operation_result.
+    Record record {balance_updates operation_result internal_operation_results :
+      Set} := {
+      balance_updates : balance_updates;
+      operation_result : operation_result;
+      internal_operation_results : internal_operation_results }.
+    Arguments record : clear implicits.
+  End Manager_operation_result.
+  Definition Manager_operation_result := Manager_operation_result.record.
+End contents_result.
+
+Module successful_manager_operation_result.
+  Module Reveal_result.
+    Record record {consumed_gas : Set} := {
+      consumed_gas : consumed_gas }.
+    Arguments record : clear implicits.
+  End Reveal_result.
+  Definition Reveal_result := Reveal_result.record.
+  
+  Module Transaction_result.
+    Record record {storage big_map_diff balance_updates originated_contracts
+      consumed_gas storage_size paid_storage_size_diff
+      allocated_destination_contract : Set} := {
+      storage : storage;
+      big_map_diff : big_map_diff;
+      balance_updates : balance_updates;
+      originated_contracts : originated_contracts;
+      consumed_gas : consumed_gas;
+      storage_size : storage_size;
+      paid_storage_size_diff : paid_storage_size_diff;
+      allocated_destination_contract : allocated_destination_contract }.
+    Arguments record : clear implicits.
+  End Transaction_result.
+  Definition Transaction_result := Transaction_result.record.
+  
+  Module Origination_result.
+    Record record {big_map_diff balance_updates originated_contracts
+      consumed_gas storage_size paid_storage_size_diff : Set} := {
+      big_map_diff : big_map_diff;
+      balance_updates : balance_updates;
+      originated_contracts : originated_contracts;
+      consumed_gas : consumed_gas;
+      storage_size : storage_size;
+      paid_storage_size_diff : paid_storage_size_diff }.
+    Arguments record : clear implicits.
+  End Origination_result.
+  Definition Origination_result := Origination_result.record.
+  
+  Module Delegation_result.
+    Record record {consumed_gas : Set} := {
+      consumed_gas : consumed_gas }.
+    Arguments record : clear implicits.
+  End Delegation_result.
+  Definition Delegation_result := Delegation_result.record.
+End successful_manager_operation_result.
+
 Reserved Notation &quot;'operation_metadata&quot;.
 Reserved Notation &quot;'packed_operation_metadata&quot;.
 Reserved Notation &quot;'contents_result_list&quot;.
@@ -12548,12 +12880,12 @@ Reserved Notation &quot;'successful_manager_operation_result&quot;.
 Reserved Notation &quot;'packed_successful_manager_operation_result&quot;.
 Reserved Notation &quot;'packed_internal_operation_result&quot;.
 
-Module operation_metadata_skeleton.
+Module operation_metadata.
   Record record {contents : Set} := {
     contents : contents }.
   Arguments record : clear implicits.
-End operation_metadata_skeleton.
-Definition operation_metadata_skeleton := operation_metadata_skeleton.record.
+End operation_metadata.
+Definition operation_metadata_skeleton := operation_metadata.record.
 
 Inductive packed_operation_metadata_gadt : Set :=
 | Operation_metadata : forall {kind : Set},
@@ -12573,8 +12905,8 @@ with packed_contents_result_list_gadt : Set :=
 
 with contents_result_gadt : Set :=
 | Endorsement_result :
-  Alpha_context.Delegate.balance_updates -&gt;
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt; list Z -&gt;
+  contents_result.Endorsement_result Alpha_context.Delegate.balance_updates
+    Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) (list Z) -&gt;
   contents_result_gadt
 | Seed_nonce_revelation_result :
   Alpha_context.Delegate.balance_updates -&gt; contents_result_gadt
@@ -12587,8 +12919,9 @@ with contents_result_gadt : Set :=
 | Proposals_result : contents_result_gadt
 | Ballot_result : contents_result_gadt
 | Manager_operation_result : forall {kind : Set},
-  Alpha_context.Delegate.balance_updates -&gt; 'manager_operation_result kind -&gt;
-  list 'packed_internal_operation_result -&gt; contents_result_gadt
+  contents_result.Manager_operation_result
+    Alpha_context.Delegate.balance_updates ('manager_operation_result kind)
+    (list 'packed_internal_operation_result) -&gt; contents_result_gadt
 
 with packed_contents_result_gadt : Set :=
 | Contents_result : forall {kind : Set},
@@ -12607,17 +12940,23 @@ with manager_operation_result_gadt : Set :=
   Alpha_context.Kind.manager kind -&gt; manager_operation_result_gadt
 
 with successful_manager_operation_result_gadt : Set :=
-| Reveal_result : Z.t -&gt; successful_manager_operation_result_gadt
+| Reveal_result :
+  successful_manager_operation_result.Reveal_result Z.t -&gt;
+  successful_manager_operation_result_gadt
 | Transaction_result :
-  option Alpha_context.Script.expr -&gt;
-  option Alpha_context.Contract.big_map_diff -&gt;
-  Alpha_context.Delegate.balance_updates -&gt; list Alpha_context.Contract.t -&gt;
-  Z.t -&gt; Z.t -&gt; Z.t -&gt; bool -&gt; successful_manager_operation_result_gadt
+  successful_manager_operation_result.Transaction_result
+    (option Alpha_context.Script.expr)
+    (option Alpha_context.Contract.big_map_diff)
+    Alpha_context.Delegate.balance_updates (list Alpha_context.Contract.t) Z.t
+    Z.t Z.t bool -&gt; successful_manager_operation_result_gadt
 | Origination_result :
-  option Alpha_context.Contract.big_map_diff -&gt;
-  Alpha_context.Delegate.balance_updates -&gt; list Alpha_context.Contract.t -&gt;
-  Z.t -&gt; Z.t -&gt; Z.t -&gt; successful_manager_operation_result_gadt
-| Delegation_result : Z.t -&gt; successful_manager_operation_result_gadt
+  successful_manager_operation_result.Origination_result
+    (option Alpha_context.Contract.big_map_diff)
+    Alpha_context.Delegate.balance_updates (list Alpha_context.Contract.t) Z.t
+    Z.t Z.t -&gt; successful_manager_operation_result_gadt
+| Delegation_result :
+  successful_manager_operation_result.Delegation_result Z.t -&gt;
+  successful_manager_operation_result_gadt
 
 with packed_successful_manager_operation_result_gadt : Set :=
 | Successful_manager_result : forall {kind : Set},
@@ -21164,7 +21503,7 @@ Parameter register : unit -&gt; unit.
 <hr />
 <div class="row conversion-row" id="contract_storage.ml">
   <div class="col-md-6">
-    <a href="#contract_storage.ml"><code>contract_storage.ml</code></a>&nbsp;<span class="label label-danger">6 errors</span>
+    <a href="#contract_storage.ml"><code>contract_storage.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -21424,19 +21763,19 @@ Parameter register : unit -&gt; unit.
 let failwith msg = fail (Failure msg)
 
 type big_map_diff_item =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Update of {
+  | Update of {
       big_map : Z.t;
       diff_key : Script_repr.expr;
       diff_key_hash : Script_expr_hash.t;
       diff_value : Script_repr.expr option;
-    }</abbr>
+    }
   | Clear of Z.t
   | Copy of Z.t * Z.t
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Alloc of {
+  | Alloc of {
       big_map : Z.t;
       key_type : Script_repr.expr;
       value_type : Script_repr.expr;
-    }</abbr>
+    }
 
 type big_map_diff = big_map_diff_item list
 
@@ -21934,13 +22273,36 @@ Require Tezos.Tez_repr.
 Definition failwith {A : Set} (msg : string) : Lwt.t (Error_monad.tzresult A) :=
   Error_monad.fail (Error_monad.Failure msg).
 
+Module big_map_diff_item.
+  Module Update.
+    Record record {big_map diff_key diff_key_hash diff_value : Set} := {
+      big_map : big_map;
+      diff_key : diff_key;
+      diff_key_hash : diff_key_hash;
+      diff_value : diff_value }.
+    Arguments record : clear implicits.
+  End Update.
+  Definition Update := Update.record.
+  
+  Module Alloc.
+    Record record {big_map key_type value_type : Set} := {
+      big_map : big_map;
+      key_type : key_type;
+      value_type : value_type }.
+    Arguments record : clear implicits.
+  End Alloc.
+  Definition Alloc := Alloc.record.
+End big_map_diff_item.
+
 Inductive big_map_diff_item : Set :=
 | Update :
-  Z.t -&gt; Script_repr.expr -&gt; Script_expr_hash.t -&gt; option Script_repr.expr -&gt;
-  big_map_diff_item
+  big_map_diff_item.Update Z.t Script_repr.expr Script_expr_hash.t
+    (option Script_repr.expr) -&gt; big_map_diff_item
 | Clear : Z.t -&gt; big_map_diff_item
 | Copy : Z.t -&gt; Z.t -&gt; big_map_diff_item
-| Alloc : Z.t -&gt; Script_repr.expr -&gt; Script_repr.expr -&gt; big_map_diff_item.
+| Alloc :
+  big_map_diff_item.Alloc Z.t Script_repr.expr Script_repr.expr -&gt;
+  big_map_diff_item.
 
 Definition big_map_diff := list big_map_diff_item.
 
@@ -22687,7 +23049,7 @@ Definition set_paid_storage_space_and_return_fees_to_pay
 <hr />
 <div class="row conversion-row" id="contract_storage.mli">
   <div class="col-md-6">
-    <a href="#contract_storage.mli"><code>contract_storage.mli</code></a>&nbsp;<span class="label label-danger">3 errors</span>
+    <a href="#contract_storage.mli"><code>contract_storage.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -22793,19 +23155,19 @@ val get_storage :
   (Raw_context.t * Script_repr.expr option) tzresult Lwt.t
 
 type big_map_diff_item =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Update of {
+  | Update of {
       big_map : Z.t;
       diff_key : Script_repr.expr;
       diff_key_hash : Script_expr_hash.t;
       diff_value : Script_repr.expr option;
-    }</abbr>
+    }
   | Clear of Z.t
   | Copy of Z.t * Z.t
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Alloc of {
+  | Alloc of {
       big_map : Z.t;
       key_type : Script_repr.expr;
       value_type : Script_repr.expr;
-    }</abbr>
+    }
 
 type big_map_diff = big_map_diff_item list
 
@@ -22939,13 +23301,36 @@ Parameter get_storage :
   Raw_context.t -&gt; Contract_repr.t -&gt;
   Lwt.t (Error_monad.tzresult (Raw_context.t * option Script_repr.expr)).
 
+Module big_map_diff_item.
+  Module Update.
+    Record record {big_map diff_key diff_key_hash diff_value : Set} := {
+      big_map : big_map;
+      diff_key : diff_key;
+      diff_key_hash : diff_key_hash;
+      diff_value : diff_value }.
+    Arguments record : clear implicits.
+  End Update.
+  Definition Update := Update.record.
+  
+  Module Alloc.
+    Record record {big_map key_type value_type : Set} := {
+      big_map : big_map;
+      key_type : key_type;
+      value_type : value_type }.
+    Arguments record : clear implicits.
+  End Alloc.
+  Definition Alloc := Alloc.record.
+End big_map_diff_item.
+
 Inductive big_map_diff_item : Set :=
 | Update :
-  Z.t -&gt; Script_repr.expr -&gt; Script_expr_hash.t -&gt; option Script_repr.expr -&gt;
-  big_map_diff_item
+  big_map_diff_item.Update Z.t Script_repr.expr Script_expr_hash.t
+    (option Script_repr.expr) -&gt; big_map_diff_item
 | Clear : Z.t -&gt; big_map_diff_item
 | Copy : Z.t -&gt; Z.t -&gt; big_map_diff_item
-| Alloc : Z.t -&gt; Script_repr.expr -&gt; Script_repr.expr -&gt; big_map_diff_item.
+| Alloc :
+  big_map_diff_item.Alloc Z.t Script_repr.expr Script_repr.expr -&gt;
+  big_map_diff_item.
 
 Definition big_map_diff := list big_map_diff_item.
 
@@ -30357,7 +30742,7 @@ Definition increase (op_staroptstar : option Z)
 <hr />
 <div class="row conversion-row" id="gas_limit_repr.ml">
   <div class="col-md-6">
-    <a href="#gas_limit_repr.ml"><code>gas_limit_repr.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
+    <a href="#gas_limit_repr.ml"><code>gas_limit_repr.ml</code></a>&nbsp;<span class="label label-danger">3 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -30384,7 +30769,7 @@ Definition increase (op_staroptstar : option Z)
 (*                                                                           *)
 (*****************************************************************************)
 
-type t = Unaccounted <abbr class="mark-error" title="Unhandled named constructor parameters.">| Limited of {remaining : Z.t}</abbr>
+type t = Unaccounted | Limited of {remaining : Z.t}
 
 type internal_gas = Z.t
 
@@ -30632,9 +31017,18 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 
+Module t.
+  Module Limited.
+    Record record {remaining : Set} := {
+      remaining : remaining }.
+    Arguments record : clear implicits.
+  End Limited.
+  Definition Limited := Limited.record.
+End t.
+
 Inductive t : Set :=
 | Unaccounted : t
-| Limited : Z.t -&gt; t.
+| Limited : t.Limited Z.t -&gt; t.
 
 Definition internal_gas := Z.t.
 
@@ -30788,19 +31182,20 @@ Definition cost_to_internal_gas (cost : cost) : internal_gas :=
       (Z.add (Z.mul (cost.bytes_read cost) byte_read_weight)
         (Z.mul (cost.bytes_written cost) byte_written_weight))).
 
-Definition internal_gas_to_gas (internal_gas : Z.t) : Z.t * internal_gas :=
-  let gas := rescale internal_gas in
-  let rest := Z.logand internal_gas rescaling_mask in
+Definition internal_gas_to_gas (__internal_gas_value : Z.t)
+  : Z.t * internal_gas :=
+  let gas := rescale __internal_gas_value in
+  let rest := Z.logand __internal_gas_value rescaling_mask in
   (gas, rest).
 
 Definition consume
-  (block_gas : Z.t) (operation_gas : t) (internal_gas : Z.t) (cost : cost)
-  : Error_monad.tzresult (Z.t * t * Z.t) :=
+  (block_gas : Z.t) (operation_gas : t) (__internal_gas_value : Z.t)
+  (cost : cost) : Error_monad.tzresult (Z.t * t * Z.t) :=
   match operation_gas with
-  | Unaccounted =&gt; Error_monad.ok (block_gas, Unaccounted, internal_gas)
+  | Unaccounted =&gt; Error_monad.ok (block_gas, Unaccounted, __internal_gas_value)
   | Limited {| t.Limited.remaining := remaining |} =&gt;
     let cost_internal_gas := cost_to_internal_gas cost in
-    let total_internal_gas := Z.add cost_internal_gas internal_gas in
+    let total_internal_gas := Z.add cost_internal_gas __internal_gas_value in
     let '(gas, rest) := internal_gas_to_gas total_internal_gas in
     if Compare.Z.[Compare.S.op_gt] gas Z.zero then
       let remaining := Z.sub remaining gas in
@@ -30819,10 +31214,10 @@ Definition consume
   end.
 
 Definition check_enough
-  (block_gas : Z.t) (operation_gas : t) (internal_gas : Z.t) (cost : cost)
-  : Error_monad.tzresult unit :=
+  (block_gas : Z.t) (operation_gas : t) (__internal_gas_value : Z.t)
+  (cost : cost) : Error_monad.tzresult unit :=
   Error_monad.op_gtpipequestion
-    (consume block_gas operation_gas internal_gas cost)
+    (consume block_gas operation_gas __internal_gas_value cost)
     (fun function_parameter =&gt;
       let '(_block_remainig, _remaining, _internal_gas) := function_parameter in
       tt).
@@ -30894,7 +31289,7 @@ Definition alloc_mbytes_cost (n : Z) : cost :=
 <hr />
 <div class="row conversion-row" id="gas_limit_repr.mli">
   <div class="col-md-6">
-    <a href="#gas_limit_repr.mli"><code>gas_limit_repr.mli</code></a>&nbsp;<span class="label label-danger">3 errors</span>
+    <a href="#gas_limit_repr.mli"><code>gas_limit_repr.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -30921,7 +31316,7 @@ Definition alloc_mbytes_cost (n : Z) : cost :=
 (*                                                                           *)
 (*****************************************************************************)
 
-type t = Unaccounted <abbr class="mark-error" title="Unhandled named constructor parameters.">| Limited of {remaining : Z.t}</abbr>
+type t = Unaccounted | Limited of {remaining : Z.t}
 
 type internal_gas
 
@@ -30980,9 +31375,18 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 
+Module t.
+  Module Limited.
+    Record record {remaining : Set} := {
+      remaining : remaining }.
+    Arguments record : clear implicits.
+  End Limited.
+  Definition Limited := Limited.record.
+End t.
+
 Inductive t : Set :=
 | Unaccounted : t
-| Limited : Z.t -&gt; t.
+| Limited : t.Limited Z.t -&gt; t.
 
 Parameter internal_gas : Set.
 
@@ -39892,7 +40296,7 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
 <hr />
 <div class="row conversion-row" id="main.ml">
   <div class="col-md-6">
-    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-danger">9 errors</span>
+    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-danger">5 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -39990,23 +40394,23 @@ Alternative: use a monad to sequence side-effects.">Alpha_services.register () ;
   Services_registration.get_rpc_services ()</abbr>
 
 type validation_mode =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Application of {
+  | Application of {
       block_header : Alpha_context.Block_header.t;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
-    }</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Partial_application of {
+    }
+  | Partial_application of {
       block_header : Alpha_context.Block_header.t;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
-    }</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Partial_construction of {predecessor : Block_hash.t}</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Full_construction of {
+    }
+  | Partial_construction of {predecessor : Block_hash.t}
+  | Full_construction of {
       predecessor : Block_hash.t;
       protocol_data : Alpha_context.Block_header.contents;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
-    }</abbr>
+    }
 
 type validation_state = {
   mode : validation_mode;
@@ -40387,17 +40791,56 @@ Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
   (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.get_rpc_services tt.
 
+Module validation_mode.
+  Module Application.
+    Record record {block_header baker block_delay : Set} := {
+      block_header : block_header;
+      baker : baker;
+      block_delay : block_delay }.
+    Arguments record : clear implicits.
+  End Application.
+  Definition Application := Application.record.
+  
+  Module Partial_application.
+    Record record {block_header baker block_delay : Set} := {
+      block_header : block_header;
+      baker : baker;
+      block_delay : block_delay }.
+    Arguments record : clear implicits.
+  End Partial_application.
+  Definition Partial_application := Partial_application.record.
+  
+  Module Partial_construction.
+    Record record {predecessor : Set} := {
+      predecessor : predecessor }.
+    Arguments record : clear implicits.
+  End Partial_construction.
+  Definition Partial_construction := Partial_construction.record.
+  
+  Module Full_construction.
+    Record record {predecessor protocol_data baker block_delay : Set} := {
+      predecessor : predecessor;
+      protocol_data : protocol_data;
+      baker : baker;
+      block_delay : block_delay }.
+    Arguments record : clear implicits.
+  End Full_construction.
+  Definition Full_construction := Full_construction.record.
+End validation_mode.
+
 Inductive validation_mode : Set :=
 | Application :
-  Alpha_context.Block_header.t -&gt; Alpha_context.public_key_hash -&gt;
-  Alpha_context.Period.t -&gt; validation_mode
+  validation_mode.Application Alpha_context.Block_header.t
+    Alpha_context.public_key_hash Alpha_context.Period.t -&gt; validation_mode
 | Partial_application :
-  Alpha_context.Block_header.t -&gt; Alpha_context.public_key_hash -&gt;
-  Alpha_context.Period.t -&gt; validation_mode
-| Partial_construction : Block_hash.[S.HASH.t] -&gt; validation_mode
+  validation_mode.Partial_application Alpha_context.Block_header.t
+    Alpha_context.public_key_hash Alpha_context.Period.t -&gt; validation_mode
+| Partial_construction :
+  validation_mode.Partial_construction Block_hash.[S.HASH.t] -&gt; validation_mode
 | Full_construction :
-  Block_hash.[S.HASH.t] -&gt; Alpha_context.Block_header.contents -&gt;
-  Alpha_context.public_key_hash -&gt; Alpha_context.Period.t -&gt; validation_mode.
+  validation_mode.Full_construction Block_hash.[S.HASH.t]
+    Alpha_context.Block_header.contents Alpha_context.public_key_hash
+    Alpha_context.Period.t -&gt; validation_mode.
 
 Module validation_state.
   Record record := {
@@ -40836,7 +41279,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
 <hr />
 <div class="row conversion-row" id="main.mli">
   <div class="col-md-6">
-    <a href="#main.mli"><code>main.mli</code></a>&nbsp;<span class="label label-danger">4 errors</span>
+    <a href="#main.mli"><code>main.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -40866,23 +41309,23 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
 (** Tezos Protocol Implementation - Protocol Signature Instance *)
 
 type validation_mode =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Application of {
+  | Application of {
       block_header : Alpha_context.Block_header.t;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
-    }</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Partial_application of {
+    }
+  | Partial_application of {
       block_header : Alpha_context.Block_header.t;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
-    }</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Partial_construction of {predecessor : Block_hash.t}</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Full_construction of {
+    }
+  | Partial_construction of {predecessor : Block_hash.t}
+  | Full_construction of {
       predecessor : Block_hash.t;
       protocol_data : Alpha_context.Block_header.contents;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
-    }</abbr>
+    }
 
 type validation_state = {
   mode : validation_mode;
@@ -40922,17 +41365,56 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Apply_results.
 
+Module validation_mode.
+  Module Application.
+    Record record {block_header baker block_delay : Set} := {
+      block_header : block_header;
+      baker : baker;
+      block_delay : block_delay }.
+    Arguments record : clear implicits.
+  End Application.
+  Definition Application := Application.record.
+  
+  Module Partial_application.
+    Record record {block_header baker block_delay : Set} := {
+      block_header : block_header;
+      baker : baker;
+      block_delay : block_delay }.
+    Arguments record : clear implicits.
+  End Partial_application.
+  Definition Partial_application := Partial_application.record.
+  
+  Module Partial_construction.
+    Record record {predecessor : Set} := {
+      predecessor : predecessor }.
+    Arguments record : clear implicits.
+  End Partial_construction.
+  Definition Partial_construction := Partial_construction.record.
+  
+  Module Full_construction.
+    Record record {predecessor protocol_data baker block_delay : Set} := {
+      predecessor : predecessor;
+      protocol_data : protocol_data;
+      baker : baker;
+      block_delay : block_delay }.
+    Arguments record : clear implicits.
+  End Full_construction.
+  Definition Full_construction := Full_construction.record.
+End validation_mode.
+
 Inductive validation_mode : Set :=
 | Application :
-  Alpha_context.Block_header.t -&gt; Alpha_context.public_key_hash -&gt;
-  Alpha_context.Period.t -&gt; validation_mode
+  validation_mode.Application Alpha_context.Block_header.t
+    Alpha_context.public_key_hash Alpha_context.Period.t -&gt; validation_mode
 | Partial_application :
-  Alpha_context.Block_header.t -&gt; Alpha_context.public_key_hash -&gt;
-  Alpha_context.Period.t -&gt; validation_mode
-| Partial_construction : Block_hash.[S.HASH.t] -&gt; validation_mode
+  validation_mode.Partial_application Alpha_context.Block_header.t
+    Alpha_context.public_key_hash Alpha_context.Period.t -&gt; validation_mode
+| Partial_construction :
+  validation_mode.Partial_construction Block_hash.[S.HASH.t] -&gt; validation_mode
 | Full_construction :
-  Block_hash.[S.HASH.t] -&gt; Alpha_context.Block_header.contents -&gt;
-  Alpha_context.public_key_hash -&gt; Alpha_context.Period.t -&gt; validation_mode.
+  validation_mode.Full_construction Block_hash.[S.HASH.t]
+    Alpha_context.Block_header.contents Alpha_context.public_key_hash
+    Alpha_context.Period.t -&gt; validation_mode.
 
 Module validation_state.
   Record record := {
@@ -46501,7 +46983,7 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
 <hr />
 <div class="row conversion-row" id="operation_repr.ml">
   <div class="col-md-6">
-    <a href="#operation_repr.ml"><code>operation_repr.ml</code></a>&nbsp;<span class="label label-danger">18 errors</span>
+    <a href="#operation_repr.ml"><code>operation_repr.ml</code></a>&nbsp;<span class="label label-danger">6 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -46581,41 +47063,41 @@ and _ contents_list =
       -&gt; ('kind * 'rest) Kind.manager contents_list
 
 and _ contents =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Endorsement : {level : Raw_level_repr.t} -&gt; Kind.endorsement contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Seed_nonce_revelation : {
+  | Endorsement : {level : Raw_level_repr.t} -&gt; Kind.endorsement contents
+  | Seed_nonce_revelation : {
       level : Raw_level_repr.t;
       nonce : Seed_repr.nonce;
     }
-      -&gt; Kind.seed_nonce_revelation contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Double_endorsement_evidence : {
+      -&gt; Kind.seed_nonce_revelation contents
+  | Double_endorsement_evidence : {
       op1 : Kind.endorsement operation;
       op2 : Kind.endorsement operation;
     }
-      -&gt; Kind.double_endorsement_evidence contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Double_baking_evidence : {
+      -&gt; Kind.double_endorsement_evidence contents
+  | Double_baking_evidence : {
       bh1 : Block_header_repr.t;
       bh2 : Block_header_repr.t;
     }
-      -&gt; Kind.double_baking_evidence contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Activate_account : {
+      -&gt; Kind.double_baking_evidence contents
+  | Activate_account : {
       id : Ed25519.Public_key_hash.t;
       activation_code : Blinded_public_key_hash.activation_code;
     }
-      -&gt; Kind.activate_account contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Proposals : {
+      -&gt; Kind.activate_account contents
+  | Proposals : {
       source : Signature.Public_key_hash.t;
       period : Voting_period_repr.t;
       proposals : Protocol_hash.t list;
     }
-      -&gt; Kind.proposals contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Ballot : {
+      -&gt; Kind.proposals contents
+  | Ballot : {
       source : Signature.Public_key_hash.t;
       period : Voting_period_repr.t;
       proposal : Protocol_hash.t;
       ballot : Vote_repr.ballot;
     }
-      -&gt; Kind.ballot contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Manager_operation : {
+      -&gt; Kind.ballot contents
+  | Manager_operation : {
       source : Signature.public_key_hash;
       fee : Tez_repr.tez;
       counter : counter;
@@ -46623,24 +47105,24 @@ and _ contents =
       gas_limit : Z.t;
       storage_limit : Z.t;
     }
-      -&gt; 'kind Kind.manager contents</abbr>
+      -&gt; 'kind Kind.manager contents
 
 and _ manager_operation =
   | Reveal : Signature.Public_key.t -&gt; Kind.reveal manager_operation
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Transaction : {
+  | Transaction : {
       amount : Tez_repr.tez;
       parameters : Script_repr.lazy_expr;
       entrypoint : string;
       destination : Contract_repr.contract;
     }
-      -&gt; Kind.transaction manager_operation</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Origination : {
+      -&gt; Kind.transaction manager_operation
+  | Origination : {
       delegate : Signature.Public_key_hash.t option;
       script : Script_repr.t;
       credit : Tez_repr.tez;
       preorigination : Contract_repr.t option;
     }
-      -&gt; Kind.origination manager_operation</abbr>
+      -&gt; Kind.origination manager_operation
   | Delegation :
       Signature.Public_key_hash.t option
       -&gt; Kind.delegation manager_operation
@@ -46723,7 +47205,7 @@ module Encoding = struct
 
   module Manager_operations = struct
     type 'kind case =
-      <abbr class="mark-error" title="Unhandled named constructor parameters.">| MCase : {
+      | MCase : {
           tag : int;
           name : string;
           encoding : 'a Data_encoding.t;
@@ -46731,7 +47213,7 @@ module Encoding = struct
           proj : 'kind manager_operation -&gt; 'a;
           inj : 'a -&gt; 'kind manager_operation;
         }
-          -&gt; 'kind case</abbr>
+          -&gt; 'kind case
 
     let reveal_case =
       MCase
@@ -46871,7 +47353,7 @@ module Encoding = struct
   end
 
   type 'b case =
-    <abbr class="mark-error" title="Unhandled named constructor parameters.">| Case : {
+    | Case : {
         tag : int;
         name : string;
         encoding : 'a Data_encoding.t;
@@ -46879,7 +47361,7 @@ module Encoding = struct
         proj : 'b contents -&gt; 'a;
         inj : 'a -&gt; 'b contents;
       }
-        -&gt; 'b case</abbr>
+        -&gt; 'b case
 
   let endorsement_encoding = obj1 (req &quot;level&quot; Raw_level_repr.encoding)
 
@@ -47437,6 +47919,100 @@ Definition raw := raw.record.
 
 Definition raw_encoding : Data_encoding.t Operation.t := Operation.encoding.
 
+Module contents.
+  Module Endorsement.
+    Record record {level : Set} := {
+      level : level }.
+    Arguments record : clear implicits.
+  End Endorsement.
+  Definition Endorsement := Endorsement.record.
+  
+  Module Seed_nonce_revelation.
+    Record record {level nonce : Set} := {
+      level : level;
+      nonce : nonce }.
+    Arguments record : clear implicits.
+  End Seed_nonce_revelation.
+  Definition Seed_nonce_revelation := Seed_nonce_revelation.record.
+  
+  Module Double_endorsement_evidence.
+    Record record {op1 op2 : Set} := {
+      op1 : op1;
+      op2 : op2 }.
+    Arguments record : clear implicits.
+  End Double_endorsement_evidence.
+  Definition Double_endorsement_evidence := Double_endorsement_evidence.record.
+  
+  Module Double_baking_evidence.
+    Record record {bh1 bh2 : Set} := {
+      bh1 : bh1;
+      bh2 : bh2 }.
+    Arguments record : clear implicits.
+  End Double_baking_evidence.
+  Definition Double_baking_evidence := Double_baking_evidence.record.
+  
+  Module Activate_account.
+    Record record {id activation_code : Set} := {
+      id : id;
+      activation_code : activation_code }.
+    Arguments record : clear implicits.
+  End Activate_account.
+  Definition Activate_account := Activate_account.record.
+  
+  Module Proposals.
+    Record record {source period proposals : Set} := {
+      source : source;
+      period : period;
+      proposals : proposals }.
+    Arguments record : clear implicits.
+  End Proposals.
+  Definition Proposals := Proposals.record.
+  
+  Module Ballot.
+    Record record {source period proposal ballot : Set} := {
+      source : source;
+      period : period;
+      proposal : proposal;
+      ballot : ballot }.
+    Arguments record : clear implicits.
+  End Ballot.
+  Definition Ballot := Ballot.record.
+  
+  Module Manager_operation.
+    Record record {source fee counter operation gas_limit storage_limit : Set} := {
+      source : source;
+      fee : fee;
+      counter : counter;
+      operation : operation;
+      gas_limit : gas_limit;
+      storage_limit : storage_limit }.
+    Arguments record : clear implicits.
+  End Manager_operation.
+  Definition Manager_operation := Manager_operation.record.
+End contents.
+
+Module manager_operation.
+  Module Transaction.
+    Record record {amount parameters entrypoint destination : Set} := {
+      amount : amount;
+      parameters : parameters;
+      entrypoint : entrypoint;
+      destination : destination }.
+    Arguments record : clear implicits.
+  End Transaction.
+  Definition Transaction := Transaction.record.
+  
+  Module Origination.
+    Record record {delegate script credit preorigination : Set} := {
+      delegate : delegate;
+      script : script;
+      credit : credit;
+      preorigination : preorigination }.
+    Arguments record : clear implicits.
+  End Origination.
+  Definition Origination := Origination.record.
+End manager_operation.
+
 Reserved Notation &quot;'operation&quot;.
 Reserved Notation &quot;'protocol_data&quot;.
 Reserved Notation &quot;'contents_list&quot;.
@@ -47444,21 +48020,21 @@ Reserved Notation &quot;'contents&quot;.
 Reserved Notation &quot;'manager_operation&quot;.
 Reserved Notation &quot;'counter&quot;.
 
-Module protocol_data_skeleton.
+Module protocol_data.
   Record record {contents signature : Set} := {
     contents : contents;
     signature : signature }.
   Arguments record : clear implicits.
-End protocol_data_skeleton.
-Definition protocol_data_skeleton := protocol_data_skeleton.record.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
 
-Module operation_skeleton.
+Module operation.
   Record record {shell protocol_data : Set} := {
     shell : shell;
     protocol_data : protocol_data }.
   Arguments record : clear implicits.
-End operation_skeleton.
-Definition operation_skeleton := operation_skeleton.record.
+End operation.
+Definition operation_skeleton := operation.record.
 
 Inductive contents_list_gadt : Set :=
 | Single : forall {kind : Set}, 'contents kind -&gt; contents_list_gadt
@@ -47466,35 +48042,42 @@ Inductive contents_list_gadt : Set :=
   'contents (Kind.manager kind) -&gt; contents_list_gadt -&gt; contents_list_gadt
 
 with contents_gadt : Set :=
-| Endorsement : Raw_level_repr.t -&gt; contents_gadt
-| Seed_nonce_revelation : Raw_level_repr.t -&gt; Seed_repr.nonce -&gt; contents_gadt
+| Endorsement : contents.Endorsement Raw_level_repr.t -&gt; contents_gadt
+| Seed_nonce_revelation :
+  contents.Seed_nonce_revelation Raw_level_repr.t Seed_repr.nonce -&gt;
+  contents_gadt
 | Double_endorsement_evidence :
-  'operation Kind.endorsement -&gt; 'operation Kind.endorsement -&gt; contents_gadt
+  contents.Double_endorsement_evidence ('operation Kind.endorsement)
+    ('operation Kind.endorsement) -&gt; contents_gadt
 | Double_baking_evidence :
-  Block_header_repr.t -&gt; Block_header_repr.t -&gt; contents_gadt
+  contents.Double_baking_evidence Block_header_repr.t Block_header_repr.t -&gt;
+  contents_gadt
 | Activate_account :
-  Ed25519.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Blinded_public_key_hash.activation_code -&gt; contents_gadt
+  contents.Activate_account
+    Ed25519.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Blinded_public_key_hash.activation_code -&gt; contents_gadt
 | Proposals :
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Voting_period_repr.t -&gt; list Protocol_hash.[S.HASH.t] -&gt; contents_gadt
+  contents.Proposals
+    Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Voting_period_repr.t (list Protocol_hash.[S.HASH.t]) -&gt; contents_gadt
 | Ballot :
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Voting_period_repr.t -&gt; Protocol_hash.[S.HASH.t] -&gt; Vote_repr.ballot -&gt;
+  contents.Ballot Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Voting_period_repr.t Protocol_hash.[S.HASH.t] Vote_repr.ballot -&gt;
   contents_gadt
 | Manager_operation : forall {kind : Set},
-  Signature.[S.SIGNATURE.public_key_hash] -&gt; Tez_repr.tez -&gt; 'counter -&gt;
-  'manager_operation kind -&gt; Z.t -&gt; Z.t -&gt; contents_gadt
+  contents.Manager_operation Signature.[S.SIGNATURE.public_key_hash]
+    Tez_repr.tez 'counter ('manager_operation kind) Z.t Z.t -&gt; contents_gadt
 
 with manager_operation_gadt : Set :=
 | Reveal :
   Signature.[S.SIGNATURE.Public_key].(S.SPublic_key.t) -&gt; manager_operation_gadt
 | Transaction :
-  Tez_repr.tez -&gt; Script_repr.lazy_expr -&gt; string -&gt; Contract_repr.contract -&gt;
-  manager_operation_gadt
+  manager_operation.Transaction Tez_repr.tez Script_repr.lazy_expr string
+    Contract_repr.contract -&gt; manager_operation_gadt
 | Origination :
-  option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Script_repr.t -&gt; Tez_repr.tez -&gt; option Contract_repr.t -&gt;
+  manager_operation.Origination
+    (option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t))
+    Script_repr.t Tez_repr.tez (option Contract_repr.t) -&gt;
   manager_operation_gadt
 | Delegation :
   option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
@@ -47648,14 +48231,27 @@ Module Encoding.
         inj x).
   
   Module Manager_operations.
+    Module case.
+      Module MCase.
+        Record record {tag name encoding select proj inj : Set} := {
+          tag : tag;
+          name : name;
+          encoding : encoding;
+          select : select;
+          proj : proj;
+          inj : inj }.
+        Arguments record : clear implicits.
+      End MCase.
+      Definition MCase := MCase.record.
+    End case.
+    
     Reserved Notation &quot;'case&quot;.
     
     Inductive case_gadt : Set :=
     | MCase : forall {a kind : Set},
-      Z -&gt; string -&gt; Data_encoding.t a -&gt;
-      (packed_manager_operation -&gt; option (manager_operation kind)) -&gt;
-      (manager_operation kind -&gt; a) -&gt; (a -&gt; manager_operation kind) -&gt;
-      case_gadt
+      case.MCase Z string (Data_encoding.t a)
+        (packed_manager_operation -&gt; option (manager_operation kind))
+        (manager_operation kind -&gt; a) (a -&gt; manager_operation kind) -&gt; case_gadt
     
     where &quot;'case&quot; := (fun (kind : Set) =&gt; case_gadt).
     
@@ -47842,13 +48438,27 @@ Module Encoding.
             (cons (make origination_case) (cons (make delegation_case) [])))).
   End Manager_operations.
   
+  Module case.
+    Module Case.
+      Record record {tag name encoding select proj inj : Set} := {
+        tag : tag;
+        name : name;
+        encoding : encoding;
+        select : select;
+        proj : proj;
+        inj : inj }.
+      Arguments record : clear implicits.
+    End Case.
+    Definition Case := Case.record.
+  End case.
+  
   Reserved Notation &quot;'case&quot;.
   
   Inductive case_gadt : Set :=
   | Case : forall {a b : Set},
-    Z -&gt; string -&gt; Data_encoding.t a -&gt;
-    (packed_contents -&gt; option (contents b)) -&gt; (contents b -&gt; a) -&gt;
-    (a -&gt; contents b) -&gt; case_gadt
+    case.Case Z string (Data_encoding.t a)
+      (packed_contents -&gt; option (contents b)) (contents b -&gt; a)
+      (a -&gt; contents b) -&gt; case_gadt
   
   where &quot;'case&quot; := (fun (b : Set) =&gt; case_gadt).
   
@@ -48554,7 +49164,7 @@ Definition equal {a b : Set} (op1 : operation a) (op2 : operation b)
 <hr />
 <div class="row conversion-row" id="operation_repr.mli">
   <div class="col-md-6">
-    <a href="#operation_repr.mli"><code>operation_repr.mli</code></a>&nbsp;<span class="label label-danger">14 errors</span>
+    <a href="#operation_repr.mli"><code>operation_repr.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -48634,41 +49244,41 @@ and _ contents_list =
       -&gt; ('kind * 'rest) Kind.manager contents_list
 
 and _ contents =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Endorsement : {level : Raw_level_repr.t} -&gt; Kind.endorsement contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Seed_nonce_revelation : {
+  | Endorsement : {level : Raw_level_repr.t} -&gt; Kind.endorsement contents
+  | Seed_nonce_revelation : {
       level : Raw_level_repr.t;
       nonce : Seed_repr.nonce;
     }
-      -&gt; Kind.seed_nonce_revelation contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Double_endorsement_evidence : {
+      -&gt; Kind.seed_nonce_revelation contents
+  | Double_endorsement_evidence : {
       op1 : Kind.endorsement operation;
       op2 : Kind.endorsement operation;
     }
-      -&gt; Kind.double_endorsement_evidence contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Double_baking_evidence : {
+      -&gt; Kind.double_endorsement_evidence contents
+  | Double_baking_evidence : {
       bh1 : Block_header_repr.t;
       bh2 : Block_header_repr.t;
     }
-      -&gt; Kind.double_baking_evidence contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Activate_account : {
+      -&gt; Kind.double_baking_evidence contents
+  | Activate_account : {
       id : Ed25519.Public_key_hash.t;
       activation_code : Blinded_public_key_hash.activation_code;
     }
-      -&gt; Kind.activate_account contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Proposals : {
+      -&gt; Kind.activate_account contents
+  | Proposals : {
       source : Signature.Public_key_hash.t;
       period : Voting_period_repr.t;
       proposals : Protocol_hash.t list;
     }
-      -&gt; Kind.proposals contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Ballot : {
+      -&gt; Kind.proposals contents
+  | Ballot : {
       source : Signature.Public_key_hash.t;
       period : Voting_period_repr.t;
       proposal : Protocol_hash.t;
       ballot : Vote_repr.ballot;
     }
-      -&gt; Kind.ballot contents</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Manager_operation : {
+      -&gt; Kind.ballot contents
+  | Manager_operation : {
       source : Signature.Public_key_hash.t;
       fee : Tez_repr.tez;
       counter : counter;
@@ -48676,24 +49286,24 @@ and _ contents =
       gas_limit : Z.t;
       storage_limit : Z.t;
     }
-      -&gt; 'kind Kind.manager contents</abbr>
+      -&gt; 'kind Kind.manager contents
 
 and _ manager_operation =
   | Reveal : Signature.Public_key.t -&gt; Kind.reveal manager_operation
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Transaction : {
+  | Transaction : {
       amount : Tez_repr.tez;
       parameters : Script_repr.lazy_expr;
       entrypoint : string;
       destination : Contract_repr.contract;
     }
-      -&gt; Kind.transaction manager_operation</abbr>
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Origination : {
+      -&gt; Kind.transaction manager_operation
+  | Origination : {
       delegate : Signature.Public_key_hash.t option;
       script : Script_repr.t;
       credit : Tez_repr.tez;
       preorigination : Contract_repr.t option;
     }
-      -&gt; Kind.origination manager_operation</abbr>
+      -&gt; Kind.origination manager_operation
   | Delegation :
       Signature.Public_key_hash.t option
       -&gt; Kind.delegation manager_operation
@@ -48772,7 +49382,7 @@ val equal : 'a operation -&gt; 'b operation -&gt; ('a, 'b) eq option
 
 module Encoding : sig
   type 'b case =
-    <abbr class="mark-error" title="Unhandled named constructor parameters.">| Case : {
+    | Case : {
         tag : int;
         name : string;
         encoding : 'a Data_encoding.t;
@@ -48780,7 +49390,7 @@ module Encoding : sig
         proj : 'b contents -&gt; 'a;
         inj : 'a -&gt; 'b contents;
       }
-        -&gt; 'b case</abbr>
+        -&gt; 'b case
 
   val endorsement_case : Kind.endorsement case
 
@@ -48806,7 +49416,7 @@ module Encoding : sig
 
   module Manager_operations : sig
     type 'b case =
-      <abbr class="mark-error" title="Unhandled named constructor parameters.">| MCase : {
+      | MCase : {
           tag : int;
           name : string;
           encoding : 'a Data_encoding.t;
@@ -48814,7 +49424,7 @@ module Encoding : sig
           proj : 'kind manager_operation -&gt; 'a;
           inj : 'a -&gt; 'kind manager_operation;
         }
-          -&gt; 'kind case</abbr>
+          -&gt; 'kind case
 
     val reveal_case : Kind.reveal case
 
@@ -48903,6 +49513,100 @@ Definition raw := raw.record.
 
 Parameter raw_encoding : Data_encoding.t raw.
 
+Module contents.
+  Module Endorsement.
+    Record record {level : Set} := {
+      level : level }.
+    Arguments record : clear implicits.
+  End Endorsement.
+  Definition Endorsement := Endorsement.record.
+  
+  Module Seed_nonce_revelation.
+    Record record {level nonce : Set} := {
+      level : level;
+      nonce : nonce }.
+    Arguments record : clear implicits.
+  End Seed_nonce_revelation.
+  Definition Seed_nonce_revelation := Seed_nonce_revelation.record.
+  
+  Module Double_endorsement_evidence.
+    Record record {op1 op2 : Set} := {
+      op1 : op1;
+      op2 : op2 }.
+    Arguments record : clear implicits.
+  End Double_endorsement_evidence.
+  Definition Double_endorsement_evidence := Double_endorsement_evidence.record.
+  
+  Module Double_baking_evidence.
+    Record record {bh1 bh2 : Set} := {
+      bh1 : bh1;
+      bh2 : bh2 }.
+    Arguments record : clear implicits.
+  End Double_baking_evidence.
+  Definition Double_baking_evidence := Double_baking_evidence.record.
+  
+  Module Activate_account.
+    Record record {id activation_code : Set} := {
+      id : id;
+      activation_code : activation_code }.
+    Arguments record : clear implicits.
+  End Activate_account.
+  Definition Activate_account := Activate_account.record.
+  
+  Module Proposals.
+    Record record {source period proposals : Set} := {
+      source : source;
+      period : period;
+      proposals : proposals }.
+    Arguments record : clear implicits.
+  End Proposals.
+  Definition Proposals := Proposals.record.
+  
+  Module Ballot.
+    Record record {source period proposal ballot : Set} := {
+      source : source;
+      period : period;
+      proposal : proposal;
+      ballot : ballot }.
+    Arguments record : clear implicits.
+  End Ballot.
+  Definition Ballot := Ballot.record.
+  
+  Module Manager_operation.
+    Record record {source fee counter operation gas_limit storage_limit : Set} := {
+      source : source;
+      fee : fee;
+      counter : counter;
+      operation : operation;
+      gas_limit : gas_limit;
+      storage_limit : storage_limit }.
+    Arguments record : clear implicits.
+  End Manager_operation.
+  Definition Manager_operation := Manager_operation.record.
+End contents.
+
+Module manager_operation.
+  Module Transaction.
+    Record record {amount parameters entrypoint destination : Set} := {
+      amount : amount;
+      parameters : parameters;
+      entrypoint : entrypoint;
+      destination : destination }.
+    Arguments record : clear implicits.
+  End Transaction.
+  Definition Transaction := Transaction.record.
+  
+  Module Origination.
+    Record record {delegate script credit preorigination : Set} := {
+      delegate : delegate;
+      script : script;
+      credit : credit;
+      preorigination : preorigination }.
+    Arguments record : clear implicits.
+  End Origination.
+  Definition Origination := Origination.record.
+End manager_operation.
+
 Reserved Notation &quot;'operation&quot;.
 Reserved Notation &quot;'protocol_data&quot;.
 Reserved Notation &quot;'contents_list&quot;.
@@ -48910,21 +49614,21 @@ Reserved Notation &quot;'contents&quot;.
 Reserved Notation &quot;'manager_operation&quot;.
 Reserved Notation &quot;'counter&quot;.
 
-Module protocol_data_skeleton.
+Module protocol_data.
   Record record {contents signature : Set} := {
     contents : contents;
     signature : signature }.
   Arguments record : clear implicits.
-End protocol_data_skeleton.
-Definition protocol_data_skeleton := protocol_data_skeleton.record.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
 
-Module operation_skeleton.
+Module operation.
   Record record {shell protocol_data : Set} := {
     shell : shell;
     protocol_data : protocol_data }.
   Arguments record : clear implicits.
-End operation_skeleton.
-Definition operation_skeleton := operation_skeleton.record.
+End operation.
+Definition operation_skeleton := operation.record.
 
 Inductive contents_list_gadt : Set :=
 | Single : forall {kind : Set}, 'contents kind -&gt; contents_list_gadt
@@ -48932,36 +49636,43 @@ Inductive contents_list_gadt : Set :=
   'contents (Kind.manager kind) -&gt; contents_list_gadt -&gt; contents_list_gadt
 
 with contents_gadt : Set :=
-| Endorsement : Raw_level_repr.t -&gt; contents_gadt
-| Seed_nonce_revelation : Raw_level_repr.t -&gt; Seed_repr.nonce -&gt; contents_gadt
+| Endorsement : contents.Endorsement Raw_level_repr.t -&gt; contents_gadt
+| Seed_nonce_revelation :
+  contents.Seed_nonce_revelation Raw_level_repr.t Seed_repr.nonce -&gt;
+  contents_gadt
 | Double_endorsement_evidence :
-  'operation Kind.endorsement -&gt; 'operation Kind.endorsement -&gt; contents_gadt
+  contents.Double_endorsement_evidence ('operation Kind.endorsement)
+    ('operation Kind.endorsement) -&gt; contents_gadt
 | Double_baking_evidence :
-  Block_header_repr.t -&gt; Block_header_repr.t -&gt; contents_gadt
+  contents.Double_baking_evidence Block_header_repr.t Block_header_repr.t -&gt;
+  contents_gadt
 | Activate_account :
-  Ed25519.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Blinded_public_key_hash.activation_code -&gt; contents_gadt
+  contents.Activate_account
+    Ed25519.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Blinded_public_key_hash.activation_code -&gt; contents_gadt
 | Proposals :
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Voting_period_repr.t -&gt; list Protocol_hash.[S.HASH.t] -&gt; contents_gadt
+  contents.Proposals
+    Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Voting_period_repr.t (list Protocol_hash.[S.HASH.t]) -&gt; contents_gadt
 | Ballot :
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Voting_period_repr.t -&gt; Protocol_hash.[S.HASH.t] -&gt; Vote_repr.ballot -&gt;
+  contents.Ballot Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t)
+    Voting_period_repr.t Protocol_hash.[S.HASH.t] Vote_repr.ballot -&gt;
   contents_gadt
 | Manager_operation : forall {kind : Set},
-  Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Tez_repr.tez -&gt; 'counter -&gt; 'manager_operation kind -&gt; Z.t -&gt; Z.t -&gt;
-  contents_gadt
+  contents.Manager_operation
+    Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) Tez_repr.tez
+    'counter ('manager_operation kind) Z.t Z.t -&gt; contents_gadt
 
 with manager_operation_gadt : Set :=
 | Reveal :
   Signature.[S.SIGNATURE.Public_key].(S.SPublic_key.t) -&gt; manager_operation_gadt
 | Transaction :
-  Tez_repr.tez -&gt; Script_repr.lazy_expr -&gt; string -&gt; Contract_repr.contract -&gt;
-  manager_operation_gadt
+  manager_operation.Transaction Tez_repr.tez Script_repr.lazy_expr string
+    Contract_repr.contract -&gt; manager_operation_gadt
 | Origination :
-  option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
-  Script_repr.t -&gt; Tez_repr.tez -&gt; option Contract_repr.t -&gt;
+  manager_operation.Origination
+    (option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t))
+    Script_repr.t Tez_repr.tez (option Contract_repr.t) -&gt;
   manager_operation_gadt
 | Delegation :
   option Signature.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
@@ -49108,13 +49819,27 @@ Parameter equal : forall {a b : Set},
   operation a -&gt; operation b -&gt; option (eq a b).
 
 Module Encoding.
+  Module case.
+    Module Case.
+      Record record {tag name encoding select proj inj : Set} := {
+        tag : tag;
+        name : name;
+        encoding : encoding;
+        select : select;
+        proj : proj;
+        inj : inj }.
+      Arguments record : clear implicits.
+    End Case.
+    Definition Case := Case.record.
+  End case.
+  
   Reserved Notation &quot;'case&quot;.
   
   Inductive case_gadt : Set :=
   | Case : forall {a b : Set},
-    Z -&gt; string -&gt; Data_encoding.t a -&gt;
-    (packed_contents -&gt; option (contents b)) -&gt; (contents b -&gt; a) -&gt;
-    (a -&gt; contents b) -&gt; case_gadt
+    case.Case Z string (Data_encoding.t a)
+      (packed_contents -&gt; option (contents b)) (contents b -&gt; a)
+      (a -&gt; contents b) -&gt; case_gadt
   
   where &quot;'case&quot; := (fun (b : Set) =&gt; case_gadt).
   
@@ -49144,14 +49869,27 @@ Module Encoding.
   Parameter delegation_case : case (Kind.manager Kind.delegation).
   
   Module Manager_operations.
+    Module case.
+      Module MCase.
+        Record record {tag name encoding select proj inj : Set} := {
+          tag : tag;
+          name : name;
+          encoding : encoding;
+          select : select;
+          proj : proj;
+          inj : inj }.
+        Arguments record : clear implicits.
+      End MCase.
+      Definition MCase := MCase.record.
+    End case.
+    
     Reserved Notation &quot;'case&quot;.
     
     Inductive case_gadt : Set :=
     | MCase : forall {a kind : Set},
-      Z -&gt; string -&gt; Data_encoding.t a -&gt;
-      (packed_manager_operation -&gt; option (manager_operation kind)) -&gt;
-      (manager_operation kind -&gt; a) -&gt; (a -&gt; manager_operation kind) -&gt;
-      case_gadt
+      case.MCase Z string (Data_encoding.t a)
+        (packed_manager_operation -&gt; option (manager_operation kind))
+        (manager_operation kind -&gt; a) (a -&gt; manager_operation kind) -&gt; case_gadt
     
     where &quot;'case&quot; := (fun (b : Set) =&gt; case_gadt).
     
@@ -51316,7 +52054,8 @@ Definition consume_gas (ctxt : t) (cost : Gas_limit_repr.cost)
     (Gas_limit_repr.consume (t.block_gas ctxt) (t.operation_gas ctxt)
       (t.internal_gas ctxt) cost)
     (fun function_parameter =&gt;
-      let '(block_gas, operation_gas, internal_gas) := function_parameter in
+      let '(block_gas, operation_gas, __internal_gas_value) :=
+        function_parameter in
       Error_monad.ok
         (* ❌ Record substitution not handled *)
         record_substitution).
@@ -60847,7 +61586,7 @@ Parameter parse_var_type_annot :
 <hr />
 <div class="row conversion-row" id="script_ir_translator.ml">
   <div class="col-md-6">
-    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">107 errors</span>
+    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">105 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -60893,13 +61632,13 @@ type ex_stack_ty = Ex_stack_ty : 'a stack_ty -&gt; ex_stack_ty
 type tc_context =
   | Lambda : tc_context
   | Dip : 'a stack_ty * tc_context -&gt; tc_context
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Toplevel : {
+  | Toplevel : {
       storage_type : 'sto ty;
       param_type : 'param ty;
       root_name : string option;
       legacy_create_contract_literal : bool;
     }
-      -&gt; tc_context</abbr>
+      -&gt; tc_context
 
 type unparsing_mode = Optimized | Readable
 
@@ -63273,11 +64012,7 @@ let has_big_map : type t. t ty -&gt; bool = function
 
 type 'bef judgement =
   | Typed : ('bef, 'aft) descr -&gt; 'bef judgement
-  <abbr class="mark-error" title="Unhandled named constructor parameters.
-
-——————————
-
-Forall quantifier is not handled">| Failed : {
+  <abbr class="mark-error" title="Forall quantifier is not handled">| Failed : {
       descr : 'aft. 'aft stack_ty -&gt; ('bef, 'aft) descr;
     }
       -&gt; 'bef judgement</abbr>
@@ -68352,6 +69087,19 @@ where &quot;'ex_stack_ty&quot; := (ex_stack_ty_gadt).
 
 Definition ex_stack_ty := 'ex_stack_ty.
 
+Module tc_context.
+  Module Toplevel.
+    Record record {storage_type param_type root_name
+      legacy_create_contract_literal : Set} := {
+      storage_type : storage_type;
+      param_type : param_type;
+      root_name : root_name;
+      legacy_create_contract_literal : legacy_create_contract_literal }.
+    Arguments record : clear implicits.
+  End Toplevel.
+  Definition Toplevel := Toplevel.record.
+End tc_context.
+
 Reserved Notation &quot;'tc_context&quot;.
 
 Inductive tc_context_gadt : Set :=
@@ -68359,8 +69107,8 @@ Inductive tc_context_gadt : Set :=
 | Dip : forall {a : Set},
   Script_typed_ir.stack_ty a -&gt; tc_context_gadt -&gt; tc_context_gadt
 | Toplevel : forall {param sto : Set},
-  Script_typed_ir.ty sto -&gt; Script_typed_ir.ty param -&gt; option string -&gt; bool -&gt;
-  tc_context_gadt
+  tc_context.Toplevel (Script_typed_ir.ty sto) (Script_typed_ir.ty param)
+    (option string) bool -&gt; tc_context_gadt
 
 where &quot;'tc_context&quot; := (tc_context_gadt).
 
@@ -69806,13 +70554,23 @@ Definition has_big_map {t : Set} (function_parameter : Script_typed_ir.ty t)
   | Script_typed_ir.Map_t _ _ _ has_big_map =&gt; has_big_map
   end.
 
+Module judgement.
+  Module Failed.
+    Record record {descr : Set} := {
+      descr : descr }.
+    Arguments record : clear implicits.
+  End Failed.
+  Definition Failed := Failed.record.
+End judgement.
+
 Reserved Notation &quot;'judgement&quot;.
 
 Inductive judgement_gadt : Set :=
 | Typed : forall {aft bef : Set},
   Script_typed_ir.descr bef aft -&gt; judgement_gadt
 | Failed : forall {aft bef : Set},
-  (Script_typed_ir.stack_ty aft -&gt; Script_typed_ir.descr bef aft) * aft -&gt;
+  judgement.Failed
+    ((Script_typed_ir.stack_ty aft -&gt; Script_typed_ir.descr bef aft) * aft) -&gt;
   judgement_gadt
 
 where &quot;'judgement&quot; := (fun (bef : Set) =&gt; judgement_gadt).
@@ -76683,7 +77441,7 @@ Definition list_of_big_map_ids (ids : Ids.[S.SET.t]) : list Ids.[S.SET.elt] :=
 <hr />
 <div class="row conversion-row" id="script_ir_translator.mli">
   <div class="col-md-6">
-    <a href="#script_ir_translator.mli"><code>script_ir_translator.mli</code></a>&nbsp;<span class="label label-danger">5 errors</span>
+    <a href="#script_ir_translator.mli"><code>script_ir_translator.mli</code></a>&nbsp;<span class="label label-danger">3 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -76727,21 +77485,17 @@ type ex_script = Ex_script : ('a, 'b) Script_typed_ir.script -&gt; ex_script
 type tc_context =
   | Lambda : tc_context
   | Dip : 'a Script_typed_ir.stack_ty * tc_context -&gt; tc_context
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Toplevel : {
+  | Toplevel : {
       storage_type : 'sto Script_typed_ir.ty;
       param_type : 'param Script_typed_ir.ty;
       root_name : string option;
       legacy_create_contract_literal : bool;
     }
-      -&gt; tc_context</abbr>
+      -&gt; tc_context
 
 type 'bef judgement =
   | Typed : ('bef, 'aft) Script_typed_ir.descr -&gt; 'bef judgement
-  <abbr class="mark-error" title="Unhandled named constructor parameters.
-
-——————————
-
-Forall quantifier is not handled">| Failed : {
+  <abbr class="mark-error" title="Forall quantifier is not handled">| Failed : {
       descr :
         'aft. 'aft Script_typed_ir.stack_ty -&gt;
         ('bef, 'aft) Script_typed_ir.descr;
@@ -77029,6 +77783,19 @@ where &quot;'ex_script&quot; := (ex_script_gadt).
 
 Definition ex_script := 'ex_script.
 
+Module tc_context.
+  Module Toplevel.
+    Record record {storage_type param_type root_name
+      legacy_create_contract_literal : Set} := {
+      storage_type : storage_type;
+      param_type : param_type;
+      root_name : root_name;
+      legacy_create_contract_literal : legacy_create_contract_literal }.
+    Arguments record : clear implicits.
+  End Toplevel.
+  Definition Toplevel := Toplevel.record.
+End tc_context.
+
 Reserved Notation &quot;'tc_context&quot;.
 
 Inductive tc_context_gadt : Set :=
@@ -77036,12 +77803,21 @@ Inductive tc_context_gadt : Set :=
 | Dip : forall {a : Set},
   Script_typed_ir.stack_ty a -&gt; tc_context_gadt -&gt; tc_context_gadt
 | Toplevel : forall {param sto : Set},
-  Script_typed_ir.ty sto -&gt; Script_typed_ir.ty param -&gt; option string -&gt; bool -&gt;
-  tc_context_gadt
+  tc_context.Toplevel (Script_typed_ir.ty sto) (Script_typed_ir.ty param)
+    (option string) bool -&gt; tc_context_gadt
 
 where &quot;'tc_context&quot; := (tc_context_gadt).
 
 Definition tc_context := 'tc_context.
+
+Module judgement.
+  Module Failed.
+    Record record {descr : Set} := {
+      descr : descr }.
+    Arguments record : clear implicits.
+  End Failed.
+  Definition Failed := Failed.record.
+End judgement.
 
 Reserved Notation &quot;'judgement&quot;.
 
@@ -77049,7 +77825,8 @@ Inductive judgement_gadt : Set :=
 | Typed : forall {aft bef : Set},
   Script_typed_ir.descr bef aft -&gt; judgement_gadt
 | Failed : forall {aft bef : Set},
-  (Script_typed_ir.stack_ty aft -&gt; Script_typed_ir.descr bef aft) * aft -&gt;
+  judgement.Failed
+    ((Script_typed_ir.stack_ty aft -&gt; Script_typed_ir.descr bef aft) * aft) -&gt;
   judgement_gadt
 
 where &quot;'judgement&quot; := (fun (bef : Set) =&gt; judgement_gadt).
@@ -79783,27 +80560,27 @@ Reserved Notation &quot;'instr&quot;.
 Reserved Notation &quot;'stack_prefix_preservation_witness&quot;.
 Reserved Notation &quot;'descr&quot;.
 
-Module descr_skeleton.
+Module descr.
   Record record {loc bef aft instr : Set} := {
     loc : loc;
     bef : bef;
     aft : aft;
     instr : instr }.
   Arguments record : clear implicits.
-End descr_skeleton.
-Definition descr_skeleton := descr_skeleton.record.
+End descr.
+Definition descr_skeleton := descr.record.
 
-Module big_map_skeleton.
+Module big_map.
   Record record {id diff key_type value_type : Set} := {
     id : id;
     diff : diff;
     key_type : key_type;
     value_type : value_type }.
   Arguments record : clear implicits.
-End big_map_skeleton.
-Definition big_map_skeleton := big_map_skeleton.record.
+End big_map.
+Definition big_map_skeleton := big_map.record.
 
-Module script_skeleton.
+Module script.
   Record record {code arg_type storage storage_type root_name : Set} := {
     code : code;
     arg_type : arg_type;
@@ -79811,8 +80588,8 @@ Module script_skeleton.
     storage_type : storage_type;
     root_name : root_name }.
   Arguments record : clear implicits.
-End script_skeleton.
-Definition script_skeleton := script_skeleton.record.
+End script.
+Definition script_skeleton := script.record.
 
 Inductive lambda_gadt : Set :=
 | Lam : forall {arg ret : Set},
@@ -86097,7 +86874,7 @@ End Ramp_up.
 <hr />
 <div class="row conversion-row" id="storage_description.ml">
   <div class="col-md-6">
-    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-danger">12 errors</span>
+    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-danger">7 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -86130,19 +86907,19 @@ type 'key t = 'key description ref
 
 and 'key description =
   | Empty : 'key description
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Value : {
+  | Value : {
       get : 'key -&gt; 'a option tzresult Lwt.t;
       encoding : 'a Data_encoding.t;
     }
-      -&gt; 'key description</abbr>
+      -&gt; 'key description
   | NamedDir : 'key t StringMap.t -&gt; 'key description
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| IndexedDir : {
+  | IndexedDir : {
       arg : 'a RPC_arg.t;
       arg_encoding : 'a Data_encoding.t;
       list : 'key -&gt; 'a list tzresult Lwt.t;
       subdir : ('key * 'a) t;
     }
-      -&gt; 'key description</abbr>
+      -&gt; 'key description
 
 let rec register_named_subcontext : type r. r t -&gt; string list -&gt; r t =
  fun dir names -&gt;
@@ -86174,12 +86951,12 @@ Alternative: use a monad to sequence side-effects.">dir := NamedDir (StringMap.a
       register_named_subcontext subdir names
 
 type (_, _, _) args =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| One : {
+  | One : {
       rpc_arg : 'a RPC_arg.t;
       encoding : 'a Data_encoding.t;
       compare : 'a -&gt; 'a -&gt; int;
     }
-      -&gt; ('key, 'a, 'key * 'a) args</abbr>
+      -&gt; ('key, 'a, 'key * 'a) args
   | Pair :
       ('key, 'a, 'inter_key) args * ('inter_key, 'b, 'sub_key) args
       -&gt; ('key, 'a * 'b, 'sub_key) args
@@ -86310,18 +87087,18 @@ module type INDEX = sig
 end
 
 type _ handler =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Handler : {
+  | Handler : {
       encoding : 'a Data_encoding.t;
       get : 'key -&gt; int -&gt; 'a tzresult Lwt.t;
     }
-      -&gt; 'key handler</abbr>
+      -&gt; 'key handler
 
 type _ opt_handler =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| Opt_handler : {
+  | Opt_handler : {
       encoding : 'a Data_encoding.t;
       get : 'key -&gt; int -&gt; 'a option tzresult Lwt.t;
     }
-      -&gt; 'key opt_handler</abbr>
+      -&gt; 'key opt_handler
 
 let rec combine_object = function
   | [] -&gt;
@@ -86472,19 +87249,39 @@ Definition StringMap :=
         Compare.COMPARABLE.compare := String.compare
         |}).
 
+Module description.
+  Module Value.
+    Record record {get encoding : Set} := {
+      get : get;
+      encoding : encoding }.
+    Arguments record : clear implicits.
+  End Value.
+  Definition Value := Value.record.
+  
+  Module IndexedDir.
+    Record record {arg arg_encoding list subdir : Set} := {
+      arg : arg;
+      arg_encoding : arg_encoding;
+      list : list;
+      subdir : subdir }.
+    Arguments record : clear implicits.
+  End IndexedDir.
+  Definition IndexedDir := IndexedDir.record.
+End description.
+
 Reserved Notation &quot;'t&quot;.
 Reserved Notation &quot;'description&quot;.
 
 Inductive description_gadt : Set :=
 | Empty : description_gadt
 | Value : forall {a key : Set},
-  (key -&gt; Lwt.t (Error_monad.tzresult (option a))) -&gt; Data_encoding.t a -&gt;
-  description_gadt
+  description.Value (key -&gt; Lwt.t (Error_monad.tzresult (option a)))
+    (Data_encoding.t a) -&gt; description_gadt
 | NamedDir : forall {key : Set},
   StringMap.[S.MAP.t] ('t key) -&gt; description_gadt
 | IndexedDir : forall {a key : Set},
-  RPC_arg.t a -&gt; Data_encoding.t a -&gt;
-  (key -&gt; Lwt.t (Error_monad.tzresult (list a))) -&gt; 't (key * a) -&gt;
+  description.IndexedDir (RPC_arg.t a) (Data_encoding.t a)
+    (key -&gt; Lwt.t (Error_monad.tzresult (list a))) ('t (key * a)) -&gt;
   description_gadt
 
 where &quot;'t&quot; := (fun (key : Set) =&gt; Pervasives.ref ('description key))
@@ -86517,11 +87314,22 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
     register_named_subcontext subdir names
   end.
 
+Module args.
+  Module One.
+    Record record {rpc_arg encoding compare : Set} := {
+      rpc_arg : rpc_arg;
+      encoding : encoding;
+      compare : compare }.
+    Arguments record : clear implicits.
+  End One.
+  Definition One := One.record.
+End args.
+
 Reserved Notation &quot;'args&quot;.
 
 Inductive args_gadt : Set :=
 | One : forall {a : Set},
-  RPC_arg.t a -&gt; Data_encoding.t a -&gt; (a -&gt; a -&gt; Z) -&gt; args_gadt
+  args.One (RPC_arg.t a) (Data_encoding.t a) (a -&gt; a -&gt; Z) -&gt; args_gadt
 | Pair : args_gadt -&gt; args_gadt -&gt; args_gadt
 
 where &quot;'args&quot; := (fun (_ _ _ : Set) =&gt; args_gadt).
@@ -86723,23 +87531,43 @@ Module INDEX.
   Arguments signature : clear implicits.
 End INDEX.
 
+Module handler.
+  Module Handler.
+    Record record {encoding get : Set} := {
+      encoding : encoding;
+      get : get }.
+    Arguments record : clear implicits.
+  End Handler.
+  Definition Handler := Handler.record.
+End handler.
+
 Reserved Notation &quot;'handler&quot;.
 
 Inductive handler_gadt : Set :=
 | Handler : forall {a key : Set},
-  Data_encoding.t a -&gt; (key -&gt; Z -&gt; Lwt.t (Error_monad.tzresult a)) -&gt;
-  handler_gadt
+  handler.Handler (Data_encoding.t a)
+    (key -&gt; Z -&gt; Lwt.t (Error_monad.tzresult a)) -&gt; handler_gadt
 
 where &quot;'handler&quot; := (fun (_ : Set) =&gt; handler_gadt).
 
 Definition handler := 'handler.
 
+Module opt_handler.
+  Module Opt_handler.
+    Record record {encoding get : Set} := {
+      encoding : encoding;
+      get : get }.
+    Arguments record : clear implicits.
+  End Opt_handler.
+  Definition Opt_handler := Opt_handler.record.
+End opt_handler.
+
 Reserved Notation &quot;'opt_handler&quot;.
 
 Inductive opt_handler_gadt : Set :=
 | Opt_handler : forall {a key : Set},
-  Data_encoding.t a -&gt; (key -&gt; Z -&gt; Lwt.t (Error_monad.tzresult (option a))) -&gt;
-  opt_handler_gadt
+  opt_handler.Opt_handler (Data_encoding.t a)
+    (key -&gt; Z -&gt; Lwt.t (Error_monad.tzresult (option a))) -&gt; opt_handler_gadt
 
 where &quot;'opt_handler&quot; := (fun (_ : Set) =&gt; opt_handler_gadt).
 
@@ -86950,7 +87778,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
 <hr />
 <div class="row conversion-row" id="storage_description.mli">
   <div class="col-md-6">
-    <a href="#storage_description.mli"><code>storage_description.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
+    <a href="#storage_description.mli"><code>storage_description.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -87006,12 +87834,12 @@ val register_named_subcontext : 'key t -&gt; string list -&gt; 'key t
 
 (** Description of an index as a sequence of `RPC_arg.t`. *)
 type (_, _, _) args =
-  <abbr class="mark-error" title="Unhandled named constructor parameters.">| One : {
+  | One : {
       rpc_arg : 'a RPC_arg.t;
       encoding : 'a Data_encoding.t;
       compare : 'a -&gt; 'a -&gt; int;
     }
-      -&gt; ('key, 'a, 'key * 'a) args</abbr>
+      -&gt; ('key, 'a, 'key * 'a) args
   | Pair :
       ('key, 'a, 'inter_key) args * ('inter_key, 'b, 'sub_key) args
       -&gt; ('key, 'a * 'b, 'sub_key) args
@@ -87075,11 +87903,22 @@ Parameter register_value : forall {a key : Set},
 Parameter register_named_subcontext : forall {key : Set},
   t key -&gt; list string -&gt; t key.
 
+Module args.
+  Module One.
+    Record record {rpc_arg encoding compare : Set} := {
+      rpc_arg : rpc_arg;
+      encoding : encoding;
+      compare : compare }.
+    Arguments record : clear implicits.
+  End One.
+  Definition One := One.record.
+End args.
+
 Reserved Notation &quot;'args&quot;.
 
 Inductive args_gadt : Set :=
 | One : forall {a : Set},
-  RPC_arg.t a -&gt; Data_encoding.t a -&gt; (a -&gt; a -&gt; Z) -&gt; args_gadt
+  args.One (RPC_arg.t a) (Data_encoding.t a) (a -&gt; a -&gt; Z) -&gt; args_gadt
 | Pair : args_gadt -&gt; args_gadt -&gt; args_gadt
 
 where &quot;'args&quot; := (fun (_ _ _ : Set) =&gt; args_gadt).

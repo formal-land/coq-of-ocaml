@@ -8315,13 +8315,13 @@ End RPC_service.
 Module RPC_answer.
   Reserved Notation &quot;'stream&quot;.
   
-  Module stream_skeleton.
+  Module stream.
     Record record {next shutdown : Set} := {
       next : next;
       shutdown : shutdown }.
     Arguments record : clear implicits.
-  End stream_skeleton.
-  Definition stream_skeleton := stream_skeleton.record.
+  End stream.
+  Definition stream_skeleton := stream.record.
   
   Inductive t (o : Set) : Set :=
   | OkStream : 'stream o -&gt; t o
@@ -9784,22 +9784,22 @@ Module Protocol.
   Reserved Notation &quot;'component&quot;.
   Reserved Notation &quot;'t&quot;.
   
-  Module t_skeleton.
+  Module t.
     Record record {expected_env components : Set} := {
       expected_env : expected_env;
       components : components }.
     Arguments record : clear implicits.
-  End t_skeleton.
-  Definition t_skeleton := t_skeleton.record.
+  End t.
+  Definition t_skeleton := t.record.
   
-  Module component_skeleton.
+  Module component.
     Record record {name interface implementation : Set} := {
       name : name;
       interface : interface;
       implementation : implementation }.
     Arguments record : clear implicits.
-  End component_skeleton.
-  Definition component_skeleton := component_skeleton.record.
+  End component.
+  Definition component_skeleton := component.record.
   
   Inductive env_version : Set :=
   | V1 : env_version
