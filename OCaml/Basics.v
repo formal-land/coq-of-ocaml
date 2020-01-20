@@ -34,6 +34,8 @@ Parameter exn : Set.
 
 Parameter extensible_type : Set.
 
+Parameter extensible_type_value : extensible_type.
+
 Definition int32 := Z.
 
 Definition int64 := Z.

@@ -159,9 +159,19 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
   | Texp_construct (_, constuctor_description, es) ->
-    let x = PathName.of_constructor_description constuctor_description in
-    Monad.List.map (of_expression typ_vars) es >>= fun es ->
-    return (Constructor (x, es))
+      begin match constuctor_description.cstr_tag with
+      | Cstr_extension _ ->
+        raise
+          (Variable (
+            MixedPath.of_name (Name.of_string true "extensible_type_value")
+          ))
+          NotSupported
+          "Values of extensible types are not handled"
+      | _ ->
+        let x = PathName.of_constructor_description constuctor_description in
+        Monad.List.map (of_expression typ_vars) es >>= fun es ->
+        return (Constructor (x, es))
+      end
   | Texp_variant (label, e) ->
     begin match e with
     | None ->
