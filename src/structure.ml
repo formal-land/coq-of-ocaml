@@ -15,25 +15,34 @@ module Value = struct
       separate (newline ^^ newline) (value.Exp.Definition.cases |> List.mapi (fun index (header, e) ->
         let firt_case = index = 0 in
         nest (
-          (if firt_case then (
-            if Recursivity.to_bool value.Exp.Definition.is_rec then
+          begin if firt_case then
+            begin if Recursivity.to_bool value.Exp.Definition.is_rec then
               !^ "Fixpoint"
             else
               !^ "Definition"
-          ) else
-            !^ "with") ^^
-          Name.to_coq header.Exp.Header.name ^^
-          (match header.Exp.Header.typ_vars with
+            end
+          else
+            !^ "with"
+          end ^^
+          let { Exp.Header.name; typ_vars; args; typ } = header in
+          Name.to_coq name ^^
+          begin match typ_vars with
           | [] -> empty
           | _ :: _ ->
-            braces @@ group (separate space (List.map Name.to_coq header.Exp.Header.typ_vars) ^^
-            !^ ":" ^^ Pp.set)) ^^
-          group (separate space (header.Exp.Header.args |> List.map (fun (x, t) ->
-            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)))) ^^
-          (match header.Exp.Header.typ with
+            braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
+            !^ ":" ^^ Pp.set)
+          end ^^
+          group (separate space (args |> List.map (fun (x, t) ->
+            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
+          ))) ^^
+          begin match typ with
           | None -> empty
-          | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^
-          !^ " :=" ^^ Exp.to_coq false e))) ^-^ !^ "."
+          | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
+          end ^-^
+          !^ (match typ with None -> ":=" | _ -> " :=") ^^
+          Exp.to_coq false e
+        )
+      )) ^-^ !^ "."
 end
 
 (** A structure. *)
@@ -55,6 +64,22 @@ let error_message
   (message : string)
   : t list Monad.t =
   raise [ErrorMessage (message, structure)] category message
+
+let simple_value (name : Name.t) (e : Exp.t) : t =
+  Value {
+    is_rec = Recursivity.New false;
+    cases = [
+      (
+        {
+          name;
+          typ_vars = [];
+          args = [];
+          typ = None
+        },
+        e
+      )
+    ]
+  }
 
 let top_level_evaluation_error : t list Monad.t =
   error_message
@@ -96,6 +121,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         mb_id = name;
         mb_expr = {
           mod_desc = Tmod_structure structure;
+          mod_type;
           _
         };
         _
@@ -104,28 +130,50 @@ let rec of_structure (structure : structure) : t list Monad.t =
         mb_id = name;
         mb_expr = {
           mod_desc = Tmod_constraint ({ mod_desc = Tmod_structure structure; _ }, _, _, _);
+          mod_type;
           _
         };
         _
       } ->
       let name = Name.of_ident false name in
       of_structure structure >>= fun structures ->
-      return [Module (name, structures)]
+      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
+      begin match is_first_class with
+      | Found md_type_path ->
+        Exp.of_structure
+          Name.Map.empty
+          md_type_path
+          mod_type
+          structure.str_items >>= fun module_exp ->
+        return [simple_value name module_exp]
+      | Not_found _ -> return [Module (name, structures)]
+      end
     | Tstr_module {
         mb_id = name;
         mb_expr = {
           mod_desc = Tmod_ident (_, long_ident);
+          mod_type;
           _
         };
         _
       } ->
       let name = Name.of_ident false name in
       let reference = PathName.of_long_ident false long_ident.txt in
-      return [ModuleSynonym (name, reference)]
+      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
+      begin match is_first_class with
+      | Found _ ->
+        return [simple_value name (Exp.Variable (MixedPath.PathName reference))]
+      | Not_found _ -> return [ModuleSynonym (name, reference)]
+      end
     | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
       error_message (Error "functor") NotSupported "Functors are not handled."
-    | Tstr_module { mb_expr = { mod_desc = Tmod_apply _; _ }; _ } ->
-      error_message (Error "functor_application") NotSupported "Applications of functors are not handled."
+    | Tstr_module { mb_id; mb_expr = { mod_desc = Tmod_apply _; _ } as mb_expr; _ } ->
+      let name = Name.of_ident false mb_id in
+      Exp.of_module_expr
+        Name.Map.empty
+        mb_expr
+        None >>= fun module_exp ->
+      return [simple_value name module_exp]
     | Tstr_module _ -> error_message (Error "unhandled_module") NotSupported "This kind of module is not handled."
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message (Error "abstract_module_type") NotSupported "Abstract module types not handled."
@@ -185,26 +233,15 @@ let rec of_structure (structure : structure) : t list Monad.t =
                 let field =
                   PathName.of_path_and_name_with_convert mod_type_path name in
                 Some (
-                  Value {
-                    is_rec = Recursivity.New false;
-                    cases = [
-                      (
-                        {
-                          name;
-                          typ_vars = [];
-                          args = [];
-                          typ = None
-                        },
-                        Exp.Variable (
-                          MixedPath.Access (
-                            MixedPath.PathName reference,
-                            field,
-                            false
-                          )
-                        )
+                  simple_value
+                    name
+                    (Exp.Variable (
+                      MixedPath.Access (
+                        MixedPath.PathName reference,
+                        field,
+                        false
                       )
-                    ]
-                  }
+                    ))
                 )
               | _ -> None
             )

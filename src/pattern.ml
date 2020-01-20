@@ -57,19 +57,6 @@ let rec of_pattern (p : pattern) : t Monad.t =
     of_pattern p >>= fun pattern ->
     raise pattern NotSupported "Lazy patterns are not supported")
 
-(** Free variables in a pattern. *)
-let rec free_variables (p : t) : Name.Set.t =
-  let aux ps =
-    List.fold_left (fun s p -> Name.Set.union s (free_variables p))
-    Name.Set.empty ps in
-  match p with
-  | Any | Constant _ -> Name.Set.empty
-  | Variable x -> Name.Set.singleton x
-  | Tuple ps | Constructor (_, ps) -> aux ps
-  | Alias (p, x) -> Name.Set.union (Name.Set.singleton x) (free_variables p)
-  | Record fields -> aux (List.map snd fields)
-  | Or (p1, p2) -> Name.Set.inter (free_variables p1) (free_variables p2)
-
 (** Pretty-print a pattern to Coq (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
   match p with

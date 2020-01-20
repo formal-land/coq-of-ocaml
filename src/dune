@@ -1,4 +1,4 @@
 (executable
   (name coqOfOCaml)
-  (libraries merlin_kernel smart_print)
+  (libraries merlin_analysis merlin_kernel smart_print)
 )

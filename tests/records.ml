@@ -34,3 +34,23 @@ type ('first, 'second) poly = {
   second : 'second }
 
 let p = { first = 12; second = false }
+
+module ConstructorWithRecords = struct
+  type t =
+    | Foo of { name : string; size : int }
+    | Bar of loc
+
+  and 'a gadt =
+    | Ex : { x : 'a } -> 'a gadt
+
+  and loc = { x : int; y : int }
+
+  let l = { x = 12; y = 23 }
+
+  let foo = Foo { name = "foo"; size = 12 }
+
+  let f (x : t) =
+    match x with
+    | Foo { size } -> size
+    | Bar { y } -> y
+end

@@ -15,8 +15,7 @@ Definition c3 : ascii := "009" % char.
 
 Definition c4 : ascii := """" % char.
 
-Definition s : string := "hi
-	:)""" % string.
+Definition s : string := "hi\n\t:)\""" % string.
 
 Definition b1 : bool := false.
 

@@ -111,9 +111,9 @@ let set_update
       else Box.OPS.remove v Box.boxed
     let size =
       let mem = Box.OPS.mem v Box.boxed in
-    if mem
-    then if b then Box.size else Box.size - 1
-    else if b then Box.size + 1 else Box.size
+      if mem
+      then if b then Box.size else Box.size - 1
+      else if b then Box.size + 1 else Box.size
   end)
 
 let set_mem

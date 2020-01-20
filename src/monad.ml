@@ -85,12 +85,21 @@ module List = struct
       flatten_map f l >>= fun l ->
       return (x @ l)
 
-  let rec fold_left (f : 'a -> 'b -> 'a t) (accumulator : 'a) (l : 'b list) : 'a t =
+  let rec fold_left (f : 'a -> 'b -> 'a t) (accumulator : 'a) (l : 'b list)
+    : 'a t =
     match l with
     | [] -> return accumulator
     | x :: l ->
       f accumulator x >>= fun accumulator ->
       fold_left f accumulator l
+
+  let rec fold_right (f : 'b -> 'a -> 'a t) (l : 'b list) (accumulator : 'a)
+    : 'a t =
+    match l with
+    | [] -> return accumulator
+    | x :: l ->
+      fold_right f l accumulator >>= fun accumulator ->
+      f x accumulator
 
   let rec iter (f : 'a -> unit t) (l :'a list) : unit t =
     match l with

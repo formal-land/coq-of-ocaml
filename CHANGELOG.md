@@ -1,4 +1,11 @@
 ## [Unreleased]
+* Define a default value for the extensible types.
+* Add support for constructors using records as parameters.
+* Add polymorphic record fields for modules with polymorphic elements.
+* Compute the shape of a module by only looking at the top-level of definitions.
+* Add support of functor application.
+* Use `let` to represent intermediate results in the definition of a first-class module value.
+* Define modules with a named signature as dependent records.
 * Add changelog file.
 * Add support for `include` of modules represented as a record.
 * Fix bug on ambiguous detection of first-class module signatures.
