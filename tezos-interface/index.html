@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 6146 lines</li>
-      <li>Coq size: 3422 lines (-45% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 196</li>
+      <li>OCaml size: 6148 lines</li>
+      <li>Coq size: 3156 lines (-49% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 191</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -95,7 +95,7 @@
 <hr />
 <div class="row conversion-row" id="environment.mli">
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">196 errors</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">191 errors</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -5414,6 +5414,8 @@ module Signature : sig
 (*                                                                           *)
 (*****************************************************************************)
 
+val signature_module_tag : unit
+
 type public_key_hash =
   | Ed25519Hash of Ed25519.Public_key_hash.t
   | Secp256k1Hash of Secp256k1.Public_key_hash.t
@@ -5430,27 +5432,11 @@ type watermark =
   | Generic_operation
   | Custom of MBytes.t
 
-<abbr class="mark-error" title="Module 'Public_key' not found
-
-——————————
-
-Extensible type 'Base58.data' not handled
-
-——————————
-
-Module 'Public_key_hash' not found
-
-——————————
-
-Extensible type 'Base58.data' not handled
-
-——————————
-
-Extensible type 'Base58.data' not handled">include
+include
   S.SIGNATURE
     with type Public_key_hash.t = public_key_hash
      and type Public_key.t = public_key
-     and type watermark := watermark</abbr>
+     and type watermark := watermark
 end
 module Block_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/block_hash.mli&quot;
@@ -8100,25 +8086,27 @@ End Logging.
 Module Time.
   Parameter t : Set.
   
-  Parameter op_eq : t -&gt; t -&gt; bool.
+  Parameter Included_S : {_ : unit &amp; Compare.S.signature t}.
   
-  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  Definition op_eq := Included_S.[Compare.S.op_eq].
   
-  Parameter op_lt : t -&gt; t -&gt; bool.
+  Definition op_ltgt := Included_S.[Compare.S.op_ltgt].
   
-  Parameter op_lteq : t -&gt; t -&gt; bool.
+  Definition op_lt := Included_S.[Compare.S.op_lt].
   
-  Parameter op_gteq : t -&gt; t -&gt; bool.
+  Definition op_lteq := Included_S.[Compare.S.op_lteq].
   
-  Parameter op_gt : t -&gt; t -&gt; bool.
+  Definition op_gteq := Included_S.[Compare.S.op_gteq].
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Definition op_gt := Included_S.[Compare.S.op_gt].
   
-  Parameter equal : t -&gt; t -&gt; bool.
+  Definition compare := Included_S.[Compare.S.compare].
   
-  Parameter max : t -&gt; t -&gt; t.
+  Definition equal := Included_S.[Compare.S.equal].
   
-  Parameter min : t -&gt; t -&gt; t.
+  Definition max := Included_S.[Compare.S.max].
+  
+  Definition min := Included_S.[Compare.S.min].
   
   Parameter add : t -&gt; int64 -&gt; t.
   
@@ -9245,6 +9233,8 @@ Parameter Chain_id :
   {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}.
 
 Module Signature.
+  Parameter signature_module_tag : unit.
+  
   Inductive public_key_hash : Set :=
   | Ed25519Hash :
     Ed25519.[S.SIGNATURE.Public_key_hash].(S.SPublic_key_hash.t) -&gt;
@@ -9267,345 +9257,66 @@ Module Signature.
   | Generic_operation : watermark
   | Custom : MBytes.t -&gt; watermark.
   
-  Module Public_key_hash.
-    Definition t := public_key_hash.
-    
-    Parameter pp : Format.formatter -&gt; t -&gt; unit.
-    
-    Parameter pp_short : Format.formatter -&gt; t -&gt; unit.
-    
-    Parameter op_eq : t -&gt; t -&gt; bool.
-    
-    Parameter op_ltgt : t -&gt; t -&gt; bool.
-    
-    Parameter op_lt : t -&gt; t -&gt; bool.
-    
-    Parameter op_lteq : t -&gt; t -&gt; bool.
-    
-    Parameter op_gteq : t -&gt; t -&gt; bool.
-    
-    Parameter op_gt : t -&gt; t -&gt; bool.
-    
-    Parameter compare : t -&gt; t -&gt; Z.
-    
-    Parameter equal : t -&gt; t -&gt; bool.
-    
-    Parameter max : t -&gt; t -&gt; t.
-    
-    Parameter min : t -&gt; t -&gt; t.
-    
-    Parameter size : Z.
-    
-    Parameter to_bytes : t -&gt; MBytes.t.
-    
-    Parameter of_bytes_opt : MBytes.t -&gt; option t.
-    
-    Parameter of_bytes_exn : MBytes.t -&gt; t.
-    
-    Parameter to_b58check : t -&gt; string.
-    
-    Parameter to_short_b58check : t -&gt; string.
-    
-    Parameter of_b58check_exn : string -&gt; t.
-    
-    Parameter of_b58check_opt : string -&gt; option t.
-    
-    (* extensible_type Base58.data *)
-    
-    Parameter b58check_encoding : Base58.encoding t.
-    
-    Parameter encoding : Data_encoding.t t.
-    
-    Parameter rpc_arg : RPC_arg.t t.
-    
-    Parameter to_path : t -&gt; list string -&gt; list string.
-    
-    Parameter of_path : list string -&gt; option t.
-    
-    Parameter of_path_exn : list string -&gt; t.
-    
-    Parameter prefix_path : string -&gt; list string.
-    
-    Parameter path_length : Z.
-    
-    Module __Set.
-      Definition elt := t.
-      
-      Parameter t : Set.
-      
-      Parameter empty : t.
-      
-      Parameter is_empty : t -&gt; bool.
-      
-      Parameter mem : elt -&gt; t -&gt; bool.
-      
-      Parameter add : elt -&gt; t -&gt; t.
-      
-      Parameter singleton : elt -&gt; t.
-      
-      Parameter remove : elt -&gt; t -&gt; t.
-      
-      Parameter union : t -&gt; t -&gt; t.
-      
-      Parameter inter : t -&gt; t -&gt; t.
-      
-      Parameter diff : t -&gt; t -&gt; t.
-      
-      Parameter compare : t -&gt; t -&gt; Z.
-      
-      Parameter equal : t -&gt; t -&gt; bool.
-      
-      Parameter subset : t -&gt; t -&gt; bool.
-      
-      Parameter iter : (elt -&gt; unit) -&gt; t -&gt; unit.
-      
-      Parameter map : (elt -&gt; elt) -&gt; t -&gt; t.
-      
-      Parameter fold : forall {a : Set}, (elt -&gt; a -&gt; a) -&gt; t -&gt; a -&gt; a.
-      
-      Parameter for_all : (elt -&gt; bool) -&gt; t -&gt; bool.
-      
-      Parameter __exists : (elt -&gt; bool) -&gt; t -&gt; bool.
-      
-      Parameter filter : (elt -&gt; bool) -&gt; t -&gt; t.
-      
-      Parameter partition : (elt -&gt; bool) -&gt; t -&gt; t * t.
-      
-      Parameter cardinal : t -&gt; Z.
-      
-      Parameter elements : t -&gt; list elt.
-      
-      Parameter min_elt : t -&gt; elt.
-      
-      Parameter min_elt_opt : t -&gt; option elt.
-      
-      Parameter max_elt : t -&gt; elt.
-      
-      Parameter max_elt_opt : t -&gt; option elt.
-      
-      Parameter choose : t -&gt; elt.
-      
-      Parameter choose_opt : t -&gt; option elt.
-      
-      Parameter split : elt -&gt; t -&gt; t * bool * t.
-      
-      Parameter find : elt -&gt; t -&gt; elt.
-      
-      Parameter find_opt : elt -&gt; t -&gt; option elt.
-      
-      Parameter find_first : (elt -&gt; bool) -&gt; t -&gt; elt.
-      
-      Parameter find_first_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
-      
-      Parameter find_last : (elt -&gt; bool) -&gt; t -&gt; elt.
-      
-      Parameter find_last_opt : (elt -&gt; bool) -&gt; t -&gt; option elt.
-      
-      Parameter of_list : list elt -&gt; t.
-      
-      Parameter to_seq_from : elt -&gt; t -&gt; OCaml.Seq.t elt.
-      
-      Parameter to_seq : t -&gt; OCaml.Seq.t elt.
-      
-      Parameter add_seq : OCaml.Seq.t elt -&gt; t -&gt; t.
-      
-      Parameter of_seq : OCaml.Seq.t elt -&gt; t.
-      
-      Parameter encoding : Data_encoding.t t.
-    End __Set.
-    
-    Module Map.
-      Definition key := t.
-      
-      Parameter t : forall (a : Set), Set.
-      
-      Parameter empty : forall {a : Set}, t a.
-      
-      Parameter is_empty : forall {a : Set}, t a -&gt; bool.
-      
-      Parameter mem : forall {a : Set}, key -&gt; t a -&gt; bool.
-      
-      Parameter add : forall {a : Set}, key -&gt; a -&gt; t a -&gt; t a.
-      
-      Parameter update : forall {a : Set},
-        key -&gt; (option a -&gt; option a) -&gt; t a -&gt; t a.
-      
-      Parameter singleton : forall {a : Set}, key -&gt; a -&gt; t a.
-      
-      Parameter remove : forall {a : Set}, key -&gt; t a -&gt; t a.
-      
-      Parameter merge : forall {a b c : Set},
-        (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c.
-      
-      Parameter union : forall {a : Set},
-        (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a.
-      
-      Parameter compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z.
-      
-      Parameter equal : forall {a : Set},
-        (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool.
-      
-      Parameter iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit.
-      
-      Parameter fold : forall {a b : Set},
-        (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b.
-      
-      Parameter for_all : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
-      
-      Parameter __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool.
-      
-      Parameter filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a.
-      
-      Parameter partition : forall {a : Set},
-        (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a.
-      
-      Parameter cardinal : forall {a : Set}, t a -&gt; Z.
-      
-      Parameter bindings : forall {a : Set}, t a -&gt; list (key * a).
-      
-      Parameter min_binding : forall {a : Set}, t a -&gt; key * a.
-      
-      Parameter min_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
-      
-      Parameter max_binding : forall {a : Set}, t a -&gt; key * a.
-      
-      Parameter max_binding_opt : forall {a : Set}, t a -&gt; option (key * a).
-      
-      Parameter choose : forall {a : Set}, t a -&gt; key * a.
-      
-      Parameter choose_opt : forall {a : Set}, t a -&gt; option (key * a).
-      
-      Parameter split : forall {a : Set}, key -&gt; t a -&gt; t a * option a * t a.
-      
-      Parameter find : forall {a : Set}, key -&gt; t a -&gt; a.
-      
-      Parameter find_opt : forall {a : Set}, key -&gt; t a -&gt; option a.
-      
-      Parameter find_first : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
-      
-      Parameter find_first_opt : forall {a : Set},
-        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
-      
-      Parameter find_last : forall {a : Set}, (key -&gt; bool) -&gt; t a -&gt; key * a.
-      
-      Parameter find_last_opt : forall {a : Set},
-        (key -&gt; bool) -&gt; t a -&gt; option (key * a).
-      
-      Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; t a -&gt; t b.
-      
-      Parameter mapi : forall {a b : Set}, (key -&gt; a -&gt; b) -&gt; t a -&gt; t b.
-      
-      Parameter to_seq : forall {a : Set}, t a -&gt; OCaml.Seq.t (key * a).
-      
-      Parameter to_seq_from : forall {a : Set},
-        key -&gt; t a -&gt; OCaml.Seq.t (key * a).
-      
-      Parameter add_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a -&gt; t a.
-      
-      Parameter of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -&gt; t a.
-      
-      Parameter encoding : forall {a : Set},
-        Data_encoding.t a -&gt; Data_encoding.t (t a).
-    End Map.
-    
-    Parameter zero : t.
-  End Public_key_hash.
+  Parameter Included_SIGNATURE :
+    {'[Public_key_hash___Set_t, Public_key_hash_Map_t, t] : _ &amp;
+      S.SIGNATURE.signature public_key Public_key_hash___Set_t
+        Public_key_hash_Map_t public_key t watermark}.
   
-  Module Public_key.
-    Definition t := public_key.
-    
-    Parameter pp : Format.formatter -&gt; t -&gt; unit.
-    
-    Parameter op_eq : t -&gt; t -&gt; bool.
-    
-    Parameter op_ltgt : t -&gt; t -&gt; bool.
-    
-    Parameter op_lt : t -&gt; t -&gt; bool.
-    
-    Parameter op_lteq : t -&gt; t -&gt; bool.
-    
-    Parameter op_gteq : t -&gt; t -&gt; bool.
-    
-    Parameter op_gt : t -&gt; t -&gt; bool.
-    
-    Parameter compare : t -&gt; t -&gt; Z.
-    
-    Parameter equal : t -&gt; t -&gt; bool.
-    
-    Parameter max : t -&gt; t -&gt; t.
-    
-    Parameter min : t -&gt; t -&gt; t.
-    
-    Parameter to_b58check : t -&gt; string.
-    
-    Parameter to_short_b58check : t -&gt; string.
-    
-    Parameter of_b58check_exn : string -&gt; t.
-    
-    Parameter of_b58check_opt : string -&gt; option t.
-    
-    (* extensible_type Base58.data *)
-    
-    Parameter b58check_encoding : Base58.encoding t.
-    
-    Parameter encoding : Data_encoding.t t.
-    
-    Parameter rpc_arg : RPC_arg.t t.
-    
-    Parameter __hash_value : t -&gt; Public_key_hash.t.
-  End Public_key.
+  Definition Public_key_hash := existT (fun _ =&gt; _) tt
+    Included_SIGNATURE.[S.SIGNATURE.Public_key_hash].
   
-  Parameter t : Set.
+  Definition Public_key := existT (fun _ =&gt; _) tt
+    Included_SIGNATURE.[S.SIGNATURE.Public_key].
   
-  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  Definition t := Included_SIGNATURE.[S.SIGNATURE.t].
   
-  Parameter size : Z.
+  Definition pp := Included_SIGNATURE.[S.SIGNATURE.pp].
   
-  Parameter to_bytes : t -&gt; MBytes.t.
+  Definition size := Included_SIGNATURE.[S.SIGNATURE.size].
   
-  Parameter of_bytes_opt : MBytes.t -&gt; option t.
+  Definition to_bytes := Included_SIGNATURE.[S.SIGNATURE.to_bytes].
   
-  Parameter of_bytes_exn : MBytes.t -&gt; t.
+  Definition of_bytes_opt := Included_SIGNATURE.[S.SIGNATURE.of_bytes_opt].
   
-  Parameter op_eq : t -&gt; t -&gt; bool.
+  Definition of_bytes_exn := Included_SIGNATURE.[S.SIGNATURE.of_bytes_exn].
   
-  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  Definition op_eq := Included_SIGNATURE.[S.SIGNATURE.op_eq].
   
-  Parameter op_lt : t -&gt; t -&gt; bool.
+  Definition op_ltgt := Included_SIGNATURE.[S.SIGNATURE.op_ltgt].
   
-  Parameter op_lteq : t -&gt; t -&gt; bool.
+  Definition op_lt := Included_SIGNATURE.[S.SIGNATURE.op_lt].
   
-  Parameter op_gteq : t -&gt; t -&gt; bool.
+  Definition op_lteq := Included_SIGNATURE.[S.SIGNATURE.op_lteq].
   
-  Parameter op_gt : t -&gt; t -&gt; bool.
+  Definition op_gteq := Included_SIGNATURE.[S.SIGNATURE.op_gteq].
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Definition op_gt := Included_SIGNATURE.[S.SIGNATURE.op_gt].
   
-  Parameter equal : t -&gt; t -&gt; bool.
+  Definition compare := Included_SIGNATURE.[S.SIGNATURE.compare].
   
-  Parameter max : t -&gt; t -&gt; t.
+  Definition equal := Included_SIGNATURE.[S.SIGNATURE.equal].
   
-  Parameter min : t -&gt; t -&gt; t.
+  Definition max := Included_SIGNATURE.[S.SIGNATURE.max].
   
-  Parameter to_b58check : t -&gt; string.
+  Definition min := Included_SIGNATURE.[S.SIGNATURE.min].
   
-  Parameter to_short_b58check : t -&gt; string.
+  Definition to_b58check := Included_SIGNATURE.[S.SIGNATURE.to_b58check].
   
-  Parameter of_b58check_exn : string -&gt; t.
+  Definition to_short_b58check := Included_SIGNATURE.[S.SIGNATURE.to_short_b58check].
   
-  Parameter of_b58check_opt : string -&gt; option t.
+  Definition of_b58check_exn := Included_SIGNATURE.[S.SIGNATURE.of_b58check_exn].
   
-  (* extensible_type Base58.data *)
+  Definition of_b58check_opt := Included_SIGNATURE.[S.SIGNATURE.of_b58check_opt].
   
-  Parameter b58check_encoding : Base58.encoding t.
+  Definition b58check_encoding := Included_SIGNATURE.[S.SIGNATURE.b58check_encoding].
   
-  Parameter encoding : Data_encoding.t t.
+  Definition encoding := Included_SIGNATURE.[S.SIGNATURE.encoding].
   
-  Parameter rpc_arg : RPC_arg.t t.
+  Definition rpc_arg := Included_SIGNATURE.[S.SIGNATURE.rpc_arg].
   
-  Parameter zero : t.
+  Definition zero := Included_SIGNATURE.[S.SIGNATURE.zero].
   
-  Parameter check : option watermark -&gt; Public_key.t -&gt; t -&gt; MBytes.t -&gt; bool.
+  Definition check := Included_SIGNATURE.[S.SIGNATURE.check].
 End Signature.
 
 Parameter Block_hash :
@@ -9696,37 +9407,40 @@ Module Block_header.
   End t.
   Definition t := t.record.
   
-  Parameter op_eq : t -&gt; t -&gt; bool.
+  Parameter Included_HASHABLE :
+    {_ : unit &amp; S.HASHABLE.signature t Block_hash.[S.HASH.t]}.
   
-  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  Definition op_eq := Included_HASHABLE.[S.HASHABLE.op_eq].
   
-  Parameter op_lt : t -&gt; t -&gt; bool.
+  Definition op_ltgt := Included_HASHABLE.[S.HASHABLE.op_ltgt].
   
-  Parameter op_lteq : t -&gt; t -&gt; bool.
+  Definition op_lt := Included_HASHABLE.[S.HASHABLE.op_lt].
   
-  Parameter op_gteq : t -&gt; t -&gt; bool.
+  Definition op_lteq := Included_HASHABLE.[S.HASHABLE.op_lteq].
   
-  Parameter op_gt : t -&gt; t -&gt; bool.
+  Definition op_gteq := Included_HASHABLE.[S.HASHABLE.op_gteq].
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Definition op_gt := Included_HASHABLE.[S.HASHABLE.op_gt].
   
-  Parameter equal : t -&gt; t -&gt; bool.
+  Definition compare := Included_HASHABLE.[S.HASHABLE.compare].
   
-  Parameter max : t -&gt; t -&gt; t.
+  Definition equal := Included_HASHABLE.[S.HASHABLE.equal].
   
-  Parameter min : t -&gt; t -&gt; t.
+  Definition max := Included_HASHABLE.[S.HASHABLE.max].
   
-  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  Definition min := Included_HASHABLE.[S.HASHABLE.min].
   
-  Parameter encoding : Data_encoding.t t.
+  Definition pp := Included_HASHABLE.[S.HASHABLE.pp].
   
-  Parameter to_bytes : t -&gt; MBytes.t.
+  Definition encoding := Included_HASHABLE.[S.HASHABLE.encoding].
   
-  Parameter of_bytes : MBytes.t -&gt; option t.
+  Definition to_bytes := Included_HASHABLE.[S.HASHABLE.to_bytes].
   
-  Parameter __hash_value : t -&gt; Block_hash.[S.HASH.t].
+  Definition of_bytes := Included_HASHABLE.[S.HASHABLE.of_bytes].
   
-  Parameter hash_raw : MBytes.t -&gt; Block_hash.[S.HASH.t].
+  Definition __hash_value := Included_HASHABLE.[S.HASHABLE.__hash_value].
+  
+  Definition hash_raw := Included_HASHABLE.[S.HASHABLE.hash_raw].
 End Block_header.
 
 Parameter Fitness : {_ : unit &amp; S.T.signature (list MBytes.t)}.
@@ -9747,37 +9461,40 @@ Module Operation.
   End t.
   Definition t := t.record.
   
-  Parameter op_eq : t -&gt; t -&gt; bool.
+  Parameter Included_HASHABLE :
+    {_ : unit &amp; S.HASHABLE.signature t Operation_hash.[S.HASH.t]}.
   
-  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  Definition op_eq := Included_HASHABLE.[S.HASHABLE.op_eq].
   
-  Parameter op_lt : t -&gt; t -&gt; bool.
+  Definition op_ltgt := Included_HASHABLE.[S.HASHABLE.op_ltgt].
   
-  Parameter op_lteq : t -&gt; t -&gt; bool.
+  Definition op_lt := Included_HASHABLE.[S.HASHABLE.op_lt].
   
-  Parameter op_gteq : t -&gt; t -&gt; bool.
+  Definition op_lteq := Included_HASHABLE.[S.HASHABLE.op_lteq].
   
-  Parameter op_gt : t -&gt; t -&gt; bool.
+  Definition op_gteq := Included_HASHABLE.[S.HASHABLE.op_gteq].
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Definition op_gt := Included_HASHABLE.[S.HASHABLE.op_gt].
   
-  Parameter equal : t -&gt; t -&gt; bool.
+  Definition compare := Included_HASHABLE.[S.HASHABLE.compare].
   
-  Parameter max : t -&gt; t -&gt; t.
+  Definition equal := Included_HASHABLE.[S.HASHABLE.equal].
   
-  Parameter min : t -&gt; t -&gt; t.
+  Definition max := Included_HASHABLE.[S.HASHABLE.max].
   
-  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  Definition min := Included_HASHABLE.[S.HASHABLE.min].
   
-  Parameter encoding : Data_encoding.t t.
+  Definition pp := Included_HASHABLE.[S.HASHABLE.pp].
   
-  Parameter to_bytes : t -&gt; MBytes.t.
+  Definition encoding := Included_HASHABLE.[S.HASHABLE.encoding].
   
-  Parameter of_bytes : MBytes.t -&gt; option t.
+  Definition to_bytes := Included_HASHABLE.[S.HASHABLE.to_bytes].
   
-  Parameter __hash_value : t -&gt; Operation_hash.[S.HASH.t].
+  Definition of_bytes := Included_HASHABLE.[S.HASHABLE.of_bytes].
   
-  Parameter hash_raw : MBytes.t -&gt; Operation_hash.[S.HASH.t].
+  Definition __hash_value := Included_HASHABLE.[S.HASHABLE.__hash_value].
+  
+  Definition hash_raw := Included_HASHABLE.[S.HASHABLE.hash_raw].
 End Operation.
 
 Module Protocol.
@@ -9814,37 +9531,40 @@ Module Protocol.
   
   Parameter env_version_encoding : Data_encoding.t env_version.
   
-  Parameter op_eq : t -&gt; t -&gt; bool.
+  Parameter Included_HASHABLE :
+    {_ : unit &amp; S.HASHABLE.signature t Protocol_hash.[S.HASH.t]}.
   
-  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  Definition op_eq := Included_HASHABLE.[S.HASHABLE.op_eq].
   
-  Parameter op_lt : t -&gt; t -&gt; bool.
+  Definition op_ltgt := Included_HASHABLE.[S.HASHABLE.op_ltgt].
   
-  Parameter op_lteq : t -&gt; t -&gt; bool.
+  Definition op_lt := Included_HASHABLE.[S.HASHABLE.op_lt].
   
-  Parameter op_gteq : t -&gt; t -&gt; bool.
+  Definition op_lteq := Included_HASHABLE.[S.HASHABLE.op_lteq].
   
-  Parameter op_gt : t -&gt; t -&gt; bool.
+  Definition op_gteq := Included_HASHABLE.[S.HASHABLE.op_gteq].
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Definition op_gt := Included_HASHABLE.[S.HASHABLE.op_gt].
   
-  Parameter equal : t -&gt; t -&gt; bool.
+  Definition compare := Included_HASHABLE.[S.HASHABLE.compare].
   
-  Parameter max : t -&gt; t -&gt; t.
+  Definition equal := Included_HASHABLE.[S.HASHABLE.equal].
   
-  Parameter min : t -&gt; t -&gt; t.
+  Definition max := Included_HASHABLE.[S.HASHABLE.max].
   
-  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  Definition min := Included_HASHABLE.[S.HASHABLE.min].
   
-  Parameter encoding : Data_encoding.t t.
+  Definition pp := Included_HASHABLE.[S.HASHABLE.pp].
   
-  Parameter to_bytes : t -&gt; MBytes.t.
+  Definition encoding := Included_HASHABLE.[S.HASHABLE.encoding].
   
-  Parameter of_bytes : MBytes.t -&gt; option t.
+  Definition to_bytes := Included_HASHABLE.[S.HASHABLE.to_bytes].
   
-  Parameter __hash_value : t -&gt; Protocol_hash.[S.HASH.t].
+  Definition of_bytes := Included_HASHABLE.[S.HASHABLE.of_bytes].
   
-  Parameter hash_raw : MBytes.t -&gt; Protocol_hash.[S.HASH.t].
+  Definition __hash_value := Included_HASHABLE.[S.HASHABLE.__hash_value].
+  
+  Definition hash_raw := Included_HASHABLE.[S.HASHABLE.hash_raw].
 End Protocol.
 
 Module Context.

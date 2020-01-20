@@ -18,12 +18,9 @@ files = [
   "Cycle_repr.v",
   "Gas_limit_repr.v",
   "Gas_limit_repr_mli.v",
-  # "Manager_repr.v",
-  # "Manager_repr_mli.v",
-  # "Michelson_v1_primitives.v",
+  "Manager_repr.v",
+  "Manager_repr_mli.v",
   "Michelson_v1_primitives_mli.v",
-  # "Misc.v",
-  # "Misc_mli.v",
   "Nonce_hash.v",
   "Period_repr.v",
   "Period_repr_mli.v",
@@ -32,14 +29,19 @@ files = [
   "Script_expr_hash.v",
   "Script_int_repr.v",
   "Script_int_repr_mli.v",
-  # "Storage_description.v",
   "Storage_description_mli.v",
-  # "Tez_repr.v",
   "Tez_repr_mli.v",
   "Vote_repr.v",
   "Vote_repr_mli.v",
-  # "Voting_period_repr.v",
-  "Voting_period_repr_mli.v"
+  "Voting_period_repr_mli.v",
+
+  # in progress
+  # "Michelson_v1_primitives.v",
+  # "Misc.v",
+  # "Misc_mli.v",
+  # "Storage_description.v",
+  # "Tez_repr.v",
+  # "Voting_period_repr.v"
 
   # files with one dependency
   # "Blinded_public_key_hash_mli.v",
