@@ -57,6 +57,11 @@ let rec of_pattern (p : pattern) : t Monad.t =
     of_pattern p >>= fun pattern ->
     raise pattern NotSupported "Lazy patterns are not supported")
 
+let rec flatten_or (p : t) : t list =
+  match p with
+  | Or (p1, p2) -> flatten_or p1 @ flatten_or p2
+  | _ -> [p]
+
 (** Pretty-print a pattern to Coq (inside parenthesis if the [paren] flag is set). *)
 let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
   match p with
@@ -80,4 +85,8 @@ let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
     nest_all @@ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, p) ->
       nest (PathName.to_coq x ^^ !^ ":=" ^^ to_coq false p)))
     ^^ !^ "|}"
-  | Or (p1, p2) -> Pp.parens paren @@ nest (to_coq false p1 ^^ !^ "|" ^^ to_coq false p2)
+  | Or _ ->
+    let ps = flatten_or p in
+    Pp.parens paren @@ group (
+      separate (space ^^ !^ "|" ^^ space) (ps |> List.map (to_coq false))
+    )
