@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35805 lines</li>
-      <li>Coq size: 44859 lines (+25% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 2877</li>
+      <li>OCaml size: 35819 lines</li>
+      <li>Coq size: 45308 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 2872</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -69,7 +69,7 @@
           1147,
           1541,
           2680,
-          2763,
+          2929,
         ],
         generated: [
           47563,
@@ -79,7 +79,7 @@
           44618,
           45107,
           44768,
-          44768,
+          45308,
         ],
         labels: [
           "01-14",
@@ -209,11 +209,11 @@
       </li>
       
       <li>
-        <a href="#contract_hash.ml">contract_hash.ml</a>&nbsp;<span class="label label-danger">2</span>
+        <a href="#contract_hash.ml">contract_hash.ml</a>&nbsp;<span class="label label-danger">1</span>
       </li>
       
       <li>
-        <a href="#contract_repr.ml">contract_repr.ml</a>&nbsp;<span class="label label-danger">18</span>
+        <a href="#contract_repr.ml">contract_repr.ml</a>&nbsp;<span class="label label-danger">17</span>
       </li>
       
       <li>
@@ -311,7 +311,7 @@
       </li>
       
       <li>
-        <a href="#level_repr.ml">level_repr.ml</a>&nbsp;<span class="label label-danger">1</span>
+        <a href="#level_repr.ml">level_repr.ml</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -439,7 +439,7 @@
       </li>
       
       <li>
-        <a href="#script_expr_hash.ml">script_expr_hash.ml</a>&nbsp;<span class="label label-danger">2</span>
+        <a href="#script_expr_hash.ml">script_expr_hash.ml</a>&nbsp;<span class="label label-danger">1</span>
       </li>
       
     </ul>
@@ -529,11 +529,11 @@
       </li>
       
       <li>
-        <a href="#state_hash.ml">state_hash.ml</a>&nbsp;<span class="label label-danger">2</span>
+        <a href="#state_hash.ml">state_hash.ml</a>&nbsp;<span class="label label-danger">1</span>
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">97</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-danger">98</span>
       </li>
       
       <li>
@@ -561,7 +561,7 @@
       </li>
       
       <li>
-        <a href="#tez_repr.ml">tez_repr.ml</a>&nbsp;<span class="label label-danger">1</span>
+        <a href="#tez_repr.ml">tez_repr.ml</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -16945,7 +16945,7 @@ Definition parametric (c : Raw_context.context) : Constants_repr.parametric :=
 <hr />
 <div class="row conversion-row" id="contract_hash.ml">
   <div class="col-md-6">
-    <a href="#contract_hash.ml"><code>contract_hash.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#contract_hash.ml"><code>contract_hash.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -16975,7 +16975,7 @@ Definition parametric (c : Raw_context.context) : Constants_repr.parametric :=
 (* 20 *)
 let contract_hash = &quot;\002\090\121&quot; (* KT1(36) *)
 
-<abbr class="mark-error" title="Cannot include this kind of module expression">include Blake2B.Make
+module Blake2BModule = Blake2B.Make
           (Base58)
           (struct
             let name = &quot;Contract_hash&quot;
@@ -16985,7 +16985,9 @@ let contract_hash = &quot;\002\090\121&quot; (* KT1(36) *)
             let b58check_prefix = contract_hash
 
             let size = Some 20
-          end)</abbr>
+          end)
+
+include Blake2BModule
 
 <abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () = Base58.check_encoded_prefix b58check_encoding &quot;KT1&quot; 36</abbr>
 </pre>
@@ -17006,8 +17008,91 @@ Require Import Tezos.Environment.
 
 Definition contract_hash : string := &quot;\002Zy&quot; % string.
 
-(* ❌ Cannot include this kind of module expression *)
-(* include *)
+Definition Blake2BModule :=
+  (Blake2B.Make
+    (existT _ tt
+      {|
+        Blake2B.SRegister.register_encoding {_} := Base58.register_encoding
+        |}))
+    (let name := &quot;Contract_hash&quot; % string in
+    let title := &quot;A contract ID&quot; % string in
+    let b58check_prefix := contract_hash in
+    let size := Some 20 in
+    existT _ tt
+      {|
+        Blake2B.PrefixedName.name := name;
+        Blake2B.PrefixedName.title := title;
+        Blake2B.PrefixedName.size := size;
+        Blake2B.PrefixedName.b58check_prefix := b58check_prefix
+        |}).
+
+Definition t := Blake2BModule.[S.HASH.t].
+
+Definition name := Blake2BModule.[S.HASH.name].
+
+Definition title := Blake2BModule.[S.HASH.title].
+
+Definition pp := Blake2BModule.[S.HASH.pp].
+
+Definition pp_short := Blake2BModule.[S.HASH.pp_short].
+
+Definition op_eq := Blake2BModule.[S.HASH.op_eq].
+
+Definition op_ltgt := Blake2BModule.[S.HASH.op_ltgt].
+
+Definition op_lt := Blake2BModule.[S.HASH.op_lt].
+
+Definition op_lteq := Blake2BModule.[S.HASH.op_lteq].
+
+Definition op_gteq := Blake2BModule.[S.HASH.op_gteq].
+
+Definition op_gt := Blake2BModule.[S.HASH.op_gt].
+
+Definition compare := Blake2BModule.[S.HASH.compare].
+
+Definition equal := Blake2BModule.[S.HASH.equal].
+
+Definition max := Blake2BModule.[S.HASH.max].
+
+Definition min := Blake2BModule.[S.HASH.min].
+
+Definition hash_bytes := Blake2BModule.[S.HASH.hash_bytes].
+
+Definition hash_string := Blake2BModule.[S.HASH.hash_string].
+
+Definition zero := Blake2BModule.[S.HASH.zero].
+
+Definition size := Blake2BModule.[S.HASH.size].
+
+Definition to_bytes := Blake2BModule.[S.HASH.to_bytes].
+
+Definition of_bytes_opt := Blake2BModule.[S.HASH.of_bytes_opt].
+
+Definition of_bytes_exn := Blake2BModule.[S.HASH.of_bytes_exn].
+
+Definition to_b58check := Blake2BModule.[S.HASH.to_b58check].
+
+Definition to_short_b58check := Blake2BModule.[S.HASH.to_short_b58check].
+
+Definition of_b58check_exn := Blake2BModule.[S.HASH.of_b58check_exn].
+
+Definition of_b58check_opt := Blake2BModule.[S.HASH.of_b58check_opt].
+
+Definition b58check_encoding := Blake2BModule.[S.HASH.b58check_encoding].
+
+Definition encoding := Blake2BModule.[S.HASH.encoding].
+
+Definition rpc_arg := Blake2BModule.[S.HASH.rpc_arg].
+
+Definition to_path := Blake2BModule.[S.HASH.to_path].
+
+Definition of_path := Blake2BModule.[S.HASH.of_path].
+
+Definition of_path_exn := Blake2BModule.[S.HASH.of_path_exn].
+
+Definition prefix_path := Blake2BModule.[S.HASH.prefix_path].
+
+Definition path_length := Blake2BModule.[S.HASH.path_length].
 
 (* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
 (* top_level_evaluation *)
@@ -17018,7 +17103,7 @@ Definition contract_hash : string := &quot;\002Zy&quot; % string.
 <hr />
 <div class="row conversion-row" id="contract_repr.ml">
   <div class="col-md-6">
-    <a href="#contract_repr.ml"><code>contract_repr.ml</code></a>&nbsp;<span class="label label-danger">18 errors</span>
+    <a href="#contract_repr.ml"><code>contract_repr.ml</code></a>&nbsp;<span class="label label-danger">17 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -17049,7 +17134,7 @@ type t =
   | Implicit of Signature.Public_key_hash.t
   | Originated of Contract_hash.t
 
-<abbr class="mark-error" title="Cannot include this kind of module expression">include Compare.Make (struct
+module CompareModule = Compare.Make (struct
   type nonrec t = t
 
   let compare l1 l2 =
@@ -17062,7 +17147,9 @@ type t =
         -1
     | (Originated _, Implicit _) -&gt;
         1
-end)</abbr>
+end)
+
+include CompareModule
 
 type contract = t
 
@@ -17383,8 +17470,40 @@ Inductive t : Set :=
 | Implicit : Signature.Public_key_hash.[S.SPublic_key_hash.t] -&gt; t
 | Originated : Contract_hash.t -&gt; t.
 
-(* ❌ Cannot include this kind of module expression *)
-(* include *)
+Definition CompareModule :=
+  Compare.Make
+    (let compare (l1 : t) (l2 : t) : Z :=
+      match (l1, l2) with
+      | (Implicit pkh1, Implicit pkh2) =&gt;
+        Signature.Public_key_hash.[S.SPublic_key_hash.compare] pkh1 pkh2
+      | (Originated h1, Originated h2) =&gt; Contract_hash.compare h1 h2
+      | (Implicit _, Originated _) =&gt; (-1)
+      | (Originated _, Implicit _) =&gt; 1
+      end in
+    existT _ _
+      {|
+        Compare.COMPARABLE.compare := compare
+        |}).
+
+Definition op_eq := CompareModule.[Compare.S.op_eq].
+
+Definition op_ltgt := CompareModule.[Compare.S.op_ltgt].
+
+Definition op_lt := CompareModule.[Compare.S.op_lt].
+
+Definition op_lteq := CompareModule.[Compare.S.op_lteq].
+
+Definition op_gteq := CompareModule.[Compare.S.op_gteq].
+
+Definition op_gt := CompareModule.[Compare.S.op_gt].
+
+Definition compare := CompareModule.[Compare.S.compare].
+
+Definition equal := CompareModule.[Compare.S.equal].
+
+Definition max := CompareModule.[Compare.S.max].
+
+Definition min := CompareModule.[Compare.S.min].
 
 Definition contract := t.
 
@@ -39300,7 +39419,7 @@ Parameter add_root_entrypoint :
 <hr />
 <div class="row conversion-row" id="level_repr.ml">
   <div class="col-md-6">
-    <a href="#level_repr.ml"><code>level_repr.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
+    <a href="#level_repr.ml"><code>level_repr.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -39337,11 +39456,13 @@ type t = {
   expected_commitment : bool;
 }
 
-<abbr class="mark-error" title="Cannot include this kind of module expression">include Compare.Make (struct
+module CompareModule = Compare.Make (struct
   type nonrec t = t
 
   let compare {level = l1} {level = l2} = Raw_level_repr.compare l1 l2
-end)</abbr>
+end)
+
+include CompareModule
 
 type level = t
 
@@ -39518,8 +39639,37 @@ Module t.
 End t.
 Definition t := t.record.
 
-(* ❌ Cannot include this kind of module expression *)
-(* include *)
+Definition CompareModule :=
+  Compare.Make
+    (let compare (function_parameter : t) : t -&gt; Z :=
+      let '{| t.level := l1 |} := function_parameter in
+      fun function_parameter =&gt;
+        let '{| t.level := l2 |} := function_parameter in
+        Raw_level_repr.compare l1 l2 in
+    existT _ _
+      {|
+        Compare.COMPARABLE.compare := compare
+        |}).
+
+Definition op_eq := CompareModule.[Compare.S.op_eq].
+
+Definition op_ltgt := CompareModule.[Compare.S.op_ltgt].
+
+Definition op_lt := CompareModule.[Compare.S.op_lt].
+
+Definition op_lteq := CompareModule.[Compare.S.op_lteq].
+
+Definition op_gteq := CompareModule.[Compare.S.op_gteq].
+
+Definition op_gt := CompareModule.[Compare.S.op_gt].
+
+Definition compare := CompareModule.[Compare.S.compare].
+
+Definition equal := CompareModule.[Compare.S.equal].
+
+Definition max := CompareModule.[Compare.S.max].
+
+Definition min := CompareModule.[Compare.S.min].
 
 Definition level := t.
 
@@ -55540,7 +55690,7 @@ Parameter get_contract_delegate :
 <hr />
 <div class="row conversion-row" id="script_expr_hash.ml">
   <div class="col-md-6">
-    <a href="#script_expr_hash.ml"><code>script_expr_hash.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#script_expr_hash.ml"><code>script_expr_hash.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -55569,7 +55719,7 @@ Parameter get_contract_delegate :
 
 let script_expr_hash = &quot;\013\044\064\027&quot; (* expr(54) *)
 
-<abbr class="mark-error" title="Cannot include this kind of module expression">include Blake2B.Make
+module Blake2BModule = Blake2B.Make
           (Base58)
           (struct
             let name = &quot;script_expr&quot;
@@ -55579,7 +55729,9 @@ let script_expr_hash = &quot;\013\044\064\027&quot; (* expr(54) *)
             let b58check_prefix = script_expr_hash
 
             let size = None
-          end)</abbr>
+          end)
+
+include Blake2BModule
 
 <abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () = Base58.check_encoded_prefix b58check_encoding &quot;expr&quot; 54</abbr>
 </pre>
@@ -55600,8 +55752,91 @@ Require Import Tezos.Environment.
 
 Definition script_expr_hash : string := &quot;\r,@\027&quot; % string.
 
-(* ❌ Cannot include this kind of module expression *)
-(* include *)
+Definition Blake2BModule :=
+  (Blake2B.Make
+    (existT _ tt
+      {|
+        Blake2B.SRegister.register_encoding {_} := Base58.register_encoding
+        |}))
+    (let name := &quot;script_expr&quot; % string in
+    let title := &quot;A script expression ID&quot; % string in
+    let b58check_prefix := script_expr_hash in
+    let size := None in
+    existT _ tt
+      {|
+        Blake2B.PrefixedName.name := name;
+        Blake2B.PrefixedName.title := title;
+        Blake2B.PrefixedName.size := size;
+        Blake2B.PrefixedName.b58check_prefix := b58check_prefix
+        |}).
+
+Definition t := Blake2BModule.[S.HASH.t].
+
+Definition name := Blake2BModule.[S.HASH.name].
+
+Definition title := Blake2BModule.[S.HASH.title].
+
+Definition pp := Blake2BModule.[S.HASH.pp].
+
+Definition pp_short := Blake2BModule.[S.HASH.pp_short].
+
+Definition op_eq := Blake2BModule.[S.HASH.op_eq].
+
+Definition op_ltgt := Blake2BModule.[S.HASH.op_ltgt].
+
+Definition op_lt := Blake2BModule.[S.HASH.op_lt].
+
+Definition op_lteq := Blake2BModule.[S.HASH.op_lteq].
+
+Definition op_gteq := Blake2BModule.[S.HASH.op_gteq].
+
+Definition op_gt := Blake2BModule.[S.HASH.op_gt].
+
+Definition compare := Blake2BModule.[S.HASH.compare].
+
+Definition equal := Blake2BModule.[S.HASH.equal].
+
+Definition max := Blake2BModule.[S.HASH.max].
+
+Definition min := Blake2BModule.[S.HASH.min].
+
+Definition hash_bytes := Blake2BModule.[S.HASH.hash_bytes].
+
+Definition hash_string := Blake2BModule.[S.HASH.hash_string].
+
+Definition zero := Blake2BModule.[S.HASH.zero].
+
+Definition size := Blake2BModule.[S.HASH.size].
+
+Definition to_bytes := Blake2BModule.[S.HASH.to_bytes].
+
+Definition of_bytes_opt := Blake2BModule.[S.HASH.of_bytes_opt].
+
+Definition of_bytes_exn := Blake2BModule.[S.HASH.of_bytes_exn].
+
+Definition to_b58check := Blake2BModule.[S.HASH.to_b58check].
+
+Definition to_short_b58check := Blake2BModule.[S.HASH.to_short_b58check].
+
+Definition of_b58check_exn := Blake2BModule.[S.HASH.of_b58check_exn].
+
+Definition of_b58check_opt := Blake2BModule.[S.HASH.of_b58check_opt].
+
+Definition b58check_encoding := Blake2BModule.[S.HASH.b58check_encoding].
+
+Definition encoding := Blake2BModule.[S.HASH.encoding].
+
+Definition rpc_arg := Blake2BModule.[S.HASH.rpc_arg].
+
+Definition to_path := Blake2BModule.[S.HASH.to_path].
+
+Definition of_path := Blake2BModule.[S.HASH.of_path].
+
+Definition of_path_exn := Blake2BModule.[S.HASH.of_path_exn].
+
+Definition prefix_path := Blake2BModule.[S.HASH.prefix_path].
+
+Definition path_length := Blake2BModule.[S.HASH.path_length].
 
 (* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
 (* top_level_evaluation *)
@@ -81469,7 +81704,7 @@ Definition get_rpc_services (function_parameter : unit)
 <hr />
 <div class="row conversion-row" id="state_hash.ml">
   <div class="col-md-6">
-    <a href="#state_hash.ml"><code>state_hash.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#state_hash.ml"><code>state_hash.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -81498,7 +81733,7 @@ Definition get_rpc_services (function_parameter : unit)
 
 let random_state_hash = &quot;\076\064\204&quot; (* rng(53): never used... *)
 
-<abbr class="mark-error" title="Cannot include this kind of module expression">include Blake2B.Make
+module Blake2BModule = Blake2B.Make
           (Base58)
           (struct
             let name = &quot;random&quot;
@@ -81508,7 +81743,9 @@ let random_state_hash = &quot;\076\064\204&quot; (* rng(53): never used... *)
             let b58check_prefix = random_state_hash
 
             let size = None
-          end)</abbr>
+          end)
+
+include Blake2BModule
 
 <abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () = Base58.check_encoded_prefix b58check_encoding &quot;rng&quot; 53</abbr>
 </pre>
@@ -81529,8 +81766,91 @@ Require Import Tezos.Environment.
 
 Definition random_state_hash : string := &quot;L@\204&quot; % string.
 
-(* ❌ Cannot include this kind of module expression *)
-(* include *)
+Definition Blake2BModule :=
+  (Blake2B.Make
+    (existT _ tt
+      {|
+        Blake2B.SRegister.register_encoding {_} := Base58.register_encoding
+        |}))
+    (let name := &quot;random&quot; % string in
+    let title := &quot;A random generation state&quot; % string in
+    let b58check_prefix := random_state_hash in
+    let size := None in
+    existT _ tt
+      {|
+        Blake2B.PrefixedName.name := name;
+        Blake2B.PrefixedName.title := title;
+        Blake2B.PrefixedName.size := size;
+        Blake2B.PrefixedName.b58check_prefix := b58check_prefix
+        |}).
+
+Definition t := Blake2BModule.[S.HASH.t].
+
+Definition name := Blake2BModule.[S.HASH.name].
+
+Definition title := Blake2BModule.[S.HASH.title].
+
+Definition pp := Blake2BModule.[S.HASH.pp].
+
+Definition pp_short := Blake2BModule.[S.HASH.pp_short].
+
+Definition op_eq := Blake2BModule.[S.HASH.op_eq].
+
+Definition op_ltgt := Blake2BModule.[S.HASH.op_ltgt].
+
+Definition op_lt := Blake2BModule.[S.HASH.op_lt].
+
+Definition op_lteq := Blake2BModule.[S.HASH.op_lteq].
+
+Definition op_gteq := Blake2BModule.[S.HASH.op_gteq].
+
+Definition op_gt := Blake2BModule.[S.HASH.op_gt].
+
+Definition compare := Blake2BModule.[S.HASH.compare].
+
+Definition equal := Blake2BModule.[S.HASH.equal].
+
+Definition max := Blake2BModule.[S.HASH.max].
+
+Definition min := Blake2BModule.[S.HASH.min].
+
+Definition hash_bytes := Blake2BModule.[S.HASH.hash_bytes].
+
+Definition hash_string := Blake2BModule.[S.HASH.hash_string].
+
+Definition zero := Blake2BModule.[S.HASH.zero].
+
+Definition size := Blake2BModule.[S.HASH.size].
+
+Definition to_bytes := Blake2BModule.[S.HASH.to_bytes].
+
+Definition of_bytes_opt := Blake2BModule.[S.HASH.of_bytes_opt].
+
+Definition of_bytes_exn := Blake2BModule.[S.HASH.of_bytes_exn].
+
+Definition to_b58check := Blake2BModule.[S.HASH.to_b58check].
+
+Definition to_short_b58check := Blake2BModule.[S.HASH.to_short_b58check].
+
+Definition of_b58check_exn := Blake2BModule.[S.HASH.of_b58check_exn].
+
+Definition of_b58check_opt := Blake2BModule.[S.HASH.of_b58check_opt].
+
+Definition b58check_encoding := Blake2BModule.[S.HASH.b58check_encoding].
+
+Definition encoding := Blake2BModule.[S.HASH.encoding].
+
+Definition rpc_arg := Blake2BModule.[S.HASH.rpc_arg].
+
+Definition to_path := Blake2BModule.[S.HASH.to_path].
+
+Definition of_path := Blake2BModule.[S.HASH.of_path].
+
+Definition of_path_exn := Blake2BModule.[S.HASH.of_path_exn].
+
+Definition prefix_path := Blake2BModule.[S.HASH.prefix_path].
+
+Definition path_length := Blake2BModule.[S.HASH.path_length].
 
 (* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
 (* top_level_evaluation *)
@@ -81541,7 +81861,7 @@ Definition random_state_hash : string := &quot;L@\204&quot; % string.
 <hr />
 <div class="row conversion-row" id="storage.ml">
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">97 errors</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-danger">98 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -81857,11 +82177,21 @@ module Big_map = struct
       end)
 
   module Next = struct
-    <abbr class="mark-error" title="Cannot include this kind of module expression">include Make_single_data_storage (Registered) (Raw_context)
+    module Single_data_storage = Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
               (struct
                 let name = [&quot;next&quot;]
               end)
-              (Z)</abbr>
+              (Z)
+
+    <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
+module signatures found, namely:
+Tezos_raw_protocol_alpha__Storage_sigs.Single_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Single_carbonated_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_data_storage, Tezos_raw_protocol_alpha__Storage_sigs.Non_iterable_indexed_carbonated_data_storage
+
+We were looking for a module signature name for the following shape:
+[ mem; get; get_option; init; set; init_set; set_option; delete; remove ]
+(a shape is a list of names of values)
+
+We use the concept of shape to find the name of a signature for Coq.">include Single_data_storage</abbr>
 
     let incr ctxt =
       get ctxt
@@ -83715,8 +84045,79 @@ Module Big_map.
           |}).
   
   Module Next.
-    (* ❌ Cannot include this kind of module expression *)
-    (* include *)
+    Definition Single_data_storage :=
+      (((Storage_functors.Make_single_data_storage
+        (existT _ tt
+          {|
+            Storage_sigs.REGISTER.ghost :=
+              Storage_functors.Registered.[Storage_sigs.REGISTER.ghost]
+            |}))
+        (existT _ _
+          {|
+            Raw_context.T.mem := Raw_context.[Raw_context.T.mem];
+            Raw_context.T.dir_mem := Raw_context.[Raw_context.T.dir_mem];
+            Raw_context.T.get := Raw_context.[Raw_context.T.get];
+            Raw_context.T.get_option := Raw_context.[Raw_context.T.get_option];
+            Raw_context.T.init := Raw_context.[Raw_context.T.init];
+            Raw_context.T.set := Raw_context.[Raw_context.T.set];
+            Raw_context.T.init_set := Raw_context.[Raw_context.T.init_set];
+            Raw_context.T.set_option := Raw_context.[Raw_context.T.set_option];
+            Raw_context.T.delete := Raw_context.[Raw_context.T.delete];
+            Raw_context.T.remove := Raw_context.[Raw_context.T.remove];
+            Raw_context.T.remove_rec := Raw_context.[Raw_context.T.remove_rec];
+            Raw_context.T.copy := Raw_context.[Raw_context.T.copy];
+            Raw_context.T.fold {_} := Raw_context.[Raw_context.T.fold];
+            Raw_context.T.keys := Raw_context.[Raw_context.T.keys];
+            Raw_context.T.fold_keys {_} := Raw_context.[Raw_context.T.fold_keys];
+            Raw_context.T.project := Raw_context.[Raw_context.T.project];
+            Raw_context.T.absolute_key :=
+              Raw_context.[Raw_context.T.absolute_key];
+            Raw_context.T.consume_gas := Raw_context.[Raw_context.T.consume_gas];
+            Raw_context.T.check_enough_gas :=
+              Raw_context.[Raw_context.T.check_enough_gas];
+            Raw_context.T.description := Raw_context.[Raw_context.T.description]
+            |}))
+        (let name := cons &quot;next&quot; % string [] in
+        existT _ tt
+          {|
+            Storage_sigs.NAME.name := name
+            |}))
+        (existT _ _
+          {|
+            Storage_sigs.VALUE.encoding := Z.encoding
+            |}).
+    
+    Definition t := Single_data_storage.[Storage_sigs.Single_data_storage.t].
+    
+    Definition context :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.context].
+    
+    Definition value :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.value].
+    
+    Definition mem := Single_data_storage.[Storage_sigs.Single_data_storage.mem].
+    
+    Definition get := Single_data_storage.[Storage_sigs.Single_data_storage.get].
+    
+    Definition get_option :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.get_option].
+    
+    Definition init :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.init].
+    
+    Definition set := Single_data_storage.[Storage_sigs.Single_data_storage.set].
+    
+    Definition init_set :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.init_set].
+    
+    Definition set_option :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.set_option].
+    
+    Definition delete :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.delete].
+    
+    Definition remove :=
+      Single_data_storage.[Storage_sigs.Single_data_storage.remove].
     
     Definition incr (ctxt : context)
       : Lwt.t (Error_monad.tzresult (Raw_context.t * value)) :=
@@ -89693,7 +90094,7 @@ End Indexed_raw_context.
 <hr />
 <div class="row conversion-row" id="tez_repr.ml">
   <div class="col-md-6">
-    <a href="#tez_repr.ml"><code>tez_repr.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
+    <a href="#tez_repr.ml"><code>tez_repr.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -89720,9 +90121,11 @@ End Indexed_raw_context.
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-error" title="Cannot include this kind of module expression">include Qty_repr.Make (struct
+module QtyModule = Qty_repr.Make (struct
   let id = &quot;tez&quot;
-end)</abbr>
+end)
+
+include QtyModule
 
 type t = qty
 
@@ -89744,9 +90147,77 @@ Require Import TypingFlags.Loader.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Require Tezos.Qty_repr.
 
-(* ❌ Cannot include this kind of module expression *)
-(* include *)
+Definition QtyModule :=
+  Qty_repr.Make
+    (let id := &quot;tez&quot; % string in
+    existT _ tt
+      {|
+        Qty_repr.QTY.id := id
+        |}).
+
+Definition qty := QtyModule.[Qty_repr.S.qty].
+
+Definition id := QtyModule.[Qty_repr.S.id].
+
+Definition zero := QtyModule.[Qty_repr.S.zero].
+
+Definition one_mutez := QtyModule.[Qty_repr.S.one_mutez].
+
+Definition one_cent := QtyModule.[Qty_repr.S.one_cent].
+
+Definition fifty_cents := QtyModule.[Qty_repr.S.fifty_cents].
+
+Definition one := QtyModule.[Qty_repr.S.one].
+
+Definition op_minusquestion := QtyModule.[Qty_repr.S.op_minusquestion].
+
+Definition op_plusquestion := QtyModule.[Qty_repr.S.op_plusquestion].
+
+Definition op_starquestion := QtyModule.[Qty_repr.S.op_starquestion].
+
+Definition op_divquestion := QtyModule.[Qty_repr.S.op_divquestion].
+
+Definition to_mutez := QtyModule.[Qty_repr.S.to_mutez].
+
+Definition of_mutez := QtyModule.[Qty_repr.S.of_mutez].
+
+Definition of_mutez_exn := QtyModule.[Qty_repr.S.of_mutez_exn].
+
+Definition add_exn := QtyModule.[Qty_repr.S.add_exn].
+
+Definition mul_exn := QtyModule.[Qty_repr.S.mul_exn].
+
+Definition encoding := QtyModule.[Qty_repr.S.encoding].
+
+Definition to_int64 := QtyModule.[Qty_repr.S.to_int64].
+
+Definition op_eq := QtyModule.[Qty_repr.S.op_eq].
+
+Definition op_ltgt := QtyModule.[Qty_repr.S.op_ltgt].
+
+Definition op_lt := QtyModule.[Qty_repr.S.op_lt].
+
+Definition op_lteq := QtyModule.[Qty_repr.S.op_lteq].
+
+Definition op_gteq := QtyModule.[Qty_repr.S.op_gteq].
+
+Definition op_gt := QtyModule.[Qty_repr.S.op_gt].
+
+Definition compare := QtyModule.[Qty_repr.S.compare].
+
+Definition equal := QtyModule.[Qty_repr.S.equal].
+
+Definition max := QtyModule.[Qty_repr.S.max].
+
+Definition min := QtyModule.[Qty_repr.S.min].
+
+Definition pp := QtyModule.[Qty_repr.S.pp].
+
+Definition of_string := QtyModule.[Qty_repr.S.of_string].
+
+Definition to_string := QtyModule.[Qty_repr.S.to_string].
 
 Definition t := qty.
 
