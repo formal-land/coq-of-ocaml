@@ -22,6 +22,7 @@ files = [
   "Manager_repr_mli.v",
   "Michelson_v1_primitives.v",
   "Michelson_v1_primitives_mli.v",
+  "Misc.v",
   "Misc_mli.v",
   "Nonce_hash.v",
   "Period_repr.v",
@@ -38,15 +39,14 @@ files = [
   "Voting_period_repr_mli.v",
 
   # in progress
-  # "Misc.v",
   # "Storage_description.v",
-  # "Tez_repr.v",
   # "Voting_period_repr.v"
 
   # files with one dependency
   # "Blinded_public_key_hash_mli.v",
   # "Cycle_repr_mli.v",
   # "Raw_level_repr_mli.v",
+  # "Tez_repr.v",
 ]
 
 nb_valid_lines = 0

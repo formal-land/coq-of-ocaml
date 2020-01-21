@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35819 lines</li>
-      <li>Coq size: 45308 lines (+26% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 2872</li>
+      <li>OCaml size: 35828 lines</li>
+      <li>Coq size: 45482 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 2861</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -69,7 +69,7 @@
           1147,
           1541,
           2680,
-          2929,
+          3078,
         ],
         generated: [
           47563,
@@ -79,7 +79,7 @@
           44618,
           45107,
           44768,
-          45308,
+          45482,
         ],
         labels: [
           "01-14",
@@ -133,7 +133,7 @@
       </li>
       
       <li>
-        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-danger">71</span>
+        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-danger">70</span>
       </li>
       
       <li>
@@ -327,7 +327,7 @@
       </li>
       
       <li>
-        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-danger">5</span>
+        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-danger">4</span>
       </li>
       
       <li>
@@ -465,7 +465,7 @@
       </li>
       
       <li>
-        <a href="#script_ir_annot.ml">script_ir_annot.ml</a>&nbsp;<span class="label label-danger">141</span>
+        <a href="#script_ir_annot.ml">script_ir_annot.ml</a>&nbsp;<span class="label label-danger">138</span>
       </li>
       
       <li>
@@ -473,7 +473,7 @@
       </li>
       
       <li>
-        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">270</span>
+        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-danger">264</span>
       </li>
       
       <li>
@@ -6190,7 +6190,7 @@ Parameter record_ballot :
 <hr />
 <div class="row conversion-row" id="apply.ml">
   <div class="col-md-6">
-    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-danger">71 errors</span>
+    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-danger">70 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -7314,8 +7314,8 @@ let apply_contents_list (type kind) ctxt chain_id mode pred_block baker
   | Single (Double_endorsement_evidence {op1; op2}) -&gt; (
     match (op1.protocol_data.contents, op2.protocol_data.contents) with
     | (Single (Endorsement e1), Single (Endorsement e2))
-      when <abbr class="mark-error" title="Guard on pattern not supported">Raw_level.(e1.level = e2.level)
-           &amp;&amp; not (Block_hash.equal op1.shell.branch op2.shell.branch)</abbr> -&gt;
+      when Raw_level.(e1.level = e2.level)
+           &amp;&amp; not (Block_hash.equal op1.shell.branch op2.shell.branch) -&gt;
         let level = Level.from_raw ctxt e1.level in
         let oldest_level = Level.last_allowed_fork_level ctxt in
         fail_unless
@@ -8835,13 +8835,33 @@ Definition apply_contents_list {A : Set}
           Alpha_context.contents.Double_endorsement_evidence.op2 := op2
           |}) =&gt;
     match
-      ((Alpha_context.protocol_data.contents
+      (((Alpha_context.protocol_data.contents
         (Alpha_context.operation.protocol_data op1)),
         (Alpha_context.protocol_data.contents
-          (Alpha_context.operation.protocol_data op2))) with
+          (Alpha_context.operation.protocol_data op2))),
+        match
+          ((Alpha_context.protocol_data.contents
+            (Alpha_context.operation.protocol_data op1)),
+            (Alpha_context.protocol_data.contents
+              (Alpha_context.operation.protocol_data op2))) with
+        |
+          (Alpha_context.Single (Alpha_context.Endorsement e1),
+            Alpha_context.Single (Alpha_context.Endorsement e2)) =&gt;
+          Pervasives.op_andand
+            (Alpha_context.Raw_level.op_eq
+              (Alpha_context.contents.Endorsement.level e1)
+              (Alpha_context.contents.Endorsement.level e2))
+            (Pervasives.not
+              (Block_hash.[S.HASH.equal]
+                (Operation.shell_header.branch
+                  (Alpha_context.operation.shell op1))
+                (Operation.shell_header.branch
+                  (Alpha_context.operation.shell op2))))
+        | _ =&gt; false
+        end) with
     |
-      (Alpha_context.Single (Alpha_context.Endorsement e1),
-        Alpha_context.Single (Alpha_context.Endorsement e2)) =&gt;
+      ((Alpha_context.Single (Alpha_context.Endorsement e1),
+        Alpha_context.Single (Alpha_context.Endorsement e2)), true) =&gt;
       let level :=
         Alpha_context.Level.from_raw ctxt None
           (Alpha_context.contents.Endorsement.level e1) in
@@ -8949,7 +8969,7 @@ Definition apply_contents_list {A : Set}
                                                                   current_cycle),
                                                                   (Alpha_context.Delegate.Credited
                                                                     reward)) []))))))))))))))))))
-    | (_, _) =&gt; Error_monad.fail extensible_type_value
+    | ((_, _), _) =&gt; Error_monad.fail extensible_type_value
     end
   |
     Alpha_context.Single
@@ -29152,8 +29172,15 @@ Definition set
                 (Error_monad.op_gtgteqquestion
                   (Storage.Contract.Delegate.get_option c contract)
                   (fun function_parameter =&gt;
-                    match function_parameter with
-                    | Some current_delegate =&gt;
+                    match
+                      (function_parameter,
+                        match function_parameter with
+                        | Some current_delegate =&gt;
+                          Signature.Public_key_hash.[S.SPublic_key_hash.equal]
+                            delegate current_delegate
+                        | _ =&gt; false
+                        end) with
+                    | (Some current_delegate, true) =&gt;
                       if self_delegation then
                         Error_monad.op_gtgteqquestion
                           (Roll_storage.Delegate.is_inactive c delegate)
@@ -29164,7 +29191,7 @@ Definition set
                             end)
                       else
                         Error_monad.fail extensible_type_value
-                    | None | Some _ =&gt; Error_monad.return_unit
+                    | (None | Some _, _) =&gt; Error_monad.return_unit
                     end))
                 (fun function_parameter =&gt;
                   let 'tt := function_parameter in
@@ -30587,17 +30614,30 @@ Definition from_int64 (fitness : int64) : list MBytes.t :=
 
 Definition to_int64 (function_parameter : list MBytes.t)
   : Error_monad.tzresult int64 :=
-  match function_parameter with
-  | cons version (cons fitness []) =&gt; int64_of_bytes fitness
-  | cons version (cons _fitness []) =&gt;
+  match
+    (function_parameter,
+      match function_parameter with
+      | cons version (cons fitness []) =&gt;
+        Compare.String.[Compare.S.op_eq] (MBytes.to_string version)
+          Constants_repr.version_number
+      | _ =&gt; false
+      end,
+      match function_parameter with
+      | cons version (cons _fitness []) =&gt;
+        Compare.String.[Compare.S.op_eq] (MBytes.to_string version)
+          Constants_repr.version_number_004
+      | _ =&gt; false
+      end) with
+  | (cons version (cons fitness []), true, _) =&gt; int64_of_bytes fitness
+  | (cons version (cons _fitness []), _, true) =&gt;
     Error_monad.ok
       (* ❌ Constant of type int64 is converted to int *)
       0
-  | [] =&gt;
+  | ([], _, _) =&gt;
     Error_monad.ok
       (* ❌ Constant of type int64 is converted to int *)
       0
-  | _ =&gt; Error_monad.__error_value extensible_type_value
+  | (_, _, _) =&gt; Error_monad.__error_value extensible_type_value
   end.
 </pre>
   </div>
@@ -38414,10 +38454,16 @@ Definition find_toplevel {A : Set}
     (function_parameter : list (Micheline.node B Michelson_v1_primitives.prim))
     {struct toplevel}
     : option (Micheline.node B Michelson_v1_primitives.prim) :=
-    match function_parameter with
-    | cons ((Micheline.Prim _ prim _ _) as found) _ =&gt; Some found
-    | cons _ rest =&gt; iter toplevel rest
-    | [] =&gt; None
+    match
+      (function_parameter,
+        match function_parameter with
+        | cons ((Micheline.Prim _ prim _ _) as found) _ =&gt;
+          String.equal toplevel (Michelson_v1_primitives.string_of_prim prim)
+        | _ =&gt; false
+        end) with
+    | (cons ((Micheline.Prim _ prim _ _) as found) _, true) =&gt; Some found
+    | (cons _ rest, _) =&gt; iter toplevel rest
+    | ([], _) =&gt; None
     end in
   iter (Michelson_v1_primitives.string_of_prim toplevel) exprs.
 
@@ -40334,7 +40380,7 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
 <hr />
 <div class="row conversion-row" id="main.ml">
   <div class="col-md-6">
-    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-danger">5 errors</span>
+    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -40522,10 +40568,10 @@ let apply_operation ({mode; chain_id; ctxt; op_count; _} as data)
     (operation : Alpha_context.packed_operation) =
   match mode with
   | Partial_application _
-    when <abbr class="mark-error" title="Guard on pattern not supported">not
+    when not
            (List.exists
               (Compare.Int.equal 0)
-              (Alpha_context.Operation.acceptable_passes operation))</abbr> -&gt;
+              (Alpha_context.Operation.acceptable_passes operation)) -&gt;
       (* Multipass validation only considers operations in pass 0. *)
       let op_count = op_count + 1 in
       return (<abbr class="mark-error" title="Record substitution not handled">{data with ctxt; op_count}</abbr>, No_operation_metadata)
@@ -41021,13 +41067,21 @@ Definition apply_operation (function_parameter : validation_state)
         validation_state.op_count := op_count
         |} as data := function_parameter in
   fun operation =&gt;
-    match mode with
-    | Partial_application _ =&gt;
+    match
+      (mode,
+        match mode with
+        | Partial_application _ =&gt;
+          Pervasives.not
+            (List.__exists (Compare.Int.[Compare.S.equal] 0)
+              (Alpha_context.Operation.acceptable_passes operation))
+        | _ =&gt; false
+        end) with
+    | (Partial_application _, true) =&gt;
       let op_count := Pervasives.op_plus op_count 1 in
       Error_monad.__return
         ((* ❌ Record substitution not handled *)
         record_substitution, No_operation_metadata)
-    | _ =&gt;
+    | (_, _) =&gt;
       let '{|
         operation.shell := shell;
           operation.protocol_data := Operation_data protocol_data
@@ -44705,9 +44759,12 @@ let prim_of_string = function
 
 let prims_of_strings expr =
   let rec convert = function
-    | Int (l, x) -&gt; ok (Int (l, x))
-    | String (l, x) -&gt; ok (String (l, x))
-    | Bytes (l, x) -&gt; ok (Bytes (l, x))
+    | Int (l, x) -&gt;
+        ok (Int (l, x))
+    | String (l, x) -&gt;
+        ok (String (l, x))
+    | Bytes (l, x) -&gt;
+        ok (Bytes (l, x))
     | Prim (loc, prim, args, annot) -&gt;
         Error_monad.record_trace
           <abbr class="mark-error" title="Values of extensible types are not handled">(Invalid_primitive_name (expr, loc))</abbr>
@@ -44731,9 +44788,12 @@ let prims_of_strings expr =
 
 let strings_of_prims expr =
   let rec convert = function
-  | Int (l, x) -&gt; Int (l, x)
-  | String (l, x) -&gt; String (l, x)
-  | Bytes (l, x) -&gt; Bytes (l, x)
+    | Int (l, x) -&gt;
+        Int (l, x)
+    | String (l, x) -&gt;
+        String (l, x)
+    | Bytes (l, x) -&gt;
+        Bytes (l, x)
     | Prim (_, prim, args, annot) -&gt;
         let prim = string_of_prim prim in
         let args = List.map convert args in
@@ -46291,7 +46351,8 @@ let rec ( ---&gt; ) i j =
 
 let rec do_slashes delim path l acc limit i =
   if Compare.Int.(i &gt;= l) then List.rev acc
-  else if Compare.Char.(path.[i] = delim) then do_slashes delim path l acc limit (i + 1)
+  else if Compare.Char.(path.[i] = delim) then
+    do_slashes delim path l acc limit (i + 1)
   else do_split delim path l acc limit i
 
 and do_split delim path l acc limit i =
@@ -46320,13 +46381,15 @@ let pp_print_paragraph ppf description =
     (split ' ' description)
 
 let take n l =
-  let rec loop acc n = function
-    | xs when Compare.Int.(n &lt;= 0) -&gt;
-        Some (List.rev acc, xs)
-    | [] -&gt;
-        None
-    | x :: xs -&gt;
-        loop (x :: acc) (n - 1) xs
+  let rec loop acc n xs =
+    if Compare.Int.(n &lt;= 0) then
+      Some (List.rev acc, xs)
+    else
+      match xs with
+      | [] -&gt;
+          None
+      | x :: xs -&gt;
+          loop (x :: acc) (n - 1) xs
   in
   loop [] n l
 
@@ -46340,7 +46403,7 @@ let remove_prefix ~prefix s =
 let rec remove_elem_from_list nb = function
   | [] -&gt;
       []
-  | l when Compare.Int.(nb &lt;= 0) -&gt;
+  | (_ :: _) as l when Compare.Int.(nb &lt;= 0) -&gt;
       l
   | _ :: tl -&gt;
       remove_elem_from_list (nb - 1) tl
@@ -46462,13 +46525,15 @@ Definition pp_print_paragraph (ppf : Format.formatter) (description : string)
 Definition take {A : Set} (n : Compare.Int.[Compare.S.t]) (l : list A)
   : option (list A * list A) :=
   let fix loop {B : Set}
-    (acc : list B) (n : Compare.Int.[Compare.S.t]) (function_parameter : list B)
-    {struct acc} : option (list B * list B) :=
-    match function_parameter with
-    | xs =&gt; Some ((List.rev acc), xs)
-    | [] =&gt; None
-    | cons x xs =&gt; loop (cons x acc) (Pervasives.op_minus n 1) xs
-    end in
+    (acc : list B) (n : Compare.Int.[Compare.S.t]) (xs : list B) {struct acc}
+    : option (list B * list B) :=
+    if Compare.Int.[Compare.S.op_lteq] n 0 then
+      Some ((List.rev acc), xs)
+    else
+      match xs with
+      | [] =&gt; None
+      | cons x xs =&gt; loop (cons x acc) (Pervasives.op_minus n 1) xs
+      end in
   loop [] n l.
 
 Definition remove_prefix (prefix : Compare.String.[Compare.S.t]) (s : string)
@@ -46485,10 +46550,15 @@ Definition remove_prefix (prefix : Compare.String.[Compare.S.t]) (s : string)
 Fixpoint remove_elem_from_list {A : Set}
   (nb : Compare.Int.[Compare.S.t]) (function_parameter : list A) {struct nb}
   : list A :=
-  match function_parameter with
-  | [] =&gt; []
-  | l =&gt; l
-  | cons _ tl =&gt; remove_elem_from_list (Pervasives.op_minus nb 1) tl
+  match
+    (function_parameter,
+      match function_parameter with
+      | (cons _ _) as l =&gt; Compare.Int.[Compare.S.op_lteq] nb 0
+      | _ =&gt; false
+      end) with
+  | ([], _) =&gt; []
+  | ((cons _ _) as l, true) =&gt; l
+  | (cons _ tl, _) =&gt; remove_elem_from_list (Pervasives.op_minus nb 1) tl
   end.
 </pre>
   </div>
@@ -59957,7 +60027,7 @@ Parameter trace :
 <hr />
 <div class="row conversion-row" id="script_ir_annot.ml">
   <div class="col-md-6">
-    <a href="#script_ir_annot.ml"><code>script_ir_annot.ml</code></a>&nbsp;<span class="label label-danger">141 errors</span>
+    <a href="#script_ir_annot.ml"><code>script_ir_annot.ml</code></a>&nbsp;<span class="label label-danger">138 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -60150,9 +60220,9 @@ let <abbr class="mark-error" title="Polymorphic variant types are not handled">p
       match s.[1] with
       | 'a' .. 'z' | 'A' .. 'Z' | '_' -&gt;
           ok @@ (wrap (Some (String.sub s 1 (len - 1))) :: acc)
-      | '@' when <abbr class="mark-error" title="Guard on pattern not supported">Compare.Int.(len = 2) &amp;&amp; List.mem '@' specials</abbr> -&gt;
+      | '@' when Compare.Int.(len = 2) &amp;&amp; List.mem '@' specials -&gt;
           ok @@ (wrap (Some &quot;@&quot;) :: acc)
-      | '%' when <abbr class="mark-error" title="Guard on pattern not supported">List.mem '%' specials</abbr> -&gt;
+      | '%' when List.mem '%' specials -&gt;
           if Compare.Int.(len = 2) then ok @@ (wrap (Some &quot;%&quot;) :: acc)
           else if Compare.Int.(len = 3) &amp;&amp; Compare.Char.(s.[2] = '%') then
             ok @@ (wrap (Some &quot;%%&quot;) :: acc)
@@ -60447,7 +60517,7 @@ Polymorphic variant types are not handled
 Polymorphic variant types are not handled">common_prefix</abbr> v1 v2 =
   match (v1, v2) with
   | (Some <abbr class="mark-error" title="Patterns on variants are not supported">(`Var_annot s1)</abbr>, Some <abbr class="mark-error" title="Patterns on variants are not supported">(`Var_annot s2)</abbr>)
-    when <abbr class="mark-error" title="Guard on pattern not supported">Compare.String.equal s1 s2</abbr> -&gt;
+    when Compare.String.equal s1 s2 -&gt;
       v1
   | (Some _, None) -&gt;
       v1
@@ -60920,9 +60990,20 @@ Definition parse_annots
         if Compare.Int.[Compare.S.op_eq] len 1 then
           Pervasives.op_atat Error_monad.ok (cons (wrap None) acc)
         else
-          match String.get s 1 with
+          match
+            ((String.get s 1),
+              match String.get s 1 with
+              | &quot;@&quot; % char =&gt;
+                Pervasives.op_andand (Compare.Int.[Compare.S.op_eq] len 2)
+                  (List.mem &quot;@&quot; % char specials)
+              | _ =&gt; false
+              end,
+              match String.get s 1 with
+              | &quot;%&quot; % char =&gt; List.mem &quot;%&quot; % char specials
+              | _ =&gt; false
+              end) with
           |
-            &quot;a&quot; % char | &quot;b&quot; % char | &quot;c&quot; % char | &quot;d&quot; % char | &quot;e&quot; % char |
+            (&quot;a&quot; % char | &quot;b&quot; % char | &quot;c&quot; % char | &quot;d&quot; % char | &quot;e&quot; % char |
             &quot;f&quot; % char | &quot;g&quot; % char | &quot;h&quot; % char | &quot;i&quot; % char | &quot;j&quot; % char |
             &quot;k&quot; % char | &quot;l&quot; % char | &quot;m&quot; % char | &quot;n&quot; % char | &quot;o&quot; % char |
             &quot;p&quot; % char | &quot;q&quot; % char | &quot;r&quot; % char | &quot;s&quot; % char | &quot;t&quot; % char |
@@ -60932,14 +61013,14 @@ Definition parse_annots
             &quot;J&quot; % char | &quot;K&quot; % char | &quot;L&quot; % char | &quot;M&quot; % char | &quot;N&quot; % char |
             &quot;O&quot; % char | &quot;P&quot; % char | &quot;Q&quot; % char | &quot;R&quot; % char | &quot;S&quot; % char |
             &quot;T&quot; % char | &quot;U&quot; % char | &quot;V&quot; % char | &quot;W&quot; % char | &quot;X&quot; % char |
-            &quot;Y&quot; % char | &quot;Z&quot; % char | &quot;_&quot; % char =&gt;
+            &quot;Y&quot; % char | &quot;Z&quot; % char | &quot;_&quot; % char, _, _) =&gt;
             Pervasives.op_atat Error_monad.ok
               (cons (wrap (Some (String.sub s 1 (Pervasives.op_minus len 1))))
                 acc)
-          | &quot;@&quot; % char =&gt;
+          | (&quot;@&quot; % char, true, _) =&gt;
             Pervasives.op_atat Error_monad.ok
               (cons (wrap (Some &quot;@&quot; % string)) acc)
-          | &quot;%&quot; % char =&gt;
+          | (&quot;%&quot; % char, _, true) =&gt;
             if Compare.Int.[Compare.S.op_eq] len 2 then
               Pervasives.op_atat Error_monad.ok
                 (cons (wrap (Some &quot;%&quot; % string)) acc)
@@ -60952,7 +61033,7 @@ Definition parse_annots
                   (cons (wrap (Some &quot;%%&quot; % string)) acc)
               else
                 Error_monad.__error_value extensible_type_value
-          | _ =&gt; Error_monad.__error_value extensible_type_value
+          | (_, _, _) =&gt; Error_monad.__error_value extensible_type_value
           end in
       Error_monad.op_gtpipequestion
         (List.fold_left
@@ -61255,11 +61336,17 @@ Definition common_prefix
   (v1 : option (* `Var_annot *) Compare.String.[Compare.S.t])
   (v2 : option (* `Var_annot *) Compare.String.[Compare.S.t])
   : option (* `Var_annot *) Compare.String.[Compare.S.t] :=
-  match (v1, v2) with
-  | (Some (Var_annot s1), Some (Var_annot s2)) =&gt; v1
-  | (Some _, None) =&gt; v1
-  | (None, Some _) =&gt; v2
-  | (_, _) =&gt; None
+  match
+    ((v1, v2),
+      match (v1, v2) with
+      | (Some (Var_annot s1), Some (Var_annot s2)) =&gt;
+        Compare.String.[Compare.S.equal] s1 s2
+      | _ =&gt; false
+      end) with
+  | ((Some (Var_annot s1), Some (Var_annot s2)), true) =&gt; v1
+  | ((Some _, None), _) =&gt; v1
+  | ((None, Some _), _) =&gt; v2
+  | ((_, _), _) =&gt; None
   end.
 
 Definition parse_constr_annot
@@ -61783,7 +61870,7 @@ Parameter parse_var_type_annot :
 <hr />
 <div class="row conversion-row" id="script_ir_translator.ml">
   <div class="col-md-6">
-    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">270 errors</span>
+    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-danger">264 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -64545,7 +64632,7 @@ and parse_ty :
       &gt;&gt;? fun ty_name -&gt;
       Gas.consume ctxt (Typecheck_costs.type_ 2)
       &gt;|? fun ctxt -&gt; (Ex_ty (Map_t (ta, tr, ty_name, has_big_map tr)), ctxt)
-  | Prim (loc, T_big_map, args, annot) when <abbr class="mark-error" title="Guard on pattern not supported">allow_big_map</abbr> -&gt;
+  | Prim (loc, T_big_map, args, annot) when allow_big_map -&gt;
       parse_big_map_ty ctxt ~legacy loc args annot
       &gt;&gt;? fun (big_map_ty, ctxt) -&gt;
       Gas.consume ctxt (Typecheck_costs.type_ 2)
@@ -64626,7 +64713,7 @@ and parse_storage_ty :
         T_pair,
         [Prim (big_map_loc, T_big_map, args, map_annot); remaining_storage],
         storage_annot )
-    when <abbr class="mark-error" title="Guard on pattern not supported">legacy</abbr> -&gt; (
+    when legacy -&gt; (
     match storage_annot with
     | [] -&gt;
         parse_ty
@@ -64637,8 +64724,8 @@ and parse_storage_ty :
           ~allow_contract:legacy
           node
     | [single]
-      when <abbr class="mark-error" title="Guard on pattern not supported">Compare.Int.(String.length single &gt; 0)
-           &amp;&amp; Compare.Char.(single.[0] = '%')</abbr> -&gt;
+      when Compare.Int.(String.length single &gt; 0)
+           &amp;&amp; Compare.Char.(single.[0] = '%') -&gt;
         parse_ty
           ctxt
           ~legacy
@@ -64829,7 +64916,7 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
     error <abbr class="mark-error" title="Values of extensible types are not handled">(Entrypoint_name_too_long entrypoint)</abbr>
   else
     match root_name with
-    | Some root_name when Compare.String.(<abbr class="mark-error" title="Guard on pattern not supported">entrypoint = root_name</abbr>) -&gt;
+    | Some root_name when Compare.String.(entrypoint = root_name) -&gt;
         ok ((fun e -&gt; e), Ex_ty full)
     | _ -&gt; <abbr class="mark-error" title="Try-with are not handled
 
@@ -66483,7 +66570,7 @@ Alternative: use a monad to sequence side-effects.">log loc stack_ty aft ; retur
       | Failed _ -&gt;
           fail <abbr class="mark-error" title="Values of extensible types are not handled">(Fail_not_in_tail_position loc)</abbr> )
   | (Prim (loc, I_DIP, [n; code], result_annot), stack)
-    when <abbr class="mark-error" title="Guard on pattern not supported">match parse_int32 n with Ok _ -&gt; true | Error _ -&gt; false</abbr> -&gt;
+    when match parse_int32 n with Ok _ -&gt; true | Error _ -&gt; false -&gt;
       let rec make_proof_argument :
           type tstk.
           int
@@ -67878,8 +67965,8 @@ and parse_toplevel :
             | None -&gt; (
               match pannot with
               | [single]
-                when <abbr class="mark-error" title="Guard on pattern not supported">Compare.Int.(String.length single &gt; 0)
-                     &amp;&amp; Compare.Char.(single.[0] = '%')</abbr> -&gt;
+                when Compare.Int.(String.length single &gt; 0)
+                     &amp;&amp; Compare.Char.(single.[0] = '%') -&gt;
                   ok
                     ( p,
                       [],
@@ -70950,80 +71037,86 @@ with parse_ty
   Error_monad.op_gtgtquestion
     (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle)
     (fun ctxt =&gt;
-      match node with
-      | Micheline.Prim loc Alpha_context.Script.T_unit [] annot =&gt;
+      match
+        (node,
+          match node with
+          | Micheline.Prim loc Alpha_context.Script.T_big_map args annot =&gt;
+            allow_big_map
+          | _ =&gt; false
+          end) with
+      | (Micheline.Prim loc Alpha_context.Script.T_unit [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Unit_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_int [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_int [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Int_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_nat [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_nat [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Nat_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_string [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_string [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.String_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_bytes [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_bytes [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Bytes_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_mutez [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_mutez [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Mutez_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_bool [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_bool [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Bool_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_key [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_key [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Key_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Key_hash_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Timestamp_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_address [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_address [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Address_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_signature [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_signature [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Signature_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_operation [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_operation [] annot, _) =&gt;
         if allow_operation then
           Error_monad.op_gtgtquestion
             (Script_ir_annot.parse_type_annot loc annot)
@@ -71034,14 +71127,15 @@ with parse_ty
                   ((Ex_ty (Script_typed_ir.Operation_t ty_name)), ctxt)))
         else
           Error_monad.__error_value extensible_type_value
-      | Micheline.Prim loc Alpha_context.Script.T_chain_id [] annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_chain_id [] annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.parse_type_annot loc annot)
           (fun ty_name =&gt;
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
               (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Chain_id_t ty_name)), ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_contract (cons utl []) annot
-        =&gt;
+      |
+        (Micheline.Prim loc Alpha_context.Script.T_contract (cons utl []) annot,
+          _) =&gt;
         if allow_contract then
           Error_monad.op_gtgtquestion (parse_parameter_ty ctxt legacy utl)
             (fun function_parameter =&gt;
@@ -71056,8 +71150,8 @@ with parse_ty
         else
           Error_monad.__error_value extensible_type_value
       |
-        Micheline.Prim loc Alpha_context.Script.T_pair (cons utl (cons utr []))
-          annot =&gt;
+        (Micheline.Prim loc Alpha_context.Script.T_pair (cons utl (cons utr []))
+          annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.extract_field_annot utl)
           (fun function_parameter =&gt;
             let '(utl, left_field) := function_parameter in
@@ -71088,8 +71182,8 @@ with parse_ty
                                     (Pervasives.op_pipepipe (has_big_map tl)
                                       (has_big_map tr)))), ctxt)))))))
       |
-        Micheline.Prim loc Alpha_context.Script.T_or (cons utl (cons utr []))
-          annot =&gt;
+        (Micheline.Prim loc Alpha_context.Script.T_or (cons utl (cons utr []))
+          annot, _) =&gt;
         Error_monad.op_gtgtquestion (Script_ir_annot.extract_field_annot utl)
           (fun function_parameter =&gt;
             let '(utl, left_constr) := function_parameter in
@@ -71120,8 +71214,8 @@ with parse_ty
                                     (Pervasives.op_pipepipe (has_big_map tl)
                                       (has_big_map tr)))), ctxt)))))))
       |
-        Micheline.Prim loc Alpha_context.Script.T_lambda
-          (cons uta (cons utr [])) annot =&gt;
+        (Micheline.Prim loc Alpha_context.Script.T_lambda
+          (cons uta (cons utr [])) annot, _) =&gt;
         Error_monad.op_gtgtquestion (parse_any_ty ctxt legacy uta)
           (fun function_parameter =&gt;
             let '(Ex_ty ta, ctxt) := function_parameter in
@@ -71135,7 +71229,8 @@ with parse_ty
                       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
                       (fun ctxt =&gt;
                         ((Ex_ty (Script_typed_ir.Lambda_t ta tr ty_name)), ctxt)))))
-      | Micheline.Prim loc Alpha_context.Script.T_option (cons ut []) annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_option (cons ut []) annot, _)
+        =&gt;
         Error_monad.op_gtgtquestion
           (if legacy then
             Error_monad.op_gtgtquestion (Script_ir_annot.extract_field_annot ut)
@@ -71162,7 +71257,8 @@ with parse_ty
                   (fun ctxt =&gt;
                     ((Ex_ty (Script_typed_ir.Option_t t ty_name (has_big_map t))),
                       ctxt))))
-      | Micheline.Prim loc Alpha_context.Script.T_list (cons ut []) annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_list (cons ut []) annot, _)
+        =&gt;
         Error_monad.op_gtgtquestion
           (parse_ty ctxt legacy allow_big_map allow_operation allow_contract ut)
           (fun function_parameter =&gt;
@@ -71175,7 +71271,7 @@ with parse_ty
                   (fun ctxt =&gt;
                     ((Ex_ty (Script_typed_ir.List_t t ty_name (has_big_map t))),
                       ctxt))))
-      | Micheline.Prim loc Alpha_context.Script.T_set (cons ut []) annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_set (cons ut []) annot, _) =&gt;
         Error_monad.op_gtgtquestion (parse_comparable_ty ctxt ut)
           (fun function_parameter =&gt;
             let '(Ex_comparable_ty t, ctxt) := function_parameter in
@@ -71186,8 +71282,8 @@ with parse_ty
                   (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 1))
                   (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Set_t t ty_name)), ctxt))))
       |
-        Micheline.Prim loc Alpha_context.Script.T_map (cons uta (cons utr []))
-          annot =&gt;
+        (Micheline.Prim loc Alpha_context.Script.T_map (cons uta (cons utr []))
+          annot, _) =&gt;
         Error_monad.op_gtgtquestion (parse_comparable_ty ctxt uta)
           (fun function_parameter =&gt;
             let '(Ex_comparable_ty ta, ctxt) := function_parameter in
@@ -71205,7 +71301,7 @@ with parse_ty
                         ((Ex_ty
                           (Script_typed_ir.Map_t ta tr ty_name (has_big_map tr))),
                           ctxt)))))
-      | Micheline.Prim loc Alpha_context.Script.T_big_map args annot =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_big_map args annot, true) =&gt;
         Error_monad.op_gtgtquestion
           (parse_big_map_ty ctxt legacy loc args annot)
           (fun function_parameter =&gt;
@@ -71213,28 +71309,28 @@ with parse_ty
             Error_monad.op_gtpipequestion
               (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
               (fun ctxt =&gt; (big_map_ty, ctxt)))
-      | Micheline.Prim loc Alpha_context.Script.T_big_map _ _ =&gt;
+      | (Micheline.Prim loc Alpha_context.Script.T_big_map _ _, _) =&gt;
         Error_monad.__error_value extensible_type_value
       |
-        Micheline.Prim loc
+        (Micheline.Prim loc
           ((Alpha_context.Script.T_unit | Alpha_context.Script.T_signature |
           Alpha_context.Script.T_int | Alpha_context.Script.T_nat |
           Alpha_context.Script.T_string | Alpha_context.Script.T_bytes |
           Alpha_context.Script.T_mutez | Alpha_context.Script.T_bool |
           Alpha_context.Script.T_key | Alpha_context.Script.T_key_hash |
           Alpha_context.Script.T_timestamp | Alpha_context.Script.T_address) as
-            prim) l _ =&gt; Error_monad.__error_value extensible_type_value
+            prim) l _, _) =&gt; Error_monad.__error_value extensible_type_value
       |
-        Micheline.Prim loc
+        (Micheline.Prim loc
           ((Alpha_context.Script.T_set | Alpha_context.Script.T_list |
           Alpha_context.Script.T_option | Alpha_context.Script.T_contract) as
-            prim) l _ =&gt; Error_monad.__error_value extensible_type_value
+            prim) l _, _) =&gt; Error_monad.__error_value extensible_type_value
       |
-        Micheline.Prim loc
+        (Micheline.Prim loc
           ((Alpha_context.Script.T_pair | Alpha_context.Script.T_or |
           Alpha_context.Script.T_map | Alpha_context.Script.T_lambda) as prim) l
-          _ =&gt; Error_monad.__error_value extensible_type_value
-      | expr =&gt;
+          _, _) =&gt; Error_monad.__error_value extensible_type_value
+      | (expr, _) =&gt;
         Pervasives.op_atat Error_monad.__error_value
           (unexpected expr [] Script_tc_errors.Type_namespace
             (cons Alpha_context.Script.T_pair
@@ -71297,16 +71393,33 @@ with parse_storage_ty
   (ctxt : Alpha_context.context) (legacy : bool)
   (node : Alpha_context.Script.node) {struct ctxt}
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
-  match node with
+  match
+    (node,
+      match node with
+      |
+        Micheline.Prim loc Alpha_context.Script.T_pair
+          (cons
+            (Micheline.Prim big_map_loc Alpha_context.Script.T_big_map args
+              map_annot) (cons remaining_storage [])) storage_annot =&gt; legacy
+      | _ =&gt; false
+      end) with
   |
-    Micheline.Prim loc Alpha_context.Script.T_pair
+    (Micheline.Prim loc Alpha_context.Script.T_pair
       (cons
         (Micheline.Prim big_map_loc Alpha_context.Script.T_big_map args
-          map_annot) (cons remaining_storage [])) storage_annot =&gt;
-    match storage_annot with
-    | [] =&gt; parse_ty ctxt legacy true false legacy node
-    | cons single [] =&gt; parse_ty ctxt legacy true false legacy node
-    | _ =&gt;
+          map_annot) (cons remaining_storage [])) storage_annot, true) =&gt;
+    match
+      (storage_annot,
+        match storage_annot with
+        | cons single [] =&gt;
+          Pervasives.op_andand
+            (Compare.Int.[Compare.S.op_gt] (String.length single) 0)
+            (Compare.Char.[Compare.S.op_eq] (String.get single 0) &quot;%&quot; % char)
+        | _ =&gt; false
+        end) with
+    | ([], _) =&gt; parse_ty ctxt legacy true false legacy node
+    | (cons single [], true) =&gt; parse_ty ctxt legacy true false legacy node
+    | (_, _) =&gt;
       Error_monad.op_gtgtquestion
         (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle)
         (fun ctxt =&gt;
@@ -71333,7 +71446,7 @@ with parse_storage_ty
                               (remaining_storage, storage_field, None) ty_name
                               true)), ctxt))))))
     end
-  | _ =&gt; parse_ty ctxt legacy true false legacy node
+  | (_, _) =&gt; parse_ty ctxt legacy true false legacy node
   end.
 
 Definition check_packable {A : Set}
@@ -71341,41 +71454,46 @@ Definition check_packable {A : Set}
   (root : Script_typed_ir.ty A) : Error_monad.tzresult unit :=
   let fix check {t : Set} (function_parameter : Script_typed_ir.ty t)
     {struct function_parameter} : Error_monad.tzresult unit :=
-    match function_parameter with
-    | Script_typed_ir.Big_map_t _ _ _ =&gt;
+    match
+      (function_parameter,
+        match function_parameter with
+        | Script_typed_ir.Contract_t _ _ =&gt; legacy
+        | _ =&gt; false
+        end) with
+    | (Script_typed_ir.Big_map_t _ _ _, _) =&gt;
       Error_monad.__error_value extensible_type_value
-    | Script_typed_ir.Operation_t _ =&gt;
+    | (Script_typed_ir.Operation_t _, _) =&gt;
       Error_monad.__error_value extensible_type_value
-    | Script_typed_ir.Unit_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Int_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Nat_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Signature_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.String_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Bytes_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Mutez_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Key_hash_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Key_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Timestamp_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Address_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Bool_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Chain_id_t _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Pair_t (l_ty, _, _) (r_ty, _, _) _ _ =&gt;
+    | (Script_typed_ir.Unit_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Int_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Nat_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Signature_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.String_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Bytes_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Mutez_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Key_hash_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Key_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Timestamp_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Address_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Bool_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Chain_id_t _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Pair_t (l_ty, _, _) (r_ty, _, _) _ _, _) =&gt;
       Error_monad.op_gtgtquestion (check l_ty)
         (fun function_parameter =&gt;
           let 'tt := function_parameter in
           check r_ty)
-    | Script_typed_ir.Union_t (l_ty, _) (r_ty, _) _ _ =&gt;
+    | (Script_typed_ir.Union_t (l_ty, _) (r_ty, _) _ _, _) =&gt;
       Error_monad.op_gtgtquestion (check l_ty)
         (fun function_parameter =&gt;
           let 'tt := function_parameter in
           check r_ty)
-    | Script_typed_ir.Option_t v_ty _ _ =&gt; check v_ty
-    | Script_typed_ir.List_t elt_ty _ _ =&gt; check elt_ty
-    | Script_typed_ir.Set_t _ _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Map_t _ elt_ty _ _ =&gt; check elt_ty
-    | Script_typed_ir.Lambda_t _l_ty _r_ty _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Contract_t _ _ =&gt; Error_monad.ok tt
-    | Script_typed_ir.Contract_t _ _ =&gt;
+    | (Script_typed_ir.Option_t v_ty _ _, _) =&gt; check v_ty
+    | (Script_typed_ir.List_t elt_ty _ _, _) =&gt; check elt_ty
+    | (Script_typed_ir.Set_t _ _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Map_t _ elt_ty _ _, _) =&gt; check elt_ty
+    | (Script_typed_ir.Lambda_t _l_ty _r_ty _, _) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Contract_t _ _, true) =&gt; Error_monad.ok tt
+    | (Script_typed_ir.Contract_t _ _, _) =&gt;
       Error_monad.__error_value extensible_type_value
     end in
   check root.
@@ -71532,9 +71650,15 @@ Definition find_entrypoint {A : Set}
   if Compare.Int.[Compare.S.op_gt] (String.length entrypoint) 31 then
     Error_monad.__error_value extensible_type_value
   else
-    match root_name with
-    | Some root_name =&gt; Error_monad.ok ((fun e =&gt; e), (Ex_ty full))
-    | _ =&gt;
+    match
+      (root_name,
+        match root_name with
+        | Some root_name =&gt;
+          Compare.String.[Compare.S.op_eq] entrypoint root_name
+        | _ =&gt; false
+        end) with
+    | (Some root_name, true) =&gt; Error_monad.ok ((fun e =&gt; e), (Ex_ty full))
+    | (_, _) =&gt;
       (* ❌ Try-with are not handled *)
       try (Error_monad.ok (find_entrypoint full entrypoint))
     end.
@@ -72633,18 +72757,29 @@ with parse_instr {bef : Set}
     (Pervasives.op_atat Lwt.__return
       (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
     (fun ctxt =&gt;
-      match (script_instr, stack_ty) with
+      match
+        ((script_instr, stack_ty),
+          match (script_instr, stack_ty) with
+          |
+            (Micheline.Prim loc Alpha_context.Script.I_DIP
+              (cons n (cons code [])) result_annot, stack) =&gt;
+            match parse_int32 n with
+            | Pervasives.Ok _ =&gt; true
+            | Pervasives.Error _ =&gt; false
+            end
+          | _ =&gt; false
+          end) with
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DROP [] annot,
-          Script_typed_ir.Item_t _ rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DROP [] annot,
+          Script_typed_ir.Item_t _ rest _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
             let 'tt := function_parameter in
             typed ctxt loc Script_typed_ir.Drop rest)
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DROP (cons n []) result_annot,
-          whole_stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DROP (cons n [])
+          result_annot, whole_stack), _) =&gt;
         Error_monad.op_gtgteqquestion (Lwt.__return (parse_int32 n))
           (fun whole_n =&gt;
             let fix make_proof_argument {tstk : Set}
@@ -72683,12 +72818,12 @@ with parse_instr {bef : Set}
                     typed ctxt loc (Script_typed_ir.Dropn whole_n n')
                       stack_after_drops)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DROP
-          ((cons _ (cons _ _)) as l) _, _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DROP
+          ((cons _ (cons _ _)) as l) _, _), _) =&gt;
         Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DUP [] annot,
-          Script_typed_ir.Item_t v rest stack_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DUP [] annot,
+          Script_typed_ir.Item_t v rest stack_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some stack_annot) annot)
           (fun annot =&gt;
@@ -72696,8 +72831,8 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t v
                 (Script_typed_ir.Item_t v rest stack_annot) annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
-          stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
+          stack), _) =&gt;
         let fix make_proof_argument {tstk : Set}
           (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
           : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
@@ -72734,12 +72869,12 @@ with parse_instr {bef : Set}
                     typed ctxt loc (Script_typed_ir.Dig n n')
                       (Script_typed_ir.Item_t x aft stack_annot))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DIG
-          (([] | cons _ (cons _ _)) as l) _, _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DIG
+          (([] | cons _ (cons _ _)) as l) _, _), _) =&gt;
         Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DUG (cons n []) result_annot,
-          Script_typed_ir.Item_t x whole_stack stack_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons n []) result_annot,
+          Script_typed_ir.Item_t x whole_stack stack_annot), _) =&gt;
         Error_monad.op_gtgteqquestion (Lwt.__return (parse_int32 n))
           (fun whole_n =&gt;
             let fix make_proof_argument {tstk x : Set}
@@ -72782,8 +72917,8 @@ with parse_instr {bef : Set}
                       in
                     typed ctxt loc (Script_typed_ir.Dug whole_n n') aft)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DUG (cons _ []) result_annot,
-          Script_typed_ir.Empty_t as stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons _ []) result_annot,
+          Script_typed_ir.Empty_t as stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc result_annot)
           (fun function_parameter =&gt;
@@ -72793,13 +72928,13 @@ with parse_instr {bef : Set}
                 let '(stack, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DUG
-          (([] | cons _ (cons _ _)) as l) _, _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DUG
+          (([] | cons _ (cons _ _)) as l) _, _), _) =&gt;
         Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SWAP [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SWAP [] annot,
           Script_typed_ir.Item_t v (Script_typed_ir.Item_t w rest stack_annot)
-            cur_top_annot) =&gt;
+            cur_top_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
@@ -72808,8 +72943,8 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t w
                 (Script_typed_ir.Item_t v rest cur_top_annot) stack_annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_PUSH (cons t (cons d []))
-          annot, stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_PUSH (cons t (cons d []))
+          annot, stack), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -72822,7 +72957,7 @@ with parse_instr {bef : Set}
                     let '(v, ctxt) := function_parameter in
                     typed ctxt loc (Script_typed_ir.Const v)
                       (Script_typed_ir.Item_t t stack annot))))
-      | (Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, stack) =&gt;
+      | ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, stack), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
           (fun function_parameter =&gt;
             let '(annot, ty_name) := function_parameter in
@@ -72830,8 +72965,8 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name) stack
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SOME [] annot,
-          Script_typed_ir.Item_t t rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SOME [] annot,
+          Script_typed_ir.Item_t t rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
           (fun function_parameter =&gt;
             let '(annot, ty_name) := function_parameter in
@@ -72839,8 +72974,8 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t
                 (Script_typed_ir.Option_t t ty_name (has_big_map t)) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_NONE (cons t []) annot, stack)
-        =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_NONE (cons t []) annot,
+          stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy t))
           (fun function_parameter =&gt;
@@ -72853,10 +72988,10 @@ with parse_instr {bef : Set}
                     (Script_typed_ir.Option_t t ty_name (has_big_map t)) stack
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_IF_NONE
+        ((Micheline.Prim loc Alpha_context.Script.I_IF_NONE
           (cons bt (cons bf [])) annot,
           (Script_typed_ir.Item_t (Script_typed_ir.Option_t t _ _) rest
-            option_annot) as bef) =&gt;
+            option_annot) as bef), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) bt)
           (fun function_parameter =&gt;
@@ -72901,9 +73036,9 @@ with parse_instr {bef : Set}
                                 let '(judgement, ctxt) := function_parameter in
                                 __return ctxt judgement))))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_PAIR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_PAIR [] annot,
           Script_typed_ir.Item_t a (Script_typed_ir.Item_t b rest snd_annot)
-            fst_annot) =&gt;
+            fst_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_constr_annot loc
             (Some (Script_ir_annot.var_to_field_annot fst_annot))
@@ -72917,10 +73052,10 @@ with parse_instr {bef : Set}
                   (Pervasives.op_pipepipe (has_big_map a) (has_big_map b))) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CAR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CAR [] annot,
           Script_typed_ir.Item_t
             (Script_typed_ir.Pair_t (a, expected_field_annot, a_annot) _ _ _)
-            rest pair_annot) =&gt;
+            rest pair_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_destr_annot loc annot Script_ir_annot.default_car_annot
             expected_field_annot pair_annot a_annot)
@@ -72935,10 +73070,10 @@ with parse_instr {bef : Set}
                 typed ctxt loc Script_typed_ir.Car
                   (Script_typed_ir.Item_t a rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CDR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CDR [] annot,
           Script_typed_ir.Item_t
             (Script_typed_ir.Pair_t _ (b, expected_field_annot, b_annot) _ _)
-            rest pair_annot) =&gt;
+            rest pair_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_destr_annot loc annot Script_ir_annot.default_cdr_annot
             expected_field_annot pair_annot b_annot)
@@ -72953,8 +73088,8 @@ with parse_instr {bef : Set}
                 typed ctxt loc Script_typed_ir.Cdr
                   (Script_typed_ir.Item_t b rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LEFT (cons tr []) annot,
-          Script_typed_ir.Item_t tl rest stack_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_LEFT (cons tr []) annot,
+          Script_typed_ir.Item_t tl rest stack_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy tr))
           (fun function_parameter =&gt;
@@ -72971,8 +73106,8 @@ with parse_instr {bef : Set}
                       (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))
                     rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_RIGHT (cons tl []) annot,
-          Script_typed_ir.Item_t tr rest stack_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_RIGHT (cons tl []) annot,
+          Script_typed_ir.Item_t tr rest stack_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy tl))
           (fun function_parameter =&gt;
@@ -72988,11 +73123,11 @@ with parse_instr {bef : Set}
                       (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))
                     rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_IF_LEFT
+        ((Micheline.Prim loc Alpha_context.Script.I_IF_LEFT
           (cons bt (cons bf [])) annot,
           (Script_typed_ir.Item_t
             (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) _ _) rest
-            union_annot) as bef) =&gt;
+            union_annot) as bef), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) bt)
           (fun function_parameter =&gt;
@@ -73043,8 +73178,9 @@ with parse_instr {bef : Set}
                               (fun function_parameter =&gt;
                                 let '(judgement, ctxt) := function_parameter in
                                 __return ctxt judgement))))))
-      | (Micheline.Prim loc Alpha_context.Script.I_NIL (cons t []) annot, stack)
-        =&gt;
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_NIL (cons t []) annot, stack),
+          _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy t))
           (fun function_parameter =&gt;
@@ -73057,10 +73193,10 @@ with parse_instr {bef : Set}
                     (Script_typed_ir.List_t t ty_name (has_big_map t)) stack
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CONS [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CONS [] annot,
           Script_typed_ir.Item_t tv
             (Script_typed_ir.Item_t
-              (Script_typed_ir.List_t t ty_name has_big_map) rest _) _) =&gt;
+              (Script_typed_ir.List_t t ty_name has_big_map) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt tv t loc Alpha_context.Script.I_CONS 1 2)
           (fun function_parameter =&gt;
@@ -73071,10 +73207,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t
                     (Script_typed_ir.List_t t ty_name has_big_map) rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_IF_CONS
+        ((Micheline.Prim loc Alpha_context.Script.I_IF_CONS
           (cons bt (cons bf [])) annot,
           (Script_typed_ir.Item_t (Script_typed_ir.List_t t ty_name has_big_map)
-            rest list_annot) as bef) =&gt;
+            rest list_annot) as bef), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) bt)
           (fun function_parameter =&gt;
@@ -73127,17 +73263,17 @@ with parse_instr {bef : Set}
                                 let '(judgement, ctxt) := function_parameter in
                                 __return ctxt judgement))))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.List_t _ _ _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.List_t _ _ _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
           (fun function_parameter =&gt;
             let '(annot, tname) := function_parameter in
             typed ctxt loc Script_typed_ir.List_size
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.List_t elt _ _) starting_rest
-            list_annot) =&gt;
+            list_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) body)
           (fun function_parameter =&gt;
@@ -73192,9 +73328,9 @@ with parse_instr {bef : Set}
                     | Failed _ =&gt; Error_monad.fail extensible_type_value
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.List_t elt _ _) rest
-            list_annot) =&gt;
+            list_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) body)
           (fun function_parameter =&gt;
@@ -73244,8 +73380,8 @@ with parse_instr {bef : Set}
                         (Script_typed_ir.List_iter (__descr_value rest)) rest
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EMPTY_SET (cons t []) annot,
-          rest) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_SET (cons t []) annot,
+          rest), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt t))
           (fun function_parameter =&gt;
@@ -73257,9 +73393,9 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Set_t t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.Set_t comp_elt _) rest
-            set_annot) =&gt;
+            set_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) body)
           (fun function_parameter =&gt;
@@ -73310,9 +73446,10 @@ with parse_instr {bef : Set}
                         (Script_typed_ir.Set_iter (__descr_value rest)) rest
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
           Script_typed_ir.Item_t v
-            (Script_typed_ir.Item_t (Script_typed_ir.Set_t elt _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Set_t elt _) rest _) _), _)
+        =&gt;
         let elt := ty_of_comparable_ty elt in
         Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
           (fun function_parameter =&gt;
@@ -73325,11 +73462,11 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
           Script_typed_ir.Item_t v
             (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
               (Script_typed_ir.Item_t (Script_typed_ir.Set_t elt tname) rest
-                set_annot) _) _) =&gt;
+                set_annot) _) _), _) =&gt;
         match comparable_ty_of_ty v with
         | None =&gt;
           Error_monad.op_gtgteqquestion (unparse_ty ctxt v)
@@ -73350,15 +73487,15 @@ with parse_instr {bef : Set}
                       rest annot)))
         end
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Set_t _ _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Set_t _ _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Set_size
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP
-          (cons tk (cons tv [])) annot, stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP
+          (cons tk (cons tv [])) annot, stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =&gt;
@@ -73375,9 +73512,9 @@ with parse_instr {bef : Set}
                         (Script_typed_ir.Map_t tk tv ty_name (has_big_map tv))
                         stack annot))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.Map_t ck elt _ _)
-            starting_rest _map_annot) =&gt;
+            starting_rest _map_annot), _) =&gt;
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) body)
@@ -73439,9 +73576,9 @@ with parse_instr {bef : Set}
                     | Failed _ =&gt; Error_monad.fail extensible_type_value
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.Map_t comp_elt element_ty _ _)
-            rest _map_annot) =&gt;
+            rest _map_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) body)
           (fun function_parameter =&gt;
@@ -73498,10 +73635,10 @@ with parse_instr {bef : Set}
                         (Script_typed_ir.Map_iter (__descr_value rest)) rest
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
           Script_typed_ir.Item_t vk
-            (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck _ _ _) rest _) _)
-        =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck _ _ _) rest _) _),
+          _) =&gt;
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt vk k loc Alpha_context.Script.I_MEM 1 2)
@@ -73513,10 +73650,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
           Script_typed_ir.Item_t vk
             (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck elt _ has_big_map)
-              rest _) _) =&gt;
+              rest _) _), _) =&gt;
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2)
@@ -73528,12 +73665,12 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t
                     (Script_typed_ir.Option_t elt None has_big_map) rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
           Script_typed_ir.Item_t vk
             (Script_typed_ir.Item_t (Script_typed_ir.Option_t vv _ _)
               (Script_typed_ir.Item_t
                 (Script_typed_ir.Map_t ck v map_name has_big_map) rest map_annot)
-              _) _) =&gt;
+              _) _), _) =&gt;
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt vk k loc Alpha_context.Script.I_UPDATE 1 3)
@@ -73551,15 +73688,15 @@ with parse_instr {bef : Set}
                         (Script_typed_ir.Map_t ck v map_name has_big_map) rest
                         annot))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Map_t _ _ _ _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Map_t _ _ _ _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Map_size
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
-          (cons tk (cons tv [])) annot, stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
+          (cons tk (cons tv [])) annot, stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =&gt;
@@ -73576,10 +73713,10 @@ with parse_instr {bef : Set}
                       (Script_typed_ir.Item_t
                         (Script_typed_ir.Big_map_t tk tv ty_name) stack annot))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
           Script_typed_ir.Item_t set_key
             (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t map_key _ _) rest
-              _) _) =&gt;
+              _) _), _) =&gt;
         let k := ty_of_comparable_ty map_key in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt set_key k loc Alpha_context.Script.I_MEM 1 2)
@@ -73591,10 +73728,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
           Script_typed_ir.Item_t vk
             (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t ck elt _) rest _)
-            _) =&gt;
+            _), _) =&gt;
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2)
@@ -73607,12 +73744,12 @@ with parse_instr {bef : Set}
                     (Script_typed_ir.Option_t elt None (has_big_map elt)) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
           Script_typed_ir.Item_t set_key
             (Script_typed_ir.Item_t (Script_typed_ir.Option_t set_value _ _)
               (Script_typed_ir.Item_t
                 (Script_typed_ir.Big_map_t map_key map_value map_name) rest
-                map_annot) _) _) =&gt;
+                map_annot) _) _), _) =&gt;
         let k := ty_of_comparable_ty map_key in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt set_key k loc Alpha_context.Script.I_UPDATE 1 3)
@@ -73630,9 +73767,9 @@ with parse_instr {bef : Set}
                       (Script_typed_ir.Item_t
                         (Script_typed_ir.Big_map_t map_key map_value map_name)
                         rest annot))))
-      | (Micheline.Seq loc [], stack) =&gt;
+      | ((Micheline.Seq loc [], stack), _) =&gt;
         typed ctxt loc Script_typed_ir.Nop stack
-      | (Micheline.Seq loc (cons single []), stack) =&gt;
+      | ((Micheline.Seq loc (cons single []), stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_instr type_logger tc_context ctxt legacy single stack)
           (fun function_parameter =&gt;
@@ -73659,7 +73796,7 @@ with parse_instr {bef : Set}
               __return ctxt
                 (Failed {| judgement.Failed.descr := __descr_value |})
             end)
-      | (Micheline.Seq loc (cons hd tl), stack) =&gt;
+      | ((Micheline.Seq loc (cons hd tl), stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_instr type_logger tc_context ctxt legacy hd stack)
           (fun function_parameter =&gt;
@@ -73690,9 +73827,10 @@ with parse_instr {bef : Set}
                   end)
             end)
       |
-        (Micheline.Prim loc Alpha_context.Script.I_IF (cons bt (cons bf []))
+        ((Micheline.Prim loc Alpha_context.Script.I_IF (cons bt (cons bf []))
           annot,
-          (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _) as bef) =&gt;
+          (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _) as bef), _)
+        =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) bt)
           (fun function_parameter =&gt;
@@ -73731,9 +73869,9 @@ with parse_instr {bef : Set}
                                 let '(judgement, ctxt) := function_parameter in
                                 __return ctxt judgement))))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LOOP (cons body []) annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_LOOP (cons body []) annot,
           (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _stack_annot)
-            as stack) =&gt;
+            as stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) body)
           (fun function_parameter =&gt;
@@ -73780,11 +73918,11 @@ with parse_instr {bef : Set}
                       typed ctxt loc (Script_typed_ir.Loop ibody) rest
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LOOP_LEFT (cons body [])
+        ((Micheline.Prim loc Alpha_context.Script.I_LOOP_LEFT (cons body [])
           annot,
           (Script_typed_ir.Item_t
             (Script_typed_ir.Union_t (tl, l_field) (tr, _) _ _) rest union_annot)
-            as stack) =&gt;
+            as stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_kind (cons Script_tc_errors.Seq_kind []) body)
           (fun function_parameter =&gt;
@@ -73835,8 +73973,8 @@ with parse_instr {bef : Set}
                         (Script_typed_ir.Item_t tr rest annot)
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LAMBDA
-          (cons arg (cons ret (cons code []))) annot, stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
+          (cons arg (cons ret (cons code []))) annot, stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy arg))
           (fun function_parameter =&gt;
@@ -73862,10 +74000,10 @@ with parse_instr {bef : Set}
                                 (Script_typed_ir.Lambda_t arg ret None) stack
                                 annot))))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EXEC [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_EXEC [] annot,
           Script_typed_ir.Item_t arg
             (Script_typed_ir.Item_t (Script_typed_ir.Lambda_t param ret _) rest
-              _) _) =&gt;
+              _) _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt arg param loc Alpha_context.Script.I_EXEC 1 2)
           (fun function_parameter =&gt;
@@ -73875,12 +74013,12 @@ with parse_instr {bef : Set}
                 typed ctxt loc Script_typed_ir.Exec
                   (Script_typed_ir.Item_t ret rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_APPLY [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_APPLY [] annot,
           Script_typed_ir.Item_t capture
             (Script_typed_ir.Item_t
               (Script_typed_ir.Lambda_t
                 (Script_typed_ir.Pair_t (capture_ty, _, _) (arg_ty, _, _)
-                  lam_annot _) ret _) rest _) _) =&gt;
+                  lam_annot _) ret _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (check_packable false loc capture_ty))
           (fun function_parameter =&gt;
@@ -73897,8 +74035,8 @@ with parse_instr {bef : Set}
                         (Script_typed_ir.Lambda_t arg_ty ret lam_annot) rest
                         annot))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DIP (cons code []) annot,
-          Script_typed_ir.Item_t v rest stack_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons code []) annot,
+          Script_typed_ir.Item_t v rest stack_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
@@ -73920,8 +74058,8 @@ with parse_instr {bef : Set}
                     | Failed _ =&gt; Error_monad.fail extensible_type_value
                     end)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
-          result_annot, stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
+          result_annot, stack), true) =&gt;
         let fix make_proof_argument {tstk : Set}
           (n : Z) (inner_tc_context : tc_context)
           (stk : Script_typed_ir.stack_ty tstk) {struct n}
@@ -73972,12 +74110,12 @@ with parse_instr {bef : Set}
                     typed new_ctxt loc (Script_typed_ir.Dipn n n' __descr_value)
                       aft)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_DIP
-          (([] | cons _ (cons _ (cons _ _))) as l) _, _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_DIP
+          (([] | cons _ (cons _ (cons _ _))) as l) _, _), _) =&gt;
         Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc Alpha_context.Script.I_FAILWITH [] annot,
-          Script_typed_ir.Item_t v _rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_FAILWITH [] annot,
+          Script_typed_ir.Item_t v _rest _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
@@ -73995,38 +74133,38 @@ with parse_instr {bef : Set}
                 __return ctxt
                   (Failed {| judgement.Failed.descr := __descr_value |})))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Add_timestamp_to_seconds
               (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
             (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest _)
-            _) =&gt;
+            _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Add_seconds_to_timestamp
               (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Sub_timestamp_seconds
               (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn2) rest _) _)
-        =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn2) rest _) _),
+          _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74037,9 +74175,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.String_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.String_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.String_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74050,10 +74189,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
           Script_typed_ir.Item_t
             (Script_typed_ir.List_t (Script_typed_ir.String_t tname) _ _) rest
-            list_annot) =&gt;
+            list_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some list_annot) annot)
           (fun annot =&gt;
@@ -74061,11 +74200,11 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
             (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
               (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
-                string_annot) _) _) =&gt;
+                string_annot) _) _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc
             (Some
@@ -74077,16 +74216,17 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Option_t (Script_typed_ir.String_t tname) None
                   false) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.String_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.String_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.String_size
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74097,21 +74237,21 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
           Script_typed_ir.Item_t
             (Script_typed_ir.List_t (Script_typed_ir.Bytes_t tname) _ _) rest
-            list_annot) =&gt;
+            list_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some list_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Concat_bytes
               (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
             (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
               (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest
-                bytes_annot) _) _) =&gt;
+                bytes_annot) _) _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc
             (Some
@@ -74123,16 +74263,17 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Option_t (Script_typed_ir.Bytes_t tname) None
                   false) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Bytes_size
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74143,9 +74284,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74156,26 +74298,27 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Mul_teznat
               (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest _) _)
-        =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest _) _),
+          _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Mul_nattez
               (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74186,9 +74329,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74199,9 +74343,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74212,22 +74357,23 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Not
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ABS [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_ABS [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Abs_int
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ISNAT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest int_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_ISNAT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest int_annot), _)
+        =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some int_annot) annot)
           (fun annot =&gt;
@@ -74236,30 +74382,31 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Option_t (Script_typed_ir.Nat_t None) None
                   false) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_INT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_INT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Int_nat
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Neg_int
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Neg_nat
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74270,25 +74417,27 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Add_intnat
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Add_natint
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74299,9 +74448,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74312,25 +74462,27 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Sub_int
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Sub_int
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74341,9 +74493,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74354,25 +74507,27 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Mul_intnat
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Mul_natint
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74383,9 +74538,9 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Ediv_teznat
@@ -74396,9 +74551,10 @@ with parse_instr {bef : Set}
                     ((Script_typed_ir.Mutez_t tname), None, None) None false)
                   None false) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74413,9 +74569,10 @@ with parse_instr {bef : Set}
                         ((Script_typed_ir.Mutez_t tname), None, None) None false)
                       None false) rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74430,9 +74587,9 @@ with parse_instr {bef : Set}
                         ((Script_typed_ir.Nat_t None), None, None) None false)
                       None false) rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Ediv_intnat
@@ -74443,9 +74600,9 @@ with parse_instr {bef : Set}
                     ((Script_typed_ir.Nat_t None), None, None) None false) None
                   false) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Ediv_natint
@@ -74456,9 +74613,10 @@ with parse_instr {bef : Set}
                     ((Script_typed_ir.Nat_t tname), None, None) None false) None
                   false) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74473,9 +74631,10 @@ with parse_instr {bef : Set}
                         ((Script_typed_ir.Nat_t tname), None, None) None false)
                       None false) rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LSL [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_LSL [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74486,9 +74645,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LSR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_LSR [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74499,9 +74659,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74512,9 +74673,10 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74525,17 +74687,19 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.And_int_nat
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74546,22 +74710,22 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Not_int
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Not_nat
               (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_COMPARE [] annot,
-          Script_typed_ir.Item_t t1 (Script_typed_ir.Item_t t2 rest _) _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_COMPARE [] annot,
+          Script_typed_ir.Item_t t1 (Script_typed_ir.Item_t t2 rest _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -74581,50 +74745,50 @@ with parse_instr {bef : Set}
                       annot)
                 end))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_EQ [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_EQ [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Eq
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_NEQ [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_NEQ [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Neq
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_LT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Lt
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_GT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_GT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Gt
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_LE [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Le
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_GE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_GE [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Ge
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CAST (cons cast_t []) annot,
-          Script_typed_ir.Item_t t stack item_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_CAST (cons cast_t []) annot,
+          Script_typed_ir.Item_t t stack item_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some item_annot) annot)
           (fun annot =&gt;
@@ -74644,15 +74808,15 @@ with parse_instr {bef : Set}
                         typed ctxt loc Script_typed_ir.Nop
                           (Script_typed_ir.Item_t cast_t stack annot)))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_RENAME [] annot,
-          Script_typed_ir.Item_t t stack _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_RENAME [] annot,
+          Script_typed_ir.Item_t t stack _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Nop
               (Script_typed_ir.Item_t t stack annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_PACK [] annot,
-          Script_typed_ir.Item_t t rest unpacked_annot) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_PACK [] annot,
+          Script_typed_ir.Item_t t rest unpacked_annot), _) =&gt;
         Error_monad.op_gtgteqquestion (Lwt.__return (check_packable true loc t))
           (fun function_parameter =&gt;
             let 'tt := function_parameter in
@@ -74666,9 +74830,9 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest
                     annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_UNPACK (cons ty []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest packed_annot)
-        =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_UNPACK (cons ty []) annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest packed_annot),
+          _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_packable_ty ctxt legacy ty))
           (fun function_parameter =&gt;
@@ -74684,9 +74848,9 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t
                     (Script_typed_ir.Option_t t ty_name false) rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_ADDRESS [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_ADDRESS [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Contract_t _ _) rest
-            contract_annot) =&gt;
+            contract_annot), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc
             (Some
@@ -74697,9 +74861,9 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CONTRACT (cons ty []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Address_t _) rest addr_annot)
-        =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_CONTRACT (cons ty []) annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Address_t _) rest addr_annot),
+          _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_parameter_ty ctxt legacy ty))
           (fun function_parameter =&gt;
@@ -74732,11 +74896,11 @@ with parse_instr {bef : Set}
                           (Script_typed_ir.Contract_t t None) None false) rest
                         annot))))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] annot,
           Script_typed_ir.Item_t p
             (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
               (Script_typed_ir.Item_t (Script_typed_ir.Contract_t cp _) rest _)
-              _) _) =&gt;
+              _) _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt p cp loc Alpha_context.Script.I_TRANSFER_TOKENS 1
             4)
@@ -74748,23 +74912,23 @@ with parse_instr {bef : Set}
                   (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None)
                     rest annot)))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SET_DELEGATE [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_SET_DELEGATE [] annot,
           Script_typed_ir.Item_t
-            (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _) rest _)
-        =&gt;
+            (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _) rest _),
+          _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Set_delegate
               (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _)
             (Script_typed_ir.Item_t
               (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
                 (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _) rest _) _) _)
-            _) =&gt;
+            _), _) =&gt;
         if legacy then
           Error_monad.op_gtgteqquestion (parse_two_var_annot loc annot)
             (fun function_parameter =&gt;
@@ -74776,8 +74940,8 @@ with parse_instr {bef : Set}
         else
           Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc Alpha_context.Script.I_IMPLICIT_ACCOUNT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_IMPLICIT_ACCOUNT [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Implicit_account
@@ -74785,7 +74949,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Contract_t (Script_typed_ir.Unit_t None) None)
                 rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
           (cons ((Micheline.Seq _ _) as code) []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _)
             (Script_typed_ir.Item_t
@@ -74793,7 +74957,7 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
                 (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
                   (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
-                    (Script_typed_ir.Item_t ginit rest _) _) _) _) _) _) =&gt;
+                    (Script_typed_ir.Item_t ginit rest _) _) _) _) _) _), _) =&gt;
         if legacy then
           Error_monad.op_gtgteqquestion (parse_two_var_annot loc annot)
             (fun function_parameter =&gt;
@@ -74940,12 +75104,12 @@ with parse_instr {bef : Set}
         else
           Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
           (cons ((Micheline.Seq _ _) as code) []) annot,
           Script_typed_ir.Item_t
             (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
             (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
-              (Script_typed_ir.Item_t ginit rest _) _) _) =&gt;
+              (Script_typed_ir.Item_t ginit rest _) _) _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_two_var_annot loc annot)
           (fun function_parameter =&gt;
             let '(op_annot, addr_annot) := function_parameter in
@@ -75079,26 +75243,30 @@ with parse_instr {bef : Set}
                                                                 None) rest
                                                               addr_annot)
                                                             op_annot)))))))))))))
-      | (Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, stack) =&gt;
+      | ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_now_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Now
               (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None) stack
                 annot))
-      | (Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot, stack) =&gt;
+      | ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot, stack), _)
+        =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_amount_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Amount
               (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) stack annot))
-      | (Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot, stack) =&gt;
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot, stack), _)
+        =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.ChainId
               (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None) stack
                 annot))
-      | (Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot, stack) =&gt;
+      | ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot, stack), _)
+        =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_balance_annot)
             annot)
@@ -75106,47 +75274,47 @@ with parse_instr {bef : Set}
             typed ctxt loc Script_typed_ir.Balance
               (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) stack annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_HASH_KEY [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Key_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_HASH_KEY [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Key_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Hash_key
               (Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t None) rest
                 annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_CHECK_SIGNATURE [] annot,
+        ((Micheline.Prim loc Alpha_context.Script.I_CHECK_SIGNATURE [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Key_t _)
             (Script_typed_ir.Item_t (Script_typed_ir.Signature_t _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) _) _)
-        =&gt;
+              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) _) _),
+          _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Check_signature
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_BLAKE2B [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_BLAKE2B [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Blake2b
               (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SHA256 [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SHA256 [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Sha256
               (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_SHA512 [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_SHA512 [] annot,
+          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Sha512
               (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
       |
-        (Micheline.Prim loc Alpha_context.Script.I_STEPS_TO_QUOTA [] annot,
-          stack) =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_STEPS_TO_QUOTA [] annot,
+          stack), _) =&gt;
         if legacy then
           Error_monad.op_gtgteqquestion
             (parse_var_annot loc (Some Script_ir_annot.default_steps_annot)
@@ -75156,21 +75324,23 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) stack annot))
         else
           Error_monad.fail extensible_type_value
-      | (Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot, stack) =&gt;
+      | ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot, stack), _)
+        =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_source_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Source
               (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) stack
                 annot))
-      | (Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot, stack) =&gt;
+      | ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot, stack), _)
+        =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_sender_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Sender
               (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) stack
                 annot))
-      | (Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, stack) =&gt;
+      | ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, stack), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_entrypoint_annot loc (Some Script_ir_annot.default_self_annot)
             annot)
@@ -75215,7 +75385,7 @@ with parse_instr {bef : Set}
               end in
             get_toplevel_type tc_context)
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_DUP | Alpha_context.Script.I_SWAP |
           Alpha_context.Script.I_SOME | Alpha_context.Script.I_UNIT |
           Alpha_context.Script.I_PAIR | Alpha_context.Script.I_CAR |
@@ -75244,37 +75414,37 @@ with parse_instr {bef : Set}
           Alpha_context.Script.I_SENDER | Alpha_context.Script.I_BLAKE2B |
           Alpha_context.Script.I_SHA256 | Alpha_context.Script.I_SHA512 |
           Alpha_context.Script.I_STEPS_TO_QUOTA | Alpha_context.Script.I_ADDRESS)
-            as name) ((cons _ _) as l) _, _) =&gt;
+            as name) ((cons _ _) as l) _, _), _) =&gt;
         Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_NONE | Alpha_context.Script.I_LEFT |
           Alpha_context.Script.I_RIGHT | Alpha_context.Script.I_NIL |
           Alpha_context.Script.I_MAP | Alpha_context.Script.I_ITER |
           Alpha_context.Script.I_EMPTY_SET | Alpha_context.Script.I_DIP |
           Alpha_context.Script.I_LOOP | Alpha_context.Script.I_LOOP_LEFT |
           Alpha_context.Script.I_CONTRACT) as name)
-          (([] | cons _ (cons _ _)) as l) _, _) =&gt;
+          (([] | cons _ (cons _ _)) as l) _, _), _) =&gt;
         Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_PUSH | Alpha_context.Script.I_IF_NONE |
           Alpha_context.Script.I_IF_LEFT | Alpha_context.Script.I_IF_CONS |
           Alpha_context.Script.I_EMPTY_MAP | Alpha_context.Script.I_IF) as name)
-          (([] | cons _ [] | cons _ (cons _ (cons _ _))) as l) _, _) =&gt;
+          (([] | cons _ [] | cons _ (cons _ (cons _ _))) as l) _, _), _) =&gt;
         Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc Alpha_context.Script.I_LAMBDA
-          (([] | cons _ [] | cons _ (cons _ (cons _ (cons _ _)))) as l) _, _) =&gt;
-        Error_monad.fail extensible_type_value
+        ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
+          (([] | cons _ [] | cons _ (cons _ (cons _ (cons _ _)))) as l) _, _), _)
+        =&gt; Error_monad.fail extensible_type_value
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_ADD | Alpha_context.Script.I_SUB |
           Alpha_context.Script.I_MUL | Alpha_context.Script.I_EDIV |
           Alpha_context.Script.I_AND | Alpha_context.Script.I_OR |
           Alpha_context.Script.I_XOR | Alpha_context.Script.I_LSL |
           Alpha_context.Script.I_LSR) as name) [] _,
-          Script_typed_ir.Item_t ta (Script_typed_ir.Item_t tb _ _) _) =&gt;
+          Script_typed_ir.Item_t ta (Script_typed_ir.Item_t tb _ _) _), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (serialize_ty_for_error ctxt ta))
           (fun function_parameter =&gt;
@@ -75285,47 +75455,50 @@ with parse_instr {bef : Set}
                 let '(tb, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value))
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_NEG | Alpha_context.Script.I_ABS |
           Alpha_context.Script.I_NOT | Alpha_context.Script.I_CONCAT |
           Alpha_context.Script.I_SIZE | Alpha_context.Script.I_EQ |
           Alpha_context.Script.I_NEQ | Alpha_context.Script.I_LT |
           Alpha_context.Script.I_GT | Alpha_context.Script.I_LE |
-          Alpha_context.Script.I_GE) as name) [] _, Script_typed_ir.Item_t t _ _)
-        =&gt;
+          Alpha_context.Script.I_GE) as name) [] _, Script_typed_ir.Item_t t _ _),
+          _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (serialize_ty_for_error ctxt t))
           (fun function_parameter =&gt;
             let '(t, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_UPDATE | Alpha_context.Script.I_SLICE) as
-            name) [] _, stack) =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
-          (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      | (Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _, stack)
-        =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
-          (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      | (Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _, stack)
-        =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
-          (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      | (Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _, stack)
-        =&gt;
+            name) [] _, stack), _) =&gt;
         Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
           (fun function_parameter =&gt;
             let '(stack, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _, stack),
+          _) =&gt;
+        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+          (fun function_parameter =&gt;
+            let '(stack, _ctxt) := function_parameter in
+            Error_monad.fail extensible_type_value)
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _, stack),
+          _) =&gt;
+        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+          (fun function_parameter =&gt;
+            let '(stack, _ctxt) := function_parameter in
+            Error_monad.fail extensible_type_value)
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _, stack),
+          _) =&gt;
+        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+          (fun function_parameter =&gt;
+            let '(stack, _ctxt) := function_parameter in
+            Error_monad.fail extensible_type_value)
+      |
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_DROP | Alpha_context.Script.I_DUP |
           Alpha_context.Script.I_CAR | Alpha_context.Script.I_CDR |
           Alpha_context.Script.I_SOME | Alpha_context.Script.I_BLAKE2B |
@@ -75340,13 +75513,13 @@ with parse_instr {bef : Set}
           Alpha_context.Script.I_EQ | Alpha_context.Script.I_NEQ |
           Alpha_context.Script.I_LT | Alpha_context.Script.I_GT |
           Alpha_context.Script.I_LE | Alpha_context.Script.I_GE) as name) _ _,
-          stack) =&gt;
+          stack), _) =&gt;
         Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
           (fun function_parameter =&gt;
             let '(stack, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        (Micheline.Prim loc
+        ((Micheline.Prim loc
           ((Alpha_context.Script.I_SWAP | Alpha_context.Script.I_PAIR |
           Alpha_context.Script.I_CONS | Alpha_context.Script.I_GET |
           Alpha_context.Script.I_MEM | Alpha_context.Script.I_EXEC |
@@ -75355,12 +75528,12 @@ with parse_instr {bef : Set}
           Alpha_context.Script.I_EDIV | Alpha_context.Script.I_AND |
           Alpha_context.Script.I_OR | Alpha_context.Script.I_XOR |
           Alpha_context.Script.I_LSL | Alpha_context.Script.I_LSR) as name) _ _,
-          stack) =&gt;
+          stack), _) =&gt;
         Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
           (fun function_parameter =&gt;
             let '(stack, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
-      | (expr, _) =&gt;
+      | ((expr, _), _) =&gt;
         Pervasives.op_atat Error_monad.fail
           (unexpected expr (cons Script_tc_errors.Seq_kind [])
             Script_tc_errors.Instr_namespace
@@ -75787,14 +75960,24 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                   | Some (Field_annot root_name) =&gt;
                     Error_monad.ok (p, pannot, (Some root_name))
                   | None =&gt;
-                    match pannot with
-                    | cons single [] =&gt;
+                    match
+                      (pannot,
+                        match pannot with
+                        | cons single [] =&gt;
+                          Pervasives.op_andand
+                            (Compare.Int.[Compare.S.op_gt]
+                              (String.length single) 0)
+                            (Compare.Char.[Compare.S.op_eq]
+                              (String.get single 0) &quot;%&quot; % char)
+                        | _ =&gt; false
+                        end) with
+                    | (cons single [], true) =&gt;
                       Error_monad.ok
                         (p, [],
                           (Some
                             (String.sub single 1
                               (Pervasives.op_minus (String.length single) 1))))
-                    | _ =&gt; Error_monad.ok (p, pannot, None)
+                    | (_, _) =&gt; Error_monad.ok (p, pannot, None)
                     end
                   end) in
             if legacy then
