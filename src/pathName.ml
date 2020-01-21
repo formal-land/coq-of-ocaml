@@ -275,5 +275,11 @@ let is_unit (path_name : t) : bool =
   | ([], "unit") -> true
   | _ -> false
 
+let false_value : t =
+  { path = []; base = Name.Make "false" }
+
+let true_value : t =
+  { path = []; base = Name.Make "true" }
+
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))

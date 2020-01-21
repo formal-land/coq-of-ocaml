@@ -80,6 +80,18 @@ let get_module_typ_values
     )
   | _ -> return []
 
+let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
+  : Pattern.t list =
+  if n = 0 then
+    []
+  else
+    let head =
+      if i = 0 && is_guarded then
+        Pattern.Constructor (PathName.true_value, [])
+      else
+        Pattern.Any in
+    head :: any_patterns_with_ith_true is_guarded (i - 1) (n - 1)
+
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
@@ -107,7 +119,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let x = Name.of_ident true x in
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
-  | Texp_function { cases = cases; _ } ->
+  | Texp_function { cases; _ } ->
     open_cases typ_vars cases >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
@@ -120,41 +132,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
     of_expression typ_vars e >>= fun e ->
-    (cases |> Monad.List.map (fun {c_lhs; c_guard; c_rhs} ->
-      set_loc (Loc.of_location c_lhs.pat_loc) (
-      begin match c_guard with
-      | Some { exp_loc; _ } ->
-        set_loc (Loc.of_location exp_loc) (raise () NotSupported "Guard on pattern not supported")
-      | None -> return ()
-      end >>
-      Pattern.of_pattern c_lhs >>= fun pattern ->
-      of_expression typ_vars c_rhs >>= fun c_rhs ->
-      return (pattern, c_rhs)
-      )
-    )) >>= fun cases ->
-    (exception_cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
-      set_loc (Loc.of_location c_lhs.pat_loc) (
-      match c_guard with
-      | Some guard_exp ->
-        of_expression typ_vars guard_exp >>= fun guard_exp ->
-        begin match guard_exp with
-        | Constructor ({ PathName.path = []; base = Name.Make "false" }, []) ->
-          of_expression typ_vars c_rhs >>= fun c_rhs ->
-          return (Some c_rhs)
-        | _ -> raise None Unexpected "Expected `false` as guard on the exception case to represent the default GADT case"
-        end
-      | None ->
-        raise None NotSupported (
-          "Pattern-matching on exceptions not supported\n\n" ^
-          "Only the special case `| exception _ when false -> ...` is supported for default value of GADT pattern-matching"
-        )
-      )
-    )) >>= fun default_values ->
-    let default_value =
-      match default_values with
-      | [default_value] -> Some default_value
-      | _ -> None in
-    return (Match (e, cases, default_value))
+    of_match typ_vars e cases exception_cases
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
@@ -267,19 +245,99 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_extension_constructor _ ->
     error_message (Error "extension") NotSupported "Construction of extensions is not handled"))
 
+and of_match
+  (typ_vars : Name.t Name.Map.t)
+  (e : t)
+  (cases : case list)
+  (exception_cases : case list)
+  : t Monad.t =
+  (cases |> Monad.List.map (fun {c_lhs; c_guard; c_rhs} ->
+    set_loc (Loc.of_location c_lhs.pat_loc) (
+    begin match c_guard with
+    | Some guard ->
+      of_expression typ_vars guard >>= fun guard ->
+      return (Some guard)
+    | None -> return None
+    end >>= fun guard ->
+    Pattern.of_pattern c_lhs >>= fun pattern ->
+    of_expression typ_vars c_rhs >>= fun c_rhs ->
+    return (pattern, guard, c_rhs)
+    )
+  )) >>= fun cases_with_guards ->
+  let guards =
+    cases_with_guards |> Util.List.filter_map (function
+      | (p, Some guard, _) -> Some (p, guard)
+      | _ -> None
+    ) in
+  let guard_checks =
+    guards |> List.map (fun (p, guard) ->
+      Match (
+        e,
+        [
+          (p, guard);
+          (Pattern.Any, Variable (MixedPath.PathName PathName.false_value))
+        ],
+        None
+      )
+    ) in
+  let e =
+    match guards with
+    | [] -> e
+    | _ :: _ -> Tuple (e :: guard_checks) in
+  let i = ref (-1) in
+  let nb_guards = List.length guard_checks in
+  let cases = cases_with_guards |> List.map (fun (p, guard, rhs) ->
+    let is_guarded = match guard with Some _ -> true | None -> false in
+    begin if is_guarded then
+      i := !i + 1
+    end;
+    let p =
+      if nb_guards = 0 then
+        p
+      else
+        Pattern.Tuple (
+          p :: any_patterns_with_ith_true is_guarded !i nb_guards
+        ) in
+    (p, rhs)
+  ) in
+  (exception_cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
+    set_loc (Loc.of_location c_lhs.pat_loc) (
+    match c_guard with
+    | Some guard_exp ->
+      of_expression typ_vars guard_exp >>= fun guard_exp ->
+      begin match guard_exp with
+      | Constructor ({ PathName.path = []; base = Name.Make "false" }, []) ->
+        of_expression typ_vars c_rhs >>= fun c_rhs ->
+        return (Some c_rhs)
+      | _ ->
+        raise
+          None
+          Unexpected
+          "Expected `false` as guard on the exception case to represent the default GADT case"
+      end
+    | None ->
+      raise None NotSupported (
+        "Pattern-matching on exceptions not supported\n\n" ^
+        "Only the special case `| exception _ when false -> ...` is supported for default value of GADT pattern-matching"
+      )
+    )
+  )) >>= fun default_values ->
+  let default_value =
+    match default_values with
+    | [default_value] -> Some default_value
+    | _ -> None in
+  return (Match (e, cases, default_value))
+
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
 and open_cases
   (typ_vars : Name.t Name.Map.t)
   (cases : case list)
   : (Name.t * t) Monad.t =
-  (cases |> Monad.List.map (fun { c_lhs = p; c_rhs = e; _ } ->
-    Pattern.of_pattern p >>= fun pattern ->
-    of_expression typ_vars e >>= fun e ->
-    return (pattern, e)
-  )) >>= fun cases ->
   let name = Name.of_string false "function_parameter" in
-  return (name, Match (Variable (MixedPath.of_name name), cases, None))
+  let e = Variable (MixedPath.of_name name) in
+  of_match typ_vars e cases [] >>= fun e ->
+  return (name, e)
 
 and import_let_fun
   (typ_vars : Name.t Name.Map.t)
