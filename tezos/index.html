@@ -53,8 +53,8 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35828 lines</li>
-      <li>Coq size: 45469 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 35822 lines</li>
+      <li>Coq size: 45468 lines (+26% compared to&nbsp;OCaml)</li>
       <li>errors from coq-of-ocaml: 2861</li>
     </ul>
     
@@ -69,7 +69,7 @@
           1147,
           1541,
           2680,
-          2735,
+          2863,
         ],
         generated: [
           47563,
@@ -79,7 +79,7 @@
           44618,
           45107,
           44768,
-          45469,
+          45468,
         ],
         labels: [
           "01-14",
@@ -7806,7 +7806,7 @@ Definition apply_manager_operation_content {kind : Set}
                 (Apply_results.Reveal_result
                   {|
                     Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-                      Alpha_context.Gas.consumed before_operation ctxt |}), [ ])
+                      Alpha_context.Gas.consumed before_operation ctxt |}), [])
           |
             Alpha_context.Transaction {|
               Alpha_context.manager_operation.Transaction.amount := amount;
@@ -7822,13 +7822,13 @@ Definition apply_manager_operation_content {kind : Set}
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
                   match Alpha_context.Contract.is_implicit destination with
-                  | None =&gt; Error_monad.__return (ctxt, [ ], false)
+                  | None =&gt; Error_monad.__return (ctxt, [], false)
                   | Some _ =&gt;
                     Error_monad.op_gtgteqquestion
                       (Alpha_context.Contract.allocated ctxt destination)
                       (fun function_parameter =&gt;
                         match function_parameter with
-                        | true =&gt; Error_monad.__return (ctxt, [ ], false)
+                        | true =&gt; Error_monad.__return (ctxt, [], false)
                         | false =&gt;
                           Error_monad.op_gtgteqquestion
                             (Alpha_context.Fees.origination_burn ctxt)
@@ -7911,7 +7911,7 @@ Definition apply_manager_operation_content {kind : Set}
                                                     amount))
                                               ] maybe_burn_balance_update);
                                         Apply_results.successful_manager_operation_result.Transaction_result.originated_contracts :=
-                                          [ ];
+                                          [];
                                         Apply_results.successful_manager_operation_result.Transaction_result.consumed_gas :=
                                           Alpha_context.Gas.consumed
                                             before_operation ctxt;
@@ -7922,7 +7922,7 @@ Definition apply_manager_operation_content {kind : Set}
                                         Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
                                           allocated_destination_contract |} in
                                   Error_monad.__return
-                                    (ctxt, __result_value, [ ]))
+                                    (ctxt, __result_value, []))
                             | Some script =&gt;
                               Error_monad.op_gtgteqquestion
                                 (Alpha_context.Script.force_decode ctxt
@@ -8187,7 +8187,7 @@ Definition apply_manager_operation_content {kind : Set}
                                                                 Error_monad.__return
                                                                   (ctxt,
                                                                     __result_value,
-                                                                    [ ]))))))))))))))
+                                                                    []))))))))))))))
           | Alpha_context.Delegation delegate =&gt;
             Error_monad.op_gtgteqquestion
               (Alpha_context.Delegate.set ctxt source delegate)
@@ -8198,7 +8198,7 @@ Definition apply_manager_operation_content {kind : Set}
                       {|
                         Apply_results.successful_manager_operation_result.Delegation_result.consumed_gas :=
                           Alpha_context.Gas.consumed before_operation ctxt |}),
-                    [ ]))
+                    []))
           end)).
 
 Definition apply_internal_manager_operations
@@ -8268,7 +8268,7 @@ Definition apply_internal_manager_operations
               (Pervasives.op_at rest emitted)
           end)
     end in
-  apply ctxt [ ] ops.
+  apply ctxt [] ops.
 
 Definition precheck_manager_contents {A B : Set}
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
@@ -8446,7 +8446,7 @@ Definition apply_manager_contents {A : Set}
           (* ❌ `Failure *)
           tt,
             (Apply_results.Failed (Alpha_context.manager_kind operation) errors),
-            [ ])
+            [])
       end).
 
 Definition skipped_operation_result {kind : Set}
@@ -8493,7 +8493,7 @@ Fixpoint mark_skipped {kind : Set}
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            [ ] |})
+            [] |})
   |
     Alpha_context.Cons
       (Alpha_context.Manager_operation {|
@@ -8517,7 +8517,7 @@ Fixpoint mark_skipped {kind : Set}
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            [ ] |}) (mark_skipped baker level rest)
+            [] |}) (mark_skipped baker level rest)
   end.
 
 Fixpoint precheck_manager_contents_list {A kind : Set}
@@ -9278,7 +9278,7 @@ Definition may_start_new_cycle (ctxt : Alpha_context.context)
   Error_monad.op_gtgteqquestion (Baking.dawn_of_a_new_cycle ctxt)
     (fun function_parameter =&gt;
       match function_parameter with
-      | None =&gt; Error_monad.__return (ctxt, [ ], [ ])
+      | None =&gt; Error_monad.__return (ctxt, [], [])
       | Some last_cycle =&gt;
         Error_monad.op_gtgteqquestion
           (Alpha_context.Seed.cycle_end ctxt last_cycle)
@@ -10973,7 +10973,7 @@ Module Manager_result.
           (Some
             (* ❌ Variants not supported *)
             (* ❌ `Uint8 *)
-            tt)
+            Data_encoding.Uint8)
           [
             Data_encoding.__case_value &quot;Applied&quot; None (Data_encoding.Tag 0)
               (Data_encoding.merge_objs
@@ -11098,9 +11098,9 @@ Module Manager_result.
         (Data_encoding.opt None None &quot;big_map_diff&quot;
           Alpha_context.Contract.big_map_diff_encoding)
         (Data_encoding.dft None None &quot;balance_updates&quot;
-          Alpha_context.Delegate.balance_updates_encoding [ ])
+          Alpha_context.Delegate.balance_updates_encoding [])
         (Data_encoding.dft None None &quot;originated_contracts&quot;
-          (Data_encoding.__list_value None Alpha_context.Contract.encoding) [ ])
+          (Data_encoding.__list_value None Alpha_context.Contract.encoding) [])
         (Data_encoding.dft None None &quot;consumed_gas&quot; Data_encoding.z Z.zero)
         (Data_encoding.dft None None &quot;storage_size&quot; Data_encoding.z Z.zero)
         (Data_encoding.dft None None &quot;paid_storage_size_diff&quot; Data_encoding.z
@@ -11174,9 +11174,9 @@ Module Manager_result.
         (Data_encoding.opt None None &quot;big_map_diff&quot;
           Alpha_context.Contract.big_map_diff_encoding)
         (Data_encoding.dft None None &quot;balance_updates&quot;
-          Alpha_context.Delegate.balance_updates_encoding [ ])
+          Alpha_context.Delegate.balance_updates_encoding [])
         (Data_encoding.dft None None &quot;originated_contracts&quot;
-          (Data_encoding.__list_value None Alpha_context.Contract.encoding) [ ])
+          (Data_encoding.__list_value None Alpha_context.Contract.encoding) [])
         (Data_encoding.dft None None &quot;consumed_gas&quot; Data_encoding.z Z.zero)
         (Data_encoding.dft None None &quot;storage_size&quot; Data_encoding.z Z.zero)
         (Data_encoding.dft None None &quot;paid_storage_size_diff&quot; Data_encoding.z
@@ -11708,7 +11708,7 @@ Module Encoding.
                   (Manager_result.case.MCase.t res_case))
                 (Data_encoding.dft None None &quot;internal_operation_results&quot;
                   (Data_encoding.__list_value None
-                    internal_operation_result_encoding) [ ]);
+                    internal_operation_result_encoding) []);
             case.Case.select :=
               fun function_parameter =&gt;
                 match function_parameter with
@@ -13752,7 +13752,7 @@ Definition select_delegate
           acc in
       Error_monad.op_gtgteqquestion (t tt)
         (fun t =&gt; loop acc t (Pervasives.succ n)) in
-  loop [ ] delegate_list 0.
+  loop [] delegate_list 0.
 
 Definition first_baking_priorities
   (ctxt : Alpha_context.context)
@@ -17606,7 +17606,7 @@ Definition encoding : Data_encoding.encoding t :=
         (Some
           (* ❌ Variants not supported *)
           (* ❌ `Uint8 *)
-          tt)
+          Data_encoding.Uint8)
         [
           Data_encoding.__case_value &quot;Implicit&quot; None (Data_encoding.Tag 0)
             (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
@@ -17703,7 +17703,7 @@ Definition originated_contracts (function_parameter : origination_nonce)
           record_substitution in
         let acc := cons (originated_contract origination_nonce) acc in
         contracts acc (Int32.pred origination_index) in
-    contracts [ ] (Int32.pred last).
+    contracts [] (Int32.pred last).
 
 Definition initial_origination_nonce
   (operation_hash : (|Operation_hash|).(S.HASH.t)) : origination_nonce :=
@@ -19667,7 +19667,7 @@ Module S.
             (Data_encoding.obj1
               (Data_encoding.req None None &quot;path&quot;
                 (Data_encoding.__list_value None
-                  Michelson_v1_primitives.prim_encoding)))) [ ])
+                  Michelson_v1_primitives.prim_encoding)))) [])
         (Data_encoding.req None None &quot;entrypoints&quot;
           (Data_encoding.assoc Alpha_context.Script.expr_encoding)))
       (RPC_path.op_div
@@ -26143,7 +26143,7 @@ Module Baking_rights.
                       t.timestamp := timestamp |} acc in
                 Error_monad.op_gtgteqquestion (next tt)
                   (fun l =&gt; loop l acc (Pervasives.op_plus priority 1))) in
-        loop contract_list [ ] 0).
+        loop contract_list [] 0).
   
   Definition remove_duplicated_delegates (rights : list t) : list t :=
     Pervasives.op_atat List.rev
@@ -26160,7 +26160,7 @@ Module Baking_rights.
                 ((cons r acc),
                   ((|Signature.Public_key_hash|).(S.SPublic_key_hash.__Set).(S.INDEXES_Set.add)
                     (t.delegate r) previous)))
-          ([ ],
+          ([],
             (|Signature.Public_key_hash|).(S.SPublic_key_hash.__Set).(S.INDEXES_Set.empty))
           rights)).
   
@@ -26234,19 +26234,19 @@ Module Baking_rights.
     let levels :=
       match op_staroptstar with
       | Some op_starsthstar =&gt; op_starsthstar
-      | None =&gt; [ ]
+      | None =&gt; []
       end in
     fun op_staroptstar =&gt;
       let cycles :=
         match op_staroptstar with
         | Some op_starsthstar =&gt; op_starsthstar
-        | None =&gt; [ ]
+        | None =&gt; []
         end in
       fun op_staroptstar =&gt;
         let delegates :=
           match op_staroptstar with
           | Some op_starsthstar =&gt; op_starsthstar
-          | None =&gt; [ ]
+          | None =&gt; []
           end in
         fun op_staroptstar =&gt;
           let all :=
@@ -26360,7 +26360,7 @@ Module Endorsing_rights.
                   cons
                     {| t.level := Alpha_context.Level.t.level level;
                       t.delegate := delegate; t.slots := slots;
-                      t.estimated_time := estimated_time |} acc) rights [ ])).
+                      t.estimated_time := estimated_time |} acc) rights [])).
   
   Definition register (function_parameter : unit) : unit :=
     let 'tt := function_parameter in
@@ -26420,19 +26420,19 @@ Module Endorsing_rights.
     let levels :=
       match op_staroptstar with
       | Some op_starsthstar =&gt; op_starsthstar
-      | None =&gt; [ ]
+      | None =&gt; []
       end in
     fun op_staroptstar =&gt;
       let cycles :=
         match op_staroptstar with
         | Some op_starsthstar =&gt; op_starsthstar
-        | None =&gt; [ ]
+        | None =&gt; []
         end in
       fun op_staroptstar =&gt;
         let delegates :=
           match op_staroptstar with
           | Some op_starsthstar =&gt; op_starsthstar
-          | None =&gt; [ ]
+          | None =&gt; []
           end in
         fun block =&gt;
           RPC_context.make_call0 S.endorsing_rights ctxt block
@@ -29516,7 +29516,7 @@ Definition cycle_end
   let preserved := Constants_storage.preserved_cycles ctxt in
   Error_monad.op_gtgteqquestion
     match Cycle_repr.pred last_cycle with
-    | None =&gt; Error_monad.__return (ctxt, [ ])
+    | None =&gt; Error_monad.__return (ctxt, [])
     | Some revealed_cycle =&gt;
       List.fold_left
         (fun acc =&gt;
@@ -29547,12 +29547,12 @@ Definition cycle_end
                           ] in
                         Error_monad.__return
                           (ctxt, (Pervasives.op_at bus balance_updates))))))
-        (Error_monad.__return (ctxt, [ ])) unrevealed
+        (Error_monad.__return (ctxt, [])) unrevealed
     end
     (fun function_parameter =&gt;
       let '(ctxt, balance_updates) := function_parameter in
       match Cycle_repr.sub last_cycle preserved with
-      | None =&gt; Error_monad.__return (ctxt, balance_updates, [ ])
+      | None =&gt; Error_monad.__return (ctxt, balance_updates, [])
       | Some unfrozen_cycle =&gt;
         Error_monad.op_gtgteqquestion
           (Storage.Delegates_with_frozen_balance.fold (ctxt, unfrozen_cycle)
@@ -29576,7 +29576,7 @@ Definition cycle_end
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
                   (Storage.Active_delegates_with_rolls.fold ctxt
-                    (Pervasives.Ok (ctxt, [ ]))
+                    (Pervasives.Ok (ctxt, []))
                     (fun delegate =&gt;
                       fun acc =&gt;
                         Error_monad.op_gtgteqquestion (Lwt.__return acc)
@@ -34021,7 +34021,7 @@ Module Scripts.
               (Data_encoding.obj1
                 (Data_encoding.req None None &quot;path&quot;
                   (Data_encoding.__list_value None
-                    Michelson_v1_primitives.prim_encoding)))) [ ])
+                    Michelson_v1_primitives.prim_encoding)))) [])
           (Data_encoding.req None None &quot;entrypoints&quot;
             (Data_encoding.assoc Alpha_context.Script.expr_encoding)))
         (RPC_path.op_div path &quot;entrypoints&quot;).
@@ -34099,7 +34099,7 @@ Module Scripts.
                           let '(_, ty) := function_parameter in
                           fun acc =&gt;
                             cons (entry, (Micheline.strip_locations ty)) acc)
-                      map [ ])))).
+                      map [])))).
   
   Definition run_code {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -34524,7 +34524,7 @@ Module Forge.
       : Lwt.t (Pervasives.result MBytes.t (list Error_monad.shell_error)) :=
       let 'tt := function_parameter in
       operations ctxt block branch source (Some sourcePubKey) counter fee Z.zero
-        Z.zero [ ].
+        Z.zero [].
     
     Definition transaction {D E G I K L a b c i o q : Set}
       (ctxt :
@@ -40494,7 +40494,7 @@ Definition levels_in_cycle
       loop (succ ctxt n) (cons n acc)
     else
       acc in
-  loop first [ ].
+  loop first [].
 
 Definition levels_in_current_cycle
   (ctxt : Raw_context.context) (op_staroptstar : option int32)
@@ -40515,7 +40515,7 @@ Definition levels_in_current_cycle
       (|Compare.Int32|).(Compare.S.op_lt) cycle
         (* ❌ Constant of type int32 is converted to int *)
         0 then
-      [ ]
+      []
     else
       let cycle := Cycle_repr.of_int32_exn cycle in
       levels_in_cycle ctxt cycle.
@@ -40532,7 +40532,7 @@ Definition levels_with_commitments_in_cycle
         loop (succ ctxt n) acc
     else
       acc in
-  loop first [ ].
+  loop first [].
 
 Definition last_allowed_fork_level (c : Raw_context.context)
   : Raw_level_repr.raw_level :=
@@ -41442,8 +41442,8 @@ Definition finalize_block (function_parameter : validation_state)
                     voting_period_kind;
                   Apply_results.block_metadata.nonce_hash := None;
                   Apply_results.block_metadata.consumed_gas := Z.zero;
-                  Apply_results.block_metadata.deactivated := [ ];
-                  Apply_results.block_metadata.balance_updates := [ ] |})))
+                  Apply_results.block_metadata.deactivated := [];
+                  Apply_results.block_metadata.balance_updates := [] |})))
   |
     Partial_application {|
       validation_mode.Partial_application.block_header := block_header;
@@ -41471,8 +41471,8 @@ Definition finalize_block (function_parameter : validation_state)
                     voting_period_kind;
                   Apply_results.block_metadata.nonce_hash := None;
                   Apply_results.block_metadata.consumed_gas := Z.zero;
-                  Apply_results.block_metadata.deactivated := [ ];
-                  Apply_results.block_metadata.balance_updates := [ ] |})))
+                  Apply_results.block_metadata.deactivated := [];
+                  Apply_results.block_metadata.balance_updates := [] |})))
   |
     Application {|
       validation_mode.Application.block_header := {|
@@ -43641,9 +43641,9 @@ Module Cost_of.
     
     Definition cycle : Alpha_context.Gas.cost := Alpha_context.Gas.step_cost 1.
     
-    Definition __bool_value : Alpha_context.Gas.cost := prim_cost 0 [ ].
+    Definition __bool_value : Alpha_context.Gas.cost := prim_cost 0 [].
     
-    Definition __unit_value : Alpha_context.Gas.cost := prim_cost 0 [ ].
+    Definition __unit_value : Alpha_context.Gas.cost := prim_cost 0 [].
     
     Definition __string_value (s : string) : Alpha_context.Gas.cost :=
       Alpha_context.Script.string_node_cost s.
@@ -43681,13 +43681,13 @@ Module Cost_of.
     
     Definition contract : Alpha_context.Gas.cost := string_cost 36.
     
-    Definition pair : Alpha_context.Gas.cost := prim_cost 2 [ ].
+    Definition pair : Alpha_context.Gas.cost := prim_cost 2 [].
     
-    Definition union : Alpha_context.Gas.cost := prim_cost 1 [ ].
+    Definition union : Alpha_context.Gas.cost := prim_cost 1 [].
     
-    Definition some : Alpha_context.Gas.cost := prim_cost 1 [ ].
+    Definition some : Alpha_context.Gas.cost := prim_cost 1 [].
     
-    Definition none : Alpha_context.Gas.cost := prim_cost 0 [ ].
+    Definition none : Alpha_context.Gas.cost := prim_cost 0 [].
     
     Definition list_element : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost 2.
@@ -45729,7 +45729,7 @@ Definition prims_of_strings (expr : Micheline.canonical string)
                     (fun args =&gt;
                       Error_monad.op_gtgtquestion (convert arg)
                         (fun arg =&gt; Error_monad.ok (cons arg args))))
-              (Error_monad.ok [ ]) args)
+              (Error_monad.ok []) args)
             (fun args =&gt;
               Error_monad.ok (Micheline.Prim 0 prim (List.rev args) annot)))
     | Micheline.Seq _ args =&gt;
@@ -45741,7 +45741,7 @@ Definition prims_of_strings (expr : Micheline.canonical string)
                 (fun args =&gt;
                   Error_monad.op_gtgtquestion (convert arg)
                     (fun arg =&gt; Error_monad.ok (cons arg args))))
-          (Error_monad.ok [ ]) args)
+          (Error_monad.ok []) args)
         (fun args =&gt; Error_monad.ok (Micheline.Seq 0 (List.rev args)))
     end in
   Error_monad.op_gtgtquestion (convert (Micheline.root expr))
@@ -46302,14 +46302,8 @@ let pp_print_paragraph ppf description =
 
 let take n l =
   let rec loop acc n xs =
-    if Compare.Int.(n &lt;= 0) then
-      Some (List.rev acc, xs)
-    else
-      match xs with
-      | [] -&gt;
-          None
-      | x :: xs -&gt;
-          loop (x :: acc) (n - 1) xs
+    if Compare.Int.(n &lt;= 0) then Some (List.rev acc, xs)
+    else match xs with [] -&gt; None | x :: xs -&gt; loop (x :: acc) (n - 1) xs
   in
   loop [] n l
 
@@ -46323,7 +46317,7 @@ let remove_prefix ~prefix s =
 let rec remove_elem_from_list nb = function
   | [] -&gt;
       []
-  | (_ :: _) as l when Compare.Int.(nb &lt;= 0) -&gt;
+  | _ :: _ as l when Compare.Int.(nb &lt;= 0) -&gt;
       l
   | _ :: tl -&gt;
       remove_elem_from_list (nb - 1) tl
@@ -46358,7 +46352,7 @@ Fixpoint op_minusminusgt
   (i : (|Compare.Int|).(Compare.S.t)) (j : (|Compare.Int|).(Compare.S.t))
   {struct i} : list (|Compare.Int|).(Compare.S.t) :=
   if (|Compare.Int|).(Compare.S.op_gt) i j then
-    [ ]
+    []
   else
     cons i (op_minusminusgt (Pervasives.succ i) j).
 
@@ -46366,7 +46360,7 @@ Fixpoint op_minusminusminusgt
   (i : (|Compare.Int32|).(Compare.S.t)) (j : (|Compare.Int32|).(Compare.S.t))
   {struct i} : list (|Compare.Int32|).(Compare.S.t) :=
   if (|Compare.Int32|).(Compare.S.op_gt) i j then
-    [ ]
+    []
   else
     cons i (op_minusminusminusgt (Int32.succ i) j).
 
@@ -46425,7 +46419,7 @@ Definition split
   fun path =&gt;
     let l := String.length path in
     if (|Compare.Int|).(Compare.S.op_gt) limit 0 then
-      do_slashes delim path l [ ] limit 0
+      do_slashes delim path l [] limit 0
     else
       [ path ].
 
@@ -46456,7 +46450,7 @@ Definition take {A : Set} (n : (|Compare.Int|).(Compare.S.t)) (l : list A)
       | [] =&gt; None
       | cons x xs =&gt; loop (cons x acc) (Pervasives.op_minus n 1) xs
       end in
-  loop [ ] n l.
+  loop [] n l.
 
 Definition remove_prefix
   (prefix : (|Compare.String|).(Compare.S.t)) (s : string) : option string :=
@@ -46478,7 +46472,7 @@ Fixpoint remove_elem_from_list {A : Set}
       | (cons _ _) as l =&gt; (|Compare.Int|).(Compare.S.op_lteq) nb 0
       | _ =&gt; false
       end) with
-  | ([], _) =&gt; [ ]
+  | ([], _) =&gt; []
   | ((cons _ _) as l, true) =&gt; l
   | (cons _ tl, _) =&gt; remove_elem_from_list (Pervasives.op_minus nb 1) tl
   end.
@@ -48561,7 +48555,7 @@ Module Encoding.
         (Some
           (* ❌ Variants not supported *)
           (* ❌ `Uint8 *)
-          tt)
+          Data_encoding.Uint8)
         [
           make reveal_case;
           make transaction_case;
@@ -50305,9 +50299,9 @@ Definition encoding : Data_encoding.encoding t :=
         (Data_encoding.req None None &quot;bootstrap_accounts&quot;
           (Data_encoding.__list_value None bootstrap_account_encoding))
         (Data_encoding.dft None None &quot;bootstrap_contracts&quot;
-          (Data_encoding.__list_value None bootstrap_contract_encoding) [ ])
+          (Data_encoding.__list_value None bootstrap_contract_encoding) [])
         (Data_encoding.dft None None &quot;commitments&quot;
-          (Data_encoding.__list_value None Commitment_repr.encoding) [ ])
+          (Data_encoding.__list_value None Commitment_repr.encoding) [])
         (Data_encoding.opt None None &quot;security_deposit_ramp_up_cycles&quot;
           Data_encoding.int31)
         (Data_encoding.opt None None &quot;no_reward_cycles&quot; Data_encoding.int31))
@@ -58195,7 +58189,7 @@ Fixpoint step {a b : Set}
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt Interp_costs.variant_no_data))
-            (fun ctxt =&gt; logged_return ((Item [ ] rest), ctxt))
+            (fun ctxt =&gt; logged_return ((Item [] rest), ctxt))
         | (Script_typed_ir.If_cons _ bf, Item [] rest) =&gt;
           Error_monad.op_gtgteqquestion
             (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch))
@@ -58225,7 +58219,7 @@ Fixpoint step {a b : Set}
                       let '(Item hd rest, ctxt) := function_parameter in
                       loop rest ctxt tl (cons hd acc))
                 end) in
-          Error_monad.op_gtgteqquestion (loop rest ctxt l [ ])
+          Error_monad.op_gtgteqquestion (loop rest ctxt l [])
             (fun function_parameter =&gt;
               let '(res, ctxt) := function_parameter in
               logged_return (res, ctxt))
@@ -58288,7 +58282,7 @@ Fixpoint step {a b : Set}
               let l :=
                 List.rev
                   (Script_ir_translator.set_fold
-                    (fun e =&gt; fun acc =&gt; cons e acc) set [ ]) in
+                    (fun e =&gt; fun acc =&gt; cons e acc) set []) in
               let fix loop
                 (ctxt : Alpha_context.context) (l : list op_dollar56)
                 (stack : stack op_dollar57) {struct ctxt}
@@ -58340,7 +58334,7 @@ Fixpoint step {a b : Set}
               let l :=
                 List.rev
                   (Script_ir_translator.map_fold
-                    (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map [ ]) in
+                    (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map []) in
               let fix loop
                 (rest : stack op_dollar68) (ctxt : Alpha_context.context)
                 (l : list (op_dollar66 * op_dollar67))
@@ -58379,7 +58373,7 @@ Fixpoint step {a b : Set}
               let l :=
                 List.rev
                   (Script_ir_translator.map_fold
-                    (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map [ ]) in
+                    (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map []) in
               let fix loop
                 (ctxt : Alpha_context.context)
                 (l : list (op_dollar70 * op_dollar71))
@@ -58915,9 +58909,8 @@ Fixpoint step {a b : Set}
                             [
                               Micheline.Prim 0 Alpha_context.Script.I_PUSH
                                 [ ty_expr; const_expr ]
-                                [ ];
-                              Micheline.Prim 0 Alpha_context.Script.I_PAIR [ ]
-                                [ ];
+                                [];
+                              Micheline.Prim 0 Alpha_context.Script.I_PAIR [] [];
                               expr
                             ] in
                         let lam' := Script_typed_ir.Lam full_descr full_expr in
@@ -59223,13 +59216,13 @@ Fixpoint step {a b : Set}
                                   Alpha_context.Script.K_parameter
                                   [
                                     unparsed_param_type
-                                  ] [ ];
+                                  ] [];
                                 Micheline.Prim 0 Alpha_context.Script.K_storage
                                   [
                                     unparsed_storage_type
-                                  ] [ ];
+                                  ] [];
                                 Micheline.Prim 0 Alpha_context.Script.K_code
-                                  [ code ] [ ]
+                                  [ code ] []
                               ])) in
                       Error_monad.op_gtgteqquestion
                         (Script_ir_translator.collect_big_maps ctxt storage_type
@@ -59348,13 +59341,13 @@ Fixpoint step {a b : Set}
                             [
                               Micheline.Prim 0 Alpha_context.Script.K_parameter
                                 [ unparsed_param_type ]
-                                [ ];
+                                [];
                               Micheline.Prim 0 Alpha_context.Script.K_storage
                                 [
                                   unparsed_storage_type
-                                ] [ ];
+                                ] [];
                               Micheline.Prim 0 Alpha_context.Script.K_code
-                                [ code ] [ ]
+                                [ code ] []
                             ]) in
                       Error_monad.op_gtgteqquestion
                         (Script_ir_translator.collect_big_maps ctxt storage_type
@@ -59697,7 +59690,7 @@ with execute
                                       let big_map_diff :=
                                         match
                                           List.flatten
-                                            (List.map (Option.unopt [ ])
+                                            (List.map (Option.unopt [])
                                               (Pervasives.op_at op_diffs
                                                 [ big_map_diff ])) with
                                         | [] =&gt; None
@@ -59727,7 +59720,7 @@ Definition trace
         list
           (Alpha_context.Script.location * Alpha_context.Gas.t *
             list (Alpha_context.Script.expr * option string)))) :=
-  let log := Pervasives.__ref_value [ ] in
+  let log := Pervasives.__ref_value [] in
   Error_monad.op_gtgteqquestion
     (execute (Some log) ctxt mode step_constants entrypoint script
       (Micheline.root parameter))
@@ -60736,21 +60729,21 @@ Definition default_binding_annot : option (* `Field_annot *) string :=
 Definition unparse_type_annot
   (function_parameter : option Script_typed_ir.type_annot) : list string :=
   match function_parameter with
-  | None =&gt; [ ]
+  | None =&gt; []
   | Some (Type_annot a) =&gt; [ Pervasives.op_caret &quot;:&quot; a ]
   end.
 
 Definition unparse_var_annot
   (function_parameter : option Script_typed_ir.var_annot) : list string :=
   match function_parameter with
-  | None =&gt; [ ]
+  | None =&gt; []
   | Some (Var_annot a) =&gt; [ Pervasives.op_caret &quot;@&quot; a ]
   end.
 
 Definition unparse_field_annot
   (function_parameter : option Script_typed_ir.field_annot) : list string :=
   match function_parameter with
-  | None =&gt; [ ]
+  | None =&gt; []
   | Some (Field_annot a) =&gt; [ Pervasives.op_caret &quot;%&quot; a ]
   end.
 
@@ -60956,7 +60949,7 @@ Definition parse_annots
                   else
                     match String.get s 0 with
                     | &quot;:&quot; % char =&gt;
-                      sub_or_wildcard [ ]
+                      sub_or_wildcard []
                         (fun a =&gt;
                           (* ❌ Variants not supported *)
                           (* ❌ `Type_annot *)
@@ -60966,7 +60959,7 @@ Definition parse_annots
                         (if allow_special_var then
                           [ &quot;%&quot; % char ]
                         else
-                          [ ])
+                          [])
                         (fun a =&gt;
                           (* ❌ Variants not supported *)
                           (* ❌ `Var_annot *)
@@ -60976,13 +60969,13 @@ Definition parse_annots
                         (if allow_special_field then
                           [ &quot;@&quot; % char ]
                         else
-                          [ ])
+                          [])
                         (fun a =&gt;
                           (* ❌ Variants not supported *)
                           (* ❌ `Field_annot *)
                           a) s acc
                     | _ =&gt; Error_monad.__error_value extensible_type_value
-                    end)) (Error_monad.ok [ ]) l) List.rev.
+                    end)) (Error_monad.ok []) l) List.rev.
 
 Definition opt_var_of_var_opt {A : Set}
   (function_parameter : (* `Var_annot *) option A)
@@ -61048,7 +61041,7 @@ Definition classify_annot
               ((Field_annot _) as a, _, _, _, _, false, []) =&gt;
               (false, rv, false, rt, true, (cons (opt_field_of_field_opt a) rf))
             | _ =&gt; Pervasives.raise extensible_type_value
-            end) (false, [ ], false, [ ], false, [ ]) l in
+            end) (false, [], false, [], false, []) l in
     Error_monad.ok ((List.rev rv), (List.rev rt), (List.rev rf))).
 
 Definition get_one_annot {A : Set}
@@ -61154,7 +61147,7 @@ Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
         else
           extract_first (cons s acc) rest
       end in
-    let '(field_annot, annot) := extract_first [ ] annot in
+    let '(field_annot, annot) := extract_first [] annot in
     let field_annot :=
       match field_annot with
       | None =&gt; None
@@ -69961,31 +69954,31 @@ Fixpoint unparse_comparable_ty {a s : Set}
   {struct function_parameter} : Alpha_context.Script.node :=
   match function_parameter with
   | Script_typed_ir.Int_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_int [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_int []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Nat_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_nat [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_nat []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.String_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_string [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_string []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Bytes_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_bytes [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_bytes []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Mutez_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_mutez [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_mutez []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Bool_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_bool [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_bool []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Key_hash_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_key_hash [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_key_hash []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Timestamp_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_timestamp [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_timestamp []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Address_key tname =&gt;
-    Micheline.Prim (-1) Alpha_context.Script.T_address [ ]
+    Micheline.Prim (-1) Alpha_context.Script.T_address []
       (Script_ir_annot.unparse_type_annot tname)
   | Script_typed_ir.Pair_key (l, al) (r, ar) pname =&gt;
     let tl := add_field_annot al None (unparse_comparable_ty l) in
@@ -70013,59 +70006,59 @@ Fixpoint unparse_ty_no_lwt {a : Set}
       match ty with
       | Script_typed_ir.Unit_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_unit, [ ],
+          (Alpha_context.Script.T_unit, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Int_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_int, [ ],
+          (Alpha_context.Script.T_int, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Nat_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_nat, [ ],
+          (Alpha_context.Script.T_nat, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.String_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_string, [ ],
+          (Alpha_context.Script.T_string, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Bytes_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_bytes, [ ],
+          (Alpha_context.Script.T_bytes, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Mutez_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_mutez, [ ],
+          (Alpha_context.Script.T_mutez, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Bool_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_bool, [ ],
+          (Alpha_context.Script.T_bool, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Key_hash_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_key_hash, [ ],
+          (Alpha_context.Script.T_key_hash, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Key_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_key, [ ],
+          (Alpha_context.Script.T_key, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Timestamp_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_timestamp, [ ],
+          (Alpha_context.Script.T_timestamp, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Address_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_address, [ ],
+          (Alpha_context.Script.T_address, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Signature_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_signature, [ ],
+          (Alpha_context.Script.T_signature, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Operation_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_operation, [ ],
+          (Alpha_context.Script.T_operation, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Chain_id_t tname =&gt;
         __return ctxt
-          (Alpha_context.Script.T_chain_id, [ ],
+          (Alpha_context.Script.T_chain_id, [],
             (Script_ir_annot.unparse_type_annot tname))
       | Script_typed_ir.Contract_t ut tname =&gt;
         Error_monad.op_gtgtquestion (unparse_ty_no_lwt ctxt ut)
@@ -70182,7 +70175,7 @@ Fixpoint unparse_stack {a : Set}
       (list (Alpha_context.Script.expr * Alpha_context.Script.annot) *
         Alpha_context.context)) :=
   match function_parameter with
-  | Script_typed_ir.Empty_t =&gt; Error_monad.__return ([ ], ctxt)
+  | Script_typed_ir.Empty_t =&gt; Error_monad.__return ([], ctxt)
   | Script_typed_ir.Item_t ty rest annot =&gt;
     Error_monad.op_gtgteqquestion (unparse_ty ctxt ty)
       (fun function_parameter =&gt;
@@ -70912,7 +70905,7 @@ Fixpoint parse_comparable_ty
               _ _ =&gt; Error_monad.__error_value extensible_type_value
           | expr =&gt;
             Pervasives.op_atat Error_monad.__error_value
-              (unexpected expr [ ] Script_tc_errors.Type_namespace
+              (unexpected expr [] Script_tc_errors.Type_namespace
                 [
                   Alpha_context.Script.T_int;
                   Alpha_context.Script.T_nat;
@@ -71245,7 +71238,7 @@ with parse_ty
           _, _) =&gt; Error_monad.__error_value extensible_type_value
       | (expr, _) =&gt;
         Pervasives.op_atat Error_monad.__error_value
-          (unexpected expr [ ] Script_tc_errors.Type_namespace
+          (unexpected expr [] Script_tc_errors.Type_namespace
             [
               Alpha_context.Script.T_pair;
               Alpha_context.Script.T_or;
@@ -71533,7 +71526,7 @@ Definition find_entrypoint {A : Set}
         | Some (Field_annot l) =&gt;
           (|Compare.String|).(Compare.S.op_eq) l entrypoint
         end then
-        ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Left [ e ] [ ]),
+        ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Left [ e ] []),
           (Ex_ty tl))
       else
         if
@@ -71542,13 +71535,13 @@ Definition find_entrypoint {A : Set}
           | Some (Field_annot r) =&gt;
             (|Compare.String|).(Compare.S.op_eq) r entrypoint
           end then
-          ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Right [ e ] [ ]),
+          ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Right [ e ] []),
             (Ex_ty tr))
         else
           (* ❌ Try-with are not handled *)
           try
             (let '(f, t) := find_entrypoint tl entrypoint in
-            ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Left [ f e ] [ ]),
+            ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Left [ f e ] []),
               t))
     | _ =&gt; Pervasives.raise extensible_type_value
     end in
@@ -71679,7 +71672,7 @@ Definition well_formed_entrypoints {A : Set}
       | None | Some &quot;&quot; =&gt; ((|Entrypoints|).(S.SET.empty), false)
       | Some name =&gt; (((|Entrypoints|).(S.SET.singleton) name), true)
       end in
-    let '(first_unreachable, all) := check full [ ] reachable (None, init) in
+    let '(first_unreachable, all) := check full [] reachable (None, init) in
     if Pervasives.not ((|Entrypoints|).(S.SET.mem) &quot;default&quot; all) then
       Error_monad.ok tt
     else
@@ -71805,7 +71798,7 @@ Fixpoint parse_data {a : Set}
       | (Script_typed_ir.Unit_t _, expr) =&gt;
         traced
           (Error_monad.fail
-            (unexpected expr [ ] Script_tc_errors.Constant_namespace
+            (unexpected expr [] Script_tc_errors.Constant_namespace
               [ Alpha_context.Script.D_Unit ]))
       |
         (Script_typed_ir.Bool_t _,
@@ -71843,7 +71836,7 @@ Fixpoint parse_data {a : Set}
       | (Script_typed_ir.Bool_t _, expr) =&gt;
         traced
           (Error_monad.fail
-            (unexpected expr [ ] Script_tc_errors.Constant_namespace
+            (unexpected expr [] Script_tc_errors.Constant_namespace
               [ Alpha_context.Script.D_True; Alpha_context.Script.D_False ]))
       | (Script_typed_ir.String_t _, Micheline.String _ v) =&gt;
         Error_monad.op_gtgteqquestion
@@ -72205,7 +72198,7 @@ Fixpoint parse_data {a : Set}
       | (Script_typed_ir.Pair_t _ _ _ _, expr) =&gt;
         traced
           (Error_monad.fail
-            (unexpected expr [ ] Script_tc_errors.Constant_namespace
+            (unexpected expr [] Script_tc_errors.Constant_namespace
               [ Alpha_context.Script.D_Pair ]))
       |
         (Script_typed_ir.Union_t (tl, _) _ _ _,
@@ -72255,7 +72248,7 @@ Fixpoint parse_data {a : Set}
       | (Script_typed_ir.Union_t _ _ _ _, expr) =&gt;
         traced
           (Error_monad.fail
-            (unexpected expr [ ] Script_tc_errors.Constant_namespace
+            (unexpected expr [] Script_tc_errors.Constant_namespace
               [ Alpha_context.Script.D_Left; Alpha_context.Script.D_Right ]))
       |
         (Script_typed_ir.Lambda_t ta tr _ty_name,
@@ -72317,7 +72310,7 @@ Fixpoint parse_data {a : Set}
       | (Script_typed_ir.Option_t _ _ _, expr) =&gt;
         traced
           (Error_monad.fail
-            (unexpected expr [ ] Script_tc_errors.Constant_namespace
+            (unexpected expr [] Script_tc_errors.Constant_namespace
               [ Alpha_context.Script.D_Some; Alpha_context.Script.D_None ]))
       | (Script_typed_ir.List_t t _ty_name _, Micheline.Seq _loc items) =&gt;
         Pervasives.op_atat traced
@@ -72334,7 +72327,7 @@ Fixpoint parse_data {a : Set}
                       (fun function_parameter =&gt;
                         let '(v, ctxt) := function_parameter in
                         Error_monad.__return ((cons v rest), ctxt)))) items
-            ([ ], ctxt))
+            ([], ctxt))
       | (Script_typed_ir.List_t _ _ _, expr) =&gt;
         traced (Error_monad.fail extensible_type_value)
       | (Script_typed_ir.Set_t t _ty_name, (Micheline.Seq loc vs) as expr) =&gt;
@@ -75830,7 +75823,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                         end) with
                     | (cons single [], true) =&gt;
                       Error_monad.ok
-                        (p, [ ],
+                        (p, [],
                           (Some
                             (String.sub single 1
                               (Pervasives.op_minus (String.length single) 1))))
@@ -75978,7 +75971,7 @@ Definition typecheck_code
     (fun function_parameter =&gt;
       let '(arg_type, storage_type, code_field, root_name) := function_parameter
         in
-      let type_map := Pervasives.__ref_value [ ] in
+      let type_map := Pervasives.__ref_value [] in
       Error_monad.op_gtgteqquestion
         (Error_monad.trace extensible_type_value
           (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)))
@@ -76159,10 +76152,10 @@ Definition list_entrypoints {A : Set}
         match root_name with
         | None | Some &quot;&quot; =&gt; ((|Entrypoints_map|).(S.MAP.empty), false)
         | Some name =&gt;
-          (((|Entrypoints_map|).(S.MAP.singleton) name ([ ], unparsed_full)),
+          (((|Entrypoints_map|).(S.MAP.singleton) name ([], unparsed_full)),
             true)
         end in
-      fold_tree full [ ] reachable ([ ], init)).
+      fold_tree full [] reachable ([], init)).
 
 Fixpoint unparse_data {a : Set}
   (ctxt : Alpha_context.context) (mode : unparsing_mode)
@@ -76179,7 +76172,7 @@ Fixpoint unparse_data {a : Set}
             (Alpha_context.Gas.consume ctxt Unparse_costs.__unit_value))
           (fun ctxt =&gt;
             Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_Unit [ ] [ ]), ctxt))
+              ((Micheline.Prim (-1) Alpha_context.Script.D_Unit [] []), ctxt))
       | (Script_typed_ir.Int_t _, v) =&gt;
         Error_monad.op_gtgteqquestion
           (Lwt.__return (Alpha_context.Gas.consume ctxt (Unparse_costs.int v)))
@@ -76208,14 +76201,14 @@ Fixpoint unparse_data {a : Set}
             (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value))
           (fun ctxt =&gt;
             Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_True [ ] [ ]), ctxt))
+              ((Micheline.Prim (-1) Alpha_context.Script.D_True [] []), ctxt))
       | (Script_typed_ir.Bool_t _, false) =&gt;
         Error_monad.op_gtgteqquestion
           (Lwt.__return
             (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value))
           (fun ctxt =&gt;
             Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_False [ ] [ ]), ctxt))
+              ((Micheline.Prim (-1) Alpha_context.Script.D_False [] []), ctxt))
       | (Script_typed_ir.Timestamp_t _, t) =&gt;
         Error_monad.op_gtgteqquestion
           (Lwt.__return
@@ -76372,7 +76365,7 @@ Fixpoint unparse_data {a : Set}
                     let '(r, ctxt) := function_parameter in
                     Error_monad.__return
                       ((Micheline.Prim (-1) Alpha_context.Script.D_Pair [ l; r ]
-                        [ ]), ctxt))))
+                        []), ctxt))))
       | (Script_typed_ir.Union_t (tl, _) _ _ _, Script_typed_ir.L l) =&gt;
         Error_monad.op_gtgteqquestion
           (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.union))
@@ -76381,7 +76374,7 @@ Fixpoint unparse_data {a : Set}
               (fun function_parameter =&gt;
                 let '(l, ctxt) := function_parameter in
                 Error_monad.__return
-                  ((Micheline.Prim (-1) Alpha_context.Script.D_Left [ l ] [ ]),
+                  ((Micheline.Prim (-1) Alpha_context.Script.D_Left [ l ] []),
                     ctxt)))
       | (Script_typed_ir.Union_t _ (tr, _) _ _, Script_typed_ir.R r) =&gt;
         Error_monad.op_gtgteqquestion
@@ -76391,7 +76384,7 @@ Fixpoint unparse_data {a : Set}
               (fun function_parameter =&gt;
                 let '(r, ctxt) := function_parameter in
                 Error_monad.__return
-                  ((Micheline.Prim (-1) Alpha_context.Script.D_Right [ r ] [ ]),
+                  ((Micheline.Prim (-1) Alpha_context.Script.D_Right [ r ] []),
                     ctxt)))
       | (Script_typed_ir.Option_t t _ _, Some v) =&gt;
         Error_monad.op_gtgteqquestion
@@ -76401,14 +76394,14 @@ Fixpoint unparse_data {a : Set}
               (fun function_parameter =&gt;
                 let '(v, ctxt) := function_parameter in
                 Error_monad.__return
-                  ((Micheline.Prim (-1) Alpha_context.Script.D_Some [ v ] [ ]),
+                  ((Micheline.Prim (-1) Alpha_context.Script.D_Some [ v ] []),
                     ctxt)))
       | (Script_typed_ir.Option_t _ _ _, None) =&gt;
         Error_monad.op_gtgteqquestion
           (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.none))
           (fun ctxt =&gt;
             Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_None [ ] [ ]), ctxt))
+              ((Micheline.Prim (-1) Alpha_context.Script.D_None [] []), ctxt))
       | (Script_typed_ir.List_t t _ _, items) =&gt;
         Error_monad.op_gtgteqquestion
           (Error_monad.fold_left_s
@@ -76424,7 +76417,7 @@ Fixpoint unparse_data {a : Set}
                       (fun function_parameter =&gt;
                         let '(unparsed, ctxt) := function_parameter in
                         Error_monad.__return ((cons unparsed l), ctxt))))
-            ([ ], ctxt) items)
+            ([], ctxt) items)
           (fun function_parameter =&gt;
             let '(items, ctxt) := function_parameter in
             Error_monad.__return ((Micheline.Seq (-1) (List.rev items)), ctxt))
@@ -76443,8 +76436,8 @@ Fixpoint unparse_data {a : Set}
                       (unparse_data ctxt mode t item)
                       (fun function_parameter =&gt;
                         let '(item, ctxt) := function_parameter in
-                        Error_monad.__return ((cons item l), ctxt))))
-            ([ ], ctxt) (set_fold (fun e =&gt; fun acc =&gt; cons e acc) set [ ]))
+                        Error_monad.__return ((cons item l), ctxt)))) ([], ctxt)
+            (set_fold (fun e =&gt; fun acc =&gt; cons e acc) set []))
           (fun function_parameter =&gt;
             let '(items, ctxt) := function_parameter in
             Error_monad.__return ((Micheline.Seq (-1) items), ctxt))
@@ -76470,8 +76463,8 @@ Fixpoint unparse_data {a : Set}
                             Error_monad.__return
                               ((cons
                                 (Micheline.Prim (-1) Alpha_context.Script.D_Elt
-                                  [ key; value ] [ ]) l), ctxt))))) ([ ], ctxt)
-            (map_fold (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map [ ]))
+                                  [ key; value ] []) l), ctxt))))) ([], ctxt)
+            (map_fold (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map []))
           (fun function_parameter =&gt;
             let '(items, ctxt) := function_parameter in
             Error_monad.__return ((Micheline.Seq (-1) items), ctxt))
@@ -76501,7 +76494,7 @@ Fixpoint unparse_data {a : Set}
                             Error_monad.__return
                               ((cons
                                 (Micheline.Prim (-1) Alpha_context.Script.D_Elt
-                                  [ key; value ] [ ]) l), ctxt))))) ([ ], ctxt)
+                                  [ key; value ] []) l), ctxt))))) ([], ctxt)
             ((|Diff|).(Script_typed_ir.Boxed_map.OPS).(S.MAP.fold)
               (fun k =&gt;
                 fun v =&gt;
@@ -76510,7 +76503,7 @@ Fixpoint unparse_data {a : Set}
                     | None =&gt; acc
                     | Some v =&gt; cons (k, v) acc
                     end)
-              (Pervasives.fst (|Diff|).(Script_typed_ir.Boxed_map.boxed)) [ ]))
+              (Pervasives.fst (|Diff|).(Script_typed_ir.Boxed_map.boxed)) []))
           (fun function_parameter =&gt;
             let '(items, ctxt) := function_parameter in
             Error_monad.__return ((Micheline.Seq (-1) items), ctxt))
@@ -76571,7 +76564,7 @@ with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
               Error_monad.op_gtgteqquestion (unparse_code ctxt mode item)
                 (fun function_parameter =&gt;
                   let '(item, ctxt) := function_parameter in
-                  Error_monad.__return ((cons item l), ctxt))) ([ ], ctxt) items)
+                  Error_monad.__return ((cons item l), ctxt))) ([], ctxt) items)
         (fun function_parameter =&gt;
           let '(items, ctxt) := function_parameter in
           Error_monad.op_gtgteqquestion
@@ -76589,7 +76582,7 @@ with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
               Error_monad.op_gtgteqquestion (unparse_code ctxt mode item)
                 (fun function_parameter =&gt;
                   let '(item, ctxt) := function_parameter in
-                  Error_monad.__return ((cons item l), ctxt))) ([ ], ctxt) items)
+                  Error_monad.__return ((cons item l), ctxt))) ([], ctxt) items)
         (fun function_parameter =&gt;
           let '(items, ctxt) := function_parameter in
           Error_monad.op_gtgteqquestion
@@ -76639,11 +76632,11 @@ Definition unparse_script {A B : Set}
                     Micheline.Seq (-1)
                       [
                         Micheline.Prim (-1) Alpha_context.Script.K_parameter
-                          [ arg_type ] [ ];
+                          [ arg_type ] [];
                         Micheline.Prim (-1) Alpha_context.Script.K_storage
-                          [ storage_type ] [ ];
+                          [ storage_type ] [];
                         Micheline.Prim (-1) Alpha_context.Script.K_code [ code ]
-                          [ ]
+                          []
                       ] in
                   Error_monad.op_gtgteqquestion
                     (Lwt.__return
@@ -76653,14 +76646,14 @@ Definition unparse_script {A B : Set}
                         (fun ctxt =&gt;
                           Error_monad.op_gtgtquestion
                             (Alpha_context.Gas.consume ctxt
-                              (Unparse_costs.prim_cost 1 [ ]))
+                              (Unparse_costs.prim_cost 1 []))
                             (fun ctxt =&gt;
                               Error_monad.op_gtgtquestion
                                 (Alpha_context.Gas.consume ctxt
-                                  (Unparse_costs.prim_cost 1 [ ]))
+                                  (Unparse_costs.prim_cost 1 []))
                                 (fun ctxt =&gt;
                                   Alpha_context.Gas.consume ctxt
-                                    (Unparse_costs.prim_cost 1 [ ]))))))
+                                    (Unparse_costs.prim_cost 1 []))))))
                     (fun ctxt =&gt;
                       Error_monad.__return
                         ({|
@@ -76824,7 +76817,7 @@ Definition diff_of_big_map {A B : Set}
                 Error_monad.__return
                   (ctxt, [ Alpha_context.Contract.Copy id duplicate ], duplicate))
           else
-            Error_monad.__return (ctxt, [ ], id)
+            Error_monad.__return (ctxt, [], id)
         | None =&gt;
           Error_monad.op_gtgteqquestion (fresh ctxt)
             (fun function_parameter =&gt;
@@ -76855,7 +76848,7 @@ Definition diff_of_big_map {A B : Set}
           let '(ctxt, init, big_map) := function_parameter in
           let pairs :=
             map_fold (fun key =&gt; fun value =&gt; fun acc =&gt; cons (key, value) acc)
-              diff [ ] in
+              diff [] in
           Error_monad.op_gtgteqquestion
             (Error_monad.fold_left_s
               (fun function_parameter =&gt;
@@ -76903,8 +76896,8 @@ Definition diff_of_big_map {A B : Set}
                                         Alpha_context.Contract.big_map_diff_item.Update.diff_value :=
                                           diff_value |} in
                                   Error_monad.__return
-                                    ((cons diff_item acc), ctxt))))))
-              ([ ], ctxt) pairs)
+                                    ((cons diff_item acc), ctxt)))))) ([], ctxt)
+              pairs)
             (fun function_parameter =&gt;
               let '(diff, ctxt) := function_parameter in
               Error_monad.__return ((Pervasives.op_at init diff), big_map, ctxt)))).
@@ -76988,7 +76981,7 @@ Fixpoint extract_big_map_updates {a : Set}
                   (fun function_parameter =&gt;
                     let '(ctxt, x, ids, acc) := function_parameter in
                     Error_monad.__return (ctxt, (cons x l), ids, acc))))
-        (ctxt, [ ], ids, acc) l)
+        (ctxt, [], ids, acc) l)
       (fun function_parameter =&gt;
         let '(ctxt, l, ids, acc) := function_parameter in
         Error_monad.__return (ctxt, (List.rev l), ids, acc))
@@ -77169,7 +77162,7 @@ Definition extract_big_map_diff {A : Set}
     else
       Alpha_context.Big_map.fresh in
   Error_monad.op_gtgteqquestion
-    (extract_big_map_updates ctxt fresh mode to_duplicate [ ] ty v)
+    (extract_big_map_updates ctxt fresh mode to_duplicate [] ty v)
     (fun function_parameter =&gt;
       let '(ctxt, v, alive, diffs) := function_parameter in
       let diffs :=
@@ -77180,7 +77173,7 @@ Definition extract_big_map_diff {A : Set}
           cons
             ((|Ids|).(S.SET.fold)
               (fun id =&gt; fun acc =&gt; cons (Alpha_context.Contract.Clear id) acc)
-              dead [ ]) diffs in
+              dead []) diffs in
       match diffs with
       | [] =&gt; Error_monad.__return (v, None, ctxt)
       | diffs =&gt; Error_monad.__return (v, (Some (List.flatten diffs)), ctxt)
@@ -78278,7 +78271,7 @@ Definition minimal_deserialize_cost {A : Set} (lexpr : Data_encoding.lazy_t A)
 
 Definition __unit_value : Micheline.canonical Michelson_v1_primitives.prim :=
   Micheline.strip_locations
-    (Micheline.Prim 0 Michelson_v1_primitives.D_Unit [ ] [ ]).
+    (Micheline.Prim 0 Michelson_v1_primitives.D_Unit [] []).
 
 Definition unit_parameter
   : Data_encoding.lazy_t (Micheline.canonical Michelson_v1_primitives.prim) :=
@@ -78305,7 +78298,7 @@ Fixpoint strip_annotations {A B : Set} (node : Micheline.node A B) {struct node}
   | (Micheline.Int _ _ | Micheline.String _ _ | Micheline.Bytes _ _) as leaf =&gt;
     leaf
   | Micheline.Prim loc name args _ =&gt;
-    Micheline.Prim loc name (List.map strip_annotations args) [ ]
+    Micheline.Prim loc name (List.map strip_annotations args) []
   | Micheline.Seq loc args =&gt;
     Micheline.Seq loc (List.map strip_annotations args)
   end.
@@ -79558,7 +79551,7 @@ Definition stack_ty_enc
     (Data_encoding.obj2
       (Data_encoding.req None None &quot;type&quot; Alpha_context.Script.expr_encoding)
       (Data_encoding.dft None None &quot;annots&quot;
-        (Data_encoding.__list_value None Data_encoding.__string_value) [ ])).
+        (Data_encoding.__list_value None Data_encoding.__string_value) [])).
 
 (* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
 (* top_level_evaluation *)
@@ -80897,7 +80890,7 @@ Definition initial_seeds (n : (|Compare.Int|).(Compare.S.t)) : list seed :=
       List.rev (cons elt acc)
     else
       loop (cons elt acc) (deterministic_seed elt) (Pervasives.op_minus i 1) in
-  loop [ ] (B (State_hash.hash_bytes None [ ])) n.
+  loop [] (B (State_hash.hash_bytes None [])) n.
 </pre>
   </div>
 </div>
@@ -81291,7 +81284,7 @@ Definition compute_for_cycle
       (fun prev_seed =&gt;
         let seed := Seed_repr.deterministic_seed prev_seed in
         Error_monad.op_gtgteqquestion
-          (Error_monad.fold_left_s combine (c, seed, [ ]) levels)
+          (Error_monad.fold_left_s combine (c, seed, []) levels)
           (fun function_parameter =&gt;
             let '(c, seed, unrevealed) := function_parameter in
             Error_monad.op_gtgteqquestion
@@ -81354,7 +81347,7 @@ Definition cycle_end
     end
     (fun ctxt =&gt;
       match Cycle_repr.pred last_cycle with
-      | None =&gt; Error_monad.__return (ctxt, [ ])
+      | None =&gt; Error_monad.__return (ctxt, [])
       | Some revealed =&gt;
         let inited_seed_cycle :=
           Cycle_repr.add last_cycle (Pervasives.op_plus preserved 1) in
@@ -87468,7 +87461,7 @@ Fixpoint compare {a b c : Set} (function_parameter : args a b c)
 Definition destutter {A B : Set} (equal : A -&gt; A -&gt; bool) (l : list (A * B))
   : list A :=
   match l with
-  | [] =&gt; [ ]
+  | [] =&gt; []
   | cons (i, _) l =&gt;
     let fix loop {C : Set}
       (acc : list A) (i : A) (function_parameter : list (A * C)) {struct acc}
@@ -87832,7 +87825,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           Error_monad.return_none
         else
           if (|Compare.Int|).(Compare.S.op_eq) i 0 then
-            Error_monad.return_some [ ]
+            Error_monad.return_some []
           else
             Error_monad.op_gtgteqquestion (__list_value k)
               (fun keys =&gt;
@@ -91778,7 +91771,7 @@ Definition kind_encoding : Data_encoding.encoding kind :=
     (Some
       (* ❌ Variants not supported *)
       (* ❌ `Uint8 *)
-      tt)
+      Data_encoding.Uint8)
     [
       Data_encoding.__case_value &quot;Proposal&quot; None (Data_encoding.Tag 0)
         (Data_encoding.constant &quot;proposal&quot;)
