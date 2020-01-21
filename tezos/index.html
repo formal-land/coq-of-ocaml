@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35803 lines</li>
-      <li>Coq size: 44776 lines (+25% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 2878</li>
+      <li>OCaml size: 35805 lines</li>
+      <li>Coq size: 44859 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 2877</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -69,7 +69,7 @@
           1147,
           1541,
           2680,
-          2680,
+          2763,
         ],
         generated: [
           47563,
@@ -367,7 +367,7 @@
       </li>
       
       <li>
-        <a href="#nonce_hash.ml">nonce_hash.ml</a>&nbsp;<span class="label label-danger">2</span>
+        <a href="#nonce_hash.ml">nonce_hash.ml</a>&nbsp;<span class="label label-danger">1</span>
       </li>
       
       <li>
@@ -46440,7 +46440,7 @@ Parameter remove_elem_from_list : forall {a : Set}, Z -&gt; list a -&gt; list a.
 <hr />
 <div class="row conversion-row" id="nonce_hash.ml">
   <div class="col-md-6">
-    <a href="#nonce_hash.ml"><code>nonce_hash.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
+    <a href="#nonce_hash.ml"><code>nonce_hash.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -46470,7 +46470,7 @@ Parameter remove_elem_from_list : forall {a : Set}, Z -&gt; list a -&gt; list a.
 (* 32 *)
 let nonce_hash = &quot;\069\220\169&quot; (* nce(53) *)
 
-<abbr class="mark-error" title="Cannot include this kind of module expression">include Blake2B.Make
+module Blake2BModule = Blake2B.Make
           (Base58)
           (struct
             let name = &quot;cycle_nonce&quot;
@@ -46480,7 +46480,9 @@ let nonce_hash = &quot;\069\220\169&quot; (* nce(53) *)
             let b58check_prefix = nonce_hash
 
             let size = None
-          end)</abbr>
+          end)
+
+include Blake2BModule
 
 <abbr class="mark-error" title="Top-level evaluations are considered as an error as sources of side-effects">let () = Base58.check_encoded_prefix b58check_encoding &quot;nce&quot; 53</abbr>
 </pre>
@@ -46501,8 +46503,91 @@ Require Import Tezos.Environment.
 
 Definition nonce_hash : string := &quot;E\220\169&quot; % string.
 
-(* ❌ Cannot include this kind of module expression *)
-(* include *)
+Definition Blake2BModule :=
+  (Blake2B.Make
+    (existT _ tt
+      {|
+        Blake2B.SRegister.register_encoding {_} := Base58.register_encoding
+        |}))
+    (let name := &quot;cycle_nonce&quot; % string in
+    let title := &quot;A nonce hash&quot; % string in
+    let b58check_prefix := nonce_hash in
+    let size := None in
+    existT _ tt
+      {|
+        Blake2B.PrefixedName.name := name;
+        Blake2B.PrefixedName.title := title;
+        Blake2B.PrefixedName.size := size;
+        Blake2B.PrefixedName.b58check_prefix := b58check_prefix
+        |}).
+
+Definition t := Blake2BModule.[S.HASH.t].
+
+Definition name := Blake2BModule.[S.HASH.name].
+
+Definition title := Blake2BModule.[S.HASH.title].
+
+Definition pp := Blake2BModule.[S.HASH.pp].
+
+Definition pp_short := Blake2BModule.[S.HASH.pp_short].
+
+Definition op_eq := Blake2BModule.[S.HASH.op_eq].
+
+Definition op_ltgt := Blake2BModule.[S.HASH.op_ltgt].
+
+Definition op_lt := Blake2BModule.[S.HASH.op_lt].
+
+Definition op_lteq := Blake2BModule.[S.HASH.op_lteq].
+
+Definition op_gteq := Blake2BModule.[S.HASH.op_gteq].
+
+Definition op_gt := Blake2BModule.[S.HASH.op_gt].
+
+Definition compare := Blake2BModule.[S.HASH.compare].
+
+Definition equal := Blake2BModule.[S.HASH.equal].
+
+Definition max := Blake2BModule.[S.HASH.max].
+
+Definition min := Blake2BModule.[S.HASH.min].
+
+Definition hash_bytes := Blake2BModule.[S.HASH.hash_bytes].
+
+Definition hash_string := Blake2BModule.[S.HASH.hash_string].
+
+Definition zero := Blake2BModule.[S.HASH.zero].
+
+Definition size := Blake2BModule.[S.HASH.size].
+
+Definition to_bytes := Blake2BModule.[S.HASH.to_bytes].
+
+Definition of_bytes_opt := Blake2BModule.[S.HASH.of_bytes_opt].
+
+Definition of_bytes_exn := Blake2BModule.[S.HASH.of_bytes_exn].
+
+Definition to_b58check := Blake2BModule.[S.HASH.to_b58check].
+
+Definition to_short_b58check := Blake2BModule.[S.HASH.to_short_b58check].
+
+Definition of_b58check_exn := Blake2BModule.[S.HASH.of_b58check_exn].
+
+Definition of_b58check_opt := Blake2BModule.[S.HASH.of_b58check_opt].
+
+Definition b58check_encoding := Blake2BModule.[S.HASH.b58check_encoding].
+
+Definition encoding := Blake2BModule.[S.HASH.encoding].
+
+Definition rpc_arg := Blake2BModule.[S.HASH.rpc_arg].
+
+Definition to_path := Blake2BModule.[S.HASH.to_path].
+
+Definition of_path := Blake2BModule.[S.HASH.of_path].
+
+Definition of_path_exn := Blake2BModule.[S.HASH.of_path_exn].
+
+Definition prefix_path := Blake2BModule.[S.HASH.prefix_path].
+
+Definition path_length := Blake2BModule.[S.HASH.path_length].
 
 (* ❌ Top-level evaluations are considered as an error as sources of side-effects *)
 (* top_level_evaluation *)

@@ -161,7 +161,7 @@ File.open("tezos/index.html", "w") do |file|
           1147,
           1541,
           2680,
-          2680,
+          2763,
         ],
         generated: [
           47563,
