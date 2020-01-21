@@ -35,6 +35,13 @@ module Value = struct
           group (separate space (args |> List.map (fun (x, t) ->
             parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
           ))) ^^
+          (if Recursivity.to_bool value.Exp.Definition.is_rec then
+            match args with
+            | [] -> empty
+            | (x, _) :: _ -> braces (nest (!^ "struct" ^^ Name.to_coq x))
+          else
+            empty
+          ) ^^
           begin match typ with
           | None -> empty
           | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
@@ -104,7 +111,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       top_level_evaluation_error
     | Tstr_eval _ -> top_level_evaluation_error
     | Tstr_value (is_rec, cases) ->
-      Exp.import_let_fun Name.Map.empty is_rec cases >>= fun def ->
+      Exp.import_let_fun Name.Map.empty true is_rec cases >>= fun def ->
       return [Value def]
     | Tstr_type (_, typs) ->
       TypeDefinition.of_ocaml typs >>= fun def ->

@@ -5,8 +5,11 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
+
 Definition map {A B : Set} (f : A -> B) (l : list A) : list B :=
-  let fix map_coq_rec (l : list A) : list B :=
+  let fix map_coq_rec (l : list A) {struct l} : list B :=
     match l with
     | [] => []
     | cons x l => cons (f x) (map_coq_rec l)
@@ -14,7 +17,8 @@ Definition map {A B : Set} (f : A -> B) (l : list A) : list B :=
   map_coq_rec l.
 
 Definition map2 {A B : Set} (f : A -> B) (l : list A) : list B :=
-  let fix map2_coq_rec {C D : Set} (f : C -> D) (l : list C) : list D :=
+  let fix map2_coq_rec {C D : Set} (f : C -> D) (l : list C) {struct f}
+    : list D :=
     match l with
     | [] => []
     | cons x l => cons (f x) (map2_coq_rec f l)

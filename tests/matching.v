@@ -5,6 +5,9 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
+
 Definition n : Z :=
   match ((cons 1 (cons 2 [])), false) with
   | (cons x (cons _ []), true) => x

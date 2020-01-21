@@ -283,6 +283,7 @@ and open_cases
 
 and import_let_fun
   (typ_vars : Name.t Name.Map.t)
+  (at_top_level : bool)
   (is_rec : Asttypes.rec_flag)
   (cases : value_binding list)
   : t Definition.t Monad.t =
@@ -312,10 +313,14 @@ and import_let_fun
       return (Some (header, e_body))
     )
   ))) >>= fun cases ->
-  return {
-    Definition.is_rec = is_rec;
-    cases = cases;
-  }
+  let result = { Definition.is_rec = is_rec; cases } in
+  match (at_top_level, result) with
+  | (false, { is_rec = Recursivity.New true; cases = _ :: _ :: _ }) ->
+    raise
+      result
+      NotSupported
+      "Mutually recursive definition are only handled at top-level"
+  | _ -> return result
 
 and of_let
   (typ_vars : Name.t Name.Map.t)
@@ -336,7 +341,7 @@ and of_let
     | _ -> return (Match (e1, [p, e2], None))
     end
   | _ ->
-    import_let_fun typ_vars is_rec cases >>= fun def ->
+    import_let_fun typ_vars false is_rec cases >>= fun def ->
     return (LetFun (def, e2))
 
 and of_module_expr
@@ -559,7 +564,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       )
     end
   | LetFun (def, e) ->
-    (* TODO: say that 'let rec and' is not supported (yet?) inside expressions. *)
+    (* There should be only on case for recursive definitionss. *)
     Pp.parens paren @@ nest (separate newline
       (def.Definition.cases |> List.mapi (fun index (header, e) ->
         let first_case = index = 0 in
@@ -579,6 +584,13 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
             Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None x_typ
           )))
         )) ^^
+        (if Recursivity.to_bool def.Definition.is_rec then
+          match header.Header.args with
+          | [] -> empty
+          | (x, _) :: _ -> braces (nest (!^ "struct" ^^ Name.to_coq x))
+        else
+          empty
+        ) ^^
         (match header.Header.typ with
         | None -> empty
         | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^

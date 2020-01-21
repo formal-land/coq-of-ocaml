@@ -5,6 +5,9 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
+
 Definition f {A B : Set} (x : A) (y : B) : A := x.
 
 Definition n : Z := f 12 3.

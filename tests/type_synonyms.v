@@ -5,6 +5,9 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
+
 Definition t1 := string.
 
 Definition t2 (a b : Set) := a * b.

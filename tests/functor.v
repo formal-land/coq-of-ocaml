@@ -5,6 +5,9 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
+
 Module COMPARABLE.
   Record signature {t : Set} := {
     t := t;

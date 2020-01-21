@@ -47,7 +47,9 @@ let to_coq (ast : t) : SmartPrint.t =
     !^ "Require Import OCaml.OCaml." ^^ newline;
     !^ "Local Open Scope Z_scope.";
     !^ "Local Open Scope type_scope.";
-    !^ "Import ListNotations."
+    !^ "Import ListNotations." ^^ newline;
+    !^ "Require Import TypingFlags.Loader.";
+    !^ "Unset Guard Checking."
   ]) ^^ newline ^^
   (match ast with
   | SignatureAxioms signature -> SignatureAxioms.to_coq signature

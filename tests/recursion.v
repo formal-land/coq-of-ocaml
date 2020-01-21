@@ -5,13 +5,17 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Fixpoint map {A B : Set} (f : A -> B) (l : list A) : list B :=
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
+
+Fixpoint map {A B : Set} (f : A -> B) (l : list A) {struct f} : list B :=
   match l with
   | [] => []
   | cons x xs => cons (f x) (map f xs)
   end.
 
-Fixpoint fold {A B : Set} (f : A -> B -> A) (a : A) (l : list B) : A :=
+Fixpoint fold {A B : Set} (f : A -> B -> A) (a : A) (l : list B) {struct f}
+  : A :=
   match l with
   | [] => a
   | cons x xs => fold f (f a x) xs

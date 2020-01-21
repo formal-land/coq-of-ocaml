@@ -5,6 +5,9 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
+
 Definition t0 : unit := tt.
 
 Definition t1 : ascii * string := ("c" % char, "one" % string).
