@@ -54,8 +54,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6148 lines</li>
-      <li>Coq size: 3156 lines (-49% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 191</li>
+      <li>Coq size: 3159 lines (-49% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 192</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -95,7 +95,7 @@
 <hr />
 <div class="row conversion-row" id="environment.mli">
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">191 errors</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">192 errors</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -5432,11 +5432,11 @@ type watermark =
   | Generic_operation
   | Custom of MBytes.t
 
-include
+<abbr class="mark-error" title="Type extension not handled">include
   S.SIGNATURE
     with type Public_key_hash.t = public_key_hash
      and type Public_key.t = public_key
-     and type watermark := watermark
+     and type watermark := watermark</abbr>
 end
 module Block_hash : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/block_hash.mli&quot;
@@ -6730,6 +6730,9 @@ Require Import OCaml.OCaml.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+
+Require Import TypingFlags.Loader.
+Unset Guard Checking.
 
 Module Pervasives.
   Parameter raise : forall {a : Set}, exn -&gt; a.

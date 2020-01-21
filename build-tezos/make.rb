@@ -20,7 +20,9 @@ files = [
   "Gas_limit_repr_mli.v",
   "Manager_repr.v",
   "Manager_repr_mli.v",
+  "Michelson_v1_primitives.v",
   "Michelson_v1_primitives_mli.v",
+  "Misc_mli.v",
   "Nonce_hash.v",
   "Period_repr.v",
   "Period_repr_mli.v",
@@ -36,9 +38,7 @@ files = [
   "Voting_period_repr_mli.v",
 
   # in progress
-  # "Michelson_v1_primitives.v",
   # "Misc.v",
-  # "Misc_mli.v",
   # "Storage_description.v",
   # "Tez_repr.v",
   # "Voting_period_repr.v"
