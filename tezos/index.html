@@ -53,8 +53,8 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35822 lines</li>
-      <li>Coq size: 45468 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 35827 lines</li>
+      <li>Coq size: 45158 lines (+26% compared to&nbsp;OCaml)</li>
       <li>errors from coq-of-ocaml: 2861</li>
     </ul>
     
@@ -69,7 +69,7 @@
           1147,
           1541,
           2680,
-          2863,
+          3100,
         ],
         generated: [
           47563,
@@ -79,7 +79,7 @@
           44618,
           45107,
           44768,
-          45468,
+          45158,
         ],
         labels: [
           "01-14",
@@ -5062,7 +5062,7 @@ Module Nonce.
             | _ =&gt; None
             end)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Forgotten)
       ].
   
@@ -5078,14 +5078,14 @@ Module Nonce.
   End S.
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     Services_registration.register1 S.get
       (fun ctxt =&gt;
         fun raw_level =&gt;
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               let level := Alpha_context.Level.from_raw ctxt None raw_level in
               Error_monad.op_gtgteq (Alpha_context.Nonce.get ctxt level)
                 (fun function_parameter =&gt;
@@ -5143,7 +5143,7 @@ Module Parse := Helpers_services.Parse.
 Module Voting := Voting_services.
 
 Definition register (function_parameter : unit) : unit :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
@@ -5980,7 +5980,7 @@ Definition record_proposals
     | cons _ _ =&gt; Error_monad.return_unit
     end
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       Error_monad.op_gtgteqquestion
         (Alpha_context.Vote.get_current_period_kind ctxt)
         (fun function_parameter =&gt;
@@ -6000,7 +6000,7 @@ Definition record_proposals
                               Alpha_context.Constants.max_proposals_per_delegate
                               count)) extensible_type_value)
                         (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
+                          let '_ := function_parameter in
                           Error_monad.op_gtgteqquestion
                             (Error_monad.fold_left_s
                               (fun ctxt =&gt;
@@ -6036,14 +6036,14 @@ Definition record_ballot
                 ((|Protocol_hash|).(S.HASH.equal) proposal current_proposal)
                 extensible_type_value)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteq
                   (Alpha_context.Vote.has_recorded_ballot ctxt delegate)
                   (fun has_ballot =&gt;
                     Error_monad.op_gtgteqquestion
                       (Error_monad.fail_when has_ballot extensible_type_value)
                       (fun function_parameter =&gt;
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgteq
                           (Alpha_context.Vote.in_listings ctxt delegate)
                           (fun in_listings =&gt;
@@ -7793,7 +7793,7 @@ Definition apply_manager_operation_content {kind : Set}
   let before_operation := ctxt in
   Error_monad.op_gtgteqquestion (Alpha_context.Contract.must_exist ctxt source)
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       Error_monad.op_gtgteqquestion
         (Lwt.__return
           (Alpha_context.Gas.consume ctxt
@@ -7865,7 +7865,7 @@ Definition apply_manager_operation_content {kind : Set}
                                     Error_monad.fail extensible_type_value
                                   end
                                   (fun function_parameter =&gt;
-                                    let 'tt := function_parameter in
+                                    let '_ := function_parameter in
                                     Error_monad.op_gtgteqquestion
                                       (Alpha_context.Script.force_decode ctxt
                                         parameters)
@@ -8287,23 +8287,23 @@ Definition precheck_manager_contents {A B : Set}
   Error_monad.op_gtgteqquestion
     (Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit))
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
       Error_monad.op_gtgteqquestion
         (Lwt.__return
           (Alpha_context.Fees.check_storage_limit ctxt storage_limit))
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgteqquestion
             (Alpha_context.Contract.must_be_allocated ctxt
               (Alpha_context.Contract.implicit_contract source))
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtgteqquestion
                 (Alpha_context.Contract.check_counter_increment ctxt source
                   counter)
                 (fun function_parameter =&gt;
-                  let 'tt := function_parameter in
+                  let '_ := function_parameter in
                   Error_monad.op_gtgteqquestion
                     match operation with
                     | Alpha_context.Reveal pk =&gt;
@@ -8320,7 +8320,7 @@ Definition precheck_manager_contents {A B : Set}
                               (Alpha_context.Script.minimal_deserialize_cost
                                 parameters))))
                         (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
+                          let '_ := function_parameter in
                           Error_monad.op_gtgtpipequestion
                             (Pervasives.op_atat
                               (Error_monad.trace extensible_type_value)
@@ -8345,7 +8345,7 @@ Definition precheck_manager_contents {A B : Set}
                                   (Alpha_context.Script.minimal_deserialize_cost
                                     (Alpha_context.Script.t.storage script))))))
                         (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
+                          let '_ := function_parameter in
                           Error_monad.op_gtgteqquestion
                             (Pervasives.op_atat
                               (Error_monad.trace extensible_type_value)
@@ -8371,7 +8371,7 @@ Definition precheck_manager_contents {A B : Set}
                             (Alpha_context.Operation.check_signature public_key
                               chain_id raw_operation)
                             (fun function_parameter =&gt;
-                              let 'tt := function_parameter in
+                              let '_ := function_parameter in
                               Error_monad.op_gtgteqquestion
                                 (Alpha_context.Contract.increment_counter ctxt
                                   source)
@@ -8734,7 +8734,7 @@ Definition apply_contents_list {A : Set}
       (Error_monad.fail_unless ((|Block_hash|).(S.HASH.equal) block pred_block)
         extensible_type_value)
       (fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         let current_level :=
           Alpha_context.Level.t.level (Alpha_context.Level.current ctxt) in
         Error_monad.op_gtgteqquestion
@@ -8742,7 +8742,7 @@ Definition apply_contents_list {A : Set}
             (Alpha_context.Raw_level.op_eq (Alpha_context.Raw_level.succ level)
               current_level) extensible_type_value)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Baking.check_endorsement_rights ctxt chain_id operation)
               (fun function_parameter =&gt;
@@ -8872,13 +8872,13 @@ Definition apply_contents_list {A : Set}
           (Alpha_context.Level.op_lt level (Alpha_context.Level.current ctxt))
           extensible_type_value)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgteqquestion
             (Error_monad.fail_unless
               (Alpha_context.Raw_level.op_lteq oldest_level
                 (Alpha_context.Level.t.level level)) extensible_type_value)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtgteqquestion
                 (Baking.check_endorsement_rights ctxt chain_id op1)
                 (fun function_parameter =&gt;
@@ -8892,7 +8892,7 @@ Definition apply_contents_list {A : Set}
                           ((|Signature.Public_key_hash|).(S.SPublic_key_hash.equal)
                             delegate1 delegate2) extensible_type_value)
                         (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
+                          let '_ := function_parameter in
                           Error_monad.op_gtgteqquestion
                             (Alpha_context.Delegate.has_frozen_balance ctxt
                               delegate1 (Alpha_context.Level.t.cycle level))
@@ -8901,7 +8901,7 @@ Definition apply_contents_list {A : Set}
                                 (Error_monad.fail_unless valid
                                   extensible_type_value)
                                 (fun function_parameter =&gt;
-                                  let 'tt := function_parameter in
+                                  let '_ := function_parameter in
                                   Error_monad.op_gtgteqquestion
                                     (Alpha_context.Delegate.punish ctxt
                                       delegate1
@@ -8989,7 +8989,7 @@ Definition apply_contents_list {A : Set}
           (Pervasives.not ((|Block_hash|).(S.HASH.equal) hash1 hash2)))
         extensible_type_value)
       (fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         Error_monad.op_gtgteqquestion
           (Lwt.__return
             (Alpha_context.Raw_level.of_int32
@@ -9004,13 +9004,13 @@ Definition apply_contents_list {A : Set}
                   (Alpha_context.Level.t.level
                     (Alpha_context.Level.current ctxt))) extensible_type_value)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Error_monad.fail_unless
                     (Alpha_context.Raw_level.op_lteq oldest_level raw_level)
                     extensible_type_value)
                   (fun function_parameter =&gt;
-                    let 'tt := function_parameter in
+                    let '_ := function_parameter in
                     let level :=
                       Alpha_context.Level.from_raw ctxt None raw_level in
                     Error_monad.op_gtgteqquestion
@@ -9022,7 +9022,7 @@ Definition apply_contents_list {A : Set}
                         Error_monad.op_gtgteqquestion
                           (Baking.check_signature bh1 chain_id delegate1)
                           (fun function_parameter =&gt;
-                            let 'tt := function_parameter in
+                            let '_ := function_parameter in
                             Error_monad.op_gtgteqquestion
                               (Alpha_context.Roll.baking_rights_owner ctxt level
                                 (Alpha_context.Block_header.contents.priority
@@ -9033,14 +9033,14 @@ Definition apply_contents_list {A : Set}
                                 Error_monad.op_gtgteqquestion
                                   (Baking.check_signature bh2 chain_id delegate2)
                                   (fun function_parameter =&gt;
-                                    let 'tt := function_parameter in
+                                    let '_ := function_parameter in
                                     Error_monad.op_gtgteqquestion
                                       (Error_monad.fail_unless
                                         ((|Signature.Public_key|).(S.SPublic_key.equal)
                                           delegate1 delegate2)
                                         extensible_type_value)
                                       (fun function_parameter =&gt;
-                                        let 'tt := function_parameter in
+                                        let '_ := function_parameter in
                                         let delegate :=
                                           (|Signature.Public_key|).(S.SPublic_key.__hash_value)
                                             delegate1 in
@@ -9053,7 +9053,7 @@ Definition apply_contents_list {A : Set}
                                               (Error_monad.fail_unless valid
                                                 extensible_type_value)
                                               (fun function_parameter =&gt;
-                                                let 'tt := function_parameter in
+                                                let '_ := function_parameter in
                                                 Error_monad.op_gtgteqquestion
                                                   (Alpha_context.Delegate.punish
                                                     ctxt delegate
@@ -9169,7 +9169,7 @@ Definition apply_contents_list {A : Set}
         Error_monad.op_gtgteqquestion
           (Alpha_context.Operation.check_signature delegate chain_id operation)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             let level := Alpha_context.Level.current ctxt in
             Error_monad.op_gtgteqquestion
               (Error_monad.fail_unless
@@ -9177,7 +9177,7 @@ Definition apply_contents_list {A : Set}
                   (Alpha_context.Level.t.voting_period level) period)
                 extensible_type_value)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Amendment.record_proposals ctxt source proposals)
                   (fun ctxt =&gt;
@@ -9199,7 +9199,7 @@ Definition apply_contents_list {A : Set}
         Error_monad.op_gtgteqquestion
           (Alpha_context.Operation.check_signature delegate chain_id operation)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             let level := Alpha_context.Level.current ctxt in
             Error_monad.op_gtgteqquestion
               (Error_monad.fail_unless
@@ -9207,7 +9207,7 @@ Definition apply_contents_list {A : Set}
                   (Alpha_context.Level.t.voting_period level) period)
                 extensible_type_value)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Amendment.record_ballot ctxt source proposal ballot)
                   (fun ctxt =&gt;
@@ -9359,11 +9359,11 @@ Definition begin_application
       Error_monad.op_gtgteqquestion
         (Baking.check_proof_of_work_stamp ctxt block_header)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgteqquestion
             (Baking.check_fitness_gap ctxt block_header)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtgteqquestion
                 (Baking.check_baking_rights ctxt
                   (Alpha_context.Block_header.protocol_data.contents
@@ -9374,7 +9374,7 @@ Definition begin_application
                   Error_monad.op_gtgteqquestion
                     (Baking.check_signature block_header chain_id delegate_pk)
                     (fun function_parameter =&gt;
-                      let 'tt := function_parameter in
+                      let '_ := function_parameter in
                       let has_commitment :=
                         match
                           Alpha_context.Block_header.contents.seed_nonce_hash
@@ -9390,7 +9390,7 @@ Definition begin_application
                             (Alpha_context.Level.t.expected_commitment
                               current_level)) extensible_type_value)
                         (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
+                          let '_ := function_parameter in
                           let ctxt := Alpha_context.Fitness.increase None ctxt
                             in
                           match
@@ -9433,7 +9433,7 @@ Definition finalize_application
     (check_minimum_endorsements ctxt protocol_data block_delay
       included_endorsements)
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       let deposit := Alpha_context.Constants.block_security_deposit ctxt in
       Error_monad.op_gtgteqquestion
         (Alpha_context.add_deposit ctxt delegate deposit)
@@ -10996,7 +10996,7 @@ Module Manager_result.
                   end
                 end)
               (fun function_parameter =&gt;
-                let '(tt, x) := function_parameter in
+                let '(_, x) := function_parameter in
                 Applied (inj x));
             Data_encoding.__case_value &quot;Failed&quot; None (Data_encoding.Tag 1)
               (Data_encoding.obj2
@@ -11011,7 +11011,7 @@ Module Manager_result.
                 | _ =&gt; None
                 end)
               (fun function_parameter =&gt;
-                let '(tt, errs) := function_parameter in
+                let '(_, errs) := function_parameter in
                 Failed kind errs);
             Data_encoding.__case_value &quot;Skipped&quot; None (Data_encoding.Tag 2)
               (Data_encoding.obj1
@@ -11023,7 +11023,7 @@ Module Manager_result.
                 | _ =&gt; None
                 end)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Skipped kind);
             Data_encoding.__case_value &quot;Backtracked&quot; None (Data_encoding.Tag 3)
               (Data_encoding.merge_objs
@@ -11050,7 +11050,7 @@ Module Manager_result.
                   end
                 end)
               (fun function_parameter =&gt;
-                let '((tt, errs), x) := function_parameter in
+                let '((_, errs), x) := function_parameter in
                 Backtracked (inj x) errs)
           ]) in
     MCase
@@ -11303,7 +11303,7 @@ Definition internal_operation_result_encoding
         | None =&gt; None
         end)
       (fun function_parameter =&gt;
-        let '((tt, source, nonce), (op, res)) := function_parameter in
+        let '((_, source, nonce), (op, res)) := function_parameter in
         let op :=
           {| Alpha_context.internal_operation.source := source;
             Alpha_context.internal_operation.operation :=
@@ -11465,7 +11465,7 @@ Module Encoding.
         | Some x =&gt; Some (tt, x)
         end)
       (fun function_parameter =&gt;
-        let '(tt, x) := function_parameter in
+        let '(_, x) := function_parameter in
         inj x).
   
   Definition endorsement_case : case Alpha_context.Kind.endorsement :=
@@ -11656,7 +11656,7 @@ Module Encoding.
             tt;
         case.Case.inj :=
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Proposals_result |}.
   
   Definition ballot_case : case Alpha_context.Kind.ballot :=
@@ -11682,7 +11682,7 @@ Module Encoding.
             tt;
         case.Case.inj :=
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Ballot_result |}.
   
   Definition make_manager_case {A : Set}
@@ -12128,7 +12128,7 @@ Definition operation_metadata_encoding
             | _ =&gt; None
             end)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             No_operation_metadata)
       ]).
 
@@ -13603,7 +13603,7 @@ Definition baking_reward
     (Error_monad.fail_unless ((|Compare.Int|).(Compare.S.op_gteq) prio 0)
       extensible_type_value)
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       let max_endorsements := Alpha_context.Constants.endorsers_per_block ctxt
         in
       Error_monad.op_gtgteqquestion
@@ -13612,7 +13612,7 @@ Definition baking_reward
             ((|Compare.Int|).(Compare.S.op_lteq) num_endo max_endorsements))
           extensible_type_value)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           let prio_factor_denominator := Int64.succ (Int64.of_int prio) in
           let endo_factor_numerator :=
             Int64.of_int
@@ -13659,7 +13659,7 @@ Definition baking_priorities
         Error_monad.__return
           (Misc.LCons delegate
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               f (Pervasives.succ priority)))) in
   f 0.
 
@@ -13723,7 +13723,7 @@ Definition check_endorsement_rights
                   Alpha_context.Operation.check_signature_sync pk chain_id op
                   with
                 | Pervasives.Error _ =&gt; acc
-                | Pervasives.Ok tt =&gt; Some (pkh, slots, used)
+                | Pervasives.Ok _ =&gt; Some (pkh, slots, used)
                 end) endorsements None with
       | None =&gt; Error_monad.fail extensible_type_value
       | Some v =&gt; Error_monad.__return v
@@ -16444,15 +16444,15 @@ Module S.
 End S.
 
 Definition register (function_parameter : unit) : unit :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register0 S.all
     (fun ctxt =&gt;
       fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.__return
             {| Alpha_context.Constants.t.fixed := Alpha_context.Constants.fixed;
               Alpha_context.Constants.t.parametric :=
@@ -17016,17 +17016,18 @@ Definition parametric (c : Raw_context.context) : Constants_repr.parametric :=
 (* 20 *)
 let contract_hash = &quot;\002\090\121&quot; (* KT1(36) *)
 
-module Blake2BModule = Blake2B.Make
-          (Base58)
-          (struct
-            let name = &quot;Contract_hash&quot;
+module Blake2BModule =
+  Blake2B.Make
+    (Base58)
+    (struct
+      let name = &quot;Contract_hash&quot;
 
-            let title = &quot;A contract ID&quot;
+      let title = &quot;A contract ID&quot;
 
-            let b58check_prefix = contract_hash
+      let b58check_prefix = contract_hash
 
-            let size = Some 20
-          end)
+      let size = Some 20
+    end)
 
 include Blake2BModule
 
@@ -19720,7 +19721,7 @@ Module S.
 End S.
 
 Definition register (function_parameter : unit) : unit :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   let register_field {A : Set}
@@ -19736,9 +19737,9 @@ Definition register (function_parameter : unit) : unit :=
       (fun ctxt =&gt;
         fun contract =&gt;
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtgteqquestion
                 (Alpha_context.Contract.__exists ctxt contract)
                 (fun function_parameter =&gt;
@@ -22342,7 +22343,7 @@ Definition big_map_diff_item_encoding
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let '(tt, big_map, diff_key_hash, diff_key, diff_value) :=
+          let '(_, big_map, diff_key_hash, diff_key, diff_value) :=
             function_parameter in
           Update
             {| big_map_diff_item.Update.big_map := big_map;
@@ -22360,7 +22361,7 @@ Definition big_map_diff_item_encoding
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let '(tt, big_map) := function_parameter in
+          let '(_, big_map) := function_parameter in
           Clear big_map);
       Data_encoding.__case_value &quot;copy&quot; None (Data_encoding.Tag 2)
         (Data_encoding.obj3
@@ -22374,7 +22375,7 @@ Definition big_map_diff_item_encoding
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let '(tt, src, dst) := function_parameter in
+          let '(_, src, dst) := function_parameter in
           Copy src dst);
       Data_encoding.__case_value &quot;alloc&quot; None (Data_encoding.Tag 3)
         (Data_encoding.obj4
@@ -22395,7 +22396,7 @@ Definition big_map_diff_item_encoding
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let '(tt, big_map, key_type, value_type) := function_parameter in
+          let '(_, big_map, key_type, value_type) := function_parameter in
           Alloc
             {| big_map_diff_item.Alloc.big_map := big_map;
               big_map_diff_item.Alloc.key_type := key_type;
@@ -22547,7 +22548,7 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
         fun delegate =&gt;
           fun script =&gt;
             fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtgteqquestion
                 match Contract_repr.is_implicit contract with
                 | None =&gt; Error_monad.__return c
@@ -22969,7 +22970,7 @@ Definition credit
           Error_monad.op_gtgteqquestion
             (Error_monad.fail_unless target_has_code extensible_type_value)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.__return c)))
     (fun c =&gt;
       Error_monad.op_gtgteqquestion
@@ -25680,7 +25681,7 @@ Module S.
 End S.
 
 Definition register (function_parameter : unit) : unit :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
@@ -25703,9 +25704,9 @@ Definition register (function_parameter : unit) : unit :=
     (fun ctxt =&gt;
       fun pkh =&gt;
         fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Alpha_context.Delegate.grace_period ctxt pkh).
 
 Definition __list_value {D E G I K L a b c i o q : Set}
@@ -25747,7 +25748,7 @@ Definition __list_value {D E G I K L a b c i o q : Set}
       | None =&gt; false
       end in
     fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       RPC_context.make_call0 S.list_delegate ctxt block
         {| S.list_query.active := active; S.list_query.inactive := inactive |}
         tt.
@@ -26165,12 +26166,12 @@ Module Baking_rights.
           rights)).
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     Services_registration.register0 S.baking_rights
       (fun ctxt =&gt;
         fun q =&gt;
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (requested_levels
                 ((Alpha_context.Level.succ ctxt
@@ -26363,12 +26364,12 @@ Module Endorsing_rights.
                       t.estimated_time := estimated_time |} acc) rights [])).
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     Services_registration.register0 S.endorsing_rights
       (fun ctxt =&gt;
         fun q =&gt;
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (requested_levels
                 ((Alpha_context.Level.current ctxt),
@@ -26482,11 +26483,11 @@ Module Endorsing_power.
   End S.
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     Services_registration.register0 S.endorsing_power
       (fun ctxt =&gt;
         fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           fun function_parameter =&gt;
             let '(op, chain_id) := function_parameter in
             endorsing_power ctxt (op, chain_id)).
@@ -26552,13 +26553,13 @@ Module Required_endorsements.
   End S.
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     Services_registration.register0 S.required_endorsements
       (fun ctxt =&gt;
         fun function_parameter =&gt;
           let '{| S.t.block_delay := block_delay |} := function_parameter in
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             required_endorsements ctxt block_delay).
   
   Definition get {D E G I K L a b c i o q : Set}
@@ -26629,7 +26630,7 @@ Module Minimal_valid_time.
   End S.
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     Services_registration.register0 S.minimal_valid_time
       (fun ctxt =&gt;
         fun function_parameter =&gt;
@@ -26638,7 +26639,7 @@ Module Minimal_valid_time.
               S.t.endorsing_power := endorsing_power
               |} := function_parameter in
           fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             minimal_valid_time ctxt priority endorsing_power).
   
   Definition get {D E G I K L a b c i o q : Set}
@@ -26671,7 +26672,7 @@ Module Minimal_valid_time.
 End Minimal_valid_time.
 
 Definition register (function_parameter : unit) : unit :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
@@ -28905,7 +28906,7 @@ Definition balance_encoding : Data_encoding.encoding balance :=
             | _ =&gt; None
             end)
           (fun function_parameter =&gt;
-            let '(tt, c) := function_parameter in
+            let '(_, c) := function_parameter in
             Contract c);
         Data_encoding.__case_value &quot;Rewards&quot; None (Data_encoding.Tag 1)
           (Data_encoding.obj4
@@ -28922,7 +28923,7 @@ Definition balance_encoding : Data_encoding.encoding balance :=
             | _ =&gt; None
             end)
           (fun function_parameter =&gt;
-            let '(tt, tt, d, l) := function_parameter in
+            let '(_, _, d, l) := function_parameter in
             Rewards d l);
         Data_encoding.__case_value &quot;Fees&quot; None (Data_encoding.Tag 2)
           (Data_encoding.obj4
@@ -28939,7 +28940,7 @@ Definition balance_encoding : Data_encoding.encoding balance :=
             | _ =&gt; None
             end)
           (fun function_parameter =&gt;
-            let '(tt, tt, d, l) := function_parameter in
+            let '(_, _, d, l) := function_parameter in
             Fees d l);
         Data_encoding.__case_value &quot;Deposits&quot; None (Data_encoding.Tag 3)
           (Data_encoding.obj4
@@ -28956,7 +28957,7 @@ Definition balance_encoding : Data_encoding.encoding balance :=
             | _ =&gt; None
             end)
           (fun function_parameter =&gt;
-            let '(tt, tt, d, l) := function_parameter in
+            let '(_, _, d, l) := function_parameter in
             Deposits d l)
       ]).
 
@@ -29116,13 +29117,13 @@ Definition init
       Error_monad.op_gtgteqquestion
         (Error_monad.fail_unless known_delegate extensible_type_value)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgteqquestion (registered ctxt delegate)
             (fun is_registered =&gt;
               Error_monad.op_gtgteqquestion
                 (Error_monad.fail_unless is_registered extensible_type_value)
                 (fun function_parameter =&gt;
-                  let 'tt := function_parameter in
+                  let '_ := function_parameter in
                   Error_monad.op_gtgteqquestion
                     (Storage.Contract.Delegate.init ctxt contract delegate)
                     (fun ctxt =&gt; link ctxt contract delegate))))).
@@ -29143,7 +29144,7 @@ Definition set
   | None =&gt;
     let delete (function_parameter : unit)
       : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       Error_monad.op_gtgteqquestion (unlink c contract)
         (fun c =&gt;
           Error_monad.op_gtgteq (Storage.Contract.Delegate.remove c contract)
@@ -29203,7 +29204,7 @@ Definition set
                     | (None | Some _, _) =&gt; Error_monad.return_unit
                     end))
                 (fun function_parameter =&gt;
-                  let 'tt := function_parameter in
+                  let '_ := function_parameter in
                   Error_monad.op_gtgteqquestion
                     match Contract_repr.is_implicit contract with
                     | Some pkh =&gt;
@@ -29219,7 +29220,7 @@ Definition set
                     | None =&gt; Error_monad.return_unit
                     end
                     (fun function_parameter =&gt;
-                      let 'tt := function_parameter in
+                      let '_ := function_parameter in
                       Error_monad.op_gtgteq
                         (Storage.Contract.Balance.mem c contract)
                         (fun __exists =&gt;
@@ -29228,7 +29229,7 @@ Definition set
                               (Pervasives.op_andand self_delegation
                                 (Pervasives.not __exists)) extensible_type_value)
                             (fun function_parameter =&gt;
-                              let 'tt := function_parameter in
+                              let '_ := function_parameter in
                               Error_monad.op_gtgteqquestion (unlink c contract)
                                 (fun c =&gt;
                                   Error_monad.op_gtgteq
@@ -30401,7 +30402,7 @@ Definition burn_storage_fees
               (Error_monad.op_gtgteqquestion
                 (Contract_storage.must_exist c payer)
                 (fun function_parameter =&gt;
-                  let 'tt := function_parameter in
+                  let '_ := function_parameter in
                   Contract_storage.spend c payer to_burn)))
             (fun c =&gt; Error_monad.__return c)).
 
@@ -31060,7 +31061,7 @@ Definition encoding : Data_encoding.encoding t :=
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Unaccounted)
     ].
 
@@ -34028,7 +34029,7 @@ Module Scripts.
   End S.
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     let originate_dummy_contract
       (ctxt : Alpha_context.context) (script : Alpha_context.Script.t)
       : Lwt.t
@@ -34071,7 +34072,7 @@ Module Scripts.
     Services_registration.register0 S.list_entrypoints
       (fun ctxt =&gt;
         fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           fun expr =&gt;
             let ctxt := Alpha_context.Gas.set_unlimited ctxt in
             let legacy := false in
@@ -34395,12 +34396,12 @@ Module Forge.
   End S.
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0_noctxt S.protocol_data
       (fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         fun function_parameter =&gt;
           let '(priority, seed_nonce_hash, proof_of_work_nonce) :=
             function_parameter in
@@ -34522,7 +34523,7 @@ Module Forge.
       (counter : Alpha_context.counter) (fee : Alpha_context.Tez.tez)
       (function_parameter : unit)
       : Lwt.t (Pervasives.result MBytes.t (list Error_monad.shell_error)) :=
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       operations ctxt block branch source (Some sourcePubKey) counter fee Z.zero
         Z.zero [].
     
@@ -34568,7 +34569,7 @@ Module Forge.
           fun storage_limit =&gt;
             fun fee =&gt;
               fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 let parameters :=
                   Option.unopt_map Alpha_context.Script.lazy_expr
                     Alpha_context.Script.unit_parameter parameters in
@@ -34621,7 +34622,7 @@ Module Forge.
       (script : Alpha_context.Script.t) (gas_limit : Z.t) (storage_limit : Z.t)
       (fee : Alpha_context.Tez.tez) (function_parameter : unit)
       : Lwt.t (Pervasives.result MBytes.t (list Error_monad.shell_error)) :=
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       operations ctxt block branch source sourcePubKey counter fee gas_limit
         storage_limit
         [
@@ -34725,7 +34726,7 @@ Module Forge.
               (K * a * b * c * q * i * o)) * L)))) * L * D) (b : D)
     (branch : (|Block_hash|).(S.HASH.t)) (level : Alpha_context.Raw_level.t)
     (function_parameter : unit) : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     operation ctxt b branch
       (Alpha_context.Endorsement
         {| Alpha_context.contents.Endorsement.level := level |}).
@@ -34758,7 +34759,7 @@ Module Forge.
     (period : Alpha_context.Voting_period.t)
     (proposals : list (|Protocol_hash|).(S.HASH.t)) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     operation ctxt b branch
       (Alpha_context.Proposals
         {| Alpha_context.contents.Proposals.source := source;
@@ -34794,7 +34795,7 @@ Module Forge.
     (proposal : (|Protocol_hash|).(S.HASH.t))
     (ballot : Alpha_context.Vote.ballot) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     operation ctxt b branch
       (Alpha_context.Ballot
         {| Alpha_context.contents.Ballot.source := source;
@@ -34828,7 +34829,7 @@ Module Forge.
     (branch : (|Block_hash|).(S.HASH.t)) (level : Alpha_context.Raw_level.t)
     (nonce : Alpha_context.Nonce.t) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Seed_nonce_revelation
         {| Alpha_context.contents.Seed_nonce_revelation.level := level;
@@ -34860,7 +34861,7 @@ Module Forge.
     (branch : (|Block_hash|).(S.HASH.t)) (bh1 : Alpha_context.Block_header.t)
     (bh2 : Alpha_context.Block_header.t) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_baking_evidence
         {| Alpha_context.contents.Double_baking_evidence.bh1 := bh1;
@@ -34893,7 +34894,7 @@ Module Forge.
     (op1 : Alpha_context.operation Alpha_context.Kind.endorsement)
     (op2 : Alpha_context.operation Alpha_context.Kind.endorsement)
     (function_parameter : unit) : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_endorsement_evidence
         {| Alpha_context.contents.Double_endorsement_evidence.op1 := op1;
@@ -34935,7 +34936,7 @@ Module Forge.
       | None =&gt; empty_proof_of_work_nonce
       end in
     fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       RPC_context.make_call0 S.protocol_data ctxt block tt
         (priority, seed_nonce_hash, proof_of_work_nonce).
 End Forge.
@@ -34984,12 +34985,12 @@ Module Parse.
     end.
   
   Definition register (function_parameter : unit) : unit :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0_noctxt S.block
       (fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         fun raw_block =&gt;
           parse_protocol_data (Block_header.t.protocol_data raw_block)).
   
@@ -35090,7 +35091,7 @@ Module S.
 End S.
 
 Definition register (function_parameter : unit) : unit :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
@@ -35103,7 +35104,7 @@ Definition register (function_parameter : unit) : unit :=
     (fun ctxt =&gt;
       fun q =&gt;
         fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           let levels :=
             Alpha_context.Level.levels_in_current_cycle ctxt
               (Some (S.level_query.offset q)) tt in
@@ -40507,7 +40508,7 @@ Definition levels_in_current_cycle
       0
     end in
   fun function_parameter =&gt;
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     let current_cycle := Cycle_repr.to_int32 (Level_repr.t.cycle (current ctxt))
       in
     let cycle := Int32.add current_cycle offset in
@@ -41288,7 +41289,7 @@ Definition begin_construction
   (predecessor : (|Block_hash|).(S.HASH.t)) (timestamp : Time.t)
   (protocol_data : option block_header_data) (function_parameter : unit)
   : Lwt.t (Error_monad.tzresult validation_state) :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   let level := Int32.succ pred_level in
   let fitness := pred_fitness in
   Error_monad.op_gtgteqquestion
@@ -41458,7 +41459,7 @@ Definition finalize_block (function_parameter : validation_state)
           (block_header.protocol_data block_header)) block_delay
         included_endorsements)
       (fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         Error_monad.op_gtgteqquestion
           (Alpha_context.Vote.get_current_period_kind ctxt)
           (fun voting_period_kind =&gt;
@@ -46607,17 +46608,18 @@ Parameter remove_elem_from_list : forall {a : Set}, Z -&gt; list a -&gt; list a.
 (* 32 *)
 let nonce_hash = &quot;\069\220\169&quot; (* nce(53) *)
 
-module Blake2BModule = Blake2B.Make
-          (Base58)
-          (struct
-            let name = &quot;cycle_nonce&quot;
+module Blake2BModule =
+  Blake2B.Make
+    (Base58)
+    (struct
+      let name = &quot;cycle_nonce&quot;
 
-            let title = &quot;A nonce hash&quot;
+      let title = &quot;A nonce hash&quot;
 
-            let b58check_prefix = nonce_hash
+      let b58check_prefix = nonce_hash
 
-            let size = None
-          end)
+      let size = None
+    end)
 
 include Blake2BModule
 
@@ -46947,7 +46949,7 @@ Definition reveal
             (Storage.Seed.unrevealed_nonce.nonce_hash unrevealed))
           extensible_type_value)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgteqquestion
             (Storage.Seed.Nonce.set ctxt level (Storage.Seed.Revealed nonce))
             (fun ctxt =&gt; Error_monad.__return ctxt))).
@@ -48353,7 +48355,7 @@ Module Encoding.
         | Some x =&gt; Some (tt, x)
         end)
       (fun function_parameter =&gt;
-        let '(tt, x) := function_parameter in
+        let '(_, x) := function_parameter in
         inj x).
   
   Module Manager_operations.
@@ -48416,7 +48418,7 @@ Module Encoding.
               else
                 None)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               name) in
         Data_encoding.union None
           [
@@ -52529,7 +52531,7 @@ Definition prepare
         (fun fitness =&gt;
           Error_monad.op_gtgteqquestion (check_inited ctxt)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtgteqquestion (get_constants ctxt)
                 (fun constants =&gt;
                   Error_monad.op_gtgteqquestion (get_first_level ctxt)
@@ -54840,7 +54842,7 @@ Module Random.
                       (Error_monad.fail_unless snapshot_exists
                         extensible_type_value)
                       (fun function_parameter =&gt;
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         loop sequence))))).
 End Random.
 
@@ -55692,17 +55694,18 @@ Parameter get_contract_delegate :
 
 let script_expr_hash = &quot;\013\044\064\027&quot; (* expr(54) *)
 
-module Blake2BModule = Blake2B.Make
-          (Base58)
-          (struct
-            let name = &quot;script_expr&quot;
+module Blake2BModule =
+  Blake2B.Make
+    (Base58)
+    (struct
+      let name = &quot;script_expr&quot;
 
-            let title = &quot;A script expression ID&quot;
+      let title = &quot;A script expression ID&quot;
 
-            let b58check_prefix = script_expr_hash
+      let b58check_prefix = script_expr_hash
 
-            let size = None
-          end)
+      let size = None
+    end)
 
 include Blake2BModule
 
@@ -59009,7 +59012,7 @@ Fixpoint step {a b : Set}
               (Alpha_context.Gas.check_enough ctxt
                 (Alpha_context.Script.serialized_cost __bytes_value)))
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               if
                 Pervasives.op_andand
                   ((|Compare.Int|).(Compare.S.op_gteq)
@@ -59555,7 +59558,7 @@ Fixpoint step {a b : Set}
                 (interp_stack_prefix_preserving_operation
                   (fun stk =&gt; Error_monad.__return ((Item v stk), tt)) n' rest)
                 (fun function_parameter =&gt;
-                  let '(aft, tt) := function_parameter in
+                  let '(aft, _) := function_parameter in
                   logged_return (aft, ctxt)))
         | (Script_typed_ir.Dipn n n' b, stack) =&gt;
           Error_monad.op_gtgteqquestion
@@ -59613,7 +59616,7 @@ with interp {p r : Set}
             Error_monad.return_unit)
       end
       (fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         Error_monad.op_gtgteqquestion (step log ctxt step_constants code stack)
           (fun function_parameter =&gt;
             let '(Item ret Empty, ctxt) := function_parameter in
@@ -61072,10 +61075,10 @@ Definition parse_type_annot (loc : Z) (annot : list string)
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               get_one_annot loc types))).
 
 Definition parse_type_field_annot (loc : Z) (annot : list string)
@@ -61088,7 +61091,7 @@ Definition parse_type_field_annot (loc : Z) (annot : list string)
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (get_one_annot loc types)
             (fun t =&gt;
               Error_monad.op_gtpipequestion (get_one_annot loc fields)
@@ -61105,7 +61108,7 @@ Definition parse_composed_type_annot (loc : Z) (annot : list string)
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (get_one_annot loc types)
             (fun t =&gt;
               Error_monad.op_gtpipequestion (get_two_annot loc fields)
@@ -61122,10 +61125,10 @@ Definition parse_field_annot (loc : Z) (annot : list string)
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               get_one_annot loc fields))).
 
 Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
@@ -61185,10 +61188,10 @@ Definition parse_var_annot
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtpipequestion (get_one_annot loc vars)
                 (fun function_parameter =&gt;
                   match function_parameter with
@@ -61308,10 +61311,10 @@ Definition parse_two_var_annot (loc : Z) (annot : list string)
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               get_two_annot loc vars))).
 
 Definition parse_destr_annot
@@ -61329,7 +61332,7 @@ Definition parse_destr_annot
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (get_one_annot loc vars)
             (fun v =&gt;
               Error_monad.op_gtpipequestion (get_one_annot loc fields)
@@ -61358,7 +61361,7 @@ Definition parse_entrypoint_annot
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (get_one_annot loc fields)
             (fun f =&gt;
               Error_monad.op_gtpipequestion (get_one_annot loc vars)
@@ -61382,7 +61385,7 @@ Definition parse_var_type_annot (loc : Z) (annot : list string)
       let '(vars, types, fields) := function_parameter in
       Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtquestion (get_one_annot loc vars)
             (fun v =&gt;
               Error_monad.op_gtpipequestion (get_one_annot loc types)
@@ -70273,7 +70276,7 @@ Definition record_inconsistent {A B C : Set}
   : Error_monad.tzresult C -&gt; Error_monad.tzresult C :=
   Error_monad.record_trace_eval
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       Error_monad.op_gtgtquestion (serialize_ty_for_error ctxt ta)
         (fun function_parameter =&gt;
           let '(ta, ctxt) := function_parameter in
@@ -70288,7 +70291,7 @@ Definition record_inconsistent_type_annotations {A B C : Set}
   : Error_monad.tzresult C -&gt; Error_monad.tzresult C :=
   Error_monad.record_trace_eval
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       Error_monad.op_gtgtquestion (serialize_ty_for_error ctxt ta)
         (fun function_parameter =&gt;
           let '(ta, ctxt) := function_parameter in
@@ -70793,7 +70796,7 @@ Definition merge_branches {a b bef : Set}
       Typed ({| Script_typed_ir.descr.aft := aftbf |} as dbf)) =&gt;
     let unmatched_branches (function_parameter : unit)
       : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt aftbt)
         (fun function_parameter =&gt;
           let '(aftbt, ctxt) := function_parameter in
@@ -71384,12 +71387,12 @@ Definition check_packable {A : Set}
     | (Script_typed_ir.Pair_t (l_ty, _, _) (r_ty, _, _) _ _, _) =&gt;
       Error_monad.op_gtgtquestion (check l_ty)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           check r_ty)
     | (Script_typed_ir.Union_t (l_ty, _) (r_ty, _) _ _, _) =&gt;
       Error_monad.op_gtgtquestion (check l_ty)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           check r_ty)
     | (Script_typed_ir.Option_t v_ty _ _, _) =&gt; check v_ty
     | (Script_typed_ir.List_t elt_ty _ _, _) =&gt; check elt_ty
@@ -71691,7 +71694,7 @@ Fixpoint parse_data {a : Set}
     (fun ctxt =&gt;
       let __error_value (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         Error_monad.op_gtgtpipequestion
           (Lwt.__return (serialize_ty_for_error ctxt ty))
           (fun function_parameter =&gt;
@@ -71756,7 +71759,7 @@ Fixpoint parse_data {a : Set}
                                   | None =&gt; Error_monad.return_unit
                                   end
                                   (fun function_parameter =&gt;
-                                    let 'tt := function_parameter in
+                                    let '_ := function_parameter in
                                     Error_monad.__return
                                       ((Some k),
                                         (map_update k (Some (item_wrapper v))
@@ -71786,7 +71789,7 @@ Fixpoint parse_data {a : Set}
           else
             Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgtpipequestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.__unit_value))
@@ -71809,7 +71812,7 @@ Fixpoint parse_data {a : Set}
           else
             Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgtpipequestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
@@ -71823,7 +71826,7 @@ Fixpoint parse_data {a : Set}
           else
             Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgtpipequestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
@@ -72176,7 +72179,7 @@ Fixpoint parse_data {a : Set}
           else
             Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.pair))
@@ -72209,7 +72212,7 @@ Fixpoint parse_data {a : Set}
           else
             Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.union))
@@ -72230,7 +72233,7 @@ Fixpoint parse_data {a : Set}
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.union))
@@ -72274,7 +72277,7 @@ Fixpoint parse_data {a : Set}
           else
             Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.some))
@@ -72298,7 +72301,7 @@ Fixpoint parse_data {a : Set}
           else
             Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.none))
@@ -72364,7 +72367,7 @@ Fixpoint parse_data {a : Set}
                             | None =&gt; Error_monad.return_unit
                             end
                             (fun function_parameter =&gt;
-                              let 'tt := function_parameter in
+                              let '_ := function_parameter in
                               Error_monad.op_gtgteqquestion
                                 (Lwt.__return
                                   (Alpha_context.Gas.consume ctxt
@@ -72464,7 +72467,7 @@ with parse_returning {arg ret : Set}
                   |} as __descr_value), ctxt) =&gt;
             Error_monad.trace_eval
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Lwt.__return (serialize_ty_for_error ctxt ret))
                   (fun function_parameter =&gt;
@@ -72509,7 +72512,7 @@ with parse_int32
   (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
   {struct n} : Error_monad.tzresult Z :=
   let error' (function_parameter : unit) : Error_monad.__error :=
-    let 'tt := function_parameter in
+    let '_ := function_parameter in
     extensible_type_value in
   match n with
   | Micheline.Int _ n' =&gt;
@@ -72539,7 +72542,7 @@ with parse_instr {bef : Set}
     Pervasives.op_atat
       (Error_monad.trace_eval
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtpipequestion
             (serialize_stack_for_error ctxt stack_ty)
             (fun function_parameter =&gt;
@@ -72557,7 +72560,7 @@ with parse_instr {bef : Set}
     Pervasives.op_atat
       (Error_monad.trace_eval
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtpipequestion
             (serialize_stack_for_error ctxt stack_ty)
             (fun function_parameter =&gt;
@@ -72581,7 +72584,7 @@ with parse_instr {bef : Set}
     Pervasives.op_atat
       (Error_monad.trace_eval
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgtpipequestion
             (serialize_stack_for_error ctxt stack_ty)
             (fun function_parameter =&gt;
@@ -72643,7 +72646,7 @@ with parse_instr {bef : Set}
     : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
     Error_monad.op_gtgteqquestion (log_stack ctxt loc stack_ty aft)
       (fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return
             (Alpha_context.Gas.consume ctxt (Typecheck_costs.instr instr)))
@@ -72676,7 +72679,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             typed ctxt loc Script_typed_ir.Drop rest)
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DROP (cons n [])
@@ -72710,7 +72713,7 @@ with parse_instr {bef : Set}
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc result_annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (make_proof_argument whole_n whole_stack)
                   (fun function_parameter =&gt;
@@ -72762,7 +72765,7 @@ with parse_instr {bef : Set}
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc result_annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion (make_proof_argument n stack)
                   (fun function_parameter =&gt;
                     let 'Dig_proof_argument (n', (x, stack_annot), aft) :=
@@ -72794,7 +72797,7 @@ with parse_instr {bef : Set}
                   (make_proof_argument (Pervasives.op_minus n 1) x stack_annot
                     rest)
                   (fun function_parameter =&gt;
-                    let 'Dug_proof_argument (n', tt, aft') := function_parameter
+                    let 'Dug_proof_argument (n', _, aft') := function_parameter
                       in
                     Pervasives.op_atat outer_return
                       (Dug_proof_argument
@@ -72810,11 +72813,11 @@ with parse_instr {bef : Set}
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc result_annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (make_proof_argument whole_n x stack_annot whole_stack)
                   (fun function_parameter =&gt;
-                    let 'Dug_proof_argument (n', tt, aft) := function_parameter
+                    let 'Dug_proof_argument (n', _, aft) := function_parameter
                       in
                     typed ctxt loc (Script_typed_ir.Dug whole_n n') aft)))
       |
@@ -72823,7 +72826,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc result_annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
               (fun function_parameter =&gt;
                 let '(stack, _ctxt) := function_parameter in
@@ -72839,7 +72842,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             typed ctxt loc Script_typed_ir.Swap
               (Script_typed_ir.Item_t w
                 (Script_typed_ir.Item_t v rest cur_top_annot) stack_annot))
@@ -72896,15 +72899,15 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] bt)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (check_kind [ Script_tc_errors.Seq_kind ] bf)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Script_ir_annot.fail_unexpected_annot loc annot)
                   (fun function_parameter =&gt;
-                    let 'tt := function_parameter in
+                    let '_ := function_parameter in
                     let annot :=
                       Script_ir_annot.gen_access_annot option_annot None
                         Script_ir_annot.default_some_annot in
@@ -72967,7 +72970,7 @@ with parse_instr {bef : Set}
                 (Script_ir_annot.check_correct_field field_annot
                   expected_field_annot))
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 typed ctxt loc Script_typed_ir.Car
                   (Script_typed_ir.Item_t a rest annot)))
       |
@@ -72985,7 +72988,7 @@ with parse_instr {bef : Set}
                 (Script_ir_annot.check_correct_field field_annot
                   expected_field_annot))
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 typed ctxt loc Script_typed_ir.Cdr
                   (Script_typed_ir.Item_t b rest annot)))
       |
@@ -73032,15 +73035,15 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] bt)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (check_kind [ Script_tc_errors.Seq_kind ] bf)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Script_ir_annot.fail_unexpected_annot loc annot)
                   (fun function_parameter =&gt;
-                    let 'tt := function_parameter in
+                    let '_ := function_parameter in
                     let left_annot :=
                       Script_ir_annot.gen_access_annot union_annot
                         (Some Script_ir_annot.default_left_annot) l_field in
@@ -73115,15 +73118,15 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] bt)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (check_kind [ Script_tc_errors.Seq_kind ] bf)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Script_ir_annot.fail_unexpected_annot loc annot)
                   (fun function_parameter =&gt;
-                    let 'tt := function_parameter in
+                    let '_ := function_parameter in
                     let hd_annot :=
                       Script_ir_annot.gen_access_annot list_annot None
                         Script_ir_annot.default_hd_annot in
@@ -73178,7 +73181,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
               (fun function_parameter =&gt;
                 let '(ret_annot, list_ty_name) := function_parameter in
@@ -73198,7 +73201,7 @@ with parse_instr {bef : Set}
                             |} as ibody) =&gt;
                       let invalid_map_body (function_parameter : unit)
                         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgtpipequestion
                           (serialize_stack_for_error ctxt
                             (Script_typed_ir.descr.aft ibody))
@@ -73235,11 +73238,11 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 let elt_annot :=
                   Script_ir_annot.gen_access_annot list_annot None
                     Script_ir_annot.default_elt_annot in
@@ -73252,7 +73255,7 @@ with parse_instr {bef : Set}
                     | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =&gt;
                       let invalid_iter_body (function_parameter : unit)
                         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (serialize_stack_for_error ctxt
                             (Script_typed_ir.descr.aft ibody))
@@ -73300,11 +73303,11 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 let elt_annot :=
                   Script_ir_annot.gen_access_annot set_annot None
                     Script_ir_annot.default_elt_annot in
@@ -73318,7 +73321,7 @@ with parse_instr {bef : Set}
                     | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =&gt;
                       let invalid_iter_body (function_parameter : unit)
                         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (serialize_stack_for_error ctxt
                             (Script_typed_ir.descr.aft ibody))
@@ -73420,7 +73423,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
               (fun function_parameter =&gt;
                 let '(ret_annot, ty_name) := function_parameter in
@@ -73446,7 +73449,7 @@ with parse_instr {bef : Set}
                             |} as ibody) =&gt;
                       let invalid_map_body (function_parameter : unit)
                         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgtpipequestion
                           (serialize_stack_for_error ctxt
                             (Script_typed_ir.descr.aft ibody))
@@ -73483,11 +73486,11 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 let k_name :=
                   Script_ir_annot.field_to_var_annot
                     Script_ir_annot.default_key_annot in
@@ -73507,7 +73510,7 @@ with parse_instr {bef : Set}
                     | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =&gt;
                       let invalid_iter_body (function_parameter : unit)
                         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (serialize_stack_for_error ctxt
                             (Script_typed_ir.descr.aft ibody))
@@ -73735,15 +73738,15 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] bt)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (check_kind [ Script_tc_errors.Seq_kind ] bf)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Script_ir_annot.fail_unexpected_annot loc annot)
                   (fun function_parameter =&gt;
-                    let 'tt := function_parameter in
+                    let '_ := function_parameter in
                     Error_monad.op_gtgteqquestion
                       (parse_instr type_logger tc_context ctxt legacy bt rest)
                       (fun function_parameter =&gt;
@@ -73776,11 +73779,11 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (parse_instr type_logger tc_context ctxt legacy body rest)
                   (fun function_parameter =&gt;
@@ -73789,7 +73792,7 @@ with parse_instr {bef : Set}
                     | Typed ibody =&gt;
                       let unmatched_branches (function_parameter : unit)
                         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (serialize_stack_for_error ctxt
                             (Script_typed_ir.descr.aft ibody))
@@ -73827,7 +73830,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
               (fun annot =&gt;
                 let l_annot :=
@@ -73842,7 +73845,7 @@ with parse_instr {bef : Set}
                     | Typed ibody =&gt;
                       let unmatched_branches (function_parameter : unit)
                         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (serialize_stack_for_error ctxt
                             (Script_typed_ir.descr.aft ibody))
@@ -73887,7 +73890,7 @@ with parse_instr {bef : Set}
                 Error_monad.op_gtgteqquestion
                   (check_kind [ Script_tc_errors.Seq_kind ] code)
                   (fun function_parameter =&gt;
-                    let 'tt := function_parameter in
+                    let '_ := function_parameter in
                     Error_monad.op_gtgteqquestion
                       (parse_var_annot loc None annot)
                       (fun annot =&gt;
@@ -73923,7 +73926,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (check_packable false loc capture_ty))
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (check_item_ty ctxt capture capture_ty loc
                 Alpha_context.Script.I_APPLY 1 2)
@@ -73941,11 +73944,11 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (check_kind [ Script_tc_errors.Seq_kind ] code)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (parse_instr type_logger (add_dip v stack_annot tc_context)
                     ctxt legacy code rest)
@@ -74001,7 +74004,7 @@ with parse_instr {bef : Set}
             Error_monad.op_gtgteqquestion
               (Script_ir_annot.fail_unexpected_annot loc result_annot)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
                   (make_proof_argument n tc_context stack)
                   (fun function_parameter =&gt;
@@ -74020,7 +74023,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc annot)
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             let __descr_value {B : Set} (aft : Script_typed_ir.stack_ty B)
               : Script_typed_ir.descr bef B :=
               {| Script_typed_ir.descr.loc := loc;
@@ -74030,7 +74033,7 @@ with parse_instr {bef : Set}
             Error_monad.op_gtgteqquestion
               (log_stack ctxt loc stack_ty Script_typed_ir.Empty_t)
               (fun function_parameter =&gt;
-                let 'tt := function_parameter in
+                let '_ := function_parameter in
                 __return ctxt
                   (Failed {| judgement.Failed.descr := __descr_value |})))
       |
@@ -74720,7 +74723,7 @@ with parse_instr {bef : Set}
           Script_typed_ir.Item_t t rest unpacked_annot), _) =&gt;
         Error_monad.op_gtgteqquestion (Lwt.__return (check_packable true loc t))
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
               (parse_var_annot loc
                 (Some
@@ -74885,7 +74888,7 @@ with parse_instr {bef : Set}
                           Lwt.__return
                             (well_formed_entrypoints arg_type root_name))
                         (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
+                          let '_ := function_parameter in
                           Error_monad.op_gtgteqquestion
                             (Error_monad.trace extensible_type_value
                               (Pervasives.op_atat Lwt.__return
@@ -75036,7 +75039,7 @@ with parse_instr {bef : Set}
                         Lwt.__return
                           (well_formed_entrypoints arg_type root_name))
                       (fun function_parameter =&gt;
-                        let 'tt := function_parameter in
+                        let '_ := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (Error_monad.trace extensible_type_value
                             (Pervasives.op_atat Lwt.__return
@@ -75844,15 +75847,15 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                   Error_monad.op_gtgtquestion
                     (Script_ir_annot.error_unexpected_annot ploc pannot)
                     (fun function_parameter =&gt;
-                      let 'tt := function_parameter in
+                      let '_ := function_parameter in
                       Error_monad.op_gtgtquestion
                         (Script_ir_annot.error_unexpected_annot cloc carrot)
                         (fun function_parameter =&gt;
-                          let 'tt := function_parameter in
+                          let '_ := function_parameter in
                           Error_monad.op_gtgtquestion
                             (Script_ir_annot.error_unexpected_annot sloc sannot)
                             (fun function_parameter =&gt;
-                              let 'tt := function_parameter in
+                              let '_ := function_parameter in
                               Error_monad.ok (p, s, c, root_name)))))
           end)
     end.
@@ -75888,7 +75891,7 @@ Definition parse_script
                     else
                       Lwt.__return (well_formed_entrypoints arg_type root_name))
                     (fun function_parameter =&gt;
-                      let 'tt := function_parameter in
+                      let '_ := function_parameter in
                       Error_monad.op_gtgteqquestion
                         (Error_monad.trace extensible_type_value
                           (Lwt.__return
@@ -75920,7 +75923,7 @@ Definition parse_script
                           Error_monad.op_gtgteqquestion
                             (Error_monad.trace_eval
                               (fun function_parameter =&gt;
-                                let 'tt := function_parameter in
+                                let '_ := function_parameter in
                                 Error_monad.op_gtgtpipequestion
                                   (Pervasives.op_atat Lwt.__return
                                     (serialize_ty_for_error ctxt storage_type))
@@ -75983,7 +75986,7 @@ Definition typecheck_code
             else
               Lwt.__return (well_formed_entrypoints arg_type root_name))
             (fun function_parameter =&gt;
-              let 'tt := function_parameter in
+              let '_ := function_parameter in
               Error_monad.op_gtgteqquestion
                 (Error_monad.trace extensible_type_value
                   (Lwt.__return (parse_storage_ty ctxt legacy storage_type)))
@@ -76049,7 +76052,7 @@ Definition typecheck_data
       Error_monad.op_gtgteqquestion
         (Error_monad.trace_eval
           (fun function_parameter =&gt;
-            let 'tt := function_parameter in
+            let '_ := function_parameter in
             Error_monad.op_gtgtpipequestion
               (Pervasives.op_atat Lwt.__return
                 (serialize_ty_for_error ctxt exp_ty))
@@ -76166,7 +76169,7 @@ Fixpoint unparse_data {a : Set}
     (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.cycle))
     (fun ctxt =&gt;
       match (ty, a) with
-      | (Script_typed_ir.Unit_t _, tt) =&gt;
+      | (Script_typed_ir.Unit_t _, _) =&gt;
         Error_monad.op_gtgteqquestion
           (Lwt.__return
             (Alpha_context.Gas.consume ctxt Unparse_costs.__unit_value))
@@ -81312,7 +81315,7 @@ Definition for_cycle (ctxt : Raw_context.context) (cycle : Cycle_repr.t)
       (Pervasives.op_andand (Cycle_repr.op_lteq oldest cycle)
         (Cycle_repr.op_lteq cycle latest)) extensible_type_value)
     (fun function_parameter =&gt;
-      let 'tt := function_parameter in
+      let '_ := function_parameter in
       Storage.Seed.For_cycle.get ctxt cycle).
 
 Definition clear_cycle (c : Raw_context.t) (cycle : Cycle_repr.t)
@@ -81722,7 +81725,7 @@ Definition register2 {A B C D E : Set}
 
 Definition get_rpc_services (function_parameter : unit)
   : RPC_directory.directory Updater.rpc_context :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   let p :=
     RPC_directory.map
       (fun c =&gt;
@@ -81779,17 +81782,18 @@ Definition get_rpc_services (function_parameter : unit)
 
 let random_state_hash = &quot;\076\064\204&quot; (* rng(53): never used... *)
 
-module Blake2BModule = Blake2B.Make
-          (Base58)
-          (struct
-            let name = &quot;random&quot;
+module Blake2BModule =
+  Blake2B.Make
+    (Base58)
+    (struct
+      let name = &quot;random&quot;
 
-            let title = &quot;A random generation state&quot;
+      let title = &quot;A random generation state&quot;
 
-            let b58check_prefix = random_state_hash
+      let b58check_prefix = random_state_hash
 
-            let size = None
-          end)
+      let size = None
+    end)
 
 include Blake2BModule
 
@@ -82224,11 +82228,12 @@ module Big_map = struct
       end)
 
   module Next = struct
-    module Single_data_storage = Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
-              (struct
-                let name = [&quot;next&quot;]
-              end)
-              (Z)
+    module Single_data_storage =
+      Make_single_data_storage (Registered) (<abbr class="mark-error" title="Polymorphic variant types are not handled">Raw_context</abbr>)
+        (struct
+          let name = [&quot;next&quot;]
+        end)
+        (Z)
 
     <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
 module signatures found, namely:
@@ -87035,7 +87040,7 @@ type (_, _, _) args =
       ('key, 'a, 'inter_key) args * ('inter_key, 'b, 'sub_key) args
       -&gt; ('key, 'a * 'b, 'sub_key) args
 
-let rec unpack : type a b c. (a, b, c) args -&gt; c -&gt; a * b = function
+let [@axiom] rec unpack : type a b c. (a, b, c) args -&gt; c -&gt; a * b = function
   | One _ -&gt;
       fun x -&gt; x
   | Pair (l, r) -&gt;
@@ -87046,7 +87051,7 @@ let rec unpack : type a b c. (a, b, c) args -&gt; c -&gt; a * b = function
         let (b, a) = unpack_l c in
         (b, (a, d))
 
-let rec pack : type a b c. (a, b, c) args -&gt; a -&gt; b -&gt; c = function
+let [@axiom] rec pack : type a b c. (a, b, c) args -&gt; a -&gt; b -&gt; c = function
   | One _ -&gt;
       fun b a -&gt; (b, a)
   | Pair (l, r) -&gt;
@@ -87056,7 +87061,7 @@ let rec pack : type a b c. (a, b, c) args -&gt; a -&gt; b -&gt; c = function
         let c = pack_l b a in
         pack_r c d
 
-let rec compare : type a b c. (a, b, c) args -&gt; b -&gt; b -&gt; int = function
+let [@axiom] rec compare : type a b c. (a, b, c) args -&gt; b -&gt; b -&gt; int = function
   | One {compare; _} -&gt;
       compare
   | Pair (l, r) -&gt; (
@@ -87078,7 +87083,7 @@ let destutter equal l =
       in
       loop [i] i l
 
-let rec register_indexed_subcontext :
+let [@axiom] rec register_indexed_subcontext :
     type r a b.
     r t -&gt; list:(r -&gt; a list tzresult Lwt.t) -&gt; (r, a, b) args -&gt; b t =
  fun dir ~list path -&gt;
@@ -87124,7 +87129,7 @@ let register_value :
 
 let create () = ref Empty
 
-let rec pp : type a. Format.formatter -&gt; a t -&gt; unit =
+let [@axiom] rec pp : type a. Format.formatter -&gt; a t -&gt; unit =
  fun ppf dir -&gt;
   match !dir with
   | Empty -&gt;
@@ -87141,7 +87146,7 @@ let rec pp : type a. Format.formatter -&gt; a t -&gt; unit =
       let name = Format.asprintf &quot;&lt;%s&gt;&quot; (RPC_arg.descr arg).name in
       pp_item ppf (name, subdir)
 
-and pp_item : type a. Format.formatter -&gt; string * a t -&gt; unit =
+and [@axiom] pp_item : type a. Format.formatter -&gt; string * a t -&gt; unit =
  fun ppf (name, dir) -&gt; Format.fprintf ppf &quot;@[&lt;v 2&gt;%s@ %a@]&quot; name pp dir
 
 module type INDEX = sig
@@ -87174,7 +87179,7 @@ type _ opt_handler =
     }
       -&gt; 'key opt_handler
 
-let rec combine_object = function
+let [@axiom] rec combine_object = function
   | [] -&gt;
       Handler {encoding = Data_encoding.unit; get = (fun _ _ -&gt; return_unit)}
   | (name, Opt_handler handler) :: fields -&gt;
@@ -87199,7 +87204,7 @@ let depth_query =
   |+ field &quot;depth&quot; RPC_arg.int 0 (fun t -&gt; t.depth)
   |&gt; seal
 
-let build_directory : type key. key t -&gt; key RPC_directory.t =
+let [@axiom] build_directory : type key. key t -&gt; key RPC_directory.t =
  fun dir -&gt;
   let rpc_dir = ref (RPC_directory.empty : key RPC_directory.t) in
   let register : type ikey. (key, ikey) RPC_path.t -&gt; ikey opt_handler -&gt; unit
@@ -87415,48 +87420,13 @@ where &quot;'args&quot; := (fun (_ _ _ : Set) =&gt; args_gadt).
 Definition args := 'args.
 
 Fixpoint unpack {a b c : Set} (function_parameter : args a b c)
-  {struct function_parameter} : c -&gt; a * b :=
-  match function_parameter with
-  | One _ =&gt; fun x =&gt; x
-  | Pair l r =&gt;
-    let unpack_l := unpack l in
-    let unpack_r := unpack r in
-    fun x =&gt;
-      let '(c, d) := unpack_r x in
-      let '(b, a) := unpack_l c in
-      (b, (a, d))
-  end.
+  {struct function_parameter} : c -&gt; a * b := axiom.
 
 Fixpoint pack {a b c : Set} (function_parameter : args a b c)
-  {struct function_parameter} : a -&gt; b -&gt; c :=
-  match function_parameter with
-  | One _ =&gt; fun b =&gt; fun a =&gt; (b, a)
-  | Pair l r =&gt;
-    let pack_l := pack l in
-    let pack_r := pack r in
-    fun b =&gt;
-      fun function_parameter =&gt;
-        let '(a, d) := function_parameter in
-        let c := pack_l b a in
-        pack_r c d
-  end.
+  {struct function_parameter} : a -&gt; b -&gt; c := axiom.
 
 Fixpoint compare {a b c : Set} (function_parameter : args a b c)
-  {struct function_parameter} : b -&gt; b -&gt; Z :=
-  match function_parameter with
-  | One {| args.One.compare := compare |} =&gt; compare
-  | Pair l r =&gt;
-    let compare_l := compare l in
-    let compare_r := compare r in
-    fun function_parameter =&gt;
-      let '(a1, b1) := function_parameter in
-      fun function_parameter =&gt;
-        let '(a2, b2) := function_parameter in
-        match compare_l a1 a2 with
-        | 0 =&gt; compare_r b1 b2
-        | x =&gt; x
-        end
-  end.
+  {struct function_parameter} : b -&gt; b -&gt; Z := axiom.
 
 Definition destutter {A B : Set} (equal : A -&gt; A -&gt; bool) (l : list (A * B))
   : list A :=
@@ -87479,48 +87449,7 @@ Definition destutter {A B : Set} (equal : A -&gt; A -&gt; bool) (l : list (A * B
 
 Fixpoint register_indexed_subcontext {a b r : Set}
   (dir : t r) (__list_value : r -&gt; Lwt.t (Error_monad.tzresult (list a)))
-  (path : args r a b) {struct dir} : t b :=
-  match path with
-  | Pair left right =&gt;
-    let compare_left := compare left in
-    let equal_left (x : op_dollar0) (y : op_dollar0) : bool :=
-      (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
-    let list_left (r : r) : Lwt.t (Error_monad.tzresult (list op_dollar0)) :=
-      Error_monad.op_gtgteqquestion (__list_value r)
-        (fun l =&gt; Error_monad.__return (destutter equal_left l)) in
-    let list_right (r : op_dollarPair_'inter_key)
-      : Lwt.t (Error_monad.tzresult (list op_dollar1)) :=
-      let '(a, k) := unpack left r in
-      Error_monad.op_gtgteqquestion (__list_value a)
-        (fun l =&gt;
-          Error_monad.__return
-            (List.map Pervasives.snd
-              (List.filter
-                (fun function_parameter =&gt;
-                  let '(x, _) := function_parameter in
-                  equal_left x k) l))) in
-    register_indexed_subcontext (register_indexed_subcontext dir list_left left)
-      list_right right
-  | One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |} =&gt;
-    match Pervasives.op_exclamation dir with
-    | Value _ =&gt; Pervasives.invalid_arg &quot;&quot;
-    | NamedDir _ =&gt; Pervasives.invalid_arg &quot;&quot;
-    | Empty =&gt;
-      let subdir := Pervasives.__ref_value Empty in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      (* ❌ instruction_sequence &quot;;&quot; *)
-      subdir
-    |
-      IndexedDir {|
-        description.IndexedDir.arg := inner_arg;
-          description.IndexedDir.subdir := subdir
-          |} =&gt;
-      match RPC_arg.__eq_value arg inner_arg with
-      | None =&gt; Pervasives.invalid_arg &quot;&quot;
-      | Some RPC_arg.Eq =&gt; subdir
-      end
-    end
-  end.
+  (path : args r a b) {struct dir} : t b := axiom.
 
 Definition register_value {a b : Set}
   (dir : t a) (get : a -&gt; Lwt.t (Error_monad.tzresult (option b)))
@@ -87536,70 +87465,15 @@ Definition register_value {a b : Set}
 
 Definition create {A : Set} (function_parameter : unit)
   : Pervasives.ref (description A) :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   Pervasives.__ref_value Empty.
 
 Fixpoint pp {a : Set} (ppf : Format.formatter) (dir : t a) {struct ppf}
-  : unit :=
-  match Pervasives.op_exclamation dir with
-  | Empty =&gt;
-    Format.fprintf ppf
-      (CamlinternalFormatBasics.Format
-        (CamlinternalFormatBasics.String_literal &quot;EMPTY&quot;
-          CamlinternalFormatBasics.End_of_format) &quot;EMPTY&quot;)
-  | Value _e =&gt;
-    Format.fprintf ppf
-      (CamlinternalFormatBasics.Format
-        (CamlinternalFormatBasics.String_literal &quot;Value&quot;
-          CamlinternalFormatBasics.End_of_format) &quot;Value&quot;)
-  | NamedDir map =&gt;
-    Format.fprintf ppf
-      (CamlinternalFormatBasics.Format
-        (CamlinternalFormatBasics.Formatting_gen
-          (CamlinternalFormatBasics.Open_box
-            (CamlinternalFormatBasics.Format
-              (CamlinternalFormatBasics.String_literal &quot;&lt;v&gt;&quot;
-                CamlinternalFormatBasics.End_of_format) &quot;&lt;v&gt;&quot;))
-          (CamlinternalFormatBasics.Alpha
-            (CamlinternalFormatBasics.Formatting_lit
-              CamlinternalFormatBasics.Close_box
-              CamlinternalFormatBasics.End_of_format))) &quot;@[&lt;v&gt;%a@]&quot;)
-      (Format.pp_print_list None pp_item) ((|StringMap|).(S.MAP.bindings) map)
-  |
-    IndexedDir {|
-      description.IndexedDir.arg := arg;
-        description.IndexedDir.subdir := subdir
-        |} =&gt;
-    let name :=
-      Format.asprintf
-        (CamlinternalFormatBasics.Format
-          (CamlinternalFormatBasics.Char_literal &quot;&lt;&quot; % char
-            (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
-              (CamlinternalFormatBasics.Char_literal &quot;&gt;&quot; % char
-                CamlinternalFormatBasics.End_of_format))) &quot;&lt;%s&gt;&quot;)
-        (RPC_arg.descr.name (RPC_arg.__descr_value arg)) in
-    pp_item ppf (name, subdir)
-  end
+  : unit := axiom
 
 with pp_item {a : Set}
   (ppf : Format.formatter) (function_parameter : string * t a) {struct ppf}
-  : unit :=
-  let '(name, dir) := function_parameter in
-  Format.fprintf ppf
-    (CamlinternalFormatBasics.Format
-      (CamlinternalFormatBasics.Formatting_gen
-        (CamlinternalFormatBasics.Open_box
-          (CamlinternalFormatBasics.Format
-            (CamlinternalFormatBasics.String_literal &quot;&lt;v 2&gt;&quot;
-              CamlinternalFormatBasics.End_of_format) &quot;&lt;v 2&gt;&quot;))
-        (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
-          (CamlinternalFormatBasics.Formatting_lit
-            (CamlinternalFormatBasics.Break &quot;@ &quot; 1 0)
-            (CamlinternalFormatBasics.Alpha
-              (CamlinternalFormatBasics.Formatting_lit
-                CamlinternalFormatBasics.Close_box
-                CamlinternalFormatBasics.End_of_format))))) &quot;@[&lt;v 2&gt;%s@ %a@]&quot;)
-    name pp dir.
+  : unit := axiom.
 
 Module INDEX.
   Record signature {t : Set} := {
@@ -87658,38 +87532,7 @@ Definition opt_handler := 'opt_handler.
 
 Fixpoint combine_object {A : Set}
   (function_parameter : list (string * opt_handler A))
-  {struct function_parameter} : handler A :=
-  match function_parameter with
-  | [] =&gt;
-    Handler
-      {| handler.Handler.encoding := Data_encoding.__unit_value;
-        handler.Handler.get :=
-          fun function_parameter =&gt;
-            let '_ := function_parameter in
-            fun function_parameter =&gt;
-              let '_ := function_parameter in
-              Error_monad.return_unit |}
-  | cons (name, Opt_handler handler) fields =&gt;
-    let 'Handler handlers := combine_object fields in
-    Handler
-      {|
-        handler.Handler.encoding :=
-          Data_encoding.merge_objs
-            (Data_encoding.obj1
-              (Data_encoding.opt None None name
-                (Data_encoding.dynamic_size None
-                  (opt_handler.Opt_handler.encoding handler))))
-            (handler.Handler.encoding handlers);
-        handler.Handler.get :=
-          fun k =&gt;
-            fun i =&gt;
-              Error_monad.op_gtgteqquestion
-                ((opt_handler.Opt_handler.get handler) k i)
-                (fun v1 =&gt;
-                  Error_monad.op_gtgteqquestion
-                    ((handler.Handler.get handlers) k i)
-                    (fun v2 =&gt; Error_monad.__return (v1, v2))) |}
-  end.
+  {struct function_parameter} : handler A := axiom.
 
 Module query.
   Record record := {
@@ -87705,155 +87548,7 @@ Definition depth_query : RPC_query.t query :=
         (fun t =&gt; query.depth t))) RPC_query.seal.
 
 Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
-  let rpc_dir := Pervasives.__ref_value RPC_directory.empty in
-  let register {ikey : Set}
-    (path : RPC_path.t key ikey) (function_parameter : opt_handler ikey)
-    : unit :=
-    let
-      'Opt_handler {|
-        opt_handler.Opt_handler.encoding := encoding;
-          opt_handler.Opt_handler.get := get
-          |} := function_parameter in
-    let service := RPC_service.get_service None depth_query encoding path in
-    Pervasives.op_coloneq rpc_dir
-      (RPC_directory.register (Pervasives.op_exclamation rpc_dir) service
-        (fun k =&gt;
-          fun q =&gt;
-            fun function_parameter =&gt;
-              let 'tt := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (get k (Pervasives.op_plus (query.depth q) 1))
-                (fun function_parameter =&gt;
-                  match function_parameter with
-                  | None =&gt; Pervasives.raise extensible_type_value
-                  | Some x =&gt; Error_monad.__return x
-                  end))) in
-  let fix build_handler {ikey : Set} (dir : t ikey) (path : RPC_path.t key ikey)
-    {struct dir} : opt_handler ikey :=
-    match Pervasives.op_exclamation dir with
-    | Empty =&gt;
-      Opt_handler
-        {| opt_handler.Opt_handler.encoding := Data_encoding.__unit_value;
-          opt_handler.Opt_handler.get :=
-            fun function_parameter =&gt;
-              let '_ := function_parameter in
-              fun function_parameter =&gt;
-                let '_ := function_parameter in
-                Error_monad.return_none |}
-    |
-      Value {|
-        description.Value.get := get;
-          description.Value.encoding := encoding
-          |} =&gt;
-      let handler :=
-        Opt_handler
-          {| opt_handler.Opt_handler.encoding := encoding;
-            opt_handler.Opt_handler.get :=
-              fun k =&gt;
-                fun i =&gt;
-                  if (|Compare.Int|).(Compare.S.op_lt) i 0 then
-                    Error_monad.return_none
-                  else
-                    get k |} in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      (* ❌ instruction_sequence &quot;;&quot; *)
-      handler
-    | NamedDir map =&gt;
-      let fields := (|StringMap|).(S.MAP.bindings) map in
-      let fields :=
-        List.map
-          (fun function_parameter =&gt;
-            let '(name, dir) := function_parameter in
-            (name, (build_handler dir (RPC_path.op_div path name)))) fields in
-      let 'Handler handler := combine_object fields in
-      let handler :=
-        Opt_handler
-          {|
-            opt_handler.Opt_handler.encoding := handler.Handler.encoding handler;
-            opt_handler.Opt_handler.get :=
-              fun k =&gt;
-                fun i =&gt;
-                  if (|Compare.Int|).(Compare.S.op_lt) i 0 then
-                    Error_monad.return_none
-                  else
-                    Error_monad.op_gtgteqquestion
-                      ((handler.Handler.get handler) k (Pervasives.op_minus i 1))
-                      (fun v =&gt; Error_monad.return_some v) |} in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      (* ❌ instruction_sequence &quot;;&quot; *)
-      handler
-    |
-      IndexedDir {|
-        description.IndexedDir.arg := arg;
-          description.IndexedDir.arg_encoding := arg_encoding;
-          description.IndexedDir.list := __list_value;
-          description.IndexedDir.subdir := subdir
-          |} =&gt;
-      let 'Opt_handler handler :=
-        build_handler subdir (RPC_path.op_divcolon path arg) in
-      let encoding :=
-        Data_encoding.union None
-          [
-            Data_encoding.__case_value &quot;Leaf&quot; None (Data_encoding.Tag 0)
-              (Data_encoding.dynamic_size None arg_encoding)
-              (fun function_parameter =&gt;
-                match function_parameter with
-                | (key, None) =&gt; Some key
-                | _ =&gt; None
-                end) (fun key =&gt; (key, None));
-            Data_encoding.__case_value &quot;Dir&quot; None (Data_encoding.Tag 1)
-              (Data_encoding.tup2
-                (Data_encoding.dynamic_size None arg_encoding)
-                (Data_encoding.dynamic_size None
-                  (opt_handler.Opt_handler.encoding
-                    handler)))
-              (fun function_parameter =&gt;
-                match function_parameter with
-                | (key, Some value) =&gt; Some (key, value)
-                | _ =&gt; None
-                end)
-              (fun function_parameter =&gt;
-                let '(key, value) := function_parameter in
-                (key, (Some value)))
-          ] in
-      let get (k : ikey) (i : (|Compare.Int|).(Compare.S.t))
-        : Lwt.t
-          (Error_monad.tzresult
-            (option
-              (list (op_dollarIndexedDir_'a * option op_dollarOpt_handler_'a1)))) :=
-        if (|Compare.Int|).(Compare.S.op_lt) i 0 then
-          Error_monad.return_none
-        else
-          if (|Compare.Int|).(Compare.S.op_eq) i 0 then
-            Error_monad.return_some []
-          else
-            Error_monad.op_gtgteqquestion (__list_value k)
-              (fun keys =&gt;
-                Error_monad.op_gtgteqquestion
-                  (Error_monad.map_s
-                    (fun key =&gt;
-                      if (|Compare.Int|).(Compare.S.op_eq) i 1 then
-                        Error_monad.__return (key, None)
-                      else
-                        Error_monad.op_gtgteqquestion
-                          ((opt_handler.Opt_handler.get handler) (k, key)
-                            (Pervasives.op_minus i 1))
-                          (fun value =&gt; Error_monad.__return (key, value))) keys)
-                  (fun values =&gt; Error_monad.return_some values)) in
-      let handler :=
-        Opt_handler
-          {|
-            opt_handler.Opt_handler.encoding :=
-              Data_encoding.__list_value None
-                (Data_encoding.dynamic_size None encoding);
-            opt_handler.Opt_handler.get := get |} in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-      (* ❌ instruction_sequence &quot;;&quot; *)
-      handler
-    end in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  Pervasives.op_exclamation rpc_dir.
+  axiom.
 </pre>
   </div>
 </div>
@@ -91781,7 +91476,7 @@ Definition kind_encoding : Data_encoding.encoding kind :=
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Proposal);
       Data_encoding.__case_value &quot;Testing_vote&quot; None (Data_encoding.Tag 1)
         (Data_encoding.constant &quot;testing_vote&quot;)
@@ -91791,7 +91486,7 @@ Definition kind_encoding : Data_encoding.encoding kind :=
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Testing_vote);
       Data_encoding.__case_value &quot;Testing&quot; None (Data_encoding.Tag 2)
         (Data_encoding.constant &quot;testing&quot;)
@@ -91801,7 +91496,7 @@ Definition kind_encoding : Data_encoding.encoding kind :=
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Testing);
       Data_encoding.__case_value &quot;Promotion_vote&quot; None (Data_encoding.Tag 3)
         (Data_encoding.constant &quot;promotion_vote&quot;)
@@ -91811,7 +91506,7 @@ Definition kind_encoding : Data_encoding.encoding kind :=
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Promotion_vote)
     ].
 </pre>
@@ -92603,7 +92298,7 @@ Module S.
 End S.
 
 Definition register (function_parameter : unit) : unit :=
-  let 'tt := function_parameter in
+  let '_ := function_parameter in
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
@@ -92619,9 +92314,9 @@ Definition register (function_parameter : unit) : unit :=
   Services_registration.register0 S.current_proposal
     (fun ctxt =&gt;
       fun function_parameter =&gt;
-        let 'tt := function_parameter in
+        let '_ := function_parameter in
         fun function_parameter =&gt;
-          let 'tt := function_parameter in
+          let '_ := function_parameter in
           Error_monad.op_gtgteq (Alpha_context.Vote.get_current_proposal ctxt)
             (fun function_parameter =&gt;
               match function_parameter with

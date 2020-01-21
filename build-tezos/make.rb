@@ -32,15 +32,13 @@ files = [
   "Script_expr_hash.v",
   "Script_int_repr.v",
   "Script_int_repr_mli.v",
+  "Storage_description.v",
   "Storage_description_mli.v",
   "Tez_repr_mli.v",
   "Vote_repr.v",
   "Vote_repr_mli.v",
   "Voting_period_repr.v",
   "Voting_period_repr_mli.v"
-
-  # in progress
-  # "Storage_description.v",
 
   # files with one dependency
   # "Blinded_public_key_hash_mli.v",
