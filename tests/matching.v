@@ -10,7 +10,7 @@ Require Import TypingFlags.Loader.
 Unset Guard Checking.
 
 Definition n : Z :=
-  match ((cons 1 (cons 2 [])), false) with
+  match ([ 1; 2 ], false) with
   | (cons x (cons _ []), true) => x
   | (cons _ (cons y []), false) => y
   | _ => 0

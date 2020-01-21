@@ -590,6 +590,20 @@ let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
   else
     (!^ "_") :: to_coq_n_underscores (n - 1)
 
+let rec flatten_list (e : t) : t list option =
+  match e with
+  | Constructor (x, es) ->
+    begin match (x, es) with
+    | ({ PathName.path = []; base = Name.Make "[]" }, []) -> Some []
+    | ({ PathName.path = []; base = Name.Make "cons" }, [e; es]) ->
+      begin match flatten_list es with
+      | Some es -> Some (e :: es)
+      | None -> None
+      end
+    | _ -> None
+    end
+  | _ -> None
+
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
@@ -602,11 +616,16 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     else
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
   | Constructor (x, es) ->
-    if es = [] then
-      PathName.to_coq x
-    else
-      Pp.parens paren @@ nest @@ separate space
-        (PathName.to_coq x :: List.map (to_coq true) es)
+    begin match flatten_list e with
+    | Some [] -> !^ "[]"
+    | Some es -> OCaml.list (to_coq false) es
+    | None ->
+      if es = [] then
+        PathName.to_coq x
+      else
+        Pp.parens paren @@ nest @@ separate space
+          (PathName.to_coq x :: List.map (to_coq true) es)
+    end
   | Apply (e_f, e_xs) ->
     Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
   | Function (x, e) ->

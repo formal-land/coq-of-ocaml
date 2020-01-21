@@ -95,5 +95,4 @@ Definition n1 : Z := fst (12, 13).
 
 Definition n2 : Z := snd (12, 13).
 
-Definition ll : list Z :=
-  OCaml.Stdlib.app (cons 1 (cons 2 [])) (cons 3 (cons 4 [])).
+Definition ll : list Z := OCaml.Stdlib.app [ 1; 2 ] [ 3; 4 ].

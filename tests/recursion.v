@@ -22,7 +22,7 @@ Fixpoint fold {A B : Set} (f : A -> B -> A) (a : A) (l : list B) {struct f}
   | cons x xs => fold f (f a x) xs
   end.
 
-Definition l : list Z := cons 5 (cons 6 (cons 7 (cons 2 []))).
+Definition l : list Z := [ 5; 6; 7; 2 ].
 
 Definition n {A : Set} (incr : Z -> A) (plus : Z -> A -> Z) : Z :=
   fold (fun x => fun y => plus x y) 0 (map incr l).

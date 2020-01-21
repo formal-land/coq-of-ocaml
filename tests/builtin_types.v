@@ -29,7 +29,7 @@ Definition u : unit := tt.
 
 Definition l1 {A : Set} : list A := [].
 
-Definition l2 : list Z := cons 0 (cons 1 (cons 2 (cons 3 []))).
+Definition l2 : list Z := [ 0; 1; 2; 3 ].
 
 Definition o : option Z :=
   if b1 then

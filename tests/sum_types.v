@@ -43,7 +43,7 @@ Fixpoint sum (l : t2 Z) {struct l} : Z :=
 
 Definition s {A : Set} (function_parameter : A) : Z :=
   let '_ := function_parameter in
-  sum (of_list (cons 5 (cons 7 (cons 3 [])))).
+  sum (of_list [ 5; 7; 3 ]).
 
 Parameter t3 : Set.
 

@@ -31,6 +31,6 @@ Definition x : unit := OCaml.Stdlib.ignore 23.
 
 Definition p : Z := Z.add (fst (1, 2)) (snd (3, 4)).
 
-Definition l : list Z := OCaml.Stdlib.app (cons 1 (cons 2 [])) (cons 3 []).
+Definition l : list Z := OCaml.Stdlib.app [ 1; 2 ] [ 3 ].
 
 Definition y : Z := apply (fun n => Z.add n 1) 12.

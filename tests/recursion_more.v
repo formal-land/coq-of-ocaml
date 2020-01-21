@@ -21,4 +21,4 @@ Definition n : Z :=
     | [] => 0
     | cons x l => Z.add x (sum l)
     end in
-  sum (cons 1 (cons 2 (cons 3 []))).
+  sum [ 1; 2; 3 ].

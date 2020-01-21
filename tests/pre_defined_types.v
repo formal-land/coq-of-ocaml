@@ -13,9 +13,9 @@ Definition u : unit := tt.
 
 Definition l1 {A : Set} : list A := [].
 
-Definition l2 : list Z := cons 1 [].
+Definition l2 : list Z := [ 1 ].
 
-Definition l3 : list Z := cons 1 (cons 5 (cons 7 (cons 32 (cons 15 [])))).
+Definition l3 : list Z := [ 1; 5; 7; 32; 15 ].
 
 Definition o1 {A : Set} : option A := None.
 

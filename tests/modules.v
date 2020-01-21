@@ -37,7 +37,7 @@ End List2.
 
 Definition n {A : Set} (function_parameter : A) : Z :=
   let '_ := function_parameter in
-  List2.sum (List2.of_list (cons 5 (cons 7 (cons 6 (cons List2.Inside.x []))))).
+  List2.sum (List2.of_list [ 5; 7; 6; List2.Inside.x ]).
 
 Module Syn := List2.Inside.
 
