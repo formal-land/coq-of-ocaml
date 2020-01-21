@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35801 lines</li>
-      <li>Coq size: 44768 lines (+25% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 2877</li>
+      <li>OCaml size: 35803 lines</li>
+      <li>Coq size: 44776 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 2878</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -69,6 +69,7 @@
           1147,
           1541,
           2680,
+          2680,
         ],
         generated: [
           47563,
@@ -77,6 +78,7 @@
           43404,
           44618,
           45107,
+          44768,
           44768,
         ],
         labels: [
@@ -87,6 +89,7 @@
           "01-18",
           "01-19",
           "01-20",
+          "01-21",
         ]
       }
 ;
@@ -130,7 +133,7 @@
       </li>
       
       <li>
-        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-danger">70</span>
+        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-danger">71</span>
       </li>
       
       <li>
@@ -6187,7 +6190,7 @@ Parameter record_ballot :
 <hr />
 <div class="row conversion-row" id="apply.ml">
   <div class="col-md-6">
-    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-danger">70 errors</span>
+    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-danger">71 errors</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -7193,7 +7196,7 @@ let rec <abbr class="mark-error" title="Polymorphic variant types are not handle
           Lwt.return (ctxt_result, Cons_result (result, results)) )
 
 let mark_backtracked results =
-  let rec mark_contents_list :
+  <abbr class="mark-error" title="Mutually recursive definition are only handled at top-level">let rec mark_contents_list :
       type kind.
       kind Kind.manager contents_result_list -&gt;
       kind Kind.manager contents_result_list = function
@@ -7235,7 +7238,7 @@ let mark_backtracked results =
     | Applied result -&gt;
         Backtracked (result, None)
   in
-  mark_contents_list results
+  mark_contents_list results</abbr>
 
 let apply_manager_contents_list ctxt mode baker chain_id contents_list =
   apply_manager_contents_list_rec ctxt mode baker chain_id contents_list
@@ -8462,8 +8465,8 @@ Fixpoint mark_skipped {kind : Set}
   (baker : Signature.Public_key_hash.[S.SPublic_key_hash.t])
   (level : Alpha_context.Level.t)
   (function_parameter :
-    Alpha_context.contents_list (Alpha_context.Kind.manager kind)) {struct
-  baker}
+    Alpha_context.contents_list (Alpha_context.Kind.manager kind))
+  {struct baker}
   : Apply_results.contents_result_list (Alpha_context.Kind.manager kind) :=
   match function_parameter with
   |
@@ -8678,8 +8681,8 @@ Definition mark_backtracked {A : Set}
     Apply_results.Internal_operation_result kind
       (mark_manager_operation_result __result_value)
   with mark_manager_operation_result {kind : Set}
-    (function_parameter : Apply_results.manager_operation_result kind) {struct
-    function_parameter} : Apply_results.manager_operation_result kind :=
+    (function_parameter : Apply_results.manager_operation_result kind)
+    {struct function_parameter} : Apply_results.manager_operation_result kind :=
     match function_parameter with
     |
       (Apply_results.Failed _ _ | Apply_results.Skipped _ |
@@ -11965,15 +11968,15 @@ Definition packed_contents_result_list := 'packed_contents_result_list.
 
 Definition contents_result_list_encoding
   : Data_encoding.encoding packed_contents_result_list :=
-  let fix to_list (function_parameter : packed_contents_result_list) {struct
-    function_parameter} : list packed_contents_result :=
+  let fix to_list (function_parameter : packed_contents_result_list)
+    {struct function_parameter} : list packed_contents_result :=
     match function_parameter with
     | Contents_result_list (Single_result o) =&gt; cons (Contents_result o) []
     | Contents_result_list (Cons_result o os) =&gt;
       cons (Contents_result o) (to_list (Contents_result_list os))
     end in
-  let fix of_list (function_parameter : list packed_contents_result) {struct
-    function_parameter} : packed_contents_result_list :=
+  let fix of_list (function_parameter : list packed_contents_result)
+    {struct function_parameter} : packed_contents_result_list :=
     match function_parameter with
     | [] =&gt; Pervasives.failwith &quot;cannot decode empty operation result&quot; % string
     | cons (Contents_result o) [] =&gt; Contents_result_list (Single_result o)
@@ -12024,8 +12027,8 @@ Definition packed_contents_and_result_list := 'packed_contents_and_result_list.
 
 Definition contents_and_result_list_encoding
   : Data_encoding.encoding packed_contents_and_result_list :=
-  let fix to_list (function_parameter : packed_contents_and_result_list) {struct
-    function_parameter} : list packed_contents_and_result :=
+  let fix to_list (function_parameter : packed_contents_and_result_list)
+    {struct function_parameter} : list packed_contents_and_result :=
     match function_parameter with
     | Contents_and_result_list (Single_and_result op res) =&gt;
       cons (Contents_and_result op res) []
@@ -12033,8 +12036,8 @@ Definition contents_and_result_list_encoding
       cons (Contents_and_result op res)
         (to_list (Contents_and_result_list rest))
     end in
-  let fix of_list (function_parameter : list packed_contents_and_result) {struct
-    function_parameter} : packed_contents_and_result_list :=
+  let fix of_list (function_parameter : list packed_contents_and_result)
+    {struct function_parameter} : packed_contents_and_result_list :=
     match function_parameter with
     | [] =&gt;
       Pervasives.failwith
@@ -12362,8 +12365,8 @@ Fixpoint pack_contents_list {kind : Set}
   end.
 
 Fixpoint unpack_contents_list {kind : Set}
-  (function_parameter : contents_and_result_list kind) {struct
-  function_parameter}
+  (function_parameter : contents_and_result_list kind)
+  {struct function_parameter}
   : Alpha_context.contents_list kind * contents_result_list kind :=
   match function_parameter with
   | Single_and_result op res =&gt; ((Alpha_context.Single op), (Single_result res))
@@ -12372,16 +12375,16 @@ Fixpoint unpack_contents_list {kind : Set}
     ((Alpha_context.Cons op ops), (Cons_result res ress))
   end.
 
-Fixpoint to_list (function_parameter : packed_contents_result_list) {struct
-  function_parameter} : list packed_contents_result :=
+Fixpoint to_list (function_parameter : packed_contents_result_list)
+  {struct function_parameter} : list packed_contents_result :=
   match function_parameter with
   | Contents_result_list (Single_result o) =&gt; cons (Contents_result o) []
   | Contents_result_list (Cons_result o os) =&gt;
     cons (Contents_result o) (to_list (Contents_result_list os))
   end.
 
-Fixpoint of_list (function_parameter : list packed_contents_result) {struct
-  function_parameter} : packed_contents_result_list :=
+Fixpoint of_list (function_parameter : list packed_contents_result)
+  {struct function_parameter} : packed_contents_result_list :=
   match function_parameter with
   | [] =&gt;
     (* ❌ Assert instruction is not handled. *)
@@ -17531,8 +17534,8 @@ Definition originated_contracts (function_parameter : origination_nonce)
     (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     let fix contracts
-      (acc : list t) (origination_index : Compare.Int32.[Compare.S.t]) {struct
-      acc} : list t :=
+      (acc : list t) (origination_index : Compare.Int32.[Compare.S.t])
+      {struct acc} : list t :=
       if Compare.Int32.[Compare.S.op_lt] origination_index first then
         acc
       else
@@ -39155,8 +39158,8 @@ Definition add_root_entrypoint (script_code : Script_repr.lazy_expr)
                   =&gt;
                   let fix rewrite_self
                     (function_parameter :
-                      Micheline.node Z Michelson_v1_primitives.prim) {struct
-                    function_parameter}
+                      Micheline.node Z Michelson_v1_primitives.prim)
+                    {struct function_parameter}
                     : Micheline.node Z Michelson_v1_primitives.prim :=
                     match function_parameter with
                     |
@@ -45251,8 +45254,8 @@ Definition prims_of_strings (expr : Micheline.canonical string)
 
 Definition strings_of_prims (expr : Micheline.canonical prim)
   : Micheline.canonical string :=
-  let fix convert (function_parameter : Micheline.node Z prim) {struct
-    function_parameter} : Micheline.node Z string :=
+  let fix convert (function_parameter : Micheline.node Z prim)
+    {struct function_parameter} : Micheline.node Z string :=
     match function_parameter with
     | Micheline.Int l x =&gt; Micheline.Int l x
     | Micheline.String l x =&gt; Micheline.String l x
@@ -46136,26 +46139,28 @@ let rec ( ---&gt; ) i j =
   (* [i; i+1; ...; j] *)
   if Compare.Int32.(i &gt; j) then [] else i :: (Int32.succ i ---&gt; j)
 
+let rec do_slashes delim path l acc limit i =
+  if Compare.Int.(i &gt;= l) then List.rev acc
+  else if Compare.Char.(path.[i] = delim) then do_slashes delim path l acc limit (i + 1)
+  else do_split delim path l acc limit i
+
+and do_split delim path l acc limit i =
+  if Compare.Int.(limit &lt;= 0) then
+    if Compare.Int.(i = l) then List.rev acc
+    else List.rev (String.sub path i (l - i) :: acc)
+  else do_component delim path l acc (pred limit) i i
+
+and do_component delim path l acc limit i j =
+  if Compare.Int.(j &gt;= l) then
+    if Compare.Int.(i = j) then List.rev acc
+    else List.rev (String.sub path i (j - i) :: acc)
+  else if Compare.Char.(path.[j] = delim) then
+    do_slashes delim path l (String.sub path i (j - i) :: acc) limit j
+  else do_component delim path l acc limit i (j + 1)
+
 let split delim ?(limit = max_int) path =
   let l = String.length path in
-  let rec do_slashes acc limit i =
-    if Compare.Int.(i &gt;= l) then List.rev acc
-    else if Compare.Char.(path.[i] = delim) then do_slashes acc limit (i + 1)
-    else do_split acc limit i
-  and do_split acc limit i =
-    if Compare.Int.(limit &lt;= 0) then
-      if Compare.Int.(i = l) then List.rev acc
-      else List.rev (String.sub path i (l - i) :: acc)
-    else do_component acc (pred limit) i i
-  and do_component acc limit i j =
-    if Compare.Int.(j &gt;= l) then
-      if Compare.Int.(i = j) then List.rev acc
-      else List.rev (String.sub path i (j - i) :: acc)
-    else if Compare.Char.(path.[j] = delim) then
-      do_slashes (String.sub path i (j - i) :: acc) limit j
-    else do_component acc limit i (j + 1)
-  in
-  if Compare.Int.(limit &gt; 0) then do_slashes [] limit 0 else [path]
+  if Compare.Int.(limit &gt; 0) then do_slashes delim path l [] limit 0 else [path]
 
 let pp_print_paragraph ppf description =
   Format.fprintf
@@ -46231,6 +46236,49 @@ Fixpoint op_minusminusminusgt
   else
     cons i (op_minusminusminusgt (Int32.succ i) j).
 
+Fixpoint do_slashes
+  (delim : Compare.Char.[Compare.S.t]) (path : string)
+  (l : Compare.Int.[Compare.S.t]) (acc : list string)
+  (limit : Compare.Int.[Compare.S.t]) (i : Compare.Int.[Compare.S.t])
+  {struct delim} : list string :=
+  if Compare.Int.[Compare.S.op_gteq] i l then
+    List.rev acc
+  else
+    if Compare.Char.[Compare.S.op_eq] (String.get path i) delim then
+      do_slashes delim path l acc limit (Pervasives.op_plus i 1)
+    else
+      do_split delim path l acc limit i
+
+with do_split
+  (delim : Compare.Char.[Compare.S.t]) (path : string)
+  (l : Compare.Int.[Compare.S.t]) (acc : list string)
+  (limit : Compare.Int.[Compare.S.t]) (i : Compare.Int.[Compare.S.t])
+  {struct delim} : list string :=
+  if Compare.Int.[Compare.S.op_lteq] limit 0 then
+    if Compare.Int.[Compare.S.op_eq] i l then
+      List.rev acc
+    else
+      List.rev (cons (String.sub path i (Pervasives.op_minus l i)) acc)
+  else
+    do_component delim path l acc (Pervasives.pred limit) i i
+
+with do_component
+  (delim : Compare.Char.[Compare.S.t]) (path : string)
+  (l : Compare.Int.[Compare.S.t]) (acc : list string)
+  (limit : Compare.Int.[Compare.S.t]) (i : Compare.Int.[Compare.S.t])
+  (j : Compare.Int.[Compare.S.t]) {struct delim} : list string :=
+  if Compare.Int.[Compare.S.op_gteq] j l then
+    if Compare.Int.[Compare.S.op_eq] i j then
+      List.rev acc
+    else
+      List.rev (cons (String.sub path i (Pervasives.op_minus j i)) acc)
+  else
+    if Compare.Char.[Compare.S.op_eq] (String.get path j) delim then
+      do_slashes delim path l
+        (cons (String.sub path i (Pervasives.op_minus j i)) acc) limit j
+    else
+      do_component delim path l acc limit i (Pervasives.op_plus j 1).
+
 Definition split
   (delim : Compare.Char.[Compare.S.t])
   (op_staroptstar : option Compare.Int.[Compare.S.t]) : string -&gt; list string :=
@@ -46241,43 +46289,8 @@ Definition split
     end in
   fun path =&gt;
     let l := String.length path in
-    let fix do_slashes
-      (acc : list string) (limit : Compare.Int.[Compare.S.t])
-      (i : Compare.Int.[Compare.S.t]) {struct acc} : list string :=
-      if Compare.Int.[Compare.S.op_gteq] i l then
-        List.rev acc
-      else
-        if Compare.Char.[Compare.S.op_eq] (String.get path i) delim then
-          do_slashes acc limit (Pervasives.op_plus i 1)
-        else
-          do_split acc limit i
-    with do_split
-      (acc : list string) (limit : Compare.Int.[Compare.S.t])
-      (i : Compare.Int.[Compare.S.t]) {struct acc} : list string :=
-      if Compare.Int.[Compare.S.op_lteq] limit 0 then
-        if Compare.Int.[Compare.S.op_eq] i l then
-          List.rev acc
-        else
-          List.rev (cons (String.sub path i (Pervasives.op_minus l i)) acc)
-      else
-        do_component acc (Pervasives.pred limit) i i
-    with do_component
-      (acc : list string) (limit : Compare.Int.[Compare.S.t])
-      (i : Compare.Int.[Compare.S.t]) (j : Compare.Int.[Compare.S.t]) {struct
-      acc} : list string :=
-      if Compare.Int.[Compare.S.op_gteq] j l then
-        if Compare.Int.[Compare.S.op_eq] i j then
-          List.rev acc
-        else
-          List.rev (cons (String.sub path i (Pervasives.op_minus j i)) acc)
-      else
-        if Compare.Char.[Compare.S.op_eq] (String.get path j) delim then
-          do_slashes (cons (String.sub path i (Pervasives.op_minus j i)) acc)
-            limit j
-        else
-          do_component acc limit i (Pervasives.op_plus j 1) in
     if Compare.Int.[Compare.S.op_gt] limit 0 then
-      do_slashes [] limit 0
+      do_slashes delim path l [] limit 0
     else
       cons path [].
 
@@ -48070,15 +48083,15 @@ where &quot;'packed_internal_operation&quot; := (packed_internal_operation_gadt)
 
 Definition packed_internal_operation := 'packed_internal_operation.
 
-Fixpoint to_list (function_parameter : packed_contents_list) {struct
-  function_parameter} : list packed_contents :=
+Fixpoint to_list (function_parameter : packed_contents_list)
+  {struct function_parameter} : list packed_contents :=
   match function_parameter with
   | Contents_list (Single o) =&gt; cons (Contents o) []
   | Contents_list (Cons o os) =&gt; cons (Contents o) (to_list (Contents_list os))
   end.
 
-Fixpoint of_list (function_parameter : list packed_contents) {struct
-  function_parameter} : packed_contents_list :=
+Fixpoint of_list (function_parameter : list packed_contents)
+  {struct function_parameter} : packed_contents_list :=
   match function_parameter with
   | [] =&gt;
     (* ❌ Assert instruction is not handled. *)
@@ -57578,8 +57591,8 @@ Definition unparse_stack {A : Set}
   let '(stack, stack_ty) := function_parameter in
   let ctxt := Alpha_context.Gas.set_unlimited ctxt in
   let fix unparse_stack {a : Set}
-    (function_parameter : stack a * Script_typed_ir.stack_ty a) {struct
-    function_parameter}
+    (function_parameter : stack a * Script_typed_ir.stack_ty a)
+    {struct function_parameter}
     : Lwt.t
       (Error_monad.tzresult (list (Alpha_context.Script.expr * option string))) :=
     match function_parameter with
@@ -58028,8 +58041,8 @@ Fixpoint step {a b : Set}
               let fix loop
                 (rest : stack op_dollar68) (ctxt : Alpha_context.context)
                 (l : list (op_dollar66 * op_dollar67))
-                (acc : Script_typed_ir.map op_dollar66 op_dollar69) {struct
-                rest}
+                (acc : Script_typed_ir.map op_dollar66 op_dollar69)
+                {struct rest}
                 : Lwt.t
                   (Error_monad.tzresult
                     (Script_typed_ir.map op_dollar66 op_dollar69 *
@@ -69530,8 +69543,8 @@ Definition map_size {key value : Set} (Box : Script_typed_ir.map key value)
       (Pervasives.snd Box.[Script_typed_ir.Boxed_map.boxed])).
 
 Fixpoint ty_of_comparable_ty {a s : Set}
-  (function_parameter : Script_typed_ir.comparable_struct a s) {struct
-  function_parameter} : Script_typed_ir.ty a :=
+  (function_parameter : Script_typed_ir.comparable_struct a s)
+  {struct function_parameter} : Script_typed_ir.ty a :=
   match function_parameter with
   | Script_typed_ir.Int_key tname =&gt; Script_typed_ir.Int_t tname
   | Script_typed_ir.Nat_key tname =&gt; Script_typed_ir.Nat_t tname
@@ -69624,8 +69637,8 @@ Definition add_field_annot {A B : Set}
   end.
 
 Fixpoint unparse_comparable_ty {a s : Set}
-  (function_parameter : Script_typed_ir.comparable_struct a s) {struct
-  function_parameter} : Alpha_context.Script.node :=
+  (function_parameter : Script_typed_ir.comparable_struct a s)
+  {struct function_parameter} : Alpha_context.Script.node :=
   match function_parameter with
   | Script_typed_ir.Int_key tname =&gt;
     Micheline.Prim (-1) Alpha_context.Script.T_int []
@@ -70592,14 +70605,14 @@ Fixpoint parse_comparable_ty
                               (cons Alpha_context.Script.T_timestamp [])))))))))
           end))
 
-with parse_packable_ty (ctxt : Alpha_context.context) (legacy : bool) {struct
-  ctxt}
+with parse_packable_ty (ctxt : Alpha_context.context) (legacy : bool)
+  {struct ctxt}
   : Alpha_context.Script.node -&gt;
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy false false legacy
 
-with parse_parameter_ty (ctxt : Alpha_context.context) (legacy : bool) {struct
-  ctxt}
+with parse_parameter_ty (ctxt : Alpha_context.context) (legacy : bool)
+  {struct ctxt}
   : Alpha_context.Script.node -&gt;
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy true false true
@@ -71006,8 +71019,8 @@ with parse_storage_ty
 Definition check_packable {A : Set}
   (legacy : bool) (loc : Alpha_context.Script.location)
   (root : Script_typed_ir.ty A) : Error_monad.tzresult unit :=
-  let fix check {t : Set} (function_parameter : Script_typed_ir.ty t) {struct
-    function_parameter} : Error_monad.tzresult unit :=
+  let fix check {t : Set} (function_parameter : Script_typed_ir.ty t)
+    {struct function_parameter} : Error_monad.tzresult unit :=
     match function_parameter with
     | Script_typed_ir.Big_map_t _ _ _ =&gt;
       Error_monad.__error_value extensible_type_value
@@ -72081,8 +72094,8 @@ with parse_returning {arg ret : Set}
   (type_logger : option type_logger) (tc_context : tc_context)
   (ctxt : Alpha_context.context) (legacy : bool)
   (function_parameter :
-    Script_typed_ir.ty arg * option Script_typed_ir.var_annot) {struct
-  type_logger}
+    Script_typed_ir.ty arg * option Script_typed_ir.var_annot)
+  {struct type_logger}
   : Script_typed_ir.ty ret -&gt; Alpha_context.Script.node -&gt;
   Lwt.t
     (Error_monad.tzresult
@@ -74848,8 +74861,8 @@ with parse_instr {bef : Set}
                 (fun function_parameter =&gt;
                   let 'Field_annot annot := function_parameter in
                   annot) &quot;default&quot; % string entrypoint in
-            let fix get_toplevel_type (function_parameter : tc_context) {struct
-              function_parameter}
+            let fix get_toplevel_type (function_parameter : tc_context)
+              {struct function_parameter}
               : Lwt.t
                 (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
               match function_parameter with
@@ -75751,8 +75764,8 @@ Definition list_entrypoints {A : Set}
     (acc :
       list (list Alpha_context.Script.prim) *
         Entrypoints_map.[S.MAP.t]
-          (list Alpha_context.Script.prim * Alpha_context.Script.node)) {struct
-    t}
+          (list Alpha_context.Script.prim * Alpha_context.Script.node))
+    {struct t}
     : Error_monad.tzresult
       (list (list Alpha_context.Script.prim) *
         Entrypoints_map.[S.MAP.t]
@@ -76157,8 +76170,8 @@ Fixpoint unparse_data {a : Set}
         unparse_code ctxt mode original_code
       end)
 
-with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode) {struct
-  ctxt}
+with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
+  {struct ctxt}
   : Alpha_context.Script.node -&gt;
   Lwt.t
     (Error_monad.tzresult
@@ -86763,8 +86776,8 @@ where &quot;'args&quot; := (fun (_ _ _ : Set) =&gt; args_gadt).
 
 Definition args := 'args.
 
-Fixpoint unpack {a b c : Set} (function_parameter : args a b c) {struct
-  function_parameter} : c -&gt; a * b :=
+Fixpoint unpack {a b c : Set} (function_parameter : args a b c)
+  {struct function_parameter} : c -&gt; a * b :=
   match function_parameter with
   | One _ =&gt; fun x =&gt; x
   | Pair l r =&gt;
@@ -86776,8 +86789,8 @@ Fixpoint unpack {a b c : Set} (function_parameter : args a b c) {struct
       (b, (a, d))
   end.
 
-Fixpoint pack {a b c : Set} (function_parameter : args a b c) {struct
-  function_parameter} : a -&gt; b -&gt; c :=
+Fixpoint pack {a b c : Set} (function_parameter : args a b c)
+  {struct function_parameter} : a -&gt; b -&gt; c :=
   match function_parameter with
   | One _ =&gt; fun b =&gt; fun a =&gt; (b, a)
   | Pair l r =&gt;
@@ -86790,8 +86803,8 @@ Fixpoint pack {a b c : Set} (function_parameter : args a b c) {struct
         pack_r c d
   end.
 
-Fixpoint compare {a b c : Set} (function_parameter : args a b c) {struct
-  function_parameter} : b -&gt; b -&gt; Z :=
+Fixpoint compare {a b c : Set} (function_parameter : args a b c)
+  {struct function_parameter} : b -&gt; b -&gt; Z :=
   match function_parameter with
   | One {| args.One.compare := compare |} =&gt; compare
   | Pair l r =&gt;
@@ -87006,8 +87019,8 @@ where &quot;'opt_handler&quot; := (fun (_ : Set) =&gt; opt_handler_gadt).
 Definition opt_handler := 'opt_handler.
 
 Fixpoint combine_object {A : Set}
-  (function_parameter : list (string * opt_handler A)) {struct
-  function_parameter} : handler A :=
+  (function_parameter : list (string * opt_handler A))
+  {struct function_parameter} : handler A :=
   match function_parameter with
   | [] =&gt;
     Handler
