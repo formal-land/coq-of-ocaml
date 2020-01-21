@@ -5,7 +5,7 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Notation "record .[ field ]" := (field (projT2 record)) (at level 5).
+Notation "(| record |)" := (projT2 record).
 
 Module Primitive.
   Set Primitive Projections.

@@ -79,6 +79,12 @@ let of_path
 let rec to_coq (path : t) : SmartPrint.t =
   match path with
   | Access (path, field_path_name, is_local) ->
-    to_coq path ^-^ !^ "." ^-^
-    (if is_local then parens else brakets) (PathName.to_coq field_path_name)
+    let path = to_coq path in
+    let path =
+      if is_local then
+        path
+      else
+        parens (!^ "|" ^-^ path ^-^ !^ "|") in
+    path ^-^ !^ "." ^-^
+    parens (PathName.to_coq field_path_name)
   | PathName path_name -> PathName.to_coq path_name

@@ -35,7 +35,7 @@ End S.
 
 Parameter Make :
   forall (P : {t : _ & COMPARABLE.signature t}),
-    {_ : unit & S.signature P.[COMPARABLE.t]}.
+    {_ : unit & S.signature (|P|).(COMPARABLE.t)}.
 
 Parameter Char : {_ : unit & S.signature ascii}.
 
