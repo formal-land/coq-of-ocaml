@@ -263,7 +263,13 @@ let rec of_structure (structure : structure) : t list Monad.t =
         return [ModuleInclude reference]
       end
     | Tstr_include _ ->
-      error_message (Error "include") NotSupported "Cannot include this kind of module expression"
+      error_message
+        (Error "include")
+        NotSupported
+        (
+          "Cannot include this kind of module expression.\n\n" ^
+          "Try to first give a name to this module."
+        )
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
   structure.str_items |> Monad.List.flatten_map of_structure_item
