@@ -27,14 +27,13 @@ files = [
   "Nonce_hash.v",
   "Period_repr.v",
   "Period_repr_mli.v",
-  "Qty_repr.v",
+  # "Qty_repr.v"
   "Raw_level_repr.v",
   "Script_expr_hash.v",
   "Script_int_repr.v",
   "Script_int_repr_mli.v",
   "Storage_description.v",
   "Storage_description_mli.v",
-  "Tez_repr_mli.v",
   "Vote_repr.v",
   "Vote_repr_mli.v",
   "Voting_period_repr.v",
@@ -45,6 +44,7 @@ files = [
   # "Cycle_repr_mli.v",
   # "Raw_level_repr_mli.v",
   # "Tez_repr.v",
+  # "Tez_repr_mli.v",
 ]
 
 nb_valid_lines = 0
