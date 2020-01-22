@@ -30,6 +30,8 @@ Class OrderDec {A R} `(StrictOrder A R) := {
 
 Definition array (A : Set) : Set := list A.
 
+Parameter axiom : forall {A : Set}, A.
+
 Parameter exn : Set.
 
 Parameter extensible_type : Set.
@@ -438,6 +440,8 @@ Module CamlinternalFormatBasics.
   Parameter Any : Set.
 
   Parameter Alpha : Any -> Any.
+  Parameter Break : string -> Z -> Z -> Any.
+  Parameter Char_literal : ascii -> Any -> Any.
   Parameter Format : forall {A : Set}, Any -> string -> A.
   Parameter Formatting_gen : Any -> Any -> Any.
   Parameter Formatting_lit : Any -> Any -> Any.

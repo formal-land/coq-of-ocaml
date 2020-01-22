@@ -28,7 +28,7 @@ type t =
   | Apply of t * t list (** An application. *)
   | Function of Name.t * t (** An argument name and a body. *)
   | LetVar of Name.t * t * t
-  | LetFun of t Definition.t * t
+  | LetFun of t option Definition.t * t
   | Match of t * (Pattern.t * t) list * t option
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list
@@ -344,10 +344,13 @@ and import_let_fun
   (at_top_level : bool)
   (is_rec : Asttypes.rec_flag)
   (cases : value_binding list)
-  : t Definition.t Monad.t =
+  : t option Definition.t Monad.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
-  (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr = e; _ } ->
-    set_env e.exp_env (
+  (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
+    let attributes =
+      vb_attributes |> List.map (fun attr -> (fst attr).Asttypes.txt) in
+    let is_axiom = List.mem "axiom" attributes in
+    set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
     (match p with
@@ -355,11 +358,11 @@ and import_let_fun
     | Pattern.Variable x -> return (Some x)
     | _ -> raise None Unexpected "A variable name instead of a pattern was expected."
     ) >>= fun x ->
-    Type.of_typ_expr true typ_vars e.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
+    Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
     match x with
     | None -> return None
     | Some x ->
-      of_expression typ_vars e >>= fun e ->
+      of_expression typ_vars vb_expr >>= fun e ->
       let (args_names, e_body) = open_function e in
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
       let header = {
@@ -368,6 +371,7 @@ and import_let_fun
         args = List.combine args_names args_typs;
         typ = Some e_body_typ
       } in
+      let e_body = if is_axiom then None else Some e_body in
       return (Some (header, e_body))
     )
   ))) >>= fun cases ->
@@ -672,7 +676,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         | None -> empty
         | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^
         !^ " :=" ^^ newline ^^
-        indent (to_coq false e))) ^^ !^ "in" ^^ newline ^^ to_coq false e)
+        indent (
+          match e with
+          | None -> !^ "axiom"
+          | Some e -> to_coq false e
+        )
+      )) ^^ !^ "in" ^^ newline ^^ to_coq false e)
   | Match (e, cases, default_value) ->
     begin match (cases, default_value) with
     | ([(pattern, e2)], None) ->

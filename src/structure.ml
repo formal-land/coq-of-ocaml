@@ -5,7 +5,7 @@ open Monad.Notations
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
-  type t = Exp.t Exp.Definition.t
+  type t = Exp.t option Exp.Definition.t
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (value : t) : SmartPrint.t =
@@ -47,7 +47,10 @@ module Value = struct
           | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
           end ^-^
           !^ (match typ with None -> ":=" | _ -> " :=") ^^
-          Exp.to_coq false e
+          begin match e with
+          | None -> !^ "axiom"
+          | Some e -> Exp.to_coq false e
+          end
         )
       )) ^-^ !^ "."
 end
@@ -83,7 +86,7 @@ let simple_value (name : Name.t) (e : Exp.t) : t =
           args = [];
           typ = None
         },
-        e
+        Some e
       )
     ]
   }
