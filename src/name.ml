@@ -53,6 +53,7 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "float" -> escape_if_value s
   | "int32" -> escape_if_value s
   | "int64" -> escape_if_value s
+  | "left" -> "__left"
   | "list" -> escape_if_value s
   | "mod" -> "__mod"
   | "nativeint" -> escape_if_value s
@@ -60,6 +61,7 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "ref" -> escape_if_value s
   | "result" -> escape_if_value s
   | "return" -> "__return"
+  | "right" -> "__right"
   | "Set" -> "__Set"
   | "string" -> escape_if_value s
   | "unit" -> escape_if_value s

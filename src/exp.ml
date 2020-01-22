@@ -29,6 +29,8 @@ type t =
   | Function of Name.t * t (** An argument name and a body. *)
   | LetVar of Name.t * t * t
   | LetFun of t option Definition.t * t
+  | LetTyp of Name.t * Name.t list * Type.t * t
+    (** The definition of a type. It is used to represent module values. *)
   | Match of t * (Pattern.t * t) list * t option
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list
@@ -39,6 +41,10 @@ type t =
     (** The value of a first-class module. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module (no existentials). There may be error messages. *)
+  | Functor of Name.t * Type.t * t
+    (** A functor. *)
+  | TypeAnnotation of t * Type.t
+    (** Annotate with a type. *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
   | ErrorTyp of Type.t (** An error composed of a type. *)
@@ -476,17 +482,23 @@ and of_module_expr
         (Error "first_class_module_value_of_unknown_signature")
         FirstClassModule
         (
-          "The signature name of this module could not be found" ^
-          match reason with
-          | None -> ""
-          | Some reason -> "\n\n" ^ "Reason:\n" ^ reason
+          "The signature name of this module could not be found\n\n" ^
+          reason
         )
     end
-  | Tmod_functor _ ->
-    error_message
-      (Error "unsupported_functor")
-      NotSupported
-      "Functors are not supported for first-class module values"
+  | Tmod_functor (ident, _, module_type_arg, e) ->
+    begin match module_type_arg with
+    | None ->
+      error_message
+        (Error "functor_without_argument_annotation")
+        NotSupported
+        "Expected an annotation to get the module type of the parameter of this functor"
+    | Some module_type_arg ->
+      let x = Name.of_ident false ident in
+      ModuleTyp.of_ocaml module_type_arg >>= fun module_type_arg ->
+      of_module_expr typ_vars e None >>= fun e ->
+      return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
+    end
   | Tmod_apply (e1, e2, _) ->
     let expected_module_type_for_e2 =
       match e1.mod_type with
@@ -495,12 +507,18 @@ and of_module_expr
     of_module_expr typ_vars e1 None >>= fun e1 ->
     of_module_expr typ_vars e2 expected_module_type_for_e2 >>= fun e2 ->
     return (Apply (e1, [e2]))
-  | Tmod_constraint (module_expr, mod_type, _, _) ->
+  | Tmod_constraint (module_expr, mod_type, annotation, _) ->
     let module_type =
       match module_type with
       | Some _ -> module_type
       | None -> Some mod_type in
-    of_module_expr typ_vars module_expr module_type
+    of_module_expr typ_vars module_expr module_type >>= fun e ->
+    begin match annotation with
+    | Tmodtype_implicit -> return e
+    | Tmodtype_explicit module_type ->
+      ModuleTyp.of_ocaml module_type >>= fun module_type ->
+      return (TypeAnnotation (e, ModuleTyp.to_typ module_type))
+    end
   | Tmod_unpack (e, _) -> of_expression typ_vars e
   ))
 
@@ -538,7 +556,36 @@ and of_structure
           (ErrorMessage (e_next, "primitive"))
           NotSupported
           "Primitive not handled"
-      | Tstr_type _ -> return e_next
+      | Tstr_type (_, typs) ->
+        begin match typs with
+        | [typ] ->
+          begin match typ with
+          | {
+              typ_id;
+              typ_type = {
+                type_kind = Type_abstract;
+                type_manifest = Some typ;
+                type_params;
+                _
+              };
+              _
+            } ->
+            let name = Name.of_ident false typ_id in
+            (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+            Type.of_type_expr_without_free_vars typ >>= fun typ ->
+            return (LetTyp (name, typ_args, typ, e_next))
+          | _ ->
+            raise
+              (ErrorMessage (e_next, "typ_definition"))
+              NotSupported
+              "Only type synonyms are handled here"
+          end
+        | _ ->
+          raise
+            (ErrorMessage (e_next, "mutual_typ_definition"))
+            NotSupported
+            "Mutually recursive type definition not handled here"
+        end
       | Tstr_typext _ ->
         raise
           (ErrorMessage (e_next, "type_extension"))
@@ -578,11 +625,50 @@ and of_structure
           (ErrorMessage (e_next, "class_type"))
           NotSupported
           "Class type not handled"
-      | Tstr_include _ ->
-        raise
-          (ErrorMessage (e_next, "include"))
-          NotSupported
-          "Include not handled in module with a named signature"
+      | Tstr_include { incl_mod; incl_type; _ } ->
+        begin match incl_mod.mod_desc with
+        | Tmod_ident (path, _)
+        | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
+          let incl_module_type = Types.Mty_signature incl_type in
+          IsFirstClassModule.is_module_typ_first_class
+            incl_module_type >>= fun is_first_class ->
+          begin match is_first_class with
+          | Found incl_signature_path ->
+            let path_name = PathName.of_path_with_convert false path in
+            get_module_typ_values typ_vars incl_module_type >>= fun values ->
+            return (
+              List.fold_right
+                (fun (value, _) e_next ->
+                  LetVar (
+                    value,
+                    Variable (MixedPath.Access (
+                      MixedPath.PathName path_name,
+                      PathName.of_path_and_name_with_convert
+                        incl_signature_path
+                        value,
+                      false
+                    )),
+                    e_next
+                  )
+                )
+                values
+                e_next
+            )
+          | Not_found reason ->
+            raise
+              (ErrorMessage (e_next, "include_without_named_signature"))
+              NotSupported
+              (
+                "We did not find a signature name for the include of this module\n\n" ^
+                reason
+              )
+          end
+        | _ ->
+          raise
+            (ErrorMessage (e_next, "unhandled_include"))
+            NotSupported
+            "The include of this kind of module is not supported"
+        end
       | Tstr_attribute _ -> return e_next))
     )
     items
@@ -682,6 +768,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           | Some e -> to_coq false e
         )
       )) ^^ !^ "in" ^^ newline ^^ to_coq false e)
+  | LetTyp (x, typ_args, typ, e) ->
+    Pp.parens paren @@ nest (
+      !^ "let" ^^ Name.to_coq x ^^
+      begin match typ_args with
+      | [] -> empty
+      | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
+      end ^^ !^ ":=" ^^ Type.to_coq None None typ ^^ !^ "in" ^^
+      newline ^^ to_coq false e
+    )
   | Match (e, cases, default_value) ->
     begin match (cases, default_value) with
     | ([(pattern, e2)], None) ->
@@ -750,6 +845,14 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )) ^^ newline ^^
       !^ "|}"
     )
+  | Functor (x, typ, e) ->
+    Pp.parens paren @@ nest (
+      !^ "fun" ^^
+      parens (nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)) ^^
+      !^ "=>" ^^ to_coq false e
+    )
+  | TypeAnnotation (e, typ) ->
+    parens @@ nest (to_coq false e ^^ !^ ":" ^^ Type.to_coq None None typ)
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ

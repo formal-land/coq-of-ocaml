@@ -175,18 +175,27 @@ let rec of_structure (structure : structure) : t list Monad.t =
         return [simple_value name (Exp.Variable (MixedPath.PathName reference))]
       | Not_found _ -> return [ModuleSynonym (name, reference)]
       end
-    | Tstr_module { mb_expr = { mod_desc = Tmod_functor _; _ }; _ } ->
-      error_message (Error "functor") NotSupported "Functors are not handled."
-    | Tstr_module { mb_id; mb_expr = { mod_desc = Tmod_apply _; _ } as mb_expr; _ } ->
+    | Tstr_module {
+        mb_id;
+        mb_expr = { mod_desc = (Tmod_apply _ | Tmod_functor _); _ } as mb_expr;
+        _
+      } ->
       let name = Name.of_ident false mb_id in
       Exp.of_module_expr
         Name.Map.empty
         mb_expr
         None >>= fun module_exp ->
       return [simple_value name module_exp]
-    | Tstr_module _ -> error_message (Error "unhandled_module") NotSupported "This kind of module is not handled."
+    | Tstr_module _ ->
+      error_message
+        (Error "unhandled_module")
+        NotSupported
+        "This kind of module is not handled."
     | Tstr_modtype { mtd_type = None; _ } ->
-      error_message (Error "abstract_module_type") NotSupported "Abstract module types not handled."
+      error_message
+        (Error "abstract_module_type")
+        NotSupported
+        "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
       let name = Name.of_ident false mtd_id in
       begin
@@ -194,16 +203,36 @@ let rec of_structure (structure : structure) : t list Monad.t =
         | Tmty_signature signature ->
           Signature.of_signature signature >>= fun signature ->
           return [Signature (name, signature)]
-        | _ -> error_message (Error "unhandled_module_type") NotSupported "This kind of signature is not handled."
+        | _ ->
+          error_message
+            (Error "unhandled_module_type")
+            NotSupported
+            "This kind of signature is not handled."
       end
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
       return [AbstractValue (name, Name.Set.elements free_typ_vars, typ)]
-    | Tstr_typext _ -> error_message (Error "type_extension") NotSupported "Structure item `typext` not handled."
-    | Tstr_recmodule _ -> error_message (Error "recursive_module") NotSupported "Structure item `recmodule` not handled."
-    | Tstr_class _ -> error_message (Error "class") NotSupported "Structure item `class` not handled."
-    | Tstr_class_type _ -> error_message (Error "class_type") NotSupported "Structure item `class_type` not handled."
+    | Tstr_typext _ ->
+      error_message
+        (Error "type_extension")
+        NotSupported
+        "Structure item `typext` not handled."
+    | Tstr_recmodule _ ->
+      error_message
+        (Error "recursive_module")
+        NotSupported
+        "Structure item `recmodule` not handled."
+    | Tstr_class _ ->
+      error_message
+        (Error "class")
+        NotSupported
+        "Structure item `class` not handled."
+    | Tstr_class_type _ ->
+      error_message
+        (Error "class_type")
+        NotSupported
+        "Structure item `class_type` not handled."
     | Tstr_include {
         incl_mod = { mod_desc = Tmod_ident (_, long_ident); mod_type; _ };
         _

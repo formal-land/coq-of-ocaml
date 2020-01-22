@@ -115,9 +115,13 @@ Module Triple.
 End Triple.
 
 Definition tripe : {'[a, b, c, bar] : _ & Triple.signature a b c bar} :=
+  let a := Z in
+  let b := bool in
+  let c := string in
   let va := 0 in
   let vb := false in
   let vc := "" in
+  let bar := Z in
   let foo := 12 in
   existT _ [_, _, _, _]
     {|
@@ -139,6 +143,7 @@ Module UsingTriple.
 End UsingTriple.
 
 Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
+  let elt := a in
   let elt_ty := (|Box|).(Boxed_set.elt_ty) in
   let OPS := (|Box|).(Boxed_set.OPS) in
   let boxed :=
