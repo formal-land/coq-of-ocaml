@@ -270,6 +270,11 @@ let add_prefix (prefix : Name.t) (path_name : t) : t =
   let { path; base } = path_name in
   { path = prefix :: path; base }
 
+let is_tt (path_name : t) : bool =
+  match (path_name.path, Name.to_string path_name.base) with
+  | ([], "tt") -> true
+  | _ -> false
+
 let is_unit (path_name : t) : bool =
   match (path_name.path, Name.to_string path_name.base) with
   | ([], "unit") -> true

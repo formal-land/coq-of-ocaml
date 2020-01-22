@@ -75,7 +75,7 @@ let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq false) ps)
   | Constructor (x, ps) ->
     if ps = [] then
-      PathName.to_coq x
+      if PathName.is_tt x then !^ "_" else PathName.to_coq x
     else
       Pp.parens paren @@ nest @@ separate space (PathName.to_coq x :: List.map (to_coq true) ps)
   | Alias (p, x) ->
