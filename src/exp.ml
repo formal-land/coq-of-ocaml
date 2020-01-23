@@ -40,7 +40,8 @@ type t =
   | Module of int * (PathName.t * int * t) list
     (** The value of a first-class module. *)
   | ModuleNested of (string option * PathName.t * t) list
-    (** The value of a first-class module inside another module (no existentials). There may be error messages. *)
+    (** The value of a first-class module inside another module
+        (no existentials). There may be error messages. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
   | TypeAnnotation of t * Type.t
@@ -113,7 +114,14 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_let (is_rec, cases, e2) ->
     of_expression typ_vars e2 >>= fun e2 ->
     of_let typ_vars is_rec cases e2
-  | Texp_function { cases = [{c_lhs = {pat_desc = Tpat_var (x, _); _}; c_rhs = e; _}]; _ }
+  | Texp_function {
+      cases = [{
+        c_lhs = {pat_desc = Tpat_var (x, _); _};
+        c_rhs = e;
+        _
+      }];
+      _
+    }
   | Texp_function {
       cases = [{
         c_lhs = { pat_desc = Tpat_alias ({ pat_desc = Tpat_any; _ }, x, _); _ };
@@ -133,8 +141,12 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     (e_xs |> Monad.List.map (fun (_, e_x) ->
       match e_x with
       | Some e_x -> of_expression typ_vars e_x
-      | None -> error_message (Error "expected_argument") Unexpected "expected an argument")
-    ) >>= fun e_xs ->
+      | None ->
+        error_message
+          (Error "expected_argument")
+          Unexpected
+          "expected an argument"
+    )) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
     of_expression typ_vars e >>= fun e ->
@@ -223,33 +235,70 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_array es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     error_message (ErrorArray es) NotSupported "Arrays not handled."
-  | Texp_while _ -> error_message (Error "while") SideEffect "While loops not handled."
-  | Texp_for _ -> error_message (Error "for") SideEffect "For loops not handled."
-  | Texp_send _ -> error_message (Error "send") NotSupported "Sending method message is not handled"
-  | Texp_new _ -> error_message (Error "new") NotSupported "Creation of new objects is not handled"
+  | Texp_while _ ->
+    error_message (Error "while") SideEffect "While loops not handled."
+  | Texp_for _ ->
+    error_message (Error "for") SideEffect "For loops not handled."
+  | Texp_send _ ->
+    error_message
+      (Error "send")
+      NotSupported
+      "Sending method message is not handled"
+  | Texp_new _ ->
+    error_message
+      (Error "new")
+      NotSupported
+      "Creation of new objects is not handled"
   | Texp_instvar _ ->
-    error_message (Error "instance_variable") NotSupported "Creating an instance variable is not handled"
+    error_message
+      (Error "instance_variable")
+      NotSupported
+      "Creating an instance variable is not handled"
   | Texp_setinstvar _ ->
-    error_message (Error "set_instance_variable") SideEffect "Setting an instance variable is not handled"
-  | Texp_override _ -> error_message (Error "override") NotSupported "Overriding is not handled"
+    error_message
+      (Error "set_instance_variable")
+      SideEffect
+      "Setting an instance variable is not handled"
+  | Texp_override _ ->
+    error_message (Error "override") NotSupported "Overriding is not handled"
   | Texp_letmodule (x, _, module_expr, e) ->
     let x = Name.of_ident true x in
     of_module_expr typ_vars module_expr None >>= fun value ->
     of_expression typ_vars e >>= fun e ->
     return (LetVar (x, value, e))
-  | Texp_letexception _ -> error_message (Error "let_exception") SideEffect "Let of exception is not handled"
+  | Texp_letexception _ ->
+    error_message
+      (Error "let_exception")
+      SideEffect
+      "Let of exception is not handled"
   | Texp_assert e ->
     of_expression typ_vars e >>= fun e ->
-    error_message (Apply (Error "assert", [e])) SideEffect "Assert instruction is not handled."
+    error_message
+      (Apply (Error "assert", [e]))
+      SideEffect
+      "Assert instruction is not handled."
   | Texp_lazy e ->
     of_expression typ_vars e >>= fun e ->
-    error_message (Apply (Error "lazy", [e])) SideEffect "Lazy expressions are not handled"
-  | Texp_object _ -> error_message (Error "object") NotSupported "Creation of objects is not handled"
+    error_message
+      (Apply (Error "lazy", [e]))
+      SideEffect
+      "Lazy expressions are not handled"
+  | Texp_object _ ->
+    error_message
+      (Error "object")
+      NotSupported
+      "Creation of objects is not handled"
   | Texp_pack module_expr -> of_module_expr typ_vars module_expr None
   | Texp_unreachable ->
-    error_message (Error "unreachable") NotSupported "Unreachable expressions are not supported"
+    error_message
+      (Error "unreachable")
+      NotSupported
+      "Unreachable expressions are not supported"
   | Texp_extension_constructor _ ->
-    error_message (Error "extension") NotSupported "Construction of extensions is not handled"))
+    error_message
+      (Error "extension")
+      NotSupported
+      "Construction of extensions is not handled"))
 
 and of_match
   (typ_vars : Name.t Name.Map.t)
@@ -362,7 +411,8 @@ and import_let_fun
     (match p with
     | Pattern.Any -> return None
     | Pattern.Variable x -> return (Some x)
-    | _ -> raise None Unexpected "A variable name instead of a pattern was expected."
+    | _ ->
+      raise None Unexpected "A variable name instead of a pattern was expected."
     ) >>= fun x ->
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
     match x with
@@ -397,6 +447,22 @@ and of_let
   (e2 : t)
   : t Monad.t =
   match cases with
+  | [{
+      vb_pat = {
+        pat_desc =
+          Tpat_construct (
+            _,
+            { cstr_res = { desc = Tconstr (path, _, _); _ }; _ },
+            _
+          );
+        _
+      };
+      _
+     }] when PathName.is_unit (PathName.of_path_without_convert false path) ->
+     raise
+      (ErrorMessage (e2, "top_level_evaluation"))
+      SideEffect
+      "Top-level evaluations are not handled"
   | [{ vb_pat = p; vb_expr = e1; _ }] when
     begin match e1.exp_desc with
     | Texp_function _ -> false
@@ -795,7 +861,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     begin match (cases, default_value) with
     | ([(pattern, e2)], None) ->
       Pp.parens paren @@ nest (
-        !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^ to_coq false e ^^ !^ "in" ^^ newline ^^ to_coq false e2
+        !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
+        to_coq false e ^^ !^ "in" ^^ newline ^^ to_coq false e2
       )
     | _ ->
       nest (
@@ -805,7 +872,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         )) ^^
         (match default_value with
         | None -> empty
-        | Some default_value -> nest (!^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline)
+        | Some default_value ->
+          nest (
+            !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline
+          )
         ) ^^
         !^ "end"
       )
@@ -870,4 +940,5 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
-  | ErrorMessage (e, error_message) -> group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
+  | ErrorMessage (e, error_message) ->
+    group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)

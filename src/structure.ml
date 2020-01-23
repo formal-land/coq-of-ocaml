@@ -95,7 +95,7 @@ let top_level_evaluation_error : t list Monad.t =
   error_message
     (Error "top_level_evaluation")
     SideEffect
-    "Top-level evaluations are considered as an error as sources of side-effects"
+    "Top-level evaluations are not handled"
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -105,7 +105,12 @@ let rec of_structure (structure : structure) : t list Monad.t =
     match item.str_desc with
     | Tstr_value (_, [ {
         vb_pat = {
-          pat_desc = Tpat_construct (_, { cstr_res = { desc = Tconstr (path, _, _); _ }; _ }, _);
+          pat_desc =
+            Tpat_construct (
+              _,
+              { cstr_res = { desc = Tconstr (path, _, _); _ }; _ },
+              _
+            );
           _
         };
         _
@@ -122,7 +127,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_exception { ext_id; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
-        "Alternative: using sum types (\"option\", \"result\", ...) to represent error cases."
+        "Alternative: using sum types (\"option\", \"result\", ...) to " ^
+        "represent error cases."
       )
     | Tstr_open open_description ->
       let o = Open.of_ocaml open_description in
