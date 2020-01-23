@@ -270,10 +270,21 @@ let add_prefix (prefix : Name.t) (path_name : t) : t =
   let { path; base } = path_name in
   { path = prefix :: path; base }
 
+let is_tt (path_name : t) : bool =
+  match (path_name.path, Name.to_string path_name.base) with
+  | ([], "tt") -> true
+  | _ -> false
+
 let is_unit (path_name : t) : bool =
   match (path_name.path, Name.to_string path_name.base) with
   | ([], "unit") -> true
   | _ -> false
+
+let false_value : t =
+  { path = []; base = Name.Make "false" }
+
+let true_value : t =
+  { path = []; base = Name.Make "true" }
 
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))

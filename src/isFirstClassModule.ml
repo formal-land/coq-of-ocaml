@@ -68,7 +68,7 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature)
 
 type maybe_found =
   | Found of Path.t
-  | Not_found of string option
+  | Not_found of string
 
 (** Get the path of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. *)
@@ -82,7 +82,7 @@ let rec is_module_typ_first_class
     | { Types.md_type; _ } -> is_module_typ_first_class md_type
     | exception Not_found ->
       let reason = "Module " ^ Path.name path ^ " not found" in
-      return (Not_found (Some reason))
+      return (Not_found reason)
     end
   | Mty_signature signature ->
     let (signature_paths, shape) = find_similar_signatures env signature in
@@ -90,12 +90,10 @@ let rec is_module_typ_first_class
     | [] ->
       return (
         Not_found (
-          Some (
-            "Did not find a module signature name for the following shape:\n" ^
-            Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
-            "(a shape is a list of names of values)\n\n" ^
-            "We use the concept of shape to find the name of a signature for Coq."
-          )
+          "Did not find a module signature name for the following shape:\n" ^
+          Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
+          "(a shape is a list of names of values)\n\n" ^
+          "We use the concept of shape to find the name of a signature for Coq."
         )
       )
     | [signature_path] -> return (Found signature_path)
@@ -110,4 +108,4 @@ let rec is_module_typ_first_class
         "We use the concept of shape to find the name of a signature for Coq."
       )
     end
-  | Mty_functor _ -> return (Not_found (Some "This is a functor type."))
+  | Mty_functor _ -> return (Not_found "This is a functor type.")

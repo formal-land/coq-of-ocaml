@@ -9,6 +9,4 @@ Import ListNotations.
 Require Import TypingFlags.Loader.
 Unset Guard Checking.
 
-Definition t1 := string.
-
-Definition t2 (a b : Set) := a * b.
+Definition show {a : Set} (x : a) : string := axiom.

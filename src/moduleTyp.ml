@@ -6,6 +6,20 @@ type t =
   | Functor of Name.t * t * t
   | With of PathName.t * Type.t option Tree.t
 
+let rec get_module_typ_desc_path
+  (module_typ_desc : Typedtree.module_type_desc) : Path.t option =
+  match module_typ_desc with
+  | Tmty_ident (path, _) -> Some path
+  | Tmty_signature _ -> None
+  | Tmty_functor _ -> None
+  | Tmty_with (module_typ, _) -> get_module_typ_path_name module_typ
+  | Tmty_typeof _ -> None
+  | Tmty_alias _ -> None
+
+and get_module_typ_path_name (module_typ : Typedtree.module_type)
+  : Path.t option =
+  get_module_typ_desc_path module_typ.mty_desc
+
 let of_ocaml_module_with_substitutions
   (long_ident_loc : Longident.t Asttypes.loc)
   (substitutions :

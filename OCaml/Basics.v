@@ -5,7 +5,7 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
-Notation "record .[ field ]" := (field (projT2 record)) (at level 5).
+Notation "(| record |)" := (projT2 record).
 
 Module Primitive.
   Set Primitive Projections.
@@ -29,6 +29,8 @@ Class OrderDec {A R} `(StrictOrder A R) := {
     CompareSpec (x = y) (R x y) (R y x) (compare x y) }.
 
 Definition array (A : Set) : Set := list A.
+
+Parameter axiom : forall {A : Set}, A.
 
 Parameter exn : Set.
 
@@ -437,14 +439,24 @@ Module CamlinternalFormatBasics.
 
   Parameter Any : Set.
 
+  Parameter Alpha : Any -> Any.
+  Parameter Break : string -> Z -> Z -> Any.
+  Parameter Char_literal : ascii -> Any -> Any.
   Parameter Format : forall {A : Set}, Any -> string -> A.
+  Parameter Formatting_gen : Any -> Any -> Any.
+  Parameter Formatting_lit : Any -> Any -> Any.
+  Parameter Int : Any -> Any -> Any -> Any -> Any.
   Parameter Int32 : Any -> Any -> Any -> Any -> Any.
   Parameter Int64 : Any -> Any -> Any -> Any -> Any.
-  Parameter String_literal : string -> Any -> Any.
+  Parameter Lit_padding : Any -> Z -> Any.
+  Parameter Open_box : Any -> Any.
   Parameter String : Any -> Any -> Any.
+  Parameter String_literal : string -> Any -> Any.
 
+  Parameter Close_box : Any.
   Parameter End_of_format : Any.
   Parameter Int_d : Any.
   Parameter No_padding : Any.
   Parameter No_precision : Any.
+  Parameter Zeros : Any.
 End CamlinternalFormatBasics.

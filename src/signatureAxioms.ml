@@ -4,6 +4,7 @@ open Monad.Notations
 
 type item =
   | Error of string
+  | IncludedField of Name.t * Name.t * PathName.t * bool
   | Module of Name.t * t
   | Signature of Name.t * Signature.t
   | TypDefinition of TypeDefinition.t
@@ -23,76 +24,51 @@ let rec flatten_single_include (module_typ_desc : Typedtree.module_type_desc)
     } -> flatten_single_include mty_desc
   | _ -> module_typ_desc
 
-let rec of_types_signature (signature : Types.signature) : t Monad.t =
-  let of_types_signature_item
-    (signature_item : Types.signature_item)
-    : item Monad.t =
-    match signature_item with
-    | Sig_class _ ->
-      raise
-        (Error "class")
-        NotSupported
-        "Signature item `class` not handled"
-    | Sig_class_type _ ->
-      raise
-        (Error "class_type")
-        NotSupported
-        "Signature item `class_type` not handled"
-    | Sig_modtype (_, { mtd_type = None; _ }) ->
-      raise
-        (Error "abstract_module_type")
-        NotSupported
-        "Abstract module type not handled"
-    | Sig_modtype (ident, { mtd_type = Some module_typ; _ }) ->
-      let name = Name.of_ident false ident in
-      begin match module_typ with
-      | Mty_signature signature ->
-        Signature.of_types_signature signature >>= fun signature ->
-        return (Signature (name, signature))
-      | _ ->
-        raise
-          (Error "unhandled_module_type")
-          NotSupported
-          "Unhandled kind of module type"
-      end
-    | Sig_module (ident, { md_type; _ }, _) ->
-      let name = Name.of_ident false ident in
-      of_types_module_type md_type >>= fun signature ->
-      return (Module (name, signature))
-    | Sig_type (ident, { type_manifest; type_params; _}, _) ->
-      let name = Name.of_ident false ident in
-      Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
-      begin match type_manifest with
-      | None ->
-        return (TypDefinition (TypeDefinition.Abstract (name, typ_args)))
-      | Some typ ->
-        Type.of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
-        return (TypDefinition (TypeDefinition.Synonym (name, typ_args, typ)))
-      end
-    | Sig_typext (_, { ext_type_path; _ }, _) ->
-      let name = Path.name ext_type_path in
-      raise
-        (Error ("extensible_type " ^ name))
-        NotSupported
-        ("Extensible type '" ^ name ^ "' not handled")
-    | Sig_value (ident, { val_type; _ }) ->
-      let name = Name.of_ident true ident in
-      Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, _) ->
-      let typ_vars = Name.Set.elements (Type.typ_args typ) in
-      return (Value (name, typ_vars, typ)) in
-  Monad.List.map of_types_signature_item signature
+let rec string_of_included_module_typ (module_typ : Typedtree.module_type)
+  : string =
+  match module_typ.mty_desc with
+  | Tmty_ident (path, _) | Tmty_alias (path, _) -> Path.last path
+  | Tmty_signature _ -> "signature"
+  | Tmty_functor (ident, _, _, _) -> Ident.name ident
+  | Tmty_with (module_typ, _) -> string_of_included_module_typ module_typ
+  | Tmty_typeof _ -> "typedof"
 
-and of_types_module_type (module_typ : Types.module_type) : t Monad.t =
-  get_env >>= fun env ->
-  let module_typ = Mtype.scrape env module_typ in
-  match module_typ with
-  | Mty_alias _ | Mty_ident _ ->
-    let error_message = "Unhandled inlined abstract module" in
-    raise [Error error_message] NotSupported error_message
-  | Mty_signature signature -> of_types_signature signature
-  | Mty_functor _ ->
-    let error_message = "Unhandled functor" in
-    raise [Error error_message] NotSupported error_message
+let name_of_included_module_typ (module_typ : Typedtree.module_type)
+  : Name.t =
+  Name.of_string false ("Included_" ^ string_of_included_module_typ module_typ)
+
+let of_top_level_typ_signature
+  (module_name : Name.t)
+  (signature_path : Path.t)
+  (signature : Types.signature)
+  : t Monad.t =
+  let field_path_name name =
+    PathName.of_path_and_name_with_convert signature_path name in
+  signature |> Monad.List.filter_map (function
+    | Types.Sig_value (ident, _) ->
+      let name = Name.of_ident true ident in
+      return (Some (
+        IncludedField (name, module_name, field_path_name name, false)
+      ))
+    | Sig_type (ident, _, _) ->
+      let name = Name.of_ident false ident in
+      return (Some (
+        IncludedField (name, module_name, field_path_name name, false)
+      ))
+    | Sig_typext _ ->
+      raise None NotSupported "Type extension not handled"
+    | Sig_module (ident, _, _) ->
+      let name = Name.of_ident false ident in
+      return (Some (
+        IncludedField (name, module_name, field_path_name name, true)
+      ))
+    | Sig_modtype _ ->
+      raise None NotSupported "Module type not handled in included signature"
+    | Sig_class _ ->
+      raise None NotSupported "Class not handled"
+    | Sig_class_type _ ->
+      raise None NotSupported "Class type not handled"
+  )
 
 let rec of_signature (signature : Typedtree.signature) : t Monad.t =
   let of_signature_item (signature_item : Typedtree.signature_item)
@@ -120,7 +96,19 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         [Error ("exception " ^ Ident.name ext_id)]
         SideEffect
         "Signature item `exception` not handled"
-    | Tsig_include { incl_type; _} -> of_types_signature incl_type
+    | Tsig_include { incl_mod; incl_type; _} ->
+      let module_name = name_of_included_module_typ incl_mod in
+      let signature_path = ModuleTyp.get_module_typ_path_name incl_mod in
+      ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
+      let typ = ModuleTyp.to_typ module_typ in
+      begin match signature_path with
+      | None ->
+        raise [] FirstClassModule "Name for the included signature not found"
+      | Some signature_path ->
+        of_top_level_typ_signature
+          module_name signature_path incl_type >>= fun fields ->
+        return (Value (module_name, [], typ) :: fields)
+      end
     | Tsig_modtype { mtd_type = None; _ } ->
       raise
         [Error "abstract_module_type"]
@@ -175,6 +163,18 @@ let rec to_coq (signature : t) : SmartPrint.t =
   let to_coq_item (signature_item : item) : SmartPrint.t =
     match signature_item with
     | Error message -> !^ ("(* " ^ message ^ " *)")
+    | IncludedField (name, module_name, field_name, is_module) ->
+      let field =
+        MixedPath.to_coq (
+          MixedPath.Access (MixedPath.of_name module_name, field_name, false)
+        ) in
+      let field_as_module =
+        if is_module then
+          nest (!^ "existT" ^^ !^ "(fun _ => _)" ^^ !^ "tt" ^^ field)
+        else
+          field in
+      !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+      field_as_module ^-^ !^ "."
     | Module (name, signature) ->
       !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
       indent (to_coq signature) ^^ newline ^^

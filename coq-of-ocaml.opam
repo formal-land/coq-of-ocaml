@@ -19,6 +19,7 @@ install: [
 depends: [
   "conf-ruby" {with-test}
   "coq" {>= "8.9"}
+  "coq-typing-flags"
   "dune" {build}
   "menhir" {build}
   "ocaml" {>= "4.05" & < "4.08"}
