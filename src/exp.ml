@@ -635,25 +635,7 @@ and of_structure
           begin match is_first_class with
           | Found incl_signature_path ->
             let path_name = PathName.of_path_with_convert false path in
-            get_module_typ_values typ_vars incl_module_type >>= fun values ->
-            return (
-              List.fold_right
-                (fun (value, _) e_next ->
-                  LetVar (
-                    value,
-                    Variable (MixedPath.Access (
-                      MixedPath.PathName path_name,
-                      PathName.of_path_and_name_with_convert
-                        incl_signature_path
-                        value,
-                      false
-                    )),
-                    e_next
-                  )
-                )
-                values
-                e_next
-            )
+            of_include path_name incl_signature_path incl_type e_next
           | Not_found reason ->
             raise
               (ErrorMessage (e_next, "include_without_named_signature"))
@@ -673,6 +655,38 @@ and of_structure
     )
     items
     e_next
+
+and of_include
+  (module_path_name : PathName.t)
+  (signature_path : Path.t)
+  (signature : Types.signature)
+  (e_next : t)
+  : t Monad.t =
+  match signature with
+  | [] -> return e_next
+  | signature_item :: signature ->
+    of_include module_path_name signature_path signature e_next >>= fun e_next ->
+    begin match signature_item with
+    | Sig_value (ident, _) | Sig_type (ident, _, _) ->
+      let is_value =
+        match signature_item with Sig_value _ -> true | _ -> false in
+      let name = Name.of_ident is_value ident in
+      return (
+        LetVar (
+          name,
+          Variable (MixedPath.Access (
+            MixedPath.PathName module_path_name,
+            PathName.of_path_and_name_with_convert
+              signature_path
+              name,
+            false
+          )),
+          e_next
+        )
+      )
+    | Sig_typext _ | Sig_module _ | Sig_modtype _ | Sig_class _
+      | Sig_class_type _ -> return e_next
+    end
 
 let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
   if n = 0 then
