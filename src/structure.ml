@@ -335,7 +335,7 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         !^ "End" ^^ Name.to_coq name ^-^ !^ "."
       )
     | ModuleInclude reference ->
-      nest (!^ "Export" ^^ PathName.to_coq reference ^-^ !^ ".")
+      nest (!^ "Include" ^^ PathName.to_coq reference ^-^ !^ ".")
     | ModuleSynonym (name, reference) ->
       nest (!^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^ PathName.to_coq reference ^-^ !^ ".")
     | Signature (name, signature) -> Signature.to_coq_definition name signature
