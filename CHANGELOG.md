@@ -1,4 +1,13 @@
 ## [Unreleased]
+* Ignore patterns with extensible types.
+* Replace the generation of `Export` by `Included` (fix).
+* Add support of `include` in first-class module values.
+* Add support of functor definitions.
+* Add an annotation mechanism `[@axiom]` to ignore the content of some definitions.
+* Use list notation for list values.
+* Add support for `when` clauses in `match`.
+* Disable recursivity checks in Coq.
+* Change the include of signature to preserve the first-class sub-modules.
 * Define a default value for the extensible types.
 * Add support for constructors using records as parameters.
 * Add polymorphic record fields for modules with polymorphic elements.
