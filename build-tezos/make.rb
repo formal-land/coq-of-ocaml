@@ -27,7 +27,7 @@ files = [
   "Nonce_hash.v",
   "Period_repr.v",
   "Period_repr_mli.v",
-  # "Qty_repr.v"
+  "Qty_repr.v",
   "Raw_level_repr.v",
   "Script_expr_hash.v",
   "Script_int_repr.v",
@@ -37,14 +37,17 @@ files = [
   "Vote_repr.v",
   "Vote_repr_mli.v",
   "Voting_period_repr.v",
-  "Voting_period_repr_mli.v"
+  "Voting_period_repr_mli.v",
 
-  # files with one dependency
+  # files at least one dependency
   # "Blinded_public_key_hash_mli.v",
-  # "Cycle_repr_mli.v",
-  # "Raw_level_repr_mli.v",
-  # "Tez_repr.v",
-  # "Tez_repr_mli.v",
+  "Cycle_repr_mli.v",
+  "Raw_level_repr_mli.v",
+  "Tez_repr.v",
+  "Tez_repr_mli.v",
+  "Constants_repr.v",
+  "Contract_hash.v",
+  "Contract_repr.v"
 ]
 
 nb_valid_lines = 0
