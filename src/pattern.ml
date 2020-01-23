@@ -13,46 +13,90 @@ type t =
   | Record of (PathName.t * t) list (** A list of fields from a record with their expected patterns. *)
   | Or of t * t
 
-(** Import an OCaml pattern. *)
-let rec of_pattern (p : pattern) : t Monad.t =
+(** Import an OCaml pattern. If the answer is [None] then the pattern is
+    impossible (for example with extensible types). *)
+let rec of_pattern (p : pattern) : t option Monad.t =
   set_loc (Loc.of_location p.pat_loc) (
   match p.pat_desc with
-  | Tpat_any -> return Any
-  | Tpat_var (x, _) -> return (Variable (Name.of_ident true x))
+  | Tpat_any -> return (Some Any)
+  | Tpat_var (x, _) -> return (Some (Variable (Name.of_ident true x)))
   | Tpat_tuple ps ->
     Monad.List.map of_pattern ps >>= fun patterns ->
-    return (Tuple patterns)
+    return (
+      let patterns = Util.Option.all patterns in
+      Util.Option.map patterns (fun patterns ->
+      Tuple patterns)
+    )
   | Tpat_construct (_, constructor_description, ps) ->
-    let x = PathName.of_constructor_description constructor_description in
-    Monad.List.map of_pattern ps >>= fun patterns ->
-    return (Constructor (x, patterns))
+    begin match constructor_description.cstr_tag with
+    | Cstr_extension _ ->
+      raise
+        None
+        NotSupported
+        "Patterns of extensible types are not handled"
+    | _ ->
+      let x = PathName.of_constructor_description constructor_description in
+      Monad.List.map of_pattern ps >>= fun patterns ->
+      return (
+        let patterns = Util.Option.all patterns in
+        Util.Option.map patterns (fun patterns ->
+        Constructor (x, patterns))
+      )
+    end
   | Tpat_alias (p, x, _) ->
     of_pattern p >>= fun pattern ->
-    return (Alias (pattern, Name.of_ident true x))
+    return (
+      Util.Option.map pattern (fun pattern ->
+      Alias (pattern, Name.of_ident true x))
+    )
   | Tpat_constant c ->
     Constant.of_constant c >>= fun constant ->
-    return (Constant constant)
+    return (Some (Constant constant))
   | Tpat_variant (label, p, _) ->
     let path_name = PathName.of_name [] (Name.of_string false label) in
     (match p with
-    | None -> return []
-    | Some p -> of_pattern p >>= fun pattern -> return [pattern]
+    | None -> return (Some [])
+    | Some p ->
+      of_pattern p >>= fun pattern ->
+      return (
+        Util.Option.map pattern (fun pattern ->
+        [pattern])
+      )
     ) >>= fun patterns ->
-    raise (Constructor (path_name, patterns)) NotSupported "Patterns on variants are not supported"
+    raise
+      (Util.Option.map patterns (fun patterns ->
+      Constructor (path_name, patterns)))
+      NotSupported
+      "Patterns on variants are not supported"
   | Tpat_record (fields, _) ->
     (fields |> Monad.List.map (fun (_, label_description, p) ->
       let x = PathName.of_label_description label_description in
       of_pattern p >>= fun pattern ->
-      return (x, pattern)
+      return (
+        Util.Option.map pattern (fun pattern -> (x, pattern))
+      )
     )) >>= fun fields ->
-    return (Record fields)
+    return (
+      Util.Option.map (Util.Option.all fields) (fun fields ->
+      Record fields)
+    )
   | Tpat_array ps ->
     Monad.List.map of_pattern ps >>= fun patterns ->
-    raise (Tuple patterns) NotSupported "Patterns on array are not supported"
+    raise
+      (
+        Util.Option.map (Util.Option.all patterns) (fun patterns ->
+        Tuple patterns)
+      )
+      NotSupported
+      "Patterns on array are not supported"
   | Tpat_or (p1, p2, _) ->
     of_pattern p1 >>= fun pattern1 ->
     of_pattern p2 >>= fun pattern2 ->
-    return (Or (pattern1, pattern2))
+    return (
+      Util.Option.bind pattern1 (fun pattern1 ->
+      Util.Option.map pattern2 (fun pattern2 ->
+      Or (pattern1, pattern2)))
+    )
   | Tpat_lazy p ->
     of_pattern p >>= fun pattern ->
     raise pattern NotSupported "Lazy patterns are not supported")

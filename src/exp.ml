@@ -154,20 +154,20 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
-  | Texp_construct (_, constuctor_description, es) ->
-      begin match constuctor_description.cstr_tag with
-      | Cstr_extension _ ->
-        raise
-          (Variable (
-            MixedPath.of_name (Name.of_string true "extensible_type_value")
-          ))
-          NotSupported
-          "Values of extensible types are not handled"
-      | _ ->
-        let x = PathName.of_constructor_description constuctor_description in
-        Monad.List.map (of_expression typ_vars) es >>= fun es ->
-        return (Constructor (x, es))
-      end
+  | Texp_construct (_, constructor_description, es) ->
+    begin match constructor_description.cstr_tag with
+    | Cstr_extension _ ->
+      raise
+        (Variable (
+          MixedPath.of_name (Name.of_string true "extensible_type_value")
+        ))
+        NotSupported
+        "Values of extensible types are not handled"
+    | _ ->
+      let x = PathName.of_constructor_description constructor_description in
+      Monad.List.map (of_expression typ_vars) es >>= fun es ->
+      return (Constructor (x, es))
+    end
   | Texp_variant (label, e) ->
     begin match e with
     | None ->
@@ -306,7 +306,7 @@ and of_match
   (cases : case list)
   (exception_cases : case list)
   : t Monad.t =
-  (cases |> Monad.List.map (fun {c_lhs; c_guard; c_rhs} ->
+  (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
     begin match c_guard with
     | Some guard ->
@@ -316,8 +316,9 @@ and of_match
     end >>= fun guard ->
     Pattern.of_pattern c_lhs >>= fun pattern ->
     of_expression typ_vars c_rhs >>= fun c_rhs ->
-    return (pattern, guard, c_rhs)
-    )
+    return (
+      Util.Option.map pattern (fun pattern -> (pattern, guard, c_rhs))
+    ))
   )) >>= fun cases_with_guards ->
   let guards =
     cases_with_guards |> Util.List.filter_map (function
@@ -409,8 +410,8 @@ and import_let_fun
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
     (match p with
-    | Pattern.Any -> return None
-    | Pattern.Variable x -> return (Some x)
+    | Some Pattern.Any -> return None
+    | Some (Pattern.Variable x) -> return (Some x)
     | _ ->
       raise None Unexpected "A variable name instead of a pattern was expected."
     ) >>= fun x ->
@@ -471,8 +472,9 @@ and of_let
     Pattern.of_pattern p >>= fun p ->
     of_expression typ_vars e1 >>= fun e1 ->
     begin match p with
-    | Pattern.Variable x -> return (LetVar (x, e1, e2))
-    | _ -> return (Match (e1, [p, e2], None))
+    | Some (Pattern.Variable x) -> return (LetVar (x, e1, e2))
+    | Some p -> return (Match (e1, [p, e2], None))
+    | None -> return (Match (e1, [], None))
     end
   | _ ->
     import_let_fun typ_vars false is_rec cases >>= fun def ->
