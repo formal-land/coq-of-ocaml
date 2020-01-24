@@ -53,9 +53,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 6150 lines</li>
-      <li>Coq size: 3166 lines (-49% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 192</li>
+      <li>OCaml size: 6152 lines</li>
+      <li>Coq size: 3317 lines (-47% compared to&nbsp;OCaml)</li>
+      <li>errors from coq-of-ocaml: 185</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -95,7 +95,7 @@
 <hr />
 <div class="row conversion-row" id="environment.mli">
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">192 errors</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">185 errors</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -2495,9 +2495,11 @@ val compare : t -&gt; t -&gt; int
 
 val concat : string -&gt; t list -&gt; t
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val to_hex : t -&gt; [`Hex of string]</abbr>
+<abbr class="mark-error" title="Polymorphic variant types are not handled">type hex = [`Hex of string]</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val of_hex : [`Hex of string] -&gt; t</abbr>
+val to_hex : t -&gt; hex
+
+val of_hex : hex -&gt; t
 end
 module Z : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/z.mli&quot;
@@ -4992,33 +4994,13 @@ module type HASH = sig
 
   include ENCODER with type t := t
 
-  <abbr class="mark-error" title="Module 'Map' in included signature not handled.
-
-You may try to use a sub-module instead of an `include`.
-
-——————————
-
-Module 'Set' in included signature not handled.
-
-You may try to use a sub-module instead of an `include`.">include INDEXES with type t := t</abbr>
+  include INDEXES with type t := t
 end
 
 module type MERKLE_TREE = sig
   type elt
 
-  <abbr class="mark-error" title="Module 'Map' in included signature not handled.
-
-You may try to use a sub-module instead of an `include`.
-
-——————————
-
-Module 'Set' in included signature not handled.
-
-You may try to use a sub-module instead of an `include`.
-
-——————————
-
-Extensible type 'Base58.data' not handled">include HASH</abbr>
+  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include HASH</abbr>
 
   val compute : elt list -&gt; t
 
@@ -5048,15 +5030,7 @@ module type SPublic_key_hash = sig
 
   include ENCODER with type t := t
 
-  <abbr class="mark-error" title="Module 'Map' in included signature not handled.
-
-You may try to use a sub-module instead of an `include`.
-
-——————————
-
-Module 'Set' in included signature not handled.
-
-You may try to use a sub-module instead of an `include`.">include INDEXES with type t := t</abbr>
+  include INDEXES with type t := t
 
   val zero : t
 end
@@ -6838,6 +6812,9 @@ Module Pervasives.
     Record record {a : Set} := {
       contents : a }.
     Arguments record : clear implicits.
+    Definition with_contents {a_type : Set} (r : record a_type) contents
+      : record a_type :=
+      {| contents := contents |}.
   End ref.
   Definition ref := ref.record.
   
@@ -7403,9 +7380,12 @@ Module MBytes.
   
   Parameter concat : string -&gt; list t -&gt; t.
   
-  Parameter to_hex : t -&gt; (* `Hex *) string.
+  Inductive hex : Set :=
+  | Hex : string -&gt; hex.
   
-  Parameter of_hex : (* `Hex *) string -&gt; t.
+  Parameter to_hex : t -&gt; hex.
+  
+  Parameter of_hex : hex -&gt; t.
 End MBytes.
 
 Module Z.
@@ -7951,6 +7931,21 @@ Module Error_monad.
       title : string;
       description : string;
       schema : Data_encoding.json_schema }.
+    Definition with_category (r : record) category : record :=
+      {| category := category; id := id r; title := title r;
+        description := description r; schema := schema r |}.
+    Definition with_id (r : record) id : record :=
+      {| category := category r; id := id; title := title r;
+        description := description r; schema := schema r |}.
+    Definition with_title (r : record) title : record :=
+      {| category := category r; id := id r; title := title;
+        description := description r; schema := schema r |}.
+    Definition with_description (r : record) description : record :=
+      {| category := category r; id := id r; title := title r;
+        description := description; schema := schema r |}.
+    Definition with_schema (r : record) schema : record :=
+      {| category := category r; id := id r; title := title r;
+        description := description r; schema := schema |}.
   End error_info.
   Definition error_info := error_info.record.
   
@@ -8169,6 +8164,10 @@ Module RPC_arg.
     Record record := {
       name : string;
       descr : option string }.
+    Definition with_name (r : record) name : record :=
+      {| name := name; descr := descr r |}.
+    Definition with_descr (r : record) descr : record :=
+      {| name := name r; descr := descr |}.
   End descr.
   Definition descr := descr.record.
   
@@ -8317,6 +8316,14 @@ Module RPC_answer.
       next : next;
       shutdown : shutdown }.
     Arguments record : clear implicits.
+    Definition with_next {next_type shutdown_type : Set}
+      (r : record next_type shutdown_type) next
+      : record next_type shutdown_type :=
+      {| next := next; shutdown := shutdown r |}.
+    Definition with_shutdown {next_type shutdown_type : Set}
+      (r : record next_type shutdown_type) shutdown
+      : record next_type shutdown_type :=
+      {| next := next r; shutdown := shutdown |}.
   End stream.
   Definition stream_skeleton := stream.record.
   
@@ -9007,8 +9014,8 @@ Module S.
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
       path_length : Z;
-      (* module Set *)
-      (* module Map *)
+      __Set : INDEXES_Set.signature t __Set_t;
+      Map : INDEXES_Map.signature t Map_t;
     }.
     Arguments signature : clear implicits.
   End HASH.
@@ -9052,8 +9059,8 @@ Module S.
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
       path_length : Z;
-      (* module Set *)
-      (* module Map *)
+      __Set : INDEXES_Set.signature t __Set_t;
+      Map : INDEXES_Map.signature t Map_t;
       compute : list elt -&gt; t;
       empty : t;
       path := path;
@@ -9096,8 +9103,8 @@ Module S.
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
       path_length : Z;
-      (* module Set *)
-      (* module Map *)
+      __Set : INDEXES_Set.signature t __Set_t;
+      Map : INDEXES_Map.signature t Map_t;
       zero : t;
     }.
     Arguments signature : clear implicits.
@@ -9406,6 +9413,54 @@ Module Block_header.
       operations_hash : (|Operation_list_list_hash|).(S.MERKLE_TREE.t);
       fitness : list MBytes.t;
       context : (|Context_hash|).(S.HASH.t) }.
+    Definition with_level (r : record) level : record :=
+      {| level := level; proto_level := proto_level r;
+        predecessor := predecessor r; timestamp := timestamp r;
+        validation_passes := validation_passes r;
+        operations_hash := operations_hash r; fitness := fitness r;
+        context := context r |}.
+    Definition with_proto_level (r : record) proto_level : record :=
+      {| level := level r; proto_level := proto_level;
+        predecessor := predecessor r; timestamp := timestamp r;
+        validation_passes := validation_passes r;
+        operations_hash := operations_hash r; fitness := fitness r;
+        context := context r |}.
+    Definition with_predecessor (r : record) predecessor : record :=
+      {| level := level r; proto_level := proto_level r;
+        predecessor := predecessor; timestamp := timestamp r;
+        validation_passes := validation_passes r;
+        operations_hash := operations_hash r; fitness := fitness r;
+        context := context r |}.
+    Definition with_timestamp (r : record) timestamp : record :=
+      {| level := level r; proto_level := proto_level r;
+        predecessor := predecessor r; timestamp := timestamp;
+        validation_passes := validation_passes r;
+        operations_hash := operations_hash r; fitness := fitness r;
+        context := context r |}.
+    Definition with_validation_passes (r : record) validation_passes : record :=
+      {| level := level r; proto_level := proto_level r;
+        predecessor := predecessor r; timestamp := timestamp r;
+        validation_passes := validation_passes;
+        operations_hash := operations_hash r; fitness := fitness r;
+        context := context r |}.
+    Definition with_operations_hash (r : record) operations_hash : record :=
+      {| level := level r; proto_level := proto_level r;
+        predecessor := predecessor r; timestamp := timestamp r;
+        validation_passes := validation_passes r;
+        operations_hash := operations_hash; fitness := fitness r;
+        context := context r |}.
+    Definition with_fitness (r : record) fitness : record :=
+      {| level := level r; proto_level := proto_level r;
+        predecessor := predecessor r; timestamp := timestamp r;
+        validation_passes := validation_passes r;
+        operations_hash := operations_hash r; fitness := fitness;
+        context := context r |}.
+    Definition with_context (r : record) context : record :=
+      {| level := level r; proto_level := proto_level r;
+        predecessor := predecessor r; timestamp := timestamp r;
+        validation_passes := validation_passes r;
+        operations_hash := operations_hash r; fitness := fitness r;
+        context := context |}.
   End shell_header.
   Definition shell_header := shell_header.record.
   
@@ -9415,6 +9470,10 @@ Module Block_header.
     Record record := {
       shell : shell_header;
       protocol_data : MBytes.t }.
+    Definition with_shell (r : record) shell : record :=
+      {| shell := shell; protocol_data := protocol_data r |}.
+    Definition with_protocol_data (r : record) protocol_data : record :=
+      {| shell := shell r; protocol_data := protocol_data |}.
   End t.
   Definition t := t.record.
   
@@ -9460,6 +9519,8 @@ Module Operation.
   Module shell_header.
     Record record := {
       branch : (|Block_hash|).(S.HASH.t) }.
+    Definition with_branch (r : record) branch : record :=
+      {| branch := branch |}.
   End shell_header.
   Definition shell_header := shell_header.record.
   
@@ -9469,6 +9530,10 @@ Module Operation.
     Record record := {
       shell : shell_header;
       proto : MBytes.t }.
+    Definition with_shell (r : record) shell : record :=
+      {| shell := shell; proto := proto r |}.
+    Definition with_proto (r : record) proto : record :=
+      {| shell := shell r; proto := proto |}.
   End t.
   Definition t := t.record.
   
@@ -9517,6 +9582,14 @@ Module Protocol.
       expected_env : expected_env;
       components : components }.
     Arguments record : clear implicits.
+    Definition with_expected_env {expected_env_type components_type : Set}
+      (r : record expected_env_type components_type) expected_env
+      : record expected_env_type components_type :=
+      {| expected_env := expected_env; components := components r |}.
+    Definition with_components {expected_env_type components_type : Set}
+      (r : record expected_env_type components_type) components
+      : record expected_env_type components_type :=
+      {| expected_env := expected_env r; components := components |}.
   End t.
   Definition t_skeleton := t.record.
   
@@ -9526,6 +9599,23 @@ Module Protocol.
       interface : interface;
       implementation : implementation }.
     Arguments record : clear implicits.
+    Definition with_name {name_type interface_type implementation_type : Set}
+      (r : record name_type interface_type implementation_type) name
+      : record name_type interface_type implementation_type :=
+      {| name := name; interface := interface r;
+        implementation := implementation r |}.
+    Definition with_interface
+      {name_type interface_type implementation_type : Set}
+      (r : record name_type interface_type implementation_type) interface
+      : record name_type interface_type implementation_type :=
+      {| name := name r; interface := interface;
+        implementation := implementation r |}.
+    Definition with_implementation
+      {name_type interface_type implementation_type : Set}
+      (r : record name_type interface_type implementation_type) implementation
+      : record name_type interface_type implementation_type :=
+      {| name := name r; interface := interface r;
+        implementation := implementation |}.
   End component.
   Definition component_skeleton := component.record.
   
@@ -9622,6 +9712,28 @@ Module Updater.
       message : option string;
       max_operations_ttl : Z;
       last_allowed_fork_level : Int32.t }.
+    Definition with_context (r : record) context : record :=
+      {| context := context; fitness := fitness r; message := message r;
+        max_operations_ttl := max_operations_ttl r;
+        last_allowed_fork_level := last_allowed_fork_level r |}.
+    Definition with_fitness (r : record) fitness : record :=
+      {| context := context r; fitness := fitness; message := message r;
+        max_operations_ttl := max_operations_ttl r;
+        last_allowed_fork_level := last_allowed_fork_level r |}.
+    Definition with_message (r : record) message : record :=
+      {| context := context r; fitness := fitness r; message := message;
+        max_operations_ttl := max_operations_ttl r;
+        last_allowed_fork_level := last_allowed_fork_level r |}.
+    Definition with_max_operations_ttl (r : record) max_operations_ttl
+      : record :=
+      {| context := context r; fitness := fitness r; message := message r;
+        max_operations_ttl := max_operations_ttl;
+        last_allowed_fork_level := last_allowed_fork_level r |}.
+    Definition with_last_allowed_fork_level (r : record) last_allowed_fork_level
+      : record :=
+      {| context := context r; fitness := fitness r; message := message r;
+        max_operations_ttl := max_operations_ttl r;
+        last_allowed_fork_level := last_allowed_fork_level |}.
   End validation_result.
   Definition validation_result := validation_result.record.
   
@@ -9629,6 +9741,10 @@ Module Updater.
     Record record := {
       max_size : Z;
       max_op : option Z }.
+    Definition with_max_size (r : record) max_size : record :=
+      {| max_size := max_size; max_op := max_op r |}.
+    Definition with_max_op (r : record) max_op : record :=
+      {| max_size := max_size r; max_op := max_op |}.
   End quota.
   Definition quota := quota.record.
   
@@ -9637,6 +9753,15 @@ Module Updater.
       block_hash : (|Block_hash|).(S.HASH.t);
       block_header : Block_header.shell_header;
       context : Context.t }.
+    Definition with_block_hash (r : record) block_hash : record :=
+      {| block_hash := block_hash; block_header := block_header r;
+        context := context r |}.
+    Definition with_block_header (r : record) block_header : record :=
+      {| block_hash := block_hash r; block_header := block_header;
+        context := context r |}.
+    Definition with_context (r : record) context : record :=
+      {| block_hash := block_hash r; block_header := block_header r;
+        context := context |}.
   End rpc_context.
   Definition rpc_context := rpc_context.record.
   
