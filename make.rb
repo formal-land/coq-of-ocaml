@@ -177,7 +177,7 @@ File.open("tezos/index.html", "w") do |file|
           45158,
           46874,
           46800,
-          49533,
+          49535,
         ],
         labels: [
           "01-14",
