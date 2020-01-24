@@ -169,33 +169,48 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       return (Constructor (x, es))
     end
   | Texp_variant (label, e) ->
+    let constructor =
+      Variable (MixedPath.PathName (PathName.of_variant label)) in
     begin match e with
-    | None ->
-      return (Constructor ({ PathName.path = []; base = Name.Make "tt" }, []))
-    | Some e -> of_expression typ_vars e
+    | None -> return constructor
+    | Some e ->
+      of_expression typ_vars e >>= fun e ->
+      return (Apply (constructor, [e]))
     end >>= fun e ->
     error_message
       (ErrorMessage (e, "`" ^ label))
       NotSupported
       "Variants not supported"
-  | Texp_record { fields = fields; extended_expression = None; _ } ->
-    (Array.to_list fields |> Monad.List.filter_map (fun (label_description, definition) ->
-      begin match definition with
-      | Kept _ ->
-        raise None NotSupported "Records with overwriting are not handled"
-      | Overridden (_, e) ->
-        let x = PathName.of_label_description label_description in
-        return (Some (x, e))
-      end >>= fun x_e ->
-      match x_e with
-      | None -> return None
-      | Some (x, e) ->
-        of_expression typ_vars e >>= fun e ->
-        return (Some (x, e))
-    )) >>= fun fields ->
-    return (Record fields)
-  | Texp_record { extended_expression = Some _; _ } ->
-    error_message (Error "record_substitution") NotSupported "Record substitution not handled"
+  | Texp_record { fields; extended_expression; _ } ->
+      Array.to_list fields |> Monad.List.filter_map (
+        fun (label_description, definition) ->
+          let x_e =
+            match definition with
+            | Kept _ -> None
+            | Overridden (_, e) ->
+              let x = PathName.of_label_description label_description in
+              Some (x, e) in
+          match x_e with
+          | None -> return None
+          | Some (x, e) ->
+            of_expression typ_vars e >>= fun e ->
+            return (Some (x, e))
+      ) >>= fun fields ->
+      begin match extended_expression with
+      | None -> return (Record fields)
+      | Some extended_expression ->
+        of_expression typ_vars extended_expression >>= fun extended_e ->
+        return (
+          List.fold_left
+            (fun extended_e (x, e) ->
+              Apply (
+                Variable (MixedPath.PathName (PathName.prefix_by_with x)),
+                [extended_e; e])
+            )
+            extended_e
+            fields
+        )
+    end
   | Texp_field (e, _, label_description) ->
     let x = PathName.of_label_description label_description in
     of_expression typ_vars e >>= fun e ->

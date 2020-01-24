@@ -53,7 +53,7 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     Constant.of_constant c >>= fun constant ->
     return (Some (Constant constant))
   | Tpat_variant (label, p, _) ->
-    let path_name = PathName.of_name [] (Name.of_string false label) in
+    let path_name = PathName.of_variant label in
     (match p with
     | None -> return (Some [])
     | Some p ->
