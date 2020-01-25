@@ -32,6 +32,8 @@ Definition array (A : Set) : Set := list A.
 
 Parameter axiom : forall {A : Set}, A.
 
+Parameter assert : forall {A : Set}, bool -> A.
+
 Parameter exn : Set.
 
 Parameter extensible_type : Set.
