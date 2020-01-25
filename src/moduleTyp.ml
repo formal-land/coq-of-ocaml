@@ -97,17 +97,10 @@ let rec to_typ (module_typ : t) : Type.t =
   | With (path_name, typ_values) ->
     Type.Package (path_name, typ_values)
 
-let rec to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
+let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
   match module_typ with
   | Error message -> !^ message
-  | Functor (name, param, result) ->
-    nest (
-      !^ "forall" ^^
-      parens (
-        Name.to_coq name ^^ !^ ":" ^^ to_coq typ_variables_prefix param
-      ) ^-^ !^ "," ^^
-      to_coq typ_variables_prefix result
-    )
+  | Functor _ -> Type.to_coq None None (to_typ module_typ)
   | With (path_name, typ_values) ->
     nest (
       nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^

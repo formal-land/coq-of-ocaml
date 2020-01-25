@@ -305,12 +305,14 @@ let rec to_coq
       | _ -> !^ "'" ^-^ brakets (separate (!^ "," ^^ space) existential_typs) ^^ !^ ":" ^^ !^ "_"
       ) ^^ !^ "&" ^^
       nest (
-        nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^
-        separate space (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
-          match typ with
-          | None -> Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
-          | Some typ -> to_coq subst (Some Context.Apply) typ
-        ))
+        separate space (
+          nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::
+          (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
+            match typ with
+            | None -> Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
+            | Some typ -> to_coq subst (Some Context.Apply) typ
+          ))
+        )
       )
     ))
   | ForallModule (name, param, result) ->
