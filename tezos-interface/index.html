@@ -9250,7 +9250,7 @@ Module Blake2B.
   End PrefixedName.
   
   Parameter Make_minimal :
-    forall (Name : {_ : unit &amp; Name.signature }),
+    forall (Name : {_ : unit &amp; Name.signature}),
       {t : _ &amp; S.MINIMAL_HASH.signature t}.
   
   Module SRegister.
@@ -9262,8 +9262,8 @@ Module Blake2B.
   End SRegister.
   
   Parameter Make :
-    forall (Register : {_ : unit &amp; SRegister.signature }),
-      (forall (Name : {_ : unit &amp; PrefixedName.signature }),
+    forall (Register : {_ : unit &amp; SRegister.signature}),
+      (forall (Name : {_ : unit &amp; PrefixedName.signature}),
         {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}).
 End Blake2B.
 
