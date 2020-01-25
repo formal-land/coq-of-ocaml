@@ -14,6 +14,10 @@ Module SizedString.
     Record record := {
       name : string;
       size : Z }.
+    Definition with_name (r : record) name : record :=
+      {| name := name; size := size r |}.
+    Definition with_size (r : record) size : record :=
+      {| name := name r; size := size |}.
   End t.
   Definition t := t.record.
 End SizedString.
@@ -42,6 +46,12 @@ Module Point.
       x : Z;
       y : Z;
       z : Z }.
+    Definition with_x (r : record) x : record :=
+      {| x := x; y := y r; z := z r |}.
+    Definition with_y (r : record) y : record :=
+      {| x := x r; y := y; z := z r |}.
+    Definition with_z (r : record) z : record :=
+      {| x := x r; y := y r; z := z |}.
   End t.
   Definition t := t.record.
   
@@ -59,6 +69,13 @@ Module poly.
     first : first;
     second : second }.
   Arguments record : clear implicits.
+  Definition with_first {first_type second_type : Set}
+    (r : record first_type second_type) first : record first_type second_type :=
+    {| first := first; second := second r |}.
+  Definition with_second {first_type second_type : Set}
+    (r : record first_type second_type) second
+    : record first_type second_type :=
+    {| first := first r; second := second |}.
 End poly.
 Definition poly := poly.record.
 
@@ -92,6 +109,12 @@ Module ConstructorWithRecords.
       x : x;
       y : y }.
     Arguments record : clear implicits.
+    Definition with_x {x_type y_type : Set} (r : record x_type y_type) x
+      : record x_type y_type :=
+      {| x := x; y := y r |}.
+    Definition with_y {x_type y_type : Set} (r : record x_type y_type) y
+      : record x_type y_type :=
+      {| x := x r; y := y |}.
   End loc.
   Definition loc_skeleton := loc.record.
   
@@ -109,6 +132,8 @@ Module ConstructorWithRecords.
   Definition loc := 'loc.
   
   Definition l : loc := {| loc.x := 12; loc.y := 23 |}.
+  
+  Definition l_with : loc := loc.with_x l 41.
   
   Definition foo : t := Foo {| t.Foo.name := "foo"; t.Foo.size := 12 |}.
   

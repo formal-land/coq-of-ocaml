@@ -12,7 +12,7 @@ type item =
 
 type t = {
   items: item list;
-  typ_params: ModuleTypParams.t }
+  typ_params: int ModuleTypParams.t }
 
 let items_of_types_signature (signature : Types.signature) : item list Monad.t =
   let of_types_signature_item (signature_item : Types.signature_item)
@@ -38,15 +38,48 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
         (Error ("extensible_type " ^ name))
         NotSupported
         ("Extensible type '" ^ name ^ "' not handled")
-    | Sig_module (ident, _, _) ->
-      let name = Ident.name ident in
-      raise
-        (Error ("module " ^ name))
-        NotSupported
-        (
-          "Module '" ^ name ^ "' in included signature not handled.\n\n" ^
-          "You may try to use a sub-module instead of an `include`."
-        )
+    | Sig_module (ident, { md_type; _ }, _) ->
+      let name = Name.of_ident false ident in
+      IsFirstClassModule.is_module_typ_first_class
+        md_type >>= fun is_first_class ->
+      begin match is_first_class with
+      | Found signature_path ->
+        let signature_path_name =
+          PathName.of_path_with_convert false signature_path in
+        let mapper ident { Types.type_manifest; type_params; _ } =
+          let name = Name.of_ident false ident in
+          match type_manifest with
+          | None -> return (Some (Tree.Item (name, None)))
+          | Some type_manifest ->
+            (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+            Type.of_type_expr_without_free_vars type_manifest >>= fun typ ->
+            let typ = Type.ForallTyps (typ_args, typ) in
+            return (Some (Tree.Item (name, Some typ))) in
+        ModuleTypParams.get_module_typ_typ_params
+          mapper md_type >>= fun typ_params ->
+        raise
+          (Module (name, ModuleTyp.With (signature_path_name, typ_params)))
+          FirstClassModule
+          (
+            "Sub-module '" ^ Ident.name ident ^ "' in included " ^
+            "signature.\n\n" ^
+            "Sub-modules in included signatures are not handled well yet. " ^
+            "It does not work if there are destructive type " ^
+            "substitutions (:=) in the sub-module or type definitions in the " ^
+            "sub-module's source signature. We do not develop this feature " ^
+            "further as it is working in our cases.\n\n" ^
+            "A safer way is to make a sub-module instead of an `include`."
+          )
+      | Not_found reason ->
+        raise
+          (Error ("module " ^ Ident.name ident))
+          FirstClassModule
+          (
+            "Signature name for the module '" ^ Ident.name ident ^
+            "' in included signature not found.\n\n" ^
+            reason
+          )
+      end
     | Sig_modtype (ident, _) ->
       let name = Ident.name ident in
       raise
@@ -69,7 +102,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
 
 let of_types_signature (signature : Types.signature) : t Monad.t =
   items_of_types_signature signature >>= fun items ->
-  (ModuleTypParams.get_signature_typ_params signature) >>= fun typ_params ->
+  (ModuleTypParams.get_signature_typ_params_arity signature) >>= fun typ_params ->
   return { items; typ_params }
 
 let items_of_signature (signature : signature) : item list Monad.t =
@@ -117,7 +150,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
       raise [Error "mutual_type"] NotSupported "Mutual type definitions in signatures not handled."
     | Tsig_typext { tyext_path; _ } ->
       raise
-      [Error ("extensible_type " ^ Path.name tyext_path)]
+      [Error ("extensible_type " ^ Path.last tyext_path)]
         NotSupported
         "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
@@ -130,7 +163,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
 let of_signature (signature : signature) : t Monad.t =
   set_scoping_env (
   items_of_signature signature >>= fun items ->
-  ModuleTypParams.get_signature_typ_params signature.sig_type >>= fun typ_params ->
+  ModuleTypParams.get_signature_typ_params_arity signature.sig_type >>= fun typ_params ->
   return { items; typ_params })
 
 let to_coq_item (signature_item : item) : SmartPrint.t =

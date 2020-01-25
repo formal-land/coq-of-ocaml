@@ -42,6 +42,9 @@ Module re_bis.
   Record record {bis : Set} := {
     bis : bis }.
   Arguments record : clear implicits.
+  Definition with_bis {bis_type : Set} (r : record bis_type) bis
+    : record bis_type :=
+    {| bis := bis |}.
 End re_bis.
 Definition re_bis_skeleton := re_bis.record.
 
@@ -50,6 +53,14 @@ Module re.
     payload : payload;
     message : message }.
   Arguments record : clear implicits.
+  Definition with_payload {payload_type message_type : Set}
+    (r : record payload_type message_type) payload
+    : record payload_type message_type :=
+    {| payload := payload; message := message r |}.
+  Definition with_message {payload_type message_type : Set}
+    (r : record payload_type message_type) message
+    : record payload_type message_type :=
+    {| payload := payload r; message := message |}.
 End re.
 Definition re_skeleton := re.record.
 

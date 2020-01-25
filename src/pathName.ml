@@ -15,13 +15,19 @@ let stdlib_name =
   else
     "Pervasives"
 
+(** Internal helper for this module. *)
+let __make (path : string list) (base : string) : t =
+  {
+    path = path |> List.map (fun name -> Name.Make name);
+    base = Name.Make base
+  }
+
 (* Convert an identifier from OCaml to its Coq's equivalent, or [None] if no
    conversion is needed. We consider all the paths in the standard library
    to be converted, as conversion also means keeping the name as it (without
    taking into accounts that the stdlib was open). *)
 let try_convert (path_name : t) : t option =
-  let make (path : string list) (base : string) : t option =
-    Some { path = path |> List.map (fun name -> Name.Make name); base = Name.Make base } in
+  let make path base = Some (__make path base) in
   let { path; base } = path_name in
   match path |> List.map Name.to_string with
   (* The core library *)
@@ -260,6 +266,11 @@ let of_label_description (label_description : Types.label_description) : t =
     convert path_name
   | _ -> failwith "Unexpected label description without a type constructor"
 
+let of_variant (label : string) : t =
+  match label with
+  (* Custom variants to add here. *)
+  | _ -> { path = []; base = Name.of_string false label }
+
 let get_head_and_tail (path_name : t) : Name.t * t option =
   let { path; base } = path_name in
   match path with
@@ -285,6 +296,10 @@ let false_value : t =
 
 let true_value : t =
   { path = []; base = Name.Make "true" }
+
+let prefix_by_with (path_name : t) : t =
+  let { path; base } = path_name in
+  { path; base = Name.prefix_by_with base }
 
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))

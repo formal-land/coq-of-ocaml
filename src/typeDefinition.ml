@@ -3,6 +3,7 @@ open SmartPrint
 open Monad.Notations
 
 let to_coq_record
+  (generate_withs : bool)
   (module_name : Name.t)
   (typ_name : Name.t)
   (typ_args : Name.t list)
@@ -27,7 +28,47 @@ let to_coq_record
       begin match typ_args with
       | [] -> empty
       | _ :: _ ->
-        newline ^^ !^ "Arguments" ^^ !^ "record" ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
+        newline ^^ !^ "Arguments" ^^ !^ "record" ^^ !^ ":" ^^
+        !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
+      end ^^
+      begin if generate_withs then
+        newline ^^ separate newline (fields |> List.map (fun (name, _) ->
+          let suffixed_typ_args =
+            typ_args |> List.map (fun typ_arg ->
+              Name.to_coq (Name.suffix_by_type typ_arg)
+             ) in
+          let record_typ =
+            nest (separate space (!^ "record" :: suffixed_typ_args)) in
+          nest (
+            !^ "Definition" ^^ Name.to_coq (Name.prefix_by_with name) ^^
+            begin match typ_args with
+            | [] -> empty
+            | _ :: _ ->
+              braces (nest (
+                separate space suffixed_typ_args ^^
+                !^ ":" ^^ Pp.set
+              ))
+            end ^^
+            nest (parens (!^ "r" ^^ !^ ":" ^^ record_typ)) ^^
+            Name.to_coq name ^^
+            nest (!^ ":" ^^ record_typ ^^ !^ ":=") ^^ newline ^^
+            indent @@ nest (
+              !^ "{|" ^^
+              separate (!^ ";" ^^ space) (fields |> List.map (fun (name', _) ->
+                nest (
+                  Name.to_coq name' ^-^ !^ " :=" ^^
+                  if Name.equal name name' then
+                    Name.to_coq name
+                  else
+                    Name.to_coq name' ^^ !^ "r"
+                )
+              )) ^^
+              !^ "|}" ^-^ !^ "."
+            )
+          )
+        ))
+      else
+        empty
       end
     ) ^^ newline ^^
     !^ "End" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
@@ -44,9 +85,9 @@ module RecordSkeleton = struct
     typ_name : Name.t;
   }
 
-  let to_coq (record_skeleton : t) : SmartPrint.t =
+  let to_coq (generate_withs : bool) (record_skeleton : t) : SmartPrint.t =
     let { fields; module_name; typ_name } = record_skeleton in
-    to_coq_record module_name typ_name fields (fields |>
+    to_coq_record generate_withs module_name typ_name fields (fields |>
       List.map (fun field -> (field, Type.Variable field))
     )
 end
@@ -156,8 +197,8 @@ module Constructors = struct
         | None -> typ
         | Some typ -> Some (subst_gadt_typ_constructor typ_name typ)
       ))
-    | Forall (name, param, result) ->
-      Forall (
+    | ForallModule (name, param, result) ->
+      ForallModule (
         name,
         subst_gadt_typ_constructor typ_name param,
         if Name.equal typ_name name then
@@ -165,6 +206,11 @@ module Constructors = struct
         else
           subst_gadt_typ_constructor typ_name result
       )
+    | ForallTyps (typ_args, typ) ->
+      if Name.Set.mem typ_name (Name.Set.of_list typ_args) then
+        typ
+      else
+        ForallTyps (typ_args, subst_gadt_typ_constructor typ_name typ)
     | Error _ -> typ
 
   let of_ocaml
@@ -214,7 +260,9 @@ module Inductive = struct
     inductive.constructor_records |> List.map (fun (name, records) ->
       !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
       indent (
-        separate (newline ^^ newline) (List.map RecordSkeleton.to_coq records)
+        separate
+          (newline ^^ newline)
+          (List.map (RecordSkeleton.to_coq false) records)
       ) ^^ newline ^^
       !^ "End" ^^ Name.to_coq name ^-^ !^ "."
     )
@@ -225,7 +273,7 @@ module Inductive = struct
     )
 
   let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
-    inductive.records |> List.map RecordSkeleton.to_coq
+    inductive.records |> List.map (RecordSkeleton.to_coq true)
 
   let to_coq_typs
     (subst : (Name.t -> Name.t) option)
@@ -496,7 +544,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
 let to_coq (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq inductive
-  | Record (name, typ_args, fields) -> to_coq_record name name typ_args fields
+  | Record (name, typ_args, fields) ->
+    to_coq_record true name name typ_args fields
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^

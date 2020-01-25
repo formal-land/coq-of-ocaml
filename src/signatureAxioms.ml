@@ -149,7 +149,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       return [TypDefinition typ_definition]
     | Tsig_typext { tyext_path; _ } ->
       raise
-        [Error ("extensible_type " ^ Path.name tyext_path)]
+        [Error ("extensible_type " ^ Path.last tyext_path)]
         NotSupported
         "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->

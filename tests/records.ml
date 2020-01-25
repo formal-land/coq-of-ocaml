@@ -47,6 +47,8 @@ module ConstructorWithRecords = struct
 
   let l = { x = 12; y = 23 }
 
+  let l_with = { l with x = 41 }
+
   let foo = Foo { name = "foo"; size = 12 }
 
   let f (x : t) =
