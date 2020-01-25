@@ -44,6 +44,19 @@ Fixpoint sum (tree : tree Z) : Z :=
   end.
 ```
 
+## Features
+* core of OCaml (functions, let bindings, pattern-matching,...) ✔️
+* type definitions (records, inductive types, synonyms, mutual types) ✔️
+* modules as namespaces ✔️
+* modules as dependent records (signatures, functors, first-class modules) ✔️
+* projects with complex dependencies using `.merlin` files ✔️
+* `.ml` and `.mli` files ✔️
+* partial support of polymorphic variants
+* ignores extensible types ❌
+* ignores side-effects ❌
+
+Even in case of errors we try to generate some Coq code. The generated Coq code should be readable and with a size similar to the OCaml source. One should not hesitate to fix remaining compilation errors, by hand or with a script (name collisions, missing `Require`,...).
+
 ## Install
 ### Latest stable version
 Using the package manager [opam](https://opam.ocaml.org/), add the [Coq repository](http://coq.io/opam/):
