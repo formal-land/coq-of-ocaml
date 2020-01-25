@@ -50,6 +50,7 @@
       </small>
     </h2>
     <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>.</p>
+    
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
@@ -62,7 +63,9 @@
 </div>
 
 <hr />
-<div class="row">
+<div class="row" style="margin: 20px;">
+  <h3>List of files</h3>
+  <p>We add the errors from coq-of-ocaml as annotations. Errors from coq-of-ocaml are never fatal. They are not necessarly related to compilation bugs of the generated Coq files. These errors are either due to unsupported features in coq-of-ocaml or to side-effects in the source code.</p>
   
   
   
@@ -497,6 +500,13 @@
 
 <hr />
 <div class="row conversion-row" id="cClosure.ml">
+  <div style="margin: 20px;">
+    <h3>CClosure</h3>
+    <ul>
+      <li>OCaml size: 1333 lines</li>
+      <li>Coq size: 2015 lines (+51% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cClosure.ml"><code>cClosure.ml</code></a>&nbsp;<span class="label label-danger">124 errors</span>
     
@@ -4901,6 +4911,13 @@ Definition set_relevance (r : Sorts.relevance) (f : fconstr) : unit :=
 
 <hr />
 <div class="row conversion-row" id="cClosure.mli">
+  <div style="margin: 20px;">
+    <h3>CClosure_mli</h3>
+    <ul>
+      <li>OCaml size: 235 lines</li>
+      <li>Coq size: 212 lines (-10% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cClosure.mli"><code>cClosure.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -5361,6 +5378,13 @@ Parameter to_constr : Esubst.lift -&gt; fconstr -&gt; Constr.constr.
 
 <hr />
 <div class="row conversion-row" id="cPrimitives.ml">
+  <div style="margin: 20px;">
+    <h3>CPrimitives</h3>
+    <ul>
+      <li>OCaml size: 155 lines</li>
+      <li>Coq size: 154 lines (-1% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cPrimitives.ml"><code>cPrimitives.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -5683,6 +5707,13 @@ Definition op_or_type_to_string (function_parameter : op_or_type) : string :=
 
 <hr />
 <div class="row conversion-row" id="cPrimitives.mli">
+  <div style="margin: 20px;">
+    <h3>CPrimitives_mli</h3>
+    <ul>
+      <li>OCaml size: 70 lines</li>
+      <li>Coq size: 70 lines (+0% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cPrimitives.mli"><code>cPrimitives.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -5836,6 +5867,13 @@ Parameter op_or_type_to_string : op_or_type -&gt; string.
 
 <hr />
 <div class="row conversion-row" id="cbytecodes.ml">
+  <div style="margin: 20px;">
+    <h3>Cbytecodes</h3>
+    <ul>
+      <li>OCaml size: 161 lines</li>
+      <li>Coq size: 197 lines (+22% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cbytecodes.ml"><code>cbytecodes.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -6209,6 +6247,13 @@ with pp_bytecodes (c : bytecodes) {struct c} : Pp.t :=
 
 <hr />
 <div class="row conversion-row" id="cbytecodes.mli">
+  <div style="margin: 20px;">
+    <h3>Cbytecodes_mli</h3>
+    <ul>
+      <li>OCaml size: 78 lines</li>
+      <li>Coq size: 74 lines (-6% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cbytecodes.mli"><code>cbytecodes.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -6374,6 +6419,13 @@ Parameter pp_fv_elem : fv_elem -&gt; Pp.t.
 
 <hr />
 <div class="row conversion-row" id="cbytegen.ml">
+  <div style="margin: 20px;">
+    <h3>Cbytegen</h3>
+    <ul>
+      <li>OCaml size: 896 lines</li>
+      <li>Coq size: 892 lines (-1% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cbytegen.ml"><code>cbytegen.ml</code></a>&nbsp;<span class="label label-danger">44 errors</span>
     
@@ -8687,6 +8739,13 @@ Definition compile_alias (kn : Names.Constant.t) : Cemitcodes.body_code :=
 
 <hr />
 <div class="row conversion-row" id="cbytegen.mli">
+  <div style="margin: 20px;">
+    <h3>Cbytegen_mli</h3>
+    <ul>
+      <li>OCaml size: 31 lines</li>
+      <li>Coq size: 23 lines (-26% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cbytegen.mli"><code>cbytegen.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -8754,6 +8813,13 @@ Parameter dump_bytecode : Stdlib.ref bool.
 
 <hr />
 <div class="row conversion-row" id="cemitcodes.ml">
+  <div style="margin: 20px;">
+    <h3>Cemitcodes</h3>
+    <ul>
+      <li>OCaml size: 461 lines</li>
+      <li>Coq size: 652 lines (+41% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cemitcodes.ml"><code>cemitcodes.ml</code></a>&nbsp;<span class="label label-danger">92 errors</span>
     
@@ -10610,6 +10676,13 @@ Definition to_memory {A : Set}
 
 <hr />
 <div class="row conversion-row" id="cemitcodes.mli">
+  <div style="margin: 20px;">
+    <h3>Cemitcodes_mli</h3>
+    <ul>
+      <li>OCaml size: 43 lines</li>
+      <li>Coq size: 44 lines (+2% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cemitcodes.mli"><code>cemitcodes.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -10710,6 +10783,13 @@ Parameter to_memory :
 
 <hr />
 <div class="row conversion-row" id="clambda.ml">
+  <div style="margin: 20px;">
+    <h3>Clambda</h3>
+    <ul>
+      <li>OCaml size: 815 lines</li>
+      <li>Coq size: 1107 lines (+35% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#clambda.ml"><code>clambda.ml</code></a>&nbsp;<span class="label label-danger">43 errors</span>
     
@@ -12793,6 +12873,13 @@ Definition lambda_of_constr
 
 <hr />
 <div class="row conversion-row" id="clambda.mli">
+  <div style="margin: 20px;">
+    <h3>Clambda_mli</h3>
+    <ul>
+      <li>OCaml size: 44 lines</li>
+      <li>Coq size: 79 lines (+79% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#clambda.mli"><code>clambda.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
@@ -12929,6 +13016,13 @@ Parameter dump_lambda : Stdlib.ref bool.
 
 <hr />
 <div class="row conversion-row" id="constr.mli">
+  <div style="margin: 20px;">
+    <h3>Constr_mli</h3>
+    <ul>
+      <li>OCaml size: 612 lines</li>
+      <li>Coq size: 443 lines (-28% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#constr.mli"><code>constr.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
@@ -13997,6 +14091,13 @@ Parameter debug_print_fix : forall {a : Set},
 
 <hr />
 <div class="row conversion-row" id="context.ml">
+  <div style="margin: 20px;">
+    <h3>Context</h3>
+    <ul>
+      <li>OCaml size: 497 lines</li>
+      <li>Coq size: 642 lines (+29% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#context.ml"><code>context.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
     
@@ -15153,6 +15254,13 @@ End Compacted.
 
 <hr />
 <div class="row conversion-row" id="context.mli">
+  <div style="margin: 20px;">
+    <h3>Context_mli</h3>
+    <ul>
+      <li>OCaml size: 319 lines</li>
+      <li>Coq size: 257 lines (-20% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#context.mli"><code>context.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -15742,6 +15850,13 @@ End Compacted.
 
 <hr />
 <div class="row conversion-row" id="conv_oracle.ml">
+  <div style="margin: 20px;">
+    <h3>Conv_oracle</h3>
+    <ul>
+      <li>OCaml size: 110 lines</li>
+      <li>Coq size: 167 lines (+51% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#conv_oracle.ml"><code>conv_oracle.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -16036,6 +16151,13 @@ Definition get_strategy (o : oracle) : Names.tableKey Names.Cmap.key -&gt; level
 
 <hr />
 <div class="row conversion-row" id="conv_oracle.mli">
+  <div style="margin: 20px;">
+    <h3>Conv_oracle_mli</h3>
+    <ul>
+      <li>OCaml size: 44 lines</li>
+      <li>Coq size: 37 lines (-16% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#conv_oracle.mli"><code>conv_oracle.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -16131,6 +16253,13 @@ Parameter get_transp_state : oracle -&gt; TransparentState.t.
 
 <hr />
 <div class="row conversion-row" id="cooking.ml">
+  <div style="margin: 20px;">
+    <h3>Cooking</h3>
+    <ul>
+      <li>OCaml size: 251 lines</li>
+      <li>Coq size: 359 lines (+43% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cooking.ml"><code>cooking.ml</code></a>&nbsp;<span class="label label-danger">21 errors</span>
     
@@ -17145,6 +17274,13 @@ Definition expmod_constr
 
 <hr />
 <div class="row conversion-row" id="cooking.mli">
+  <div style="margin: 20px;">
+    <h3>Cooking_mli</h3>
+    <ul>
+      <li>OCaml size: 35 lines</li>
+      <li>Coq size: 85 lines (+142% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#cooking.mli"><code>cooking.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -17279,6 +17415,13 @@ Parameter expmod_constr :
 
 <hr />
 <div class="row conversion-row" id="copcodes.ml">
+  <div style="margin: 20px;">
+    <h3>Copcodes</h3>
+    <ul>
+      <li>OCaml size: 239 lines</li>
+      <li>Coq size: 250 lines (+4% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#copcodes.ml"><code>copcodes.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -17782,6 +17925,13 @@ Definition opSTOP : Z := 119.
 
 <hr />
 <div class="row conversion-row" id="csymtable.ml">
+  <div style="margin: 20px;">
+    <h3>Csymtable</h3>
+    <ul>
+      <li>OCaml size: 196 lines</li>
+      <li>Coq size: 230 lines (+17% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#csymtable.ml"><code>csymtable.ml</code></a>&nbsp;<span class="label label-danger">29 errors</span>
     
@@ -18679,6 +18829,13 @@ Definition set_opaque_const {A : Set} (_kn : A) : unit := tt.
 
 <hr />
 <div class="row conversion-row" id="csymtable.mli">
+  <div style="margin: 20px;">
+    <h3>Csymtable_mli</h3>
+    <ul>
+      <li>OCaml size: 22 lines</li>
+      <li>Coq size: 18 lines (-19% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#csymtable.mli"><code>csymtable.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -18732,6 +18889,13 @@ Parameter get_global_data : unit -&gt; Vmvalues.vm_global.
 
 <hr />
 <div class="row conversion-row" id="declarations.ml">
+  <div style="margin: 20px;">
+    <h3>Declarations</h3>
+    <ul>
+      <li>OCaml size: 322 lines</li>
+      <li>Coq size: 703 lines (+118% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#declarations.ml"><code>declarations.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -19770,6 +19934,13 @@ Definition module_retroknowledge := 'module_retroknowledge.
 
 <hr />
 <div class="row conversion-row" id="declareops.ml">
+  <div style="margin: 20px;">
+    <h3>Declareops</h3>
+    <ul>
+      <li>OCaml size: 421 lines</li>
+      <li>Coq size: 672 lines (+59% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#declareops.ml"><code>declareops.ml</code></a>&nbsp;<span class="label label-danger">4 errors</span>
     
@@ -20880,6 +21051,13 @@ with hcons_module_type (mb : Declarations.module_type_body) {struct mb}
 
 <hr />
 <div class="row conversion-row" id="declareops.mli">
+  <div style="margin: 20px;">
+    <h3>Declareops_mli</h3>
+    <ul>
+      <li>OCaml size: 89 lines</li>
+      <li>Coq size: 90 lines (+1% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#declareops.mli"><code>declareops.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -21072,6 +21250,13 @@ Parameter hcons_module_type :
 
 <hr />
 <div class="row conversion-row" id="entries.ml">
+  <div style="margin: 20px;">
+    <h3>Entries</h3>
+    <ul>
+      <li>OCaml size: 128 lines</li>
+      <li>Coq size: 310 lines (+142% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#entries.ml"><code>entries.ml</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
@@ -21523,6 +21708,13 @@ Definition side_eff := side_eff.record.
 
 <hr />
 <div class="row conversion-row" id="environ.ml">
+  <div style="margin: 20px;">
+    <h3>Environ</h3>
+    <ul>
+      <li>OCaml size: 811 lines</li>
+      <li>Coq size: 1215 lines (+49% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#environ.ml"><code>environ.ml</code></a>&nbsp;<span class="label label-danger">14 errors</span>
     
@@ -23582,6 +23774,13 @@ Definition set_retroknowledge (env : env) (r : Retroknowledge.retroknowledge)
 
 <hr />
 <div class="row conversion-row" id="environ.mli">
+  <div style="margin: 20px;">
+    <h3>Environ_mli</h3>
+    <ul>
+      <li>OCaml size: 367 lines</li>
+      <li>Coq size: 464 lines (+26% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#environ.mli"><code>environ.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -24426,6 +24625,13 @@ Parameter set_retroknowledge : env -&gt; Retroknowledge.retroknowledge -&gt; env
 
 <hr />
 <div class="row conversion-row" id="esubst.ml">
+  <div style="margin: 20px;">
+    <h3>Esubst</h3>
+    <ul>
+      <li>OCaml size: 186 lines</li>
+      <li>Coq size: 241 lines (+29% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#esubst.ml"><code>esubst.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -24866,6 +25072,13 @@ Fixpoint comp {A : Set} (mk_cl : subs A * A -&gt; A) (s1 : subs A) (s2 : subs A)
 
 <hr />
 <div class="row conversion-row" id="esubst.mli">
+  <div style="margin: 20px;">
+    <h3>Esubst_mli</h3>
+    <ul>
+      <li>OCaml size: 81 lines</li>
+      <li>Coq size: 61 lines (-25% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#esubst.mli"><code>esubst.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -25021,6 +25234,13 @@ Parameter lift_subst : forall {a b : Set},
 
 <hr />
 <div class="row conversion-row" id="evar.ml">
+  <div style="margin: 20px;">
+    <h3>Evar</h3>
+    <ul>
+      <li>OCaml size: 21 lines</li>
+      <li>Coq size: 28 lines (+33% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#evar.ml"><code>evar.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -25083,6 +25303,13 @@ Module Map := Int.Map.
 
 <hr />
 <div class="row conversion-row" id="evar.mli">
+  <div style="margin: 20px;">
+    <h3>Evar_mli</h3>
+    <ul>
+      <li>OCaml size: 39 lines</li>
+      <li>Coq size: 28 lines (-29% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#evar.mli"><code>evar.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
@@ -25163,6 +25390,13 @@ Parameter Map : {'[t, __Set_t] : _ &amp; CMap.ExtS.signature t t __Set_t}.
 
 <hr />
 <div class="row conversion-row" id="genOpcodeFiles.ml">
+  <div style="margin: 20px;">
+    <h3>GenOpcodeFiles</h3>
+    <ul>
+      <li>OCaml size: 193 lines</li>
+      <li>Coq size: 252 lines (+30% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#genOpcodeFiles.ml"><code>genOpcodeFiles.ml</code></a>&nbsp;<span class="label label-danger">9 errors</span>
     
@@ -25671,6 +25905,13 @@ Definition main (function_parameter : unit) : unit :=
 
 <hr />
 <div class="row conversion-row" id="indTyping.ml">
+  <div style="margin: 20px;">
+    <h3>IndTyping</h3>
+    <ul>
+      <li>OCaml size: 420 lines</li>
+      <li>Coq size: 576 lines (+37% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#indTyping.ml"><code>indTyping.ml</code></a>&nbsp;<span class="label label-danger">14 errors</span>
     
@@ -26716,6 +26957,13 @@ Definition typecheck_inductive
 
 <hr />
 <div class="row conversion-row" id="indTyping.mli">
+  <div style="margin: 20px;">
+    <h3>IndTyping_mli</h3>
+    <ul>
+      <li>OCaml size: 45 lines</li>
+      <li>Coq size: 23 lines (-49% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#indTyping.mli"><code>indTyping.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -26797,6 +27045,13 @@ Parameter template_polymorphic_univs :
 
 <hr />
 <div class="row conversion-row" id="indtypes.ml">
+  <div style="margin: 20px;">
+    <h3>Indtypes</h3>
+    <ul>
+      <li>OCaml size: 573 lines</li>
+      <li>Coq size: 784 lines (+36% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#indtypes.ml"><code>indtypes.ml</code></a>&nbsp;<span class="label label-danger">28 errors</span>
     
@@ -28279,6 +28534,13 @@ Definition check_inductive
 
 <hr />
 <div class="row conversion-row" id="indtypes.mli">
+  <div style="margin: 20px;">
+    <h3>Indtypes_mli</h3>
+    <ul>
+      <li>OCaml size: 36 lines</li>
+      <li>Coq size: 34 lines (-6% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#indtypes.mli"><code>indtypes.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
@@ -28362,6 +28624,13 @@ Inductive inductive_error : Set :=
 
 <hr />
 <div class="row conversion-row" id="inductive.ml">
+  <div style="margin: 20px;">
+    <h3>Inductive</h3>
+    <ul>
+      <li>OCaml size: 1284 lines</li>
+      <li>Coq size: 1656 lines (+28% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#inductive.ml"><code>inductive.ml</code></a>&nbsp;<span class="label label-danger">87 errors</span>
     
@@ -31573,6 +31842,13 @@ Definition check_cofix {A : Set}
 
 <hr />
 <div class="row conversion-row" id="inductive.mli">
+  <div style="margin: 20px;">
+    <h3>Inductive_mli</h3>
+    <ul>
+      <li>OCaml size: 144 lines</li>
+      <li>Coq size: 141 lines (-3% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#inductive.mli"><code>inductive.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
@@ -31871,6 +32147,13 @@ Parameter abstract_mind_lc :
 
 <hr />
 <div class="row conversion-row" id="mod_subst.ml">
+  <div style="margin: 20px;">
+    <h3>Mod_subst</h3>
+    <ul>
+      <li>OCaml size: 583 lines</li>
+      <li>Coq size: 1014 lines (+73% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#mod_subst.ml"><code>mod_subst.ml</code></a>&nbsp;<span class="label label-danger">26 errors</span>
     
@@ -33537,6 +33820,13 @@ Definition repr_substituted {A : Set} (r : substituted A)
 
 <hr />
 <div class="row conversion-row" id="mod_subst.mli">
+  <div style="margin: 20px;">
+    <h3>Mod_subst_mli</h3>
+    <ul>
+      <li>OCaml size: 171 lines</li>
+      <li>Coq size: 144 lines (-16% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#mod_subst.mli"><code>mod_subst.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -33865,6 +34155,13 @@ Parameter subst_constr :
 
 <hr />
 <div class="row conversion-row" id="mod_typing.ml">
+  <div style="margin: 20px;">
+    <h3>Mod_typing</h3>
+    <ul>
+      <li>OCaml size: 380 lines</li>
+      <li>Coq size: 573 lines (+50% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#mod_typing.ml"><code>mod_typing.ml</code></a>&nbsp;<span class="label label-danger">13 errors</span>
     
@@ -34887,6 +35184,13 @@ Definition translate_mse_incl
 
 <hr />
 <div class="row conversion-row" id="mod_typing.mli">
+  <div style="margin: 20px;">
+    <h3>Mod_typing_mli</h3>
+    <ul>
+      <li>OCaml size: 61 lines</li>
+      <li>Coq size: 36 lines (-41% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#mod_typing.mli"><code>mod_typing.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -34997,6 +35301,13 @@ Parameter translate_mse_incl :
 
 <hr />
 <div class="row conversion-row" id="modops.ml">
+  <div style="margin: 20px;">
+    <h3>Modops</h3>
+    <ul>
+      <li>OCaml size: 633 lines</li>
+      <li>Coq size: 1005 lines (+58% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#modops.ml"><code>modops.ml</code></a>&nbsp;<span class="label label-danger">20 errors</span>
     
@@ -36667,6 +36978,13 @@ Definition join_structure
 
 <hr />
 <div class="row conversion-row" id="modops.mli">
+  <div style="margin: 20px;">
+    <h3>Modops_mli</h3>
+    <ul>
+      <li>OCaml size: 159 lines</li>
+      <li>Coq size: 176 lines (+10% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#modops.mli"><code>modops.mli</code></a>&nbsp;<span class="label label-danger">1 error</span>
     
@@ -37015,6 +37333,13 @@ Parameter error_include_restricted_functor : forall {a : Set},
 
 <hr />
 <div class="row conversion-row" id="names.ml">
+  <div style="margin: 20px;">
+    <h3>Names</h3>
+    <ul>
+      <li>OCaml size: 1024 lines</li>
+      <li>Coq size: 1714 lines (+67% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#names.ml"><code>names.ml</code></a>&nbsp;<span class="label label-danger">31 errors</span>
     
@@ -40006,6 +40331,13 @@ Definition lstring := CAst.t string.
 
 <hr />
 <div class="row conversion-row" id="names.mli">
+  <div style="margin: 20px;">
+    <h3>Names_mli</h3>
+    <ul>
+      <li>OCaml size: 691 lines</li>
+      <li>Coq size: 601 lines (-14% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#names.mli"><code>names.mli</code></a>&nbsp;<span class="label label-danger">11 errors</span>
     
@@ -41311,6 +41643,13 @@ Definition lstring := CAst.t string.
 
 <hr />
 <div class="row conversion-row" id="nativecode.ml">
+  <div style="margin: 20px;">
+    <h3>Nativecode</h3>
+    <ul>
+      <li>OCaml size: 2137 lines</li>
+      <li>Coq size: 3688 lines (+72% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativecode.ml"><code>nativecode.ml</code></a>&nbsp;<span class="label label-danger">150 errors</span>
     
@@ -48026,6 +48365,13 @@ Definition add_header_comment (mlcode : list global) (s : string)
 
 <hr />
 <div class="row conversion-row" id="nativecode.mli">
+  <div style="margin: 20px;">
+    <h3>Nativecode_mli</h3>
+    <ul>
+      <li>OCaml size: 84 lines</li>
+      <li>Coq size: 85 lines (+1% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativecode.mli"><code>nativecode.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -48208,6 +48554,13 @@ Parameter add_header_comment : list global -&gt; string -&gt; list global.
 
 <hr />
 <div class="row conversion-row" id="nativeconv.ml">
+  <div style="margin: 20px;">
+    <h3>Nativeconv</h3>
+    <ul>
+      <li>OCaml size: 175 lines</li>
+      <li>Coq size: 287 lines (+64% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativeconv.ml"><code>nativeconv.ml</code></a>&nbsp;<span class="label label-danger">21 errors</span>
     
@@ -48727,6 +49080,13 @@ Definition native_conv
 
 <hr />
 <div class="row conversion-row" id="nativeconv.mli">
+  <div style="margin: 20px;">
+    <h3>Nativeconv_mli</h3>
+    <ul>
+      <li>OCaml size: 20 lines</li>
+      <li>Coq size: 18 lines (-10% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativeconv.mli"><code>nativeconv.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -48778,6 +49138,13 @@ Parameter native_conv_gen : forall {a : Set},
 
 <hr />
 <div class="row conversion-row" id="nativelambda.ml">
+  <div style="margin: 20px;">
+    <h3>Nativelambda</h3>
+    <ul>
+      <li>OCaml size: 617 lines</li>
+      <li>Coq size: 804 lines (+30% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativelambda.ml"><code>nativelambda.ml</code></a>&nbsp;<span class="label label-danger">26 errors</span>
     
@@ -50463,6 +50830,13 @@ Definition mk_lazy (c : lambda) : lambda :=
 
 <hr />
 <div class="row conversion-row" id="nativelambda.mli">
+  <div style="margin: 20px;">
+    <h3>Nativelambda_mli</h3>
+    <ul>
+      <li>OCaml size: 68 lines</li>
+      <li>Coq size: 79 lines (+16% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativelambda.mli"><code>nativelambda.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -50623,6 +50997,13 @@ Parameter lambda_of_constr : Environ.env -&gt; evars -&gt; Constr.constr -&gt; l
 
 <hr />
 <div class="row conversion-row" id="nativelib.ml">
+  <div style="margin: 20px;">
+    <h3>Nativelib</h3>
+    <ul>
+      <li>OCaml size: 155 lines</li>
+      <li>Coq size: 218 lines (+40% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativelib.ml"><code>nativelib.ml</code></a>&nbsp;<span class="label label-danger">12 errors</span>
     
@@ -51093,6 +51474,13 @@ Definition link_library (prefix : string) (dirname : string) (basename : string)
 
 <hr />
 <div class="row conversion-row" id="nativelib.mli">
+  <div style="margin: 20px;">
+    <h3>Nativelib_mli</h3>
+    <ul>
+      <li>OCaml size: 39 lines</li>
+      <li>Coq size: 33 lines (-16% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativelib.mli"><code>nativelib.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -51178,6 +51566,13 @@ Parameter rt2 : Stdlib.ref Nativevalues.t.
 
 <hr />
 <div class="row conversion-row" id="nativelibrary.ml">
+  <div style="margin: 20px;">
+    <h3>Nativelibrary</h3>
+    <ul>
+      <li>OCaml size: 74 lines</li>
+      <li>Coq size: 100 lines (+35% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativelibrary.ml"><code>nativelibrary.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
     
@@ -51405,6 +51800,13 @@ Definition dump_library {A : Set}
 
 <hr />
 <div class="row conversion-row" id="nativelibrary.mli">
+  <div style="margin: 20px;">
+    <h3>Nativelibrary_mli</h3>
+    <ul>
+      <li>OCaml size: 19 lines</li>
+      <li>Coq size: 14 lines (-27% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativelibrary.mli"><code>nativelibrary.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -51451,6 +51853,13 @@ Parameter dump_library :
 
 <hr />
 <div class="row conversion-row" id="nativevalues.ml">
+  <div style="margin: 20px;">
+    <h3>Nativevalues</h3>
+    <ul>
+      <li>OCaml size: 517 lines</li>
+      <li>Coq size: 606 lines (+17% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativevalues.ml"><code>nativevalues.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
     
@@ -52605,6 +53014,13 @@ Definition str_decode {A : Set} (s : string) : A :=
 
 <hr />
 <div class="row conversion-row" id="nativevalues.mli">
+  <div style="margin: 20px;">
+    <h3>Nativevalues_mli</h3>
+    <ul>
+      <li>OCaml size: 233 lines</li>
+      <li>Coq size: 247 lines (+6% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#nativevalues.mli"><code>nativevalues.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -53098,6 +53514,13 @@ Parameter no_check_compare : t -&gt; t -&gt; t.
 
 <hr />
 <div class="row conversion-row" id="opaqueproof.ml">
+  <div style="margin: 20px;">
+    <h3>Opaqueproof</h3>
+    <ul>
+      <li>OCaml size: 166 lines</li>
+      <li>Coq size: 282 lines (+69% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#opaqueproof.ml"><code>opaqueproof.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -53563,6 +53986,13 @@ Definition dump (function_parameter : opaquetab)
 
 <hr />
 <div class="row conversion-row" id="opaqueproof.mli">
+  <div style="margin: 20px;">
+    <h3>Opaqueproof_mli</h3>
+    <ul>
+      <li>OCaml size: 82 lines</li>
+      <li>Coq size: 71 lines (-14% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#opaqueproof.mli"><code>opaqueproof.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -53730,6 +54160,13 @@ Parameter set_indirect_univ_accessor :
 
 <hr />
 <div class="row conversion-row" id="primred.ml">
+  <div style="margin: 20px;">
+    <h3>Primred</h3>
+    <ul>
+      <li>OCaml size: 204 lines</li>
+      <li>Coq size: 301 lines (+47% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#primred.ml"><code>primred.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
     
@@ -54262,6 +54699,13 @@ Definition RedNative :=
 
 <hr />
 <div class="row conversion-row" id="primred.mli">
+  <div style="margin: 20px;">
+    <h3>Primred_mli</h3>
+    <ul>
+      <li>OCaml size: 44 lines</li>
+      <li>Coq size: 61 lines (+38% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#primred.mli"><code>primred.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -54380,6 +54824,13 @@ Parameter RedNative :
 
 <hr />
 <div class="row conversion-row" id="reduction.ml">
+  <div style="margin: 20px;">
+    <h3>Reduction</h3>
+    <ul>
+      <li>OCaml size: 991 lines</li>
+      <li>Coq size: 1473 lines (+48% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#reduction.ml"><code>reduction.ml</code></a>&nbsp;<span class="label label-danger">76 errors</span>
     
@@ -57329,6 +57780,13 @@ Definition eta_expand
 
 <hr />
 <div class="row conversion-row" id="reduction.mli">
+  <div style="margin: 20px;">
+    <h3>Reduction_mli</h3>
+    <ul>
+      <li>OCaml size: 128 lines</li>
+      <li>Coq size: 146 lines (+14% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#reduction.mli"><code>reduction.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -57616,6 +58074,13 @@ Parameter eta_expand :
 
 <hr />
 <div class="row conversion-row" id="retroknowledge.ml">
+  <div style="margin: 20px;">
+    <h3>Retroknowledge</h3>
+    <ul>
+      <li>OCaml size: 40 lines</li>
+      <li>Coq size: 57 lines (+42% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#retroknowledge.ml"><code>retroknowledge.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -57726,6 +58191,13 @@ Inductive action : Set :=
 
 <hr />
 <div class="row conversion-row" id="retroknowledge.mli">
+  <div style="margin: 20px;">
+    <h3>Retroknowledge_mli</h3>
+    <ul>
+      <li>OCaml size: 27 lines</li>
+      <li>Coq size: 52 lines (+92% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#retroknowledge.mli"><code>retroknowledge.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -57818,6 +58290,13 @@ Inductive action : Set :=
 
 <hr />
 <div class="row conversion-row" id="retypeops.ml">
+  <div style="margin: 20px;">
+    <h3>Retypeops</h3>
+    <ul>
+      <li>OCaml size: 113 lines</li>
+      <li>Coq size: 166 lines (+46% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#retypeops.ml"><code>retypeops.ml</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -58112,6 +58591,13 @@ Definition relevance_of_term (env : Environ.env) (c : Constr.constr)
 
 <hr />
 <div class="row conversion-row" id="retypeops.mli">
+  <div style="margin: 20px;">
+    <h3>Retypeops_mli</h3>
+    <ul>
+      <li>OCaml size: 26 lines</li>
+      <li>Coq size: 29 lines (+11% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#retypeops.mli"><code>retypeops.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -58180,6 +58666,13 @@ Parameter relevance_of_projection :
 
 <hr />
 <div class="row conversion-row" id="safe_typing.ml">
+  <div style="margin: 20px;">
+    <h3>Safe_typing</h3>
+    <ul>
+      <li>OCaml size: 1313 lines</li>
+      <li>Coq size: 2136 lines (+62% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#safe_typing.ml"><code>safe_typing.ml</code></a>&nbsp;<span class="label label-danger">95 errors</span>
     
@@ -63032,6 +63525,13 @@ Definition set_strategy
 
 <hr />
 <div class="row conversion-row" id="safe_typing.mli">
+  <div style="margin: 20px;">
+    <h3>Safe_typing_mli</h3>
+    <ul>
+      <li>OCaml size: 226 lines</li>
+      <li>Coq size: 212 lines (-7% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#safe_typing.mli"><code>safe_typing.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -63483,6 +63983,13 @@ Parameter set_strategy :
 
 <hr />
 <div class="row conversion-row" id="sorts.ml">
+  <div style="margin: 20px;">
+    <h3>Sorts</h3>
+    <ul>
+      <li>OCaml size: 160 lines</li>
+      <li>Coq size: 223 lines (+39% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#sorts.ml"><code>sorts.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -63879,6 +64386,13 @@ Definition pr_sort_family (function_parameter : family) : Pp.t :=
 
 <hr />
 <div class="row conversion-row" id="sorts.mli">
+  <div style="margin: 20px;">
+    <h3>Sorts_mli</h3>
+    <ul>
+      <li>OCaml size: 63 lines</li>
+      <li>Coq size: 80 lines (+26% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#sorts.mli"><code>sorts.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -64035,6 +64549,13 @@ Parameter pr_sort_family : family -&gt; Pp.t.
 
 <hr />
 <div class="row conversion-row" id="subtyping.ml">
+  <div style="margin: 20px;">
+    <h3>Subtyping</h3>
+    <ul>
+      <li>OCaml size: 353 lines</li>
+      <li>Coq size: 503 lines (+42% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#subtyping.ml"><code>subtyping.ml</code></a>&nbsp;<span class="label label-danger">15 errors</span>
     
@@ -65119,6 +65640,13 @@ Definition check_subtypes
 
 <hr />
 <div class="row conversion-row" id="subtyping.mli">
+  <div style="margin: 20px;">
+    <h3>Subtyping_mli</h3>
+    <ul>
+      <li>OCaml size: 15 lines</li>
+      <li>Coq size: 14 lines (-7% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#subtyping.mli"><code>subtyping.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -65161,6 +65689,13 @@ Parameter check_subtypes :
 
 <hr />
 <div class="row conversion-row" id="term.ml">
+  <div style="margin: 20px;">
+    <h3>Term</h3>
+    <ul>
+      <li>OCaml size: 386 lines</li>
+      <li>Coq size: 552 lines (+43% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#term.ml"><code>term.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
     
@@ -66122,6 +66657,13 @@ Definition kind_of_type (t : Constr.constr)
 
 <hr />
 <div class="row conversion-row" id="term.mli">
+  <div style="margin: 20px;">
+    <h3>Term_mli</h3>
+    <ul>
+      <li>OCaml size: 202 lines</li>
+      <li>Coq size: 191 lines (-6% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#term.mli"><code>term.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -66528,6 +67070,13 @@ Inductive sorts : Set :=
 
 <hr />
 <div class="row conversion-row" id="term_typing.ml">
+  <div style="margin: 20px;">
+    <h3>Term_typing</h3>
+    <ul>
+      <li>OCaml size: 402 lines</li>
+      <li>Coq size: 551 lines (+37% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#term_typing.ml"><code>term_typing.ml</code></a>&nbsp;<span class="label label-danger">25 errors</span>
     
@@ -67554,6 +68103,13 @@ Definition translate_local_def {A : Set}
 
 <hr />
 <div class="row conversion-row" id="term_typing.mli">
+  <div style="margin: 20px;">
+    <h3>Term_typing_mli</h3>
+    <ul>
+      <li>OCaml size: 46 lines</li>
+      <li>Coq size: 45 lines (-3% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#term_typing.mli"><code>term_typing.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -67658,6 +68214,13 @@ Parameter build_constant_declaration :
 
 <hr />
 <div class="row conversion-row" id="transparentState.ml">
+  <div style="margin: 20px;">
+    <h3>TransparentState</h3>
+    <ul>
+      <li>OCaml size: 45 lines</li>
+      <li>Coq size: 42 lines (-7% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#transparentState.ml"><code>transparentState.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -67758,6 +68321,13 @@ Definition is_transparent_constant (ts : t) (cst : Names.Cpred.elt) : bool :=
 
 <hr />
 <div class="row conversion-row" id="transparentState.mli">
+  <div style="margin: 20px;">
+    <h3>TransparentState_mli</h3>
+    <ul>
+      <li>OCaml size: 34 lines</li>
+      <li>Coq size: 35 lines (+2% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#transparentState.mli"><code>transparentState.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -67840,6 +68410,13 @@ Parameter is_transparent_constant : t -&gt; Names.Constant.t -&gt; bool.
 
 <hr />
 <div class="row conversion-row" id="type_errors.ml">
+  <div style="margin: 20px;">
+    <h3>Type_errors</h3>
+    <ul>
+      <li>OCaml size: 203 lines</li>
+      <li>Coq size: 322 lines (+58% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#type_errors.ml"><code>type_errors.ml</code></a>&nbsp;<span class="label label-danger">22 errors</span>
     
@@ -68382,6 +68959,13 @@ Definition map_ptype_error {A B : Set}
 
 <hr />
 <div class="row conversion-row" id="type_errors.mli">
+  <div style="margin: 20px;">
+    <h3>Type_errors_mli</h3>
+    <ul>
+      <li>OCaml size: 145 lines</li>
+      <li>Coq size: 217 lines (+49% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#type_errors.mli"><code>type_errors.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -68757,6 +69341,13 @@ Parameter map_ptype_error : forall {c d : Set},
 
 <hr />
 <div class="row conversion-row" id="typeops.ml">
+  <div style="margin: 20px;">
+    <h3>Typeops</h3>
+    <ul>
+      <li>OCaml size: 715 lines</li>
+      <li>Coq size: 895 lines (+25% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#typeops.ml"><code>typeops.ml</code></a>&nbsp;<span class="label label-danger">36 errors</span>
     
@@ -70486,6 +71077,13 @@ Definition check_primitive_type
 
 <hr />
 <div class="row conversion-row" id="typeops.mli">
+  <div style="margin: 20px;">
+    <h3>Typeops_mli</h3>
+    <ul>
+      <li>OCaml size: 127 lines</li>
+      <li>Coq size: 103 lines (-19% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#typeops.mli"><code>typeops.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -70729,6 +71327,13 @@ Parameter warn_bad_relevance_name : string.
 
 <hr />
 <div class="row conversion-row" id="uGraph.ml">
+  <div style="margin: 20px;">
+    <h3>UGraph</h3>
+    <ul>
+      <li>OCaml size: 226 lines</li>
+      <li>Coq size: 338 lines (+49% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#uGraph.ml"><code>uGraph.ml</code></a>&nbsp;<span class="label label-danger">7 errors</span>
     
@@ -71316,6 +71921,13 @@ Definition check_leq : t -&gt; Univ.Universe.t -&gt; Univ.Universe.t -&gt; bool 
 
 <hr />
 <div class="row conversion-row" id="uGraph.mli">
+  <div style="margin: 20px;">
+    <h3>UGraph_mli</h3>
+    <ul>
+      <li>OCaml size: 99 lines</li>
+      <li>Coq size: 69 lines (-31% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#uGraph.mli"><code>uGraph.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -71497,6 +72109,13 @@ Parameter check_universes_invariants : t -&gt; unit.
 
 <hr />
 <div class="row conversion-row" id="uint63.ml">
+  <div style="margin: 20px;">
+    <h3>Uint63</h3>
+    <ul>
+      <li>OCaml size: 229 lines</li>
+      <li>Coq size: 249 lines (+8% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#uint63.ml"><code>uint63.ml</code></a>&nbsp;<span class="label label-danger">16 errors</span>
     
@@ -72232,6 +72851,13 @@ Definition subcarryc (x : Z) (y : Z) : carry Z :=
 
 <hr />
 <div class="row conversion-row" id="uint63.mli">
+  <div style="margin: 20px;">
+    <h3>Uint63_mli</h3>
+    <ul>
+      <li>OCaml size: 71 lines</li>
+      <li>Coq size: 91 lines (+28% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#uint63.mli"><code>uint63.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -72407,6 +73033,13 @@ Parameter subcarryc : t -&gt; t -&gt; carry t.
 
 <hr />
 <div class="row conversion-row" id="uint63_amd64.ml">
+  <div style="margin: 20px;">
+    <h3>Uint63_amd64</h3>
+    <ul>
+      <li>OCaml size: 227 lines</li>
+      <li>Coq size: 249 lines (+9% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#uint63_amd64.ml"><code>uint63_amd64.ml</code></a>&nbsp;<span class="label label-danger">16 errors</span>
     
@@ -73140,6 +73773,13 @@ Definition subcarryc (x : Z) (y : Z) : carry Z :=
 
 <hr />
 <div class="row conversion-row" id="uint63_x86.ml">
+  <div style="margin: 20px;">
+    <h3>Uint63_x86</h3>
+    <ul>
+      <li>OCaml size: 216 lines</li>
+      <li>Coq size: 273 lines (+26% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#uint63_x86.ml"><code>uint63_x86.ml</code></a>&nbsp;<span class="label label-danger">24 errors</span>
     
@@ -74070,6 +74710,13 @@ Definition subcarryc (x : Stdlib.Int64.t) (y : Stdlib.Int64.t) : carry int64 :=
 
 <hr />
 <div class="row conversion-row" id="univ.ml">
+  <div style="margin: 20px;">
+    <h3>Univ</h3>
+    <ul>
+      <li>OCaml size: 1247 lines</li>
+      <li>Coq size: 1745 lines (+39% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#univ.ml"><code>univ.ml</code></a>&nbsp;<span class="label label-danger">22 errors</span>
     
@@ -77127,6 +77774,13 @@ Definition explain_universe_inconsistency
 
 <hr />
 <div class="row conversion-row" id="univ.mli">
+  <div style="margin: 20px;">
+    <h3>Univ_mli</h3>
+    <ul>
+      <li>OCaml size: 492 lines</li>
+      <li>Coq size: 570 lines (+15% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#univ.mli"><code>univ.mli</code></a>&nbsp;<span class="label label-danger">2 errors</span>
     
@@ -78202,6 +78856,13 @@ Parameter hcons_universe_context_set : ContextSet.t -&gt; ContextSet.t.
 
 <hr />
 <div class="row conversion-row" id="vars.ml">
+  <div style="margin: 20px;">
+    <h3>Vars</h3>
+    <ul>
+      <li>OCaml size: 322 lines</li>
+      <li>Coq size: 459 lines (+42% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vars.ml"><code>vars.ml</code></a>&nbsp;<span class="label label-danger">25 errors</span>
     
@@ -79060,6 +79721,13 @@ Definition universes_of_constr (c : Constr.constr) : Univ.LSet.t :=
 
 <hr />
 <div class="row conversion-row" id="vars.mli">
+  <div style="margin: 20px;">
+    <h3>Vars_mli</h3>
+    <ul>
+      <li>OCaml size: 146 lines</li>
+      <li>Coq size: 78 lines (-47% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vars.mli"><code>vars.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -79297,6 +79965,13 @@ Parameter universes_of_constr : Constr.constr -&gt; Univ.LSet.t.
 
 <hr />
 <div class="row conversion-row" id="vconv.ml">
+  <div style="margin: 20px;">
+    <h3>Vconv</h3>
+    <ul>
+      <li>OCaml size: 207 lines</li>
+      <li>Coq size: 320 lines (+54% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vconv.ml"><code>vconv.ml</code></a>&nbsp;<span class="label label-danger">25 errors</span>
     
@@ -79857,6 +80532,13 @@ Definition vm_conv
 
 <hr />
 <div class="row conversion-row" id="vconv.mli">
+  <div style="margin: 20px;">
+    <h3>Vconv_mli</h3>
+    <ul>
+      <li>OCaml size: 20 lines</li>
+      <li>Coq size: 16 lines (-20% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vconv.mli"><code>vconv.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -79906,6 +80588,13 @@ Parameter vm_conv_gen : forall {a : Set},
 
 <hr />
 <div class="row conversion-row" id="vm.ml">
+  <div style="margin: 20px;">
+    <h3>Vm</h3>
+    <ul>
+      <li>OCaml size: 189 lines</li>
+      <li>Coq size: 207 lines (+9% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vm.ml"><code>vm.ml</code></a>&nbsp;<span class="label label-danger">25 errors</span>
     
@@ -80460,6 +81149,13 @@ Definition apply_whd (k : Z) (whd : Vmvalues.whd) : Vmvalues.values :=
 
 <hr />
 <div class="row conversion-row" id="vm.mli">
+  <div style="margin: 20px;">
+    <h3>Vm_mli</h3>
+    <ul>
+      <li>OCaml size: 36 lines</li>
+      <li>Coq size: 30 lines (-17% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vm.mli"><code>vm.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -80539,6 +81235,13 @@ Parameter apply_whd : Z -&gt; Vmvalues.whd -&gt; Vmvalues.values.
 
 <hr />
 <div class="row conversion-row" id="vmvalues.ml">
+  <div style="margin: 20px;">
+    <h3>Vmvalues</h3>
+    <ul>
+      <li>OCaml size: 689 lines</li>
+      <li>Coq size: 833 lines (+20% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vmvalues.ml"><code>vmvalues.ml</code></a>&nbsp;<span class="label label-danger">40 errors</span>
     
@@ -82418,6 +83121,13 @@ with pr_zipper (z : zipper) {struct z} : Pp.t :=
 
 <hr />
 <div class="row conversion-row" id="vmvalues.mli">
+  <div style="margin: 20px;">
+    <h3>Vmvalues_mli</h3>
+    <ul>
+      <li>OCaml size: 199 lines</li>
+      <li>Coq size: 260 lines (+30% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#vmvalues.mli"><code>vmvalues.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
@@ -82890,6 +83600,13 @@ Parameter branch_arg : Z -&gt; tag * Z -&gt; values.
 
 <hr />
 <div class="row conversion-row" id="write_uint63.ml">
+  <div style="margin: 20px;">
+    <h3>Write_uint63</h3>
+    <ul>
+      <li>OCaml size: 38 lines</li>
+      <li>Coq size: 44 lines (+15% compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#write_uint63.ml"><code>write_uint63.ml</code></a>&nbsp;<span class="label label-danger">8 errors</span>
     

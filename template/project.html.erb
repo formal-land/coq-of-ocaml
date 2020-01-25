@@ -2,7 +2,7 @@
 <div class="row center-block not-full-width">
   <div class="col-md-12">
     <%= project_intro %>
-    <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does <%= "not " unless does_compile %>compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does <%= "not " unless status == :does_compile %>compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: <%= nb_ocaml_lines %> lines</li>
       <li>Coq size: <%= nb_coq_lines %> lines (<%= "+" if nb_coq_lines >= nb_ocaml_lines %><%= "#{100 * nb_coq_lines / nb_ocaml_lines - 100}%" %> compared to&nbsp;OCaml)</li>
@@ -20,7 +20,9 @@
 </div>
 <% if conversions.size >= 2 then %>
 <hr />
-<div class="row">
+<div class="row" style="margin: 20px;">
+  <h3>List of files</h3>
+  <p>We add the errors from coq-of-ocaml as annotations. Errors from coq-of-ocaml are never fatal. They are not necessarly related to compilation bugs of the generated Coq files. These errors are either due to unsupported features in coq-of-ocaml or to side-effects in the source code.</p>
   <% column_size = conversions.size / 3 %>
   <% column_size += 1 if conversions.size % 3 != 0 %>
   <% 3.times do |i| %>
@@ -39,6 +41,13 @@
 <% for conversion in conversions do %>
 <hr />
 <div class="row conversion-row" id="<%= u(conversion[:ocaml_name]) %>">
+  <div style="margin: 20px;">
+    <h3><%= h(conversion[:coq_name][0..-3]) %></h3>
+    <ul>
+      <li>OCaml size: <%= conversion[:ocaml_size] %> lines</li>
+      <li>Coq size: <%= conversion[:coq_size] %> lines (<%= "+" if conversion[:coq_size] >= conversion[:ocaml_size] %><%= "#{100 * conversion[:coq_size] / conversion[:ocaml_size] - 100}%" %> compared to&nbsp;OCaml)</li>
+    </ul>
+  </div>
   <div class="col-md-6">
     <a href="#<%= u(conversion[:ocaml_name]) %>"><code><%= h(conversion[:ocaml_name]) %></code></a>&nbsp;<span class="label label-<%= conversion[:nb_errors] == 0 ? "success" : "danger" %>"><%= conversion[:nb_errors] == 0 ? "success" : "#{conversion[:nb_errors]} error#{conversion[:nb_errors] != 1 ? "s" : ""}" %></span>
     <% if conversion[:global_errors].size != 0 then %>
