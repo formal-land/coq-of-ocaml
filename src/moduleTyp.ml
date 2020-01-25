@@ -28,7 +28,8 @@ let of_ocaml_module_with_substitutions
   let signature_path_name = PathName.of_long_ident false long_ident_loc.txt in
   get_env >>= fun env ->
   let (_, module_typ) = Env.lookup_modtype long_ident_loc.txt env in
-  ModuleTypParams.get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
+  ModuleTypParams.get_module_typ_declaration_typ_params_arity
+    module_typ >>= fun signature_typ_params ->
   (substitutions |> Monad.List.filter_map (fun (path, _, with_constraint) ->
     begin match with_constraint with
     | Typedtree.Twith_type typ_declaration | Twith_typesubst typ_declaration ->
@@ -92,7 +93,7 @@ let rec to_typ (module_typ : t) : Type.t =
   match module_typ with
   | Error message -> Type.Error message
   | Functor (name, param, result) ->
-    Type.Forall (name, to_typ param, to_typ result)
+    Type.ForallModule (name, to_typ param, to_typ result)
   | With (path_name, typ_values) ->
     Type.Package (path_name, typ_values)
 

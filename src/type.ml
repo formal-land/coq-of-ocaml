@@ -10,7 +10,8 @@ type t =
   | Tuple of t list
   | Apply of MixedPath.t * t list
   | Package of PathName.t * t option Tree.t
-  | Forall of Name.t * t * t
+  | ForallModule of Name.t * t * t
+  | ForallTyps of Name.t list * t
   | Error of string
 
 let type_exprs_of_row_field (row_field : Types.row_field) : Types.type_expr list =
@@ -126,7 +127,8 @@ let rec of_typ_expr
         typ_substitutions >>= fun (typ_substitutions, typ_vars, new_typ_vars) ->
       get_env >>= fun env ->
       let module_typ = Env.find_modtype path env in
-      ModuleTypParams.get_module_typ_declaration_typ_params module_typ >>= fun signature_typ_params ->
+      ModuleTypParams.get_module_typ_declaration_typ_params_arity
+        module_typ >>= fun signature_typ_params ->
       let typ_params = List.fold_left
         (fun typ_values (path_name, typ) ->
           Tree.map_at typ_values path_name (fun _ -> Some typ)
@@ -178,8 +180,10 @@ let rec typ_args (typ : t) : Name.Set.t =
       | Some typ -> Some (typ_args typ)
     ) |>
     List.fold_left Name.Set.union Name.Set.empty
-  | Forall (name, param, result) ->
+  | ForallModule (name, param, result) ->
     Name.Set.union (typ_args param) (Name.Set.remove name (typ_args result))
+  | ForallTyps (typ_params, typ) ->
+    Name.Set.diff (typ_args typ) (Name.Set.of_list typ_params)
   | Error _ -> Name.Set.empty
 
 and typ_args_of_typs (typs : t list) : Name.Set.t =
@@ -309,11 +313,24 @@ let rec to_coq
         ))
       )
     ))
-  | Forall (name, param, result) ->
+  | ForallModule (name, param, result) ->
     Context.parens context Context.Forall @@ nest (
       !^ "forall" ^^ parens (
         Name.to_coq name ^^ !^ ":" ^^ to_coq subst None param
       ) ^-^ !^ "," ^^
       to_coq subst (Some Context.Forall) result
     )
+  | ForallTyps (typ_args, typ) ->
+    begin match typ_args with
+    | [] -> to_coq subst context typ
+    | _ :: _ ->
+      Context.parens context Context.Forall @@ nest (
+        !^ "forall" ^^ braces (
+          nest (
+            separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set
+          )
+        ) ^-^ !^ "," ^^
+        to_coq subst (Some Context.Forall) typ
+      )
+    end
   | Error message -> !^ message

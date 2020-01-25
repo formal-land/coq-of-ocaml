@@ -197,8 +197,8 @@ module Constructors = struct
         | None -> typ
         | Some typ -> Some (subst_gadt_typ_constructor typ_name typ)
       ))
-    | Forall (name, param, result) ->
-      Forall (
+    | ForallModule (name, param, result) ->
+      ForallModule (
         name,
         subst_gadt_typ_constructor typ_name param,
         if Name.equal typ_name name then
@@ -206,6 +206,11 @@ module Constructors = struct
         else
           subst_gadt_typ_constructor typ_name result
       )
+    | ForallTyps (typ_args, typ) ->
+      if Name.Set.mem typ_name (Name.Set.of_list typ_args) then
+        typ
+      else
+        ForallTyps (typ_args, subst_gadt_typ_constructor typ_name typ)
     | Error _ -> typ
 
   let of_ocaml
