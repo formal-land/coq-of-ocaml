@@ -55,7 +55,7 @@
     <ul>
       <li>OCaml size: 6152 lines</li>
       <li>Coq size: 3317 lines (-47% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 185</li>
+      <li>errors from coq-of-ocaml: 191</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -95,7 +95,7 @@
 <hr />
 <div class="row conversion-row" id="environment.mli">
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">185 errors</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">191 errors</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -4994,13 +4994,41 @@ module type HASH = sig
 
   include ENCODER with type t := t
 
-  include INDEXES with type t := t
+  <abbr class="mark-error" title="Sub-module 'Map' in included signature.
+
+Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
+
+A safer way is to make a sub-module instead of an `include`.
+
+——————————
+
+Sub-module 'Set' in included signature.
+
+Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
+
+A safer way is to make a sub-module instead of an `include`.">include INDEXES with type t := t</abbr>
 end
 
 module type MERKLE_TREE = sig
   type elt
 
-  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include HASH</abbr>
+  <abbr class="mark-error" title="Sub-module 'Map' in included signature.
+
+Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
+
+A safer way is to make a sub-module instead of an `include`.
+
+——————————
+
+Sub-module 'Set' in included signature.
+
+Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
+
+A safer way is to make a sub-module instead of an `include`.
+
+——————————
+
+Extensible type 'Base58.data' not handled">include HASH</abbr>
 
   val compute : elt list -&gt; t
 
@@ -5030,7 +5058,19 @@ module type SPublic_key_hash = sig
 
   include ENCODER with type t := t
 
-  include INDEXES with type t := t
+  <abbr class="mark-error" title="Sub-module 'Map' in included signature.
+
+Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
+
+A safer way is to make a sub-module instead of an `include`.
+
+——————————
+
+Sub-module 'Set' in included signature.
+
+Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
+
+A safer way is to make a sub-module instead of an `include`.">include INDEXES with type t := t</abbr>
 
   val zero : t
 end
