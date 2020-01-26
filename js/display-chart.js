@@ -1,5 +1,6 @@
 const chartElement = document.getElementById('chart');
 const chartProperties = window.chart;
+
 if (chartElement && chartProperties) {
   const context = chartElement.getContext('2d');
   const colors = {
@@ -10,7 +11,11 @@ if (chartElement && chartProperties) {
     red: "#ff4136",
     redBackground: "#fecfcc"
   };
-  const myChart = new Chart(context, {
+  const compilingLines = chartProperties.compiling[chartProperties.compiling.length - 1];
+  const generatedLines = chartProperties.generated[chartProperties.generated.length - 1];
+  const conversionRatio = Math.round(compilingLines / generatedLines * 100);
+
+  new Chart(context, {
     type: 'line',
     data: {
       labels: chartProperties.labels,
@@ -36,7 +41,7 @@ if (chartElement && chartProperties) {
       title: {
         display: true,
         fontSize: 28,
-        text: 'Progress towards compilation'
+        text: `Progress towards compilation (${conversionRatio}%)`
       },
       tooltips: {
         mode: 'index',
