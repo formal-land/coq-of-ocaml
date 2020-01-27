@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Run · coq-of-ocaml</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Coq-of-ocaml translates the OCaml files one by one. To translate a complex project, add a `.merlin` file to express your dependencies in the [Merlin](https://github.com/ocaml/merlin) format."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Run · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/doc/"/><meta property="og:description" content="Coq-of-ocaml translates the OCaml files one by one. To translate a complex project, add a `.merlin` file to express your dependencies in the [Merlin](https://github.com/ocaml/merlin) format."/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/doc/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/doc/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/doc/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/doc/js/language-name.js"></script><script src="/coq-of-ocaml/doc/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/doc/css/main.css"/><script src="/coq-of-ocaml/doc/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/doc/"><img class="logo" src="/coq-of-ocaml/doc/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/doc/docs/install" target="_self">Docs</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Getting started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/doc/docs/install">Install</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/doc/docs/run">Run</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/doc/docs/ocaml-core">OCaml core</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Run</h1></header><article><div><span><p>Coq-of-ocaml translates the OCaml files one by one. To translate a complex project, add a <code>.merlin</code> file to express your dependencies in the <a href="https://github.com/ocaml/merlin">Merlin</a> format.</p>
+<h2><a class="anchor" aria-hidden="true" id="minimal-example"></a><a href="#minimal-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Minimal example</h2>
+<p>Create a file <code>example.ml</code>:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> <span class="hljs-symbol">'a</span> tree =
+  | <span class="hljs-type">Leaf</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'a</span>
+  | <span class="hljs-type">Node</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'a</span> tree * <span class="hljs-symbol">'a</span> tree
+
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">rec</span> sum tree =
+  <span class="hljs-keyword">match</span> tree <span class="hljs-keyword">with</span>
+  | <span class="hljs-type">Leaf</span> n -&gt; n
+  | <span class="hljs-type">Node</span> (tree1, tree2) -&gt; sum tree1 + sum tree2
+</code></pre>
+<p>Run:</p>
+<pre><code class="hljs css language-sh">coq-of-ocaml example.ml
+</code></pre>
+<p>You should get a file <code>Example.v</code> representing the corresponding version in Coq:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-comment">(** Generated by coq-of-ocaml *)</span>
+<span class="hljs-keyword">Require</span> <span class="hljs-keyword">Import</span> OCaml.OCaml.
+
+<span class="hljs-keyword">Local</span> <span class="hljs-keyword">Open</span> <span class="hljs-keyword">Scope</span> string_scope.
+<span class="hljs-keyword">Local</span> <span class="hljs-keyword">Open</span> <span class="hljs-keyword">Scope</span> Z_scope.
+<span class="hljs-keyword">Local</span> <span class="hljs-keyword">Open</span> <span class="hljs-keyword">Scope</span> type_scope.
+<span class="hljs-keyword">Import</span> ListNotations.
+
+<span class="hljs-keyword">Inductive</span> tree (a : <span class="hljs-keyword">Set</span>) : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Leaf</span> : a -&gt; tree a
+| <span class="hljs-type">Node</span> : tree a -&gt; tree a -&gt; tree a.
+
+<span class="hljs-keyword">Arguments</span> Leaf {<span class="hljs-keyword">_</span>}.
+<span class="hljs-keyword">Arguments</span> Node {<span class="hljs-keyword">_</span>}.
+
+<span class="hljs-keyword">Fixpoint</span> <span class="hljs-built_in">sum</span> (tree : tree Z) : Z :=
+  <span class="hljs-keyword">match</span> tree <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">Leaf</span> n =&gt; n
+  | <span class="hljs-type">Node</span> tree1 tree2 =&gt; Z.add (<span class="hljs-built_in">sum</span> tree1) (<span class="hljs-built_in">sum</span> tree2)
+  <span class="hljs-keyword">end</span>.
+
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="command-line-arguments"></a><a href="#command-line-arguments" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Command line arguments</h2>
+<p>The general usage pattern is the following:</p>
+<pre><code class="hljs css language-sh">coq-of-ocaml [options] file.ml
+</code></pre>
+<p>The options are:</p>
+<ul>
+<li><code>-merlin file</code>: specify the configuration file of Merlin (by default <code>.merlin</code> if this file exists)</li>
+<li><code>-output file</code>: specify the name of the Coq <code>.v</code> file to output (by default the capitalized OCaml file name with a <code>.v</code> extension)</li>
+<li><code>-json-mode</code>: produce the list of error messages in JSON format; may be useful for post-processing</li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/doc/docs/install"><span class="arrow-prev">← </span><span>Install</span></a><a class="docs-next button" href="/coq-of-ocaml/doc/docs/ocaml-core"><span>OCaml core</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#minimal-example">Minimal example</a></li><li><a href="#command-line-arguments">Command line arguments</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/doc/" class="nav-home"><img src="/coq-of-ocaml/doc/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/doc/docs/en/install.html">Getting Started</a><a href="/coq-of-ocaml/doc/docs/en/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://clarus.github.io/coq-of-ocaml/tezos/" target="_blank" rel="noreferrer noopener">Tezos Formalization</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
