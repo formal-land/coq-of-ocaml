@@ -126,7 +126,8 @@ Inductive json : Set :=
 ```
 
 ## Mutually recursive types
-Coq only accept mutually recursive types on inductive definitions. A known trick is to use a Coq notation to simulate mutual definitions with type synonyms:
+### With synonyms
+Coq only accept mutually recursive types on inductive definitions. A known trick is to use a Coq notation to simulate mutual definitions on type synonyms:
 ```ocaml
 type path = path_item list
 
@@ -148,6 +149,8 @@ where "'path" := (list path_item).
 
 Definition path := 'path.
 ```
+
+### With records
 For mutual definitions with a record, coq-of-ocaml first generate record skeletons, so that the record definitions are transformed into type synonyms:
 ```ocaml
 type 'o t =
@@ -193,3 +196,35 @@ Arguments Error {_}.
 ```
 
 ## GADTs
+The type annotations on GADTs do not directly translate to Coq annotations compatible with the dependent pattern-matching of Coq. The solution adopted by coq-of-ocaml is to erase the GADT type annotations, and let the user manually add axioms to validate pattern-matching on GADT expressions.
+
+For example:
+```ocaml
+type (_, _) comparable_struct =
+  | Int_key : type_annot option -> (z num, _) comparable_struct
+  | String_key : type_annot option -> (string, _) comparable_struct
+  | Bool_key : type_annot option -> (bool, _) comparable_struct
+  | Pair_key :
+      (('a, leaf) comparable_struct * field_annot option)
+      * (('b, _) comparable_struct * field_annot option)
+      * type_annot option
+      -> (('a, 'b) pair, comb) comparable_struct
+```
+translates to:
+```coq
+Reserved Notation "'comparable_struct".
+
+Inductive comparable_struct_gadt : Set :=
+| Int_key : option type_annot -> comparable_struct_gadt
+| String_key : option type_annot -> comparable_struct_gadt
+| Bool_key : option type_annot -> comparable_struct_gadt
+| Pair_key :
+  comparable_struct_gadt * option field_annot ->
+  comparable_struct_gadt * option field_annot -> option type_annot ->
+  comparable_struct_gadt
+
+where "'comparable_struct" := (fun (_ _ : Set) => comparable_struct_gadt).
+
+Definition comparable_struct := 'comparable_struct.
+```
+The type `comparable_struct_gadt` is temporarily introduced as a version of `comparable_struct` without type parameters. Then `comparable_struct` is defined by ignoring its type parameters, preserving the arity of the OCaml type (here two type parameters). The use of a notation for `comparable_struct` allows the use of GADTs in mutually recursive types, but is not strictly necessary in this specific example.
