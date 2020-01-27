@@ -23,7 +23,7 @@ const users = [
 const baseUrl = '/coq-of-ocaml/doc/';
 
 const siteConfig = {
-  title: 'coq-of-ocaml', // Title for your website.
+  title: 'coq-of-ocaml Draft documentation', // Title for your website.
   tagline: 'Import OCaml programs to Coq',
   url: 'https://clarus.github.io', // Your website URL
   baseUrl, // Base URL for your project */
