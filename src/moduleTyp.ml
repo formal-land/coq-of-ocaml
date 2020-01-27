@@ -73,7 +73,10 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
   | Tmty_ident (_, long_ident_loc) ->
     of_ocaml_module_with_substitutions long_ident_loc []
   | Tmty_signature _ ->
-    raise (Error "signature") NotSupported "Anonymous definition of signatures is not handled"
+    raise
+      (Error "anonymous_signature")
+      NotSupported
+      "Anonymous definition of signatures is not handled"
   | Tmty_typeof _ ->
     raise (Error "typeof") NotSupported "The typeof in module types is not handled"
   | Tmty_with ({ mty_desc = Tmty_ident (_, long_ident_loc); _ }, substitutions) ->
