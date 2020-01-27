@@ -34,7 +34,7 @@ Definition plus_two : Z -> Z := compose incr incr.
 The pattern-matching is handled in Coq. The main difference is that constructors are curryfied:
 ```ocaml
 type 'a sequence =
-  | Empty of 'a
+  | Empty
   | Cons of 'a * 'a sequence
 
 let rec sum s =
@@ -45,7 +45,7 @@ let rec sum s =
 generates:
 ```coq
 Inductive sequence (a : Set) : Set :=
-| Empty : a -> sequence a
+| Empty : sequence a
 | Cons : a -> sequence a -> sequence a.
 
 Arguments Empty {_}.
