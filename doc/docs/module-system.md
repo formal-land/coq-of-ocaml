@@ -288,7 +288,171 @@ Definition x : (|M_WithCast|).(Source.t) := (|M_WithCast|).(Source.x).
 We did not add a notation for doing both the projection and the field access, as this would mess up with the inference for implicit variables in polymorphic fields.
 
 ## Include
+Includes, either in signatures or modules, are generally inlined. For example, with signatures:
+```ocaml
+module type COMPARABLE = sig
+  type t
+  val compare : t -> t -> int
+end
+
+module type S = sig
+  include COMPARABLE
+  val ( = ) : t -> t -> bool
+  val ( <> ) : t -> t -> bool
+  val ( < ) : t -> t -> bool
+  val ( <= ) : t -> t -> bool
+  val ( >= ) : t -> t -> bool
+  val ( > ) : t -> t -> bool
+  val equal : t -> t -> bool
+  val max : t -> t -> t
+  val min : t -> t -> t
+end
+```
+generates:
+```coq
+Module COMPARABLE.
+  Record signature {t : Set} := {
+    t := t;
+    compare : t -> t -> Z;
+  }.
+  Arguments signature : clear implicits.
+End COMPARABLE.
+
+Module S.
+  Record signature {t : Set} := {
+    t := t;
+    compare : t -> t -> Z;
+    op_eq : t -> t -> bool;
+    op_ltgt : t -> t -> bool;
+    op_lt : t -> t -> bool;
+    op_lteq : t -> t -> bool;
+    op_gteq : t -> t -> bool;
+    op_gt : t -> t -> bool;
+    equal : t -> t -> bool;
+    max : t -> t -> t;
+    min : t -> t -> t;
+  }.
+  Arguments signature : clear implicits.
+End S.
+```
+Due to duplications, coq-of-ocaml may generate Coq terms which are larger than the corresponding OCaml code. If you want to keep a generated Coq without duplications, we recommend you to use sub-modules rather than includes.
 
 ## Functors
+We represent functors as functions over bounded records. Here is the example of a functor declaration:
+```ocaml
+module Make (P : COMPARABLE) : (S with type t = P.t)
+```
+generating:
+```coq
+Parameter Make :
+  forall (P : {t : _ & COMPARABLE.signature t}),
+    {_ : unit & S.signature (|P|).(COMPARABLE.t)}.
+```
+We see that the return type of `Make` is a dependent type depending on the value of the field `COMPARABLE.t` of `P`. A functor may also return another functor.
+
+Here is an example of functor definition and application:
+```ocaml
+module type Source = sig
+  type t
+  val x : t
+end
+
+module type Target = sig
+  type t
+  val y : t
+end
+
+module F (X : Source) : Target with type t = X.t = struct
+  type t = X.t
+  let y = X.x
+end
+
+module M : Source = struct
+  type t = int
+  let x = 12
+end
+
+module N = F (M)
+```
+generating:
+```coq
+Module Source.
+  Record signature {t : Set} := {
+    t := t;
+    x : t;
+  }.
+  Arguments signature : clear implicits.
+End Source.
+
+Module Target.
+  Record signature {t : Set} := {
+    t := t;
+    y : t;
+  }.
+  Arguments signature : clear implicits.
+End Target.
+
+Definition F :=
+  fun (X : {t : _ & Source.signature t}) =>
+    (let t := (|X|).(Source.t) in
+    let y := (|X|).(Source.x) in
+    existT (fun _ => _) tt
+      {|
+        Target.y := y
+        |} : {_ : unit & Target.signature (|X|).(Source.t)}).
+
+Definition M :=
+  let t := Z in
+  let x := 12 in
+  existT _ _
+    {|
+      Source.x := x
+      |}.
+
+Definition N :=
+  F
+    (existT _ _
+      {|
+        Source.x := (|M|).(Source.x)
+        |}).
+```
+
+Applications of functors are represented by standard function applications. We cast the module parameter to make sure he has the correct record type. We cast records by re-creating them with the right field names.
 
 ## First-class modules
+First-class modules are modules which appear as values in OCaml. The encoding to dependent records provides a perfect way to represent them in Coq. Here is an example from the Tezos source code:
+```ocaml
+module type Boxed_set = sig
+  type elt
+  val elt_ty : elt comparable_ty
+  module OPS : S.SET with type elt = elt
+  val boxed : OPS.t
+  val size : int
+end
+
+type 'elt set = (module Boxed_set with type elt = 'elt)
+
+let set_mem
+  : type elt. elt -> elt set -> bool
+  = fun v (module Box) ->
+    Box.OPS.mem v Box.boxed
+```
+generates:
+```coq
+Module Boxed_set.
+  Record signature {elt OPS_t : Set} := {
+    elt := elt;
+    elt_ty : comparable_ty elt;
+    OPS : S.SET.signature elt OPS_t;
+    boxed : OPS.(S.SET.t);
+    size : Z;
+  }.
+  Arguments signature : clear implicits.
+End Boxed_set.
+
+Definition set (elt : Set) := {OPS_t : _ & Boxed_set.signature elt OPS_t}.
+
+Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=
+  (|Box|).(Boxed_set.OPS).(S.SET.mem) v (|Box|).(Boxed_set.boxed).
+```
+Many things are happening here, but the main thing to know is that we do not need to represent the OCaml lifts "module to value" or "value to module" since dependent records are already values in Coq.
