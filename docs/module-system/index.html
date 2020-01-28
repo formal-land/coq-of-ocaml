@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Module system · coq-of-ocaml</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Module system · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/"/><meta property="og:description" content="To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules."/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/js/language-name.js"></script><script src="/coq-of-ocaml/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/css/main.css"/><script src="/coq-of-ocaml/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/"><img class="logo" src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/install" target="_self">Docs</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml/examples/" target="_self">Examples</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/install">Install</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/run">Run</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/ocaml-core">OCaml core</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/type-definitions">Type definitions</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/docs/module-system">Module system</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Module system · coq-of-ocaml</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Module system · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/"/><meta property="og:description" content="To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules."/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/js/language-name.js"></script><script src="/coq-of-ocaml/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/css/main.css"/><script src="/coq-of-ocaml/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/"><img class="logo" src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/install" target="_self">Docs</a></li><li class=""><a href="https://clarus.github.io/coq-of-ocaml/examples/" target="_self">Examples</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/install">Install</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/run">Run</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/ocaml-core">OCaml core</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/type-definitions">Type definitions</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/docs/module-system">Module system</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -172,4 +172,142 @@ We use the concept of shape to find the name of a signature for Coq.
       S1.v := v
       |<span class="hljs-type">}.
 </span></code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/type-definitions"><span class="arrow-prev">← </span><span>Type definitions</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#general-mechanism">General mechanism</a><ul class="toc-headings"><li><a href="#example">Example</a></li><li><a href="#finding-names">Finding names</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
+<p>If no signatures are found, the module <code>M</code> is translated to a plain Coq module:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> v : <span class="hljs-built_in">string</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">M</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">let</span> not_v = <span class="hljs-string">"hi"</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> S.
+  <span class="hljs-keyword">Record</span> signature := {
+    v : string;
+  }.
+<span class="hljs-keyword">End</span> S.
+
+<span class="hljs-keyword">Module</span> M.
+  <span class="hljs-keyword">Definition</span> not_v : string := <span class="hljs-string">"hi"</span>.
+<span class="hljs-keyword">End</span> M.
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="bundled-vs-unbundled"></a><a href="#bundled-vs-unbundled" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Bundled vs unbundled</h3>
+<p>In OCaml modules may have some abstract types. In Coq we represent abstract types as type parameters for the records of the signatures. For module values, we instantiate known abstract types and use existential types for unknown abstract types. We always use a single existential <code>{... &amp; ...}</code> on the tuple of unknown types. If all types are known, we still use an existential on the empty tuple for uniformity.</p>
+<p>We say that:</p>
+<ul>
+<li>signatures are always unbundled (with universal types);</li>
+<li>module are always bundled (with existential types).</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="signatures"></a><a href="#signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Signatures</h2>
+<p>Signatures can contain a mix of:</p>
+<ul>
+<li>abstract types (constant or polymorphic);</li>
+<li>type definitions as synonyms;</li>
+<li>values;</li>
+<li>sub-modules.</li>
+</ul>
+<p>A complex example is the following:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">SubS</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">type</span> t
+  <span class="hljs-keyword">val</span> v : t
+  <span class="hljs-keyword">type</span> size
+  <span class="hljs-keyword">val</span> n : size
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">type</span> <span class="hljs-symbol">'a</span> t
+  <span class="hljs-keyword">type</span> int_t = <span class="hljs-built_in">int</span> t
+  <span class="hljs-keyword">val</span> numbers : int_t
+  <span class="hljs-keyword">module</span> <span class="hljs-type">Sub</span> : <span class="hljs-type">SubS</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> t = int_t
+  <span class="hljs-keyword">val</span> n : <span class="hljs-type">Sub</span>.size
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>which gets translated to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> SubS.
+  <span class="hljs-keyword">Record</span> signature {t size : <span class="hljs-keyword">Set</span>} := {
+    t := t;
+    v : t;
+    size := size;
+    n : size;
+  }.
+  <span class="hljs-keyword">Arguments</span> signature : <span class="hljs-built_in">clear</span> implicits.
+<span class="hljs-keyword">End</span> SubS.
+
+<span class="hljs-keyword">Module</span> S.
+  <span class="hljs-keyword">Record</span> signature {t : <span class="hljs-keyword">Set</span> -&gt; <span class="hljs-keyword">Set</span>} {Sub_size : <span class="hljs-keyword">Set</span>} := {
+    t := t;
+    int_t := t Z;
+    numbers : int_t;
+    Sub : SubS.signature int_t Sub_size;
+    n : Sub.(SubS.size);
+  }.
+  <span class="hljs-keyword">Arguments</span> signature : <span class="hljs-built_in">clear</span> implicits.
+<span class="hljs-keyword">End</span> S.
+</code></pre>
+<p>The signature <code>SubS</code> has two abstract types <code>t</code> and <code>size</code>. We define two synonym record fields <code>t := t</code> and <code>size := size</code> for uniform access.</p>
+<p>The signature <code>S</code> is parametrized by its abstract type <code>t</code> and the abstract type <code>Sub_size</code> of its sub-module <code>Sub</code>. The abstract type <code>t</code> is polymorphic and of type <code>Set -&gt; Set</code>. The type synonym <code>int_t</code> is defined as a synonym record field. The sub-module <code>Sub</code> is a field of the record <code>S.signature</code> and of type the record <code>SubS.signature</code>. Its type parameter <code>t</code> is instantiated by <code>int_t</code>. Note that sub-module values appear as <em>unbundled</em> records. This is the only case where module values are unbundled. We made this choice because the abstract types of the sub-module <code>Sub</code> may be instantiated later as in:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-type">S</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> <span class="hljs-type">Sub</span>.size = <span class="hljs-built_in">int</span>
+</code></pre>
+<p>Finally, a signature field such as <code>n</code> can refer to a type defined in the sub-module <code>Sub</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="modules"></a><a href="#modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Modules</h2>
+<p>The modules with a named signature are represented as bundled dependent records. The abstract types are generally known at the moment of the definition, but may still be hidden by casting. For example, the following code:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">Source</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">type</span> t
+  <span class="hljs-keyword">val</span> x : t
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">M_NoCast</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">type</span> t = <span class="hljs-built_in">int</span>
+  <span class="hljs-keyword">let</span> x = <span class="hljs-number">12</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">M_WithCast</span> : <span class="hljs-type">Source</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">type</span> t = <span class="hljs-built_in">int</span>
+  <span class="hljs-keyword">let</span> x = <span class="hljs-number">12</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>will generate:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> Source.
+  <span class="hljs-keyword">Record</span> signature {t : <span class="hljs-keyword">Set</span>} := {
+    t := t;
+    x : t;
+  }.
+  <span class="hljs-keyword">Arguments</span> signature : <span class="hljs-built_in">clear</span> implicits.
+<span class="hljs-keyword">End</span> Source.
+
+<span class="hljs-keyword">Definition</span> M_NoCast :=
+  <span class="hljs-keyword">let</span> t := Z <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">let</span> x := <span class="hljs-number">12</span> <span class="hljs-built_in">in</span>
+  existT (<span class="hljs-keyword">fun</span> <span class="hljs-keyword">_</span> =&gt; <span class="hljs-keyword">_</span>) tt
+    {|
+      <span class="hljs-type">Source</span>.x := x
+      |<span class="hljs-type">}.
+
+Definition</span> M_WithCast :=
+  <span class="hljs-keyword">let</span> t := Z <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">let</span> x := <span class="hljs-number">12</span> <span class="hljs-built_in">in</span>
+  existT <span class="hljs-keyword">_</span> <span class="hljs-keyword">_</span>
+    {|
+      <span class="hljs-type">Source</span>.x := x
+      |<span class="hljs-type">}.
+</span></code></pre>
+<p>The module <code>M_NoCast</code> has no existential variables while the module <code>M_WithCast</code> has one due to the cast to the <code>Source</code> signature. This is visible in the use a <code>_</code> to ask Coq to infer the value of this type, in place of a <code>tt</code> to represent the absence of existential variables.</p>
+<h3><a class="anchor" aria-hidden="true" id="existential-tuples"></a><a href="#existential-tuples" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Existential tuples</h3>
+<p>In the presence of several existential variables we use tuples of types with primitive projections. Primitive projections help Coq to infer missing values in generated terms, so that we do not need to annotate too much module expressions. These tuples are a variant of the tuples of the standard library. We use the following notations:</p>
+<pre><code class="hljs css language-coq">[T1 * T2 * ... Tn] <span class="hljs-comment">(* the type of a tuple *)</span>
+[v1, v2, ..., vn]  <span class="hljs-comment">(* the value of tuple *)</span>
+</code></pre>
+<p>A tuple of <em>n</em> values is encoded as <em>n-1</em> nested tuples of two values.</p>
+<h3><a class="anchor" aria-hidden="true" id="projections"></a><a href="#projections" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Projections</h3>
+<p>As modules are always bundled (unless in the case of sub-modules in signatures), we introduce a notation for the Coq projection <code>projT2</code>:</p>
+<pre><code class="hljs css language-coq">(|<span class="hljs-type">bundled_record</span>|<span class="hljs-type">)
+</span></code></pre>
+<p>Thus projections from modules encoded as a record:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> x = <span class="hljs-type">M_WithCast</span>.x
+</code></pre>
+<p>typically have this shape in Coq:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> x : (|<span class="hljs-type">M_WithCast</span>|<span class="hljs-type">).(Source</span>.t) := (|<span class="hljs-type">M_WithCast</span>|<span class="hljs-type">).(Source</span>.x).
+</code></pre>
+<p>We did not add a notation for doing both the projection and the field access, as this would mess up with the inference for implicit variables in polymorphic fields.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/type-definitions"><span class="arrow-prev">← </span><span>Type definitions</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#general-mechanism">General mechanism</a><ul class="toc-headings"><li><a href="#example">Example</a></li><li><a href="#finding-names">Finding names</a></li><li><a href="#bundled-vs-unbundled">Bundled vs unbundled</a></li></ul></li><li><a href="#signatures">Signatures</a></li><li><a href="#modules">Modules</a><ul class="toc-headings"><li><a href="#existential-tuples">Existential tuples</a></li><li><a href="#projections">Projections</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
