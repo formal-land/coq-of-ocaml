@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Module system · coq-of-ocaml</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Module system · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/"/><meta property="og:description" content="To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules."/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/js/language-name.js"></script><script src="/coq-of-ocaml/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/css/main.css"/><script src="/coq-of-ocaml/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/"><img class="logo" src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/install" target="_self">Docs</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml/examples/" target="_self">Examples</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/install">Install</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/run">Run</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/ocaml-core">OCaml core</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/type-definitions">Type definitions</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/docs/module-system">Module system</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Module system</h1></header><article><div><span><p>To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules.</p>
+<h2><a class="anchor" aria-hidden="true" id="general-mechanism"></a><a href="#general-mechanism" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>General mechanism</h2>
+<h3><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h3>
+<p>The following code:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-type">MyModuleForNamespacing</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">let</span> foo x = x + <span class="hljs-number">1</span>
+  <span class="hljs-keyword">let</span> bar = <span class="hljs-number">12</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">COMPARABLE</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">type</span> t
+  <span class="hljs-keyword">val</span> compare : t -&gt; t -&gt; <span class="hljs-built_in">int</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">InstanceToUseInFunctors</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">type</span> t = <span class="hljs-built_in">string</span>
+  <span class="hljs-keyword">let</span> compare = <span class="hljs-type">String</span>.compare
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>is translated to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> MyModuleForNamespacing.
+  <span class="hljs-keyword">Definition</span> foo (x : Z) : Z := Z.add x <span class="hljs-number">1.</span>
+  
+  <span class="hljs-keyword">Definition</span> bar : Z := <span class="hljs-number">12.</span>
+<span class="hljs-keyword">End</span> MyModuleForNamespacing.
+
+<span class="hljs-keyword">Module</span> COMPARABLE.
+  <span class="hljs-keyword">Record</span> signature {t : <span class="hljs-keyword">Set</span>} := {
+    t := t;
+    <span class="hljs-built_in">compare</span> : t -&gt; t -&gt; Z;
+  }.
+  <span class="hljs-keyword">Arguments</span> signature : <span class="hljs-built_in">clear</span> implicits.
+<span class="hljs-keyword">End</span> COMPARABLE.
+
+<span class="hljs-keyword">Definition</span> InstanceToUseInFunctors :=
+  <span class="hljs-keyword">let</span> t := string <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">let</span> <span class="hljs-built_in">compare</span> := Stdlib.String.<span class="hljs-built_in">compare</span> <span class="hljs-built_in">in</span>
+  existT (<span class="hljs-keyword">fun</span> <span class="hljs-keyword">_</span> =&gt; <span class="hljs-keyword">_</span>) tt
+    {|
+      <span class="hljs-type">COMPARABLE</span>.<span class="hljs-built_in">compare</span> := <span class="hljs-built_in">compare</span>
+      |<span class="hljs-type">}.
+</span></code></pre>
+<p>We use a plain module for <code>MyModuleForNamespacing</code> as we think it will not be used in functors or first-class modules. We translate the module type <code>COMPARABLE</code> to a record parametrized by <code>t</code> as this type is abstract. The <code>InstanceToUseInFunctors</code> is translated to a dependent record of type <code>COMPARABLE.signature</code> as it may by used as a parameter for a functor for example. We will see how we determine that a module should translates to a record.</p>
+<h3><a class="anchor" aria-hidden="true" id="finding-names"></a><a href="#finding-names" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Finding names</h3>
+<p>The heuristic is to represent a module by a dependent record if and only if it has a named signature. The name of the signature is then the name of the record type. Each signature is translated to a record type.</p>
+<p>The OCaml modules are structurally typed while the Coq records are nominally typed. Thus a large part of the conversion effort is dedicated to the naming of signatures. A signature is named by exploring the environment to find a similar signature definition with its name. Two signatures are deemed similar if they share the same list of names of values and sub-modules at top-level. We do not check for type names or values as they could be removed or changed by the use of type substitutions (operators <code>with type t = ...</code> and <code>with type t := ...</code>). We only check top-level names for efficiency reasons, and because exploring sub-modules resulted in errors in some cases.</p>
+<p>We generate an error message when multiple names are found for a signature. For example with:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S1</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> v : <span class="hljs-built_in">string</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S2</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> v : <span class="hljs-built_in">int</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">M</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">let</span> v = <span class="hljs-string">"hi"</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>the module <code>M</code> could have the signatures <code>S1</code> or <code>S2</code> as we only look at the value names, so we output the error:</p>
+<pre><code class="hljs css language-text">   7 | end
+   8 | 
+>  9 | module M = struct
+  10 |   let v = "hi"
+  11 | end
+  12 | 
+
+
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
+S2, S1
+
+We were looking for a module signature name for the following shape:
+[ v ]
+(a shape is a list of names of values and sub-modules)
+
+We use the concept of shape to find the name of a signature for Coq.
+</code></pre>
+<p>To discriminate between two similar signatures, you can add a dummy tag field. With:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S1</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> this_is_S1 : <span class="hljs-built_in">unit</span>
+  <span class="hljs-keyword">val</span> v : <span class="hljs-built_in">string</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S2</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> this_is_S2 : <span class="hljs-built_in">unit</span>
+  <span class="hljs-keyword">val</span> v : <span class="hljs-built_in">int</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">M</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">let</span> this_is_S1 = <span class="hljs-literal">()</span>
+  <span class="hljs-keyword">let</span> v = <span class="hljs-string">"hi"</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>coq-of-ocaml generates without errors:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> S1.
+  <span class="hljs-keyword">Record</span> signature := {
+    this_is_S1 : unit;
+    v : string;
+  }.
+<span class="hljs-keyword">End</span> S1.
+
+<span class="hljs-keyword">Module</span> S2.
+  <span class="hljs-keyword">Record</span> signature := {
+    this_is_S2 : unit;
+    v : Z;
+  }.
+<span class="hljs-keyword">End</span> S2.
+
+<span class="hljs-keyword">Definition</span> M :=
+  <span class="hljs-keyword">let</span> this_is_S1 := tt <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">let</span> v := <span class="hljs-string">"hi"</span> <span class="hljs-built_in">in</span>
+  existT (<span class="hljs-keyword">fun</span> <span class="hljs-keyword">_</span> =&gt; <span class="hljs-keyword">_</span>) tt
+    {|
+      <span class="hljs-type">S1</span>.this_is_S1 := this_is_S1;
+      S1.v := v
+      |<span class="hljs-type">}.
+</span></code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/type-definitions"><span class="arrow-prev">← </span><span>Type definitions</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#general-mechanism">General mechanism</a><ul class="toc-headings"><li><a href="#example">Example</a></li><li><a href="#finding-names">Finding names</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
