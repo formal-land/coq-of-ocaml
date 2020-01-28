@@ -67,10 +67,10 @@ class HomeSplash extends React.Component {
             <Button href={docUrl('install.html')}>Getting started</Button>
             <Button href={docUrl('ocaml-core.html')}>Concepts</Button>
             <Button
-              href="https://clarus.github.io/coq-of-ocaml/tezos/"
+              href="https://clarus.github.io/coq-of-ocaml/examples/"
               target="_blank"
             >
-              Tezos Formalization
+              Examples
             </Button>
           </PromoSection>
         </div>
@@ -176,13 +176,13 @@ class Index extends React.Component {
             title: 'Functional OCaml',
           },
           {
-            content: 'Translate modules, functors and first-class modules to dependent records as needed.',
+            content: 'Translates modules, functors and first-class modules using dependent records as needed.',
             image: `${baseUrl}img/undraw_logistics.svg`,
             imageAlign: 'top',
             title: 'Module system',
           },
           {
-            content: 'Generate some Coq even in case of errors.',
+            content: 'Generates some Coq even in case of errors.',
             image: `${baseUrl}img/undraw_convert.svg`,
             imageAlign: 'top',
             title: 'Progressive imports',

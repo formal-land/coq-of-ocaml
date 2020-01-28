@@ -1,6 +1,13 @@
 {
   "docs": {
-    "Getting started": ["install", "run"],
-    "Concepts": ["ocaml-core", "type-definitions"]
+    "Getting started": [
+      "install",
+      "run"
+    ],
+    "Concepts": [
+      "ocaml-core",
+      "type-definitions",
+      "module-system"
+    ]
   }
 }

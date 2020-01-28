@@ -20,7 +20,7 @@ const users = [
   },
 ];
 
-const baseUrl = '/coq-of-ocaml/doc/';
+const baseUrl = '/coq-of-ocaml/';
 
 const siteConfig = {
   title: 'coq-of-ocaml', // Title for your website.
@@ -41,6 +41,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'install', label: 'Docs'},
+    {href: 'https://github.com/clarus/coq-of-ocaml/examples/', label: 'Examples'},
     {href: 'https://github.com/clarus/coq-of-ocaml', label: 'GitHub'},
   ],
 
