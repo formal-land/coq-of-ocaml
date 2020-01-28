@@ -12,7 +12,8 @@ class Footer extends React.Component {
     const baseUrl = this.props.config.baseUrl;
     const docsUrl = this.props.config.docsUrl;
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
-    const langPart = `${language ? `${language}/` : ''}`;
+    // const langPart = `${language ? `${language}/` : ''}`;
+    const langPart = '';
     return `${baseUrl}${docsPart}${langPart}${doc}`;
   }
 
@@ -46,10 +47,25 @@ class Footer extends React.Component {
           </div>
           <div>
             <h5>Community</h5>
-            <a href="https://clarus.github.io/coq-of-ocaml/tezos/"
+            <a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22"
               target="_blank"
               rel="noreferrer noopener">
-              Tezos Formalization
+              Feature requests and proposals
+            </a>
+            <a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22"
+              target="_blank"
+              rel="noreferrer noopener">
+              Issues
+            </a>
+            <a href="https://gitter.im/clarus/coq-of-ocaml"
+              target="_blank"
+              rel="noreferrer noopener">
+              Chat room
+            </a>
+            <a href="https://www.nomadic-labs.com/"
+              target="_blank"
+              rel="noreferrer noopener">
+              Nomadic Labs
             </a>
           </div>
           <div>

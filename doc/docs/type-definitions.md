@@ -53,7 +53,9 @@ Inductive tree (a : Set) : Set :=
 Arguments Leaf {_}.
 Arguments Node {_}.
 ```
-For data constructors with a record parameter, the convention (from the OCaml compiler) is to name the corresponding record `type.Constructor`:
+The type parameter `a` is set implicit for the data constructors with the command `Arguments`, as it is implicit in OCaml too.
+
+For data constructors with a record parameter, the convention (taken from the OCaml compiler) is to name the corresponding record `type.Constructor`. For example:
 ```ocaml
 type element =
   | Point of { x : int; y : int}
@@ -83,7 +85,7 @@ Inductive element : Set :=
 | Point : element.Point Z Z -> element
 | Rectangle : element.Rectangle Z Z -> element.
 ```
-The definitions of the constructors' records are polymorphic so that they can be applied to the type being defined if needed (in this case `element`).
+The definitions of the constructors' records are polymorphic so that they can be applied to the type being defined if needed (in this case the type `element`).
 
 ### Extensible types
 The various forms of extensible types are ignored:

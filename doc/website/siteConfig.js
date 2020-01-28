@@ -23,7 +23,7 @@ const users = [
 const baseUrl = '/coq-of-ocaml/doc/';
 
 const siteConfig = {
-  title: 'coq-of-ocaml Draft documentation', // Title for your website.
+  title: 'coq-of-ocaml', // Title for your website.
   tagline: 'Import OCaml programs to Coq',
   url: 'https://clarus.github.io', // Your website URL
   baseUrl, // Base URL for your project */
@@ -107,7 +107,7 @@ const siteConfig = {
 
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
-  //   repoUrl: 'https://github.com/facebook/test-site',
+    repoUrl: 'https://github.com/clarus/coq-of-ocaml',
 };
 
 module.exports = siteConfig;
