@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Coq of OCaml - Demos</title>
+    <link rel="icon" data-emoji="🐓" type="image/png">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-list" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+              <a class="navbar-brand" href="">🐓🐫 Coq of OCaml <span class="hidden-xs">- Demos</span></a>
+          </div>
+
+          <div class="collapse navbar-collapse" id="navbar-collapse-list">
+            <ul class="nav navbar-nav">
+              <li ><a href="kernel/">Kernel of Coq</a></li>
+              <li ><a href="tezos/">Protocol of Tezos</a></li>
+              <li ><a href="tezos-interface/">Interface of Tezos</a></li>
+              <li><a href="https://github.com/clarus/coq-of-ocaml">Sources on GitHub</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="article">
+
+<div class="row center-block not-full-width">
+  <div class="col-md-12">
+    <h2>Coq of OCaml <small>Demos</small></h2>
+    <p>Here we present some demos of the development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Write at <code>web [at] clarus [dot] me</code> for more information. This work is currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>. We use <code>coq-of-ocaml</code> to verify the implementation of <a href="https://tezos.gitlab.io/whitedoc/michelson.html">Michelson</a>, the language to write smart-contracts in the crypto-currency <a href="https://tezos.com/">Tezos</a>. Contributors needed!</p>
+
+    <h3>Demos</h3>
+    <ul>
+      <li><a href="kernel/">the kernel of Coq</a> (for show)</li>
+      <li><a href="tezos/">the protocol of Tezos</a> (active development)</li>
+      <li><a href="tezos-interface/">the interface of the protocol of Tezos</a> (done)</li>
+    </ul>
+    
+    <h3>Concepts</h3>
+    <p>We import the purely functional part of <a href="https://ocaml.org/">OCaml</a> to <a href="https://coq.inria.fr/">Coq</a>. We aim to generate readable and idiomatic Coq code without encodings. The semantics of the source code may not be completely preserved. One should do manual reviews to assert that the generated Coq is a reasonable formalization of the sources. We generate a dummy Coq term and an explicit error message in case of error, so that we always generate something.</p>
+
+    <p>We compile OCaml projects by pluging into <a href="https://github.com/ocaml/merlin">Merlin</a>. This means that if you are using Merlin then you can run <code>coq-of-ocaml</code> with no additional configurations.</p>
+
+    <p>We do not do special treatments for the termination of fixpoints. We disable termination checks by using the package <a href="https://github.com/SimonBoulier/TypingFlags">coq-typing-flags</a> from <a href="http://perso.eleves.ens-rennes.fr/people/Simon.Boulier/">Simon Boulier</a> (should be included in the upcoming Coq 8.11). We erase the type parameters for the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/manual033.html">GADTs</a>. This makes sure that the type definitions are accepted, but can make the pattern matchings incomplete. We did not find a way to represent&nbsp;GADTs in&nbsp;Coq yet. We think that this is hard because the dependent pattern matching works well on type indicies which are values, but not so well with types.</p>
+
+    <p>We support modules, module types, functors and first-class modules. We generate either Coq modules or dependent records depending on the use case. We generate axioms for&nbsp;<code>.mli</code> files to help formalizations, but importing <code>.mli</code> files should be optional. The generation of the&nbsp;<code>Require</code> primitives between Coq files is custom.</p>
+
+    <h3>Related projects</h3>
+    <p>In the <a href="http://www.crowdsafety.org/wp-content/uploads/2015/03/crowd2-1024x352.jpg">JavaScript</a> community:</p>
+    <ul>
+      <li><a href="https://github.com/clarus/coq-of-js">coq-of-js</a> (under heavy development, contributors needed! sister project; <em>currently on halt to support coq-of-ocaml</em>)</li>
+    </ul>
+    <p>In the <a href="https://www.haskell.org/">Haskell</a> community:</p>
+    <ul>
+      <li><a href="https://github.com/antalsz/hs-to-coq">hs-to-coq</a> (import Haskell to Coq);</li>
+      <li><a href="https://github.com/gdijkstra/hs-to-gallina">hs-to-gallina</a> (2012, by <a href="http://gdijkstra.github.io/">Gabe Dijkstra</a>, first such project)</li>
+    </ul>
+  </div>
+</div>
+      </div>
+      <hr/>
+      <div class="footer" style="margin-bottom: 40px;">
+        <p class="text-center">
+          <small>Sources are on <a href="https://github.com/clarus/coq-of-ocaml">GitHub</a>. © Guillaume Claret.</small>
+        </p>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/favicon.js"></script>
+  </body>
+</html>
+

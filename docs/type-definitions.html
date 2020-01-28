@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Type definitions · coq-of-ocaml</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Coq-of-ocaml generates the Coq definitions corresponding to OCaml&#x27;s type definitions."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Type definitions · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/"/><meta property="og:description" content="Coq-of-ocaml generates the Coq definitions corresponding to OCaml&#x27;s type definitions."/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/js/language-name.js"></script><script src="/coq-of-ocaml/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/css/main.css"/><script src="/coq-of-ocaml/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/"><img class="logo" src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/install" target="_self">Docs</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml/examples" target="_self">Examples</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/install">Install</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/run">Run</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/ocaml-core">OCaml core</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/docs/type-definitions">Type definitions</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Type definitions</h1></header><article><div><span><p>Coq-of-ocaml generates the Coq definitions corresponding to OCaml's type definitions.</p>
+<h2><a class="anchor" aria-hidden="true" id="single-type-definitions"></a><a href="#single-type-definitions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Single type definitions</h2>
+<h3><a class="anchor" aria-hidden="true" id="synonyms"></a><a href="#synonyms" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Synonyms</h3>
+<p>Type synonyms are transformed to Coq definitions:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> string_list = <span class="hljs-built_in">string</span> <span class="hljs-built_in">list</span>
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> string_list := list string.
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="records"></a><a href="#records" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Records</h3>
+<p>OCaml records are transformed to Coq records, namespaced into a module to prevent name collisions. The transformation includes the <code>with_</code> operators for field substitutions:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> answer = {
+  code : <span class="hljs-built_in">int</span>;
+  message : <span class="hljs-built_in">string</span> }
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> answer.
+  <span class="hljs-keyword">Record</span> <span class="hljs-built_in">record</span> := {
+    code : Z;
+    message : string }.
+  <span class="hljs-keyword">Definition</span> with_code (r : <span class="hljs-built_in">record</span>) code : <span class="hljs-built_in">record</span> :=
+    {| <span class="hljs-type">code</span> := code; message := message r |<span class="hljs-type">}.
+  Definition</span> with_message (r : <span class="hljs-built_in">record</span>) message : <span class="hljs-built_in">record</span> :=
+    {| <span class="hljs-type">code</span> := code r; message := message |<span class="hljs-type">}.
+End</span> answer.
+<span class="hljs-keyword">Definition</span> answer := answer.<span class="hljs-built_in">record</span>.
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="algebraic-data-types"></a><a href="#algebraic-data-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Algebraic data types</h3>
+<p>Algebraic data types generate an inductive definition in Coq:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> <span class="hljs-symbol">'a</span> tree =
+  | <span class="hljs-type">Leaf</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'a</span>
+  | <span class="hljs-type">Node</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'a</span> tree * <span class="hljs-symbol">'a</span> tree
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Inductive</span> tree (a : <span class="hljs-keyword">Set</span>) : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Leaf</span> : a -&gt; tree a
+| <span class="hljs-type">Node</span> : (tree a) -&gt; (tree a) -&gt; tree a.
+
+<span class="hljs-keyword">Arguments</span> Leaf {<span class="hljs-keyword">_</span>}.
+<span class="hljs-keyword">Arguments</span> Node {<span class="hljs-keyword">_</span>}.
+</code></pre>
+<p>The type parameter <code>a</code> is set implicit for the data constructors with the command <code>Arguments</code>, as it is implicit in OCaml too.</p>
+<p>For data constructors with a record parameter, the convention (taken from the OCaml compiler) is to name the corresponding record <code>type.Constructor</code>. For example:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> element =
+  | <span class="hljs-type">Point</span> <span class="hljs-keyword">of</span> { x : <span class="hljs-built_in">int</span>; y : <span class="hljs-built_in">int</span>}
+  | <span class="hljs-type">Rectangle</span> <span class="hljs-keyword">of</span> { height : <span class="hljs-built_in">int</span>; width : <span class="hljs-built_in">int</span>}
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> element.
+  <span class="hljs-keyword">Module</span> Point.
+    <span class="hljs-keyword">Record</span> <span class="hljs-built_in">record</span> {x y : <span class="hljs-keyword">Set</span>} := {
+      x : x;
+      y : y }.
+    <span class="hljs-keyword">Arguments</span> <span class="hljs-built_in">record</span> : <span class="hljs-built_in">clear</span> implicits.
+  <span class="hljs-keyword">End</span> Point.
+  <span class="hljs-keyword">Definition</span> Point := Point.<span class="hljs-built_in">record</span>.
+  
+  <span class="hljs-keyword">Module</span> Rectangle.
+    <span class="hljs-keyword">Record</span> <span class="hljs-built_in">record</span> {height width : <span class="hljs-keyword">Set</span>} := {
+      height : height;
+      width : width }.
+    <span class="hljs-keyword">Arguments</span> <span class="hljs-built_in">record</span> : <span class="hljs-built_in">clear</span> implicits.
+  <span class="hljs-keyword">End</span> Rectangle.
+  <span class="hljs-keyword">Definition</span> Rectangle := Rectangle.<span class="hljs-built_in">record</span>.
+<span class="hljs-keyword">End</span> element.
+
+<span class="hljs-keyword">Inductive</span> element : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Point</span> : element.Point Z Z -&gt; element
+| <span class="hljs-type">Rectangle</span> : element.Rectangle Z Z -&gt; element.
+</code></pre>
+<p>The definitions of the constructors' records are polymorphic so that they can be applied to the type being defined if needed (in this case the type <code>element</code>).</p>
+<h3><a class="anchor" aria-hidden="true" id="extensible-types"></a><a href="#extensible-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Extensible types</h3>
+<p>The various forms of extensible types are ignored:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">exception</span> <span class="hljs-type">Too_long</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">string</span>
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-comment">(* exception Too_long *)</span>
+</code></pre>
+<p>and:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> error += <span class="hljs-type">Lazy_script_decode</span>
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-comment">(* type_extension *)</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="polymorphic-variants"></a><a href="#polymorphic-variants" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Polymorphic variants</h3>
+<p>The polymorphic variant types are converted to the corresponding Coq inductive as an approximation:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> json =
+  [ <span class="hljs-type">`O</span> <span class="hljs-keyword">of</span> (<span class="hljs-built_in">string</span> * json) <span class="hljs-built_in">list</span>
+  | <span class="hljs-type">`Bool</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">bool</span>
+  | <span class="hljs-type">`Float</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">float</span>
+  | <span class="hljs-type">`A</span> <span class="hljs-keyword">of</span> json <span class="hljs-built_in">list</span>
+  | <span class="hljs-type">`Null</span>
+  | <span class="hljs-type">`String</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">string</span> ]
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Inductive</span> json : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Bool</span> : bool -&gt; json
+| <span class="hljs-type">Null</span> : json
+| <span class="hljs-type">O</span> : list (string * json) -&gt; json
+| <span class="hljs-type">Float</span> : Z -&gt; json
+| <span class="hljs-type">String</span> : string -&gt; json
+| <span class="hljs-type">A</span> : list json -&gt; json.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="mutually-recursive-types"></a><a href="#mutually-recursive-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mutually recursive types</h2>
+<h3><a class="anchor" aria-hidden="true" id="with-synonyms"></a><a href="#with-synonyms" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>With synonyms</h3>
+<p>Coq only accept mutually recursive types on inductive definitions. A known trick is to use a Coq notation to simulate mutual definitions on type synonyms:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> path = path_item <span class="hljs-built_in">list</span>
+
+<span class="hljs-keyword">and</span> path_item =
+  | <span class="hljs-type">Field</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">string</span>  <span class="hljs-comment">(** A field in an object. *)</span>
+  | <span class="hljs-type">Index</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>  <span class="hljs-comment">(** An index in an array. *)</span>
+  | <span class="hljs-type">Star</span>  <span class="hljs-comment">(** Any / every field or index. *)</span>
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Reserved</span> <span class="hljs-keyword">Notation</span> <span class="hljs-string">"'path"</span>.
+
+<span class="hljs-keyword">Inductive</span> path_item : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Index</span> : Z -&gt; path_item
+| <span class="hljs-type">Field</span> : string -&gt; path_item
+| <span class="hljs-type">Star</span> : path_item
+
+<span class="hljs-keyword">where</span> <span class="hljs-string">"'path"</span> := (list path_item).
+
+<span class="hljs-keyword">Definition</span> path := 'path.
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="with-records"></a><a href="#with-records" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>With records</h3>
+<p>For mutual definitions with a record, coq-of-ocaml first generate record skeletons, so that the record definitions are transformed into type synonyms:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> <span class="hljs-symbol">'o</span> t =
+  [ <span class="hljs-type">`Ok</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'o</span> <span class="hljs-comment">(* 200 *)</span>
+  | <span class="hljs-type">`OkStream</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'o</span> stream <span class="hljs-comment">(* 200 *)</span>
+  | <span class="hljs-type">`Error</span> <span class="hljs-keyword">of</span> error <span class="hljs-built_in">list</span> option <span class="hljs-comment">(* 500 *)</span> ]
+
+<span class="hljs-keyword">and</span> <span class="hljs-symbol">'a</span> stream = {next : <span class="hljs-built_in">unit</span> -&gt; <span class="hljs-symbol">'a</span> option <span class="hljs-type">Lwt</span>.t; shutdown : <span class="hljs-built_in">unit</span> -&gt; <span class="hljs-built_in">unit</span>}
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Reserved</span> <span class="hljs-keyword">Notation</span> <span class="hljs-string">"'stream"</span>.
+
+<span class="hljs-keyword">Module</span> stream.
+  <span class="hljs-keyword">Record</span> <span class="hljs-built_in">record</span> {next shutdown : <span class="hljs-keyword">Set</span>} := {
+    next : next;
+    shutdown : shutdown }.
+  <span class="hljs-keyword">Arguments</span> <span class="hljs-built_in">record</span> : <span class="hljs-built_in">clear</span> implicits.
+  <span class="hljs-keyword">Definition</span> with_next {next_type shutdown_type : <span class="hljs-keyword">Set</span>}
+    (r : <span class="hljs-built_in">record</span> next_type shutdown_type) next
+    : <span class="hljs-built_in">record</span> next_type shutdown_type :=
+    {| <span class="hljs-type">next</span> := next; shutdown := shutdown r |<span class="hljs-type">}.
+  Definition</span> with_shutdown {next_type shutdown_type : <span class="hljs-keyword">Set</span>}
+    (r : <span class="hljs-built_in">record</span> next_type shutdown_type) shutdown
+    : <span class="hljs-built_in">record</span> next_type shutdown_type :=
+    {| <span class="hljs-type">next</span> := next r; shutdown := shutdown |<span class="hljs-type">}.
+End</span> stream.
+<span class="hljs-keyword">Definition</span> stream_skeleton := stream.<span class="hljs-built_in">record</span>.
+
+<span class="hljs-keyword">Inductive</span> t (o : <span class="hljs-keyword">Set</span>) : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">OkStream</span> : 'stream o -&gt; t o
+| <span class="hljs-type">Ok</span> : o -&gt; t o
+| <span class="hljs-type">Error</span> : option (list Error_monad.__error) -&gt; t o
+
+<span class="hljs-keyword">where</span> <span class="hljs-string">"'stream"</span> := (<span class="hljs-keyword">fun</span> (a : <span class="hljs-keyword">Set</span>) =&gt;
+  stream_skeleton (unit -&gt; Lwt.t (option a)) (unit -&gt; unit)).
+
+<span class="hljs-keyword">Definition</span> stream := 'stream.
+
+<span class="hljs-keyword">Arguments</span> OkStream {<span class="hljs-keyword">_</span>}.
+<span class="hljs-keyword">Arguments</span> Ok {<span class="hljs-keyword">_</span>}.
+<span class="hljs-keyword">Arguments</span> Error {<span class="hljs-keyword">_</span>}.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="gadts"></a><a href="#gadts" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>GADTs</h2>
+<p>The type annotations on GADTs do not directly translate to Coq annotations compatible with the dependent pattern-matching of Coq. The solution adopted by coq-of-ocaml is to erase the GADT type annotations, and let the user manually add axioms to validate pattern-matching on GADT expressions.</p>
+<p>For example:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> (_, _) comparable_struct =
+  | <span class="hljs-type">Int_key</span> : type_annot option -&gt; (z num, _) comparable_struct
+  | <span class="hljs-type">String_key</span> : type_annot option -&gt; (<span class="hljs-built_in">string</span>, _) comparable_struct
+  | <span class="hljs-type">Bool_key</span> : type_annot option -&gt; (<span class="hljs-built_in">bool</span>, _) comparable_struct
+  | <span class="hljs-type">Pair_key</span> :
+      ((<span class="hljs-symbol">'a</span>, leaf) comparable_struct * field_annot option)
+      * ((<span class="hljs-symbol">'b</span>, _) comparable_struct * field_annot option)
+      * type_annot option
+      -&gt; ((<span class="hljs-symbol">'a</span>, <span class="hljs-symbol">'b</span>) pair, comb) comparable_struct
+</code></pre>
+<p>translates to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Reserved</span> <span class="hljs-keyword">Notation</span> <span class="hljs-string">"'comparable_struct"</span>.
+
+<span class="hljs-keyword">Inductive</span> comparable_struct_gadt : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Int_key</span> : option type_annot -&gt; comparable_struct_gadt
+| <span class="hljs-type">String_key</span> : option type_annot -&gt; comparable_struct_gadt
+| <span class="hljs-type">Bool_key</span> : option type_annot -&gt; comparable_struct_gadt
+| <span class="hljs-type">Pair_key</span> :
+  comparable_struct_gadt * option field_annot -&gt;
+  comparable_struct_gadt * option field_annot -&gt; option type_annot -&gt;
+  comparable_struct_gadt
+
+<span class="hljs-keyword">where</span> <span class="hljs-string">"'comparable_struct"</span> := (<span class="hljs-keyword">fun</span> (<span class="hljs-keyword">_</span> <span class="hljs-keyword">_</span> : <span class="hljs-keyword">Set</span>) =&gt; comparable_struct_gadt).
+
+<span class="hljs-keyword">Definition</span> comparable_struct := 'comparable_struct.
+</code></pre>
+<p>The type <code>comparable_struct_gadt</code> is temporarily introduced as a version of <code>comparable_struct</code> without type parameters. Then <code>comparable_struct</code> is defined by ignoring its type parameters, preserving the arity of the OCaml type (here two type parameters). The use of a notation for <code>comparable_struct</code> allows the use of GADTs in mutually recursive types, but is not strictly necessary in this specific example.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/ocaml-core"><span class="arrow-prev">← </span><span>OCaml core</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#single-type-definitions">Single type definitions</a><ul class="toc-headings"><li><a href="#synonyms">Synonyms</a></li><li><a href="#records">Records</a></li><li><a href="#algebraic-data-types">Algebraic data types</a></li><li><a href="#extensible-types">Extensible types</a></li><li><a href="#polymorphic-variants">Polymorphic variants</a></li></ul></li><li><a href="#mutually-recursive-types">Mutually recursive types</a><ul class="toc-headings"><li><a href="#with-synonyms">With synonyms</a></li><li><a href="#with-records">With records</a></li></ul></li><li><a href="#gadts">GADTs</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
