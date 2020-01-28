@@ -131,3 +131,164 @@ Definition M :=
       S1.v := v
       |}.
 ```
+
+If no signatures are found, the module `M` is translated to a plain Coq module:
+```ocaml
+module type S = sig
+  val v : string
+end
+
+module M = struct
+  let not_v = "hi"
+end
+```
+generates:
+```coq
+Module S.
+  Record signature := {
+    v : string;
+  }.
+End S.
+
+Module M.
+  Definition not_v : string := "hi".
+End M.
+```
+
+### Bundled vs unbundled
+In OCaml modules may have some abstract types. In Coq we represent abstract types as type parameters for the records of the signatures. For module values, we instantiate known abstract types and use existential types for unknown abstract types. We always use a single existential `{... & ...}` on the tuple of unknown types. If all types are known, we still use an existential on the empty tuple for uniformity.
+
+We say that:
+* signatures are always unbundled (with universal types);
+* module are always bundled (with existential types).
+
+## Signatures
+Signatures can contain a mix of:
+* abstract types (constant or polymorphic);
+* type definitions as synonyms;
+* values;
+* sub-modules.
+
+A complex example is the following:
+```ocaml
+module type SubS = sig
+  type t
+  val v : t
+  type size
+  val n : size
+end
+
+module type S = sig
+  type 'a t
+  type int_t = int t
+  val numbers : int_t
+  module Sub : SubS with type t = int_t
+  val n : Sub.size
+end
+```
+which gets translated to:
+```coq
+Module SubS.
+  Record signature {t size : Set} := {
+    t := t;
+    v : t;
+    size := size;
+    n : size;
+  }.
+  Arguments signature : clear implicits.
+End SubS.
+
+Module S.
+  Record signature {t : Set -> Set} {Sub_size : Set} := {
+    t := t;
+    int_t := t Z;
+    numbers : int_t;
+    Sub : SubS.signature int_t Sub_size;
+    n : Sub.(SubS.size);
+  }.
+  Arguments signature : clear implicits.
+End S.
+```
+
+The signature `SubS` has two abstract types `t` and `size`. We define two synonym record fields `t := t` and `size := size` for uniform access.
+
+The signature `S` is parametrized by its abstract type `t` and the abstract type `Sub_size` of its sub-module `Sub`. The abstract type `t` is polymorphic and of type `Set -> Set`. The type synonym `int_t` is defined as a synonym record field. The sub-module `Sub` is a field of the record `S.signature` and of type the record `SubS.signature`. Its type parameter `t` is instantiated by `int_t`. Note that sub-module values appear as *unbundled* records. This is the only case where module values are unbundled. We made this choice because the abstract types of the sub-module `Sub` may be instantiated later as in:
+```ocaml
+S with type Sub.size = int
+```
+Finally, a signature field such as `n` can refer to a type defined in the sub-module `Sub`.
+
+## Modules
+The modules with a named signature are represented as bundled dependent records. The abstract types are generally known at the moment of the definition, but may still be hidden by casting. For example, the following code:
+```ocaml
+module type Source = sig
+  type t
+  val x : t
+end
+
+module M_NoCast = struct
+  type t = int
+  let x = 12
+end
+
+module M_WithCast : Source = struct
+  type t = int
+  let x = 12
+end
+```
+will generate:
+```coq
+Module Source.
+  Record signature {t : Set} := {
+    t := t;
+    x : t;
+  }.
+  Arguments signature : clear implicits.
+End Source.
+
+Definition M_NoCast :=
+  let t := Z in
+  let x := 12 in
+  existT (fun _ => _) tt
+    {|
+      Source.x := x
+      |}.
+
+Definition M_WithCast :=
+  let t := Z in
+  let x := 12 in
+  existT _ _
+    {|
+      Source.x := x
+      |}.
+```
+The module `M_NoCast` has no existential variables while the module `M_WithCast` has one due to the cast to the `Source` signature. This is visible in the use a `_` to ask Coq to infer the value of this type, in place of a `tt` to represent the absence of existential variables.
+
+### Existential tuples
+In the presence of several existential variables we use tuples of types with primitive projections. Primitive projections help Coq to infer missing values in generated terms, so that we do not need to annotate too much module expressions. These tuples are a variant of the tuples of the standard library. We use the following notations:
+```coq
+[T1 * T2 * ... Tn] (* the type of a tuple *)
+[v1, v2, ..., vn]  (* the value of tuple *)
+```
+A tuple of *n* values is encoded as *n-1* nested tuples of two values.
+
+### Projections
+As modules are always bundled (unless in the case of sub-modules in signatures), we introduce a notation for the Coq projection `projT2`:
+```coq
+(|bundled_record|)
+```
+Thus projections from modules encoded as a record:
+```ocaml
+let x = M_WithCast.x
+```
+typically have this shape in Coq:
+```coq
+Definition x : (|M_WithCast|).(Source.t) := (|M_WithCast|).(Source.x).
+```
+We did not add a notation for doing both the projection and the field access, as this would mess up with the inference for implicit variables in polymorphic fields.
+
+## Include
+
+## Functors
+
+## First-class modules
