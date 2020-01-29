@@ -94,7 +94,7 @@
   existT (<span class="hljs-keyword">fun</span> <span class="hljs-keyword">_</span> =&gt; <span class="hljs-keyword">_</span>) tt
     {|
       <span class="hljs-type">COMPARABLE</span>.<span class="hljs-built_in">compare</span> := <span class="hljs-built_in">compare</span>
-      |<span class="hljs-type">}.
+    |<span class="hljs-type">}.
 </span></code></pre>
 <p>We use a plain module for <code>MyModuleForNamespacing</code> as we think it will not be used in functors or first-class modules. We translate the module type <code>COMPARABLE</code> to a record parametrized by <code>t</code> as this type is abstract. The <code>InstanceToUseInFunctors</code> is translated to a dependent record of type <code>COMPARABLE.signature</code> as it may by used as a parameter for a functor for example. We will see how we determine that a module should translates to a record.</p>
 <h3><a class="anchor" aria-hidden="true" id="finding-names"></a><a href="#finding-names" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Finding names</h3>
@@ -170,7 +170,7 @@ We use the concept of shape to find the name of a signature for Coq.
     {|
       <span class="hljs-type">S1</span>.this_is_S1 := this_is_S1;
       S1.v := v
-      |<span class="hljs-type">}.
+    |<span class="hljs-type">}.
 </span></code></pre>
 <p>If no signatures are found, the module <code>M</code> is translated to a plain Coq module:</p>
 <pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S</span> = <span class="hljs-keyword">sig</span>
@@ -282,7 +282,7 @@ We use the concept of shape to find the name of a signature for Coq.
   existT (<span class="hljs-keyword">fun</span> <span class="hljs-keyword">_</span> =&gt; <span class="hljs-keyword">_</span>) tt
     {|
       <span class="hljs-type">Source</span>.x := x
-      |<span class="hljs-type">}.
+    |<span class="hljs-type">}.
 
 Definition</span> M_WithCast :=
   <span class="hljs-keyword">let</span> t := Z <span class="hljs-built_in">in</span>
@@ -290,7 +290,7 @@ Definition</span> M_WithCast :=
   existT <span class="hljs-keyword">_</span> <span class="hljs-keyword">_</span>
     {|
       <span class="hljs-type">Source</span>.x := x
-      |<span class="hljs-type">}.
+    |<span class="hljs-type">}.
 </span></code></pre>
 <p>The module <code>M_NoCast</code> has no existential variables while the module <code>M_WithCast</code> has one due to the cast to the <code>Source</code> signature. This is visible in the use a <code>_</code> to ask Coq to infer the value of this type, in place of a <code>tt</code> to represent the absence of existential variables.</p>
 <h3><a class="anchor" aria-hidden="true" id="existential-tuples"></a><a href="#existential-tuples" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Existential tuples</h3>
@@ -414,7 +414,7 @@ Definition</span> M_WithCast :=
     existT (<span class="hljs-keyword">fun</span> <span class="hljs-keyword">_</span> =&gt; <span class="hljs-keyword">_</span>) tt
       {|
         <span class="hljs-type">Target</span>.y := y
-        |<span class="hljs-type">} : {_</span> : unit &amp; Target.signature (|<span class="hljs-type">X</span>|<span class="hljs-type">).(Source</span>.t)}).
+      |<span class="hljs-type">} : {_</span> : unit &amp; Target.signature (|<span class="hljs-type">X</span>|<span class="hljs-type">).(Source</span>.t)}).
 
 <span class="hljs-keyword">Definition</span> M :=
   <span class="hljs-keyword">let</span> t := Z <span class="hljs-built_in">in</span>
@@ -422,14 +422,14 @@ Definition</span> M_WithCast :=
   existT <span class="hljs-keyword">_</span> <span class="hljs-keyword">_</span>
     {|
       <span class="hljs-type">Source</span>.x := x
-      |<span class="hljs-type">}.
+    |<span class="hljs-type">}.
 
 Definition</span> N :=
   F
     (existT <span class="hljs-keyword">_</span> <span class="hljs-keyword">_</span>
       {|
         <span class="hljs-type">Source</span>.x := (|<span class="hljs-type">M</span>|<span class="hljs-type">).(Source</span>.x)
-        |<span class="hljs-type">}).
+      |<span class="hljs-type">}).
 </span></code></pre>
 <p>Applications of functors are represented by standard function applications. We cast the module parameter to make sure he has the correct record type. We cast records by re-creating them with the right field names.</p>
 <h2><a class="anchor" aria-hidden="true" id="first-class-modules"></a><a href="#first-class-modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>First-class modules</h2>
