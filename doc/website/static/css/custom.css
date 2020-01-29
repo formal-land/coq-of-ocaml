@@ -29,6 +29,11 @@
   }
 }
 
+/* Do not have gluing buttons for the home page on mobile */
+.pluginWrapper.buttonWrapper .button {
+  margin-bottom: 5px;
+}
+
 /* Language name in code blocks */
 .hljs.language-coq {
   background-color: hsl(0, 80%, 96%);
@@ -45,7 +50,7 @@ pre {
 pre .languageBadge {
   background-color: transparent;
   color: #5e656e;
-  font-size: 85%;
+  font-size: 75%;
   font-weight: 600;
   height: 30px;
   padding: 0;

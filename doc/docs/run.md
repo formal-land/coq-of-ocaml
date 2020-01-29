@@ -3,7 +3,7 @@ id: run
 title: Run
 ---
 
-Coq-of-ocaml translates the OCaml files one by one. To translate a complex project, add a `.merlin` file to express your dependencies in the [Merlin](https://github.com/ocaml/merlin) format.
+coq-of-ocaml translates the OCaml files one by one. It uses [Merlin](https://github.com/ocaml/merlin) to get the typing environment of each file. Thus you should first configure Merlin and have a `.merlin` file if your project contains multiple files.
 
 ## Minimal example
 Create a file `example.ml`:
@@ -55,7 +55,7 @@ coq-of-ocaml [options] file.ml
 ```
 
 The options are:
-* `-merlin file`: specify the configuration file of Merlin (by default `.merlin` if this file exists)
+* `-merlin file`: specify the configuration file of Merlin (by default `.merlin` if this file exists in the current folder)
 * `-output file`: specify the name of the Coq `.v` file to output (by default the capitalized OCaml file name with a `.v` extension)
-* `-json-mode`: produce the list of error messages in JSON format; may be useful for post-processing
+* `-json-mode`: produce the list of error messages in JSON format; useful for post-processing
 

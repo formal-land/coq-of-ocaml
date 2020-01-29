@@ -3,7 +3,7 @@ id: install
 title: Install
 ---
 
-We recommend you to install the latest stable version via [opam](https://opam.ocaml.org/).
+We recommend to install the latest stable version of coq-of-ocaml via [opam](https://opam.ocaml.org/).
 
 ## Latest stable version
 Using the package manager opam, add the [Coq repository](http://coq.io/opam/):
@@ -21,10 +21,10 @@ coq-of-ocaml
 It should show you the help message.
 
 ## Current development version
-Clone the [GitHub repository](https://github.com/clarus/coq-of-ocaml) with the sources and run:
+Install the development version to get the latest features. Clone the [GitHub repository](https://github.com/clarus/coq-of-ocaml) with the sources and run in the root folder of the project:
 ```sh
 opam pin add coq-of-ocaml .
 ```
 
 ## Manually
-Read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and to get the list of commands to build the project.
+Read the `coq-of-ocaml.opam` file at the root of the project to know the updated list of dependencies of the project and commands to build it.

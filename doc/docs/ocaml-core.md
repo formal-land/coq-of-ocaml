@@ -3,10 +3,10 @@ id: ocaml-core
 title: OCaml core
 ---
 
-Coq-of-ocaml translates the functional core of [OCaml](https://ocaml.org/) to the corresponding [Coq](https://coq.inria.fr/) constructs. It adds type annotations for each definition. We present how this translation work.
+coq-of-ocaml translates the functional core of [OCaml](https://ocaml.org/) to the corresponding [Coq](https://coq.inria.fr/) constructs. It adds type annotations for each definition. We present how this translation work.
 
 ## Functions
-The OCaml functions are translated to standard Coq functions. The definition of the composition function in OCaml:
+The OCaml functions are translated to standard Coq functions. For example, the definition of the composition function in OCaml:
 ```ocaml
 let compose g f x =
   g (f x)
@@ -16,7 +16,7 @@ produces in Coq:
 Definition compose {A B C : Set} (g : A -> B) (f : C -> A) (x : C) : B :=
   g (f x).
 ```
-The polymorphic variables `A`, `B` and `C` are written explicitly as there is no polymorphic inference in Coq. These polymorphic variables are set implicit with `{...}` so that they are inferred when doing function application:
+The polymorphic variables `A`, `B` and `C` are written explicitly as there are no polymorphic type inference in Coq (it is unclear if type variables should be in `Set`, `Type` or `Prop` for example). These polymorphic variables are set implicit with `{...}` so that they are inferred when doing function application:
 ```ocaml
 let incr n = n + 1
 

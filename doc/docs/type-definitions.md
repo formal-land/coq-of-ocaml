@@ -3,7 +3,7 @@ id: type-definitions
 title: Type definitions
 ---
 
-Coq-of-ocaml generates the Coq definitions corresponding to OCaml's type definitions.
+coq-of-ocaml generates the Coq definitions corresponding to OCaml's type definitions.
 
 ## Single type definitions
 ### Synonyms
