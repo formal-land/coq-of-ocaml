@@ -129,7 +129,7 @@ Definition tripe : {'[a, b, c, bar] : _ & Triple.signature a b c bar} :=
       Triple.vb := vb;
       Triple.vc := vc;
       Triple.foo := foo
-      |}.
+    |}.
 
 Module UsingTriple.
   Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Set} := {
@@ -169,7 +169,7 @@ Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
       Boxed_set.elt_ty := elt_ty;
       Boxed_set.boxed := boxed;
       Boxed_set.size := size
-      |}.
+    |}.
 
 Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=
   (|Box|).(Boxed_set.OPS).(S.SET.mem) v (|Box|).(Boxed_set.boxed).

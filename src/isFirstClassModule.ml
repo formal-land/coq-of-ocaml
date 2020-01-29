@@ -92,19 +92,19 @@ let rec is_module_typ_first_class
         Not_found (
           "Did not find a module signature name for the following shape:\n" ^
           Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
-          "(a shape is a list of names of values)\n\n" ^
+          "(a shape is a list of names of values and sub-modules)\n\n" ^
           "We use the concept of shape to find the name of a signature for Coq."
         )
       )
     | [signature_path] -> return (Found signature_path)
     | signature_path :: (_ :: _) ->
       raise (Found signature_path) FirstClassModule (
-        "It is unclear which first-class module this projection is from. At least two similar\n" ^
-        "module signatures found, namely:\n" ^
+        "It is unclear which name has this signature. At least two similar\n" ^
+        "signatures found, namely:\n" ^
         String.concat ", " (signature_paths |> List.map Path.name) ^ "\n\n" ^
         "We were looking for a module signature name for the following shape:\n" ^
         Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
-        "(a shape is a list of names of values)\n\n" ^
+        "(a shape is a list of names of values and sub-modules)\n\n" ^
         "We use the concept of shape to find the name of a signature for Coq."
       )
     end
