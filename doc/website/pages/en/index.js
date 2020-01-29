@@ -64,8 +64,8 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle tagline={siteConfig.tagline} title={siteConfig.title} />
           <PromoSection>
+            <Button href={docUrl('introduction.html')}>Introduction</Button>
             <Button href={docUrl('install.html')}>Getting started</Button>
-            <Button href={docUrl('ocaml-core.html')}>Concepts</Button>
             <Button
               href="https://clarus.github.io/coq-of-ocaml/examples/"
               target="_blank"

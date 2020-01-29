@@ -31,7 +31,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Inductive tree (a : Type) : Type :=
+Inductive tree (a : Set) : Set :=
 | Leaf : a -> tree a
 | Node : (tree a) -> (tree a) -> tree a.
 

@@ -1,5 +1,8 @@
 {
   "docs": {
+    "Introduction": [
+      "introduction"
+    ],
     "Getting started": [
       "install",
       "run"
