@@ -46,7 +46,7 @@ Definition InstanceToUseInFunctors :=
   existT (fun _ => _) tt
     {|
       COMPARABLE.compare := compare
-      |}.
+    |}.
 ```
 We use a plain module for `MyModuleForNamespacing` as we think it will not be used in functors or first-class modules. We translate the module type `COMPARABLE` to a record parametrized by `t` as this type is abstract. The `InstanceToUseInFunctors` is translated to a dependent record of type `COMPARABLE.signature` as it may by used as a parameter for a functor for example. We will see how we determine that a module should translates to a record.
 
@@ -129,7 +129,7 @@ Definition M :=
     {|
       S1.this_is_S1 := this_is_S1;
       S1.v := v
-      |}.
+    |}.
 ```
 
 If no signatures are found, the module `M` is translated to a plain Coq module:
@@ -252,7 +252,7 @@ Definition M_NoCast :=
   existT (fun _ => _) tt
     {|
       Source.x := x
-      |}.
+    |}.
 
 Definition M_WithCast :=
   let t := Z in
@@ -260,7 +260,7 @@ Definition M_WithCast :=
   existT _ _
     {|
       Source.x := x
-      |}.
+    |}.
 ```
 The module `M_NoCast` has no existential variables while the module `M_WithCast` has one due to the cast to the `Source` signature. This is visible in the use a `_` to ask Coq to infer the value of this type, in place of a `tt` to represent the absence of existential variables.
 
@@ -399,7 +399,7 @@ Definition F :=
     existT (fun _ => _) tt
       {|
         Target.y := y
-        |} : {_ : unit & Target.signature (|X|).(Source.t)}).
+      |} : {_ : unit & Target.signature (|X|).(Source.t)}).
 
 Definition M :=
   let t := Z in
@@ -407,14 +407,14 @@ Definition M :=
   existT _ _
     {|
       Source.x := x
-      |}.
+    |}.
 
 Definition N :=
   F
     (existT _ _
       {|
         Source.x := (|M|).(Source.x)
-        |}).
+      |}).
 ```
 
 Applications of functors are represented by standard function applications. We cast the module parameter to make sure he has the correct record type. We cast records by re-creating them with the right field names.
