@@ -17,6 +17,11 @@ module Definition = struct
     cases : (Header.t * 'a) list }
 end
 
+type match_existential_cast = {
+  new_typ_vars : Name.t list;
+  bound_vars : (Name.t * Type.t) list;
+  return_typ : Type.t }
+
 (** The simplified OCaml AST we use. We do not use a mutualy recursive type to
     simplify the importation in Coq. *)
 type t =
@@ -31,7 +36,7 @@ type t =
   | LetFun of t option Definition.t * t
   | LetTyp of Name.t * Name.t list * Type.t * t
     (** The definition of a type. It is used to represent module values. *)
-  | Match of t * (Pattern.t * t) list * t option
+  | Match of t * (Pattern.t * match_existential_cast option * t) list * t option
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list
     (** Construct a record giving an expression for each field. *)
@@ -102,6 +107,8 @@ let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
+  let attributes =
+    e.exp_attributes |> List.map (fun attr -> (fst attr).Asttypes.txt) in
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
@@ -134,7 +141,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
   | Texp_function { cases; _ } ->
-    open_cases typ_vars cases >>= fun (x, e) ->
+    let is_gadt_match = List.mem "coq_gadt_match" attributes in
+    open_cases typ_vars cases is_gadt_match >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
@@ -149,8 +157,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     )) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
+    let is_gadt_match = List.mem "coq_gadt_match" attributes in
     of_expression typ_vars e >>= fun e ->
-    of_match typ_vars e cases exception_cases
+    of_match typ_vars e cases exception_cases is_gadt_match
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
@@ -320,9 +329,35 @@ and of_match
   (e : t)
   (cases : case list)
   (exception_cases : case list)
+  (is_gadt_match : bool)
   : t Monad.t =
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
+    begin if is_gadt_match then
+      let bound_vars =
+        Typedtree.pat_bound_idents c_lhs |> List.rev |> List.map
+          (fun ident ->
+            let { Types.val_type; _ } =
+              Env.find_value (Path.Pident ident) c_rhs.exp_env in
+            let name = Name.of_ident true ident in
+            (name, val_type)
+          ) in
+      Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
+      Monad.List.map
+        (fun (name, typ) ->
+          Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
+          return (name, typ)
+        )
+        bound_vars >>= fun bound_vars ->
+      Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
+      return (Some {
+        new_typ_vars = Name.Set.elements existentials;
+        bound_vars;
+        return_typ = typ;
+      })
+    else
+      return None
+    end >>= fun existential_cast ->
     begin match c_guard with
     | Some guard ->
       of_expression typ_vars guard >>= fun guard ->
@@ -330,14 +365,15 @@ and of_match
     | None -> return None
     end >>= fun guard ->
     Pattern.of_pattern c_lhs >>= fun pattern ->
-    of_expression typ_vars c_rhs >>= fun c_rhs ->
+    of_expression typ_vars c_rhs >>= fun e ->
     return (
-      Util.Option.map pattern (fun pattern -> (pattern, guard, c_rhs))
+      Util.Option.map pattern (fun pattern ->
+      (pattern, existential_cast, guard, e))
     ))
   )) >>= fun cases_with_guards ->
   let guards =
     cases_with_guards |> Util.List.filter_map (function
-      | (p, Some guard, _) -> Some (p, guard)
+      | (p, _, Some guard, _) -> Some (p, guard)
       | _ -> None
     ) in
   let guard_checks =
@@ -345,8 +381,12 @@ and of_match
       Match (
         e,
         [
-          (p, guard);
-          (Pattern.Any, Variable (MixedPath.PathName PathName.false_value))
+          (p, None, guard);
+          (
+            Pattern.Any,
+            None,
+            Variable (MixedPath.PathName PathName.false_value)
+          )
         ],
         None
       )
@@ -357,20 +397,21 @@ and of_match
     | _ :: _ -> Tuple (e :: guard_checks) in
   let i = ref (-1) in
   let nb_guards = List.length guard_checks in
-  let cases = cases_with_guards |> List.map (fun (p, guard, rhs) ->
-    let is_guarded = match guard with Some _ -> true | None -> false in
-    begin if is_guarded then
-      i := !i + 1
-    end;
-    let p =
-      if nb_guards = 0 then
-        p
-      else
-        Pattern.Tuple (
-          p :: any_patterns_with_ith_true is_guarded !i nb_guards
-        ) in
-    (p, rhs)
-  ) in
+  let cases =
+    cases_with_guards |> List.map (fun (p, existential_cast, guard, rhs) ->
+      let is_guarded = match guard with Some _ -> true | None -> false in
+      begin if is_guarded then
+        i := !i + 1
+      end;
+      let p =
+        if nb_guards = 0 then
+          p
+        else
+          Pattern.Tuple (
+            p :: any_patterns_with_ith_true is_guarded !i nb_guards
+          ) in
+      (p, existential_cast, rhs)
+    ) in
   (exception_cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
     match c_guard with
@@ -404,10 +445,11 @@ and of_match
 and open_cases
   (typ_vars : Name.t Name.Map.t)
   (cases : case list)
+  (is_gadt_match : bool)
   : (Name.t * t) Monad.t =
   let name = Name.of_string false "function_parameter" in
   let e = Variable (MixedPath.of_name name) in
-  of_match typ_vars e cases [] >>= fun e ->
+  of_match typ_vars e cases [] is_gadt_match >>= fun e ->
   return (name, e)
 
 and import_let_fun
@@ -488,7 +530,7 @@ and of_let
     of_expression typ_vars e1 >>= fun e1 ->
     begin match p with
     | Some (Pattern.Variable x) -> return (LetVar (x, e1, e2))
-    | Some p -> return (Match (e1, [p, e2], None))
+    | Some p -> return (Match (e1, [p, None, e2], None))
     | None -> return (Match (e1, [], None))
     end
   | _ ->
@@ -876,16 +918,20 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )
   | Match (e, cases, default_value) ->
     begin match (cases, default_value) with
-    | ([(pattern, e2)], None) ->
+    | ([(pattern, existential_cast, e2)], None) ->
       Pp.parens paren @@ nest (
         !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
-        to_coq false e ^^ !^ "in" ^^ newline ^^ to_coq false e2
+        to_coq false e ^^ !^ "in" ^^ newline ^^
+        obj_magic_existential existential_cast e2
       )
     | _ ->
       nest (
         !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
-        separate space (cases |> List.map (fun (p, e) ->
-          nest (!^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^ to_coq false e ^^ newline)
+        separate space (cases |> List.map (fun (p, existential_cast, e) ->
+          nest (
+            !^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^
+            obj_magic_existential existential_cast e ^^ newline
+          )
         )) ^^
         (match default_value with
         | None -> empty
@@ -966,3 +1012,44 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
   | ErrorMessage (e, error_message) ->
     group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
+
+and obj_magic_existential
+  (existential_cast : match_existential_cast option)
+  (e : t)
+  : SmartPrint.t =
+  let e =
+    match existential_cast with
+    | None -> to_coq false e
+    | Some { return_typ; _ } ->
+      nest (
+        !^ "obj_magic" ^^ Type.to_coq None (Some Type.Context.Apply) return_typ ^^
+        to_coq true e
+      ) in
+  match existential_cast with
+  | None | Some { bound_vars = []; _ } -> e
+  | Some { new_typ_vars; bound_vars; _ } ->
+    let existential_names =
+      Pp.primitive_tuple (List.map Name.to_coq new_typ_vars) in
+    let existential_names_pattern =
+      Pp.primitive_tuple_pattern (List.map Name.to_coq new_typ_vars) in
+    let variable_names =
+      Pp.primitive_tuple (bound_vars |> List.map (fun (name, _) ->
+        Name.to_coq name
+      )) in
+    let variable_typ =
+      Pp.primitive_tuple_type (bound_vars |> List.map (fun (_, typ) ->
+        Type.to_coq None (Some Type.Context.Apply) typ
+      )) in
+    nest (
+      !^ "let" ^^
+      !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
+      variable_names ^^ !^ ":=" ^^
+      nest (
+        !^ "obj_magic_exists" ^^
+        parens (nest (
+          !^ "fun" ^^ existential_names_pattern ^^ !^ "=>" ^^ variable_typ
+        )) ^^
+        variable_names
+      ) ^^ !^ "in" ^^ newline ^^
+      e
+    )

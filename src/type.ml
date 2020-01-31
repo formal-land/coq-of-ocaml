@@ -14,7 +14,8 @@ type t =
   | ForallTyps of Name.t list * t
   | Error of string
 
-let type_exprs_of_row_field (row_field : Types.row_field) : Types.type_expr list =
+let type_exprs_of_row_field (row_field : Types.row_field)
+  : Types.type_expr list =
   match row_field with
   | Rpresent None -> []
   | Rpresent (Some typ) -> [typ]
@@ -165,6 +166,53 @@ let of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
       NotSupported
       "Only type variables are supported as parameters"
 
+(** We do not generate error messages for this function. Indeed, if there are
+    errors for the following types, they should be noticed elsewhere (by the
+    conversion function to Coq for example). *)
+let rec existential_typs_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
+  match typ.desc with
+  | Tvar _ | Tunivar _ -> return Name.Set.empty
+  | Tarrow (_, typ_x, typ_y, _) -> existential_typs_of_typs [typ_x; typ_y]
+  | Ttuple typs -> existential_typs_of_typs typs
+  | Tconstr (path, typs, _) ->
+    get_env >>= fun env ->
+    let path_existential =
+      match path with
+      | Path.Pident ident ->
+        begin match Env.find_type path env with
+        | _ -> Name.Set.empty
+        | exception Not_found -> Name.Set.singleton (Name.of_ident false ident)
+        end
+      | _ -> Name.Set.empty in
+    existential_typs_of_typs typs >>= fun existentials ->
+    return (Name.Set.union path_existential existentials)
+  | Tobject (typ, params) ->
+    let param_typs =
+      match !params with
+      | None -> []
+      | Some (_, param_typs) -> param_typs in
+    existential_typs_of_typs (typ :: param_typs)
+  | Tfield (_, _, typ1, typ2) -> existential_typs_of_typs [typ1; typ2]
+  | Tnil -> return Name.Set.empty
+  | Tlink typ | Tsubst typ -> existential_typs_of_typ typ
+  | Tvariant { row_fields; _ } ->
+    existential_typs_of_typs (
+      row_fields |>
+      List.map (fun (_, row_field) -> type_exprs_of_row_field row_field) |>
+      List.concat
+    )
+  | Tpoly (typ, typs) -> existential_typs_of_typs (typ :: typs)
+  | Tpackage (_, _, typs) -> existential_typs_of_typs typs
+
+and existential_typs_of_typs (typs : Types.type_expr list)
+  : Name.Set.t Monad.t =
+  Monad.List.fold_left
+    (fun existentials typ ->
+      existential_typs_of_typ typ >>= fun existentials_typ ->
+      return (Name.Set.union existentials existentials_typ)
+    )
+    Name.Set.empty typs
+
 (** The free variables of a type. *)
 let rec typ_args (typ : t) : Name.Set.t =
   match typ with
@@ -299,11 +347,11 @@ let rec to_coq
         Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
       ) in
     nest (braces (
-      (match existential_typs with
-      | [] -> !^ "_" ^^ !^ ":" ^^ !^ "unit"
-      | [typ] -> typ ^^ !^ ":" ^^ !^ "_"
-      | _ -> !^ "'" ^-^ brakets (separate (!^ "," ^^ space) existential_typs) ^^ !^ ":" ^^ !^ "_"
-      ) ^^ !^ "&" ^^
+      Pp.primitive_tuple_pattern existential_typs ^^ !^ ":" ^^
+      begin match existential_typs with
+      | [] -> !^ "unit"
+      | _ :: _ -> !^ "_"
+      end ^^ !^ "&" ^^
       nest (
         separate space (
           nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::

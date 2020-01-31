@@ -68,7 +68,14 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "Variable" -> "__Variable"
   | _ -> s
 
+let substitute_first_dollar (s : string) : string =
+  if String.length s <> 0 && String.get s 0 = '$' then
+    "__" ^ String.sub s 1 (String.length s - 1)
+  else
+    s
+
 let convert (is_value : bool) (s : string) : string =
+  let s = substitute_first_dollar s in
   let s_escaped_operator = escape_operator s in
   if s_escaped_operator <> s then
     "op_" ^ s_escaped_operator
