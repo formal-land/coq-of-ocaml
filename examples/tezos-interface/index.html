@@ -7895,7 +7895,7 @@ Module Data_encoding.
     
     Parameter destruct : forall {t : Set}, encoding t -&gt; json -&gt; t.
     
-    Reserved Notation &quot;'path&quot;.
+    Reserved Notation &quot;''path&quot;.
     
     Inductive path_item : Set :=
     | Index : Z -&gt; path_item
@@ -7903,9 +7903,9 @@ Module Data_encoding.
     | Next : path_item
     | Star : path_item
     
-    where &quot;'path&quot; := (list path_item).
+    where &quot;''path&quot; := (list path_item).
     
-    Definition path := 'path.
+    Definition path := ''path.
     
     (* exception Cannot_destruct *)
     
@@ -8233,14 +8233,14 @@ Module RPC_arg.
   
   Parameter like : forall {a : Set}, arg a -&gt; option string -&gt; string -&gt; arg a.
   
-  Reserved Notation &quot;'eq&quot;.
+  Reserved Notation &quot;''eq&quot;.
   
   Inductive eq_gadt : Set :=
   | Eq : eq_gadt
   
-  where &quot;'eq&quot; := (fun (a b : Set) =&gt; eq_gadt).
+  where &quot;''eq&quot; := (fun (a b : Set) =&gt; eq_gadt).
   
-  Definition eq := 'eq.
+  Definition eq := ''eq.
   
   Parameter __eq_value : forall {a b : Set}, arg a -&gt; arg b -&gt; option (eq a b).
 End RPC_arg.
@@ -8357,7 +8357,7 @@ Module RPC_service.
 End RPC_service.
 
 Module RPC_answer.
-  Reserved Notation &quot;'stream&quot;.
+  Reserved Notation &quot;''stream&quot;.
   
   Module stream.
     Record record {next shutdown : Set} := {
@@ -8376,7 +8376,7 @@ Module RPC_answer.
   Definition stream_skeleton := stream.record.
   
   Inductive t (o : Set) : Set :=
-  | OkStream : 'stream o -&gt; t o
+  | OkStream : ''stream o -&gt; t o
   | Unauthorized : option (list Error_monad.__error) -&gt; t o
   | Error : option (list Error_monad.__error) -&gt; t o
   | Ok : o -&gt; t o
@@ -8386,10 +8386,10 @@ Module RPC_answer.
   | Conflict : option (list Error_monad.__error) -&gt; t o
   | No_content : t o
   
-  where &quot;'stream&quot; := (fun (a : Set) =&gt;
+  where &quot;''stream&quot; := (fun (a : Set) =&gt;
     stream_skeleton (unit -&gt; Lwt.t (option a)) (unit -&gt; unit)).
   
-  Definition stream := 'stream.
+  Definition stream := ''stream.
   
   Arguments OkStream {_}.
   Arguments Unauthorized {_}.
@@ -9622,8 +9622,8 @@ Module Operation.
 End Operation.
 
 Module Protocol.
-  Reserved Notation &quot;'component&quot;.
-  Reserved Notation &quot;'t&quot;.
+  Reserved Notation &quot;''component&quot;.
+  Reserved Notation &quot;''t&quot;.
   
   Module t.
     Record record {expected_env components : Set} := {
@@ -9670,11 +9670,11 @@ Module Protocol.
   Inductive env_version : Set :=
   | V1 : env_version
   
-  where &quot;'component&quot; := (component_skeleton string (option string) string)
-  and &quot;'t&quot; := (t_skeleton env_version (list 'component)).
+  where &quot;''component&quot; := (component_skeleton string (option string) string)
+  and &quot;''t&quot; := (t_skeleton env_version (list ''component)).
   
-  Definition component := 'component.
-  Definition t := 't.
+  Definition component := ''component.
+  Definition t := ''t.
   
   Parameter component_encoding : Data_encoding.t component.
   
