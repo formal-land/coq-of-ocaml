@@ -8232,7 +8232,7 @@ Module RPC_arg.
   Inductive eq_gadt : Set :=
   | Eq : eq_gadt
   
-  where &quot;'eq&quot; := (fun (a b : Set) =&gt; eq_gadt).
+  where &quot;'eq&quot; := (fun (_ _ : Set) =&gt; eq_gadt).
   
   Definition eq := 'eq.
   
@@ -8351,8 +8351,6 @@ Module RPC_service.
 End RPC_service.
 
 Module RPC_answer.
-  Reserved Notation &quot;'stream&quot;.
-  
   Module stream.
     Record record {next shutdown : Set} := Build {
       next : next;
@@ -8367,6 +8365,8 @@ Module RPC_answer.
   End stream.
   Definition stream_skeleton := stream.record.
   
+  Reserved Notation &quot;'stream&quot;.
+  
   Inductive t (o : Set) : Set :=
   | OkStream : 'stream o -&gt; t o
   | Unauthorized : option (list Error_monad.__error) -&gt; t o
@@ -8378,8 +8378,8 @@ Module RPC_answer.
   | Conflict : option (list Error_monad.__error) -&gt; t o
   | No_content : t o
   
-  where &quot;'stream&quot; := (fun (a : Set) =&gt;
-    stream_skeleton (unit -&gt; Lwt.t (option a)) (unit -&gt; unit)).
+  where &quot;'stream&quot; := (fun (t_a : Set) =&gt;
+    stream_skeleton (unit -&gt; Lwt.t (option t_a)) (unit -&gt; unit)).
   
   Definition stream := 'stream.
   
@@ -9590,9 +9590,6 @@ Module Operation.
 End Operation.
 
 Module Protocol.
-  Reserved Notation &quot;'component&quot;.
-  Reserved Notation &quot;'t&quot;.
-  
   Module t.
     Record record {expected_env components : Set} := Build {
       expected_env : expected_env;
@@ -9627,6 +9624,9 @@ Module Protocol.
         implementation.
   End component.
   Definition component_skeleton := component.record.
+  
+  Reserved Notation &quot;'component&quot;.
+  Reserved Notation &quot;'t&quot;.
   
   Inductive env_version : Set :=
   | V1 : env_version
