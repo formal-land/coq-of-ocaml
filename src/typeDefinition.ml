@@ -113,7 +113,7 @@ module Constructors = struct
     }
 
     let of_ocaml_case (typ_name : Name.t) (case : Types.constructor_declaration)
-      : (t * RecordSkeleton.t option) Monad.t =
+      : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
       let constructor_name = Name.of_ident false cd_id in
@@ -132,6 +132,8 @@ module Constructors = struct
         let record_fields = labeled_typs |> List.map ( fun { Types.ld_id; _ } ->
           Name.of_ident false ld_id
         ) in
+        let typ_args =
+          Name.Set.elements (Type.typ_args_of_typs record_params) in
         return (
           [
             Type.Apply (
@@ -139,14 +141,26 @@ module Constructors = struct
                 path = [typ_name];
                 base = constructor_name;
               },
-              record_params
+              typ_args |> List.map (fun name ->
+                Type.Variable name
+              )
             )
           ],
-          Some {
-            RecordSkeleton.fields = record_fields;
-            module_name = constructor_name;
-            typ_name = constructor_name;
-          }
+          Some (
+            {
+              RecordSkeleton.fields = record_fields;
+              module_name = constructor_name;
+              typ_name = Name.suffix_by_skeleton constructor_name;
+            },
+            typ_args,
+            Type.Apply (
+              MixedPath.PathName {
+                path = [typ_name];
+                base = Name.suffix_by_skeleton constructor_name;
+              },
+              record_params
+            )
+          )
         ))
       end >>= fun (param_typs, records) ->
       let is_gadt = match cd_res with None -> false | Some _ -> true in
@@ -251,8 +265,9 @@ end
 
 module Inductive = struct
   type t = {
-    constructor_records : (Name.t * RecordSkeleton.t list) list;
-    notations : (Name.t * Name.t list * Type.t) list;
+    constructor_records
+      : (Name.t * (RecordSkeleton.t * Name.t list * Type.t) list) list;
+    notations : (Name.t * Name.t option list * Type.t) list;
     records : RecordSkeleton.t list;
     typs : (Name.t * Name.t list * Constructors.t) list;
   }
@@ -263,21 +278,38 @@ module Inductive = struct
       indent (
         separate
           (newline ^^ newline)
-          (List.map (RecordSkeleton.to_coq false) records)
+          (records |> List.map (fun (record, _, _) ->
+            RecordSkeleton.to_coq false record
+          ))
       ) ^^ newline ^^
       !^ "End" ^^ Name.to_coq name ^-^ !^ "."
     )
 
+  let to_coq_notation_name (name : Name.t) : SmartPrint.t =
+    !^ "\"'" ^-^ Name.to_coq name ^-^ !^ "\""
+
+  let to_coq_notation_record (prefix : Name.t) (name : Name.t) : SmartPrint.t =
+    !^ "\"'" ^-^ Name.to_coq prefix ^-^ !^ "." ^-^ Name.to_coq name ^-^ !^ "\""
+
   let to_coq_notations_reserved (inductive : t) : SmartPrint.t list =
-    inductive.notations |> List.map (fun (name, _, _) ->
-      !^ "Reserved Notation" ^^ !^ "\"'" ^-^ Name.to_coq name ^-^ !^ "\"" ^-^ !^ "."
-    )
+    (inductive.constructor_records |> List.map
+      (fun (name, records) ->
+        records |> List.map (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+          !^ "Reserved Notation" ^^ to_coq_notation_record name module_name ^-^
+          !^ "."
+        )
+      )
+      |> List.concat
+    ) @
+    (inductive.notations |> List.map (fun (name, _, _) ->
+      !^ "Reserved Notation" ^^ to_coq_notation_name name ^-^ !^ "."
+    ))
 
   let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
     inductive.records |> List.map (RecordSkeleton.to_coq true)
 
   let to_coq_typs
-    (subst : (Name.t -> Name.t) option)
+    (subst : Type.Subst.t)
     (is_first : bool)
     (name : Name.t)
     (left_typ_args : Name.t list)
@@ -308,33 +340,65 @@ module Inductive = struct
               ) ^-^ !^ ","
             ) ^^
             group @@ separate space (param_typs |> List.map (fun param_typ ->
-              group (Type.to_coq subst (Some Type.Context.Arrow) param_typ ^^ !^ "->")
-            )) ^^ Type.to_coq subst None (Type.Apply (MixedPath.of_name name, res_typ_params))
+              group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
+            )) ^^
+            Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params))
           )
         )
       )
     )
 
+  let to_coq_notations_where
+    (subst : Type.Subst.t)
+    (notation : SmartPrint.t)
+    (typ_args : Name.t option list)
+    (typ : Type.t)
+    : SmartPrint.t =
+    let subst = {
+      subst with
+      Type.Subst.name = fun name ->
+        if List.mem (Some name) typ_args then
+          Name.prefix_by_t name
+        else
+          name
+    } in
+    nest (
+      notation ^^ !^ ":=" ^^ parens (
+        (match typ_args with
+        | [] -> empty
+        | _ :: _ ->
+          !^ "fun" ^^ parens (
+            nest (
+              separate space (typ_args |> List.map (fun name ->
+                match name with
+                | None -> !^ "_"
+                | Some name -> Name.to_coq (Name.prefix_by_t name)
+              )) ^^
+              !^ ":" ^^ Pp.set
+            )
+          ) ^^ !^ "=>" ^^ space
+        ) ^-^ Type.to_coq (Some subst) None typ
+      )
+    )
+
   let to_coq_notations_wheres
-    (subst : (Name.t -> Name.t) option)
+    (subst : Type.Subst.t)
     (inductive : t)
     : SmartPrint.t list =
-    inductive.notations |> List.mapi (fun index (name, typ_args, value) ->
-      let is_first = index = 0 in
-      nest (
-        !^ (if is_first then "where" else "and") ^^
-        !^ "\"'" ^-^ Name.to_coq name ^-^ !^ "\"" ^^ !^ ":=" ^^ parens (
-          (match typ_args with
-          | [] -> empty
-          | _ :: _ ->
-            !^ "fun" ^^ parens (
-              nest (
-                separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set
-              )
-            ) ^^ !^ "=>" ^^ space
-          ) ^-^ Type.to_coq subst None value
+    (inductive.notations |> List.map (fun (name, typ_args, typ) ->
+      to_coq_notations_where subst (to_coq_notation_name name) typ_args typ
+    )) @
+    (inductive.constructor_records |> List.map
+      (fun (name, records) ->
+        records |> List.map (fun ({ RecordSkeleton.module_name; _ }, typ_args, typ) ->
+          to_coq_notations_where
+            subst
+            (to_coq_notation_record name module_name)
+            (typ_args |> List.map (fun typ_arg -> Some typ_arg))
+            typ
         )
       )
+      |> List.concat
     )
 
   let to_coq_notations_definitions (inductive : t) : SmartPrint.t list =
@@ -360,14 +424,39 @@ module Inductive = struct
       )
 
   let to_coq (inductive : t) : SmartPrint.t =
-    let subst = Some (fun name ->
-      match inductive.notations |> List.find_opt (fun (name', _, _) -> name' = name) with
-      | None -> name
-      | Some (name', _, _) -> Name.prefix_by_single_quote name'
-    ) in
+    let subst = {
+      Type.Subst.name = (fun name -> name);
+      path_name = fun path_name ->
+        match path_name with
+        | { PathName.path = []; base } ->
+          let corresponding_notation =
+            inductive.notations |> List.find_opt (fun (name, _, _) ->
+              name = base
+            ) in
+          begin match corresponding_notation with
+          | None -> path_name
+          | Some _ -> { path = []; base = Name.prefix_by_single_quote base }
+          end
+        | { path = [prefix]; base } ->
+          let corresponding_notation =
+            inductive.constructor_records |> List.find_opt (fun (name, records) ->
+              let corresponding_records = records |> List.find_opt
+                (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+                  name = prefix && module_name = base
+                ) in
+              match corresponding_records with
+              | None -> false
+              | Some _ -> true
+            ) in
+          begin match corresponding_notation with
+          | None -> path_name
+          | Some _ -> { path = [Name.prefix_by_single_quote prefix]; base }
+          end
+        | _ -> path_name
+    } in
     let constructor_records = to_coq_constructor_records inductive in
-    let reserved_notations = to_coq_notations_reserved inductive in
     let record_skeletons = to_coq_record_skeletons inductive in
+    let reserved_notations = to_coq_notations_reserved inductive in
     let notation_wheres = to_coq_notations_wheres subst inductive in
     let notation_definitions = to_coq_notations_definitions inductive in
     let implicit_arguments =
@@ -378,12 +467,12 @@ module Inductive = struct
       (match constructor_records with
       | [] -> empty
       | _ :: _ -> separate (newline ^^ newline) constructor_records ^^ newline ^^ newline) ^^
-      (match reserved_notations with
-      | [] -> empty
-      | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
       (match record_skeletons with
       | [] -> empty
       | _ :: _ -> separate (newline ^^ newline) record_skeletons ^^ newline ^^ newline) ^^
+      (match reserved_notations with
+      | [] -> empty
+      | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
       separate (newline ^^ newline) (inductive.typs |>
         List.mapi (fun index (name, left_typ_args, constructors) ->
           let is_first = index = 0 in
@@ -392,7 +481,10 @@ module Inductive = struct
       ) ^-^
       (match notation_wheres with
       | [] -> empty
-      | _ :: _ -> newline ^^ newline ^^ separate newline notation_wheres) ^-^ !^ "." ^^
+      | _ :: _ ->
+        newline ^^ newline ^^
+        !^ "where " ^-^ separate (newline ^^ !^ "and ") notation_wheres
+      ) ^-^ !^ "." ^^
       (match notation_definitions with
       | [] -> empty
       | _ :: _ -> newline ^^ newline ^^ separate newline notation_definitions) ^^
@@ -470,7 +562,11 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
           return (
             constructor_records,
-            (name, typ_args, typ) :: notations,
+            (
+              name,
+              typ_args |> List.map (fun name -> Some name),
+              typ
+            ) :: notations,
             records,
             typs
           )
@@ -490,7 +586,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           constructor_records,
           (
             name,
-            typ_args,
+            typ_args |> List.map (fun name -> Some name),
             Type.Apply (
               MixedPath.of_name (Name.suffix_by_skeleton name),
               fields |> List.map snd
@@ -511,11 +607,16 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         let constructor_records =
           match new_constructor_records with
           | [] -> constructor_records
-          | _ :: _ -> (name, new_constructor_records) :: constructor_records in
+          | _ :: _ ->
+            (name, new_constructor_records) :: constructor_records in
         Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, is_gadt) ->
         let gadt_notation =
           if is_gadt then
-            [(name, typ_args, Constructors.gadt_typ name)]
+            [(
+              name,
+              typ_args |> List.map (fun _ -> None),
+              Constructors.gadt_typ name
+            )]
           else
             [] in
         let name = if is_gadt then Name.suffix_by_gadt name else name in

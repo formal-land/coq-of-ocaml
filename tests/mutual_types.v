@@ -24,8 +24,8 @@ with node (a : Set) : Set :=
 with unrelated (a : Set) : Set :=
 | Unrelated : 'double ('simple a) -> unrelated a
 
-where "'simple" := (fun (b : Set) => b)
-and "'double" := (fun (b : Set) => b * 'simple b).
+where "'simple" := (fun (t_b : Set) => t_b)
+and "'double" := (fun (t_b : Set) => t_b * 'simple t_b).
 
 Definition simple := 'simple.
 Definition double := 'double.
@@ -34,9 +34,6 @@ Arguments Tree {_}.
 Arguments Leaf {_}.
 Arguments Node {_}.
 Arguments Unrelated {_}.
-
-Reserved Notation "'re".
-Reserved Notation "'re_bis".
 
 Module re_bis.
   Record record {bis : Set} := Build {
@@ -61,10 +58,13 @@ Module re.
 End re.
 Definition re_skeleton := re.record.
 
+Reserved Notation "'re".
+Reserved Notation "'re_bis".
+
 Inductive ind : Set :=
 | Ind : 're Z -> ind
 
-where "'re" := (fun (a : Set) => re_skeleton a string)
+where "'re" := (fun (t_a : Set) => re_skeleton t_a string)
 and "'re_bis" := (re_bis_skeleton unit).
 
 Definition re := 're.

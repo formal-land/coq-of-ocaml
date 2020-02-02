@@ -289,15 +289,23 @@ let rec accumulate_nested_arrows (typ : t) : t list * t =
     (typ_x :: typ_xs, typ_y)
   | _ -> ([], typ)
 
+module Subst = struct
+  type t = {
+    name : Name.t -> Name.t;
+    path_name : PathName.t -> PathName.t }
+end
+
 (** Pretty-print a type. Use the [context] parameter to know if we should add
     parenthesis. *)
-let rec to_coq
-  (subst : (Name.t -> Name.t) option)
-  (context : Context.t option)
-  (typ : t)
+let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
   : SmartPrint.t =
   match typ with
-  | Variable x -> Name.to_coq x
+  | Variable x ->
+    let x =
+      match subst with
+      | None -> x
+      | Some subst -> subst.name x in
+    Name.to_coq x
   | Arrow _ ->
     let (typ_xs, typ_y) = accumulate_nested_arrows typ in
     Context.parens context Context.Arrow @@ group (
@@ -333,7 +341,8 @@ let rec to_coq
       | None -> path
       | Some subst ->
         begin match path with
-        | MixedPath.PathName { path = []; base = name } -> MixedPath.of_name (subst name)
+        | MixedPath.PathName path_name ->
+          MixedPath.PathName (subst.path_name path_name)
         | _ -> path
         end in
     Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@

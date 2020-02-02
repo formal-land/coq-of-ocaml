@@ -20,7 +20,7 @@ Inductive foo_gadt : Set :=
 | Bar : forall {a b c : Set}, a -> Z -> b -> c -> foo_gadt
 | Other : Z -> foo_gadt
 
-where "'foo" := (fun (a b : Set) => foo_gadt).
+where "'foo" := (fun (_ _ : Set) => foo_gadt).
 
 Definition foo := 'foo.
 
@@ -32,7 +32,7 @@ Inductive expr_gadt : Set :=
 | Sum : expr_gadt -> expr_gadt -> expr_gadt
 | Pair : expr_gadt -> expr_gadt -> expr_gadt
 
-where "'expr" := (fun (a : Set) => expr_gadt).
+where "'expr" := (fun (_ : Set) => expr_gadt).
 
 Definition expr := 'expr.
 
@@ -49,7 +49,7 @@ Inductive one_case_gadt : Set :=
 | SingleCase : one_case_gadt
 | Impossible : one_case_gadt
 
-where "'one_case" := (fun (a : Set) => one_case_gadt).
+where "'one_case" := (fun (_ : Set) => one_case_gadt).
 
 Definition one_case := 'one_case.
 

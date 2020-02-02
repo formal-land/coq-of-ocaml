@@ -80,7 +80,7 @@ Definition poly := poly.record.
 
 Definition p : poly Z bool := {| poly.first := 12; poly.second := false |}.
 
-Module ConstructorWithRecords.
+Module ConstructorWithRecord.
   Module t.
     Module Foo.
       Record record {name size : Set} := {
@@ -88,7 +88,7 @@ Module ConstructorWithRecords.
         size : size }.
       Arguments record : clear implicits.
     End Foo.
-    Definition Foo := Foo.record.
+    Definition Foo_skeleton := Foo.record.
   End t.
   
   Module gadt.
@@ -97,11 +97,8 @@ Module ConstructorWithRecords.
         x : x }.
       Arguments record : clear implicits.
     End Ex.
-    Definition Ex := Ex.record.
+    Definition Ex_skeleton := Ex.record.
   End gadt.
-  
-  Reserved Notation "'gadt".
-  Reserved Notation "'loc".
   
   Module loc.
     Record record {x y : Set} := Build {
@@ -115,15 +112,22 @@ Module ConstructorWithRecords.
   End loc.
   Definition loc_skeleton := loc.record.
   
+  Reserved Notation "'t.Foo".
+  Reserved Notation "'gadt.Ex".
+  Reserved Notation "'gadt".
+  Reserved Notation "'loc".
+  
   Inductive t : Set :=
-  | Foo : t.Foo string Z -> t
+  | Foo : 't.Foo -> t
   | Bar : 'loc -> t
   
   with gadt_gadt : Set :=
-  | Ex : forall {a : Set}, gadt.Ex a -> gadt_gadt
+  | Ex : forall {a : Set}, 'gadt.Ex a -> gadt_gadt
   
-  where "'gadt" := (fun (a : Set) => gadt_gadt)
-  and "'loc" := (loc_skeleton Z Z).
+  where "'gadt" := (fun (_ : Set) => gadt_gadt)
+  and "'loc" := (loc_skeleton Z Z)
+  and "'t.Foo" := (t.Foo_skeleton string Z)
+  and "'gadt.Ex" := (fun (t_a : Set) => gadt.Ex_skeleton t_a).
   
   Definition gadt := 'gadt.
   Definition loc := 'loc.
@@ -139,4 +143,29 @@ Module ConstructorWithRecords.
     | Foo {| t.Foo.size := size |} => size
     | Bar {| loc.y := y |} => y
     end.
-End ConstructorWithRecords.
+End ConstructorWithRecord.
+
+Module ConstructorWithPolymorphicRecord.
+  Module t.
+    Module Foo.
+      Record record {location payload size : Set} := {
+        location : location;
+        payload : payload;
+        size : size }.
+      Arguments record : clear implicits.
+    End Foo.
+    Definition Foo_skeleton := Foo.record.
+  End t.
+  
+  Reserved Notation "'t.Foo".
+  
+  Inductive t (loc a : Set) : Set :=
+  | Foo : 't.Foo a loc -> t loc a
+  
+  where "'t.Foo" := (fun (t_a t_loc : Set) => t.Foo_skeleton t_loc t_a Z).
+  
+  Arguments Foo {_ _}.
+  
+  Definition foo : t Z string :=
+    Foo {| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}.
+End ConstructorWithPolymorphicRecord.
