@@ -129,6 +129,16 @@ Module ConstructorWithRecord.
   and "'t.Foo" := (t.Foo_skeleton string Z)
   and "'gadt.Ex" := (fun (t_a : Set) => gadt.Ex_skeleton t_a).
   
+  Module ConstructorRecordNotations_t_gadt_gadt.
+    Module t.
+      Definition Foo := 't.Foo.
+    End t.
+    Module gadt.
+      Definition Ex := 'gadt.Ex.
+    End gadt.
+  End ConstructorRecordNotations_t_gadt_gadt.
+  Import ConstructorRecordNotations_t_gadt_gadt.
+  
   Definition gadt := 'gadt.
   Definition loc := 'loc.
   
@@ -163,6 +173,13 @@ Module ConstructorWithPolymorphicRecord.
   | Foo : 't.Foo a loc -> t loc a
   
   where "'t.Foo" := (fun (t_a t_loc : Set) => t.Foo_skeleton t_loc t_a Z).
+  
+  Module ConstructorRecordNotations_t.
+    Module t.
+      Definition Foo := 't.Foo.
+    End t.
+  End ConstructorRecordNotations_t.
+  Import ConstructorRecordNotations_t.
   
   Arguments Foo {_ _}.
   

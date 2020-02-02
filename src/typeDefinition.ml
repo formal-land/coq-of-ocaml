@@ -401,11 +401,43 @@ module Inductive = struct
       |> List.concat
     )
 
+  let to_coq_notations_definition (name : Name.t) (definition : SmartPrint.t)
+    : SmartPrint.t =
+    nest (
+      !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^ definition ^-^ !^ "."
+    )
+
+  let to_coq_notations_record_definitions (inductive : t) : SmartPrint.t option =
+    match inductive.constructor_records with
+    | [] -> None
+    | _ :: _ ->
+      let notation_module_name =
+        !^ "ConstructorRecordNotations_" ^-^
+        separate (!^ "_") (inductive.typs |> List.map (fun (name, _, _) ->
+          Name.to_coq name
+        )) in
+      Some (
+        !^ "Module" ^^ notation_module_name ^-^ !^ "." ^^ newline ^^
+        indent (separate newline (inductive.constructor_records |> List.map (fun (name, records) ->
+          !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+          indent (separate newline (records |> List.map
+            (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+              to_coq_notations_definition
+                module_name
+                (!^ "'" ^-^ Name.to_coq name ^-^ !^ "." ^-^ Name.to_coq module_name)
+            )
+          )) ^^ newline ^^
+          !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+        ))) ^^ newline ^^
+        !^ "End" ^^ notation_module_name ^-^ !^ "." ^^ newline ^^
+        !^ "Import" ^^ notation_module_name ^-^ !^ "."
+      )
+
   let to_coq_notations_definitions (inductive : t) : SmartPrint.t list =
     inductive.notations |> List.map (fun (name, _, _) ->
-      nest (
-        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "'" ^-^ Name.to_coq name ^-^ !^ "."
-      )
+      to_coq_notations_definition
+        name
+        (Name.to_coq (Name.prefix_by_single_quote name))
     )
 
   let to_coq_typs_implicits
@@ -457,8 +489,9 @@ module Inductive = struct
     let constructor_records = to_coq_constructor_records inductive in
     let record_skeletons = to_coq_record_skeletons inductive in
     let reserved_notations = to_coq_notations_reserved inductive in
-    let notation_wheres = to_coq_notations_wheres subst inductive in
-    let notation_definitions = to_coq_notations_definitions inductive in
+    let notations_wheres = to_coq_notations_wheres subst inductive in
+    let notations_record_definitions = to_coq_notations_record_definitions inductive in
+    let notations_definitions = to_coq_notations_definitions inductive in
     let implicit_arguments =
       List.concat (inductive.typs |> List.map (fun (_, left_typ_args, constructors) ->
         to_coq_typs_implicits left_typ_args constructors
@@ -479,15 +512,18 @@ module Inductive = struct
           to_coq_typs subst is_first name left_typ_args constructors
         )
       ) ^-^
-      (match notation_wheres with
+      (match notations_wheres with
       | [] -> empty
       | _ :: _ ->
         newline ^^ newline ^^
-        !^ "where " ^-^ separate (newline ^^ !^ "and ") notation_wheres
+        !^ "where " ^-^ separate (newline ^^ !^ "and ") notations_wheres
       ) ^-^ !^ "." ^^
-      (match notation_definitions with
+      (match notations_record_definitions with
+      | None -> empty
+      | Some notations -> newline ^^ newline ^^ notations) ^^
+      (match notations_definitions with
       | [] -> empty
-      | _ :: _ -> newline ^^ newline ^^ separate newline notation_definitions) ^^
+      | _ :: _ -> newline ^^ newline ^^ separate newline notations_definitions) ^^
       (match implicit_arguments with
       | [] -> empty
       | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments)
