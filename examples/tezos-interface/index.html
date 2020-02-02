@@ -55,7 +55,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6152 lines</li>
-      <li>Coq size: 3317 lines (-47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3269 lines (-47% compared to&nbsp;OCaml)</li>
       <li>errors from coq-of-ocaml: 191</li>
     </ul>
     
@@ -99,7 +99,7 @@
     <h3>Environment_mli</h3>
     <ul>
       <li>OCaml size: 6152 lines</li>
-      <li>Coq size: 3317 lines (-47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3269 lines (-47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6857,12 +6857,11 @@ Module Pervasives.
   Parameter op_at : forall {a : Set}, list a -&gt; list a -&gt; list a.
   
   Module ref.
-    Record record {a : Set} := {
+    Record record {a : Set} := Build {
       contents : a }.
     Arguments record : clear implicits.
-    Definition with_contents {a_type : Set} (r : record a_type) contents
-      : record a_type :=
-      {| contents := contents |}.
+    Definition with_contents {t_a} contents (r : record t_a) :=
+      Build t_a contents.
   End ref.
   Definition ref := ref.record.
   
@@ -7973,27 +7972,22 @@ Module Error_monad.
   Parameter error_of_json : Data_encoding.json -&gt; __error.
   
   Module error_info.
-    Record record := {
+    Record record := Build {
       category : error_category;
       id : string;
       title : string;
       description : string;
       schema : Data_encoding.json_schema }.
-    Definition with_category (r : record) category : record :=
-      {| category := category; id := id r; title := title r;
-        description := description r; schema := schema r |}.
-    Definition with_id (r : record) id : record :=
-      {| category := category r; id := id; title := title r;
-        description := description r; schema := schema r |}.
-    Definition with_title (r : record) title : record :=
-      {| category := category r; id := id r; title := title;
-        description := description r; schema := schema r |}.
-    Definition with_description (r : record) description : record :=
-      {| category := category r; id := id r; title := title r;
-        description := description; schema := schema r |}.
-    Definition with_schema (r : record) schema : record :=
-      {| category := category r; id := id r; title := title r;
-        description := description r; schema := schema |}.
+    Definition with_category category (r : record) :=
+      Build category r.(id) r.(title) r.(description) r.(schema).
+    Definition with_id id (r : record) :=
+      Build r.(category) id r.(title) r.(description) r.(schema).
+    Definition with_title title (r : record) :=
+      Build r.(category) r.(id) title r.(description) r.(schema).
+    Definition with_description description (r : record) :=
+      Build r.(category) r.(id) r.(title) description r.(schema).
+    Definition with_schema schema (r : record) :=
+      Build r.(category) r.(id) r.(title) r.(description) schema.
   End error_info.
   Definition error_info := error_info.record.
   
@@ -8209,13 +8203,13 @@ Module RPC_arg.
     (a -&gt; string) -&gt; unit -&gt; arg a.
   
   Module descr.
-    Record record := {
+    Record record := Build {
       name : string;
       descr : option string }.
-    Definition with_name (r : record) name : record :=
-      {| name := name; descr := descr r |}.
-    Definition with_descr (r : record) descr : record :=
-      {| name := name r; descr := descr |}.
+    Definition with_name name (r : record) :=
+      Build name r.(descr).
+    Definition with_descr descr (r : record) :=
+      Build r.(name) descr.
   End descr.
   Definition descr := descr.record.
   
@@ -8360,18 +8354,16 @@ Module RPC_answer.
   Reserved Notation &quot;'stream&quot;.
   
   Module stream.
-    Record record {next shutdown : Set} := {
+    Record record {next shutdown : Set} := Build {
       next : next;
       shutdown : shutdown }.
     Arguments record : clear implicits.
-    Definition with_next {next_type shutdown_type : Set}
-      (r : record next_type shutdown_type) next
-      : record next_type shutdown_type :=
-      {| next := next; shutdown := shutdown r |}.
-    Definition with_shutdown {next_type shutdown_type : Set}
-      (r : record next_type shutdown_type) shutdown
-      : record next_type shutdown_type :=
-      {| next := next r; shutdown := shutdown |}.
+    Definition with_next {t_next t_shutdown} next
+      (r : record t_next t_shutdown) :=
+      Build t_next t_shutdown next r.(shutdown).
+    Definition with_shutdown {t_next t_shutdown} shutdown
+      (r : record t_next t_shutdown) :=
+      Build t_next t_shutdown r.(next) shutdown.
   End stream.
   Definition stream_skeleton := stream.record.
   
@@ -9452,7 +9444,7 @@ End Micheline.
 
 Module Block_header.
   Module shell_header.
-    Record record := {
+    Record record := Build {
       level : Int32.t;
       proto_level : Z;
       predecessor : (|Block_hash|).(S.HASH.t);
@@ -9461,67 +9453,43 @@ Module Block_header.
       operations_hash : (|Operation_list_list_hash|).(S.MERKLE_TREE.t);
       fitness : list MBytes.t;
       context : (|Context_hash|).(S.HASH.t) }.
-    Definition with_level (r : record) level : record :=
-      {| level := level; proto_level := proto_level r;
-        predecessor := predecessor r; timestamp := timestamp r;
-        validation_passes := validation_passes r;
-        operations_hash := operations_hash r; fitness := fitness r;
-        context := context r |}.
-    Definition with_proto_level (r : record) proto_level : record :=
-      {| level := level r; proto_level := proto_level;
-        predecessor := predecessor r; timestamp := timestamp r;
-        validation_passes := validation_passes r;
-        operations_hash := operations_hash r; fitness := fitness r;
-        context := context r |}.
-    Definition with_predecessor (r : record) predecessor : record :=
-      {| level := level r; proto_level := proto_level r;
-        predecessor := predecessor; timestamp := timestamp r;
-        validation_passes := validation_passes r;
-        operations_hash := operations_hash r; fitness := fitness r;
-        context := context r |}.
-    Definition with_timestamp (r : record) timestamp : record :=
-      {| level := level r; proto_level := proto_level r;
-        predecessor := predecessor r; timestamp := timestamp;
-        validation_passes := validation_passes r;
-        operations_hash := operations_hash r; fitness := fitness r;
-        context := context r |}.
-    Definition with_validation_passes (r : record) validation_passes : record :=
-      {| level := level r; proto_level := proto_level r;
-        predecessor := predecessor r; timestamp := timestamp r;
-        validation_passes := validation_passes;
-        operations_hash := operations_hash r; fitness := fitness r;
-        context := context r |}.
-    Definition with_operations_hash (r : record) operations_hash : record :=
-      {| level := level r; proto_level := proto_level r;
-        predecessor := predecessor r; timestamp := timestamp r;
-        validation_passes := validation_passes r;
-        operations_hash := operations_hash; fitness := fitness r;
-        context := context r |}.
-    Definition with_fitness (r : record) fitness : record :=
-      {| level := level r; proto_level := proto_level r;
-        predecessor := predecessor r; timestamp := timestamp r;
-        validation_passes := validation_passes r;
-        operations_hash := operations_hash r; fitness := fitness;
-        context := context r |}.
-    Definition with_context (r : record) context : record :=
-      {| level := level r; proto_level := proto_level r;
-        predecessor := predecessor r; timestamp := timestamp r;
-        validation_passes := validation_passes r;
-        operations_hash := operations_hash r; fitness := fitness r;
-        context := context |}.
+    Definition with_level level (r : record) :=
+      Build level r.(proto_level) r.(predecessor) r.(timestamp)
+        r.(validation_passes) r.(operations_hash) r.(fitness) r.(context).
+    Definition with_proto_level proto_level (r : record) :=
+      Build r.(level) proto_level r.(predecessor) r.(timestamp)
+        r.(validation_passes) r.(operations_hash) r.(fitness) r.(context).
+    Definition with_predecessor predecessor (r : record) :=
+      Build r.(level) r.(proto_level) predecessor r.(timestamp)
+        r.(validation_passes) r.(operations_hash) r.(fitness) r.(context).
+    Definition with_timestamp timestamp (r : record) :=
+      Build r.(level) r.(proto_level) r.(predecessor) timestamp
+        r.(validation_passes) r.(operations_hash) r.(fitness) r.(context).
+    Definition with_validation_passes validation_passes (r : record) :=
+      Build r.(level) r.(proto_level) r.(predecessor) r.(timestamp)
+        validation_passes r.(operations_hash) r.(fitness) r.(context).
+    Definition with_operations_hash operations_hash (r : record) :=
+      Build r.(level) r.(proto_level) r.(predecessor) r.(timestamp)
+        r.(validation_passes) operations_hash r.(fitness) r.(context).
+    Definition with_fitness fitness (r : record) :=
+      Build r.(level) r.(proto_level) r.(predecessor) r.(timestamp)
+        r.(validation_passes) r.(operations_hash) fitness r.(context).
+    Definition with_context context (r : record) :=
+      Build r.(level) r.(proto_level) r.(predecessor) r.(timestamp)
+        r.(validation_passes) r.(operations_hash) r.(fitness) context.
   End shell_header.
   Definition shell_header := shell_header.record.
   
   Parameter shell_header_encoding : Data_encoding.t shell_header.
   
   Module t.
-    Record record := {
+    Record record := Build {
       shell : shell_header;
       protocol_data : MBytes.t }.
-    Definition with_shell (r : record) shell : record :=
-      {| shell := shell; protocol_data := protocol_data r |}.
-    Definition with_protocol_data (r : record) protocol_data : record :=
-      {| shell := shell r; protocol_data := protocol_data |}.
+    Definition with_shell shell (r : record) :=
+      Build shell r.(protocol_data).
+    Definition with_protocol_data protocol_data (r : record) :=
+      Build r.(shell) protocol_data.
   End t.
   Definition t := t.record.
   
@@ -9565,23 +9533,23 @@ Parameter Fitness : {_ : unit &amp; S.T.signature (list MBytes.t)}.
 
 Module Operation.
   Module shell_header.
-    Record record := {
+    Record record := Build {
       branch : (|Block_hash|).(S.HASH.t) }.
-    Definition with_branch (r : record) branch : record :=
-      {| branch := branch |}.
+    Definition with_branch branch (r : record) :=
+      Build branch.
   End shell_header.
   Definition shell_header := shell_header.record.
   
   Parameter shell_header_encoding : Data_encoding.t shell_header.
   
   Module t.
-    Record record := {
+    Record record := Build {
       shell : shell_header;
       proto : MBytes.t }.
-    Definition with_shell (r : record) shell : record :=
-      {| shell := shell; proto := proto r |}.
-    Definition with_proto (r : record) proto : record :=
-      {| shell := shell r; proto := proto |}.
+    Definition with_shell shell (r : record) :=
+      Build shell r.(proto).
+    Definition with_proto proto (r : record) :=
+      Build r.(shell) proto.
   End t.
   Definition t := t.record.
   
@@ -9626,44 +9594,37 @@ Module Protocol.
   Reserved Notation &quot;'t&quot;.
   
   Module t.
-    Record record {expected_env components : Set} := {
+    Record record {expected_env components : Set} := Build {
       expected_env : expected_env;
       components : components }.
     Arguments record : clear implicits.
-    Definition with_expected_env {expected_env_type components_type : Set}
-      (r : record expected_env_type components_type) expected_env
-      : record expected_env_type components_type :=
-      {| expected_env := expected_env; components := components r |}.
-    Definition with_components {expected_env_type components_type : Set}
-      (r : record expected_env_type components_type) components
-      : record expected_env_type components_type :=
-      {| expected_env := expected_env r; components := components |}.
+    Definition with_expected_env {t_expected_env t_components} expected_env
+      (r : record t_expected_env t_components) :=
+      Build t_expected_env t_components expected_env r.(components).
+    Definition with_components {t_expected_env t_components} components
+      (r : record t_expected_env t_components) :=
+      Build t_expected_env t_components r.(expected_env) components.
   End t.
   Definition t_skeleton := t.record.
   
   Module component.
-    Record record {name interface implementation : Set} := {
+    Record record {name interface implementation : Set} := Build {
       name : name;
       interface : interface;
       implementation : implementation }.
     Arguments record : clear implicits.
-    Definition with_name {name_type interface_type implementation_type : Set}
-      (r : record name_type interface_type implementation_type) name
-      : record name_type interface_type implementation_type :=
-      {| name := name; interface := interface r;
-        implementation := implementation r |}.
-    Definition with_interface
-      {name_type interface_type implementation_type : Set}
-      (r : record name_type interface_type implementation_type) interface
-      : record name_type interface_type implementation_type :=
-      {| name := name r; interface := interface;
-        implementation := implementation r |}.
-    Definition with_implementation
-      {name_type interface_type implementation_type : Set}
-      (r : record name_type interface_type implementation_type) implementation
-      : record name_type interface_type implementation_type :=
-      {| name := name r; interface := interface r;
-        implementation := implementation |}.
+    Definition with_name {t_name t_interface t_implementation} name
+      (r : record t_name t_interface t_implementation) :=
+      Build t_name t_interface t_implementation name r.(interface)
+        r.(implementation).
+    Definition with_interface {t_name t_interface t_implementation} interface
+      (r : record t_name t_interface t_implementation) :=
+      Build t_name t_interface t_implementation r.(name) interface
+        r.(implementation).
+    Definition with_implementation {t_name t_interface t_implementation}
+      implementation (r : record t_name t_interface t_implementation) :=
+      Build t_name t_interface t_implementation r.(name) r.(interface)
+        implementation.
   End component.
   Definition component_skeleton := component.record.
   
@@ -9754,62 +9715,53 @@ End Context.
 
 Module Updater.
   Module validation_result.
-    Record record := {
+    Record record := Build {
       context : Context.t;
       fitness : (|Fitness|).(S.T.t);
       message : option string;
       max_operations_ttl : Z;
       last_allowed_fork_level : Int32.t }.
-    Definition with_context (r : record) context : record :=
-      {| context := context; fitness := fitness r; message := message r;
-        max_operations_ttl := max_operations_ttl r;
-        last_allowed_fork_level := last_allowed_fork_level r |}.
-    Definition with_fitness (r : record) fitness : record :=
-      {| context := context r; fitness := fitness; message := message r;
-        max_operations_ttl := max_operations_ttl r;
-        last_allowed_fork_level := last_allowed_fork_level r |}.
-    Definition with_message (r : record) message : record :=
-      {| context := context r; fitness := fitness r; message := message;
-        max_operations_ttl := max_operations_ttl r;
-        last_allowed_fork_level := last_allowed_fork_level r |}.
-    Definition with_max_operations_ttl (r : record) max_operations_ttl
-      : record :=
-      {| context := context r; fitness := fitness r; message := message r;
-        max_operations_ttl := max_operations_ttl;
-        last_allowed_fork_level := last_allowed_fork_level r |}.
-    Definition with_last_allowed_fork_level (r : record) last_allowed_fork_level
-      : record :=
-      {| context := context r; fitness := fitness r; message := message r;
-        max_operations_ttl := max_operations_ttl r;
-        last_allowed_fork_level := last_allowed_fork_level |}.
+    Definition with_context context (r : record) :=
+      Build context r.(fitness) r.(message) r.(max_operations_ttl)
+        r.(last_allowed_fork_level).
+    Definition with_fitness fitness (r : record) :=
+      Build r.(context) fitness r.(message) r.(max_operations_ttl)
+        r.(last_allowed_fork_level).
+    Definition with_message message (r : record) :=
+      Build r.(context) r.(fitness) message r.(max_operations_ttl)
+        r.(last_allowed_fork_level).
+    Definition with_max_operations_ttl max_operations_ttl (r : record) :=
+      Build r.(context) r.(fitness) r.(message) max_operations_ttl
+        r.(last_allowed_fork_level).
+    Definition with_last_allowed_fork_level last_allowed_fork_level
+      (r : record) :=
+      Build r.(context) r.(fitness) r.(message) r.(max_operations_ttl)
+        last_allowed_fork_level.
   End validation_result.
   Definition validation_result := validation_result.record.
   
   Module quota.
-    Record record := {
+    Record record := Build {
       max_size : Z;
       max_op : option Z }.
-    Definition with_max_size (r : record) max_size : record :=
-      {| max_size := max_size; max_op := max_op r |}.
-    Definition with_max_op (r : record) max_op : record :=
-      {| max_size := max_size r; max_op := max_op |}.
+    Definition with_max_size max_size (r : record) :=
+      Build max_size r.(max_op).
+    Definition with_max_op max_op (r : record) :=
+      Build r.(max_size) max_op.
   End quota.
   Definition quota := quota.record.
   
   Module rpc_context.
-    Record record := {
+    Record record := Build {
       block_hash : (|Block_hash|).(S.HASH.t);
       block_header : Block_header.shell_header;
       context : Context.t }.
-    Definition with_block_hash (r : record) block_hash : record :=
-      {| block_hash := block_hash; block_header := block_header r;
-        context := context r |}.
-    Definition with_block_header (r : record) block_header : record :=
-      {| block_hash := block_hash r; block_header := block_header;
-        context := context r |}.
-    Definition with_context (r : record) context : record :=
-      {| block_hash := block_hash r; block_header := block_header r;
-        context := context |}.
+    Definition with_block_hash block_hash (r : record) :=
+      Build block_hash r.(block_header) r.(context).
+    Definition with_block_header block_header (r : record) :=
+      Build r.(block_hash) block_header r.(context).
+    Definition with_context context (r : record) :=
+      Build r.(block_hash) r.(block_header) context.
   End rpc_context.
   Definition rpc_context := rpc_context.record.
   
