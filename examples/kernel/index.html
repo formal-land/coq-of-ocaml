@@ -960,25 +960,25 @@ struct
   | RelKey i -&gt; combinesmall 3 (Int.hash i)
 end
 
-module KeyTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module KeyTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">IdKeyHash</abbr>)
 
@@ -1131,8 +1131,8 @@ type clos_infos = {
   i_flags : reds;
   i_cache : infos_cache }
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -1160,7 +1160,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">type clos_tab = fconstr constant_def KeyTable.t</abbr>
 
@@ -1297,8 +1297,8 @@ let mk_clos_vect env v = match v with
   <abbr class="mark-error" title="Arrays not handled.">[|mk_clos env v0; mk_clos env v1; mk_clos env v2; mk_clos env v3|]</abbr>
 | v -&gt; Array.Fun1.map mk_clos env v
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -1326,14 +1326,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -1361,7 +1361,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ref_value_cache</abbr> ({ i_cache = cache; _ }) tab ref =
   <abbr class="mark-error" title="Try-with are not handled
@@ -1373,8 +1373,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -1402,7 +1402,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">KeyTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -2231,21 +2231,21 @@ Alternative: use a monad to sequence side-effects.">check_cmp env;
 
   end
 
-module FredNative = RedNative(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module FredNative = RedNative(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Primred.RedNativeEntries, Primred.RedNativeEntries
 
 We were looking for a module signature name for the following shape:
 [ get; get_int; mkInt; mkBool; mkCarry; mkIntPair; mkLt; mkEq; mkGt ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">FNativeEntries</abbr>)
 
 (************************************************************************)
 
 (* Computes a weak head normal form from the result of knh. *)
-let rec <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let rec <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2273,7 +2273,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">knr</abbr> info tab m stk =
   match m.term with
@@ -2345,13 +2345,13 @@ Alternative: use a monad to sequence side-effects.">assert (ci.ci_npar&gt;=0);
        begin match nargs with
          | [] -&gt;
            let args = Array.of_list (List.rev rargs) in
-           begin match <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+           begin match <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Primred.RedNative, Primred.RedNative
 
 We were looking for a module signature name for the following shape:
 [ red_prim ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">FredNative.red_prim</abbr> (info_env info) () op args with
              | Some m -&gt; kni info tab m s
@@ -2373,8 +2373,8 @@ Alternative: use a monad to sequence side-effects.">assert (kd = CPrimitives.Kwh
 
 
 (* Computes the weak head normal form of a term *)
-and <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+and <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2402,13 +2402,13 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">kni</abbr> info tab m stk =
   let (hm,s) = knh info m stk in
   knr info tab hm s
-and <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+and <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2436,14 +2436,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">knit</abbr> info tab e t stk =
   let (ht,s) = knht info e t stk in
   knr info tab ht s
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2471,7 +2471,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">kh</abbr> info tab v stk = fapp_stack(kni info tab v stk)
 
@@ -2507,8 +2507,8 @@ let rec zip_term zfun m stk =
    1- Calls kni
    2- tries to rebuild the term. If a closure still has to be computed,
       calls itself recursively. *)
-let rec <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let rec <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2536,7 +2536,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">kl</abbr> info tab m =
   let share = info.i_cache.i_share in
@@ -2550,8 +2550,8 @@ Alternative: use a monad to sequence side-effects.">(incr prune; term_of_fconstr
 
 (* no redex: go up for atoms and already normalized terms, go down
    otherwise. *)
-and <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+and <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2579,7 +2579,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">norm_head</abbr> info tab m =
   if is_val m then <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
@@ -2618,8 +2618,8 @@ Alternative: use a monad to sequence side-effects.">(incr prune; term_of_fconstr
 (* Initialization and then normalization *)
 
 (* weak reduction *)
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2647,14 +2647,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">whd_val</abbr> info tab v =
   with_stats <abbr class="mark-error" title="Lazy expressions are not handled">(lazy (term_of_fconstr (kh info tab v [])))</abbr>
 
 (* strong reduction *)
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2682,13 +2682,13 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">norm_val</abbr> info tab v =
   with_stats <abbr class="mark-error" title="Lazy expressions are not handled">(lazy (kl info tab v))</abbr>
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2716,7 +2716,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">whd_stack</abbr> infos tab m stk = match Mark.red_state m.mark with
 | Whnf | Norm -&gt;
@@ -2737,8 +2737,8 @@ let create_clos_infos ?(evars=fun _ -&gt; None) flgs env =
   } in
   { i_flags = flgs; i_cache = cache }
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2766,10 +2766,10 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">create_tab</abbr> () = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">create_tab</abbr> () = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2797,7 +2797,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">KeyTable.create</abbr> 17
 
@@ -2806,8 +2806,8 @@ let oracle_of_infos infos = Environ.oracle infos.i_cache.i_env
 let infos_with_reds infos reds =
   { infos with i_flags = reds }
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2835,14 +2835,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -2870,7 +2870,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">unfold_reference</abbr> info tab key =
   match key with
@@ -3146,7 +3146,7 @@ Definition RedFlags :=
       RedFlagsSig.mkflags := mkflags;
       RedFlagsSig.red_set := red_set;
       RedFlagsSig.red_projection := red_projection
-      |}.
+    |}.
 
 Import RedFlags.
 
@@ -3279,7 +3279,7 @@ Definition KeyTable :=
           (|IdKeyHash|).(Stdlib__hashtbl.HashedType.equal);
         Stdlib__hashtbl.HashedType.hash :=
           (|IdKeyHash|).(Stdlib__hashtbl.HashedType.hash)
-        |}).
+      |}).
 
 Import Context.Named.Declaration.
 
@@ -4479,7 +4479,7 @@ Definition FredNative :=
         Primred.RedNativeEntries.mkLt := FNativeEntries.mkLt;
         Primred.RedNativeEntries.mkEq := FNativeEntries.mkEq;
         Primred.RedNativeEntries.mkGt := FNativeEntries.mkGt
-        |}).
+      |}).
 
 Fixpoint knr
   (info : clos_infos)
@@ -6527,13 +6527,13 @@ open Environ
 (* In Cfxe_t accumulators, we need to store [fcofixi] for testing         *)
 (* conversion of cofixpoints (which is intentional).                      *)
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module Fv_elem =
 struct
@@ -6553,25 +6553,25 @@ let compare e1 e2 = match e1, e2 with
 
 end</abbr>
 
-module FvMap = Map.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module FvMap = Map.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Fv_elem</abbr>)
 
@@ -7892,10 +7892,10 @@ Definition Fv_elem :=
       1
     | (Cbytecodes.FVevar e1, Cbytecodes.FVevar e2) =&gt; Evar.compare e1 e2
     end in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       Util.__Set.OrderedType.compare := compare
-      |}.
+    |}.
 
 Definition FvMap :=
   Map.Make
@@ -7903,7 +7903,7 @@ Definition FvMap :=
       {|
         Stdlib__map.OrderedType.compare :=
           (|Fv_elem|).(Util.__Set.OrderedType.compare)
-        |}).
+      |}).
 
 Module vm_env.
   Record record := {
@@ -8874,13 +8874,13 @@ let hash_reloc_info r =
   | Reloc_getglobal c -&gt; combinesmall 3 (Constant.hash c)
   | Reloc_proj_name p -&gt; combinesmall 4 (Projection.Repr.hash p)
 
-module RelocTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module RelocTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">struct
   type t = reloc_info
@@ -8953,8 +8953,8 @@ type label_definition =
     Label_defined of int
   | Label_undefined of (int * int) list
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -8982,7 +8982,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">type env = {
   mutable out_buffer : Bytes.t;
@@ -9162,8 +9162,8 @@ let out_label env l = out_label_with_orig env env.out_position l
 
 (* Relocation information *)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -9191,7 +9191,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">enter</abbr> env info =
   let pos = env.out_position in
@@ -9203,8 +9203,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -9232,13 +9232,13 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RelocTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case."> env.reloc_info info with Not_found -&gt; []</abbr> in
-  <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -9266,7 +9266,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RelocTable.replace</abbr> env.reloc_info info (pos :: old)
 
@@ -9892,8 +9892,8 @@ let to_memory (init_code, fun_code, fv) =
     out_buffer = Bytes.create 1024;
     out_position = 0;
     label_table = Array.make 16 (Label_undefined []);
-    reloc_info = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+    reloc_info = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -9921,7 +9921,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RelocTable.create</abbr> 91;
   } in
@@ -9953,8 +9953,8 @@ Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -9982,7 +9982,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RelocTable.fold</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
@@ -10082,7 +10082,7 @@ Definition RelocTable :=
       {|
         Stdlib__hashtbl.HashedType.equal := equal;
         Stdlib__hashtbl.HashedType.hash := hash
-        |}).
+      |}).
 
 Module patches.
   Record record := {
@@ -16313,25 +16313,25 @@ struct
   | ConstructRef c -&gt; combinesmall 3 (constructor_syntactic_hash c)
 end
 
-module RefTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module RefTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RefHash</abbr>)
 
@@ -16341,8 +16341,8 @@ let instantiate_my_gr gr u =
   | IndRef i -&gt; mkIndU (i, u)
   | ConstructRef c -&gt; mkConstructU (c, u)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16370,14 +16370,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16405,7 +16405,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">share</abbr> cache r (cstl,knl) =
   <abbr class="mark-error" title="Try-with are not handled
@@ -16416,8 +16416,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16445,7 +16445,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RefTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -16463,8 +16463,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
   RefTable.add cache r c;
   c</abbr>
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16492,14 +16492,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16527,14 +16527,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">share_univs</abbr> cache r u l =
   let (u', args) = share cache r l in
     mkApp (instantiate_my_gr r (Instance.append u' u), args)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16562,7 +16562,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">update_case_info</abbr> cache ci modlist =
   <abbr class="mark-error" title="Try-with are not handled
@@ -16576,8 +16576,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 let is_empty_modlist (cm, mm) =
   Cmap.is_empty cm &amp;&amp; Mindmap.is_empty mm
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16605,7 +16605,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">expmod_constr</abbr> cache modlist c =
   let share_univs = share_univs cache in
@@ -16695,8 +16695,8 @@ type result = {
   cook_context : Constr.named_context option;
 }
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16724,7 +16724,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">expmod_constr_subst</abbr> cache modlist subst c =
   let subst = Univ.make_instance_subst subst in
@@ -16761,8 +16761,8 @@ Alternative: use a monad to sequence side-effects.">assert (AUContext.is_empty a
       subst, (Polymorphic (AUContext.union auctx0 auctx'))
 
 let cook_constr { Opaqueproof.modlist ; abstract } c =
-  let cache = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  let cache = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16790,7 +16790,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RefTable.create</abbr> 13 in
   let abstract, usubst, abs_ctx = abstract in
@@ -16805,8 +16805,8 @@ We use the concept of shape to find the name of a signature for Coq.">RefTable.c
 
 let cook_constant { from = cb; info } =
   let { Opaqueproof.modlist; abstract } = info in
-  let cache = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  let cache = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16834,7 +16834,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RefTable.create</abbr> 13 in
   let abstract, usubst, abs_ctx = abstract in
@@ -16873,8 +16873,8 @@ We use the concept of shape to find the name of a signature for Coq.">RefTable.c
 (* let cook_constant_key = CProfile.declare_profile &quot;cook_constant&quot; *)
 (* let cook_constant = CProfile.profile2 cook_constant_key cook_constant *)
 
-let expmod_constr modlist c = expmod_constr (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let expmod_constr modlist c = expmod_constr (<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -16902,7 +16902,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RefTable.create</abbr> 13) modlist c
 </pre>
@@ -16973,7 +16973,7 @@ Definition RefTable :=
           (|RefHash|).(Stdlib__hashtbl.HashedType.equal);
         Stdlib__hashtbl.HashedType.hash :=
           (|RefHash|).(Stdlib__hashtbl.HashedType.hash)
-        |}).
+      |}).
 
 Definition instantiate_my_gr (gr : my_global_reference) (u : Univ.Instance.t)
   : Constr.constr :=
@@ -18026,13 +18026,13 @@ Alternative: use a monad to sequence side-effects.">global_data.glob_len &lt;- g
 
 (* table pour les structured_constant et les annotations des switchs *)
 
-module SConstTable = Hashtbl.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module SConstTable = Hashtbl.Make (<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">struct
   type t = structured_constant
@@ -18040,13 +18040,13 @@ We use the concept of shape to find the name of a signature for Coq.">struct
   let hash = hash_structured_constant
 end</abbr>)
 
-module AnnotTable = Hashtbl.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module AnnotTable = Hashtbl.Make (<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">struct
   type t = annot_switch
@@ -18054,18 +18054,18 @@ We use the concept of shape to find the name of a signature for Coq.">struct
   let hash = hash_annot_switch
 end</abbr>)
 
-module ProjNameTable = Hashtbl.Make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module ProjNameTable = Hashtbl.Make (<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Projection.Repr</abbr>)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18093,10 +18093,10 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">str_cst_tbl</abbr> : int SConstTable.t = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">str_cst_tbl</abbr> : int SConstTable.t = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18124,12 +18124,12 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">SConstTable.create</abbr> 31
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18157,10 +18157,10 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">annot_tbl</abbr> : int AnnotTable.t = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">annot_tbl</abbr> : int AnnotTable.t = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18188,13 +18188,13 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">AnnotTable.create</abbr> 31
     (* (annot_switch * int) Hashtbl.t  *)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18222,10 +18222,10 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">proj_name_tbl</abbr> : int ProjNameTable.t = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">proj_name_tbl</abbr> : int ProjNameTable.t = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18253,7 +18253,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ProjNameTable.create</abbr> 31
 
@@ -18280,8 +18280,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 (* slot_for_*, calcul la valeur de l'objet, la place
    dans la table global, rend sa position dans la table *)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18309,7 +18309,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">slot_for_str_cst</abbr> key =
   <abbr class="mark-error" title="Try-with are not handled
@@ -18320,8 +18320,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18349,7 +18349,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">SConstTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -18359,8 +18359,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
     SConstTable.add str_cst_tbl key n;
     n</abbr>
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18388,7 +18388,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">slot_for_annot</abbr> key =
   <abbr class="mark-error" title="Try-with are not handled
@@ -18399,8 +18399,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18428,7 +18428,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">AnnotTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -18438,8 +18438,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
     AnnotTable.add annot_tbl key n;
     n</abbr>
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18467,7 +18467,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">slot_for_proj_name</abbr> key =
   <abbr class="mark-error" title="Try-with are not handled
@@ -18478,8 +18478,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -18507,7 +18507,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ProjNameTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -18685,7 +18685,7 @@ Definition SConstTable :=
       {|
         Stdlib__hashtbl.HashedType.equal := equal;
         Stdlib__hashtbl.HashedType.hash := hash
-        |}).
+      |}).
 
 Definition AnnotTable :=
   Hashtbl.Make
@@ -18696,7 +18696,7 @@ Definition AnnotTable :=
       {|
         Stdlib__hashtbl.HashedType.equal := equal;
         Stdlib__hashtbl.HashedType.hash := hash
-        |}).
+      |}).
 
 Definition ProjNameTable :=
   Hashtbl.Make
@@ -18704,7 +18704,7 @@ Definition ProjNameTable :=
       {|
         Stdlib__hashtbl.HashedType.equal := Names.Projection.Repr.equal;
         Stdlib__hashtbl.HashedType.hash := Names.Projection.Repr.hash
-        |}).
+      |}).
 
 Definition str_cst_tbl : (|SConstTable|).(Stdlib__hashtbl.S.t) Z :=
   (|SConstTable|).(Stdlib__hashtbl.S.create) 31.
@@ -37408,13 +37408,13 @@ Alternative: use a monad to sequence side-effects.">check_valid s;
 
   let print id = str id
 
-  <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module Self =
   struct
@@ -37422,68 +37422,68 @@ We use the concept of shape to find the name of a signature for Coq.">module Sel
     let compare = compare
   end</abbr>
 
-  module Set = Set.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  module Set = Set.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Self</abbr>)
-  module Map = CMap.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  module Map = CMap.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Self</abbr>)
 
-  module Pred = Predicate.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  module Pred = Predicate.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Self</abbr>)
 
@@ -37600,13 +37600,13 @@ struct
 
   let initial = [default_module_name]
 
-  module Hdir = Hashcons.Hlist(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  module Hdir = Hashcons.Hlist(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Hashcons.HashedType, Util.Set.HashedType
 
 We were looking for a module signature name for the following shape:
 [ hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Id</abbr>)
 
@@ -37677,22 +37677,22 @@ struct
 
 end
 
-module MBImap = CMap.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module MBImap = CMap.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">MBId</abbr>)
-module MBIset = Set.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module MBIset = Set.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">MBId</abbr>)
 
@@ -37795,22 +37795,22 @@ module ModPath = struct
 
 end
 
-module MPset = Set.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module MPset = Set.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ModPath</abbr>)
-module MPmap = CMap.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module MPmap = CMap.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ModPath</abbr>)
 
@@ -37897,13 +37897,13 @@ module KerName = struct
 end
 
 module KNmap = HMap.Make(KerName)
-module KNpred = Predicate.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module KNpred = Predicate.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">KerName</abbr>)
 module KNset = KNmap.Set
@@ -38052,13 +38052,13 @@ module Cmap_env = HMap.Make(Constant.UserOrd)
 (** A map whose keys are constants (values of the {!Constant.t} type).
     Keys are ordered wrt. &quot;user form&quot; of the constant. *)
 
-module Cpred = Predicate.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module Cpred = Predicate.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Constant.CanOrd</abbr>)
 module Cset = Cmap.Set
@@ -38137,141 +38137,141 @@ let constructor_user_hash (ind, i) =
 let constructor_syntactic_hash (ind, i) =
   Hashset.Combine.combine (ind_syntactic_hash ind) (Int.hash i)
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module InductiveOrdered = struct
   type t = inductive
   let compare = ind_ord
 end</abbr>
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module InductiveOrdered_env = struct
   type t = inductive
   let compare = ind_user_ord
 end</abbr>
 
-module Indmap = Map.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module Indmap = Map.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">InductiveOrdered</abbr>)
-module Indmap_env = Map.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module Indmap_env = Map.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">InductiveOrdered_env</abbr>)
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module ConstructorOrdered = struct
   type t = constructor
   let compare = constructor_ord
 end</abbr>
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module ConstructorOrdered_env = struct
   type t = constructor
   let compare = constructor_user_ord
 end</abbr>
 
-module Constrmap = Map.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module Constrmap = Map.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ConstructorOrdered</abbr>)
-module Constrmap_env = Map.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module Constrmap_env = Map.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CMap.OrderedType, Predicate.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ConstructorOrdered_env</abbr>)
 
@@ -38680,10 +38680,10 @@ Module Id.
   
   Definition Self :=
     let t := string in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         Util.__Set.OrderedType.compare := compare
-        |}.
+      |}.
   
   Definition __Set :=
     __Set.Make
@@ -38691,21 +38691,21 @@ Module Id.
         {|
           Util.__Set.OrderedType.compare :=
             (|Self|).(Util.__Set.OrderedType.compare)
-          |}).
+        |}).
   
   Definition Map :=
     CMap.Make
       (existT _ _
         {|
           CMap.OrderedType.compare := (|Self|).(CMap.OrderedType.compare)
-          |}).
+        |}).
   
   Definition Pred :=
     Predicate.Make
       (existT _ _
         {|
           CMap.OrderedType.compare := (|Self|).(CMap.OrderedType.compare)
-          |}).
+        |}).
   
   Module List := String.List.
   
@@ -38786,7 +38786,7 @@ Module Name.
             (|Self_Hashcons|).(Hashcons.HashconsedType.eq);
           Hashcons.HashconsedType.hash :=
             (|Self_Hashcons|).(Hashcons.HashconsedType.hash)
-          |}).
+        |}).
   
   Definition hcons : (|Hname|).(Hashcons.S.t) -&gt; (|Hname|).(Hashcons.S.t) :=
     Hashcons.simple_hcons (|Hname|).(Hashcons.S.generate)
@@ -38855,7 +38855,7 @@ Module DirPath.
       (existT _ _
         {|
           Hashcons.HashedType.hash := Id.hash
-          |}).
+        |}).
   
   Definition hcons : (|Hdir|).(Hashcons.S.t) -&gt; (|Hdir|).(Hashcons.S.t) :=
     Hashcons.recursive_hcons (|Hdir|).(Hashcons.S.generate)
@@ -38947,12 +38947,12 @@ Module MBId.
         orb (Stdlib.op_eqeq x y)
           (andb (Int.equal n1 n2)
             (andb (Stdlib.op_eqeq s1 s2) (Stdlib.op_eqeq dir1 dir2))) in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         Hashcons.HashconsedType.hashcons {_ _ _ _ _} := hashcons;
         Hashcons.HashconsedType.eq {_ _} := eq;
         Hashcons.HashconsedType.hash := hash
-        |}.
+      |}.
   
   Definition HashMBId :=
     Hashcons.Make
@@ -38964,7 +38964,7 @@ Module MBId.
             (|Self_Hashcons|).(Hashcons.HashconsedType.eq);
           Hashcons.HashconsedType.hash :=
             (|Self_Hashcons|).(Hashcons.HashconsedType.hash)
-          |}).
+        |}).
   
   Definition hcons
     : (|HashMBId|).(Hashcons.S.t) -&gt; (|HashMBId|).(Hashcons.S.t) :=
@@ -38977,14 +38977,14 @@ Definition MBImap :=
     (existT _ _
       {|
         CMap.OrderedType.compare := MBId.compare
-        |}).
+      |}).
 
 Definition MBIset :=
   __Set.Make
     (existT _ _
       {|
         CMap.OrderedType.compare := MBId.compare
-        |}).
+      |}).
 
 Module Label.
   Include Id.
@@ -39102,12 +39102,12 @@ Module ModPath.
           andb (Stdlib.op_eqeq l1 l2) (equal mod1 mod2)
         | _ =&gt; false
         end in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}.
+      |}.
   
   Definition HashMP :=
     Hashcons.Make
@@ -39119,7 +39119,7 @@ Module ModPath.
             (|Self_Hashcons|).(Hashcons.HashconsedType.eq);
           Hashcons.HashconsedType.hash :=
             (|Self_Hashcons|).(Hashcons.HashconsedType.hash)
-          |}).
+        |}).
   
   Definition hcons : (|HashMP|).(Hashcons.S.t) -&gt; (|HashMP|).(Hashcons.S.t) :=
     Hashcons.simple_hcons (|HashMP|).(Hashcons.S.generate)
@@ -39132,14 +39132,14 @@ Definition MPset :=
     (existT _ _
       {|
         CMap.OrderedType.compare := ModPath.compare
-        |}).
+      |}).
 
 Definition MPmap :=
   CMap.Make
     (existT _ _
       {|
         CMap.OrderedType.compare := ModPath.compare
-        |}).
+      |}).
 
 Module KerName.
   Module t.
@@ -39238,12 +39238,12 @@ Module KerName.
     let eq (kn1 : t) (kn2 : t) : bool :=
       andb (Stdlib.op_eqeq (t.modpath kn1) (t.modpath kn2))
         (Stdlib.op_eqeq (t.knlabel kn1) (t.knlabel kn2)) in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         Hashcons.HashconsedType.hashcons {_} := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}.
+      |}.
   
   Definition HashKN :=
     Hashcons.Make
@@ -39255,7 +39255,7 @@ Module KerName.
             (|Self_Hashcons|).(Hashcons.HashconsedType.eq);
           Hashcons.HashconsedType.hash :=
             (|Self_Hashcons|).(Hashcons.HashconsedType.hash)
-          |}).
+        |}).
   
   Definition hcons : (|HashKN|).(Hashcons.S.t) -&gt; (|HashKN|).(Hashcons.S.t) :=
     Hashcons.simple_hcons (|HashKN|).(Hashcons.S.generate)
@@ -39269,14 +39269,14 @@ Definition KNmap :=
       {|
         HMap.HashedType.compare := KerName.compare;
         HMap.HashedType.hash := KerName.hash
-        |}).
+      |}).
 
 Definition KNpred :=
   Predicate.Make
     (existT _ _
       {|
         CMap.OrderedType.compare := KerName.compare
-        |}).
+      |}).
 
 Module KNset := KNmap.__Set.
 
@@ -39422,12 +39422,12 @@ Module KerPair.
       | Dual knu knc =&gt;
         Hashset.Combine.combine (KerName.hash knu) (KerName.hash knc)
       end in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}.
+      |}.
   
   Definition HashKP :=
     Hashcons.Make
@@ -39439,7 +39439,7 @@ Module KerPair.
             (|Self_Hashcons|).(Hashcons.HashconsedType.eq);
           Hashcons.HashconsedType.hash :=
             (|Self_Hashcons|).(Hashcons.HashconsedType.hash)
-          |}).
+        |}).
 End KerPair.
 
 Module Constant := KerPair.
@@ -39450,7 +39450,7 @@ Definition Cmap :=
       {|
         HMap.HashedType.compare := Constant.CanOrd.compare;
         HMap.HashedType.hash := Constant.CanOrd.hash
-        |}).
+      |}).
 
 Definition Cmap_env :=
   HMap.Make
@@ -39458,14 +39458,14 @@ Definition Cmap_env :=
       {|
         HMap.HashedType.compare := Constant.UserOrd.compare;
         HMap.HashedType.hash := Constant.UserOrd.hash
-        |}).
+      |}).
 
 Definition Cpred :=
   Predicate.Make
     (existT _ _
       {|
         CMap.OrderedType.compare := Constant.CanOrd.compare
-        |}).
+      |}).
 
 Module Cset := Cmap.__Set.
 
@@ -39479,7 +39479,7 @@ Definition Mindmap :=
       {|
         HMap.HashedType.compare := MutInd.CanOrd.compare;
         HMap.HashedType.hash := MutInd.CanOrd.hash
-        |}).
+      |}).
 
 Module Mindset := Mindmap.__Set.
 
@@ -39489,7 +39489,7 @@ Definition Mindmap_env :=
       {|
         HMap.HashedType.compare := MutInd.UserOrd.compare;
         HMap.HashedType.hash := MutInd.UserOrd.hash
-        |}).
+      |}).
 
 Definition inductive := MutInd.t * Z.
 
@@ -39664,18 +39664,18 @@ Definition constructor_syntactic_hash
 Definition InductiveOrdered :=
   let t := inductive in
   let compare := ind_ord in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       CMap.OrderedType.compare := compare
-      |}.
+    |}.
 
 Definition InductiveOrdered_env :=
   let t := inductive in
   let compare := ind_user_ord in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       CMap.OrderedType.compare := compare
-      |}.
+    |}.
 
 Definition Indmap :=
   Map.Make
@@ -39683,7 +39683,7 @@ Definition Indmap :=
       {|
         CMap.OrderedType.compare :=
           (|InductiveOrdered|).(CMap.OrderedType.compare)
-        |}).
+      |}).
 
 Definition Indmap_env :=
   Map.Make
@@ -39691,23 +39691,23 @@ Definition Indmap_env :=
       {|
         CMap.OrderedType.compare :=
           (|InductiveOrdered_env|).(CMap.OrderedType.compare)
-        |}).
+      |}).
 
 Definition ConstructorOrdered :=
   let t := constructor in
   let compare := constructor_ord in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       CMap.OrderedType.compare := compare
-      |}.
+    |}.
 
 Definition ConstructorOrdered_env :=
   let t := constructor in
   let compare := constructor_user_ord in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       CMap.OrderedType.compare := compare
-      |}.
+    |}.
 
 Definition Constrmap :=
   Map.Make
@@ -39715,7 +39715,7 @@ Definition Constrmap :=
       {|
         CMap.OrderedType.compare :=
           (|ConstructorOrdered|).(CMap.OrderedType.compare)
-        |}).
+      |}).
 
 Definition Constrmap_env :=
   Map.Make
@@ -39723,7 +39723,7 @@ Definition Constrmap_env :=
       {|
         CMap.OrderedType.compare :=
           (|ConstructorOrdered_env|).(CMap.OrderedType.compare)
-        |}).
+      |}).
 
 Definition Hind :=
   Hashcons.Make
@@ -39744,7 +39744,7 @@ Definition Hind :=
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}).
+      |}).
 
 Definition Hconstruct :=
   Hashcons.Make
@@ -39765,7 +39765,7 @@ Definition Hconstruct :=
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}).
+      |}).
 
 Definition hcons_con
   : (|Constant.HashKP|).(Hashcons.S.t) -&gt; (|Constant.HashKP|).(Hashcons.S.t) :=
@@ -39947,12 +39947,12 @@ Module Projection.
             (andb (Stdlib.op_eqeq (t.proj_npars p) (t.proj_npars p'))
               (andb (Stdlib.op_eqeq (t.proj_arg p) (t.proj_arg p'))
                 (Stdlib.op_eqeq (t.proj_name p) (t.proj_name p'))))) in
-      existT _ tt
+      existT (fun _ =&gt; _) tt
         {|
           Hashcons.HashconsedType.hashcons := hashcons;
           Hashcons.HashconsedType.eq := eq;
           Hashcons.HashconsedType.hash := hash
-          |}.
+        |}.
     
     Definition HashRepr :=
       Hashcons.Make
@@ -39964,7 +39964,7 @@ Module Projection.
               (|Self_Hashcons|).(Hashcons.HashconsedType.eq);
             Hashcons.HashconsedType.hash :=
               (|Self_Hashcons|).(Hashcons.HashconsedType.hash)
-            |}).
+          |}).
     
     Definition hcons
       : (|HashRepr|).(Hashcons.S.t) -&gt; (|HashRepr|).(Hashcons.S.t) :=
@@ -40116,12 +40116,12 @@ Module Projection.
         let '(c', b') as y := function_parameter in
         orb (Stdlib.op_eqeq x y)
           (andb (Stdlib.op_eqeq c c') (Stdlib.op_eqeq b b')) in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         Hashcons.HashconsedType.hashcons {_ _ _} := hashcons;
         Hashcons.HashconsedType.eq {_ _} := eq;
         Hashcons.HashconsedType.hash := hash
-        |}.
+      |}.
   
   Definition HashProjection :=
     Hashcons.Make
@@ -40133,7 +40133,7 @@ Module Projection.
             (|Self_Hashcons|).(Hashcons.HashconsedType.eq);
           Hashcons.HashconsedType.hash :=
             (|Self_Hashcons|).(Hashcons.HashconsedType.hash)
-          |}).
+        |}).
   
   Definition hcons
     : (|HashProjection|).(Hashcons.S.t) -&gt; (|HashProjection|).(Hashcons.S.t) :=
@@ -40293,7 +40293,7 @@ Module GlobRef.
         {|
           HMap.HashedType.compare := Ordered.compare;
           HMap.HashedType.hash := Ordered.hash
-          |}).
+        |}).
   
   Module __Set := Map.__Set.
   
@@ -40303,7 +40303,7 @@ Module GlobRef.
         {|
           HMap.HashedType.compare := Ordered_env.compare;
           HMap.HashedType.hash := Ordered_env.hash
-          |}).
+        |}).
   
   Module Set_env := Map_env.__Set.
 End GlobRef.
@@ -41689,59 +41689,59 @@ let eq_lname ln1 ln2 =
 
 let dummy_lname = { lname = Anonymous; luid = -1 }
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module LNord =
   struct
     type t = lname
     let compare l1 l2 = l1.luid - l2.luid
   end</abbr>
-module LNmap = Map.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module LNmap = Map.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">LNord</abbr>)
-module LNset = Set.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module LNset = Set.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">LNord</abbr>)
 
@@ -41902,13 +41902,13 @@ let hash_symbol symb =
   | SymbLevel l -&gt; combinesmall 9 (Univ.Level.hash l)
   | SymbProj (i, k) -&gt; combinesmall 10 (combine (ind_hash i) k)
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module HashedTypeSymbol = struct
   type t = symbol
@@ -41916,30 +41916,30 @@ We use the concept of shape to find the name of a signature for Coq.">module Has
   let hash = hash_symbol
 end</abbr>
 
-module HashtblSymbol = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module HashtblSymbol = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashedTypeSymbol</abbr>)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -41967,10 +41967,10 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">symb_tbl</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">symb_tbl</abbr> = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -41998,12 +41998,12 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashtblSymbol.create</abbr> 211
 
-let clear_symbols () = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let clear_symbols () = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42031,7 +42031,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashtblSymbol.clear</abbr> symb_tbl
 
@@ -42089,8 +42089,8 @@ let get_proj tbl i =
     | SymbProj p -&gt; p
     | _ -&gt; anomaly (Pp.str &quot;get_proj failed.&quot;)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42118,7 +42118,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">push_symbol</abbr> x =
   <abbr class="mark-error" title="Try-with are not handled
@@ -42129,8 +42129,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42158,7 +42158,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashtblSymbol.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -42170,8 +42170,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 let symbols_tbl_name = Ginternal &quot;symbols_tbl&quot;
 
 let get_symbols () =
-  let tbl = Array.make (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  let tbl = Array.make (<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42199,7 +42199,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashtblSymbol.length</abbr> symb_tbl) dummy_symb in
   <abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
@@ -42653,13 +42653,13 @@ let hash_global g =
 
 let global_stack = ref ([] : global list)
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module HashedTypeGlobal = struct
   type t = global
@@ -42667,30 +42667,30 @@ We use the concept of shape to find the name of a signature for Coq.">module Has
   let hash = hash_global
 end</abbr>
 
-module HashtblGlobal = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module HashtblGlobal = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashedTypeGlobal</abbr>)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42718,10 +42718,10 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">global_tbl</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">global_tbl</abbr> = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42749,12 +42749,12 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashtblGlobal.create</abbr> 19991
 
-let clear_global_tbl () = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let clear_global_tbl () = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42782,12 +42782,12 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashtblGlobal.clear</abbr> global_tbl
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42815,7 +42815,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">push_global</abbr> gn t =
   <abbr class="mark-error" title="Try-with are not handled
@@ -42826,8 +42826,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -42855,7 +42855,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">HashtblGlobal.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -44326,34 +44326,34 @@ Arrays not handled.">[||]</abbr><abbr class="mark-error" title="Arrays not handl
           else Linked prefix
     end
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module StringOrd = struct type t = string let compare = String.compare end</abbr>
-module StringSet = Set.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module StringSet = Set.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__set.OrderedType, Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">StringOrd</abbr>)
 
@@ -44721,10 +44721,10 @@ Definition LNord :=
   let t := lname in
   let compare (l1 : lname) (l2 : lname) : Z :=
     Z.sub (lname.luid l1) (lname.luid l2) in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       Stdlib__set.OrderedType.compare := compare
-      |}.
+    |}.
 
 Definition LNmap :=
   Map.Make
@@ -44732,7 +44732,7 @@ Definition LNmap :=
       {|
         Stdlib__set.OrderedType.compare :=
           (|LNord|).(Stdlib__set.OrderedType.compare)
-        |}).
+      |}).
 
 Definition LNset :=
   __Set.Make
@@ -44740,7 +44740,7 @@ Definition LNset :=
       {|
         Stdlib__set.OrderedType.compare :=
           (|LNord|).(Stdlib__set.OrderedType.compare)
-        |}).
+      |}).
 
 Definition lname_ctr : Stdlib.ref Z := Stdlib.__ref_value (-1).
 
@@ -44914,11 +44914,11 @@ Definition HashedTypeSymbol :=
   let t := symbol in
   let equal := eq_symbol in
   let hash := hash_symbol in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       Stdlib__hashtbl.HashedType.equal := equal;
       Stdlib__hashtbl.HashedType.hash := hash
-      |}.
+    |}.
 
 Definition HashtblSymbol :=
   Hashtbl.Make
@@ -44928,7 +44928,7 @@ Definition HashtblSymbol :=
           (|HashedTypeSymbol|).(Stdlib__hashtbl.HashedType.equal);
         Stdlib__hashtbl.HashedType.hash :=
           (|HashedTypeSymbol|).(Stdlib__hashtbl.HashedType.hash)
-        |}).
+      |}).
 
 Definition symb_tbl : (|HashtblSymbol|).(Stdlib__hashtbl.S.t) Z :=
   (|HashtblSymbol|).(Stdlib__hashtbl.S.create) 211.
@@ -45612,11 +45612,11 @@ Definition HashedTypeGlobal :=
   let t := global in
   let equal := eq_global in
   let hash := hash_global in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       Stdlib__hashtbl.HashedType.equal := equal;
       Stdlib__hashtbl.HashedType.hash := hash
-      |}.
+    |}.
 
 Definition HashtblGlobal :=
   Hashtbl.Make
@@ -45626,7 +45626,7 @@ Definition HashtblGlobal :=
           (|HashedTypeGlobal|).(Stdlib__hashtbl.HashedType.equal);
         Stdlib__hashtbl.HashedType.hash :=
           (|HashedTypeGlobal|).(Stdlib__hashtbl.HashedType.hash)
-        |}).
+      |}).
 
 Definition global_tbl : (|HashtblGlobal|).(Stdlib__hashtbl.S.t) gname :=
   (|HashtblGlobal|).(Stdlib__hashtbl.S.create) 19991.
@@ -47967,10 +47967,10 @@ Definition compile_constant
 Definition StringOrd :=
   let t := string in
   let compare := (|Util.String|).(CString.ExtS.compare) in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       Stdlib__set.OrderedType.compare := compare
-      |}.
+    |}.
 
 Definition StringSet :=
   __Set.Make
@@ -47978,7 +47978,7 @@ Definition StringSet :=
       {|
         Stdlib__set.OrderedType.compare :=
           (|StringOrd|).(Stdlib__set.OrderedType.compare)
-        |}).
+      |}).
 
 Definition loaded_native_files : Stdlib.ref (|StringSet|).(Stdlib__set.S.t) :=
   Stdlib.__ref_value (|StringSet|).(Stdlib__set.S.empty).
@@ -49540,32 +49540,32 @@ module Cache =
       let hash = constructor_hash
     end
 
-    module ConstrTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+    module ConstrTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ConstrHash</abbr>)
 
     type constructor_info = tag * int * int (* nparam nrealargs *)
 
-    let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+    let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -49593,14 +49593,14 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -49628,7 +49628,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">get_construct_info</abbr> cache env c : constructor_info =
       <abbr class="mark-error" title="Try-with are not handled
@@ -49639,8 +49639,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -49668,7 +49668,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">ConstrTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -49713,8 +49713,8 @@ let rec get_fix_struct env i t = match kind (Reduction.whd_all env t) with
     get_fix_struct env (i - 1) t
 | _ -&gt; <abbr class="mark-error" title="Assert instruction is not handled.">assert false</abbr>
 
-let rec <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let rec <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -49742,7 +49742,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">lambda_of_constr</abbr> cache env sigma c =
   match kind c with
@@ -49858,8 +49858,8 @@ We use the concept of shape to find the name of a signature for Coq.">lambda_of_
 
   | Int i -&gt; Luint i
 
-and <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+and <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -49887,7 +49887,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">lambda_of_app</abbr> cache env sigma f args =
   match kind f with
@@ -49927,8 +49927,8 @@ We use the concept of shape to find the name of a signature for Coq.">lambda_of_
       let args = lambda_of_args cache env sigma 0 args in
       mkLapp f args
 
-and <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+and <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -49956,7 +49956,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">lambda_of_args</abbr> cache env sigma start args =
   let nargs = Array.length args in
@@ -49975,8 +49975,8 @@ let optimize lam =
   lam
 
 let lambda_of_constr env sigma c =
-  let cache = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  let cache = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -50004,7 +50004,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Cache.ConstrTable.create</abbr> 91 in
   let lam = lambda_of_constr cache env sigma c in
@@ -50567,7 +50567,7 @@ Module Cache.
             (|ConstrHash|).(Stdlib__hashtbl.HashedType.equal);
           Stdlib__hashtbl.HashedType.hash :=
             (|ConstrHash|).(Stdlib__hashtbl.HashedType.hash)
-          |}).
+        |}).
   
   Definition constructor_info := Nativevalues.tag * Z * Z.
   
@@ -54689,10 +54689,10 @@ Definition RedNative :=
       try
         (let r := red_prim_aux env evd p args in
         Some r) in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         RedNative.red_prim := red_prim
-        |} : signature).
+      |} : signature).
 </pre>
   </div>
 </div>
@@ -55121,8 +55121,8 @@ let conv_table_key infos k1 k2 cuniv =
     if Univ.Instance.equal u u' then cuniv
     else
       let flex = evaluable_constant cst (info_env infos)
-        &amp;&amp; <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+        &amp;&amp; <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CClosure.RedFlagsSig, CClosure.RedFlagsSig
 
 We were looking for a module signature name for the following shape:
@@ -55145,10 +55145,10 @@ We were looking for a module signature name for the following shape:
   red_set;
   red_projection
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">RedFlags.red_set</abbr> (info_flags infos) (<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">RedFlags.red_set</abbr> (info_flags infos) (<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CClosure.RedFlagsSig, CClosure.RedFlagsSig
 
 We were looking for a module signature name for the following shape:
@@ -55171,7 +55171,7 @@ We were looking for a module signature name for the following shape:
   red_set;
   red_projection
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RedFlags.fCONST</abbr> cst)
       in convert_instances ~flex u u' cuniv
@@ -55524,8 +55524,8 @@ Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CClosure.RedFlagsSig, CClosure.RedFlagsSig
 
 We were looking for a module signature name for the following shape:
@@ -55548,7 +55548,7 @@ We were looking for a module signature name for the following shape:
   red_set;
   red_projection
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RedFlags.red_add_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
@@ -55558,8 +55558,8 @@ Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CClosure.RedFlagsSig, CClosure.RedFlagsSig
 
 We were looking for a module signature name for the following shape:
@@ -55582,7 +55582,7 @@ We were looking for a module signature name for the following shape:
   red_set;
   red_projection
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RedFlags.red_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
@@ -55628,8 +55628,8 @@ Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CClosure.RedFlagsSig, CClosure.RedFlagsSig
 
 We were looking for a module signature name for the following shape:
@@ -55652,7 +55652,7 @@ We were looking for a module signature name for the following shape:
   red_set;
   red_projection
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RedFlags.red_add_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
@@ -55662,8 +55662,8 @@ Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CClosure.RedFlagsSig, CClosure.RedFlagsSig
 
 We were looking for a module signature name for the following shape:
@@ -55686,7 +55686,7 @@ We were looking for a module signature name for the following shape:
   red_set;
   red_projection
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">RedFlags.red_transparent</abbr><abbr class="mark-error" title="Sequences of instructions are not handled (operator &quot;;&quot;)
 
@@ -55973,8 +55973,8 @@ Only the special case `| exception _ when false -&gt; ...` is supported for defa
   Array.fold_right3 fold ci.ci_cstr_nargs br1 br2 cuniv
 
 let clos_gen_conv trans cv_pb l2r evars env univs t1 t2 =
-  let reds = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  let reds = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 CClosure.RedFlagsSig, CClosure.RedFlagsSig
 
 We were looking for a module signature name for the following shape:
@@ -55997,7 +55997,7 @@ We were looking for a module signature name for the following shape:
   red_set;
   red_projection
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">CClosure.RedFlags.red_add_transparent</abbr> betaiotazeta trans in
   let infos = create_clos_infos ~evars reds env in
@@ -58791,13 +58791,13 @@ type library_info = DirPath.t * vodigest
 (** Functor and funsig parameters, most recent first *)
 type module_parameters = (MBId.t * module_type_body) list
 
-module DPMap = Map.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module DPMap = Map.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">DirPath</abbr>)
 
@@ -58939,34 +58939,34 @@ sig
 end =
 struct
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module SeffOrd = struct
 </abbr><abbr class="mark-error" title="Open not handled in module with a named signature
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">open Entries</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">open Entries</abbr><abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">
 type t = side_effect
@@ -58975,25 +58975,25 @@ let compare e1 e2 =
   List.compare cmp e1.eff e2.eff
 end</abbr>
 
-module SeffSet = Set.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module SeffSet = Set.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__map.OrderedType, Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">SeffOrd</abbr>)
 
@@ -61430,7 +61430,7 @@ Definition DPMap :=
     (existT _ _
       {|
         Stdlib__map.OrderedType.compare := Names.DirPath.compare
-        |}).
+      |}).
 
 Reserved Notation &quot;'safe_environment&quot;.
 
@@ -61959,10 +61959,10 @@ Module SideEffects.
           (Entries.side_eff.seff_constant e2) in
       (|Util.List|).(CList.ExtS.compare) cmp (side_effect.eff e1)
         (side_effect.eff e2) in
-    existT _ tt
+    existT (fun _ =&gt; _) tt
       {|
         Stdlib__map.OrderedType.compare := compare
-        |}.
+      |}.
   
   Definition SeffSet :=
     __Set.Make
@@ -61970,7 +61970,7 @@ Module SideEffects.
         {|
           Stdlib__map.OrderedType.compare :=
             (|SeffOrd|).(Stdlib__map.OrderedType.compare)
-          |}).
+        |}).
   
   Module t.
     Record record := {
@@ -64330,7 +64330,7 @@ Definition Hsorts :=
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}).
+      |}).
 
 Definition hcons : (|Hsorts|).(Hashcons.S.t) -&gt; (|Hsorts|).(Hashcons.S.t) :=
   Hashcons.simple_hcons (|Hsorts|).(Hashcons.S.generate)
@@ -71609,7 +71609,7 @@ Definition G :=
         AcyclicGraph.Point.compare := compare;
         AcyclicGraph.Point.error_inconsistency {_} := error_inconsistency;
         AcyclicGraph.Point.pr := pr
-        |}).
+      |}).
 
 Module t.
   Record record := {
@@ -75145,13 +75145,13 @@ struct
 
   let compare x y = if x == y then 0 else List.compare Expr.compare x y
 
-  module Huniv = Hashcons.Hlist(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  module Huniv = Hashcons.Hlist(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Hashcons.HashedType, Util.Set.HashedType
 
 We were looking for a module signature name for the following shape:
 [ hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">Expr</abbr>)
 
@@ -75321,13 +75321,13 @@ let pr_constraint_type op =
     | Eq -&gt; &quot; = &quot;
   in str op_str
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module UConstraintOrd =
 struct
@@ -75343,25 +75343,25 @@ end</abbr>
 
 module Constraint =
 struct
-  module S = Set.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+  module S = Set.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Util.Set.OrderedType, Util.Map.OrderedType
 
 We were looking for a module signature name for the following shape:
 [ compare ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">UConstraintOrd</abbr>)
   include S
@@ -76213,7 +76213,7 @@ Module Level.
             Hashcons.HashconsedType.eq := (|Self|).(Hashcons.HashconsedType.eq);
             Hashcons.HashconsedType.hash :=
               (|Self|).(Hashcons.HashconsedType.hash)
-            |}) in
+          |}) in
     Hashcons.simple_hcons (|H|).(Hashcons.S.generate) (|H|).(Hashcons.S.hcons)
       tt.
   
@@ -76311,7 +76311,7 @@ Module LMap.
         {|
           HMap.HashedType.compare := Level.compare;
           HMap.HashedType.hash := Level.hash
-          |}).
+        |}).
   
   Definition key := (|M|).(Util.Map.ExtS.key).
   
@@ -76464,12 +76464,12 @@ Module Universe.
       let hash (function_parameter : Level.t * Z) : Z :=
         let '(x, n) := function_parameter in
         Z.add n (Level.hash x) in
-      existT _ tt
+      existT (fun _ =&gt; _) tt
         {|
           Hashcons.HashconsedType.hashcons {_ _} := hashcons;
           Hashcons.HashconsedType.eq {_ _} := eq;
           Hashcons.HashconsedType.hash := hash
-          |}.
+        |}.
     
     Definition H :=
       Hashcons.Make
@@ -76481,7 +76481,7 @@ Module Universe.
               (|ExprHash|).(Hashcons.HashconsedType.eq);
             Hashcons.HashconsedType.hash :=
               (|ExprHash|).(Hashcons.HashconsedType.hash)
-            |}).
+          |}).
     
     Definition hcons : (|H|).(Hashcons.S.t) -&gt; (|H|).(Hashcons.S.t) :=
       Hashcons.simple_hcons (|H|).(Hashcons.S.generate) (|H|).(Hashcons.S.hcons)
@@ -76663,7 +76663,7 @@ Module Universe.
       (existT _ _
         {|
           Hashcons.HashedType.hash := Expr.hash
-          |}).
+        |}).
   
   Definition hcons : (|Huniv|).(Hashcons.S.t) -&gt; (|Huniv|).(Hashcons.S.t) :=
     Hashcons.recursive_hcons (|Huniv|).(Hashcons.S.generate)
@@ -76894,10 +76894,10 @@ Definition UConstraintOrd :=
           i'
         else
           Level.compare v v' in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       Util.__Set.OrderedType.compare := compare
-      |}.
+    |}.
 
 Module Constraint.
   Definition S :=
@@ -76906,7 +76906,7 @@ Module Constraint.
         {|
           Util.__Set.OrderedType.compare :=
             (|UConstraintOrd|).(Util.__Set.OrderedType.compare)
-          |}).
+        |}).
   
   Include S.
   
@@ -76950,7 +76950,7 @@ Definition Hconstraint :=
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}).
+      |}).
 
 Definition Hconstraints :=
   Hashcons.Make
@@ -76968,7 +76968,7 @@ Definition Hconstraints :=
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}).
+      |}).
 
 Definition hcons_constraint
   : (|Hconstraint|).(Hashcons.S.t) -&gt; (|Hconstraint|).(Hashcons.S.t) :=
@@ -77710,7 +77710,7 @@ Definition Huniverse_set :=
         Hashcons.HashconsedType.hashcons := hashcons;
         Hashcons.HashconsedType.eq := eq;
         Hashcons.HashconsedType.hash := hash
-        |}).
+      |}).
 
 Definition hcons_universe_set
   : (|Huniverse_set|).(Hashcons.S.t) -&gt; (|Huniverse_set|).(Hashcons.S.t) :=
@@ -81735,13 +81735,13 @@ Alternative: use a monad to sequence side-effects.">Obj.set_field r 1 (Obj.repr 
 let val_of_proj kn v =
   val_of_atom (atom_of_proj kn v)
 
-<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">module IdKeyHash =
 struct
@@ -81751,21 +81751,21 @@ struct
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">open Hashset.Combine</abbr><abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">open Hashset.Combine</abbr><abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">
   let hash : t -&gt; tag = function
@@ -81775,30 +81775,30 @@ We use the concept of shape to find the name of a signature for Coq.">
   | EvarKey evk -&gt; combinesmall 4 (Evar.hash evk)
 end</abbr>
 
-module KeyTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+module KeyTable = Hashtbl.Make(<abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.HashedType, Stdlib__hashtbl.SeededHashedType
 
 We were looking for a module signature name for the following shape:
 [ equal; hash ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">IdKeyHash</abbr>)
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -81826,10 +81826,10 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
-We use the concept of shape to find the name of a signature for Coq.">idkey_tbl</abbr> = <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+We use the concept of shape to find the name of a signature for Coq.">idkey_tbl</abbr> = <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -81857,12 +81857,12 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">KeyTable.create</abbr> 31
 
-let <abbr class="mark-error" title="It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+let <abbr class="mark-error" title="It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -81890,7 +81890,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">val_of_idkey</abbr> key =
   <abbr class="mark-error" title="Try-with are not handled
@@ -81901,8 +81901,8 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-It is unclear which first-class module this projection is from. At least two similar
-module signatures found, namely:
+It is unclear which name has this signature. At least two similar
+signatures found, namely:
 Stdlib__hashtbl.S, Stdlib__hashtbl.SeededS
 
 We were looking for a module signature name for the following shape:
@@ -81930,7 +81930,7 @@ We were looking for a module signature name for the following shape:
   replace_seq;
   of_seq
 ]
-(a shape is a list of names of values)
+(a shape is a list of names of values and sub-modules)
 
 We use the concept of shape to find the name of a signature for Coq.">KeyTable.find</abbr><abbr class="mark-error" title="Try-with are not handled
 
@@ -82822,11 +82822,11 @@ Definition IdKeyHash :=
     | RelKey i =&gt; combinesmall 3 (Int.hash i)
     | EvarKey evk =&gt; combinesmall 4 (Evar.hash evk)
     end in
-  existT _ tt
+  existT (fun _ =&gt; _) tt
     {|
       Stdlib__hashtbl.HashedType.equal := equal;
       Stdlib__hashtbl.HashedType.hash := hash
-      |}.
+    |}.
 
 Definition KeyTable :=
   Hashtbl.Make
@@ -82836,7 +82836,7 @@ Definition KeyTable :=
           (|IdKeyHash|).(Stdlib__hashtbl.HashedType.equal);
         Stdlib__hashtbl.HashedType.hash :=
           (|IdKeyHash|).(Stdlib__hashtbl.HashedType.hash)
-        |}).
+      |}).
 
 Definition idkey_tbl : (|KeyTable|).(Stdlib__hashtbl.S.t) values :=
   (|KeyTable|).(Stdlib__hashtbl.S.create) 31.
