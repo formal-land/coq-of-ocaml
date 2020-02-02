@@ -98,6 +98,10 @@ let prefix_by_single_quote (name : t) : t =
   let Make name = name in
   Make ("'" ^ name)
 
+let prefix_by_t (name : t) : t =
+  let Make name = name in
+  Make ("t_" ^ name)
+
 let prefix_by_with (name : t) : t =
   let Make name = name in
   Make ("with_" ^ name)
@@ -109,10 +113,6 @@ let suffix_by_gadt (name : t) : t =
 let suffix_by_skeleton (name : t) : t =
   let Make name = name in
   Make (name ^ "_skeleton")
-
-let suffix_by_type (name : t) : t =
-  let Make name = name in
-  Make (name ^ "_type")
 
 (** Pretty-print a name to Coq. *)
 let to_coq (name : t) : SmartPrint.t =

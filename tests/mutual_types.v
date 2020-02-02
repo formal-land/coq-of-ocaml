@@ -39,28 +39,25 @@ Reserved Notation "'re".
 Reserved Notation "'re_bis".
 
 Module re_bis.
-  Record record {bis : Set} := {
+  Record record {bis : Set} := Build {
     bis : bis }.
   Arguments record : clear implicits.
-  Definition with_bis {bis_type : Set} (r : record bis_type) bis
-    : record bis_type :=
-    {| bis := bis |}.
+  Definition with_bis {t_bis} bis (r : record t_bis) :=
+    Build t_bis bis.
 End re_bis.
 Definition re_bis_skeleton := re_bis.record.
 
 Module re.
-  Record record {payload message : Set} := {
+  Record record {payload message : Set} := Build {
     payload : payload;
     message : message }.
   Arguments record : clear implicits.
-  Definition with_payload {payload_type message_type : Set}
-    (r : record payload_type message_type) payload
-    : record payload_type message_type :=
-    {| payload := payload; message := message r |}.
-  Definition with_message {payload_type message_type : Set}
-    (r : record payload_type message_type) message
-    : record payload_type message_type :=
-    {| payload := payload r; message := message |}.
+  Definition with_payload {t_payload t_message} payload
+    (r : record t_payload t_message) :=
+    Build t_payload t_message payload r.(message).
+  Definition with_message {t_payload t_message} message
+    (r : record t_payload t_message) :=
+    Build t_payload t_message r.(payload) message.
 End re.
 Definition re_skeleton := re.record.
 

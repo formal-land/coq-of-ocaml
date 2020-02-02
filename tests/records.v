@@ -11,13 +11,13 @@ Unset Guard Checking.
 
 Module SizedString.
   Module t.
-    Record record := {
+    Record record := Build {
       name : string;
       size : Z }.
-    Definition with_name (r : record) name : record :=
-      {| name := name; size := size r |}.
-    Definition with_size (r : record) size : record :=
-      {| name := name r; size := size |}.
+    Definition with_name name (r : record) :=
+      Build name r.(size).
+    Definition with_size size (r : record) :=
+      Build r.(name) size.
   End t.
   Definition t := t.record.
 End SizedString.
@@ -42,16 +42,16 @@ Definition b' : bool := f r'.
 
 Module Point.
   Module t.
-    Record record := {
+    Record record := Build {
       x : Z;
       y : Z;
       z : Z }.
-    Definition with_x (r : record) x : record :=
-      {| x := x; y := y r; z := z r |}.
-    Definition with_y (r : record) y : record :=
-      {| x := x r; y := y; z := z r |}.
-    Definition with_z (r : record) z : record :=
-      {| x := x r; y := y r; z := z |}.
+    Definition with_x x (r : record) :=
+      Build x r.(y) r.(z).
+    Definition with_y y (r : record) :=
+      Build r.(x) y r.(z).
+    Definition with_z z (r : record) :=
+      Build r.(x) r.(y) z.
   End t.
   Definition t := t.record.
   
@@ -65,17 +65,16 @@ Module Point.
 End Point.
 
 Module poly.
-  Record record {first second : Set} := {
+  Record record {first second : Set} := Build {
     first : first;
     second : second }.
   Arguments record : clear implicits.
-  Definition with_first {first_type second_type : Set}
-    (r : record first_type second_type) first : record first_type second_type :=
-    {| first := first; second := second r |}.
-  Definition with_second {first_type second_type : Set}
-    (r : record first_type second_type) second
-    : record first_type second_type :=
-    {| first := first r; second := second |}.
+  Definition with_first {t_first t_second} first
+    (r : record t_first t_second) :=
+    Build t_first t_second first r.(second).
+  Definition with_second {t_first t_second} second
+    (r : record t_first t_second) :=
+    Build t_first t_second r.(first) second.
 End poly.
 Definition poly := poly.record.
 
@@ -105,16 +104,14 @@ Module ConstructorWithRecords.
   Reserved Notation "'loc".
   
   Module loc.
-    Record record {x y : Set} := {
+    Record record {x y : Set} := Build {
       x : x;
       y : y }.
     Arguments record : clear implicits.
-    Definition with_x {x_type y_type : Set} (r : record x_type y_type) x
-      : record x_type y_type :=
-      {| x := x; y := y r |}.
-    Definition with_y {x_type y_type : Set} (r : record x_type y_type) y
-      : record x_type y_type :=
-      {| x := x r; y := y |}.
+    Definition with_x {t_x t_y} x (r : record t_x t_y) :=
+      Build t_x t_y x r.(y).
+    Definition with_y {t_x t_y} y (r : record t_x t_y) :=
+      Build t_x t_y r.(x) y.
   End loc.
   Definition loc_skeleton := loc.record.
   
@@ -133,7 +130,7 @@ Module ConstructorWithRecords.
   
   Definition l : loc := {| loc.x := 12; loc.y := 23 |}.
   
-  Definition l_with : loc := loc.with_x l 41.
+  Definition l_with : loc := loc.with_x 41 l.
   
   Definition foo : t := Foo {| t.Foo.name := "foo"; t.Foo.size := 12 |}.
   

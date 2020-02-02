@@ -214,7 +214,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
             (fun extended_e (x, e) ->
               Apply (
                 Variable (MixedPath.PathName (PathName.prefix_by_with x)),
-                [extended_e; e])
+                [e; extended_e]
+              )
             )
             extended_e
             fields

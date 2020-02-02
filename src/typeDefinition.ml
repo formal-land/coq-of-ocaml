@@ -21,7 +21,13 @@ let to_coq_record
           !^ ":" ^^ Pp.set
         ))
       end ^^
-      !^ ":=" ^^ !^ "{" ^^ newline ^^
+      !^ ":=" ^^
+      begin if generate_withs then
+        !^ "Build"
+      else
+        empty
+      end ^^
+      !^ "{" ^^ newline ^^
       indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
         nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)))) ^^
       !^ "}." ^^
@@ -33,37 +39,32 @@ let to_coq_record
       end ^^
       begin if generate_withs then
         newline ^^ separate newline (fields |> List.map (fun (name, _) ->
-          let suffixed_typ_args =
+          let prefixed_typ_args =
             typ_args |> List.map (fun typ_arg ->
-              Name.to_coq (Name.suffix_by_type typ_arg)
+              Name.to_coq (Name.prefix_by_t typ_arg)
              ) in
           let record_typ =
-            nest (separate space (!^ "record" :: suffixed_typ_args)) in
+            nest (separate space (!^ "record" :: prefixed_typ_args)) in
           nest (
             !^ "Definition" ^^ Name.to_coq (Name.prefix_by_with name) ^^
             begin match typ_args with
             | [] -> empty
-            | _ :: _ ->
-              braces (nest (
-                separate space suffixed_typ_args ^^
-                !^ ":" ^^ Pp.set
-              ))
+            | _ :: _ -> braces (nest (separate space prefixed_typ_args))
             end ^^
-            nest (parens (!^ "r" ^^ !^ ":" ^^ record_typ)) ^^
             Name.to_coq name ^^
-            nest (!^ ":" ^^ record_typ ^^ !^ ":=") ^^ newline ^^
+            nest (parens (!^ "r" ^^ !^ ":" ^^ record_typ)) ^-^
+            !^ " :=" ^^ newline ^^
             indent @@ nest (
-              !^ "{|" ^^
-              separate (!^ ";" ^^ space) (fields |> List.map (fun (name', _) ->
+              !^ "Build" ^^
+              separate space prefixed_typ_args ^^
+              separate space (fields |> List.map (fun (name', _) ->
                 nest (
-                  Name.to_coq name' ^-^ !^ " :=" ^^
                   if Name.equal name name' then
                     Name.to_coq name
                   else
-                    Name.to_coq name' ^^ !^ "r"
+                  !^ "r" ^-^ !^ ".(" ^-^ Name.to_coq name' ^-^ !^ ")"
                 )
-              )) ^^
-              !^ "|}" ^-^ !^ "."
+              )) ^-^ !^ "."
             )
           )
         ))
