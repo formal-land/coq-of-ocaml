@@ -5,10 +5,6 @@ type t = {
   path : Name.t list;
   base : Name.t }
 
-type t' = t
-module Set = Set.Make (struct type t = t' let compare = compare end)
-module Map = Map.Make (struct type t = t' let compare = compare end)
-
 let stdlib_name =
   if Sys.ocaml_version >= "4.07" then
     "Stdlib"

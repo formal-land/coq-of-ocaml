@@ -4,9 +4,15 @@ open SmartPrint
 (** Just a [string]. *)
 type t = Make of string
 
-type t' = t
-module Set = Set.Make (struct type t = t' let compare = compare end)
-module Map = Map.Make (struct type t = t' let compare = compare end)
+module Set = Set.Make (struct
+  type nonrec t = t
+  let compare = compare
+end)
+
+module Map = Map.Make (struct
+  type nonrec t = t
+  let compare = compare
+end)
 
 let equal (name1 : t) (name2 : t) : bool =
   match (name1, name2) with
