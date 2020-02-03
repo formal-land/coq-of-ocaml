@@ -107,8 +107,7 @@ let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
-  let attributes =
-    e.exp_attributes |> List.map (fun attr -> (fst attr).Asttypes.txt) in
+  Attribute.of_attributes e.exp_attributes >>= fun attributes ->
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
@@ -141,7 +140,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
   | Texp_function { cases; _ } ->
-    let is_gadt_match = List.mem "coq_gadt_match" attributes in
+    let is_gadt_match = Attribute.have_match_gadt attributes in
     open_cases typ_vars cases is_gadt_match >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
@@ -157,7 +156,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     )) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
-    let is_gadt_match = List.mem "coq_gadt_match" attributes in
+    let is_gadt_match = Attribute.have_match_gadt attributes in
     of_expression typ_vars e >>= fun e ->
     of_match typ_vars e cases exception_cases is_gadt_match
   | Texp_tuple es ->
@@ -461,9 +460,8 @@ and import_let_fun
   : t option Definition.t Monad.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
-    let attributes =
-      vb_attributes |> List.map (fun attr -> (fst attr).Asttypes.txt) in
-    let is_axiom = List.mem "axiom" attributes in
+    Attribute.of_attributes vb_attributes >>= fun attributes ->
+    let is_axiom = Attribute.have_axiom attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->

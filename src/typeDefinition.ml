@@ -461,29 +461,26 @@ module Inductive = struct
       path_name = fun path_name ->
         match path_name with
         | { PathName.path = []; base } ->
-          let corresponding_notation =
-            inductive.notations |> List.find_opt (fun (name, _, _) ->
+          let use_notation =
+            inductive.notations |> List.exists (fun (name, _, _) ->
               name = base
             ) in
-          begin match corresponding_notation with
-          | None -> path_name
-          | Some _ -> { path = []; base = Name.prefix_by_single_quote base }
-          end
+          if use_notation then
+            { path = []; base = Name.prefix_by_single_quote base }
+          else
+            path_name
         | { path = [prefix]; base } ->
-          let corresponding_notation =
-            inductive.constructor_records |> List.find_opt (fun (name, records) ->
-              let corresponding_records = records |> List.find_opt
+          let use_notation =
+            inductive.constructor_records |> List.exists (fun (name, records) ->
+              records |> List.exists
                 (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
                   name = prefix && module_name = base
-                ) in
-              match corresponding_records with
-              | None -> false
-              | Some _ -> true
+                )
             ) in
-          begin match corresponding_notation with
-          | None -> path_name
-          | Some _ -> { path = [Name.prefix_by_single_quote prefix]; base }
-          end
+          if use_notation then
+            { path = [Name.prefix_by_single_quote prefix]; base }
+          else
+            path_name
         | _ -> path_name
     } in
     let constructor_records = to_coq_constructor_records inductive in
