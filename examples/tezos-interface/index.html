@@ -55,7 +55,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6152 lines</li>
-      <li>Coq size: 3270 lines (-47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3269 lines (-47% compared to&nbsp;OCaml)</li>
       <li>errors from coq-of-ocaml: 191</li>
     </ul>
     
@@ -99,7 +99,7 @@
     <h3>Environment_mli</h3>
     <ul>
       <li>OCaml size: 6152 lines</li>
-      <li>Coq size: 3270 lines (-47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3269 lines (-47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6758,7 +6758,6 @@ Import ListNotations.
 
 Require Import TypingFlags.Loader.
 Unset Guard Checking.
-Set Type In Type.
 
 Module Pervasives.
   Parameter raise : forall {a : Set}, extensible_type -&gt; a.
