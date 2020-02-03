@@ -41,8 +41,6 @@ Axiom obj_magic : forall {A : Set} (B : Set), A -> B.
 Axiom obj_magic_exists : forall {As Bs : Type} (T : Bs -> Type),
   As -> {vs : Bs & T vs}.
 
-Parameter exn : Set.
-
 Parameter extensible_type : Set.
 
 Parameter extensible_type_value : extensible_type.

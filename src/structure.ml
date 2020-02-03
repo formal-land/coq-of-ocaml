@@ -178,7 +178,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | Found _ ->
-        return [simple_value name (Exp.Variable (MixedPath.PathName reference))]
+        return [
+          simple_value name (Exp.Variable (MixedPath.PathName reference, []))
+        ]
       | Not_found _ -> return [ModuleSynonym (name, reference)]
       end
     | Tstr_module {
@@ -285,7 +287,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
                         MixedPath.PathName reference,
                         field,
                         false
-                      )
+                      ),
+                      []
                     ))
                 )
               | _ -> None

@@ -48,6 +48,7 @@ let try_convert (path_name : t) : t option =
     | "Some" -> make [] "Some"
     | "Ok" -> make [] "inl"
     | "Error" -> make [] "inr"
+    | "exn" -> make [] "extensible_type"
 
     (* Predefined exceptions *)
     | "Match_failure" -> make ["OCaml"] "Match_failure"

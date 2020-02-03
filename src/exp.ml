@@ -26,10 +26,10 @@ type match_existential_cast = {
     simplify the importation in Coq. *)
 type t =
   | Constant of Constant.t
-  | Variable of MixedPath.t
+  | Variable of MixedPath.t * string list
   | Tuple of t list (** A tuple of expressions. *)
-  | Constructor of PathName.t * t list
-    (** A constructor name and a list of arguments. *)
+  | Constructor of PathName.t * string list * t list
+    (** A constructor name, some implicits and a list of arguments. *)
   | Apply of t * t list (** An application. *)
   | Function of Name.t * t (** An argument name and a body. *)
   | LetVar of Name.t * t * t
@@ -112,8 +112,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
   | Texp_ident (path, loc, _) ->
+    let implicits = Attribute.get_implicits attributes in
     MixedPath.of_path true path (Some loc.txt) >>= fun x ->
-    return (Variable x)
+    return (Variable (x, implicits))
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
     return (Constant constant)
@@ -163,22 +164,24 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
   | Texp_construct (_, constructor_description, es) ->
+    let implicits = Attribute.get_implicits attributes in
     begin match constructor_description.cstr_tag with
     | Cstr_extension _ ->
       raise
         (Variable (
-          MixedPath.of_name (Name.of_string true "extensible_type_value")
+          MixedPath.of_name (Name.of_string true "extensible_type_value"),
+          []
         ))
         NotSupported
         "Values of extensible types are not handled"
     | _ ->
       let x = PathName.of_constructor_description constructor_description in
       Monad.List.map (of_expression typ_vars) es >>= fun es ->
-      return (Constructor (x, es))
+      return (Constructor (x, implicits, es))
     end
   | Texp_variant (label, e) ->
     let constructor =
-      Variable (MixedPath.PathName (PathName.of_variant label)) in
+      Variable (MixedPath.PathName (PathName.of_variant label), []) in
     begin match e with
     | None -> return constructor
     | Some e ->
@@ -212,7 +215,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           List.fold_left
             (fun extended_e (x, e) ->
               Apply (
-                Variable (MixedPath.PathName (PathName.prefix_by_with x)),
+                Variable (MixedPath.PathName (PathName.prefix_by_with x), []),
                 [e; extended_e]
               )
             )
@@ -253,7 +256,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_expression typ_vars e_record >>= fun e_record ->
     of_expression typ_vars e >>= fun e ->
     error_message
-      (Apply (Error "set_record_field", [e_record; Constant (Constant.String lbl_name); e]))
+      (Apply (
+        Error "set_record_field",
+        [e_record; Constant (Constant.String lbl_name); e]
+      ))
       SideEffect
       "Set record field not handled."
   | Texp_array es ->
@@ -385,7 +391,7 @@ and of_match
           (
             Pattern.Any,
             None,
-            Variable (MixedPath.PathName PathName.false_value)
+            Variable (MixedPath.PathName PathName.false_value, [])
           )
         ],
         None
@@ -418,7 +424,7 @@ and of_match
     | Some guard_exp ->
       of_expression typ_vars guard_exp >>= fun guard_exp ->
       begin match guard_exp with
-      | Constructor ({ PathName.path = []; base = Name.Make "false" }, []) ->
+      | Constructor ({ PathName.path = []; base = Name.Make "false" }, _, []) ->
         of_expression typ_vars c_rhs >>= fun c_rhs ->
         return (Some c_rhs)
       | _ ->
@@ -448,7 +454,7 @@ and open_cases
   (is_gadt_match : bool)
   : (Name.t * t) Monad.t =
   let name = Name.of_string false "function_parameter" in
-  let e = Variable (MixedPath.of_name name) in
+  let e = Variable (MixedPath.of_name name, []) in
   of_match typ_vars e cases [] is_gadt_match >>= fun e ->
   return (name, e)
 
@@ -548,7 +554,7 @@ and of_module_expr
   | Tmod_ident (path, loc) ->
     let default_result =
       MixedPath.of_path true path (Some loc.txt) >>= fun path ->
-      return (Variable path) in
+      return (Variable (path, [])) in
     IsFirstClassModule.is_module_typ_first_class local_module_type >>= fun is_first_class ->
     let local_module_type_path =
       match is_first_class with
@@ -570,7 +576,7 @@ and of_module_expr
                 PathName.of_path_and_name_with_convert module_type_path value,
                 nb_free_vars,
                 Variable (
-                  match local_module_type_path with
+                  begin match local_module_type_path with
                   | Some local_module_type_path ->
                     MixedPath.Access (
                       MixedPath.PathName
@@ -584,6 +590,8 @@ and of_module_expr
                     MixedPath.PathName (
                       PathName.of_path_and_name_with_convert path value
                     )
+                  end,
+                  []
                 )
               )
             ) in
@@ -660,7 +668,7 @@ and of_structure
       (
         PathName.of_path_and_name_with_convert signature_path value,
         nb_free_vars,
-        Variable (MixedPath.of_name value)
+        Variable (MixedPath.of_name value, [])
       )
     ) in
   let e_next = Module (nb_of_existential_variables, fields) in
@@ -798,13 +806,16 @@ and of_include
       return (
         LetVar (
           name,
-          Variable (MixedPath.Access (
-            MixedPath.PathName module_path_name,
-            PathName.of_path_and_name_with_convert
-              signature_path
-              name,
-            false
-          )),
+          Variable (
+            MixedPath.Access (
+              MixedPath.PathName module_path_name,
+              PathName.of_path_and_name_with_convert
+                signature_path
+                name,
+              false
+            ),
+            []
+          ),
           e_next
         )
       )
@@ -820,7 +831,7 @@ let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
 
 let rec flatten_list (e : t) : t list option =
   match e with
-  | Constructor (x, es) ->
+  | Constructor (x, _, es) ->
     begin match (x, es) with
     | ({ PathName.path = []; base = Name.Make "[]" }, []) -> Some []
     | ({ PathName.path = []; base = Name.Make "cons" }, [e; es]) ->
@@ -837,30 +848,44 @@ let rec flatten_list (e : t) : t list option =
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   match e with
   | Constant c -> Constant.to_coq c
-  | Variable x -> MixedPath.to_coq x
+  | Variable (x, implicits) ->
+    let x = MixedPath.to_coq x in
+    begin match implicits with
+    | [] -> x
+    | _ :: _ ->
+      parens (separate space (
+        x :: List.map (fun implicit -> !^ implicit) implicits)
+      )
+    end
   | Tuple es ->
     if es = [] then
       !^ "tt"
     else
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
-  | Constructor (x, es) ->
+  | Constructor (x, implicits, es) ->
     begin match flatten_list e with
     | Some [] -> !^ "[]"
     | Some es -> OCaml.list (to_coq false) es
     | None ->
-      if es = [] then
-        PathName.to_coq x
-      else
-        Pp.parens paren @@ nest @@ separate space
-          (PathName.to_coq x :: List.map (to_coq true) es)
+      let arguments =
+        List.map (fun implicit -> !^ implicit) implicits @
+        List.map (to_coq true) es in
+      begin match arguments with
+      | [] -> PathName.to_coq x
+      | _ :: _ ->
+        Pp.parens paren @@ nest @@
+          separate space (PathName.to_coq x :: arguments)
+      end
     end
   | Apply (e_f, e_xs) ->
-    Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
+    Pp.parens paren @@ nest @@ (separate space (
+      List.map (to_coq true) (e_f :: e_xs)
+    ))
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (x, e1, e2) ->
     begin match e1 with
-    | Variable (PathName { path = []; base }) when Name.equal base x ->
+    | Variable (PathName { path = []; base }, []) when Name.equal base x ->
       to_coq paren e2
     | _ ->
       Pp.parens paren @@ nest (
@@ -1046,7 +1071,13 @@ and obj_magic_existential
       nest (
         !^ "obj_magic_exists" ^^
         parens (nest (
-          !^ "fun" ^^ existential_names_pattern ^^ !^ "=>" ^^ variable_typ
+          !^ "fun" ^^ existential_names_pattern ^^
+          (* TODO: try to remove this annotation once in Coq 8.11 *)
+          begin match new_typ_vars with
+          | [_] -> !^ ":" ^^ !^ "Set"
+          | _ -> empty
+          end ^^
+          !^ "=>" ^^ variable_typ
         )) ^^
         variable_names
       ) ^^ !^ "in" ^^ newline ^^
