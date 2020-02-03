@@ -2,25 +2,25 @@ module Output = struct
   type t = {
     error_message : string option;
     generated_file : (string * string) option;
-    success_message : string option;
+    source_file_name : string;
+    success_message : string;
   }
 
-  let write (output : t) : unit =
-    let { error_message; generated_file; success_message } = output in
-    begin match error_message with
+  let write (json_mode : bool) (output : t) : unit =
+    begin match output.error_message with
     | None -> ()
-    | Some error_message -> prerr_endline error_message
+    | Some error_message ->
+      if json_mode then
+        let error_file_name = output.source_file_name ^ ".errors" in
+        Util.File.write error_file_name error_message
+      else
+        prerr_endline error_message
     end;
-    begin match success_message with
-    | None -> ()
-    | Some success_message -> print_endline success_message
-    end;
-    begin match generated_file with
+    print_endline output.success_message;
+    begin match output.generated_file with
     | None -> ()
     | Some (generated_file_name, generated_file_content) ->
-      let output_channel = open_out generated_file_name in
-      output_string output_channel generated_file_content;
-      close_out output_channel
+      Util.File.write generated_file_name generated_file_content
     end
 end
 
@@ -84,12 +84,15 @@ let of_ocaml
   let success_message =
     match error_message with
     | None ->
-      Some (Printf.sprintf "File '%s' successfully generated" generated_file_name)
+      Error.colorize "32" "✔️" ^ " " ^
+      Printf.sprintf "File '%s' successfully generated" generated_file_name
     | Some _ ->
-      Some (Printf.sprintf "File '%s' generated with some errors" generated_file_name) in
+      Error.colorize "31" "❌" ^ " " ^
+      Printf.sprintf "File '%s' generated with some errors" generated_file_name in
   {
     error_message;
     generated_file = Some (generated_file_name, generated_file_content);
+    source_file_name;
     success_message;
   }
 
@@ -114,7 +117,7 @@ let main () =
     (
       "-json-mode",
       Arg.Set json_mode,
-      "    produce the list of error messages in JSON"
+      "    produce the list of error messages in a JSON file"
     )
   ] in
   let usage_msg = "Usage:\n  coq-of-ocaml [options] file.ml\nOptions are:" in
@@ -152,6 +155,6 @@ let main () =
     let initial_env = Mtyper.get_env typing in
     let output =
       of_ocaml initial_env initial_loc typedtree typedtree_errors file_name file_content !output_file_name !json_mode in
-    Output.write output
+    Output.write !json_mode output
 
 ;;main ()
