@@ -183,7 +183,7 @@ File.open("tezos/index.html", "w") do |file|
           9402,
           8851,
           9183,
-          9180,
+          9413,
         ],
         generated: [
           47563,

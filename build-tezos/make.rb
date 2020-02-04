@@ -60,7 +60,8 @@ files = [
   "Raw_context.v",
   "Roll_repr.v",
   "Constants_storage.v",
-  "Level_storage.v"
+  "Level_storage.v",
+  "Storage_sigs.v"
 ]
 
 nb_valid_lines = 0
