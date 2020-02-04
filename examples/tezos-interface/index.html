@@ -4285,14 +4285,14 @@ module RPC_service : sig
 (** HTTP methods. *)
 <abbr class="mark-error" title="Polymorphic variant types are not handled">type meth = [`GET | `POST | `DELETE | `PUT | `PATCH]</abbr>
 
-<abbr class="mark-error" title="Only type variables are supported as parameters">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) t
+<abbr class="mark-error" title="Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) t
   constraint 'meth = [&lt; meth]</abbr>
 
 <abbr class="mark-error" title="Polymorphic variant types are not handled
 
 ——————————
 
-Only type variables are supported as parameters">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) service =
+Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) service =
   ('meth, 'prefix, 'params, 'query, 'input, 'output) t</abbr>
 
 <abbr class="mark-error" title="Polymorphic variant types are not handled">val get_service :
@@ -8316,10 +8316,10 @@ Module RPC_service.
   | PATCH : meth.
   
   Parameter t : forall
-    (expected_variable prefix params query input output : Set), Set.
+    (expected_type_variable prefix params query input output : Set), Set.
   
-  Definition service (expected_variable prefix params query input output : Set)
-    :=
+  Definition service (expected_type_variable prefix params query input output :
+    Set) :=
     t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) prefix params query input output.
