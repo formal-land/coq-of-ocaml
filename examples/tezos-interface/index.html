@@ -3346,7 +3346,9 @@ type 'a t
 
 type 'a encoding = 'a t
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val classify : 'a encoding -&gt; [`Fixed of int | `Dynamic | `Variable]</abbr>
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `Variable, `Fixed, `Dynamic">val classify : 'a encoding -&gt; [`Fixed of int | `Dynamic | `Variable]</abbr>
 
 val splitted : json:'a encoding -&gt; binary:'a encoding -&gt; 'a encoding
 
@@ -3412,7 +3414,9 @@ module Bounded : sig
   val bytes : int -&gt; MBytes.t encoding
 end
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val dynamic_size :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `Uint16, `Uint8, `Uint30">val dynamic_size :
   ?kind:[`Uint30 | `Uint16 | `Uint8] -&gt; 'a encoding -&gt; 'a encoding</abbr>
 
 val json : json encoding
@@ -4288,21 +4292,27 @@ module RPC_service : sig
 <abbr class="mark-error" title="Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) t
   constraint 'meth = [&lt; meth]</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
 Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) service =
   ('meth, 'prefix, 'params, 'query, 'input, 'output) t</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val get_service :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `GET">val get_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
   ([`GET], 'prefix, 'params, 'query, unit, 'output) service</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val post_service :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `POST">val post_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
@@ -4310,14 +4320,18 @@ Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefi
   ('prefix, 'params) RPC_path.t -&gt;
   ([`POST], 'prefix, 'params, 'query, 'input, 'output) service</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val delete_service :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `DELETE">val delete_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
   ([`DELETE], 'prefix, 'params, 'query, unit, 'output) service</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val patch_service :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PATCH">val patch_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
@@ -4325,7 +4339,9 @@ Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefi
   ('prefix, 'params) RPC_path.t -&gt;
   ([`PATCH], 'prefix, 'params, 'query, 'input, 'output) service</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val put_service :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT">val put_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
@@ -4440,29 +4456,39 @@ type conflict =
 <abbr class="mark-error" title="Signature item `exception` not handled">exception Conflict of step list * conflict</abbr>
 
 (** Registring handler in service tree. *)
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val register :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val opt_register :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
-Polymorphic variant types are not handled">val gen_register :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val gen_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; [&lt; 'output RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val lwt_register :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output Lwt.t) -&gt;
@@ -4470,37 +4496,49 @@ Polymorphic variant types are not handled">val gen_register :
 
 (** Registring handler in service tree. Curryfied variant.  *)
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val register0 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val register1 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val register2 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val register3 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val register4 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val register5 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4512,37 +4550,49 @@ Polymorphic variant types are not handled">val gen_register :
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val opt_register0 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val opt_register1 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val opt_register2 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val opt_register3 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val opt_register4 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val opt_register5 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4554,61 +4604,85 @@ Polymorphic variant types are not handled">val gen_register :
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
-Polymorphic variant types are not handled">val gen_register0 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val gen_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
-Polymorphic variant types are not handled">val gen_register1 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val gen_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
-Polymorphic variant types are not handled">val gen_register2 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val gen_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
-Polymorphic variant types are not handled">val gen_register3 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val gen_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
-Polymorphic variant types are not handled">val gen_register4 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val gen_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
-Polymorphic variant types are not handled">val gen_register5 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val gen_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4620,37 +4694,49 @@ Polymorphic variant types are not handled">val gen_register5 :
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val lwt_register0 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val lwt_register1 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val lwt_register2 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val lwt_register3 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val lwt_register4 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val lwt_register5 :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -5935,7 +6021,9 @@ val del : t -&gt; key -&gt; t Lwt.t
 
 val remove_rec : t -&gt; key -&gt; t Lwt.t
 
-<abbr class="mark-error" title="Polymorphic variant types are not handled">val fold :
+<abbr class="mark-error" title="Polymorphic variant types are not handled.
+
+Found the following variants: `Dir, `Key">val fold :
   t -&gt;
   key -&gt;
   init:'a -&gt;
@@ -6277,7 +6365,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6285,7 +6375,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6293,7 +6385,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6301,11 +6395,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_call0 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_call0 :
   ([&lt; RPC_service.meth], t, t, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6337,7 +6435,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6345,7 +6445,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6353,7 +6455,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6361,11 +6465,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_call1 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_call1 :
   ([&lt; RPC_service.meth], t, t * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6398,7 +6506,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6406,7 +6516,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6414,7 +6526,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6422,11 +6536,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_call2 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_call2 :
   ([&lt; RPC_service.meth], t, (t * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6460,7 +6578,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6468,7 +6588,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6476,7 +6598,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6484,11 +6608,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_call3 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_call3 :
   ([&lt; RPC_service.meth], t, ((t * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6523,7 +6651,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6531,7 +6661,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6539,7 +6671,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6547,11 +6681,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_opt_call0 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_opt_call0 :
   ([&lt; RPC_service.meth], t, t, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6583,7 +6721,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6591,7 +6731,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6599,7 +6741,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6607,11 +6751,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_opt_call1 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_opt_call1 :
   ([&lt; RPC_service.meth], t, t * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6644,7 +6792,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6652,7 +6802,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6660,7 +6812,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6668,11 +6822,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_opt_call2 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_opt_call2 :
   ([&lt; RPC_service.meth], t, (t * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6706,7 +6864,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6714,7 +6874,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6722,7 +6884,9 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6730,11 +6894,15 @@ Forall quantifier is not handled
 
 ——————————
 
-Polymorphic variant types are not handled
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
-Polymorphic variant types are not handled">val make_opt_call3 :
+Polymorphic variant types are not handled.
+
+Found the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val make_opt_call3 :
   ([&lt; RPC_service.meth], t, ((t * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
