@@ -130,9 +130,10 @@ let items_of_signature (signature : signature) : item list Monad.t =
         NotSupported
         "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
+      set_scoping_env true (
       let name = Name.of_ident false md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
-      return [Module (name, module_typ)]
+      return [Module (name, module_typ)])
     | Tsig_open _ ->
       raise [Error "open"] NotSupported "Signature item `open` not handled."
     | Tsig_recmodule _ ->
@@ -161,7 +162,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
   signature.sig_items |> Monad.List.flatten_map of_signature_item
 
 let of_signature (signature : signature) : t Monad.t =
-  set_scoping_env (
+  set_scoping_env false (
   items_of_signature signature >>= fun items ->
   ModuleTypParams.get_signature_typ_params_arity signature.sig_type >>= fun typ_params ->
   return { items; typ_params })

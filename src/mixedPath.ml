@@ -36,6 +36,43 @@ let rec of_path_aux (path : Path.t)
     end
   | Pident _ -> return (path, [])
 
+let get_module_path_location (path : Path.t) (env : Env.t) : Location.t option =
+  match Env.find_module path env with
+  | { Types.md_loc; _ } -> Some md_loc
+  | exception _ -> None
+
+let is_module_path_local (path : Path.t) : bool Monad.t =
+  get_scoping_env false >>= fun outer_scoping_env ->
+  get_scoping_env true >>= fun inner_scoping_env ->
+  get_env >>= fun env ->
+  match get_module_path_location path env with
+  | Some location ->
+    begin match (outer_scoping_env, inner_scoping_env) with
+    | (None, None) -> return false
+    | (Some outer_scoping_env, None) ->
+      let outer_location = get_module_path_location path outer_scoping_env in
+      begin match outer_location with
+      | Some outer_location -> return (outer_location <> location)
+      | None -> return true
+      end
+    | (None, Some _) ->
+      (* The inner environment is supposed to be there only in cases there is
+         an outer environment too. *)
+      assert false
+    | (Some outer_scoping_env, Some inner_scoping_env) ->
+      let outer_location = get_module_path_location path outer_scoping_env in
+      let inner_location = get_module_path_location path inner_scoping_env in
+      begin match (outer_location, inner_location) with
+      | (Some outer_location, Some inner_location) ->
+        return (outer_location <> inner_location && inner_location = location)
+      | (_, None) -> return false
+      | (None, Some inner_location) -> return (inner_location = location)
+      end
+    end
+  | None ->
+    (* The [path] is supposed to be in the current environment. *)
+    assert false
+
 (** The current environment must include the potential first-class module signature
     definition of the corresponding projection in the [path]. *)
 let of_path
@@ -56,15 +93,7 @@ let of_path
     | Some path_name -> return (PathName path_name)
     end
   | _ :: _ ->
-    get_scoping_env >>= fun scoping_env ->
-    let is_local =
-      match scoping_env with
-      | None -> false
-      | Some scoping_env ->
-        begin match Env.find_module path' scoping_env with
-        | _ -> false
-        | exception _ -> true
-        end in
+    is_module_path_local path' >>= fun is_local ->
     let (mixed_path, _) =
       List.fold_left
         (fun (mixed_path, is_local) (signature_path, field_string) ->

@@ -5,9 +5,20 @@ module Result = struct
   }
 end
 
+module LocalEnv = struct
+  type t = {
+    inner : Env.t option;
+    outer : Env.t option;
+  }
+
+  let init : t = {
+    inner = None;
+    outer = None;
+  }
+end
+
 module Interpret = struct
-  type 'a t =
-    Env.t -> Loc.t -> Env.t option -> 'a Result.t
+  type 'a t = Env.t -> Loc.t -> LocalEnv.t -> 'a Result.t
 end
 
 module Command = struct
@@ -18,7 +29,11 @@ module Command = struct
       match command with
       | GetEnv -> { Result.errors = []; value = env }
       | GetLoc -> { errors = []; value = loc }
-      | GetScopingEnv -> { errors = []; value = scoping_env }
+      | GetScopingEnv is_inner ->
+        {
+          errors = [];
+          value = if is_inner then scoping_env.inner else scoping_env.outer;
+        }
       | Raise (value, category, message) ->
         { errors = [{ category; loc; message }]; value }
       | Warn message ->
@@ -34,7 +49,13 @@ module Wrapper = struct
       match wrapper with
       | Env env -> interpret env loc scoping_env
       | Loc loc -> interpret env loc scoping_env
-      | ScopingEnv -> interpret env loc (Some env)
+      | ScopingEnv is_inner ->
+        let scoping_env =
+          if is_inner then
+            { scoping_env with inner = Some env }
+          else
+            { scoping_env with outer = Some env } in
+        interpret env loc scoping_env
 end
 
 let rec eval : type a. string -> a Monad.t -> a Interpret.t =

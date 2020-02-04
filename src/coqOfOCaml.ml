@@ -39,7 +39,7 @@ let exp
       (Ast.of_typedtree typedtree typedtree_errors)
       env
       loc
-      None in
+      MonadEval.LocalEnv.init in
   let error_message =
     match errors with
     | [] -> None
