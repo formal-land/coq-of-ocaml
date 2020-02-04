@@ -91,14 +91,14 @@ Module ConstructorWithRecord.
     Definition Foo_skeleton := Foo.record.
   End t.
   
-  Module gadt.
+  Module exi.
     Module Ex.
       Record record {x : Set} := {
         x : x }.
       Arguments record : clear implicits.
     End Ex.
     Definition Ex_skeleton := Ex.record.
-  End gadt.
+  End exi.
   
   Module loc.
     Record record {x y : Set} := Build {
@@ -113,33 +113,30 @@ Module ConstructorWithRecord.
   Definition loc_skeleton := loc.record.
   
   Reserved Notation "'t.Foo".
-  Reserved Notation "'gadt.Ex".
-  Reserved Notation "'gadt".
+  Reserved Notation "'exi.Ex".
   Reserved Notation "'loc".
   
   Inductive t : Set :=
   | Foo : 't.Foo -> t
   | Bar : 'loc -> t
   
-  with gadt_gadt : Set :=
-  | Ex : forall {a : Set}, 'gadt.Ex a -> gadt_gadt
+  with exi : Set :=
+  | Ex : forall {a : Set}, 'exi.Ex a -> exi
   
-  where "'gadt" := (fun (_ : Set) => gadt_gadt)
-  and "'loc" := (loc_skeleton Z Z)
+  where "'loc" := (loc_skeleton Z Z)
   and "'t.Foo" := (t.Foo_skeleton string Z)
-  and "'gadt.Ex" := (fun (t_a : Set) => gadt.Ex_skeleton t_a).
+  and "'exi.Ex" := (fun (t_a : Set) => exi.Ex_skeleton t_a).
   
-  Module ConstructorRecordNotations_t_gadt_gadt.
+  Module ConstructorRecordNotations_t_exi.
     Module t.
       Definition Foo := 't.Foo.
     End t.
-    Module gadt.
-      Definition Ex := 'gadt.Ex.
-    End gadt.
-  End ConstructorRecordNotations_t_gadt_gadt.
-  Import ConstructorRecordNotations_t_gadt_gadt.
+    Module exi.
+      Definition Ex := 'exi.Ex.
+    End exi.
+  End ConstructorRecordNotations_t_exi.
+  Import ConstructorRecordNotations_t_exi.
   
-  Definition gadt := 'gadt.
   Definition loc := 'loc.
   
   Definition l : loc := {| loc.x := 12; loc.y := 23 |}.

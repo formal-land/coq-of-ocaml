@@ -93,6 +93,55 @@ module RecordSkeleton = struct
     )
 end
 
+module TypeVariable = struct
+  type t =
+    | Error
+    | Known of Name.t
+    | Unknown
+end
+
+let rec named_typ_param (typ : Types.type_expr) : TypeVariable.t =
+  match typ.Types.desc with
+  | Tvar x | Tunivar x ->
+    begin match x with
+    | None | Some "_" -> TypeVariable.Unknown
+    | Some x -> TypeVariable.Known (Name.of_string false x)
+    end
+  | Tlink typ | Tsubst typ -> named_typ_param typ
+  | _ -> TypeVariable.Error
+
+let named_typ_params_expecting_anything (typs : Types.type_expr list)
+  : Name.t option list option =
+  typs |>
+  List.map named_typ_param |>
+  List.map (function
+    | TypeVariable.Error -> None
+    | Known name -> Some (Some name)
+    | Unknown -> Some None
+  ) |>
+  Util.Option.all
+
+let named_typ_params_expecting_variables (typs : Types.type_expr list)
+  : Name.t option list Monad.t =
+  typs |>
+  List.map named_typ_param |>
+  Monad.List.map (function
+    | TypeVariable.Error ->
+      raise
+        (Some (Name.of_string false "expected_type_variable"))
+        Unexpected
+        "Expected a list of named or unspecified '_' type variables"
+    | Known name -> return (Some name)
+    | Unknown -> return None
+  )
+
+let named_typ_params_with_unknowns (typ_params : Name.t option list)
+  : Name.t list =
+  typ_params |> List.map (function
+    | Some typ_param -> typ_param
+    | None -> Name.of_string false "_"
+  )
+
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
   (** [constructor_name]: forall [typ_vars], [param_typs] -> t [res_typ_params] *)
@@ -108,11 +157,15 @@ module Constructors = struct
   module Single = struct
     type t = {
       constructor_name : Name.t;
-      is_gadt : bool;
       param_typs : Type.t list; (** The parameters of the constructor. *)
+      return_typ_params : Name.t option list option;
+        (** The return type, in case of GADT contructor *)
     }
 
-    let of_ocaml_case (typ_name : Name.t) (case : Types.constructor_declaration)
+    let of_ocaml_case
+      (typ_name : Name.t)
+      (defined_typ_params : Name.t option list)
+      (case : Types.constructor_declaration)
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
@@ -163,24 +216,32 @@ module Constructors = struct
           )
         ))
       end >>= fun (param_typs, records) ->
-      let is_gadt = match cd_res with None -> false | Some _ -> true in
+      let return_typ_params =
+        match cd_res with
+        | Some { Types.desc = Tconstr (_, typs, _); _ } ->
+          named_typ_params_expecting_anything typs
+        | Some _ -> None
+        | None -> Some defined_typ_params in
       return (
         {
           constructor_name;
-          is_gadt;
           param_typs;
+          return_typ_params;
         },
         records
       ))
 
-    let of_ocaml_row (row : Asttypes.label * Types.row_field) : t Monad.t =
+    let of_ocaml_row
+      (defined_typ_params : Name.t option list)
+      (row : Asttypes.label * Types.row_field)
+      : t Monad.t =
       let (label, field) = row in
       let typs = Type.type_exprs_of_row_field field in
       Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, _) ->
       return {
         constructor_name = Name.of_string false label;
-        is_gadt = false;
         param_typs;
+        return_typ_params = Some defined_typ_params;
       }
   end
 
@@ -228,16 +289,63 @@ module Constructors = struct
         ForallTyps (typ_args, subst_gadt_typ_constructor typ_name typ)
     | Error _ -> typ
 
+  let rec merge_typ_params
+    (params1 : Name.t option list)
+    (params2 : Name.t option list)
+    : Name.t option list option =
+    match (params1, params2) with
+    | ([], []) -> Some []
+    | (_ :: _, []) | ([], _ :: _) -> None
+    | (param1 :: params1, param2 :: params2) ->
+      Util.Option.bind (merge_typ_params params1 params2) (fun params ->
+      match (param1, param2) with
+      | (Some param1, Some param2) ->
+        if Name.equal param1 param2 then
+          Some (Some param1 :: params)
+        else
+          None
+      | (Some param, None) | (None, Some param) -> Some (Some param :: params)
+      | (None, None) -> Some (None :: params))
+
+  (** Check if the type is not a GADT. If this is not a GADT, also return a
+      prefered list of parameter names for the type variables. It merges the
+      names found in the definition of the type name and in the constructors. *)
+  let rec check_if_not_gadt
+    (defined_typ_params : Name.t option list)
+    (single_constructors : Single.t list)
+    : Name.t option list option =
+    match single_constructors with
+    | [] -> Some defined_typ_params
+    | { Single.return_typ_params; _ } :: single_constructors ->
+      begin match return_typ_params with
+      | None -> None
+      | Some return_typ_params ->
+        let are_variables_different =
+          let non_null_variables =
+            Util.List.filter_map (fun x -> x) return_typ_params in
+          List.length non_null_variables <>
+            Name.Set.cardinal (Name.Set.of_list non_null_variables) in
+        if are_variables_different then
+          None
+        else
+          Util.Option.bind
+            (merge_typ_params defined_typ_params return_typ_params)
+            (fun defined_typ_params ->
+              check_if_not_gadt defined_typ_params single_constructors
+            )
+      end
+
   let of_ocaml
     (typ_name : Name.t)
-    (defined_typ_params : Name.t list)
+    (defined_typ_params : Name.t option list)
     (single_constructors : Single.t list)
-    : (t * bool) Monad.t =
-    let is_gadt =
-      List.exists (fun { Single.is_gadt; _ } -> is_gadt) single_constructors in
+    : (t * Name.t option list option) Monad.t =
+    let merged_typ_params =
+      check_if_not_gadt defined_typ_params single_constructors in
     let constructors = single_constructors |> List.map (
       fun { Single.constructor_name; param_typs; _ } ->
-        if is_gadt then
+        match merged_typ_params with
+        | None ->
           let param_typs =
             param_typs |> List.map (subst_gadt_typ_constructor typ_name) in
           {
@@ -246,21 +354,25 @@ module Constructors = struct
             res_typ_params = [];
             typ_vars = Name.Set.elements (Type.typ_args_of_typs param_typs)
           }
-        else
+        | Some merged_typ_params ->
           {
             constructor_name;
             param_typs;
             res_typ_params =
-              List.map (fun name -> Type.Variable name) defined_typ_params;
+              List.map (fun name -> Type.Variable name)
+                (named_typ_params_with_unknowns merged_typ_params);
             typ_vars =
               Name.Set.elements (
                 Name.Set.diff
                   (Type.typ_args_of_typs param_typs)
-                  (Name.Set.of_list defined_typ_params)
+                  (merged_typ_params |>
+                    Util.List.filter_map (fun x -> x) |>
+                    Name.Set.of_list
+                  )
               )
           }
     ) in
-    return (constructors, is_gadt)
+    return (constructors, merged_typ_params)
 end
 
 module Inductive = struct
@@ -269,7 +381,7 @@ module Inductive = struct
       : (Name.t * (RecordSkeleton.t * Name.t list * Type.t) list) list;
     notations : (Name.t * Name.t option list * Type.t) list;
     records : RecordSkeleton.t list;
-    typs : (Name.t * Name.t list * Constructors.t) list;
+    typs : (Name.t * Name.t option list * Constructors.t) list;
   }
 
   let to_coq_constructor_records (inductive : t) : SmartPrint.t list =
@@ -312,7 +424,7 @@ module Inductive = struct
     (subst : Type.Subst.t)
     (is_first : bool)
     (name : Name.t)
-    (left_typ_args : Name.t list)
+    (left_typ_args : Name.t option list)
     (constructors : Constructors.t)
     : SmartPrint.t =
     let keyword = if is_first then !^ "Inductive" else !^ "with" in
@@ -323,7 +435,10 @@ module Inductive = struct
       else
         parens (
           nest (
-            separate space (List.map Name.to_coq left_typ_args) ^^
+            separate space (left_typ_args |> List.map (function
+              None -> !^ "_"
+              | Some name -> Name.to_coq name
+            )) ^^
             !^ ":" ^^ Pp.set
           )
         )
@@ -441,16 +556,19 @@ module Inductive = struct
     )
 
   let to_coq_typs_implicits
-    (left_typ_args : Name.t list)
+    (left_typ_args : Name.t option list)
     (constructors : Constructors.t)
     : SmartPrint.t list =
     match left_typ_args with
     | [] -> []
     | _ :: _ ->
-      constructors |> List.map (fun { Constructors.constructor_name; _ } ->
+      constructors |> List.map (fun { Constructors.constructor_name; typ_vars; _ } ->
         !^ "Arguments" ^^ Name.to_coq constructor_name ^^ braces (
           nest (
-            separate space (left_typ_args |> List.map (fun _ -> !^ "_"))
+            separate space (
+              (left_typ_args |> List.map (fun _ -> !^ "_")) @
+              (typ_vars |> List.map (fun _ -> !^ "_"))
+            )
           )
         ) ^-^ !^ "."
       )
@@ -545,12 +663,15 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     return (Record (name, typ_args, fields))
   | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params; _ }; _ } ] ->
     let name = Name.of_ident false typ_id in
-    (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+    named_typ_params_expecting_variables type_params >>= fun typ_args ->
+    let typ_args_with_unknowns = named_typ_params_with_unknowns typ_args in
     begin match type_manifest with
     | Some typ ->
       begin match typ.Types.desc with
       | Tvariant { row_fields; _ } ->
-        Monad.List.map Constructors.Single.of_ocaml_row row_fields >>= fun single_constructors ->
+        Monad.List.map
+          (Constructors.Single.of_ocaml_row typ_args)
+          row_fields >>= fun single_constructors ->
         Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
         raise
           (Inductive {
@@ -563,9 +684,9 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           "Polymorphic variant types are not handled"
       | _ ->
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return (Synonym (name, typ_args, typ))
+        return (Synonym (name, typ_args_with_unknowns, typ))
       end
-    | None -> return (Abstract (name, typ_args))
+    | None -> return (Abstract (name, typ_args_with_unknowns))
     end
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let name = Name.of_ident false typ_id in
@@ -575,12 +696,12 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     (typs |> Monad.List.fold_left (fun (constructor_records, notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
       let name = Name.of_ident false typ.typ_id in
-      (typ.typ_type.type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+      named_typ_params_expecting_variables typ.typ_type.type_params >>= fun typ_args ->
       match typ with
       | { typ_type = { type_kind = Type_abstract; type_manifest = Some typ; _ }; _ } ->
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
-          Monad.List.map Constructors.Single.of_ocaml_row row_fields >>= fun single_constructors ->
+          Monad.List.map (Constructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
           Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
           raise
             (
@@ -597,7 +718,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             constructor_records,
             (
               name,
-              typ_args |> List.map (fun name -> Some name),
+              typ_args,
               typ
             ) :: notations,
             records,
@@ -614,12 +735,12 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
           return (Name.of_ident false x, typ)
         )) >>= fun fields ->
-        (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+        named_typ_params_expecting_variables type_params >>= fun typ_args ->
         return (
           constructor_records,
           (
             name,
-            typ_args |> List.map (fun name -> Some name),
+            typ_args,
             Type.Apply (
               MixedPath.of_name (Name.suffix_by_skeleton name),
               fields |> List.map snd
@@ -633,7 +754,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           typs
         )
       | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
-        Monad.List.map (Constructors.Single.of_ocaml_case name) cases >>= fun cases ->
+        Monad.List.map (Constructors.Single.of_ocaml_case name typ_args) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
           new_constructor_records |> Util.List.filter_map (fun x -> x) in
@@ -642,18 +763,28 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           | [] -> constructor_records
           | _ :: _ ->
             (name, new_constructor_records) :: constructor_records in
-        Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, is_gadt) ->
-        let gadt_notation =
-          if is_gadt then
-            [(
+        Constructors.of_ocaml
+          name
+          typ_args
+          single_constructors >>= fun (constructors, merged_typ_params) ->
+        let (gadt_notation, name, typ_args) =
+          match merged_typ_params with
+          | None ->
+            (
+              [(
+                name,
+                typ_args |> List.map (fun _ -> None),
+                Constructors.gadt_typ name
+              )],
+              Name.suffix_by_gadt name,
+              []
+            )
+          | Some merged_typ_params ->
+            (
+              [],
               name,
-              typ_args |> List.map (fun _ -> None),
-              Constructors.gadt_typ name
-            )]
-          else
-            [] in
-        let name = if is_gadt then Name.suffix_by_gadt name else name in
-        let typ_args = if is_gadt then [] else typ_args in
+              merged_typ_params
+            ) in
         return (
           constructor_records,
           gadt_notation @ notations,

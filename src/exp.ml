@@ -20,7 +20,8 @@ end
 type match_existential_cast = {
   new_typ_vars : Name.t list;
   bound_vars : (Name.t * Type.t) list;
-  return_typ : Type.t }
+  return_typ : Type.t;
+  cast_with_axioms : bool }
 
 (** The simplified OCaml AST we use. We do not use a mutualy recursive type to
     simplify the importation in Coq. *)
@@ -339,31 +340,29 @@ and of_match
   : t Monad.t =
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
-    begin if is_gadt_match then
-      let bound_vars =
-        Typedtree.pat_bound_idents c_lhs |> List.rev |> List.map
-          (fun ident ->
-            let { Types.val_type; _ } =
-              Env.find_value (Path.Pident ident) c_rhs.exp_env in
-            let name = Name.of_ident true ident in
-            (name, val_type)
-          ) in
-      Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
-      Monad.List.map
-        (fun (name, typ) ->
-          Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
-          return (name, typ)
-        )
-        bound_vars >>= fun bound_vars ->
-      Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
-      return (Some {
+    let bound_vars =
+      Typedtree.pat_bound_idents c_lhs |> List.rev |> List.map
+        (fun ident ->
+          let { Types.val_type; _ } =
+            Env.find_value (Path.Pident ident) c_rhs.exp_env in
+          let name = Name.of_ident true ident in
+          (name, val_type)
+        ) in
+    Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
+    Monad.List.map
+      (fun (name, typ) ->
+        Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
+        return (name, typ)
+      )
+      bound_vars >>= fun bound_vars ->
+    Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
+    let existential_cast =
+      Some {
         new_typ_vars = Name.Set.elements existentials;
         bound_vars;
         return_typ = typ;
-      })
-    else
-      return None
-    end >>= fun existential_cast ->
+        cast_with_axioms = is_gadt_match;
+      } in
     begin match c_guard with
     | Some guard ->
       of_expression typ_vars guard >>= fun guard ->
@@ -946,7 +945,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       Pp.parens paren @@ nest (
         !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
         to_coq false e ^^ !^ "in" ^^ newline ^^
-        obj_magic_existential existential_cast e2
+        cast_existentials existential_cast e2
       )
     | _ ->
       nest (
@@ -954,7 +953,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         separate space (cases |> List.map (fun (p, existential_cast, e) ->
           nest (
             !^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^
-            obj_magic_existential existential_cast e ^^ newline
+            cast_existentials existential_cast e ^^ newline
           )
         )) ^^
         (match default_value with
@@ -1037,21 +1036,23 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | ErrorMessage (e, error_message) ->
     group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
 
-and obj_magic_existential
+and cast_existentials
   (existential_cast : match_existential_cast option)
   (e : t)
   : SmartPrint.t =
   let e =
     match existential_cast with
-    | None -> to_coq false e
-    | Some { return_typ; _ } ->
+    | Some { return_typ; cast_with_axioms = true; _ } ->
       nest (
         !^ "obj_magic" ^^ Type.to_coq None (Some Type.Context.Apply) return_typ ^^
         to_coq true e
-      ) in
+      )
+    | _ -> to_coq false e in
   match existential_cast with
-  | None | Some { bound_vars = []; _ } -> e
-  | Some { new_typ_vars; bound_vars; _ } ->
+  | None
+  | Some { bound_vars = []; _ }
+  | Some { new_typ_vars = []; cast_with_axioms = false; _ } -> e
+  | Some { new_typ_vars; bound_vars; cast_with_axioms; _ } ->
     let existential_names =
       Pp.primitive_tuple (List.map Name.to_coq new_typ_vars) in
     let existential_names_pattern =
@@ -1069,7 +1070,11 @@ and obj_magic_existential
       !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
       variable_names ^^ !^ ":=" ^^
       nest (
-        !^ "obj_magic_exists" ^^
+        begin if cast_with_axioms then
+          !^ "obj_magic_exists"
+        else
+          !^ "existT"
+        end ^^
         parens (nest (
           !^ "fun" ^^ existential_names_pattern ^^
           (* TODO: try to remove this annotation once in Coq 8.11 *)
@@ -1079,6 +1084,11 @@ and obj_magic_existential
           end ^^
           !^ "=>" ^^ variable_typ
         )) ^^
+        begin if cast_with_axioms then
+          empty
+        else
+          !^ "_"
+        end ^^
         variable_names
       ) ^^ !^ "in" ^^ newline ^^
       e

@@ -40,8 +40,8 @@ module ConstructorWithRecord = struct
     | Foo of { name : string; size : int }
     | Bar of loc
 
-  and 'a gadt =
-    | Ex : { x : 'a } -> 'a gadt
+  and exi =
+    | Ex : { x : 'a } -> exi
 
   and loc = { x : int; y : int }
 

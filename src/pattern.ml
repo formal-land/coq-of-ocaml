@@ -8,9 +8,11 @@ type t =
   | Constant of Constant.t
   | Variable of Name.t
   | Tuple of t list
-  | Constructor of PathName.t * t list (** A constructor name and a list of pattern in arguments. *)
+  | Constructor of PathName.t * t list
+    (** A constructor name and a list of pattern in arguments. *)
   | Alias of t * Name.t
-  | Record of (PathName.t * t) list (** A list of fields from a record with their expected patterns. *)
+  | Record of (PathName.t * t) list
+    (** A list of fields from a record with their expected patterns. *)
   | Or of t * t
 
 (** Import an OCaml pattern. If the answer is [None] then the pattern is
