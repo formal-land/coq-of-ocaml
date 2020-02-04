@@ -31,6 +31,13 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
     Path.Pdot (path, Ident.name ident, 0)
   ) path idents
 
+let merge_similar_paths (paths : Path.t list) : Path.t list =
+  let print_path (path : Path.t) : string =
+    Pp.to_string (PathName.to_coq (PathName.of_path_with_convert false path)) in
+  paths |> List.sort_uniq (fun path1 path2 ->
+    String.compare (print_path path1) (print_path path2)
+  )
+
 (** Find the [Path.t] of all the signature definitions which are found to be similar
     to [signature]. If the signature is the one of a module used as a namespace there
     should be none. If the signature is the one a first-class module there should be
@@ -64,7 +71,8 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature)
         )) @ signature_paths
       )
       None env [] in
-  (similar_signature_paths @ similar_signature_paths_in_modules, shape)
+  let paths = similar_signature_paths @ similar_signature_paths_in_modules in
+  (merge_similar_paths paths, shape)
 
 type maybe_found =
   | Found of Path.t
