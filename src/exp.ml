@@ -900,7 +900,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Record fields ->
     nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
       nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))) ^^ !^ "|}")
-  | Field (e, x) -> Pp.parens paren @@ nest (PathName.to_coq x ^^ to_coq true e)
+  | Field (e, x) -> to_coq true e ^-^ !^ ".(" ^-^ PathName.to_coq x ^-^ !^ ")"
   | IfThenElse (e1, e2, e3) ->
     Pp.parens paren @@ nest (
       !^ "if" ^^ to_coq false e1 ^^ !^ "then" ^^ newline ^^

@@ -1,9 +1,10 @@
-# ![Logo](https://raw.githubusercontent.com/clarus/icons/master/abc-48.png) CoqOfOCaml
-> Compile OCaml to Coq.
+# ![Logo](https://clarus.github.io/coq-of-ocaml/img/rooster-48.png) CoqOfOCaml
+> Import OCaml programs to Coq.
 
 [![travis status](https://img.shields.io/travis/clarus/coq-of-ocaml/master.svg?label=travis-ci)](https://travis-ci.org/clarus/coq-of-ocaml)
+[![Join the chat at https://gitter.im/clarus/coq-of-ocaml](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/clarus/coq-of-ocaml?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-**Online examples on https://clarus.github.io/coq-of-ocaml/**
+**https://clarus.github.io/coq-of-ocaml/**
 
 Start with the file `main.ml`:
 ```ocaml
@@ -22,7 +23,7 @@ Run:
 coq-of-ocaml main.ml
 ```
 
-Get a file `main_ml.v`:
+Get a file `Main.v`:
 ```coq
 Require Import OCaml.OCaml.
 
@@ -30,7 +31,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Inductive tree (a : Type) : Type :=
+Inductive tree (a : Set) : Set :=
 | Leaf : a -> tree a
 | Node : (tree a) -> (tree a) -> tree a.
 
