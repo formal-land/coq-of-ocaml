@@ -181,18 +181,15 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       return (Constructor (x, implicits, es))
     end
   | Texp_variant (label, e) ->
+    PathName.constructor_of_variant label >>= fun path_name ->
     let constructor =
-      Variable (MixedPath.PathName (PathName.of_variant label), []) in
+      Variable (MixedPath.PathName path_name, []) in
     begin match e with
     | None -> return constructor
     | Some e ->
       of_expression typ_vars e >>= fun e ->
       return (Apply (constructor, [e]))
-    end >>= fun e ->
-    error_message
-      (ErrorMessage (e, "`" ^ label))
-      NotSupported
-      "Variants not supported"
+    end
   | Texp_record { fields; extended_expression; _ } ->
       Array.to_list fields |> Monad.List.filter_map (
         fun (label_description, definition) ->
@@ -235,15 +232,17 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     | None -> return (Tuple [])
     | Some e3 -> of_expression typ_vars e3) >>= fun e3 ->
     return (IfThenElse (e1, e2, e3))
-  | Texp_sequence (_, e2) ->
+  | Texp_sequence (e1, e2) ->
     of_expression typ_vars e2 >>= fun e2 ->
+    set_loc (Loc.of_location e1.exp_loc) (
     error_message
       (ErrorMessage (e2, "instruction_sequence \";\""))
       SideEffect
       (
-        "Sequences of instructions are not handled (operator \";\")\n\n" ^
+        "Sequences of instructions are ignored (operator \";\")\n\n" ^
         "Alternative: use a monad to sequence side-effects."
       )
+    )
   | Texp_try (e, _) ->
     of_expression typ_vars e >>= fun e ->
     error_message

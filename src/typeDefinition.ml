@@ -681,7 +681,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             typs = [(name, typ_args, constructors)];
           })
           NotSupported
-          "Polymorphic variant types are not handled"
+          "Polymorphic variant types are defined as standard algebraic types"
       | _ ->
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return (Synonym (name, typ_args_with_unknowns, typ))
@@ -711,7 +711,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
               (name, typ_args, constructors) :: typs
             )
             NotSupported
-            "Polymorphic variant types are not handled"
+            "Polymorphic variant types are defined as standard algebraic types"
         | _ ->
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
           return (

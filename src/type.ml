@@ -87,22 +87,29 @@ let rec of_typ_expr
       "Nil type is not handled"
   | Tlink typ | Tsubst typ -> of_typ_expr with_free_vars typ_vars typ
   | Tvariant { row_fields; _ } ->
-    Monad.List.fold_left
-      (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
-        let typs = type_exprs_of_row_field row_field in
-        of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
-        return (
-          (name, Tuple typs) :: fields,
-          typ_vars,
-          Name.Set.union new_typ_vars new_typ_vars'
-        )
+    PathName.typ_of_variants (List.map fst row_fields) >>= fun path_name ->
+    begin match path_name with
+    | Some path_name ->
+      return (
+        Apply (MixedPath.PathName path_name, []),
+        typ_vars,
+        Name.Set.empty
       )
-      ([], typ_vars, Name.Set.empty)
-      row_fields >>= fun (fields, typ_vars, new_typ_vars) ->
-    raise
-      (Sum (List.rev fields), typ_vars, new_typ_vars)
-      NotSupported
-      "Polymorphic variant types are not handled"
+    | None ->
+      Monad.List.fold_left
+        (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
+          let typs = type_exprs_of_row_field row_field in
+          of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
+          return (
+            (name, Tuple typs) :: fields,
+            typ_vars,
+            Name.Set.union new_typ_vars new_typ_vars'
+          )
+        )
+        ([], typ_vars, Name.Set.empty)
+        row_fields >>= fun (fields, typ_vars, new_typ_vars) ->
+      return (Sum (List.rev fields), typ_vars, new_typ_vars)
+    end
   | Tpoly (typ, []) -> of_typ_expr with_free_vars typ_vars typ
   | Tpoly (typ, typs) ->
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->

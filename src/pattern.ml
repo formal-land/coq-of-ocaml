@@ -55,7 +55,7 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     Constant.of_constant c >>= fun constant ->
     return (Some (Constant constant))
   | Tpat_variant (label, p, _) ->
-    let path_name = PathName.of_variant label in
+    PathName.constructor_of_variant label >>= fun path_name ->
     (match p with
     | None -> return (Some [])
     | Some p ->
@@ -65,11 +65,9 @@ let rec of_pattern (p : pattern) : t option Monad.t =
         [pattern])
       )
     ) >>= fun patterns ->
-    raise
+    return
       (Util.Option.map patterns (fun patterns ->
       Constructor (path_name, patterns)))
-      NotSupported
-      "Patterns on variants are not supported"
   | Tpat_record (fields, _) ->
     (fields |> Monad.List.map (fun (_, label_description, p) ->
       let x = PathName.of_label_description label_description in

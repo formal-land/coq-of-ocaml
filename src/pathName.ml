@@ -1,5 +1,6 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open SmartPrint
+open Monad.Notations
 
 type t = {
   path : Name.t list;
@@ -263,10 +264,14 @@ let of_label_description (label_description : Types.label_description) : t =
     convert path_name
   | _ -> failwith "Unexpected label description without a type constructor"
 
-let of_variant (label : string) : t =
+let constructor_of_variant (label : string) : t Monad.t =
   match label with
   (* Custom variants to add here. *)
-  | _ -> { path = []; base = Name.of_string false label }
+  | _ ->
+    raise
+      { path = []; base = Name.of_string false label }
+      NotSupported
+      ("Constructor of the variant `" ^ label ^ " unknown")
 
 let get_head_and_tail (path_name : t) : Name.t * t option =
   let { path; base } = path_name in
@@ -300,3 +305,32 @@ let prefix_by_with (path_name : t) : t =
 
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
+
+let typ_of_variant (label : string) : t option =
+  match label with
+  (* Custom variants to add here. *)
+  | _ -> None
+
+let typ_of_variants (labels : string list) : t option Monad.t =
+  let typs = labels |> Util.List.filter_map typ_of_variant in
+  let typs = typs |> List.sort_uniq compare in
+  let variants_message =
+    String.concat ", " (labels |> List.map (fun label -> "`" ^ label)) in
+  match typs with
+  | [] ->
+    raise
+      None
+      NotSupported
+      ("No type known for the following variants: " ^ variants_message)
+  | [typ] -> return (Some typ)
+  | typ :: _ :: _ ->
+    raise
+      (Some typ)
+      NotSupported
+      (
+        "At least two types found for the variants " ^ variants_message ^
+        ":\n" ^
+        String.concat "\n" (typs |> List.map (fun typ ->
+          "- " ^ Pp.to_string (to_coq typ)
+        ))
+      )
