@@ -52,11 +52,11 @@
     <p>These are the sources of the interface of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.</p>
     
 
-    <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Errors reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6154 lines</li>
       <li>Coq size: 3272 lines (-47% compared to&nbsp;OCaml)</li>
-      <li>errors from coq-of-ocaml: 191</li>
+      <li>Warnings from coq-of-ocaml: 191</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -103,7 +103,7 @@
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-danger">191 errors</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-warning">191 warnings</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -162,7 +162,7 @@ val failwith : string -&gt; 'a
 
 (** The [Exit] exception is not raised by any library function.  It is
     provided for use in your programs. *)
-<abbr class="mark-error" title="Signature item `exception` not handled">exception Exit</abbr>
+<abbr class="mark-warning" title="Signature item `exception` not handled">exception Exit</abbr>
 
 (** {1 Boolean operations} *)
 
@@ -2503,7 +2503,7 @@ val compare : t -&gt; t -&gt; int
 
 val concat : string -&gt; t list -&gt; t
 
-<abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">type hex = [`Hex of string]</abbr>
+<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type hex = [`Hex of string]</abbr>
 
 val to_hex : t -&gt; hex
 
@@ -3332,7 +3332,7 @@ module Data_encoding : sig
 (*****************************************************************************)
 
 (** In memory JSON data *)
-<abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">type json =
+<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type json =
   [ `O of (string * json) list
   | `Bool of bool
   | `Float of float
@@ -3346,7 +3346,7 @@ type 'a t
 
 type 'a encoding = 'a t
 
-<abbr class="mark-error" title="No type known for the following variants: `Variable, `Fixed, `Dynamic">val classify : 'a encoding -&gt; [`Fixed of int | `Dynamic | `Variable]</abbr>
+<abbr class="mark-warning" title="No type known for the following variants: `Variable, `Fixed, `Dynamic">val classify : 'a encoding -&gt; [`Fixed of int | `Dynamic | `Variable]</abbr>
 
 val splitted : json:'a encoding -&gt; binary:'a encoding -&gt; 'a encoding
 
@@ -3412,7 +3412,7 @@ module Bounded : sig
   val bytes : int -&gt; MBytes.t encoding
 end
 
-<abbr class="mark-error" title="No type known for the following variants: `Uint16, `Uint8, `Uint30">val dynamic_size :
+<abbr class="mark-warning" title="No type known for the following variants: `Uint16, `Uint8, `Uint30">val dynamic_size :
   ?kind:[`Uint30 | `Uint16 | `Uint8] -&gt; 'a encoding -&gt; 'a encoding</abbr>
 
 val json : json encoding
@@ -3622,7 +3622,7 @@ val case :
   ('a -&gt; 't) -&gt;
   't case
 
-<abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">type tag_size = [`Uint8 | `Uint16]</abbr>
+<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type tag_size = [`Uint8 | `Uint16]</abbr>
 
 val union : ?tag_size:tag_size -&gt; 't case list -&gt; 't encoding
 
@@ -3667,7 +3667,7 @@ module Json : sig
 
   type path = path_item list
 
-  <abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">and path_item =
+  <abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">and path_item =
     [ `Field of string  (** A field in an object. *)
     | `Index of int  (** An index in an array. *)
     | `Star  (** Any / every field or index. *)
@@ -3675,22 +3675,22 @@ module Json : sig
 
   (** Exception raised by destructors, with the location in the original
       JSON structure and the specific error. *)
-  <abbr class="mark-error" title="Signature item `exception` not handled">exception Cannot_destruct of (path * exn)</abbr>
+  <abbr class="mark-warning" title="Signature item `exception` not handled">exception Cannot_destruct of (path * exn)</abbr>
 
   (** Unexpected kind of data encountered (w/ the expectation). *)
-  <abbr class="mark-error" title="Signature item `exception` not handled">exception Unexpected of string * string</abbr>
+  <abbr class="mark-warning" title="Signature item `exception` not handled">exception Unexpected of string * string</abbr>
 
   (** Some {!union} couldn't be destructed, w/ the reasons for each {!case}. *)
-  <abbr class="mark-error" title="Signature item `exception` not handled">exception No_case_matched of exn list</abbr>
+  <abbr class="mark-warning" title="Signature item `exception` not handled">exception No_case_matched of exn list</abbr>
 
   (** Array of unexpected size encountered  (w/ the expectation). *)
-  <abbr class="mark-error" title="Signature item `exception` not handled">exception Bad_array_size of int * int</abbr>
+  <abbr class="mark-warning" title="Signature item `exception` not handled">exception Bad_array_size of int * int</abbr>
 
   (** Missing field in an object. *)
-  <abbr class="mark-error" title="Signature item `exception` not handled">exception Missing_field of string</abbr>
+  <abbr class="mark-warning" title="Signature item `exception` not handled">exception Missing_field of string</abbr>
 
   (** Supernumerary field in an object. *)
-  <abbr class="mark-error" title="Signature item `exception` not handled">exception Unexpected_field of string</abbr>
+  <abbr class="mark-warning" title="Signature item `exception` not handled">exception Unexpected_field of string</abbr>
 
   val print_error :
     ?print_unknown:(Format.formatter -&gt; exn -&gt; unit) -&gt;
@@ -3723,7 +3723,7 @@ module Binary : sig
 
   type write_error
 
-  <abbr class="mark-error" title="Signature item `exception` not handled">exception Write_error of write_error</abbr>
+  <abbr class="mark-warning" title="Signature item `exception` not handled">exception Write_error of write_error</abbr>
 end
 
 (** [check_size size encoding] ensures that the binary encoding
@@ -3764,14 +3764,14 @@ module Error_monad : sig
 (** {2 Error classification} *)
 
 (** Categories of error *)
-<abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">type error_category =
+<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type error_category =
   [ `Branch  (** Errors that may not happen in another context *)
   | `Temporary  (** Errors that may not happen in a later context *)
   | `Permanent  (** Errors that will happen no matter the context *) ]</abbr>
 
 (** Custom error handling for economic protocols. *)
 
-<abbr class="mark-error" title="Extensible types are not handled">type error = ..</abbr>
+<abbr class="mark-warning" title="Extensible types are not handled">type error = ..</abbr>
 
 val pp : Format.formatter -&gt; error -&gt; unit
 
@@ -4251,7 +4251,7 @@ val seal : ('a, 'b, 'a) open_query -&gt; 'a t
 
 type untyped = (string * string) list
 
-<abbr class="mark-error" title="Signature item `exception` not handled">exception Invalid of string</abbr>
+<abbr class="mark-warning" title="Signature item `exception` not handled">exception Invalid of string</abbr>
 
 val parse : 'a query -&gt; untyped -&gt; 'a
 end
@@ -4283,26 +4283,26 @@ module RPC_service : sig
 (*****************************************************************************)
 
 (** HTTP methods. *)
-<abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">type meth = [`GET | `POST | `DELETE | `PUT | `PATCH]</abbr>
+<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type meth = [`GET | `POST | `DELETE | `PUT | `PATCH]</abbr>
 
-<abbr class="mark-error" title="Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) t
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) t
   constraint 'meth = [&lt; meth]</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
 Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) service =
   ('meth, 'prefix, 'params, 'query, 'input, 'output) t</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `GET">val get_service :
+<abbr class="mark-warning" title="No type known for the following variants: `GET">val get_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
   ([`GET], 'prefix, 'params, 'query, unit, 'output) service</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `POST">val post_service :
+<abbr class="mark-warning" title="No type known for the following variants: `POST">val post_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
@@ -4310,14 +4310,14 @@ Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefi
   ('prefix, 'params) RPC_path.t -&gt;
   ([`POST], 'prefix, 'params, 'query, 'input, 'output) service</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `DELETE">val delete_service :
+<abbr class="mark-warning" title="No type known for the following variants: `DELETE">val delete_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
   ([`DELETE], 'prefix, 'params, 'query, unit, 'output) service</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PATCH">val patch_service :
+<abbr class="mark-warning" title="No type known for the following variants: `PATCH">val patch_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
@@ -4325,7 +4325,7 @@ Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefi
   ('prefix, 'params) RPC_path.t -&gt;
   ([`PATCH], 'prefix, 'params, 'query, 'input, 'output) service</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT">val put_service :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT">val put_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
@@ -4361,7 +4361,7 @@ module RPC_answer : sig
 (*****************************************************************************)
 
 (** Return type for service handler *)
-<abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">type 'o t =
+<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type 'o t =
   [ `Ok of 'o (* 200 *)
   | `OkStream of 'o stream (* 200 *)
   | `Created of string option (* 201 *)
@@ -4437,22 +4437,22 @@ type conflict =
   | CTypes of RPC_arg.descr * RPC_arg.descr
   | CType of RPC_arg.descr * string list
 
-<abbr class="mark-error" title="Signature item `exception` not handled">exception Conflict of step list * conflict</abbr>
+<abbr class="mark-warning" title="Signature item `exception` not handled">exception Conflict of step list * conflict</abbr>
 
 (** Registring handler in service tree. *)
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
@@ -4462,7 +4462,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('params -&gt; 'query -&gt; 'input -&gt; [&lt; 'output RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output Lwt.t) -&gt;
@@ -4470,37 +4470,37 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
 
 (** Registring handler in service tree. Curryfied variant.  *)
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register0 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register1 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register2 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register3 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register4 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register5 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4512,37 +4512,37 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register0 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register1 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register2 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register3 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register4 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register5 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val opt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4554,7 +4554,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
@@ -4564,7 +4564,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
@@ -4574,7 +4574,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('a -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
@@ -4584,7 +4584,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
@@ -4594,7 +4594,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
@@ -4604,7 +4604,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
 
 ——————————
 
@@ -4620,37 +4620,37 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register0 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register1 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register2 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register3 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register4 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-error" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register5 :
+<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">val lwt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4703,7 +4703,7 @@ val simple_decode : 'a encoding -&gt; string -&gt; 'a option
 
 val simple_encode : 'a encoding -&gt; 'a -&gt; string
 
-<abbr class="mark-error" title="Extensible types are not handled">type data = ..</abbr>
+<abbr class="mark-warning" title="Extensible types are not handled">type data = ..</abbr>
 
 val register_encoding :
   prefix:string -&gt;
@@ -4823,7 +4823,7 @@ module type B58_DATA = sig
 
   val of_b58check_opt : string -&gt; t option
 
-  <abbr class="mark-error" title="Extensible types are not handled.">type Base58.data += Data of t</abbr>
+  <abbr class="mark-warning" title="Extensible types are not handled.">type Base58.data += Data of t</abbr>
 
   val b58check_encoding : t Base58.encoding
 end
@@ -4998,11 +4998,11 @@ module type HASH = sig
 
   include RAW_DATA with type t := t
 
-  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
+  <abbr class="mark-warning" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
-  <abbr class="mark-error" title="Sub-module 'Map' in included signature.
+  <abbr class="mark-warning" title="Sub-module 'Map' in included signature.
 
 Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
 
@@ -5020,7 +5020,7 @@ end
 module type MERKLE_TREE = sig
   type elt
 
-  <abbr class="mark-error" title="Sub-module 'Map' in included signature.
+  <abbr class="mark-warning" title="Sub-module 'Map' in included signature.
 
 Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
 
@@ -5062,11 +5062,11 @@ module type SPublic_key_hash = sig
 
   include RAW_DATA with type t := t
 
-  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
+  <abbr class="mark-warning" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
-  <abbr class="mark-error" title="Sub-module 'Map' in included signature.
+  <abbr class="mark-warning" title="Sub-module 'Map' in included signature.
 
 Sub-modules in included signatures are not handled well yet. It does not work if there are destructive type substitutions (:=) in the sub-module or type definitions in the sub-module's source signature. We do not develop this feature further as it is working in our cases.
 
@@ -5090,7 +5090,7 @@ module type SPublic_key = sig
 
   include Compare.S with type t := t
 
-  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
+  <abbr class="mark-warning" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
@@ -5113,7 +5113,7 @@ module type SIGNATURE = sig
 
   include Compare.S with type t := t
 
-  <abbr class="mark-error" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
+  <abbr class="mark-warning" title="Extensible type 'Base58.data' not handled">include B58_DATA with type t := t</abbr>
 
   include ENCODER with type t := t
 
@@ -5456,7 +5456,7 @@ type watermark =
   | Generic_operation
   | Custom of MBytes.t
 
-<abbr class="mark-error" title="Type extension not handled">include
+<abbr class="mark-warning" title="Type extension not handled">include
   S.SIGNATURE
     with type Public_key_hash.t = public_key_hash
      and type Public_key.t = public_key
@@ -5935,7 +5935,7 @@ val del : t -&gt; key -&gt; t Lwt.t
 
 val remove_rec : t -&gt; key -&gt; t Lwt.t
 
-<abbr class="mark-error" title="Polymorphic variant types are defined as standard algebraic types">type dir_or_key = [`Key of key | `Dir of key]</abbr>
+<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type dir_or_key = [`Key of key | `Dir of key]</abbr>
 
 val fold :
   t -&gt;
@@ -6220,7 +6220,7 @@ module RPC_context : sig
 
 type t = Updater.rpc_context
 
-<abbr class="mark-error" title="Signature item `class_type` not handled">class type ['pr] simple =
+<abbr class="mark-warning" title="Signature item `class_type` not handled">class type ['pr] simple =
   object
     method call_proto_service0 :
       'm 'q 'i 'o.
@@ -6255,7 +6255,7 @@ type t = Updater.rpc_context
       'o Error_monad.shell_tzresult Lwt.t
   end</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 
@@ -6315,7 +6315,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   'i -&gt;
   'o shell_tzresult Lwt.t</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 
@@ -6376,7 +6376,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   'i -&gt;
   'o shell_tzresult Lwt.t</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 
@@ -6438,7 +6438,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   'i -&gt;
   'o shell_tzresult Lwt.t</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 
@@ -6501,7 +6501,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   'i -&gt;
   'o shell_tzresult Lwt.t</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 
@@ -6561,7 +6561,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   'i -&gt;
   'o option shell_tzresult Lwt.t</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 
@@ -6622,7 +6622,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   'i -&gt;
   'o option shell_tzresult Lwt.t</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 
@@ -6684,7 +6684,7 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
   'i -&gt;
   'o option shell_tzresult Lwt.t</abbr>
 
-<abbr class="mark-error" title="Object types are not handled
+<abbr class="mark-warning" title="Object types are not handled
 
 ——————————
 

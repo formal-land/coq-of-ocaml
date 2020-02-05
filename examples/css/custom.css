@@ -1,5 +1,5 @@
-.mark-error {
-  background-color: #ff4136;
+.mark-warning {
+  background-color: #ff851b;
   border-bottom: none !important;
   color: white;
   font-weight: 500;
