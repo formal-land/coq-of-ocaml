@@ -85,6 +85,7 @@
           8851,
           9183,
           9413,
+          9364,
         ],
         generated: [
           47563,
@@ -109,6 +110,7 @@
           48616,
           49194,
           52058,
+          51829,
         ],
         labels: [
           "01-14",
@@ -133,6 +135,7 @@
           "02-02",
           "02-03",
           "02-04",
+          "02-05",
         ]
       }
 ;
@@ -5495,19 +5498,19 @@ module Parse = Helpers_services.Parse
 module Voting = Voting_services
 
 let register () =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Contract.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Constants.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Delegate.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Helpers.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Nonce.register ()</abbr> ;
   Voting.register ()
@@ -5694,15 +5697,15 @@ Module Voting := Voting_services.
 
 Definition register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Voting.register tt.
 </pre>
@@ -7462,7 +7465,7 @@ let apply_manager_operation_content :
       &gt;&gt;=? fun ctxt -&gt;
       ( match preorigination with
       | Some contract -&gt;
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert internal</abbr> ;
           (* The preorigination field is only used to early return
@@ -8724,7 +8727,7 @@ Definition apply_manager_operation_content {kind : Set}
                                                 Error_monad.op_gtgteqquestion
                                                   match preorigination with
                                                   | Some contract =&gt;
-                                                    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+                                                    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
                                                     (* ❌ instruction_sequence &quot;;&quot; *)
                                                     Error_monad.__return
                                                       (ctxt, contract)
@@ -15280,7 +15283,7 @@ let activation_code_size = Ed25519.Public_key_hash.size
 let activation_code_encoding = Data_encoding.Fixed.bytes activation_code_size
 
 let activation_code_of_hex h =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">if Compare.Int.(String.length h &lt;&gt; activation_code_size * 2) then
     invalid_arg &quot;Blinded_public_key_hash.activation_code_of_hex&quot;</abbr> ;
@@ -15414,7 +15417,7 @@ Definition activation_code_encoding : Data_encoding.encoding MBytes.t :=
   Data_encoding.Fixed.__bytes_value activation_code_size.
 
 Definition activation_code_of_hex (h : string) : MBytes.t :=
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   MBytes.of_hex (MBytes.Hex h).
 
@@ -17818,7 +17821,7 @@ end
 
 let register () =
   let open Services_registration in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0_noctxt S.errors (fun () () -&gt;
       return Data_encoding.Json.(schema error_encoding))</abbr> ;
@@ -17969,7 +17972,7 @@ End S.
 
 Definition register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register0 S.all
     (fun ctxt =&gt;
@@ -18861,7 +18864,7 @@ let originated_contracts
     ~since:{origination_index = first; operation_hash = first_hash}
     ~until:( {origination_index = last; operation_hash = last_hash} as
            origination_nonce ) =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Operation_hash.equal first_hash last_hash)</abbr> ;
   let rec contracts acc origination_index =
@@ -18922,22 +18925,22 @@ module Index = struct
     | [index1; index2; index3; index4; index5; index6; key] -&gt;
         let raw_key = MBytes.of_hex (`Hex key) in
         let (`Hex index_key) = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 0 2 = index1))</abbr> ;
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 2 2 = index2))</abbr> ;
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 4 2 = index3))</abbr> ;
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 6 2 = index4))</abbr> ;
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 8 2 = index5))</abbr> ;
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 10 2 = index6))</abbr> ;
         Data_encoding.Binary.of_bytes encoding raw_key
@@ -19109,7 +19112,7 @@ Definition originated_contracts (function_parameter : origination_nonce)
         origination_nonce.operation_hash := last_hash;
           origination_nonce.origination_index := last
           |} as origination_nonce := function_parameter in
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     let fix contracts
       (acc : list t) (origination_index : (|Compare.Int32|).(Compare.S.t))
@@ -19180,17 +19183,17 @@ Module Index.
       =&gt;
       let raw_key := MBytes.of_hex (MBytes.Hex key) in
       let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       Data_encoding.Binary.of_bytes encoding raw_key
     end.
@@ -19561,7 +19564,7 @@ end
 
 let register () =
   let open Services_registration in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.list (fun ctxt () () -&gt; Contract.list ctxt &gt;&gt;= return)</abbr> ;
   let <abbr class="mark-warning" title="No type known for the following variants: `DELETE, `GET, `PATCH, `POST, `PUT">register_field</abbr> s f =
@@ -19603,10 +19606,10 @@ Alternative: use a monad to sequence side-effects.">register0 S.list (fun ctxt (
             &gt;&gt;=? fun (value, _ctxt) -&gt; return (Micheline.strip_locations value)
         )
   in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register_field S.balance Contract.get_balance</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.manager_key (fun ctxt contract () () -&gt;
       match Contract.is_implicit contract with
@@ -19619,10 +19622,10 @@ Alternative: use a monad to sequence side-effects.">register1 S.manager_key (fun
               return_none
           | true -&gt;
               Contract.get_manager_key ctxt mgr &gt;&gt;=? return_some ))</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register_opt_field S.delegate Delegate.get</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.counter (fun ctxt contract () () -&gt;
       match Contract.is_implicit contract with
@@ -19630,11 +19633,11 @@ Alternative: use a monad to sequence side-effects.">register1 S.counter (fun ctx
           raise Not_found
       | Some mgr -&gt;
           Contract.get_counter ctxt mgr)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register_opt_field S.script (fun c v -&gt;
       Contract.get_script c v &gt;&gt;=? fun (_, v) -&gt; return v)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register_opt_field S.storage (fun ctxt contract -&gt;
       Contract.get_script ctxt contract
@@ -19651,7 +19654,7 @@ Alternative: use a monad to sequence side-effects.">register_opt_field S.storage
           &gt;&gt;=? fun (script, ctxt) -&gt;
           Script.force_decode ctxt script.storage
           &gt;&gt;=? fun (storage, _ctxt) -&gt; return_some storage)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register2 S.entrypoint_type (fun ctxt v entrypoint () () -&gt;
       Contract.get_script_code ctxt v
@@ -19685,7 +19688,7 @@ Alternative: use a monad to sequence side-effects.">register2 S.entrypoint_type 
               return (Micheline.strip_locations ty_node)
           | Error _ -&gt;
               raise Not_found ))</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.list_entrypoints (fun ctxt v () () -&gt;
       Contract.get_script_code ctxt v
@@ -19719,7 +19722,7 @@ Alternative: use a monad to sequence side-effects.">register1 S.list_entrypoints
                   (entry, Micheline.strip_locations ty) :: acc)
                 map
                 [] ))</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.contract_big_map_get_opt (fun ctxt contract () (key, key_type) -&gt;
       Contract.get_script ctxt contract
@@ -19760,7 +19763,7 @@ Alternative: use a monad to sequence side-effects.">register1 S.contract_big_map
               with Not_found -&gt; find ids )
           in
           find ids)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register2 S.big_map_get (fun ctxt id key () () -&gt; do_big_map_get ctxt id key)</abbr> ;
   register_field S.info (fun ctxt contract -&gt;
@@ -20780,7 +20783,7 @@ End S.
 
 Definition register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   let register_field {A : Set}
     (s :
@@ -20868,25 +20871,25 @@ Definition register (function_parameter : unit) : unit :=
                               (Micheline.strip_locations value)))
                   end))
         end) in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   register_field S.info
     (fun ctxt =&gt;
@@ -23048,7 +23051,7 @@ let create_base c ?(prepaid_bootstrap_storage = false)
       let total_size =
         Z.add (Z.add (Z.of_int code_size) (Z.of_int storage_size)) big_map_size
       in
-      <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+      <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.Z.(total_size &gt;= Z.zero))</abbr> ;
       let prepaid_bootstrap_storage =
@@ -23293,7 +23296,7 @@ let spend c contract amount =
             &gt;&gt;=? function
             | Some pkh' -&gt;
                 (* Don't delete &quot;delegate&quot; contract *)
-                <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+                <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Signature.Public_key_hash.equal pkh pkh')</abbr> ;
                 return c
@@ -23711,7 +23714,7 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                                                 (Z.add (Z.of_int code_size)
                                                   (Z.of_int storage_size))
                                                 big_map_size in
-                                            (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+                                            (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
                                             (* ❌ instruction_sequence &quot;;&quot; *)
                                             let prepaid_bootstrap_storage :=
                                               if prepaid_bootstrap_storage then
@@ -24057,7 +24060,7 @@ Definition spend
                       (fun function_parameter =&gt;
                         match function_parameter with
                         | Some pkh' =&gt;
-                          (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+                          (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
                           (* ❌ instruction_sequence &quot;;&quot; *)
                           Error_monad.__return c
                         | None =&gt; delete c contract
@@ -24570,13 +24573,13 @@ let succ = Int32.succ
 let pred = function 0l -&gt; None | i -&gt; Some (Int32.pred i)
 
 let add c i =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.Int.(i &gt; 0))</abbr> ;
   Int32.add c (Int32.of_int i)
 
 let sub c i =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.Int.(i &gt; 0))</abbr> ;
   let r = Int32.sub c (Int32.of_int i) in
@@ -24690,12 +24693,12 @@ Definition pred (function_parameter : int32) : option int32 :=
   end.
 
 Definition add (c : int32) (i : (|Compare.Int|).(Compare.S.t)) : int32 :=
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Int32.add c (Int32.of_int i).
 
 Definition sub (c : int32) (i : (|Compare.Int|).(Compare.S.t)) : option int32 :=
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   let r := Int32.sub c (Int32.of_int i) in
   if
@@ -25089,7 +25092,7 @@ end
 
 let register () =
   let open Services_registration in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.list_delegate (fun ctxt q () -&gt;
       Delegate.list ctxt
@@ -25108,7 +25111,7 @@ Alternative: use a monad to sequence side-effects.">register0 S.list_delegate (f
             &gt;&gt;=? function false -&gt; return_none | true -&gt; return_some pkh)
           delegates
       else return_nil)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.info (fun ctxt pkh () () -&gt;
       Delegate.full_balance ctxt pkh
@@ -25138,30 +25141,30 @@ Alternative: use a monad to sequence side-effects.">register1 S.info (fun ctxt p
           deactivated;
           grace_period;
         })</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.balance (fun ctxt pkh () () -&gt; Delegate.full_balance ctxt pkh)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.frozen_balance (fun ctxt pkh () () -&gt;
       Delegate.frozen_balance ctxt pkh)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.frozen_balance_by_cycle (fun ctxt pkh () () -&gt;
       Delegate.frozen_balance_by_cycle ctxt pkh &gt;&gt;= return)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.staking_balance (fun ctxt pkh () () -&gt;
       Delegate.staking_balance ctxt pkh)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.delegated_contracts (fun ctxt pkh () () -&gt;
       Delegate.delegated_contracts ctxt pkh &gt;&gt;= return)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.delegated_balance (fun ctxt pkh () () -&gt;
       Delegate.delegated_balance ctxt pkh)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register1 S.deactivated (fun ctxt pkh () () -&gt; Delegate.deactivated ctxt pkh)</abbr> ;
   register1 S.grace_period (fun ctxt pkh () () -&gt;
@@ -26297,19 +26300,19 @@ No type known for the following variants: `DELETE, `GET, `PATCH, `POST, `PUT">ge
 end
 
 let register () =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Baking_rights.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Endorsing_rights.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Endorsing_power.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Required_endorsements.register ()</abbr> ;
   Minimal_valid_time.register ()
@@ -26593,23 +26596,23 @@ End S.
 
 Definition register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register1 S.grace_period
     (fun ctxt =&gt;
@@ -27628,15 +27631,15 @@ End Minimal_valid_time.
 
 Definition register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Minimal_valid_time.register tt.
 
@@ -31623,7 +31626,7 @@ Parameter burn_storage_fees :
 
 let int64_to_bytes i =
   let b = MBytes.create 8 in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">MBytes.set_int64 b 0 i</abbr> ; b
 
@@ -31673,7 +31676,7 @@ Require Tezos.Constants_repr.
 
 Definition int64_to_bytes (i : int64) : MBytes.t :=
   let b := MBytes.create 8 in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   b.
 
@@ -32774,7 +32777,7 @@ module Scripts = struct
         ~script:(script, None)
       &gt;&gt;=? fun ctxt -&gt; return (ctxt, dummy_contract)
     in
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0
       S.run_code
@@ -32826,7 +32829,7 @@ Alternative: use a monad to sequence side-effects.">register0
           ~parameter
         &gt;&gt;=? fun {Script_interpreter.storage; operations; big_map_diff; _} -&gt;
         return (storage, operations, big_map_diff))</abbr> ;
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0
       S.trace_code
@@ -32879,7 +32882,7 @@ Alternative: use a monad to sequence side-effects.">register0
         &gt;&gt;=? fun ( {Script_interpreter.storage; operations; big_map_diff; _},
                    trace ) -&gt;
         return (storage, operations, trace, big_map_diff))</abbr> ;
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.typecheck_code (fun ctxt () (expr, maybe_gas) -&gt;
         let ctxt =
@@ -32891,7 +32894,7 @@ Alternative: use a monad to sequence side-effects.">register0 S.typecheck_code (
         in
         Script_ir_translator.typecheck_code ctxt expr
         &gt;&gt;=? fun (res, ctxt) -&gt; return (res, Gas.level ctxt))</abbr> ;
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.typecheck_data (fun ctxt () (data, ty, maybe_gas) -&gt;
         let ctxt =
@@ -32903,7 +32906,7 @@ Alternative: use a monad to sequence side-effects.">register0 S.typecheck_data (
         in
         Script_ir_translator.typecheck_data ctxt (data, ty)
         &gt;&gt;=? fun ctxt -&gt; return (Gas.level ctxt))</abbr> ;
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.pack_data (fun ctxt () (expr, typ, maybe_gas) -&gt;
         let open Script_ir_translator in
@@ -32920,7 +32923,7 @@ Alternative: use a monad to sequence side-effects.">register0 S.pack_data (fun c
         &gt;&gt;=? fun (data, ctxt) -&gt;
         Script_ir_translator.pack_data ctxt typ data
         &gt;&gt;=? fun (bytes, ctxt) -&gt; return (bytes, Gas.level ctxt))</abbr> ;
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0
       S.run_operation
@@ -33060,7 +33063,7 @@ Alternative: use a monad to sequence side-effects.">register0
               operation
               operation.protocol_data.contents
             &gt;&gt;=? fun (_ctxt, result) -&gt; return result)</abbr> ;
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.entrypoint_type (fun ctxt () (expr, entrypoint) -&gt;
         let ctxt = Gas.set_unlimited ctxt in
@@ -33563,7 +33566,7 @@ module Forge = struct
 
   let register () =
     let open Services_registration in
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0_noctxt S.operations (fun () (shell, proto) -&gt;
         return
@@ -34399,7 +34402,7 @@ module Parse = struct
 
   let register () =
     let open Services_registration in
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.operations (fun _ctxt () (operations, check) -&gt;
         map_s
@@ -34557,17 +34560,17 @@ module S = struct
 end
 
 let register () =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Scripts.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Forge.register ()</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Parse.register ()</abbr> ;
   let open Services_registration in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.current_level (fun ctxt q () -&gt;
       let level = Level.current ctxt in
@@ -34971,19 +34974,19 @@ Module Scripts.
             (Alpha_context.Contract.originate ctxt dummy_contract balance
               (script, None) None)
             (fun ctxt =&gt; Error_monad.__return (ctxt, dummy_contract))) in
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0 S.list_entrypoints
       (fun ctxt =&gt;
@@ -35317,7 +35320,7 @@ Module Forge.
   
   Definition register (function_parameter : unit) : unit :=
     let '_ := function_parameter in
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0_noctxt S.protocol_data
       (fun function_parameter =&gt;
@@ -35911,7 +35914,7 @@ Module Parse.
   
   Definition register (function_parameter : unit) : unit :=
     let '_ := function_parameter in
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     Services_registration.register0_noctxt S.block
       (fun function_parameter =&gt;
@@ -36019,13 +36022,13 @@ End S.
 
 Definition register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register0 S.levels_in_current_cycle
     (fun ctxt =&gt;
@@ -41782,7 +41785,7 @@ let validation_passes =
 (* 512kB *)
 
 let rpc_services =
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Alpha_services.register ()</abbr> ;
   Services_registration.get_rpc_services ()
@@ -42194,7 +42197,7 @@ Definition validation_passes : list Updater.quota :=
   ].
 
 Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.get_rpc_services tt.
 
@@ -51568,7 +51571,7 @@ let bootstrap_account_encoding =
         (tup2 Signature.Public_key.encoding Tez_repr.encoding)
         (function
           | {public_key_hash; public_key = Some public_key; amount} -&gt;
-              <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+              <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (
                 Signature.Public_key_hash.equal
@@ -51735,7 +51738,7 @@ Definition bootstrap_account_encoding
               bootstrap_account.public_key := Some public_key;
               bootstrap_account.amount := amount
               |} =&gt;
-            (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+            (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
             (* ❌ instruction_sequence &quot;;&quot; *)
             Some (public_key, amount)
           | {| bootstrap_account.public_key := None |} =&gt; None
@@ -52511,7 +52514,7 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
     let (ints, decs) =
       (Int64.(div amount mult_int), Int64.(to_int (rem amount mult_int)))
     in
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Format.fprintf ppf &quot;%a&quot; left ints</abbr> ;
     if Compare.Int.(decs &gt; 0) then Format.fprintf ppf &quot;.%a&quot; right decs
@@ -52907,7 +52910,7 @@ Definition Make :=
       let '(ints, decs) :=
         ((Int64.div amount mult_int), (Int64.to_int (Int64.rem amount mult_int)))
         in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       if (|Compare.Int|).(Compare.S.op_gt) decs 0 then
         Format.fprintf ppf
@@ -56214,7 +56217,7 @@ let freeze_rolls_for_cycle ctxt cycle =
 module Random = struct
   let int32_to_bytes i =
     let b = MBytes.create 4 in
-    <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+    <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">MBytes.set_int32 b 0 i</abbr> ; b
 
@@ -56815,7 +56818,7 @@ Definition freeze_rolls_for_cycle
 Module Random.
   Definition int32_to_bytes (i : int32) : MBytes.t :=
     let b := MBytes.create 4 in
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     b.
   
@@ -58663,7 +58666,7 @@ let rec step :
     | Some log -&gt;
         trace <abbr class="mark-warning" title="Values of extensible types are not handled">Cannot_serialize_log</abbr> (unparse_stack ctxt (ret, descr.aft))
         &gt;&gt;=? fun stack -&gt;
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level ctxt, stack) :: !log</abbr> ;
         return (ret, ctxt)
@@ -59782,7 +59785,7 @@ and interp :
   | Some log -&gt;
       trace <abbr class="mark-warning" title="Values of extensible types are not handled">Cannot_serialize_log</abbr> (unparse_stack ctxt (stack, code.bef))
       &gt;&gt;=? fun stack -&gt;
-      <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+      <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">log := (code.loc, Gas.level ctxt, stack) :: !log</abbr> ;
       return_unit )
@@ -60137,7 +60140,7 @@ Fixpoint step {a b : Set}
                 (unparse_stack ctxt
                   (ret, __descr_value.(Script_typed_ir.descr.aft))))
               (fun stack =&gt;
-                (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+                (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
                 (* ❌ instruction_sequence &quot;;&quot; *)
                 Error_monad.__return (ret, ctxt))
           end in
@@ -62323,7 +62326,7 @@ with interp {p r : Set}
           (Error_monad.trace extensible_type_value
             (unparse_stack ctxt (stack, code.(Script_typed_ir.descr.bef))))
           (fun stack =&gt;
-            (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+            (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
             (* ❌ instruction_sequence &quot;;&quot; *)
             Error_monad.return_unit)
       end
@@ -67585,7 +67588,7 @@ and parse_instr :
         unparse_stack ctxt stack_ty
         &gt;&gt;=? fun (stack_ty, _) -&gt;
         unparse_stack ctxt aft
-        &gt;&gt;=? fun (aft, _) -&gt; <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        &gt;&gt;=? fun (aft, _) -&gt; <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">log loc stack_ty aft</abbr> ; return_unit
   in
@@ -74724,7 +74727,7 @@ with parse_instr {bef : Set}
           Error_monad.op_gtgteqquestion (unparse_stack ctxt aft)
             (fun function_parameter =&gt;
               let '(aft, _) := function_parameter in
-              (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+              (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
               (* ❌ instruction_sequence &quot;;&quot; *)
               Error_monad.return_unit))
     end in
@@ -84258,7 +84261,7 @@ let xor_higher_bits i b =
   let higher = MBytes.get_int32 b 0 in
   let r = Int32.logxor higher i in
   let res = MBytes.copy b in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">MBytes.set_int32 res 0 r</abbr> ; res
 
@@ -84398,7 +84401,7 @@ Definition xor_higher_bits (i : int32) (b : MBytes.t) : MBytes.t :=
   let higher := MBytes.get_int32 b 0 in
   let r := Int32.logxor higher i in
   let res := MBytes.copy b in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   res.
 
@@ -85966,58 +85969,58 @@ Only the special case `| exception _ when false -&gt; ...` is supported for defa
           let c = Z.of_string key in
           let raw_key = Data_encoding.Binary.to_bytes_exn encoding c in
           let (`Hex index_key) = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-Sequences of instructions are not handled (operator &quot;;&quot;)
+Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 0 2 = index1))</abbr> ;
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-Sequences of instructions are not handled (operator &quot;;&quot;)
+Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 2 2 = index2))</abbr> ;
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-Sequences of instructions are not handled (operator &quot;;&quot;)
+Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 4 2 = index3))</abbr> ;
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-Sequences of instructions are not handled (operator &quot;;&quot;)
+Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 6 2 = index4))</abbr> ;
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-Sequences of instructions are not handled (operator &quot;;&quot;)
+Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 8 2 = index5))</abbr> ;
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.
 
 ——————————
 
-Sequences of instructions are not handled (operator &quot;;&quot;)
+Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 10 2 = index6))</abbr> ;
           Some c
@@ -87784,17 +87787,17 @@ Module Big_map.
         let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
         let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key)
           in
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
         Some c
       end in
@@ -90617,7 +90620,7 @@ let rec register_named_subcontext : type r. r t -&gt; string list -&gt; r t =
       invalid_arg &quot;&quot;
   | (Empty, name :: names) -&gt;
       let subdir = ref Empty in
-      <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+      <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">dir := NamedDir (StringMap.singleton name subdir)</abbr> ;
       register_named_subcontext subdir names
@@ -90628,7 +90631,7 @@ Alternative: use a monad to sequence side-effects.">dir := NamedDir (StringMap.s
             subdir
         | None -&gt;
             let subdir = ref Empty in
-            <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+            <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">dir := NamedDir (StringMap.add name subdir map)</abbr> ;
             subdir
@@ -90720,7 +90723,7 @@ let rec register_indexed_subcontext :
         invalid_arg &quot;&quot;
     | Empty -&gt;
         let subdir = ref Empty in
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">dir := IndexedDir {arg; arg_encoding; list; subdir}</abbr> ;
         subdir
@@ -90852,7 +90855,7 @@ let build_directory : type key. key t -&gt; key RPC_directory.t =
                 (fun k i -&gt; if Compare.Int.(i &lt; 0) then return_none else get k);
             }
         in
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register path handler</abbr> ; handler
     | NamedDir map -&gt;
@@ -90874,7 +90877,7 @@ Alternative: use a monad to sequence side-effects.">register path handler</abbr>
                   else handler.get k (i - 1) &gt;&gt;=? fun v -&gt; return_some v);
             }
         in
-        <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register path handler</abbr> ; handler
     | IndexedDir {arg; arg_encoding; list; subdir} -&gt; (
@@ -90918,11 +90921,11 @@ Alternative: use a monad to sequence side-effects.">register path handler</abbr>
             Opt_handler
               {encoding = Data_encoding.(list (dynamic_size encoding)); get}
           in
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register path handler</abbr> ; handler )
   in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">ignore (build_handler dir RPC_path.open_root : key opt_handler)</abbr> ;
   !rpc_dir
@@ -91012,7 +91015,7 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
   | (IndexedDir _, _) =&gt; Pervasives.invalid_arg &quot;&quot;
   | (Empty, cons name names) =&gt;
     let subdir := Pervasives.__ref_value Empty in
-    (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+    (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     register_named_subcontext subdir names
   | (NamedDir map, cons name names) =&gt;
@@ -91021,7 +91024,7 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
       | Some subdir =&gt; subdir
       | None =&gt;
         let subdir := Pervasives.__ref_value Empty in
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
         subdir
       end in
@@ -91180,7 +91183,7 @@ Fixpoint register_indexed_subcontext {a b r : Set}
       | NamedDir _ =&gt; Pervasives.invalid_arg &quot;&quot;
       | Empty =&gt;
         let subdir := Pervasives.__ref_value Empty in
-        (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+        (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
         (* ❌ instruction_sequence &quot;;&quot; *)
         subdir
       |
@@ -91478,7 +91481,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                     Error_monad.return_none
                   else
                     get k |} in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       __handler_value
     | NamedDir map =&gt;
@@ -91507,7 +91510,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                       (__handler_value.(handler.Handler.get) k
                         (Pervasives.op_minus i 1))
                       (fun v =&gt; Error_monad.return_some v) |} in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       __handler_value
     |
@@ -91585,11 +91588,11 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               Data_encoding.__list_value None
                 (Data_encoding.dynamic_size None encoding);
             opt_handler.Opt_handler.get := get |} in
-      (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       __handler_value
     end in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Pervasives.op_exclamation rpc_dir.
 </pre>
@@ -92748,7 +92751,7 @@ We use the concept of shape to find the name of a signature for Coq.">struct
             prefixes
           &gt;|= List.flatten
       | [d] when Compare.Int.(i = I.path_length - 1) -&gt;
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.path_length) then invalid_arg &quot;IO.resolve&quot;</abbr> ;
           list t prefix
@@ -92773,7 +92776,7 @@ Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.pa
             prefixes
           &gt;|= List.flatten
       | d :: ds -&gt; (
-          <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.path_length) then invalid_arg &quot;IO.resolve&quot;</abbr> ;
           C.dir_mem t (prefix @ [d])
@@ -94368,7 +94371,7 @@ Definition Make_indexed_subcontext :=
                       loop (Pervasives.op_plus i 1) prefix []) prefixes)
                   List.flatten)
           | (cons d [], _, true) =&gt;
-            (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+            (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
             (* ❌ instruction_sequence &quot;;&quot; *)
             Error_monad.op_gtgteq (__list_value __t_value prefix)
               (fun prefixes =&gt;
@@ -94393,7 +94396,7 @@ Definition Make_indexed_subcontext :=
                       loop (Pervasives.op_plus i 1) prefix ds) prefixes)
                   List.flatten)
           | (cons d ds, _, _) =&gt;
-            (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+            (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
             (* ❌ instruction_sequence &quot;;&quot; *)
             Error_monad.op_gtgteq
               ((|C|).(Raw_context.T.dir_mem) __t_value
@@ -97305,23 +97308,23 @@ end
 
 let register () =
   let open Services_registration in
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.ballots (fun ctxt () () -&gt; Vote.get_ballots ctxt)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.ballot_list (fun ctxt () () -&gt; Vote.get_ballot_list ctxt &gt;|= ok)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.current_period_kind (fun ctxt () () -&gt;
       Vote.get_current_period_kind ctxt)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.current_quorum (fun ctxt () () -&gt; Vote.get_current_quorum ctxt)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.proposals (fun ctxt () () -&gt; Vote.get_proposals ctxt)</abbr> ;
-  <abbr class="mark-warning" title="Sequences of instructions are not handled (operator &quot;;&quot;)
+  <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.listings (fun ctxt () () -&gt; Vote.get_listings ctxt &gt;|= ok)</abbr> ;
   register0 S.current_proposal (fun ctxt () () -&gt;
@@ -97779,17 +97782,17 @@ End S.
 
 Definition register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are not handled (operator &quot;;&quot;) *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
   Services_registration.register0 S.current_proposal
     (fun ctxt =&gt;
