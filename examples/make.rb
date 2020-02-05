@@ -156,7 +156,7 @@ File.open("tezos/index.html", "w") do |file|
     :tezos,
     "Protocol of Tezos",
     "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
-    "(2020-01-25) The import of Tezos code to Coq is currently on pause to consolitate gains (work on small features, write documentation). Our next targets will probably be the files with a lot of GADTs and the functors of the storage.",
+    "(2020-02-05) The file storage_description.ml is now completely imported, with automatic handling of existential types and semi-automatic handling of GADTs using axioms. We are currently working on the functors of the storage.",
     tezos_directory,
     :active_development,
     <<-END
