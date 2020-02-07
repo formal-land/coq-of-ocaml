@@ -306,6 +306,15 @@ let prefix_by_with (path_name : t) : t =
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
 
+let to_coq_module (module_path : t) : SmartPrint.t =
+  match module_path with
+  | { path = []; base } -> !^ "(|" ^-^ Name.to_coq base ^-^ !^ "|)"
+  | { path = path_head :: path_tail; base } ->
+    separate (!^ ".") (
+      (!^ "(|" ^-^ Name.to_coq path_head ^-^ !^ "|)") ::
+      ((path_tail @ [base]) |> List.map Name.to_coq)
+    )
+
 let typ_of_variant (label : string) : t option =
   match label with
   (* Custom variants to add here. *)
@@ -334,3 +343,8 @@ let typ_of_variants (labels : string list) : t option Monad.t =
           "- " ^ Pp.to_string (to_coq typ)
         ))
       )
+
+let compare_paths (path1 : Path.t) (path2 : Path.t) : int =
+  let print_path (path : Path.t) : string =
+    Pp.to_string (to_coq (of_path_with_convert false path)) in
+  String.compare (print_path path1) (print_path path2)

@@ -95,7 +95,7 @@ let top_level_evaluation_error : t list Monad.t =
   error_message
     (Error "top_level_evaluation")
     SideEffect
-    "Top-level evaluations are not handled"
+    "Top-level evaluations are ignored"
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =

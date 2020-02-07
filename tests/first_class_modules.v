@@ -6,7 +6,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Require Import TypingFlags.Loader.
+Unset Positivity Checking.
 Unset Guard Checking.
 
 Module S.
@@ -123,7 +123,7 @@ Definition tripe : {'[a, b, c, bar] : _ & Triple.signature a b c bar} :=
   let vc := "" in
   let bar := Z in
   let foo := 12 in
-  existT _ [_, _, _, _]
+  existT (A := [Set ** Set ** Set ** Set]) _ [_, _, _, _]
     {|
       Triple.va := va;
       Triple.vb := vb;
@@ -145,7 +145,7 @@ End UsingTriple.
 Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
   let elt := a in
   let elt_ty := (|Box|).(Boxed_set.elt_ty) in
-  let OPS := (|Box|).(Boxed_set.OPS) in
+  let OPS := existT (A := unit) (fun _ => _) tt (|Box|).(Boxed_set.OPS) in
   let boxed :=
     if b then
       (|Box|).(Boxed_set.OPS).(S.SET.add) v (|Box|).(Boxed_set.boxed)
@@ -164,9 +164,10 @@ Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
         Z.add (|Box|).(Boxed_set.size) 1
       else
         (|Box|).(Boxed_set.size) in
-  existT _ _
+  existT (A := Set) _ _
     {|
       Boxed_set.elt_ty := elt_ty;
+      Boxed_set.OPS := (|OPS|);
       Boxed_set.boxed := boxed;
       Boxed_set.size := size
     |}.

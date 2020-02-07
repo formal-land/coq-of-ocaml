@@ -6,12 +6,12 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Require Import TypingFlags.Loader.
+Unset Positivity Checking.
 Unset Guard Checking.
 
 Definition u : unit := tt.
 
-Definition l1 {A : Set} : list A := [].
+Definition l1 {A : Set} : list A := nil.
 
 Definition l2 : list Z := [ 1 ].
 

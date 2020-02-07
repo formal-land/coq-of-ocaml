@@ -32,11 +32,7 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
   ) path idents
 
 let merge_similar_paths (paths : Path.t list) : Path.t list =
-  let print_path (path : Path.t) : string =
-    Pp.to_string (PathName.to_coq (PathName.of_path_with_convert false path)) in
-  paths |> List.sort_uniq (fun path1 path2 ->
-    String.compare (print_path path1) (print_path path2)
-  )
+  paths |> List.sort_uniq PathName.compare_paths
 
 (** Find the [Path.t] of all the signature definitions which are found to be similar
     to [signature]. If the signature is the one of a module used as a namespace there

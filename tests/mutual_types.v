@@ -6,7 +6,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Require Import TypingFlags.Loader.
+Unset Positivity Checking.
 Unset Guard Checking.
 
 Definition foo := string.
