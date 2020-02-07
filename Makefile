@@ -6,7 +6,7 @@ watch:
 
 clean:
 	dune clean
-	rm -Rf a.out tests/extraction tests/.*.aux tests/Nex* tests/*.glob tests/*.vo
+	rm -Rf a.out tests/extraction tests/.*.aux tests/Nex* tests/*.glob tests/*.vo*
 
 test:
 	ruby test.rb
