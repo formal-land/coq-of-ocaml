@@ -1,20 +1,18 @@
 module Output = struct
   type t = {
-    error_message : string option;
+    error_message : string;
     generated_file : (string * string) option;
+    has_errors : bool;
     source_file_name : string;
     success_message : string;
   }
 
   let write (json_mode : bool) (output : t) : unit =
-    begin match output.error_message with
-    | None -> ()
-    | Some error_message ->
-      if json_mode then
-        let error_file_name = output.source_file_name ^ ".errors" in
-        Util.File.write error_file_name error_message
-      else
-        prerr_endline error_message
+    begin if json_mode then
+      let error_file_name = output.source_file_name ^ ".errors" in
+      Util.File.write error_file_name output.error_message
+    else if output.has_errors then
+      prerr_endline output.error_message
     end;
     print_endline output.success_message;
     begin match output.generated_file with
@@ -32,7 +30,7 @@ let exp
   (source_file_name : string)
   (source_file_content : string)
   (json_mode : bool)
-  : Ast.t * string option =
+  : Ast.t * string * bool =
   let { MonadEval.Result.errors; value} =
     MonadEval.eval
       source_file_name
@@ -41,10 +39,12 @@ let exp
       loc
       MonadEval.LocalEnv.init in
   let error_message =
+    Error.display_errors json_mode source_file_name source_file_content errors in
+  let has_errors =
     match errors with
-    | [] -> None
-    | _ :: _ -> Some (Error.display_errors json_mode source_file_name source_file_content errors) in
-  (value, error_message)
+    | [] -> false
+    | _ :: _ -> true in
+  (value, error_message, has_errors)
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml
@@ -57,7 +57,7 @@ let of_ocaml
   (output_file_name : string option)
   (json_mode : bool)
   : Output.t =
-  let (ast, error_message) =
+  let (ast, error_message, has_errors) =
     exp env loc typedtree typedtree_errors source_file_name source_file_content json_mode in
   let document = Ast.to_coq ast in
   let generated_file_name =
@@ -82,16 +82,16 @@ let of_ocaml
     | Some output_file_name -> output_file_name in
   let generated_file_content = SmartPrint.to_string 80 2 document in
   let success_message =
-    match error_message with
-    | None ->
+    if has_errors then
       Error.colorize "32" "✔️" ^ " " ^
       Printf.sprintf "File '%s' successfully generated" generated_file_name
-    | Some _ ->
+    else
       Error.colorize "31" "❌" ^ " " ^
       Printf.sprintf "File '%s' generated with some errors" generated_file_name in
   {
     error_message;
     generated_file = Some (generated_file_name, generated_file_content);
+    has_errors;
     source_file_name;
     success_message;
   }
