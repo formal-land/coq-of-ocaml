@@ -166,7 +166,7 @@ let rec to_coq (signature : t) : SmartPrint.t =
     | IncludedField (name, module_name, field_name, is_module) ->
       let field =
         MixedPath.to_coq (
-          MixedPath.Access (MixedPath.of_name module_name, field_name, false)
+          MixedPath.Access (PathName.of_name [] module_name, [field_name], false)
         ) in
       let field_as_module =
         if is_module then

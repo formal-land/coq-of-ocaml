@@ -284,8 +284,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
                     name
                     (Exp.Variable (
                       MixedPath.Access (
-                        MixedPath.PathName reference,
-                        field,
+                        reference,
+                        [field],
                         false
                       ),
                       []

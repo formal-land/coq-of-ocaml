@@ -53,7 +53,6 @@ type t =
   | ModuleCast of int Tree.t * MixedPath.t
     (** The cast of a module to another module type with potentially more
         existentials. *)
-  | ModuleProjection of PathName.t (** The projection from a bundled module. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
   | TypeAnnotation of t * Type.t
@@ -192,7 +191,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           []
         ))
         NotSupported
-        "Values of extensible types are ignored"
+        (
+          "Values of extensible types are ignored.\n\n" ^
+          "They are sent to a unit type."
+        )
     | _ ->
       let x = PathName.of_constructor_description constructor_description in
       Monad.List.map (of_expression typ_vars) es >>= fun es ->
@@ -617,11 +619,11 @@ and of_module_expr
                     begin match local_module_type_path with
                     | Some local_module_type_path ->
                       MixedPath.Access (
-                        MixedPath.PathName
-                          (PathName.of_path_with_convert false path),
-                        PathName.of_path_and_name_with_convert
+                        PathName.of_path_with_convert false path,
+                        [PathName.of_path_and_name_with_convert
                           local_module_type_path
-                          value,
+                          value
+                        ],
                         false
                       )
                     | None ->
@@ -636,7 +638,10 @@ and of_module_expr
                 (
                   PathName.of_path_and_name_with_convert module_type_path modul,
                   0,
-                  ModuleProjection (PathName.of_name [] modul)
+                  Variable (
+                    MixedPath.Access (PathName.of_name [] modul, [], false),
+                    []
+                  )
                 )
             ) in
           return (Module (module_typ_params_arity, fields))
@@ -719,7 +724,10 @@ and of_structure
         (
           PathName.of_path_and_name_with_convert signature_path modul,
           0,
-          ModuleProjection (PathName.of_name [] modul)
+          Variable (
+            MixedPath.Access (PathName.of_name [] modul, [], false),
+            []
+          )
         )
     ) in
   let e_next = Module (module_typ_params_arity, fields) in
@@ -870,10 +878,11 @@ and of_include
           typ_vars,
           Variable (
             MixedPath.Access (
-              MixedPath.PathName module_path_name,
-              PathName.of_path_and_name_with_convert
+              module_path_name,
+              [PathName.of_path_and_name_with_convert
                 signature_path
-                name,
+                name
+              ],
               false
             ),
             []
@@ -1091,7 +1100,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )
   | ModuleCast (module_typ_params_arity, module_path) ->
     to_coq_exist_t paren module_typ_params_arity (MixedPath.to_coq module_path)
-  | ModuleProjection modul -> PathName.to_coq_module modul
   | Functor (x, typ, e) ->
     Pp.parens paren @@ nest (
       !^ "fun" ^^
