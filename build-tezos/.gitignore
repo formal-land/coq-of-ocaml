@@ -1,4 +1,5 @@
 .coqdeps.d
+.Makefile.d
 CoqMakefile.conf
 Makefile
 Makefile.conf
@@ -6,3 +7,5 @@ Makefile.conf
 *.glob
 *.v
 *.vo
+*.vok
+*.vos
