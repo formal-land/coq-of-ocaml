@@ -695,13 +695,44 @@ and of_module_expr
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
     end
   | Tmod_apply (e1, e2, _) ->
-    let expected_module_type_for_e2 =
+    let expected_module_typ_for_e2 =
       match e1.mod_type with
-      | Mty_functor (_, mod_typ_arg, _) -> mod_typ_arg
+      | Mty_functor (_, module_typ_arg, _) -> module_typ_arg
+      | _ -> None in
+    let module_typ_for_application =
+      match e1.mod_type with
+      | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
       | _ -> None in
     of_module_expr typ_vars e1 None >>= fun e1 ->
-    of_module_expr typ_vars e2 expected_module_type_for_e2 >>= fun e2 ->
-    return (Apply (e1, [e2]))
+    of_module_expr typ_vars e2 expected_module_typ_for_e2 >>= fun e2 ->
+    let application = Apply (e1, [e2]) in
+    begin match (module_type, module_typ_for_application) with
+    | (None, _) | (_, None) -> return application
+    | (Some module_type, Some module_typ_for_application) ->
+      ModuleTypParams.get_module_typ_typ_params_arity module_type
+        >>= fun module_typ_params_arity ->
+      ModuleTypParams.get_module_typ_typ_params_arity module_typ_for_application
+        >>= fun module_typ_params_arity_for_application ->
+      if module_typ_params_arity = module_typ_params_arity_for_application then
+        return application
+      else
+        let functor_result_name = Name.of_string false "functor_result" in
+        return (
+          LetVar (
+            functor_result_name,
+            [],
+            application,
+            ModuleCast (
+              module_typ_params_arity,
+              MixedPath.Access (
+                { path = []; base = functor_result_name },
+                [],
+                false
+              )
+            )
+          )
+        )
+    end
   | Tmod_constraint (module_expr, mod_type, annotation, _) ->
     let module_type =
       match module_type with
