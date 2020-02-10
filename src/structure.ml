@@ -160,7 +160,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
           Name.Map.empty
           md_type_path
           mod_type
-          structure.str_items >>= fun module_exp ->
+          structure.str_items
+          structure.str_final_env >>= fun module_exp ->
         return [simple_value name module_exp]
       | Not_found _ -> return [Module (name, structures)]
       end

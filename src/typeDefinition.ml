@@ -282,11 +282,11 @@ module Constructors = struct
         else
           subst_gadt_typ_constructor typ_name result
       )
-    | ForallTyps (typ_args, typ) ->
+    | FunTyps (typ_args, typ) ->
       if Name.Set.mem typ_name (Name.Set.of_list typ_args) then
         typ
       else
-        ForallTyps (typ_args, subst_gadt_typ_constructor typ_name typ)
+        FunTyps (typ_args, subst_gadt_typ_constructor typ_name typ)
     | Error _ -> typ
 
   let rec merge_typ_params

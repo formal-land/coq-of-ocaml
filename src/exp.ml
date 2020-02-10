@@ -86,6 +86,7 @@ let error_message_in_module
 module ModuleTypValues = struct
   type t =
     | Module of Name.t
+    | ModuleFunctor of Name.t
     | Value of Name.t * int
 
   let get
@@ -103,8 +104,12 @@ module ModuleTypValues = struct
             Name.of_ident true ident,
             Name.Set.cardinal new_typ_vars
           )))
+        | Sig_module (ident, { Types.md_type = Mty_functor _; _ }, _) ->
+          let name = Name.of_ident false ident in
+          return (Some (ModuleFunctor name))
         | Sig_module (ident, _, _) ->
-          return (Some (Module (Name.of_ident false ident)))
+          let name = Name.of_ident false ident in
+          return (Some (Module name))
         | _ -> return None
       )
     | _ -> return []
@@ -634,12 +639,21 @@ and of_module_expr
                     []
                   )
                 )
-              | ModuleTypValues.Module modul ->
+              | Module modul ->
                 (
                   PathName.of_path_and_name_with_convert module_type_path modul,
                   0,
                   Variable (
                     MixedPath.Access (PathName.of_name [] modul, [], false),
+                    []
+                  )
+                )
+              | ModuleFunctor functo ->
+                (
+                  PathName.of_path_and_name_with_convert module_type_path functo,
+                  0,
+                  Variable (
+                    MixedPath.PathName (PathName.of_name [] functo),
                     []
                   )
                 )
@@ -657,7 +671,7 @@ and of_module_expr
       module_type >>= fun is_first_class ->
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
-      of_structure typ_vars signature_path module_type structure.str_items
+      of_structure typ_vars signature_path module_type structure.str_items structure.str_final_env
     | IsFirstClassModule.Not_found reason ->
       error_message
         (Error "first_class_module_value_of_unknown_signature")
@@ -708,33 +722,46 @@ and of_structure
   (signature_path : Path.t)
   (module_type : Types.module_type)
   (items : Typedtree.structure_item list)
+  (final_env : Env.t)
   : t Monad.t =
-  ModuleTypParams.get_module_typ_typ_params_arity module_type >>=
-    fun module_typ_params_arity ->
-  ModuleTypValues.get typ_vars module_type >>= fun values ->
-  let fields =
-    values |> List.map (function
-      | ModuleTypValues.Value (value, nb_free_vars) ->
-        (
-          PathName.of_path_and_name_with_convert signature_path value,
-          nb_free_vars,
-          Variable (MixedPath.of_name value, [])
-        )
-      | Module modul ->
-        (
-          PathName.of_path_and_name_with_convert signature_path modul,
-          0,
-          Variable (
-            MixedPath.Access (PathName.of_name [] modul, [], false),
-            []
+  match items with
+  | [] ->
+    set_env final_env (
+    ModuleTypParams.get_module_typ_typ_params_arity module_type >>=
+      fun module_typ_params_arity ->
+    ModuleTypValues.get typ_vars module_type >>= fun values ->
+    let fields =
+      values |> List.map (function
+        | ModuleTypValues.Value (value, nb_free_vars) ->
+          (
+            PathName.of_path_and_name_with_convert signature_path value,
+            nb_free_vars,
+            Variable (MixedPath.of_name value, [])
           )
-        )
-    ) in
-  let e_next = Module (module_typ_params_arity, fields) in
-  Monad.List.fold_right
-    (fun item e_next ->
+        | Module modul ->
+          (
+            PathName.of_path_and_name_with_convert signature_path modul,
+            0,
+            Variable (
+              MixedPath.Access (PathName.of_name [] modul, [], false),
+              []
+            )
+          )
+        | ModuleFunctor functo ->
+          (
+            PathName.of_path_and_name_with_convert signature_path functo,
+            0,
+            Variable (
+              MixedPath.PathName (PathName.of_name [] functo),
+              []
+            )
+          )
+      ) in
+    return (Module (module_typ_params_arity, fields)))
+  | item :: items ->
       set_env item.str_env (
       set_loc (Loc.of_location item.str_loc) (
+      of_structure typ_vars signature_path module_type items final_env >>= fun e_next ->
       match item.str_desc with
       | Tstr_eval _ ->
         raise
@@ -846,9 +873,6 @@ and of_structure
             )
         end
       | Tstr_attribute _ -> return e_next))
-    )
-    items
-    e_next
 
 and of_include
   (typ_vars : Name.t Name.Map.t)
@@ -1107,7 +1131,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "=>" ^^ to_coq false e
     )
   | TypeAnnotation (e, typ) ->
-    parens @@ nest (to_coq false e ^^ !^ ":" ^^ Type.to_coq None None typ)
+    parens @@ nest (to_coq true e ^^ !^ ":" ^^ Type.to_coq None None typ)
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ

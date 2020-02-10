@@ -11,7 +11,7 @@ type t =
   | Apply of MixedPath.t * t list
   | Package of PathName.t * t option Tree.t
   | ForallModule of Name.t * t * t
-  | ForallTyps of Name.t list * t
+  | FunTyps of Name.t list * t
   | Error of string
 
 let type_exprs_of_row_field (row_field : Types.row_field)
@@ -164,9 +164,10 @@ let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
   of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
   return typ
 
-let of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
+let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with
-  | Tvar (Some x) -> return (Name.of_string false x)
+  | Tvar (Some x) | Tunivar (Some x) -> return (Name.of_string false x)
+  | Tlink typ | Tsubst typ -> of_type_expr_variable typ
   | _ ->
     raise
       (Name.of_string false "expected_variable")
@@ -237,7 +238,7 @@ let rec typ_args (typ : t) : Name.Set.t =
     List.fold_left Name.Set.union Name.Set.empty
   | ForallModule (name, param, result) ->
     Name.Set.union (typ_args param) (Name.Set.remove name (typ_args result))
-  | ForallTyps (typ_params, typ) ->
+  | FunTyps (typ_params, typ) ->
     Name.Set.diff (typ_args typ) (Name.Set.of_list typ_params)
   | Error _ -> Name.Set.empty
 
@@ -386,16 +387,16 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
       ) ^-^ !^ "," ^^
       to_coq subst (Some Context.Forall) result
     )
-  | ForallTyps (typ_args, typ) ->
+  | FunTyps (typ_args, typ) ->
     begin match typ_args with
     | [] -> to_coq subst context typ
     | _ :: _ ->
       Context.parens context Context.Forall @@ nest (
-        !^ "forall" ^^ braces (
+        !^ "fun" ^^ parens (
           nest (
             separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set
           )
-        ) ^-^ !^ "," ^^
+        ) ^^ !^ "=>" ^^
         to_coq subst (Some Context.Forall) typ
       )
     end

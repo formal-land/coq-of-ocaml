@@ -53,7 +53,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
           | Some type_manifest ->
             (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
             Type.of_type_expr_without_free_vars type_manifest >>= fun typ ->
-            let typ = Type.ForallTyps (typ_args, typ) in
+            let typ = Type.FunTyps (typ_args, typ) in
             return (Some (Tree.Item (name, Some typ))) in
         ModuleTypParams.get_module_typ_typ_params
           mapper md_type >>= fun typ_params ->
