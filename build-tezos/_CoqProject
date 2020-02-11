@@ -114,7 +114,7 @@ Storage_sigs.v
 #Storage.v
 Tez_repr_mli.v
 Tez_repr.v
-#Time_repr_mli.v
+Time_repr_mli.v
 #Time_repr.v
 Vote_repr_mli.v
 Vote_repr.v
