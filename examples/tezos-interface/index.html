@@ -55,7 +55,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3272 lines (-47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3276 lines (-47% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 191</li>
     </ul>
     
@@ -99,7 +99,7 @@
     <h3>Environment_mli</h3>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3272 lines (-47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3276 lines (-47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6901,6 +6901,8 @@ Module Pervasives.
     format6 a b c d e f -&gt; format6 f b c e g h -&gt; format6 a b c d g h.
 End Pervasives.
 
+Import Pervasives.
+
 Module List.
   Parameter length : forall {a : Set}, list a -&gt; Z.
   
@@ -8095,6 +8097,8 @@ Module Error_monad.
   
   Definition shell_tzresult (a : Set) := Pervasives.result a (list shell_error).
 End Error_monad.
+
+Import Error_monad.
 
 Module Logging.
   Parameter debug : forall {a : Set},

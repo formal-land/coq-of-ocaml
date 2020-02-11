@@ -54,9 +54,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35929 lines</li>
-      <li>Coq size: 51662 lines (+43% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 2733</li>
+      <li>OCaml size: 35924 lines</li>
+      <li>Coq size: 51697 lines (+43% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 2719</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -88,6 +88,10 @@
           9364,
           9364,
           11380,
+          11380,
+          11380,
+          11380,
+          11852,
         ],
         generated: [
           47563,
@@ -115,6 +119,10 @@
           51829,
           51829,
           51401,
+          51401,
+          51401,
+          51401,
+          51697,
         ],
         labels: [
           "01-14",
@@ -142,6 +150,10 @@
           "02-05",
           "02-06",
           "02-07",
+          "02-08",
+          "02-09",
+          "02-10",
+          "02-11",
         ]
       }
 ;
@@ -267,7 +279,7 @@
       </li>
       
       <li>
-        <a href="#contract_repr.ml">contract_repr.ml</a>&nbsp;<span class="label label-warning">20</span>
+        <a href="#contract_repr.ml">contract_repr.ml</a>&nbsp;<span class="label label-warning">14</span>
       </li>
       
       <li>
@@ -291,7 +303,7 @@
       </li>
       
       <li>
-        <a href="#cycle_repr.ml">cycle_repr.ml</a>&nbsp;<span class="label label-warning">5</span>
+        <a href="#cycle_repr.ml">cycle_repr.ml</a>&nbsp;<span class="label label-warning">4</span>
       </li>
       
       <li>
@@ -587,7 +599,7 @@
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-warning">15</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-warning">8</span>
       </li>
       
       <li>
@@ -1407,7 +1419,7 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1390 lines</li>
-      <li>Coq size: 2470 lines (+77% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2472 lines (+77% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -3188,6 +3200,8 @@ End Gas.
 Parameter Script_int : typeof.
 
 Module Script_timestamp.
+  Import Script_int.
+  
   Parameter t : Set.
   
   Parameter compare : t -&gt; t -&gt; Z.
@@ -5724,7 +5738,7 @@ Definition register (function_parameter : unit) : unit :=
     <h3>Alpha_services_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 85 lines (+80% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 87 lines (+85% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -5891,6 +5905,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Nonce_hash.
+
+Import Alpha_context.
 
 Module Seed.
   Parameter get : forall {E F H J K a b c i o q : Set},
@@ -6670,7 +6686,7 @@ Definition may_start_new_voting_period (ctxt : Alpha_context.context)
     <h3>Amendment_mli</h3>
     <ul>
       <li>OCaml size: 75 lines</li>
-      <li>Coq size: 30 lines (-60% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 32 lines (-58% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6768,6 +6784,8 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
+
+Import Alpha_context.
 
 Parameter may_start_new_voting_period :
   Alpha_context.context -&gt; Lwt.t (Error_monad.tzresult Alpha_context.context).
@@ -13612,7 +13630,7 @@ Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
     <h3>Apply_results_mli</h3>
     <ul>
       <li>OCaml size: 190 lines</li>
-      <li>Coq size: 325 lines (+71% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 327 lines (+72% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -13826,6 +13844,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Nonce_hash.
+
+Import Alpha_context.
 
 Module contents_result.
   Module Endorsement_result.
@@ -15027,7 +15047,7 @@ Definition minimal_valid_time
     <h3>Baking_mli</h3>
     <ul>
       <li>OCaml size: 165 lines</li>
-      <li>Coq size: 92 lines (-45% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 96 lines (-42% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15216,6 +15236,10 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Misc.
+
+Import Alpha_context.
+
+Import Misc.
 
 (* extensible_type error *)
 
@@ -18125,7 +18149,7 @@ Definition all {D E G I K L a b c i o q : Set}
     <h3>Constants_services_mli</h3>
     <ul>
       <li>OCaml size: 36 lines</li>
-      <li>Coq size: 59 lines (+63% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 61 lines (+69% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -18280,6 +18304,8 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
+
+Import Alpha_context.
 
 Parameter errors : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -18782,7 +18808,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#contract_repr.ml"><code>contract_repr.ml</code></a>&nbsp;<span class="label label-warning">20 warnings</span>
+    <a href="#contract_repr.ml"><code>contract_repr.ml</code></a>&nbsp;<span class="label label-warning">14 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -19011,56 +19037,20 @@ module Index : Storage_description.INDEX with type t = contract = struct
         let (`Hex index_key) = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
         <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
-
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 0 2 = index1))</abbr> ;
         <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 2 2 = index2))</abbr> ;
         <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
-
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 4 2 = index3))</abbr> ;
         <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 6 2 = index4))</abbr> ;
         <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
-
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 8 2 = index5))</abbr> ;
         <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 10 2 = index6))</abbr> ;
         Data_encoding.Binary.of_bytes encoding raw_key
@@ -19271,7 +19261,7 @@ Definition rpc_arg : RPC_arg.arg t :=
   RPC_arg.make (Some &quot;A contract identifier encoded in b58check.&quot;) &quot;contract_id&quot;
     destruct construct tt.
 
-Definition depends_on_storage_description : unit :=
+Definition depends_on_storage_description : unit -&gt; unit :=
   Storage_description.depends_on_me.
 
 Definition Index :=
@@ -21489,7 +21479,7 @@ Definition contract_big_map_get_opt {D E G I K L a b c i o q : Set}
     <h3>Contract_services_mli</h3>
     <ul>
       <li>OCaml size: 119 lines</li>
-      <li>Coq size: 385 lines (+223% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 387 lines (+225% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -22353,6 +22343,8 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
+
+Import Alpha_context.
 
 Parameter __list_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -24665,7 +24657,7 @@ Parameter set_paid_storage_space_and_return_fees_to_pay :
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#cycle_repr.ml"><code>cycle_repr.ml</code></a>&nbsp;<span class="label label-warning">5 warnings</span>
+    <a href="#cycle_repr.ml"><code>cycle_repr.ml</code></a>&nbsp;<span class="label label-warning">4 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -24759,12 +24751,6 @@ module Index : Storage_description.INDEX with type t = cycle = struct
 
   let of_path = function
     | [s] -&gt; <abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">(
       try Some (Int32.of_string s) with _ -&gt; None )</abbr>
@@ -24887,7 +24873,7 @@ Definition of_int32_exn (l : (|Compare.Int32|).(Compare.S.t))
   else
     Pervasives.invalid_arg &quot;Level_repr.Cycle.of_int32&quot;.
 
-Definition depends_on_storage_description : unit :=
+Definition depends_on_storage_description : unit -&gt; unit :=
   Storage_description.depends_on_me.
 
 Definition Index :=
@@ -27879,7 +27865,7 @@ Definition minimal_valid_time
     <h3>Delegate_services_mli</h3>
     <ul>
       <li>OCaml size: 211 lines</li>
-      <li>Coq size: 488 lines (+131% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 490 lines (+132% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -28834,6 +28820,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Contract_repr.
+
+Import Alpha_context.
 
 Parameter __list_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -36336,7 +36324,7 @@ Definition levels_in_current_cycle {D E G I K L a b c i o q : Set}
     <h3>Helpers_services_mli</h3>
     <ul>
       <li>OCaml size: 271 lines</li>
-      <li>Coq size: 652 lines (+140% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 654 lines (+141% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -37787,6 +37775,8 @@ Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
 Require Tezos.Script_tc_errors.
+
+Import Alpha_context.
 
 (* extensible_type error *)
 
@@ -43231,8 +43221,8 @@ Definition init := (|Included_PROTOCOL|).(Updater.PROTOCOL.init).
   <div style="margin: 20px;">
     <h3>Manager_repr</h3>
     <ul>
-      <li>OCaml size: 54 lines</li>
-      <li>Coq size: 46 lines (-15% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 52 lines</li>
+      <li>Coq size: 44 lines (-16% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -43290,8 +43280,6 @@ let pubkey_case tag =
     (fun hash -&gt; Public_key hash)
 
 let encoding = union [hash_case (Tag 0); pubkey_case (Tag 1)]
-
-let not_a_known_signature_tag = ()
 </pre>
   </div>
   <div class="col-md-6">
@@ -43340,8 +43328,6 @@ Definition pubkey_case (tag : Data_encoding.case_tag)
 Definition encoding : Data_encoding.encoding manager_key :=
   Data_encoding.union None
     [ hash_case (Data_encoding.Tag 0); pubkey_case (Data_encoding.Tag 1) ].
-
-Definition not_a_known_signature_tag : unit := tt.
 </pre>
   </div>
 </div>
@@ -45103,7 +45089,7 @@ End Cost_of.
     <h3>Michelson_v1_gas_mli</h3>
     <ul>
       <li>OCaml size: 316 lines</li>
-      <li>Coq size: 344 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 346 lines (+9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -45443,6 +45429,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Script_typed_ir.
+
+Import Alpha_context.
 
 Module Cost_of.
   Parameter manager_operation : Alpha_context.Gas.cost.
@@ -62767,7 +62755,7 @@ Definition execute
     <h3>Script_interpreter_mli</h3>
     <ul>
       <li>OCaml size: 89 lines</li>
-      <li>Coq size: 96 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 98 lines (+10% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -62881,6 +62869,8 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Script_ir_translator.
 Require Tezos.Script_typed_ir.
+
+Import Alpha_context.
 
 Definition execution_trace :=
   list
@@ -63315,15 +63305,15 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot
-
-——————————
-
 No type known for the following variants: `Field_annot
 
 ——————————
 
 No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63373,7 +63363,21 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
+No type known for the following variants: `Field_annot
+
+——————————
+
+No type known for the following variants: `Type_annot
+
+——————————
+
 No type known for the following variants: `Var_annot
+
+——————————
+
+No type known for the following variants: `Var_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
+
+Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
 ——————————
 
@@ -63385,9 +63389,7 @@ No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63404,18 +63406,6 @@ No type known for the following variants: `Type_annot
 ——————————
 
 No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
 
 ——————————
 
@@ -63437,15 +63427,15 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot
-
-——————————
-
 No type known for the following variants: `Field_annot
 
 ——————————
 
 No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63456,7 +63446,15 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-Constructor of the variant `Var_annot unknown
+No type known for the following variants: `Field_annot
+
+——————————
+
+No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63476,15 +63474,7 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">`Var_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
+Constructor of the variant `Var_annot unknown">`Var_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -63502,15 +63492,15 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot
-
-——————————
-
 No type known for the following variants: `Field_annot
 
 ——————————
 
 No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63548,7 +63538,21 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
+No type known for the following variants: `Field_annot
+
+——————————
+
 No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
+
+——————————
+
+No type known for the following variants: `Type_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
+
+Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
 ——————————
 
@@ -63560,9 +63564,7 @@ No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63582,19 +63584,7 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">`Type_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
+No type known for the following variants: `Type_annot">`Type_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -63612,10 +63602,6 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Type_annot
-
-——————————
-
 No type known for the following variants: `Field_annot
 
 ——————————
@@ -63624,14 +63610,26 @@ No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot"> as a), _, _, true, _, _, _)
+No type known for the following variants: `Var_annot
+
+——————————
+
+No type known for the following variants: `Type_annot"> as a), _, _, true, _, _, _)
           | ((</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
 ——————————
 
-Constructor of the variant `Type_annot unknown
+No type known for the following variants: `Field_annot
+
+——————————
+
+No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63651,15 +63649,7 @@ No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">`Type_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
+Constructor of the variant `Type_annot unknown">`Type_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -63677,10 +63667,6 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Type_annot
-
-——————————
-
 No type known for the following variants: `Field_annot
 
 ——————————
@@ -63689,7 +63675,11 @@ No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot"> as a), _, _, false, [], _, _)</abbr><abbr class="mark-warning" title="Try-with are not handled
+No type known for the following variants: `Var_annot
+
+——————————
+
+No type known for the following variants: `Type_annot"> as a), _, _, false, [], _, _)</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -63727,6 +63717,20 @@ No type known for the following variants: `Field_annot
 
 ——————————
 
+No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
+
+——————————
+
+No type known for the following variants: `Field_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
+
+Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
+
+——————————
+
 No type known for the following variants: `Field_annot
 
 ——————————
@@ -63735,9 +63739,7 @@ No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63757,19 +63759,7 @@ No type known for the following variants: `Var_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">`Field_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
+No type known for the following variants: `Field_annot">`Field_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -63791,22 +63781,30 @@ No type known for the following variants: `Field_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot
-
-——————————
-
 No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot"> as a), _, _, _, _, true, _)
+No type known for the following variants: `Var_annot
+
+——————————
+
+No type known for the following variants: `Field_annot"> as a), _, _, _, _, true, _)
           | ((</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
 ——————————
 
-Constructor of the variant `Field_annot unknown
+No type known for the following variants: `Field_annot
+
+——————————
+
+No type known for the following variants: `Type_annot
+
+——————————
+
+No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -63826,15 +63824,7 @@ No type known for the following variants: `Field_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">`Field_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
+Constructor of the variant `Field_annot unknown">`Field_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -63856,15 +63846,15 @@ No type known for the following variants: `Field_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot
-
-——————————
-
 No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot"> as a), _, _, _, _, false, [])</abbr><abbr class="mark-warning" title="Try-with are not handled
+No type known for the following variants: `Var_annot
+
+——————————
+
+No type known for the following variants: `Field_annot"> as a), _, _, _, _, false, [])</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -63927,12 +63917,6 @@ Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to repr
 
 ——————————
 
-Values of extensible types are ignored.
-
-They are sent to a unit type.
-
-——————————
-
 No type known for the following variants: `Field_annot
 
 ——————————
@@ -63941,7 +63925,13 @@ No type known for the following variants: `Type_annot
 
 ——————————
 
-No type known for the following variants: `Var_annot">Exit</abbr><abbr class="mark-warning" title="Try-with are not handled
+No type known for the following variants: `Var_annot
+
+——————————
+
+Values of extensible types are ignored.
+
+They are sent to a unit type.">Exit</abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
 
@@ -64050,11 +64040,11 @@ No type known for the following variants: `Field_annot">None</abbr><abbr class="
 
 No type known for the following variants: `Field_annot">Some field_annot</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot"> -&gt;
             Some
-              </abbr><abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown
+              </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot">(`Field_annot
+Constructor of the variant `Field_annot unknown">(`Field_annot
                 (String.sub field_annot 1 (String.length field_annot - 1)))</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot">
       in
       ok (Prim (loc, prim, args, annot), field_annot)</abbr>
@@ -64137,11 +64127,11 @@ No type known for the following variants: `Var_annot">Some i</abbr> -&gt;
         <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">let f =
           if Compare.String.equal s2 &quot;car&quot; || Compare.String.equal s2 &quot;cdr&quot;
           then None
-          else Some </abbr><abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown
+          else Some </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
 
 ——————————
 
-No type known for the following variants: `Field_annot">(`Field_annot s2)</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot">
+Constructor of the variant `Field_annot unknown">(`Field_annot s2)</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot">
         in
         (Some </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
 
@@ -65008,7 +64998,7 @@ Definition parse_var_type_annot (loc : Z) (annot : list string)
     <h3>Script_ir_annot_mli</h3>
     <ul>
       <li>OCaml size: 198 lines</li>
-      <li>Coq size: 168 lines (-16% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 172 lines (-14% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -65230,6 +65220,10 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Script_typed_ir.
+
+Import Alpha_context.
+
+Import Script_typed_ir.
 
 Parameter default_now_annot : option Script_typed_ir.var_annot.
 
@@ -81632,7 +81626,7 @@ Definition list_of_big_map_ids (ids : (|Ids|).(S.SET.t))
     <h3>Script_ir_translator_mli</h3>
     <ul>
       <li>OCaml size: 272 lines</li>
-      <li>Coq size: 281 lines (+3% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 285 lines (+4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -81935,6 +81929,10 @@ Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_tc_errors.
 Require Tezos.Script_typed_ir.
+
+Import Alpha_context.
+
+Import Script_tc_errors.
 
 Reserved Notation &quot;'eq&quot;.
 
@@ -84179,7 +84177,7 @@ Definition of_zint {A : Set} (x : A) : A := x.
     <h3>Script_timestamp_repr_mli</h3>
     <ul>
       <li>OCaml size: 53 lines</li>
-      <li>Coq size: 37 lines (-31% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 39 lines (-27% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -84255,6 +84253,8 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Script_int_repr.
+
+Import Script_int_repr.
 
 Parameter t : Set.
 
@@ -86511,12 +86511,12 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Storage</h3>
     <ul>
-      <li>OCaml size: 905 lines</li>
-      <li>Coq size: 1975 lines (+118% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 902 lines</li>
+      <li>Coq size: 1969 lines (+118% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-warning">15 warnings</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -86545,7 +86545,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
 
 open Storage_functors
 
-let[@coq_axiom] depends_on_sigs () = Storage_sigs.depend_on_me ()
+let depends_on_sigs = Storage_sigs.depend_on_me
 
 module Int = struct
   type t = int
@@ -86674,10 +86674,7 @@ module Contract = struct
       (struct
         let name = [&quot;manager&quot;]
       end)
-      (struct
-        type t = Manager_repr.t
-        let encoding = Manager_repr.encoding
-      end)
+      (Manager_repr)
 
   module Delegate =
     Indexed_context.Make_map
@@ -86868,12 +86865,6 @@ module Big_map = struct
         match Z.of_string hash with
         | exception <abbr class="mark-warning" title="Pattern-matching on exceptions not supported
 
-Only the special case `| exception _ when false -&gt; ...` is supported for default value of GADT pattern-matching
-
-——————————
-
-Pattern-matching on exceptions not supported
-
 Only the special case `| exception _ when false -&gt; ...` is supported for default value of GADT pattern-matching">_</abbr> -&gt;
             Error &quot;Cannot parse big map id&quot;
         | id -&gt;
@@ -86921,56 +86912,20 @@ Only the special case `| exception _ when false -&gt; ...` is supported for defa
           let (`Hex index_key) = MBytes.to_hex (Raw_hashes.blake2b raw_key) in
           <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
-
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 0 2 = index1))</abbr> ;
           <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 2 2 = index2))</abbr> ;
           <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
-
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 4 2 = index3))</abbr> ;
           <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 6 2 = index4))</abbr> ;
           <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
-
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 8 2 = index5))</abbr> ;
           <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.
-
-——————————
-
-Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">assert (Compare.String.(String.sub index_key 10 2 = index6))</abbr> ;
           Some c
@@ -87517,7 +87472,7 @@ Require Tezos.Voting_period_repr.
 
 Import Storage_functors.
 
-Definition depends_on_sigs (function_parameter : unit) : unit := axiom.
+Definition depends_on_sigs : unit -&gt; unit := Storage_sigs.depend_on_me.
 
 Definition Int :=
   let t := Z in
@@ -87772,13 +87727,7 @@ Module Contract.
       existT (A := unit) (fun _ =&gt; _) tt
         {|
           Storage_sigs.NAME.name := name
-        |}))
-      (let t := (|Manager_repr|).(Storage_sigs.VALUE.t) in
-      let encoding := (|Manager_repr|).(Storage_sigs.VALUE.encoding) in
-      existT (A := Set) _ _
-        {|
-          Storage_sigs.VALUE.encoding := encoding
-        |}).
+        |})) (existT (A := Set) _ _ Manager_repr).
   
   Definition Delegate :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
@@ -89468,7 +89417,7 @@ End Ramp_up.
     <h3>Storage_mli</h3>
     <ul>
       <li>OCaml size: 396 lines</li>
-      <li>Coq size: 304 lines (-24% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 307 lines (-23% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -89890,6 +89839,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
+Require Tezos.Manager_repr.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Roll_repr.
@@ -89900,6 +89850,8 @@ Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
+
+Import Storage_sigs.
 
 Module Block_priority.
   Parameter get : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult Z).
@@ -89986,7 +89938,7 @@ Module Contract.
   Parameter Manager :
     {_ : unit &amp;
       Indexed_data_storage.signature Raw_context.t Contract_repr.t
-        (|Manager_repr|).(Storage_sigs.VALUE.t)}.
+        Manager_repr.t}.
   
   Parameter Delegate :
     {_ : unit &amp;
@@ -90188,7 +90140,7 @@ End Ramp_up.
     <h3>Storage_description</h3>
     <ul>
       <li>OCaml size: 353 lines</li>
-      <li>Coq size: 664 lines (+88% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 666 lines (+88% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -90219,7 +90171,7 @@ End Ramp_up.
 (*                                                                           *)
 (*****************************************************************************)
 
-let depends_on_me = ()
+let depends_on_me () = ()
 
 module StringMap = Map.Make (String)
 
@@ -90584,7 +90536,9 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-Definition depends_on_me : unit := tt.
+Definition depends_on_me (function_parameter : unit) : unit :=
+  let '_ := function_parameter in
+  tt.
 
 Definition StringMap :=
   Map.Make
@@ -91276,7 +91230,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
 (*                                                                           *)
 (*****************************************************************************)
 
-val depends_on_me : unit
+val depends_on_me : unit -&gt; unit
 
 (** Typed description of the key-value context. *)
 type 'key t
@@ -91365,7 +91319,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-Parameter depends_on_me : unit.
+Parameter depends_on_me : unit -&gt; unit.
 
 Parameter t : forall (key : Set), Set.
 
@@ -94669,7 +94623,7 @@ Definition Wrap_indexed_data_storage :=
     <h3>Storage_functors_mli</h3>
     <ul>
       <li>OCaml size: 109 lines</li>
-      <li>Coq size: 111 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 113 lines (+3% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -94803,6 +94757,8 @@ Require Import Tezos.Environment.
 Require Tezos.Raw_context.
 Require Tezos.Storage_description.
 Require Tezos.Storage_sigs.
+
+Import Storage_sigs.
 
 Parameter Registered : {_ : unit &amp; REGISTER.signature}.
 
@@ -98156,7 +98112,7 @@ Definition current_proposal {D E G I K L a b c i o q : Set}
     <h3>Voting_services_mli</h3>
     <ul>
       <li>OCaml size: 54 lines</li>
-      <li>Coq size: 183 lines (+238% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 185 lines (+242% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -98569,6 +98525,8 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
+
+Import Alpha_context.
 
 Parameter ballots : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
