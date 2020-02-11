@@ -18,25 +18,25 @@ Definition cycle := t.
 
 Parameter Included_S : {_ : unit & Compare.S.signature t}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : t -> t -> bool := (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : t -> t -> bool := (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : t -> t -> bool := (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : t -> t -> bool := (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : t -> t -> bool := (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : t -> t -> bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : t -> t -> Z := (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : t -> t -> bool := (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : t -> t -> t := (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : t -> t -> t := (|Included_S|).(Compare.S.min).
 
 Parameter encoding : Data_encoding.t cycle.
 

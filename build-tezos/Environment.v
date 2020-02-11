@@ -1388,25 +1388,25 @@ Module Time.
   
   Parameter Included_S : {_ : unit & Compare.S.signature t}.
   
-  Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+  Definition op_eq : t -> t -> bool := (|Included_S|).(Compare.S.op_eq).
   
-  Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+  Definition op_ltgt : t -> t -> bool := (|Included_S|).(Compare.S.op_ltgt).
   
-  Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+  Definition op_lt : t -> t -> bool := (|Included_S|).(Compare.S.op_lt).
   
-  Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+  Definition op_lteq : t -> t -> bool := (|Included_S|).(Compare.S.op_lteq).
   
-  Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+  Definition op_gteq : t -> t -> bool := (|Included_S|).(Compare.S.op_gteq).
   
-  Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+  Definition op_gt : t -> t -> bool := (|Included_S|).(Compare.S.op_gt).
   
-  Definition compare := (|Included_S|).(Compare.S.compare).
+  Definition compare : t -> t -> Z := (|Included_S|).(Compare.S.compare).
   
-  Definition equal := (|Included_S|).(Compare.S.equal).
+  Definition equal : t -> t -> bool := (|Included_S|).(Compare.S.equal).
   
-  Definition max := (|Included_S|).(Compare.S.max).
+  Definition max : t -> t -> t := (|Included_S|).(Compare.S.max).
   
-  Definition min := (|Included_S|).(Compare.S.min).
+  Definition min : t -> t -> t := (|Included_S|).(Compare.S.min).
   
   Parameter add : t -> int64 -> t.
   
@@ -2574,61 +2574,82 @@ Module Signature.
       S.SIGNATURE.signature public_key Public_key_hash___Set_t
         Public_key_hash_Map_t public_key t watermark}.
   
-  Definition Public_key_hash := existT (fun _ => _) tt
-    (|Included_SIGNATURE|).(S.SIGNATURE.Public_key_hash).
+  Definition Public_key_hash :=
+    existT (fun _ => _) tt (|Included_SIGNATURE|).(S.SIGNATURE.Public_key_hash).
   
-  Definition Public_key := existT (fun _ => _) tt
-    (|Included_SIGNATURE|).(S.SIGNATURE.Public_key).
+  Definition Public_key :=
+    existT (fun _ => _) tt (|Included_SIGNATURE|).(S.SIGNATURE.Public_key).
   
   Definition t := (|Included_SIGNATURE|).(S.SIGNATURE.t).
   
-  Definition pp := (|Included_SIGNATURE|).(S.SIGNATURE.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.pp).
   
-  Definition size := (|Included_SIGNATURE|).(S.SIGNATURE.size).
+  Definition size : Z := (|Included_SIGNATURE|).(S.SIGNATURE.size).
   
-  Definition to_bytes := (|Included_SIGNATURE|).(S.SIGNATURE.to_bytes).
+  Definition to_bytes : t -> MBytes.t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.to_bytes).
   
-  Definition of_bytes_opt := (|Included_SIGNATURE|).(S.SIGNATURE.of_bytes_opt).
+  Definition of_bytes_opt : MBytes.t -> option t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.of_bytes_opt).
   
-  Definition of_bytes_exn := (|Included_SIGNATURE|).(S.SIGNATURE.of_bytes_exn).
+  Definition of_bytes_exn : MBytes.t -> t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.of_bytes_exn).
   
-  Definition op_eq := (|Included_SIGNATURE|).(S.SIGNATURE.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.op_eq).
   
-  Definition op_ltgt := (|Included_SIGNATURE|).(S.SIGNATURE.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.op_ltgt).
   
-  Definition op_lt := (|Included_SIGNATURE|).(S.SIGNATURE.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.op_lt).
   
-  Definition op_lteq := (|Included_SIGNATURE|).(S.SIGNATURE.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.op_lteq).
   
-  Definition op_gteq := (|Included_SIGNATURE|).(S.SIGNATURE.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.op_gteq).
   
-  Definition op_gt := (|Included_SIGNATURE|).(S.SIGNATURE.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.op_gt).
   
-  Definition compare := (|Included_SIGNATURE|).(S.SIGNATURE.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.compare).
   
-  Definition equal := (|Included_SIGNATURE|).(S.SIGNATURE.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.equal).
   
-  Definition max := (|Included_SIGNATURE|).(S.SIGNATURE.max).
+  Definition max : t -> t -> t := (|Included_SIGNATURE|).(S.SIGNATURE.max).
   
-  Definition min := (|Included_SIGNATURE|).(S.SIGNATURE.min).
+  Definition min : t -> t -> t := (|Included_SIGNATURE|).(S.SIGNATURE.min).
   
-  Definition to_b58check := (|Included_SIGNATURE|).(S.SIGNATURE.to_b58check).
+  Definition to_b58check : t -> string :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.to_b58check).
   
-  Definition to_short_b58check := (|Included_SIGNATURE|).(S.SIGNATURE.to_short_b58check).
+  Definition to_short_b58check : t -> string :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.to_short_b58check).
   
-  Definition of_b58check_exn := (|Included_SIGNATURE|).(S.SIGNATURE.of_b58check_exn).
+  Definition of_b58check_exn : string -> t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.of_b58check_exn).
   
-  Definition of_b58check_opt := (|Included_SIGNATURE|).(S.SIGNATURE.of_b58check_opt).
+  Definition of_b58check_opt : string -> option t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.of_b58check_opt).
   
-  Definition b58check_encoding := (|Included_SIGNATURE|).(S.SIGNATURE.b58check_encoding).
+  Definition b58check_encoding : Base58.encoding t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.b58check_encoding).
   
-  Definition encoding := (|Included_SIGNATURE|).(S.SIGNATURE.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.encoding).
   
-  Definition rpc_arg := (|Included_SIGNATURE|).(S.SIGNATURE.rpc_arg).
+  Definition rpc_arg : RPC_arg.t t :=
+    (|Included_SIGNATURE|).(S.SIGNATURE.rpc_arg).
   
-  Definition zero := (|Included_SIGNATURE|).(S.SIGNATURE.zero).
+  Definition zero : t := (|Included_SIGNATURE|).(S.SIGNATURE.zero).
   
-  Definition check := (|Included_SIGNATURE|).(S.SIGNATURE.check).
+  Definition check :
+    option watermark -> (|Public_key|).(S.SPublic_key.t) -> t -> MBytes.t ->
+    bool := (|Included_SIGNATURE|).(S.SIGNATURE.check).
 End Signature.
 
 Parameter Block_hash :
@@ -2750,37 +2771,47 @@ Module Block_header.
   Parameter Included_HASHABLE :
     {_ : unit & S.HASHABLE.signature t (|Block_hash|).(S.HASH.t)}.
   
-  Definition op_eq := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
+  Definition op_eq : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
   
-  Definition op_ltgt := (|Included_HASHABLE|).(S.HASHABLE.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_ltgt).
   
-  Definition op_lt := (|Included_HASHABLE|).(S.HASHABLE.op_lt).
+  Definition op_lt : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_lt).
   
-  Definition op_lteq := (|Included_HASHABLE|).(S.HASHABLE.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_lteq).
   
-  Definition op_gteq := (|Included_HASHABLE|).(S.HASHABLE.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_gteq).
   
-  Definition op_gt := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
+  Definition op_gt : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
   
-  Definition compare := (|Included_HASHABLE|).(S.HASHABLE.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_HASHABLE|).(S.HASHABLE.compare).
   
-  Definition equal := (|Included_HASHABLE|).(S.HASHABLE.equal).
+  Definition equal : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.equal).
   
-  Definition max := (|Included_HASHABLE|).(S.HASHABLE.max).
+  Definition max : t -> t -> t := (|Included_HASHABLE|).(S.HASHABLE.max).
   
-  Definition min := (|Included_HASHABLE|).(S.HASHABLE.min).
+  Definition min : t -> t -> t := (|Included_HASHABLE|).(S.HASHABLE.min).
   
-  Definition pp := (|Included_HASHABLE|).(S.HASHABLE.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_HASHABLE|).(S.HASHABLE.pp).
   
-  Definition encoding := (|Included_HASHABLE|).(S.HASHABLE.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_HASHABLE|).(S.HASHABLE.encoding).
   
-  Definition to_bytes := (|Included_HASHABLE|).(S.HASHABLE.to_bytes).
+  Definition to_bytes : t -> MBytes.t :=
+    (|Included_HASHABLE|).(S.HASHABLE.to_bytes).
   
-  Definition of_bytes := (|Included_HASHABLE|).(S.HASHABLE.of_bytes).
+  Definition of_bytes : MBytes.t -> option t :=
+    (|Included_HASHABLE|).(S.HASHABLE.of_bytes).
   
-  Definition __hash_value := (|Included_HASHABLE|).(S.HASHABLE.__hash_value).
+  Definition __hash_value : t -> (|Block_hash|).(S.HASH.t) :=
+    (|Included_HASHABLE|).(S.HASHABLE.__hash_value).
   
-  Definition hash_raw := (|Included_HASHABLE|).(S.HASHABLE.hash_raw).
+  Definition hash_raw : MBytes.t -> (|Block_hash|).(S.HASH.t) :=
+    (|Included_HASHABLE|).(S.HASHABLE.hash_raw).
 End Block_header.
 
 Parameter Fitness : {_ : unit & S.T.signature (list MBytes.t)}.
@@ -2810,37 +2841,47 @@ Module Operation.
   Parameter Included_HASHABLE :
     {_ : unit & S.HASHABLE.signature t (|Operation_hash|).(S.HASH.t)}.
   
-  Definition op_eq := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
+  Definition op_eq : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
   
-  Definition op_ltgt := (|Included_HASHABLE|).(S.HASHABLE.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_ltgt).
   
-  Definition op_lt := (|Included_HASHABLE|).(S.HASHABLE.op_lt).
+  Definition op_lt : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_lt).
   
-  Definition op_lteq := (|Included_HASHABLE|).(S.HASHABLE.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_lteq).
   
-  Definition op_gteq := (|Included_HASHABLE|).(S.HASHABLE.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_gteq).
   
-  Definition op_gt := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
+  Definition op_gt : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
   
-  Definition compare := (|Included_HASHABLE|).(S.HASHABLE.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_HASHABLE|).(S.HASHABLE.compare).
   
-  Definition equal := (|Included_HASHABLE|).(S.HASHABLE.equal).
+  Definition equal : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.equal).
   
-  Definition max := (|Included_HASHABLE|).(S.HASHABLE.max).
+  Definition max : t -> t -> t := (|Included_HASHABLE|).(S.HASHABLE.max).
   
-  Definition min := (|Included_HASHABLE|).(S.HASHABLE.min).
+  Definition min : t -> t -> t := (|Included_HASHABLE|).(S.HASHABLE.min).
   
-  Definition pp := (|Included_HASHABLE|).(S.HASHABLE.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_HASHABLE|).(S.HASHABLE.pp).
   
-  Definition encoding := (|Included_HASHABLE|).(S.HASHABLE.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_HASHABLE|).(S.HASHABLE.encoding).
   
-  Definition to_bytes := (|Included_HASHABLE|).(S.HASHABLE.to_bytes).
+  Definition to_bytes : t -> MBytes.t :=
+    (|Included_HASHABLE|).(S.HASHABLE.to_bytes).
   
-  Definition of_bytes := (|Included_HASHABLE|).(S.HASHABLE.of_bytes).
+  Definition of_bytes : MBytes.t -> option t :=
+    (|Included_HASHABLE|).(S.HASHABLE.of_bytes).
   
-  Definition __hash_value := (|Included_HASHABLE|).(S.HASHABLE.__hash_value).
+  Definition __hash_value : t -> (|Operation_hash|).(S.HASH.t) :=
+    (|Included_HASHABLE|).(S.HASHABLE.__hash_value).
   
-  Definition hash_raw := (|Included_HASHABLE|).(S.HASHABLE.hash_raw).
+  Definition hash_raw : MBytes.t -> (|Operation_hash|).(S.HASH.t) :=
+    (|Included_HASHABLE|).(S.HASHABLE.hash_raw).
 End Operation.
 
 Module Protocol.
@@ -2898,37 +2939,47 @@ Module Protocol.
   Parameter Included_HASHABLE :
     {_ : unit & S.HASHABLE.signature t (|Protocol_hash|).(S.HASH.t)}.
   
-  Definition op_eq := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
+  Definition op_eq : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
   
-  Definition op_ltgt := (|Included_HASHABLE|).(S.HASHABLE.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_ltgt).
   
-  Definition op_lt := (|Included_HASHABLE|).(S.HASHABLE.op_lt).
+  Definition op_lt : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_lt).
   
-  Definition op_lteq := (|Included_HASHABLE|).(S.HASHABLE.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_lteq).
   
-  Definition op_gteq := (|Included_HASHABLE|).(S.HASHABLE.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_HASHABLE|).(S.HASHABLE.op_gteq).
   
-  Definition op_gt := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
+  Definition op_gt : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
   
-  Definition compare := (|Included_HASHABLE|).(S.HASHABLE.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_HASHABLE|).(S.HASHABLE.compare).
   
-  Definition equal := (|Included_HASHABLE|).(S.HASHABLE.equal).
+  Definition equal : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.equal).
   
-  Definition max := (|Included_HASHABLE|).(S.HASHABLE.max).
+  Definition max : t -> t -> t := (|Included_HASHABLE|).(S.HASHABLE.max).
   
-  Definition min := (|Included_HASHABLE|).(S.HASHABLE.min).
+  Definition min : t -> t -> t := (|Included_HASHABLE|).(S.HASHABLE.min).
   
-  Definition pp := (|Included_HASHABLE|).(S.HASHABLE.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_HASHABLE|).(S.HASHABLE.pp).
   
-  Definition encoding := (|Included_HASHABLE|).(S.HASHABLE.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_HASHABLE|).(S.HASHABLE.encoding).
   
-  Definition to_bytes := (|Included_HASHABLE|).(S.HASHABLE.to_bytes).
+  Definition to_bytes : t -> MBytes.t :=
+    (|Included_HASHABLE|).(S.HASHABLE.to_bytes).
   
-  Definition of_bytes := (|Included_HASHABLE|).(S.HASHABLE.of_bytes).
+  Definition of_bytes : MBytes.t -> option t :=
+    (|Included_HASHABLE|).(S.HASHABLE.of_bytes).
   
-  Definition __hash_value := (|Included_HASHABLE|).(S.HASHABLE.__hash_value).
+  Definition __hash_value : t -> (|Protocol_hash|).(S.HASH.t) :=
+    (|Included_HASHABLE|).(S.HASHABLE.__hash_value).
   
-  Definition hash_raw := (|Included_HASHABLE|).(S.HASHABLE.hash_raw).
+  Definition hash_raw : MBytes.t -> (|Protocol_hash|).(S.HASH.t) :=
+    (|Included_HASHABLE|).(S.HASHABLE.hash_raw).
 End Protocol.
 
 Module Context.

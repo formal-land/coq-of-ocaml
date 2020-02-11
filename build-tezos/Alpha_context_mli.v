@@ -51,29 +51,39 @@ Module Tez.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition tez := t.
   
@@ -109,29 +119,39 @@ Module Period.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition period := t.
   
@@ -157,29 +177,39 @@ Module Timestamp.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition time := t.
   
@@ -203,29 +233,39 @@ Module Raw_level.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition raw_level := t.
   
@@ -249,29 +289,39 @@ Module Cycle.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition cycle := t.
   
@@ -1116,29 +1166,39 @@ Module Voting_period.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition voting_period := t.
   
@@ -1196,29 +1256,39 @@ Module Level.
   
   Parameter Included_BASIC_DATA : {_ : unit & BASIC_DATA.signature t}.
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Parameter pp_full : Format.formatter -> t -> unit.
   
@@ -1372,29 +1442,39 @@ Module Contract.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -> t -> Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -> t -> bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -> t -> t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -> t -> unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition contract := t.
   

@@ -176,45 +176,66 @@ End T.
 
 Parameter Included_T : {_ : unit & T.signature t}.
 
-Definition mem := (|Included_T|).(T.mem).
+Definition mem : context -> key -> Lwt.t bool := (|Included_T|).(T.mem).
 
-Definition dir_mem := (|Included_T|).(T.dir_mem).
+Definition dir_mem : context -> key -> Lwt.t bool := (|Included_T|).(T.dir_mem).
 
-Definition get := (|Included_T|).(T.get).
+Definition get : context -> key -> Lwt.t (Error_monad.tzresult value) :=
+  (|Included_T|).(T.get).
 
-Definition get_option := (|Included_T|).(T.get_option).
+Definition get_option : context -> key -> Lwt.t (option value) :=
+  (|Included_T|).(T.get_option).
 
-Definition init := (|Included_T|).(T.init).
+Definition init :
+  context -> key -> value -> Lwt.t (Error_monad.tzresult context) :=
+  (|Included_T|).(T.init).
 
-Definition set := (|Included_T|).(T.set).
+Definition set : context -> key -> value -> Lwt.t (Error_monad.tzresult context)
+  := (|Included_T|).(T.set).
 
-Definition init_set := (|Included_T|).(T.init_set).
+Definition init_set : context -> key -> value -> Lwt.t context :=
+  (|Included_T|).(T.init_set).
 
-Definition set_option := (|Included_T|).(T.set_option).
+Definition set_option : context -> key -> option value -> Lwt.t context :=
+  (|Included_T|).(T.set_option).
 
-Definition delete := (|Included_T|).(T.delete).
+Definition delete : context -> key -> Lwt.t (Error_monad.tzresult context) :=
+  (|Included_T|).(T.delete).
 
-Definition remove := (|Included_T|).(T.remove).
+Definition remove : context -> key -> Lwt.t context :=
+  (|Included_T|).(T.remove).
 
-Definition remove_rec := (|Included_T|).(T.remove_rec).
+Definition remove_rec : context -> key -> Lwt.t context :=
+  (|Included_T|).(T.remove_rec).
 
-Definition copy := (|Included_T|).(T.copy).
+Definition copy : context -> key -> key -> Lwt.t (Error_monad.tzresult context)
+  := (|Included_T|).(T.copy).
 
-Definition fold := (|Included_T|).(T.fold).
+Definition fold {a : Set} :
+  context -> key -> a -> (Context.dir_or_key -> a -> Lwt.t a) -> Lwt.t a :=
+  (|Included_T|).(T.fold).
 
-Definition keys := (|Included_T|).(T.keys).
+Definition keys : context -> key -> Lwt.t (list key) := (|Included_T|).(T.keys).
 
-Definition fold_keys := (|Included_T|).(T.fold_keys).
+Definition fold_keys {a : Set} :
+  context -> key -> a -> (key -> a -> Lwt.t a) -> Lwt.t a :=
+  (|Included_T|).(T.fold_keys).
 
-Definition project := (|Included_T|).(T.project).
+Definition project : context -> root_context := (|Included_T|).(T.project).
 
-Definition absolute_key := (|Included_T|).(T.absolute_key).
+Definition absolute_key : context -> key -> key :=
+  (|Included_T|).(T.absolute_key).
 
-Definition consume_gas := (|Included_T|).(T.consume_gas).
+Definition consume_gas :
+  context -> Gas_limit_repr.cost -> Error_monad.tzresult context :=
+  (|Included_T|).(T.consume_gas).
 
-Definition check_enough_gas := (|Included_T|).(T.check_enough_gas).
+Definition check_enough_gas :
+  context -> Gas_limit_repr.cost -> Error_monad.tzresult unit :=
+  (|Included_T|).(T.check_enough_gas).
 
-Definition description := (|Included_T|).(T.description).
+Definition description : Storage_description.t context :=
+  (|Included_T|).(T.description).
 
 Parameter reset_internal_nonce : context -> context.
 

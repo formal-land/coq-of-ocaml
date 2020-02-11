@@ -23,25 +23,35 @@ Parameter pp : Format.formatter -> voting_period -> unit.
 
 Parameter Included_S : {_ : unit & Compare.S.signature voting_period}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : voting_period -> voting_period -> bool :=
+  (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : voting_period -> voting_period -> bool :=
+  (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : voting_period -> voting_period -> bool :=
+  (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : voting_period -> voting_period -> bool :=
+  (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : voting_period -> voting_period -> bool :=
+  (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : voting_period -> voting_period -> bool :=
+  (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : voting_period -> voting_period -> Z :=
+  (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : voting_period -> voting_period -> bool :=
+  (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : voting_period -> voting_period -> voting_period :=
+  (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : voting_period -> voting_period -> voting_period :=
+  (|Included_S|).(Compare.S.min).
 
 Parameter to_int32 : voting_period -> int32.
 

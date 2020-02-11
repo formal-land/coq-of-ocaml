@@ -18,64 +18,71 @@ Definition tez := t.
 
 Parameter Included_S : {_ : unit & Qty_repr.S.signature t}.
 
-Definition id := (|Included_S|).(Qty_repr.S.id).
+Definition id : string := (|Included_S|).(Qty_repr.S.id).
 
-Definition zero := (|Included_S|).(Qty_repr.S.zero).
+Definition zero : t := (|Included_S|).(Qty_repr.S.zero).
 
-Definition one_mutez := (|Included_S|).(Qty_repr.S.one_mutez).
+Definition one_mutez : t := (|Included_S|).(Qty_repr.S.one_mutez).
 
-Definition one_cent := (|Included_S|).(Qty_repr.S.one_cent).
+Definition one_cent : t := (|Included_S|).(Qty_repr.S.one_cent).
 
-Definition fifty_cents := (|Included_S|).(Qty_repr.S.fifty_cents).
+Definition fifty_cents : t := (|Included_S|).(Qty_repr.S.fifty_cents).
 
-Definition one := (|Included_S|).(Qty_repr.S.one).
+Definition one : t := (|Included_S|).(Qty_repr.S.one).
 
-Definition op_minusquestion := (|Included_S|).(Qty_repr.S.op_minusquestion).
+Definition op_minusquestion : t -> t -> Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_minusquestion).
 
-Definition op_plusquestion := (|Included_S|).(Qty_repr.S.op_plusquestion).
+Definition op_plusquestion : t -> t -> Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_plusquestion).
 
-Definition op_starquestion := (|Included_S|).(Qty_repr.S.op_starquestion).
+Definition op_starquestion : t -> int64 -> Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_starquestion).
 
-Definition op_divquestion := (|Included_S|).(Qty_repr.S.op_divquestion).
+Definition op_divquestion : t -> int64 -> Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_divquestion).
 
-Definition to_mutez := (|Included_S|).(Qty_repr.S.to_mutez).
+Definition to_mutez : t -> int64 := (|Included_S|).(Qty_repr.S.to_mutez).
 
-Definition of_mutez := (|Included_S|).(Qty_repr.S.of_mutez).
+Definition of_mutez : int64 -> option t := (|Included_S|).(Qty_repr.S.of_mutez).
 
-Definition of_mutez_exn := (|Included_S|).(Qty_repr.S.of_mutez_exn).
+Definition of_mutez_exn : int64 -> t :=
+  (|Included_S|).(Qty_repr.S.of_mutez_exn).
 
-Definition add_exn := (|Included_S|).(Qty_repr.S.add_exn).
+Definition add_exn : t -> t -> t := (|Included_S|).(Qty_repr.S.add_exn).
 
-Definition mul_exn := (|Included_S|).(Qty_repr.S.mul_exn).
+Definition mul_exn : t -> Z -> t := (|Included_S|).(Qty_repr.S.mul_exn).
 
-Definition qty_encoding := (|Included_S|).(Qty_repr.S.qty_encoding).
+Definition qty_encoding : Data_encoding.t t :=
+  (|Included_S|).(Qty_repr.S.qty_encoding).
 
-Definition to_int64 := (|Included_S|).(Qty_repr.S.to_int64).
+Definition to_int64 : t -> int64 := (|Included_S|).(Qty_repr.S.to_int64).
 
-Definition op_eq := (|Included_S|).(Qty_repr.S.op_eq).
+Definition op_eq : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Qty_repr.S.op_ltgt).
+Definition op_ltgt : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Qty_repr.S.op_lt).
+Definition op_lt : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Qty_repr.S.op_lteq).
+Definition op_lteq : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Qty_repr.S.op_gteq).
+Definition op_gteq : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Qty_repr.S.op_gt).
+Definition op_gt : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_gt).
 
-Definition compare := (|Included_S|).(Qty_repr.S.compare).
+Definition compare : t -> t -> Z := (|Included_S|).(Qty_repr.S.compare).
 
-Definition equal := (|Included_S|).(Qty_repr.S.equal).
+Definition equal : t -> t -> bool := (|Included_S|).(Qty_repr.S.equal).
 
-Definition max := (|Included_S|).(Qty_repr.S.max).
+Definition max : t -> t -> t := (|Included_S|).(Qty_repr.S.max).
 
-Definition min := (|Included_S|).(Qty_repr.S.min).
+Definition min : t -> t -> t := (|Included_S|).(Qty_repr.S.min).
 
-Definition pp := (|Included_S|).(Qty_repr.S.pp).
+Definition pp : Format.formatter -> t -> unit := (|Included_S|).(Qty_repr.S.pp).
 
-Definition of_string := (|Included_S|).(Qty_repr.S.of_string).
+Definition of_string : string -> option t :=
+  (|Included_S|).(Qty_repr.S.of_string).
 
-Definition to_string := (|Included_S|).(Qty_repr.S.to_string).
+Definition to_string : t -> string := (|Included_S|).(Qty_repr.S.to_string).
 
 Parameter encoding : Data_encoding.t t.

@@ -24,25 +24,35 @@ Parameter pp : Format.formatter -> raw_level -> unit.
 
 Parameter Included_S : {_ : unit & Compare.S.signature raw_level}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : raw_level -> raw_level -> bool :=
+  (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : raw_level -> raw_level -> bool :=
+  (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : raw_level -> raw_level -> bool :=
+  (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : raw_level -> raw_level -> bool :=
+  (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : raw_level -> raw_level -> bool :=
+  (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : raw_level -> raw_level -> bool :=
+  (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : raw_level -> raw_level -> Z :=
+  (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : raw_level -> raw_level -> bool :=
+  (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : raw_level -> raw_level -> raw_level :=
+  (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : raw_level -> raw_level -> raw_level :=
+  (|Included_S|).(Compare.S.min).
 
 Parameter to_int32 : raw_level -> int32.
 

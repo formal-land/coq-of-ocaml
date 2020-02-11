@@ -121,67 +121,86 @@ Parameter Included_PROTOCOL :
       block_header Apply_results.block_metadata operation_data
       Apply_results.packed_operation_metadata operation validation_state}.
 
-Definition max_block_length :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).
+Definition max_block_length : Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).
 
-Definition max_operation_data_length :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.max_operation_data_length).
+Definition max_operation_data_length : Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.max_operation_data_length).
 
-Definition validation_passes :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.validation_passes).
+Definition validation_passes : list Updater.quota :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.validation_passes).
 
 Definition block_header_data :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data).
 
-Definition block_header_data_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data_encoding).
+Definition block_header_data_encoding : Data_encoding.t block_header_data :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data_encoding).
 
 Definition block_header :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header).
 
 Definition block_header_metadata :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata).
 
-Definition block_header_metadata_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata_encoding).
+Definition block_header_metadata_encoding :
+  Data_encoding.t block_header_metadata :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata_encoding).
 
 Definition operation_receipt :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt).
 
-Definition operation_data_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_encoding).
+Definition operation_data_encoding : Data_encoding.t operation_data :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_encoding).
 
-Definition operation_receipt_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt_encoding).
+Definition operation_receipt_encoding : Data_encoding.t operation_receipt :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt_encoding).
 
-Definition operation_data_and_receipt_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_and_receipt_encoding).
+Definition operation_data_and_receipt_encoding :
+  Data_encoding.t (operation_data * operation_receipt) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_and_receipt_encoding).
 
-Definition acceptable_passes :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.acceptable_passes).
+Definition acceptable_passes : operation -> list Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.acceptable_passes).
 
-Definition compare_operations :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.compare_operations).
+Definition compare_operations : operation -> operation -> Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.compare_operations).
 
-Definition current_context :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.current_context).
+Definition current_context :
+  validation_state -> Lwt.t (Error_monad.tzresult Context.t) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.current_context).
 
-Definition begin_partial_application :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.begin_partial_application).
+Definition begin_partial_application :
+  (|Chain_id|).(S.HASH.t) -> Context.t -> Time.t -> (|Fitness|).(S.T.t) ->
+  block_header -> Lwt.t (Error_monad.tzresult validation_state) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.begin_partial_application).
 
-Definition begin_application :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.begin_application).
+Definition begin_application :
+  (|Chain_id|).(S.HASH.t) -> Context.t -> Time.t -> (|Fitness|).(S.T.t) ->
+  block_header -> Lwt.t (Error_monad.tzresult validation_state) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.begin_application).
 
-Definition begin_construction :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.begin_construction).
+Definition begin_construction :
+  (|Chain_id|).(S.HASH.t) -> Context.t -> Time.t -> Int32.t ->
+  (|Fitness|).(S.T.t) -> (|Block_hash|).(S.HASH.t) -> Time.t ->
+  option block_header_data -> unit ->
+  Lwt.t (Error_monad.tzresult validation_state) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.begin_construction).
 
-Definition apply_operation :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.apply_operation).
+Definition apply_operation :
+  validation_state -> operation ->
+  Lwt.t (Error_monad.tzresult (validation_state * operation_receipt)) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.apply_operation).
 
-Definition finalize_block :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.finalize_block).
+Definition finalize_block :
+  validation_state ->
+  Lwt.t
+    (Error_monad.tzresult (Updater.validation_result * block_header_metadata))
+  := (|Included_PROTOCOL|).(Updater.PROTOCOL.finalize_block).
 
-Definition rpc_services :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.rpc_services).
+Definition rpc_services : RPC_directory.t Updater.rpc_context :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.rpc_services).
 
-Definition init := (|Included_PROTOCOL|).(Updater.PROTOCOL.init).
+Definition init :
+  Context.t -> Block_header.shell_header ->
+  Lwt.t (Error_monad.tzresult Updater.validation_result) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.init).

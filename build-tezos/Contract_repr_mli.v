@@ -21,25 +21,35 @@ Definition contract := t.
 
 Parameter Included_S : {_ : unit & Compare.S.signature contract}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : contract -> contract -> bool :=
+  (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : contract -> contract -> bool :=
+  (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : contract -> contract -> bool :=
+  (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : contract -> contract -> bool :=
+  (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : contract -> contract -> bool :=
+  (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : contract -> contract -> bool :=
+  (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : contract -> contract -> Z :=
+  (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : contract -> contract -> bool :=
+  (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : contract -> contract -> contract :=
+  (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : contract -> contract -> contract :=
+  (|Included_S|).(Compare.S.min).
 
 Parameter implicit_contract :
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -> contract.
