@@ -54,8 +54,8 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35947 lines</li>
-      <li>Coq size: 51769 lines (+44% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 35950 lines</li>
+      <li>Coq size: 51773 lines (+44% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2715</li>
     </ul>
     
@@ -91,7 +91,7 @@
           11380,
           11380,
           11380,
-          11919,
+          12556,
         ],
         generated: [
           47563,
@@ -122,7 +122,7 @@
           51401,
           51401,
           51401,
-          51769,
+          51773,
         ],
         labels: [
           "01-14",
@@ -4435,7 +4435,7 @@ Module Delegate.
   Parameter has_frozen_balance :
     context -&gt; public_key_hash -&gt; Cycle.t -&gt; Lwt.t (Error_monad.tzresult bool).
   
-  Parameter frozen_balance :
+  Parameter __frozen_balance_value :
     context -&gt; public_key_hash -&gt; Lwt.t (Error_monad.tzresult Tez.t).
   
   Parameter frozen_balance_encoding : Data_encoding.t frozen_balance.
@@ -25068,7 +25068,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature cycle}.
     <h3>Delegate_services</h3>
     <ul>
       <li>OCaml size: 697 lines</li>
-      <li>Coq size: 1356 lines (+94% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1357 lines (+94% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -26596,7 +26596,7 @@ Definition info_encoding : Data_encoding.encoding info :=
     (fun function_parameter =&gt;
       let '{|
         info.balance := balance;
-          info.frozen_balance := frozen_balance;
+          info.frozen_balance := __frozen_balance_value;
           info.frozen_balance_by_cycle := frozen_balance_by_cycle;
           info.staking_balance := staking_balance;
           info.delegated_contracts := delegated_contracts;
@@ -26604,14 +26604,15 @@ Definition info_encoding : Data_encoding.encoding info :=
           info.deactivated := deactivated;
           info.grace_period := grace_period
           |} := function_parameter in
-      (balance, frozen_balance, frozen_balance_by_cycle, staking_balance,
-        delegated_contracts, delegated_balance, deactivated, grace_period))
+      (balance, __frozen_balance_value, frozen_balance_by_cycle,
+        staking_balance, delegated_contracts, delegated_balance, deactivated,
+        grace_period))
     (fun function_parameter =&gt;
       let
-        '(balance, frozen_balance, frozen_balance_by_cycle, staking_balance,
-          delegated_contracts, delegated_balance, deactivated, grace_period) :=
-        function_parameter in
-      {| info.balance := balance; info.frozen_balance := frozen_balance;
+        '(balance, __frozen_balance_value, frozen_balance_by_cycle,
+          staking_balance, delegated_contracts, delegated_balance, deactivated,
+          grace_period) := function_parameter in
+      {| info.balance := balance; info.frozen_balance := __frozen_balance_value;
         info.frozen_balance_by_cycle := frozen_balance_by_cycle;
         info.staking_balance := staking_balance;
         info.delegated_contracts := delegated_contracts;
@@ -26695,7 +26696,7 @@ Module S.
       RPC_query.empty Alpha_context.Tez.encoding
       (RPC_path.op_div path &quot;balance&quot;).
   
-  Definition frozen_balance
+  Definition __frozen_balance_value
     : RPC_service.service (* `GET *) unit Updater.rpc_context
       (Updater.rpc_context *
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) unit unit
@@ -26897,7 +26898,7 @@ Definition balance {D E G I K L a b c i o q : Set}
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
   RPC_context.make_call1 S.balance ctxt block pkh tt tt.
 
-Definition frozen_balance {D E G I K L a b c i o q : Set}
+Definition __frozen_balance_value {D E G I K L a b c i o q : Set}
   (ctxt :
     (((RPC_service.t
       ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
@@ -26921,7 +26922,7 @@ Definition frozen_balance {D E G I K L a b c i o q : Set}
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
-  RPC_context.make_call1 S.frozen_balance ctxt block pkh tt tt.
+  RPC_context.make_call1 S.__frozen_balance_value ctxt block pkh tt tt.
 
 Definition frozen_balance_by_cycle {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -28968,7 +28969,7 @@ Parameter balance : forall {E F H J K a b c i o q : Set},
     * K * a -&gt; a -&gt; (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t).
 
-Parameter frozen_balance : forall {E F H J K a b c i o q : Set},
+Parameter __frozen_balance_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
     ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit +
       (* `PATCH *) unit) RPC_context.t RPC_context.t q i o -&gt; a -&gt; q -&gt; i -&gt;
@@ -29330,7 +29331,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 985 lines (+38% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 986 lines (+38% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -30089,7 +30090,8 @@ Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
 Require Tezos.Level_storage.
 Require Tezos.Manager_repr.
-Require Tezos.Nonce_storage.
+Require Tezos.Nonce_storage_mli.
+Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Roll_storage.
 Require Tezos.Storage.
@@ -30946,7 +30948,7 @@ Definition frozen_balance_by_cycle
                         (frozen_balance.with_rewards amount balance) map)))
             (fun map =&gt; Lwt.__return map))).
 
-Definition frozen_balance
+Definition __frozen_balance_value
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Pervasives.result Tez_repr.t (list Error_monad.__error)) :=
@@ -30984,11 +30986,11 @@ Definition full_balance
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  Error_monad.op_gtgteqquestion (frozen_balance ctxt delegate)
-    (fun frozen_balance =&gt;
+  Error_monad.op_gtgteqquestion (__frozen_balance_value ctxt delegate)
+    (fun __frozen_balance_value =&gt;
       Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get ctxt contract)
         (fun balance =&gt;
-          Lwt.__return (Tez_repr.op_plusquestion frozen_balance balance))).
+          Lwt.__return (Tez_repr.op_plusquestion __frozen_balance_value balance))).
 
 Definition deactivated
   : Raw_context.t -&gt; (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
@@ -31066,7 +31068,7 @@ Definition __list_value
     <h3>Delegate_storage_mli</h3>
     <ul>
       <li>OCaml size: 191 lines</li>
-      <li>Coq size: 151 lines (-21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 152 lines (-21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -31281,7 +31283,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage.
+Require Tezos.Nonce_storage_mli.
+Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
@@ -31382,7 +31385,7 @@ Parameter has_frozen_balance :
   Raw_context.t -&gt; (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   Cycle_repr.t -&gt; Lwt.t (Error_monad.tzresult bool).
 
-Parameter frozen_balance :
+Parameter __frozen_balance_value :
   Raw_context.t -&gt; (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   Lwt.t (Error_monad.tzresult Tez_repr.t).
 
@@ -85959,7 +85962,7 @@ Definition cycle_end
     <h3>Seed_storage_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 27 lines (-43% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 28 lines (-41% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86029,7 +86032,8 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage.
+Require Tezos.Nonce_storage_mli.
+Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 
@@ -95895,8 +95899,8 @@ Parameter encoding : Data_encoding.t t.
   <div style="margin: 20px;">
     <h3>Time_repr</h3>
     <ul>
-      <li>OCaml size: 66 lines</li>
-      <li>Coq size: 46 lines (-31% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 67 lines</li>
+      <li>Coq size: 46 lines (-32% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95956,7 +95960,8 @@ type time = t
     (function Timestamp_sub -&gt; Some () | _ -&gt; None)
     (fun () -&gt; Timestamp_sub)</abbr>
 
-let of_seconds_string s = <abbr class="mark-warning" title="Try-with are not handled
+let of_seconds_string s =
+  <abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">try Some (of_seconds (Int64.of_string s)) with _ -&gt; None</abbr>
 
@@ -96033,8 +96038,8 @@ Definition op_minusquestion (x : t) (y : t)
   <div style="margin: 20px;">
     <h3>Time_repr_mli</h3>
     <ul>
-      <li>OCaml size: 38 lines</li>
-      <li>Coq size: 67 lines (+76% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 40 lines</li>
+      <li>Coq size: 67 lines (+67% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96065,7 +96070,9 @@ Definition op_minusquestion (x : t) (y : t)
 (*                                                                           *)
 (*****************************************************************************)
 
-include module type of Time
+include module type of struct
+  include Time
+end
 
 type time = t
 
