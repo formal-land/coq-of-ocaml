@@ -79,7 +79,7 @@ Qty_repr.v
 Raw_context.v
 Raw_level_repr_mli.v
 Raw_level_repr.v
-#Roll_repr_mli.v
+Roll_repr_mli.v
 Roll_repr.v
 #Roll_storage_mli.v
 #Roll_storage.v
@@ -107,9 +107,9 @@ Seed_repr.v
 State_hash.v
 Storage_description_mli.v
 Storage_description.v
-#Storage_functors_mli.v
+Storage_functors_mli.v
 Storage_functors.v
-#Storage_mli.v
+Storage_mli.v
 Storage_sigs.v
 #Storage.v
 Tez_repr_mli.v
