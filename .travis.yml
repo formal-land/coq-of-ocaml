@@ -1,0 +1,45 @@
+dist: bionic
+language: generic
+
+# Build all branches, *including* gh-pages:
+branches:
+  only:
+  - gh-pages
+  - /.*/
+
+services:
+  - docker
+
+env:
+  matrix:
+  - COQ_IMAGE="coqorg/coq:8.11"
+
+install: |
+  # Prepare the COQ container
+  docker pull ${COQ_IMAGE}
+  docker run -d -i --init --name=COQ -v ${TRAVIS_BUILD_DIR}:/home/project -w /home/project ${COQ_IMAGE}
+  docker exec COQ /bin/bash --login -c "
+    # This bash script is double-quoted to interpolate Travis CI env vars:
+    echo \"Build triggered by ${TRAVIS_EVENT_TYPE}\"
+    export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
+    set -ex  # -e = exit on failure; -x = trace for debug
+    opam switch 4.07.1+flambda
+    opam update
+    opam pin add https://github.com/clarus/coq-of-ocaml.git#custom-tezos -y
+    opam config list; opam repo list; opam pin list; opam list
+    " install
+script:
+- echo -e "${ANSI_YELLOW}Building...${ANSI_RESET}" && echo -en 'travis_fold:start:script\\r'
+- |
+  docker exec COQ /bin/bash --login -c "
+    export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
+    set -ex
+    sudo chown -R coq:coq /home/project
+    cd build-tezos
+    coq_makefile -f _CoqProject -o Makefile
+    time make -j4
+    " script
+- echo -en 'travis_fold:end:script\\r'
+
+after_script:
+- docker stop COQ  # optional
