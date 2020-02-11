@@ -83,11 +83,11 @@ let of_ocaml
   let generated_file_content = SmartPrint.to_string 80 2 document in
   let success_message =
     if has_errors then
-      Error.colorize "32" "✔️" ^ " " ^
-      Printf.sprintf "File '%s' successfully generated" generated_file_name
-    else
       Error.colorize "31" "❌" ^ " " ^
-      Printf.sprintf "File '%s' generated with some errors" generated_file_name in
+      Printf.sprintf "File '%s' generated with some errors" generated_file_name
+    else
+      Error.colorize "32" "✔️" ^ " " ^
+      Printf.sprintf "File '%s' successfully generated" generated_file_name in
   {
     error_message;
     generated_file = Some (generated_file_name, generated_file_content);

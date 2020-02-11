@@ -152,7 +152,6 @@ let rec of_structure (structure : structure) : t list Monad.t =
         _
       } ->
       let name = Name.of_ident false name in
-      of_structure structure >>= fun structures ->
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | Found md_type_path ->
@@ -163,7 +162,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
           structure.str_items
           structure.str_final_env >>= fun module_exp ->
         return [simple_value name module_exp]
-      | Not_found _ -> return [Module (name, structures)]
+      | Not_found _ ->
+        of_structure structure >>= fun structures ->
+        return [Module (name, structures)]
       end
     | Tstr_module {
         mb_id = name;
