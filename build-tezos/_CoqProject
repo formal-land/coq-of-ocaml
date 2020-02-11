@@ -20,7 +20,7 @@ Block_header_repr_mli.v
 #Bootstrap_storage.v
 #Commitment_repr_mli.v
 Commitment_repr.v
-#Commitment_storage_mli.v
+Commitment_storage_mli.v
 #Commitment_storage.v
 Constants_repr.v
 #Constants_services_mli.v
@@ -37,10 +37,10 @@ Cycle_repr_mli.v
 Cycle_repr.v
 #Delegate_services_mli.v
 #Delegate_services.v
-#Delegate_storage_mli.v
+Delegate_storage_mli.v
 #Delegate_storage.v
 Environment.v
-#Fees_storage_mli.v
+Fees_storage_mli.v
 #Fees_storage.v
 Fitness_repr.v
 #Fitness_storage.v
@@ -53,7 +53,7 @@ Legacy_script_support_repr_mli.v
 Legacy_script_support_repr.v
 Level_repr_mli.v
 Level_repr.v
-#Level_storage_mli.v
+Level_storage_mli.v
 Level_storage.v
 #Main_mli.v
 #Main.v
@@ -66,11 +66,11 @@ Michelson_v1_primitives.v
 Misc_mli.v
 Misc.v
 Nonce_hash.v
-#Nonce_storage_mli.v
+Nonce_storage_mli.v
 #Nonce_storage.v
 #Operation_repr_mli.v
 #Operation_repr.v
-#Parameters_repr_mli.v
+Parameters_repr_mli.v
 Parameters_repr.v
 Period_repr_mli.v
 Period_repr.v
@@ -81,7 +81,7 @@ Raw_level_repr_mli.v
 Raw_level_repr.v
 Roll_repr_mli.v
 Roll_repr.v
-#Roll_storage_mli.v
+Roll_storage_mli.v
 #Roll_storage.v
 Script_expr_hash.v
 Script_int_repr_mli.v
@@ -101,7 +101,7 @@ Script_timestamp_repr_mli.v
 #Script_typed_ir.v
 Seed_repr_mli.v
 Seed_repr.v
-#Seed_storage_mli.v
+Seed_storage_mli.v
 #Seed_storage.v
 #Services_registration.v
 State_hash.v
@@ -118,7 +118,7 @@ Time_repr_mli.v
 #Time_repr.v
 Vote_repr_mli.v
 Vote_repr.v
-#Vote_storage_mli.v
+Vote_storage_mli.v
 #Vote_storage.v
 Voting_period_repr_mli.v
 Voting_period_repr.v

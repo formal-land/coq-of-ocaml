@@ -12,7 +12,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage.
+Require Tezos.Nonce_storage_mli.
+Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
@@ -113,7 +114,7 @@ Parameter has_frozen_balance :
   Raw_context.t -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Cycle_repr.t -> Lwt.t (Error_monad.tzresult bool).
 
-Parameter frozen_balance :
+Parameter __frozen_balance_value :
   Raw_context.t -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.tzresult Tez_repr.t).
 

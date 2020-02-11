@@ -136,7 +136,7 @@ Parameter balance : forall {E F H J K a b c i o q : Set},
     * K * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t).
 
-Parameter frozen_balance : forall {E F H J K a b c i o q : Set},
+Parameter __frozen_balance_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
     ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit +
       (* `PATCH *) unit) RPC_context.t RPC_context.t q i o -> a -> q -> i ->

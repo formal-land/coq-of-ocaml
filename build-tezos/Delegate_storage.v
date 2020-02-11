@@ -16,7 +16,8 @@ Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
 Require Tezos.Level_storage.
 Require Tezos.Manager_repr.
-Require Tezos.Nonce_storage.
+Require Tezos.Nonce_storage_mli.
+Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Roll_storage.
 Require Tezos.Storage.
@@ -873,7 +874,7 @@ Definition frozen_balance_by_cycle
                         (frozen_balance.with_rewards amount balance) map)))
             (fun map => Lwt.__return map))).
 
-Definition frozen_balance
+Definition __frozen_balance_value
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Pervasives.result Tez_repr.t (list Error_monad.__error)) :=
@@ -911,11 +912,11 @@ Definition full_balance
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  Error_monad.op_gtgteqquestion (frozen_balance ctxt delegate)
-    (fun frozen_balance =>
+  Error_monad.op_gtgteqquestion (__frozen_balance_value ctxt delegate)
+    (fun __frozen_balance_value =>
       Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get ctxt contract)
         (fun balance =>
-          Lwt.__return (Tez_repr.op_plusquestion frozen_balance balance))).
+          Lwt.__return (Tez_repr.op_plusquestion __frozen_balance_value balance))).
 
 Definition deactivated
   : Raw_context.t -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->

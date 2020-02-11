@@ -1614,7 +1614,7 @@ Module Delegate.
   Parameter has_frozen_balance :
     context -> public_key_hash -> Cycle.t -> Lwt.t (Error_monad.tzresult bool).
   
-  Parameter frozen_balance :
+  Parameter __frozen_balance_value :
     context -> public_key_hash -> Lwt.t (Error_monad.tzresult Tez.t).
   
   Parameter frozen_balance_encoding : Data_encoding.t frozen_balance.

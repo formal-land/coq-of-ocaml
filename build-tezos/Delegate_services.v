@@ -71,7 +71,7 @@ Definition info_encoding : Data_encoding.encoding info :=
     (fun function_parameter =>
       let '{|
         info.balance := balance;
-          info.frozen_balance := frozen_balance;
+          info.frozen_balance := __frozen_balance_value;
           info.frozen_balance_by_cycle := frozen_balance_by_cycle;
           info.staking_balance := staking_balance;
           info.delegated_contracts := delegated_contracts;
@@ -79,14 +79,15 @@ Definition info_encoding : Data_encoding.encoding info :=
           info.deactivated := deactivated;
           info.grace_period := grace_period
           |} := function_parameter in
-      (balance, frozen_balance, frozen_balance_by_cycle, staking_balance,
-        delegated_contracts, delegated_balance, deactivated, grace_period))
+      (balance, __frozen_balance_value, frozen_balance_by_cycle,
+        staking_balance, delegated_contracts, delegated_balance, deactivated,
+        grace_period))
     (fun function_parameter =>
       let
-        '(balance, frozen_balance, frozen_balance_by_cycle, staking_balance,
-          delegated_contracts, delegated_balance, deactivated, grace_period) :=
-        function_parameter in
-      {| info.balance := balance; info.frozen_balance := frozen_balance;
+        '(balance, __frozen_balance_value, frozen_balance_by_cycle,
+          staking_balance, delegated_contracts, delegated_balance, deactivated,
+          grace_period) := function_parameter in
+      {| info.balance := balance; info.frozen_balance := __frozen_balance_value;
         info.frozen_balance_by_cycle := frozen_balance_by_cycle;
         info.staking_balance := staking_balance;
         info.delegated_contracts := delegated_contracts;
@@ -170,7 +171,7 @@ Module S.
       RPC_query.empty Alpha_context.Tez.encoding
       (RPC_path.op_div path "balance").
   
-  Definition frozen_balance
+  Definition __frozen_balance_value
     : RPC_service.service (* `GET *) unit Updater.rpc_context
       (Updater.rpc_context *
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) unit unit
@@ -372,7 +373,7 @@ Definition balance {D E G I K L a b c i o q : Set}
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
   RPC_context.make_call1 S.balance ctxt block pkh tt tt.
 
-Definition frozen_balance {D E G I K L a b c i o q : Set}
+Definition __frozen_balance_value {D E G I K L a b c i o q : Set}
   (ctxt :
     (((RPC_service.t
       ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
@@ -396,7 +397,7 @@ Definition frozen_balance {D E G I K L a b c i o q : Set}
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
-  RPC_context.make_call1 S.frozen_balance ctxt block pkh tt tt.
+  RPC_context.make_call1 S.__frozen_balance_value ctxt block pkh tt tt.
 
 Definition frozen_balance_by_cycle {D E G I K L a b c i o q : Set}
   (ctxt :
