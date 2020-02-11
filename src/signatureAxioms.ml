@@ -38,7 +38,32 @@ let name_of_included_module_typ (module_typ : Typedtree.module_type)
   : Name.t =
   Name.of_string false ("Included_" ^ string_of_included_module_typ module_typ)
 
-let of_top_level_typ_signature
+let of_types_signature (signature : Types.signature) : t Monad.t =
+  signature |> Monad.List.map (function
+    | Types.Sig_value (ident, { val_type; _ }) ->
+      let name = Name.of_ident true ident in
+      Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, _) ->
+      let typ_vars = Name.Set.elements (Type.typ_args typ) in
+      return (Value (name, typ_vars, typ))
+    | Sig_type (ident, { type_params; _ }, _) ->
+      (* We ignore the type manifest so that we do not unroll unwanted type
+         definitions. *)
+      let name = Name.of_ident false ident in
+      Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_params ->
+      return (TypDefinition (TypeDefinition.Abstract (name, typ_params)))
+    | Sig_typext _ ->
+      raise (Error "type_extension") NotSupported "Type extension not handled"
+    | Sig_module _ ->
+      raise (Error "module") NotSupported "Module not handled in included signature"
+    | Sig_modtype _ ->
+      raise (Error "module_type") NotSupported "Module type not handled in included signature"
+    | Sig_class _ ->
+      raise (Error "class") NotSupported "Class not handled"
+    | Sig_class_type _ ->
+      raise (Error "class_type") NotSupported "Class type not handled"
+  )
+
+let of_first_class_types_signature
   (module_name : Name.t)
   (signature_path : Path.t)
   (signature : Types.signature)
@@ -100,13 +125,12 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
     | Tsig_include { incl_mod; incl_type; _} ->
       let module_name = name_of_included_module_typ incl_mod in
       let signature_path = ModuleTyp.get_module_typ_path_name incl_mod in
-      ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
-      let typ = ModuleTyp.to_typ module_typ in
       begin match signature_path with
-      | None ->
-        raise [] FirstClassModule "Name for the included signature not found"
+      | None -> of_types_signature incl_type
       | Some signature_path ->
-        of_top_level_typ_signature
+        ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
+        let typ = ModuleTyp.to_typ module_typ in
+        of_first_class_types_signature
           module_name signature_path incl_type >>= fun fields ->
         return (Value (module_name, [], typ) :: fields)
       end
