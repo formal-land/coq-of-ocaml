@@ -54,9 +54,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35924 lines</li>
-      <li>Coq size: 51697 lines (+43% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 2719</li>
+      <li>OCaml size: 35947 lines</li>
+      <li>Coq size: 51769 lines (+44% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 2715</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -91,7 +91,7 @@
           11380,
           11380,
           11380,
-          11852,
+          11919,
         ],
         generated: [
           47563,
@@ -122,7 +122,7 @@
           51401,
           51401,
           51401,
-          51697,
+          51769,
         ],
         labels: [
           "01-14",
@@ -179,7 +179,7 @@
       </li>
       
       <li>
-        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">13</span>
+        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">11</span>
       </li>
       
       <li>
@@ -639,7 +639,7 @@
       </li>
       
       <li>
-        <a href="#time_repr.mli">time_repr.mli</a>&nbsp;<span class="label label-warning">2</span>
+        <a href="#time_repr.mli">time_repr.mli</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -1419,11 +1419,11 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1390 lines</li>
-      <li>Coq size: 2472 lines (+77% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2502 lines (+80% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">13 warnings</span>
+    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">11 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -1537,7 +1537,7 @@ module Timestamp : sig
 
   val to_notation : time -&gt; string
 
-  val of_seconds : string -&gt; time option
+  val of_seconds_string : string -&gt; time option
 
   val to_seconds_string : time -&gt; string
 
@@ -2049,11 +2049,7 @@ module Level : sig
 end
 
 module Fitness : sig
-  <abbr class="mark-warning" title="Name for the included signature not found">include </abbr><abbr class="mark-warning" title="Name for the included signature not found
-
-——————————
-
-The typeof in module types is not handled">module type of Fitness</abbr>
+  include module type of Fitness
 
   type fitness = t
 
@@ -3016,7 +3012,7 @@ Module Timestamp.
   
   Parameter to_notation : time -&gt; string.
   
-  Parameter of_seconds : string -&gt; option time.
+  Parameter of_seconds_string : string -&gt; option time.
   
   Parameter to_seconds_string : time -&gt; string.
   
@@ -4072,6 +4068,36 @@ Module Level.
 End Level.
 
 Module Fitness.
+  Parameter t : Set.
+  
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  
+  Parameter compare : t -&gt; t -&gt; Z.
+  
+  Parameter equal : t -&gt; t -&gt; bool.
+  
+  Parameter max : t -&gt; t -&gt; t.
+  
+  Parameter min : t -&gt; t -&gt; t.
+  
+  Parameter pp : Format.formatter -&gt; t -&gt; unit.
+  
+  Parameter encoding : Data_encoding.t t.
+  
+  Parameter to_bytes : t -&gt; MBytes.t.
+  
+  Parameter of_bytes : MBytes.t -&gt; option t.
+  
   Definition fitness := t.
   
   Parameter increase : option Z -&gt; context -&gt; context.
@@ -18803,7 +18829,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Contract_repr</h3>
     <ul>
-      <li>OCaml size: 235 lines</li>
+      <li>OCaml size: 234 lines</li>
       <li>Coq size: 252 lines (+7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
@@ -19006,8 +19032,7 @@ let rpc_arg =
     ~destruct
     ()
 
-let depends_on_storage_description =
-  Storage_description.depends_on_me
+let depends_on_storage_description = Storage_description.depends_on_me
 
 module Index : Storage_description.INDEX with type t = contract = struct
   type t = contract
@@ -24652,8 +24677,8 @@ Parameter set_paid_storage_space_and_return_fees_to_pay :
   <div style="margin: 20px;">
     <h3>Cycle_repr</h3>
     <ul>
-      <li>OCaml size: 96 lines</li>
-      <li>Coq size: 130 lines (+35% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 95 lines</li>
+      <li>Coq size: 130 lines (+36% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -24739,8 +24764,7 @@ let of_int32_exn l =
   if Compare.Int32.(l &gt;= 0l) then l
   else invalid_arg &quot;Level_repr.Cycle.of_int32&quot;
 
-let depends_on_storage_description =
-  Storage_description.depends_on_me
+let depends_on_storage_description = Storage_description.depends_on_me
 
 module Index : Storage_description.INDEX with type t = cycle = struct
   type t = cycle
@@ -86511,7 +86535,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Storage</h3>
     <ul>
-      <li>OCaml size: 902 lines</li>
+      <li>OCaml size: 903 lines</li>
       <li>Coq size: 1969 lines (+118% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
@@ -86717,8 +86741,8 @@ module Contract = struct
   module Make_carbonated_map_expr (N : Storage_sigs.NAME) :
     Storage_sigs.Non_iterable_indexed_carbonated_data_storage
       with type key = Contract_repr.t
-      and type value = Script_repr.lazy_expr
-      and type t := Raw_context.t = struct
+       and type value = Script_repr.lazy_expr
+       and type t := Raw_context.t = struct
     module I =
       Indexed_context.Make_carbonated_map
         (N)
@@ -86993,6 +87017,7 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.String.(Stri
 
              let encoding = Script_repr.expr_encoding
            end)
+
     let tag_Non_iterable_indexed_carbonated_data_storage = ()
 
     type context = I.context
@@ -91398,8 +91423,8 @@ End INDEX.
   <div style="margin: 20px;">
     <h3>Storage_functors</h3>
     <ul>
-      <li>OCaml size: 1189 lines</li>
-      <li>Coq size: 2007 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1212 lines</li>
+      <li>Coq size: 2007 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -91483,7 +91508,11 @@ They are sent to a unit type.">(Raw_context.Storage_error (Corrupted_data key))<
   | Some len -&gt;
       return len
 
-let map_key (f : Context.key -&gt; Context.key) = function `Key k -&gt; `Key (f k) | `Dir k -&gt; `Dir (f k)
+let map_key (f : Context.key -&gt; Context.key) = function
+  | `Key k -&gt;
+      `Key (f k)
+  | `Dir k -&gt;
+      `Dir (f k)
 
 module Make_subcontext (R : REGISTER) (C : Raw_context.T) (N : NAME) :
   Raw_context.T with type t = C.t = struct
@@ -91644,7 +91673,10 @@ struct
 
   type 'a ipath = 'a I1.ipath I2.ipath
 
-  let args () = Storage_description.Pair ((I1.args[@coq_implicit &quot;(a := A)&quot;]) (), (I2.args[@coq_implicit &quot;(a := A)&quot;]) ())
+  let args () =
+    Storage_description.Pair
+      ( (I1.args [@coq_implicit &quot;(a := A)&quot;]) (),
+        (I2.args [@coq_implicit &quot;(a := A)&quot;]) () )
 end
 
 module Make_data_set_storage (C : Raw_context.T) (I : INDEX) :
@@ -91692,7 +91724,9 @@ module Make_data_set_storage (C : Raw_context.T) (I : INDEX) :
     in
     dig I.path_length [] init
 
-  let elements s = fold s ~init:([] [@coq_implicit &quot;(A := elt)&quot;]) ~f:(fun p acc -&gt; Lwt.return (p :: acc))
+  let elements s =
+    fold s ~init:([] [@coq_implicit &quot;(A := elt)&quot;]) ~f:(fun p acc -&gt;
+        Lwt.return (p :: acc))
 
   <abbr class="mark-warning" title="Top-level evaluations are ignored">let () =
     let open Storage_description in
@@ -91805,9 +91839,12 @@ module Make_indexed_data_storage (C : Raw_context.T) (I : INDEX) (V : VALUE) :
     fold_keys s ~init ~f
 
   let bindings s =
-    fold s ~init:([][@coq_implicit &quot;(A := key * value)&quot;]) ~f:(fun p v acc -&gt; Lwt.return ((p, v) :: acc))
+    fold s ~init:([] [@coq_implicit &quot;(A := key * value)&quot;]) ~f:(fun p v acc -&gt;
+        Lwt.return ((p, v) :: acc))
 
-  let keys s = fold_keys s ~init:([][@coq_implicit &quot;(A := key)&quot;]) ~f:(fun p acc -&gt; Lwt.return (p :: acc))
+  let keys s =
+    fold_keys s ~init:([] [@coq_implicit &quot;(A := key)&quot;]) ~f:(fun p acc -&gt;
+        Lwt.return (p :: acc))
 
   <abbr class="mark-warning" title="Top-level evaluations are ignored">let () =
     let open Storage_description in
@@ -91980,7 +92017,10 @@ module Make_indexed_carbonated_data_storage
     dig I.path_length [] init
 
   let keys_unaccounted s =
-    fold_keys_unaccounted s ~init:([][@coq_implicit &quot;(A := key)&quot;]) ~f:(fun p acc -&gt; Lwt.return (p :: acc))
+    fold_keys_unaccounted
+      s
+      ~init:([] [@coq_implicit &quot;(A := key)&quot;])
+      ~f:(fun p acc -&gt; Lwt.return (p :: acc))
 
   <abbr class="mark-warning" title="Top-level evaluations are ignored">let () =
     let open Storage_description in
@@ -92026,9 +92066,7 @@ module Make_indexed_data_snapshotable_storage
 
   module Data_storage = Make_indexed_data_storage (C_data) (I) (V)
   include Data_storage
-
   module Pair_Snapshot_index_I = Pair (Snapshot_index) (I)
-
   module Snapshot =
     Make_indexed_data_storage (C_snapshot) (Pair_Snapshot_index_I) (V)
 
@@ -92077,7 +92115,9 @@ module Make_indexed_subcontext (C : Raw_context.T) (I : INDEX) :
     in
     dig I.path_length [] init
 
-  let keys t = fold_keys t ~init:([][@coq_implicit &quot;(A := key)&quot;]) ~f:(fun i acc -&gt; Lwt.return (i :: acc))
+  let keys t =
+    fold_keys t ~init:([] [@coq_implicit &quot;(A := key)&quot;]) ~f:(fun i acc -&gt;
+        Lwt.return (i :: acc))
 
   let list t k = C.fold t k ~init:[] ~f:(fun k acc -&gt; Lwt.return (k :: acc))
 
@@ -92235,8 +92275,8 @@ Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.pa
     in
     loop 0 [] prefix
 
-  module Make_set (R : REGISTER) (N : NAME)
-    : Data_set_storage with type t = t and type elt = key = struct
+  module Make_set (R : REGISTER) (N : NAME) :
+    Data_set_storage with type t = t and type elt = key = struct
     type t = C.t
 
     type context = t
@@ -92273,7 +92313,9 @@ Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.pa
       fold_keys s ~init ~f:(fun i acc -&gt;
           mem s i &gt;&gt;= function true -&gt; f i acc | false -&gt; Lwt.return acc)
 
-    let elements s = fold s ~init:([][@coq_implicit &quot;(A := elt)&quot;]) ~f:(fun p acc -&gt; Lwt.return (p :: acc))
+    let elements s =
+      fold s ~init:([] [@coq_implicit &quot;(A := elt)&quot;]) ~f:(fun p acc -&gt;
+          Lwt.return (p :: acc))
 
     <abbr class="mark-warning" title="Top-level evaluations are ignored">let () =
       let open Storage_description in
@@ -92291,11 +92333,11 @@ Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.pa
         Data_encoding.bool</abbr>
   end
 
-  module Make_map (N : NAME) (V : VALUE)
-    : Indexed_data_storage
+  module Make_map (N : NAME) (V : VALUE) :
+    Indexed_data_storage
       with type t = t
-      and type key = key
-      and type value = V.t = struct
+       and type key = key
+       and type value = V.t = struct
     let tag_Non_iterable_indexed_data_storage = ()
 
     type t = C.t
@@ -92379,13 +92421,16 @@ Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.pa
           get s i &gt;&gt;= function Error _ -&gt; Lwt.return acc | Ok v -&gt; f i v acc)
 
     let bindings s =
-      fold s ~init:([][@coq_implicit &quot;(A := key * value)&quot;]) ~f:(fun p v acc -&gt; Lwt.return ((p, v) :: acc))
+      fold s ~init:([] [@coq_implicit &quot;(A := key * value)&quot;]) ~f:(fun p v acc -&gt;
+          Lwt.return ((p, v) :: acc))
 
     let fold_keys s ~init ~f =
       fold_keys s ~init ~f:(fun i acc -&gt;
           mem s i &gt;&gt;= function false -&gt; Lwt.return acc | true -&gt; f i acc)
 
-    let keys s = fold_keys s ~init:([][@coq_implicit &quot;(A := key)&quot;]) ~f:(fun p acc -&gt; Lwt.return (p :: acc))
+    let keys s =
+      fold_keys s ~init:([] [@coq_implicit &quot;(A := key)&quot;]) ~f:(fun p acc -&gt;
+          Lwt.return (p :: acc))
 
     <abbr class="mark-warning" title="Top-level evaluations are ignored">let () =
       let open Storage_description in
@@ -92398,11 +92443,11 @@ Alternative: use a monad to sequence side-effects.">if Compare.Int.(i &gt;= I.pa
         V.encoding</abbr>
   end
 
-  module Make_carbonated_map (N : NAME) (V : VALUE)
-    : Non_iterable_indexed_carbonated_data_storage
+  module Make_carbonated_map (N : NAME) (V : VALUE) :
+    Non_iterable_indexed_carbonated_data_storage
       with type t = t
-      and type key = key
-      and type value = V.t = struct
+       and type key = key
+       and type value = V.t = struct
     let tag_Non_iterable_indexed_carbonated_data_storage = ()
 
     type t = C.t
@@ -92553,12 +92598,12 @@ module type WRAPPER = sig
 end
 
 module Wrap_indexed_data_storage
-    (C : Indexed_data_storage) (K : WRAPPER with type key := C.key) :
+    (C : Indexed_data_storage)
+    (K : WRAPPER with type key := C.key) :
   Indexed_data_storage
     with type t = C.t
-    and type key = K.t
-    and type value = C.value =
-struct
+     and type key = K.t
+     and type value = C.value = struct
   let tag_Non_iterable_indexed_data_storage = ()
 
   type t = C.t
@@ -92594,13 +92639,16 @@ struct
         match K.unwrap k with None -&gt; Lwt.return acc | Some k -&gt; f k v acc)
 
   let bindings s =
-    fold s ~init:([][@coq_implicit &quot;(A := key * value)&quot;]) ~f:(fun p v acc -&gt; Lwt.return ((p, v) :: acc))
+    fold s ~init:([] [@coq_implicit &quot;(A := key * value)&quot;]) ~f:(fun p v acc -&gt;
+        Lwt.return ((p, v) :: acc))
 
   let fold_keys s ~init ~f =
     C.fold_keys s ~init ~f:(fun k acc -&gt;
         match K.unwrap k with None -&gt; Lwt.return acc | Some k -&gt; f k acc)
 
-  let keys s = fold_keys s ~init:([][@coq_implicit &quot;(A := key)&quot;]) ~f:(fun p acc -&gt; Lwt.return (p :: acc))
+  let keys s =
+    fold_keys s ~init:([] [@coq_implicit &quot;(A := key)&quot;]) ~f:(fun p acc -&gt;
+        Lwt.return (p :: acc))
 end
 </pre>
   </div>
@@ -94622,8 +94670,8 @@ Definition Wrap_indexed_data_storage :=
   <div style="margin: 20px;">
     <h3>Storage_functors_mli</h3>
     <ul>
-      <li>OCaml size: 109 lines</li>
-      <li>Coq size: 113 lines (+3% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 110 lines</li>
+      <li>Coq size: 113 lines (+2% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -94733,7 +94781,8 @@ module type WRAPPER = sig
 end
 
 module Wrap_indexed_data_storage
-    (C : Indexed_data_storage) (K : WRAPPER with type key := C.key) :
+    (C : Indexed_data_storage)
+    (K : WRAPPER with type key := C.key) :
   Indexed_data_storage
     with type t = C.t
      and type key = K.t
@@ -95907,7 +95956,7 @@ type time = t
     (function Timestamp_sub -&gt; Some () | _ -&gt; None)
     (fun () -&gt; Timestamp_sub)</abbr>
 
-let of_seconds s = <abbr class="mark-warning" title="Try-with are not handled
+let of_seconds_string s = <abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">try Some (of_seconds (Int64.of_string s)) with _ -&gt; None</abbr>
 
@@ -95956,7 +96005,7 @@ Definition time := t.
 (* ❌ Top-level evaluations are ignored *)
 (* top_level_evaluation *)
 
-Definition of_seconds (s : string) : option t :=
+Definition of_seconds_string (s : string) : option t :=
   (* ❌ Try-with are not handled *)
   try (Some (of_seconds (Int64.of_string s))).
 
@@ -95985,11 +96034,11 @@ Definition op_minusquestion (x : t) (y : t)
     <h3>Time_repr_mli</h3>
     <ul>
       <li>OCaml size: 38 lines</li>
-      <li>Coq size: 25 lines (-35% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 67 lines (+76% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#time_repr.mli"><code>time_repr.mli</code></a>&nbsp;<span class="label label-warning">2 warnings</span>
+    <a href="#time_repr.mli"><code>time_repr.mli</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -96016,17 +96065,13 @@ Definition op_minusquestion (x : t) (y : t)
 (*                                                                           *)
 (*****************************************************************************)
 
-<abbr class="mark-warning" title="Name for the included signature not found">include </abbr><abbr class="mark-warning" title="Name for the included signature not found
-
-——————————
-
-The typeof in module types is not handled">module type of Time</abbr>
+include module type of Time
 
 type time = t
 
 val pp : Format.formatter -&gt; t -&gt; unit
 
-val of_seconds : string -&gt; time option
+val of_seconds_string : string -&gt; time option
 
 val to_seconds_string : time -&gt; string
 
@@ -96051,11 +96096,53 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Period_repr.
 
+Parameter t : Set.
+
+Parameter op_eq : t -&gt; t -&gt; bool.
+
+Parameter op_ltgt : t -&gt; t -&gt; bool.
+
+Parameter op_lt : t -&gt; t -&gt; bool.
+
+Parameter op_lteq : t -&gt; t -&gt; bool.
+
+Parameter op_gteq : t -&gt; t -&gt; bool.
+
+Parameter op_gt : t -&gt; t -&gt; bool.
+
+Parameter compare : t -&gt; t -&gt; Z.
+
+Parameter equal : t -&gt; t -&gt; bool.
+
+Parameter max : t -&gt; t -&gt; t.
+
+Parameter min : t -&gt; t -&gt; t.
+
+Parameter add : t -&gt; int64 -&gt; t.
+
+Parameter diff : t -&gt; t -&gt; int64.
+
+Parameter of_seconds : int64 -&gt; t.
+
+Parameter to_seconds : t -&gt; int64.
+
+Parameter of_notation : string -&gt; option t.
+
+Parameter of_notation_exn : string -&gt; t.
+
+Parameter to_notation : t -&gt; string.
+
+Parameter encoding : Data_encoding.t t.
+
+Parameter rfc_encoding : Data_encoding.t t.
+
+Parameter pp_hum : Format.formatter -&gt; t -&gt; unit.
+
 Definition time := t.
 
 Parameter pp : Format.formatter -&gt; t -&gt; unit.
 
-Parameter of_seconds : string -&gt; option time.
+Parameter of_seconds_string : string -&gt; option time.
 
 Parameter to_seconds_string : time -&gt; string.
 
