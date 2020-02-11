@@ -55,7 +55,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35950 lines</li>
-      <li>Coq size: 51773 lines (+44% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 51946 lines (+44% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2715</li>
     </ul>
     
@@ -91,7 +91,7 @@
           11380,
           11380,
           11380,
-          12556,
+          12864,
         ],
         generated: [
           47563,
@@ -122,7 +122,7 @@
           51401,
           51401,
           51401,
-          51773,
+          51946,
         ],
         labels: [
           "01-14",
@@ -1419,7 +1419,7 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1390 lines</li>
-      <li>Coq size: 2502 lines (+80% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2582 lines (+85% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -2872,29 +2872,39 @@ Module Tez.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition tez := t.
   
@@ -2930,29 +2940,39 @@ Module Period.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition period := t.
   
@@ -2978,29 +2998,39 @@ Module Timestamp.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition time := t.
   
@@ -3024,29 +3054,39 @@ Module Raw_level.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition raw_level := t.
   
@@ -3070,29 +3110,39 @@ Module Cycle.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition cycle := t.
   
@@ -3937,29 +3987,39 @@ Module Voting_period.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition voting_period := t.
   
@@ -4017,29 +4077,39 @@ Module Level.
   
   Parameter Included_BASIC_DATA : {_ : unit &amp; BASIC_DATA.signature t}.
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Parameter pp_full : Format.formatter -&gt; t -&gt; unit.
   
@@ -4193,29 +4263,39 @@ Module Contract.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
-  Definition op_eq := (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
+  Definition op_eq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
   
-  Definition op_ltgt := (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
+  Definition op_ltgt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_ltgt).
   
-  Definition op_lt := (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
+  Definition op_lt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lt).
   
-  Definition op_lteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
+  Definition op_lteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_lteq).
   
-  Definition op_gteq := (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
+  Definition op_gteq : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gteq).
   
-  Definition op_gt := (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
+  Definition op_gt : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare := (|Included_BASIC_DATA|).(BASIC_DATA.compare).
+  Definition compare : t -&gt; t -&gt; Z :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
-  Definition equal := (|Included_BASIC_DATA|).(BASIC_DATA.equal).
+  Definition equal : t -&gt; t -&gt; bool :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.equal).
   
-  Definition max := (|Included_BASIC_DATA|).(BASIC_DATA.max).
+  Definition max : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.max).
   
-  Definition min := (|Included_BASIC_DATA|).(BASIC_DATA.min).
+  Definition min : t -&gt; t -&gt; t := (|Included_BASIC_DATA|).(BASIC_DATA.min).
   
-  Definition encoding := (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
+  Definition encoding : Data_encoding.t t :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.encoding).
   
-  Definition pp := (|Included_BASIC_DATA|).(BASIC_DATA.pp).
+  Definition pp : Format.formatter -&gt; t -&gt; unit :=
+    (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
   Definition contract := t.
   
@@ -15561,7 +15641,7 @@ Definition Index := H.
     <h3>Blinded_public_key_hash_mli</h3>
     <ul>
       <li>OCaml size: 36 lines</li>
-      <li>Coq size: 100 lines (+177% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 113 lines (+213% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15626,71 +15706,84 @@ Parameter Included_HASH :
 
 Definition t := (|Included_HASH|).(S.HASH.t).
 
-Definition name := (|Included_HASH|).(S.HASH.name).
+Definition name : string := (|Included_HASH|).(S.HASH.name).
 
-Definition title := (|Included_HASH|).(S.HASH.title).
+Definition title : string := (|Included_HASH|).(S.HASH.title).
 
-Definition pp := (|Included_HASH|).(S.HASH.pp).
+Definition pp : Format.formatter -&gt; t -&gt; unit := (|Included_HASH|).(S.HASH.pp).
 
-Definition pp_short := (|Included_HASH|).(S.HASH.pp_short).
+Definition pp_short : Format.formatter -&gt; t -&gt; unit :=
+  (|Included_HASH|).(S.HASH.pp_short).
 
-Definition op_eq := (|Included_HASH|).(S.HASH.op_eq).
+Definition op_eq : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_eq).
 
-Definition op_ltgt := (|Included_HASH|).(S.HASH.op_ltgt).
+Definition op_ltgt : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_ltgt).
 
-Definition op_lt := (|Included_HASH|).(S.HASH.op_lt).
+Definition op_lt : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_lt).
 
-Definition op_lteq := (|Included_HASH|).(S.HASH.op_lteq).
+Definition op_lteq : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_lteq).
 
-Definition op_gteq := (|Included_HASH|).(S.HASH.op_gteq).
+Definition op_gteq : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_gteq).
 
-Definition op_gt := (|Included_HASH|).(S.HASH.op_gt).
+Definition op_gt : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_gt).
 
-Definition compare := (|Included_HASH|).(S.HASH.compare).
+Definition compare : t -&gt; t -&gt; Z := (|Included_HASH|).(S.HASH.compare).
 
-Definition equal := (|Included_HASH|).(S.HASH.equal).
+Definition equal : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.equal).
 
-Definition max := (|Included_HASH|).(S.HASH.max).
+Definition max : t -&gt; t -&gt; t := (|Included_HASH|).(S.HASH.max).
 
-Definition min := (|Included_HASH|).(S.HASH.min).
+Definition min : t -&gt; t -&gt; t := (|Included_HASH|).(S.HASH.min).
 
-Definition hash_bytes := (|Included_HASH|).(S.HASH.hash_bytes).
+Definition hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t :=
+  (|Included_HASH|).(S.HASH.hash_bytes).
 
-Definition hash_string := (|Included_HASH|).(S.HASH.hash_string).
+Definition hash_string : option string -&gt; list string -&gt; t :=
+  (|Included_HASH|).(S.HASH.hash_string).
 
-Definition zero := (|Included_HASH|).(S.HASH.zero).
+Definition zero : t := (|Included_HASH|).(S.HASH.zero).
 
-Definition size := (|Included_HASH|).(S.HASH.size).
+Definition size : Z := (|Included_HASH|).(S.HASH.size).
 
-Definition to_bytes := (|Included_HASH|).(S.HASH.to_bytes).
+Definition to_bytes : t -&gt; MBytes.t := (|Included_HASH|).(S.HASH.to_bytes).
 
-Definition of_bytes_opt := (|Included_HASH|).(S.HASH.of_bytes_opt).
+Definition of_bytes_opt : MBytes.t -&gt; option t :=
+  (|Included_HASH|).(S.HASH.of_bytes_opt).
 
-Definition of_bytes_exn := (|Included_HASH|).(S.HASH.of_bytes_exn).
+Definition of_bytes_exn : MBytes.t -&gt; t :=
+  (|Included_HASH|).(S.HASH.of_bytes_exn).
 
-Definition to_b58check := (|Included_HASH|).(S.HASH.to_b58check).
+Definition to_b58check : t -&gt; string := (|Included_HASH|).(S.HASH.to_b58check).
 
-Definition to_short_b58check := (|Included_HASH|).(S.HASH.to_short_b58check).
+Definition to_short_b58check : t -&gt; string :=
+  (|Included_HASH|).(S.HASH.to_short_b58check).
 
-Definition of_b58check_exn := (|Included_HASH|).(S.HASH.of_b58check_exn).
+Definition of_b58check_exn : string -&gt; t :=
+  (|Included_HASH|).(S.HASH.of_b58check_exn).
 
-Definition of_b58check_opt := (|Included_HASH|).(S.HASH.of_b58check_opt).
+Definition of_b58check_opt : string -&gt; option t :=
+  (|Included_HASH|).(S.HASH.of_b58check_opt).
 
-Definition b58check_encoding := (|Included_HASH|).(S.HASH.b58check_encoding).
+Definition b58check_encoding : Base58.encoding t :=
+  (|Included_HASH|).(S.HASH.b58check_encoding).
 
-Definition encoding := (|Included_HASH|).(S.HASH.encoding).
+Definition encoding : Data_encoding.t t := (|Included_HASH|).(S.HASH.encoding).
 
-Definition rpc_arg := (|Included_HASH|).(S.HASH.rpc_arg).
+Definition rpc_arg : RPC_arg.t t := (|Included_HASH|).(S.HASH.rpc_arg).
 
-Definition to_path := (|Included_HASH|).(S.HASH.to_path).
+Definition to_path : t -&gt; list string -&gt; list string :=
+  (|Included_HASH|).(S.HASH.to_path).
 
-Definition of_path := (|Included_HASH|).(S.HASH.of_path).
+Definition of_path : list string -&gt; option t :=
+  (|Included_HASH|).(S.HASH.of_path).
 
-Definition of_path_exn := (|Included_HASH|).(S.HASH.of_path_exn).
+Definition of_path_exn : list string -&gt; t :=
+  (|Included_HASH|).(S.HASH.of_path_exn).
 
-Definition prefix_path := (|Included_HASH|).(S.HASH.prefix_path).
+Definition prefix_path : string -&gt; list string :=
+  (|Included_HASH|).(S.HASH.prefix_path).
 
-Definition path_length := (|Included_HASH|).(S.HASH.path_length).
+Definition path_length : Z := (|Included_HASH|).(S.HASH.path_length).
 
 Definition __Set := existT (fun _ =&gt; _) tt (|Included_HASH|).(S.HASH.__Set).
 
@@ -19352,7 +19445,7 @@ Definition Index :=
     <h3>Contract_repr_mli</h3>
     <ul>
       <li>OCaml size: 80 lines</li>
-      <li>Coq size: 80 lines (+0% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 90 lines (+12% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19465,25 +19558,35 @@ Definition contract := t.
 
 Parameter Included_S : {_ : unit &amp; Compare.S.signature contract}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : contract -&gt; contract -&gt; bool :=
+  (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : contract -&gt; contract -&gt; bool :=
+  (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : contract -&gt; contract -&gt; bool :=
+  (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : contract -&gt; contract -&gt; bool :=
+  (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : contract -&gt; contract -&gt; bool :=
+  (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : contract -&gt; contract -&gt; bool :=
+  (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : contract -&gt; contract -&gt; Z :=
+  (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : contract -&gt; contract -&gt; bool :=
+  (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : contract -&gt; contract -&gt; contract :=
+  (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : contract -&gt; contract -&gt; contract :=
+  (|Included_S|).(Compare.S.min).
 
 Parameter implicit_contract :
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt; contract.
@@ -25015,25 +25118,25 @@ Definition cycle := t.
 
 Parameter Included_S : {_ : unit &amp; Compare.S.signature t}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : t -&gt; t -&gt; Z := (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : t -&gt; t -&gt; t := (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : t -&gt; t -&gt; t := (|Included_S|).(Compare.S.min).
 
 Parameter encoding : Data_encoding.t cycle.
 
@@ -41342,7 +41445,7 @@ Definition diff (function_parameter : t) : t -&gt; int32 :=
     <h3>Level_repr_mli</h3>
     <ul>
       <li>OCaml size: 74 lines</li>
-      <li>Coq size: 85 lines (+14% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 88 lines (+18% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -41479,25 +41582,28 @@ Definition level := t.
 
 Parameter Included_S : {_ : unit &amp; Compare.S.signature level}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : level -&gt; level -&gt; bool := (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : level -&gt; level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : level -&gt; level -&gt; bool := (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : level -&gt; level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : level -&gt; level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : level -&gt; level -&gt; bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : level -&gt; level -&gt; Z := (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : level -&gt; level -&gt; bool := (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : level -&gt; level -&gt; level := (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : level -&gt; level -&gt; level := (|Included_S|).(Compare.S.min).
 
 Parameter encoding : Data_encoding.t level.
 
@@ -42969,7 +43075,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     <h3>Main_mli</h3>
     <ul>
       <li>OCaml size: 69 lines</li>
-      <li>Coq size: 187 lines (+171% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 206 lines (+198% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -43175,70 +43281,89 @@ Parameter Included_PROTOCOL :
       block_header Apply_results.block_metadata operation_data
       Apply_results.packed_operation_metadata operation validation_state}.
 
-Definition max_block_length :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).
+Definition max_block_length : Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).
 
-Definition max_operation_data_length :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.max_operation_data_length).
+Definition max_operation_data_length : Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.max_operation_data_length).
 
-Definition validation_passes :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.validation_passes).
+Definition validation_passes : list Updater.quota :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.validation_passes).
 
 Definition block_header_data :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data).
 
-Definition block_header_data_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data_encoding).
+Definition block_header_data_encoding : Data_encoding.t block_header_data :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_data_encoding).
 
 Definition block_header :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header).
 
 Definition block_header_metadata :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata).
 
-Definition block_header_metadata_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata_encoding).
+Definition block_header_metadata_encoding :
+  Data_encoding.t block_header_metadata :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata_encoding).
 
 Definition operation_receipt :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt).
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt).
 
-Definition operation_data_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_encoding).
+Definition operation_data_encoding : Data_encoding.t operation_data :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_encoding).
 
-Definition operation_receipt_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt_encoding).
+Definition operation_receipt_encoding : Data_encoding.t operation_receipt :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt_encoding).
 
-Definition operation_data_and_receipt_encoding :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_and_receipt_encoding).
+Definition operation_data_and_receipt_encoding :
+  Data_encoding.t (operation_data * operation_receipt) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_and_receipt_encoding).
 
-Definition acceptable_passes :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.acceptable_passes).
+Definition acceptable_passes : operation -&gt; list Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.acceptable_passes).
 
-Definition compare_operations :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.compare_operations).
+Definition compare_operations : operation -&gt; operation -&gt; Z :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.compare_operations).
 
-Definition current_context :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.current_context).
+Definition current_context :
+  validation_state -&gt; Lwt.t (Error_monad.tzresult Context.t) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.current_context).
 
-Definition begin_partial_application :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.begin_partial_application).
+Definition begin_partial_application :
+  (|Chain_id|).(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; (|Fitness|).(S.T.t) -&gt;
+  block_header -&gt; Lwt.t (Error_monad.tzresult validation_state) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.begin_partial_application).
 
-Definition begin_application :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.begin_application).
+Definition begin_application :
+  (|Chain_id|).(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; (|Fitness|).(S.T.t) -&gt;
+  block_header -&gt; Lwt.t (Error_monad.tzresult validation_state) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.begin_application).
 
-Definition begin_construction :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.begin_construction).
+Definition begin_construction :
+  (|Chain_id|).(S.HASH.t) -&gt; Context.t -&gt; Time.t -&gt; Int32.t -&gt;
+  (|Fitness|).(S.T.t) -&gt; (|Block_hash|).(S.HASH.t) -&gt; Time.t -&gt;
+  option block_header_data -&gt; unit -&gt;
+  Lwt.t (Error_monad.tzresult validation_state) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.begin_construction).
 
-Definition apply_operation :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.apply_operation).
+Definition apply_operation :
+  validation_state -&gt; operation -&gt;
+  Lwt.t (Error_monad.tzresult (validation_state * operation_receipt)) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.apply_operation).
 
-Definition finalize_block :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.finalize_block).
+Definition finalize_block :
+  validation_state -&gt;
+  Lwt.t
+    (Error_monad.tzresult (Updater.validation_result * block_header_metadata))
+  := (|Included_PROTOCOL|).(Updater.PROTOCOL.finalize_block).
 
-Definition rpc_services :=
-(|Included_PROTOCOL|).(Updater.PROTOCOL.rpc_services).
+Definition rpc_services : RPC_directory.t Updater.rpc_context :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.rpc_services).
 
-Definition init := (|Included_PROTOCOL|).(Updater.PROTOCOL.init).
+Definition init :
+  Context.t -&gt; Block_header.shell_header -&gt;
+  Lwt.t (Error_monad.tzresult Updater.validation_result) :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.init).
 </pre>
   </div>
 </div>
@@ -52507,25 +52632,25 @@ Definition period := t.
 
 Parameter Included_S : {_ : unit &amp; Compare.S.signature t}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : t -&gt; t -&gt; Z := (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : t -&gt; t -&gt; t := (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : t -&gt; t -&gt; t := (|Included_S|).(Compare.S.min).
 
 Parameter encoding : Data_encoding.t period.
 
@@ -55085,7 +55210,7 @@ Definition temporary_big_maps {A : Set}
     <h3>Raw_context_mli</h3>
     <ul>
       <li>OCaml size: 293 lines</li>
-      <li>Coq size: 247 lines (-16% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 268 lines (-9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -55566,45 +55691,66 @@ End T.
 
 Parameter Included_T : {_ : unit &amp; T.signature t}.
 
-Definition mem := (|Included_T|).(T.mem).
+Definition mem : context -&gt; key -&gt; Lwt.t bool := (|Included_T|).(T.mem).
 
-Definition dir_mem := (|Included_T|).(T.dir_mem).
+Definition dir_mem : context -&gt; key -&gt; Lwt.t bool := (|Included_T|).(T.dir_mem).
 
-Definition get := (|Included_T|).(T.get).
+Definition get : context -&gt; key -&gt; Lwt.t (Error_monad.tzresult value) :=
+  (|Included_T|).(T.get).
 
-Definition get_option := (|Included_T|).(T.get_option).
+Definition get_option : context -&gt; key -&gt; Lwt.t (option value) :=
+  (|Included_T|).(T.get_option).
 
-Definition init := (|Included_T|).(T.init).
+Definition init :
+  context -&gt; key -&gt; value -&gt; Lwt.t (Error_monad.tzresult context) :=
+  (|Included_T|).(T.init).
 
-Definition set := (|Included_T|).(T.set).
+Definition set : context -&gt; key -&gt; value -&gt; Lwt.t (Error_monad.tzresult context)
+  := (|Included_T|).(T.set).
 
-Definition init_set := (|Included_T|).(T.init_set).
+Definition init_set : context -&gt; key -&gt; value -&gt; Lwt.t context :=
+  (|Included_T|).(T.init_set).
 
-Definition set_option := (|Included_T|).(T.set_option).
+Definition set_option : context -&gt; key -&gt; option value -&gt; Lwt.t context :=
+  (|Included_T|).(T.set_option).
 
-Definition delete := (|Included_T|).(T.delete).
+Definition delete : context -&gt; key -&gt; Lwt.t (Error_monad.tzresult context) :=
+  (|Included_T|).(T.delete).
 
-Definition remove := (|Included_T|).(T.remove).
+Definition remove : context -&gt; key -&gt; Lwt.t context :=
+  (|Included_T|).(T.remove).
 
-Definition remove_rec := (|Included_T|).(T.remove_rec).
+Definition remove_rec : context -&gt; key -&gt; Lwt.t context :=
+  (|Included_T|).(T.remove_rec).
 
-Definition copy := (|Included_T|).(T.copy).
+Definition copy : context -&gt; key -&gt; key -&gt; Lwt.t (Error_monad.tzresult context)
+  := (|Included_T|).(T.copy).
 
-Definition fold := (|Included_T|).(T.fold).
+Definition fold {a : Set} :
+  context -&gt; key -&gt; a -&gt; (Context.dir_or_key -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a :=
+  (|Included_T|).(T.fold).
 
-Definition keys := (|Included_T|).(T.keys).
+Definition keys : context -&gt; key -&gt; Lwt.t (list key) := (|Included_T|).(T.keys).
 
-Definition fold_keys := (|Included_T|).(T.fold_keys).
+Definition fold_keys {a : Set} :
+  context -&gt; key -&gt; a -&gt; (key -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a :=
+  (|Included_T|).(T.fold_keys).
 
-Definition project := (|Included_T|).(T.project).
+Definition project : context -&gt; root_context := (|Included_T|).(T.project).
 
-Definition absolute_key := (|Included_T|).(T.absolute_key).
+Definition absolute_key : context -&gt; key -&gt; key :=
+  (|Included_T|).(T.absolute_key).
 
-Definition consume_gas := (|Included_T|).(T.consume_gas).
+Definition consume_gas :
+  context -&gt; Gas_limit_repr.cost -&gt; Error_monad.tzresult context :=
+  (|Included_T|).(T.consume_gas).
 
-Definition check_enough_gas := (|Included_T|).(T.check_enough_gas).
+Definition check_enough_gas :
+  context -&gt; Gas_limit_repr.cost -&gt; Error_monad.tzresult unit :=
+  (|Included_T|).(T.check_enough_gas).
 
-Definition description := (|Included_T|).(T.description).
+Definition description : Storage_description.t context :=
+  (|Included_T|).(T.description).
 
 Parameter reset_internal_nonce : context -&gt; context.
 
@@ -55891,7 +56037,7 @@ End Index.
     <h3>Raw_level_repr_mli</h3>
     <ul>
       <li>OCaml size: 55 lines</li>
-      <li>Coq size: 61 lines (+10% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 71 lines (+29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -55982,25 +56128,35 @@ Parameter pp : Format.formatter -&gt; raw_level -&gt; unit.
 
 Parameter Included_S : {_ : unit &amp; Compare.S.signature raw_level}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : raw_level -&gt; raw_level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : raw_level -&gt; raw_level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : raw_level -&gt; raw_level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : raw_level -&gt; raw_level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : raw_level -&gt; raw_level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : raw_level -&gt; raw_level -&gt; bool :=
+  (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : raw_level -&gt; raw_level -&gt; Z :=
+  (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : raw_level -&gt; raw_level -&gt; bool :=
+  (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : raw_level -&gt; raw_level -&gt; raw_level :=
+  (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : raw_level -&gt; raw_level -&gt; raw_level :=
+  (|Included_S|).(Compare.S.min).
 
 Parameter to_int32 : raw_level -&gt; int32.
 
@@ -95751,7 +95907,7 @@ Definition encoding : Data_encoding.encoding qty :=
     <h3>Tez_repr_mli</h3>
     <ul>
       <li>OCaml size: 32 lines</li>
-      <li>Coq size: 81 lines (+153% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 88 lines (+175% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95829,65 +95985,72 @@ Definition tez := t.
 
 Parameter Included_S : {_ : unit &amp; Qty_repr.S.signature t}.
 
-Definition id := (|Included_S|).(Qty_repr.S.id).
+Definition id : string := (|Included_S|).(Qty_repr.S.id).
 
-Definition zero := (|Included_S|).(Qty_repr.S.zero).
+Definition zero : t := (|Included_S|).(Qty_repr.S.zero).
 
-Definition one_mutez := (|Included_S|).(Qty_repr.S.one_mutez).
+Definition one_mutez : t := (|Included_S|).(Qty_repr.S.one_mutez).
 
-Definition one_cent := (|Included_S|).(Qty_repr.S.one_cent).
+Definition one_cent : t := (|Included_S|).(Qty_repr.S.one_cent).
 
-Definition fifty_cents := (|Included_S|).(Qty_repr.S.fifty_cents).
+Definition fifty_cents : t := (|Included_S|).(Qty_repr.S.fifty_cents).
 
-Definition one := (|Included_S|).(Qty_repr.S.one).
+Definition one : t := (|Included_S|).(Qty_repr.S.one).
 
-Definition op_minusquestion := (|Included_S|).(Qty_repr.S.op_minusquestion).
+Definition op_minusquestion : t -&gt; t -&gt; Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_minusquestion).
 
-Definition op_plusquestion := (|Included_S|).(Qty_repr.S.op_plusquestion).
+Definition op_plusquestion : t -&gt; t -&gt; Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_plusquestion).
 
-Definition op_starquestion := (|Included_S|).(Qty_repr.S.op_starquestion).
+Definition op_starquestion : t -&gt; int64 -&gt; Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_starquestion).
 
-Definition op_divquestion := (|Included_S|).(Qty_repr.S.op_divquestion).
+Definition op_divquestion : t -&gt; int64 -&gt; Error_monad.tzresult t :=
+  (|Included_S|).(Qty_repr.S.op_divquestion).
 
-Definition to_mutez := (|Included_S|).(Qty_repr.S.to_mutez).
+Definition to_mutez : t -&gt; int64 := (|Included_S|).(Qty_repr.S.to_mutez).
 
-Definition of_mutez := (|Included_S|).(Qty_repr.S.of_mutez).
+Definition of_mutez : int64 -&gt; option t := (|Included_S|).(Qty_repr.S.of_mutez).
 
-Definition of_mutez_exn := (|Included_S|).(Qty_repr.S.of_mutez_exn).
+Definition of_mutez_exn : int64 -&gt; t :=
+  (|Included_S|).(Qty_repr.S.of_mutez_exn).
 
-Definition add_exn := (|Included_S|).(Qty_repr.S.add_exn).
+Definition add_exn : t -&gt; t -&gt; t := (|Included_S|).(Qty_repr.S.add_exn).
 
-Definition mul_exn := (|Included_S|).(Qty_repr.S.mul_exn).
+Definition mul_exn : t -&gt; Z -&gt; t := (|Included_S|).(Qty_repr.S.mul_exn).
 
-Definition qty_encoding := (|Included_S|).(Qty_repr.S.qty_encoding).
+Definition qty_encoding : Data_encoding.t t :=
+  (|Included_S|).(Qty_repr.S.qty_encoding).
 
-Definition to_int64 := (|Included_S|).(Qty_repr.S.to_int64).
+Definition to_int64 : t -&gt; int64 := (|Included_S|).(Qty_repr.S.to_int64).
 
-Definition op_eq := (|Included_S|).(Qty_repr.S.op_eq).
+Definition op_eq : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Qty_repr.S.op_ltgt).
+Definition op_ltgt : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Qty_repr.S.op_lt).
+Definition op_lt : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Qty_repr.S.op_lteq).
+Definition op_lteq : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Qty_repr.S.op_gteq).
+Definition op_gteq : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Qty_repr.S.op_gt).
+Definition op_gt : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_gt).
 
-Definition compare := (|Included_S|).(Qty_repr.S.compare).
+Definition compare : t -&gt; t -&gt; Z := (|Included_S|).(Qty_repr.S.compare).
 
-Definition equal := (|Included_S|).(Qty_repr.S.equal).
+Definition equal : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.equal).
 
-Definition max := (|Included_S|).(Qty_repr.S.max).
+Definition max : t -&gt; t -&gt; t := (|Included_S|).(Qty_repr.S.max).
 
-Definition min := (|Included_S|).(Qty_repr.S.min).
+Definition min : t -&gt; t -&gt; t := (|Included_S|).(Qty_repr.S.min).
 
-Definition pp := (|Included_S|).(Qty_repr.S.pp).
+Definition pp : Format.formatter -&gt; t -&gt; unit := (|Included_S|).(Qty_repr.S.pp).
 
-Definition of_string := (|Included_S|).(Qty_repr.S.of_string).
+Definition of_string : string -&gt; option t :=
+  (|Included_S|).(Qty_repr.S.of_string).
 
-Definition to_string := (|Included_S|).(Qty_repr.S.to_string).
+Definition to_string : t -&gt; string := (|Included_S|).(Qty_repr.S.to_string).
 
 Parameter encoding : Data_encoding.t t.
 </pre>
@@ -97286,7 +97449,7 @@ Definition kind_encoding : Data_encoding.encoding kind :=
     <h3>Voting_period_repr_mli</h3>
     <ul>
       <li>OCaml size: 55 lines</li>
-      <li>Coq size: 60 lines (+9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 70 lines (+27% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -97376,25 +97539,35 @@ Parameter pp : Format.formatter -&gt; voting_period -&gt; unit.
 
 Parameter Included_S : {_ : unit &amp; Compare.S.signature voting_period}.
 
-Definition op_eq := (|Included_S|).(Compare.S.op_eq).
+Definition op_eq : voting_period -&gt; voting_period -&gt; bool :=
+  (|Included_S|).(Compare.S.op_eq).
 
-Definition op_ltgt := (|Included_S|).(Compare.S.op_ltgt).
+Definition op_ltgt : voting_period -&gt; voting_period -&gt; bool :=
+  (|Included_S|).(Compare.S.op_ltgt).
 
-Definition op_lt := (|Included_S|).(Compare.S.op_lt).
+Definition op_lt : voting_period -&gt; voting_period -&gt; bool :=
+  (|Included_S|).(Compare.S.op_lt).
 
-Definition op_lteq := (|Included_S|).(Compare.S.op_lteq).
+Definition op_lteq : voting_period -&gt; voting_period -&gt; bool :=
+  (|Included_S|).(Compare.S.op_lteq).
 
-Definition op_gteq := (|Included_S|).(Compare.S.op_gteq).
+Definition op_gteq : voting_period -&gt; voting_period -&gt; bool :=
+  (|Included_S|).(Compare.S.op_gteq).
 
-Definition op_gt := (|Included_S|).(Compare.S.op_gt).
+Definition op_gt : voting_period -&gt; voting_period -&gt; bool :=
+  (|Included_S|).(Compare.S.op_gt).
 
-Definition compare := (|Included_S|).(Compare.S.compare).
+Definition compare : voting_period -&gt; voting_period -&gt; Z :=
+  (|Included_S|).(Compare.S.compare).
 
-Definition equal := (|Included_S|).(Compare.S.equal).
+Definition equal : voting_period -&gt; voting_period -&gt; bool :=
+  (|Included_S|).(Compare.S.equal).
 
-Definition max := (|Included_S|).(Compare.S.max).
+Definition max : voting_period -&gt; voting_period -&gt; voting_period :=
+  (|Included_S|).(Compare.S.max).
 
-Definition min := (|Included_S|).(Compare.S.min).
+Definition min : voting_period -&gt; voting_period -&gt; voting_period :=
+  (|Included_S|).(Compare.S.min).
 
 Parameter to_int32 : voting_period -&gt; int32.
 
