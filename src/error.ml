@@ -119,7 +119,7 @@ let display_errors_json (errors : t list) : string =
         ("message", `String message);
       ]
     ))
-  )
+  ) ^ "\n"
 
 let display_errors
   (json_mode : bool)
