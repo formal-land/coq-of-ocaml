@@ -16,11 +16,10 @@ Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
 Require Tezos.Level_storage.
 Require Tezos.Manager_repr.
-Require Tezos.Nonce_storage_mli.
-Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
-Require Tezos.Storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Inductive balance : Set :=

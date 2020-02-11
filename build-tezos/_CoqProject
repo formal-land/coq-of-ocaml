@@ -16,7 +16,7 @@
 Blinded_public_key_hash.v
 Block_header_repr_mli.v
 #Block_header_repr.v
-#Bootstrap_storage_mli.v
+Bootstrap_storage_mli.v
 #Bootstrap_storage.v
 #Commitment_repr_mli.v
 Commitment_repr.v
@@ -31,7 +31,7 @@ Contract_repr_mli.v
 Contract_repr.v
 #Contract_services_mli.v
 #Contract_services.v
-#Contract_storage_mli.v
+Contract_storage_mli.v
 #Contract_storage.v
 Cycle_repr_mli.v
 Cycle_repr.v

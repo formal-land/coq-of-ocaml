@@ -55,7 +55,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35950 lines</li>
-      <li>Coq size: 51946 lines (+44% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 51943 lines (+44% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2715</li>
     </ul>
     
@@ -91,7 +91,7 @@
           11380,
           11380,
           11380,
-          12864,
+          13051,
         ],
         generated: [
           47563,
@@ -122,7 +122,7 @@
           51401,
           51401,
           51401,
-          51946,
+          51943,
         ],
         labels: [
           "01-14",
@@ -989,13 +989,13 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Init_storage.
 Require Tezos.Period_repr.
 Require Tezos.Raw_context.
 Require Tezos.Script_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
 Require Tezos.Tez_repr.
 
@@ -16467,14 +16467,14 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Cycle_repr.
-Require Tezos.Delegate_storage.
+Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
 Require Tezos.Misc.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
 Require Tezos.Script_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Import Misc.
@@ -16739,7 +16739,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Contract_storage.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Cycle_repr.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
@@ -17003,7 +17003,7 @@ Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Commitment_repr.
 Require Tezos.Raw_context.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Definition get_opt
@@ -23637,15 +23637,15 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
-Require Tezos.Delegate_storage.
+Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Manager_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 (* ❌ Structure item `typext` not handled. *)
@@ -29434,7 +29434,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 986 lines (+38% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 985 lines (+38% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -30193,11 +30193,10 @@ Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
 Require Tezos.Level_storage.
 Require Tezos.Manager_repr.
-Require Tezos.Nonce_storage_mli.
-Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
-Require Tezos.Storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Inductive balance : Set :=
@@ -31171,7 +31170,7 @@ Definition __list_value
     <h3>Delegate_storage_mli</h3>
     <ul>
       <li>OCaml size: 191 lines</li>
-      <li>Coq size: 152 lines (-21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 151 lines (-21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -31386,8 +31385,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage_mli.
-Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
@@ -31686,7 +31684,7 @@ Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
@@ -38634,16 +38632,16 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Bootstrap_storage.
-Require Tezos.Commitment_storage.
-Require Tezos.Contract_storage.
+Require Tezos.Bootstrap_storage_mli. Module Bootstrap_storage := Bootstrap_storage_mli.
+Require Tezos.Commitment_storage_mli. Module Commitment_storage := Commitment_storage_mli.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
 Require Tezos.Script_repr.
-Require Tezos.Seed_storage.
-Require Tezos.Storage.
-Require Tezos.Vote_storage.
+Require Tezos.Seed_storage_mli. Module Seed_storage := Seed_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Vote_storage_mli. Module Vote_storage := Vote_storage_mli.
 
 Definition prepare_first_block
   (ctxt : Context.t)
@@ -48483,7 +48481,7 @@ Require Tezos.Level_storage.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Definition t := Seed_repr.nonce.
@@ -57096,8 +57094,8 @@ Require Tezos.Misc.
 Require Tezos.Raw_context.
 Require Tezos.Roll_repr.
 Require Tezos.Seed_repr.
-Require Tezos.Seed_storage.
-Require Tezos.Storage.
+Require Tezos.Seed_storage_mli. Module Seed_storage := Seed_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Import Misc.
@@ -85991,7 +85989,7 @@ Require Tezos.Level_storage.
 Require Tezos.Misc.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 
 Import Misc.
 
@@ -86118,7 +86116,7 @@ Definition cycle_end
     <h3>Seed_storage_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 28 lines (-41% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 27 lines (-43% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86188,8 +86186,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage_mli.
-Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 
@@ -96686,8 +96683,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_storage.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
-Require Tezos.Storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
 

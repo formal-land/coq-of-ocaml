@@ -10,16 +10,16 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Bootstrap_storage.
-Require Tezos.Commitment_storage.
-Require Tezos.Contract_storage.
+Require Tezos.Bootstrap_storage_mli. Module Bootstrap_storage := Bootstrap_storage_mli.
+Require Tezos.Commitment_storage_mli. Module Commitment_storage := Commitment_storage_mli.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
 Require Tezos.Script_repr.
-Require Tezos.Seed_storage.
-Require Tezos.Storage.
-Require Tezos.Vote_storage.
+Require Tezos.Seed_storage_mli. Module Seed_storage := Seed_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Vote_storage_mli. Module Vote_storage := Vote_storage_mli.
 
 Definition prepare_first_block
   (ctxt : Context.t)

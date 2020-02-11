@@ -12,8 +12,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage_mli.
-Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 

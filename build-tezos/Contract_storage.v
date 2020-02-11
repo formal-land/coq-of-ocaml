@@ -11,15 +11,15 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
-Require Tezos.Delegate_storage.
+Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Manager_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 (* ❌ Structure item `typext` not handled. *)

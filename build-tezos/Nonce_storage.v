@@ -16,7 +16,7 @@ Require Tezos.Level_storage.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Definition t := Seed_repr.nonce.

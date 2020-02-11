@@ -12,8 +12,8 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_storage.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage.
-Require Tezos.Storage.
+Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
 

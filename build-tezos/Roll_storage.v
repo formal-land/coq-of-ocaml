@@ -20,8 +20,8 @@ Require Tezos.Misc.
 Require Tezos.Raw_context.
 Require Tezos.Roll_repr.
 Require Tezos.Seed_repr.
-Require Tezos.Seed_storage.
-Require Tezos.Storage.
+Require Tezos.Seed_storage_mli. Module Seed_storage := Seed_storage_mli.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Import Misc.

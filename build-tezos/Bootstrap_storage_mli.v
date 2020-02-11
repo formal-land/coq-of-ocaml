@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Contract_storage.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Cycle_repr.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.

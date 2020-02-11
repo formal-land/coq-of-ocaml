@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Commitment_repr.
 Require Tezos.Raw_context.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Tez_repr.
 
 Definition get_opt

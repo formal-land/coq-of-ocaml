@@ -12,13 +12,13 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage.
+Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Init_storage.
 Require Tezos.Period_repr.
 Require Tezos.Raw_context.
 Require Tezos.Script_repr.
-Require Tezos.Storage.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
 Require Tezos.Tez_repr.
 
