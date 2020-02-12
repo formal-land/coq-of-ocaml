@@ -8,6 +8,7 @@ type item =
   | IncludedFieldType of Name.t * Name.t * PathName.t
   | IncludedFieldValue of Name.t * Name.t list * Type.t * Name.t * PathName.t
   | Module of Name.t * t
+  | ModuleAlias of Name.t * PathName.t
   | Open of Open.t
   | Signature of Name.t * Signature.t
   | TypDefinition of TypeDefinition.t
@@ -167,9 +168,24 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       let name = Name.of_ident false md_id in
       let mty_desc = flatten_single_include mty_desc in
       begin match mty_desc with
+      | Tmty_alias (path, _) ->
+        let path_name = PathName.of_path_with_convert false path in
+        return [ModuleAlias (name, path_name)]
       | Tmty_signature signature ->
         of_signature signature >>= fun signature ->
         return [Module (name, signature)]
+      | Tmty_typeof { mod_type; _} ->
+        get_env >>= fun env ->
+        begin match Mtype.scrape_for_type_of ~remove_aliases:true env mod_type with
+        | Types.Mty_signature signature ->
+          of_types_signature signature >>= fun signature ->
+          return [Module (name, signature)]
+        | _ ->
+          raise
+            [Error "unhandled_kind_of_typeof"]
+            NotSupported
+            "We do not support this kind of typeof"
+        end
       | _ ->
         ModuleTyp.of_ocaml_desc mty_desc >>= fun module_typ ->
         let typ = ModuleTyp.to_typ module_typ in
@@ -247,6 +263,9 @@ let rec to_coq (signature : t) : SmartPrint.t =
       !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
       indent (to_coq signature) ^^ newline ^^
       !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+    | ModuleAlias (name, path_name) ->
+      !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^
+      PathName.to_coq path_name ^-^ !^ "."
     | Open o -> Open.to_coq o
     | Signature (name, signature) -> Signature.to_coq_definition name signature
     | TypDefinition typ_definition -> TypeDefinition.to_coq typ_definition

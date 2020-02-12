@@ -21,7 +21,7 @@ depends: [
   "coq" {>= "8.11"}
   "dune" {build}
   "menhir" {build}
-  "ocaml" {>= "4.05" & < "4.08"}
+  "ocaml" {>= "4.07" & < "4.08"}
   "smart-print"
   "yojson" {>= "1.6.0"}
 ]
