@@ -10,18 +10,45 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Require Tezos.Block_header_repr.
+Require Tezos.Bootstrap_storage.
+Require Tezos.Commitment_repr.
+Require Tezos.Commitment_storage.
 Require Tezos.Constants_repr.
+Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
 Require Tezos.Contract_storage.
+Require Tezos.Cycle_repr.
+Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Fees_storage.
+Require Tezos.Fitness_repr.
+Require Tezos.Fitness_storage.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Init_storage.
+Require Tezos.Legacy_script_support_repr.
+Require Tezos.Level_repr.
+Require Tezos.Level_storage.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Nonce_storage.
+Require Tezos.Operation_repr_mli. Module Operation_repr := Operation_repr_mli.
 Require Tezos.Period_repr.
 Require Tezos.Raw_context.
+Require Tezos.Raw_level_repr.
+Require Tezos.Roll_repr.
+Require Tezos.Roll_storage.
+Require Tezos.Script_int_repr.
 Require Tezos.Script_repr.
+Require Tezos.Script_timestamp_repr.
+Require Tezos.Seed_repr.
+Require Tezos.Seed_storage.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
 Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
+Require Tezos.Time_repr.
+Require Tezos.Vote_repr.
+Require Tezos.Vote_storage.
+Require Tezos.Voting_period_repr.
 
 Definition t := Raw_context.t.
 

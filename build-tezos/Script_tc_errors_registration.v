@@ -11,10 +11,11 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Script_tc_errors.
 
 Import Alpha_context.
 
-Import Script.
+Import Alpha_context.Script.
 
 Import Script_tc_errors.
 

@@ -209,7 +209,7 @@ Parameter parse_toplevel :
       Alpha_context.Script.node * option string).
 
 Parameter add_field_annot :
-  option (* `Field_annot *) string -> option (* `Var_annot *) string ->
+  option Script_typed_ir.field_annot -> option Script_typed_ir.var_annot ->
   Alpha_context.Script.node -> Alpha_context.Script.node.
 
 Parameter typecheck_code :

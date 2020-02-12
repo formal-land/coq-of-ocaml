@@ -11,14 +11,15 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_ir_annot.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_repr.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
-Import Script.
+Import Alpha_context.Script.
 
 Import Script_typed_ir.
 
@@ -68,7 +69,7 @@ Definition unparse_stack {A : Set}
   (function_parameter : stack A * Script_typed_ir.stack_ty A)
   : Lwt.t
     (Error_monad.tzresult (list (Alpha_context.Script.expr * option string))) :=
-  let '(stack, stack_ty) := function_parameter in
+  let '(__stack_value, stack_ty) := function_parameter in
   let ctxt := Alpha_context.Gas.set_unlimited ctxt in
   let fix unparse_stack {a : Set}
     (function_parameter : stack a * Script_typed_ir.stack_ty a)
@@ -103,7 +104,7 @@ Definition unparse_stack {A : Set}
               let data := Micheline.strip_locations data in
               Error_monad.__return (cons (data, annot) rest)))
     end in
-  unparse_stack (stack, stack_ty).
+  unparse_stack (__stack_value, stack_ty).
 
 Module Interp_costs := Michelson_v1_gas.Cost_of.Interpreter.
 
@@ -241,7 +242,7 @@ Fixpoint step {a b : Set}
       Script_typed_ir.descr.loc := loc;
         Script_typed_ir.descr.instr := instr
         |} as __descr_value := function_parameter in
-  fun stack =>
+  fun __stack_value =>
     Error_monad.op_gtgteqquestion
       (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.cycle))
       (fun ctxt =>
@@ -257,7 +258,7 @@ Fixpoint step {a b : Set}
               (Error_monad.trace extensible_type_value
                 (unparse_stack ctxt
                   (ret, __descr_value.(Script_typed_ir.descr.aft))))
-              (fun stack =>
+              (fun __stack_value =>
                 (* ❌ Sequences of instructions are ignored (operator ";") *)
                 (* ❌ instruction_sequence ";" *)
                 Error_monad.__return (ret, ctxt))
@@ -318,7 +319,7 @@ Fixpoint step {a b : Set}
                   (fun ctxt =>
                     logged_return __descr_value ((Item (op arg) rest), ctxt)) in
         let logged_return := logged_return __descr_value in
-        match (instr, stack) with
+        match (instr, __stack_value) with
         | (Script_typed_ir.Drop, Item _ rest) =>
           let 'existT _ __1 rest := existT (fun __1 : Set => (stack __1)) _ rest
             in
@@ -545,21 +546,21 @@ Fixpoint step {a b : Set}
                 [(Script_typed_ir.descr (__53 * __54) __54) ** (list __53) **
                   (stack __54)]) _ [body, l, init] in
           let fix loop
-            (ctxt : Alpha_context.context) (l : list __53) (stack : stack __54)
-            {struct ctxt}
+            (ctxt : Alpha_context.context) (l : list __53)
+            (__stack_value : stack __54) {struct ctxt}
             : Lwt.t (Error_monad.tzresult (stack __54 * Alpha_context.context)) :=
             Error_monad.op_gtgteqquestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter))
               (fun ctxt =>
                 match l with
-                | [] => Error_monad.__return (stack, ctxt)
+                | [] => Error_monad.__return (__stack_value, ctxt)
                 | cons hd tl =>
                   Error_monad.op_gtgteqquestion
-                    (step log ctxt step_constants body (Item hd stack))
+                    (step log ctxt step_constants body (Item hd __stack_value))
                     (fun function_parameter =>
-                      let '(stack, ctxt) := function_parameter in
-                      loop ctxt tl stack)
+                      let '(__stack_value, ctxt) := function_parameter in
+                      loop ctxt tl __stack_value)
                 end) in
           Error_monad.op_gtgteqquestion (loop ctxt l init)
             (fun function_parameter =>
@@ -594,7 +595,7 @@ Fixpoint step {a b : Set}
                     (fun e => fun acc => cons e acc) set nil) in
               let fix loop
                 (ctxt : Alpha_context.context) (l : list __56)
-                (stack : stack __57) {struct ctxt}
+                (__stack_value : stack __57) {struct ctxt}
                 : Lwt.t
                   (Error_monad.tzresult (stack __57 * Alpha_context.context)) :=
                 Error_monad.op_gtgteqquestion
@@ -602,13 +603,14 @@ Fixpoint step {a b : Set}
                     (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter))
                   (fun ctxt =>
                     match l with
-                    | [] => Error_monad.__return (stack, ctxt)
+                    | [] => Error_monad.__return (__stack_value, ctxt)
                     | cons hd tl =>
                       Error_monad.op_gtgteqquestion
-                        (step log ctxt step_constants body (Item hd stack))
+                        (step log ctxt step_constants body
+                          (Item hd __stack_value))
                         (fun function_parameter =>
-                          let '(stack, ctxt) := function_parameter in
-                          loop ctxt tl stack)
+                          let '(__stack_value, ctxt) := function_parameter in
+                          loop ctxt tl __stack_value)
                     end) in
               Error_monad.op_gtgteqquestion (loop ctxt l init)
                 (fun function_parameter =>
@@ -713,7 +715,7 @@ Fixpoint step {a b : Set}
                     (fun k => fun v => fun acc => cons (k, v) acc) map nil) in
               let fix loop
                 (ctxt : Alpha_context.context) (l : list (__70 * __71))
-                (stack : stack __72) {struct ctxt}
+                (__stack_value : stack __72) {struct ctxt}
                 : Lwt.t
                   (Error_monad.tzresult (stack __72 * Alpha_context.context)) :=
                 Error_monad.op_gtgteqquestion
@@ -721,13 +723,14 @@ Fixpoint step {a b : Set}
                     (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter))
                   (fun ctxt =>
                     match l with
-                    | [] => Error_monad.__return (stack, ctxt)
+                    | [] => Error_monad.__return (__stack_value, ctxt)
                     | cons hd tl =>
                       Error_monad.op_gtgteqquestion
-                        (step log ctxt step_constants body (Item hd stack))
+                        (step log ctxt step_constants body
+                          (Item hd __stack_value))
                         (fun function_parameter =>
-                          let '(stack, ctxt) := function_parameter in
-                          loop ctxt tl stack)
+                          let '(__stack_value, ctxt) := function_parameter in
+                          loop ctxt tl __stack_value)
                     end) in
               Error_monad.op_gtgteqquestion (loop ctxt l init)
                 (fun function_parameter =>
@@ -1411,14 +1414,15 @@ Fixpoint step {a b : Set}
                   (stack __145)]) _ [x, rest] in
           consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
             Interp_costs.lognot rest ctxt
-        | (Script_typed_ir.Seq hd tl, stack) =>
-          let 'existT _ __Seq_'trans3 [hd, tl, stack] :=
+        | (Script_typed_ir.Seq hd tl, __stack_value) =>
+          let 'existT _ __Seq_'trans3 [hd, tl, __stack_value] :=
             existT
               (fun __Seq_'trans3 : Set =>
                 [(Script_typed_ir.descr b __Seq_'trans3) **
                   (Script_typed_ir.descr __Seq_'trans3 a) ** (stack b)]) _
-              [hd, tl, stack] in
-          Error_monad.op_gtgteqquestion (step log ctxt step_constants hd stack)
+              [hd, tl, __stack_value] in
+          Error_monad.op_gtgteqquestion
+            (step log ctxt step_constants hd __stack_value)
             (fun function_parameter =>
               let '(trans, ctxt) := function_parameter in
               step log ctxt step_constants tl trans)
@@ -1623,7 +1627,8 @@ Fixpoint step {a b : Set}
               let '(v, _ctxt) := function_parameter in
               let v := Micheline.strip_locations v in
               Error_monad.fail extensible_type_value)
-        | (Script_typed_ir.Nop, stack) => logged_return (stack, ctxt)
+        | (Script_typed_ir.Nop, __stack_value) =>
+          logged_return (__stack_value, ctxt)
         | (Script_typed_ir.Compare ty, Item a (Item b rest)) =>
           let 'existT _ [__170, __171] [ty, a, b, rest] :=
             existT
@@ -1980,8 +1985,8 @@ Fixpoint step {a b : Set}
                   let '(unparsed_param_type, ctxt) := function_parameter in
                   let unparsed_param_type :=
                     Script_ir_translator.add_field_annot
-                      (Option.map (fun n => Field_annot n) root_name) None
-                      unparsed_param_type in
+                      (Option.map (fun n => Script_typed_ir.Field_annot n)
+                        root_name) None unparsed_param_type in
                   Error_monad.op_gtgteqquestion
                     (Script_ir_translator.unparse_ty ctxt storage_type)
                     (fun function_parameter =>
@@ -2118,8 +2123,8 @@ Fixpoint step {a b : Set}
                   let '(unparsed_param_type, ctxt) := function_parameter in
                   let unparsed_param_type :=
                     Script_ir_translator.add_field_annot
-                      (Option.map (fun n => Field_annot n) root_name) None
-                      unparsed_param_type in
+                      (Option.map (fun n => Script_typed_ir.Field_annot n)
+                        root_name) None unparsed_param_type in
                   Error_monad.op_gtgteqquestion
                     (Script_ir_translator.unparse_ty ctxt storage_type)
                     (fun function_parameter =>
@@ -2353,14 +2358,14 @@ Fixpoint step {a b : Set}
             (fun ctxt =>
               logged_return
                 ((Item step_constants.(step_constants.amount) rest), ctxt))
-        | (Script_typed_ir.Dig n n', stack) =>
-          let 'existT _ [__201, __202, __Dig_'rest] [n, n', stack] :=
+        | (Script_typed_ir.Dig n n', __stack_value) =>
+          let 'existT _ [__201, __202, __Dig_'rest] [n, n', __stack_value] :=
             existT
               (fun '[__201, __202, __Dig_'rest] =>
                 [Z **
                   (Script_typed_ir.stack_prefix_preservation_witness
                     (__201 * __Dig_'rest) __Dig_'rest b __202) ** (stack b)]) _
-              [n, n', stack] in
+              [n, n', __stack_value] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)))
@@ -2369,7 +2374,7 @@ Fixpoint step {a b : Set}
                 (interp_stack_prefix_preserving_operation
                   (fun function_parameter =>
                     let 'Item v rest := function_parameter in
-                    Error_monad.__return (rest, v)) n' stack)
+                    Error_monad.__return (rest, v)) n' __stack_value)
                 (fun function_parameter =>
                   let '(aft, x) := function_parameter in
                   logged_return ((Item x aft), ctxt)))
@@ -2391,15 +2396,16 @@ Fixpoint step {a b : Set}
                 (fun function_parameter =>
                   let '(aft, _) := function_parameter in
                   logged_return (aft, ctxt)))
-        | (Script_typed_ir.Dipn n n' b, stack) =>
-          let 'existT _ [__Dipn_'faft, __Dipn_'fbef] [n, n', b, stack] :=
+        | (Script_typed_ir.Dipn n n' b, __stack_value) =>
+          let 'existT _ [__Dipn_'faft, __Dipn_'fbef] [n, n', b, __stack_value]
+            :=
             existT
               (fun '[__Dipn_'faft, __Dipn_'fbef] =>
                 [Z **
                   (Script_typed_ir.stack_prefix_preservation_witness
                     __Dipn_'fbef __Dipn_'faft b a) **
                   (Script_typed_ir.descr __Dipn_'fbef __Dipn_'faft) **
-                  (stack b)]) _ [n, n', b, stack] in
+                  (stack b)]) _ [n, n', b, __stack_value] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)))
@@ -2411,24 +2417,24 @@ Fixpoint step {a b : Set}
                       (step log ctxt step_constants b stk)
                       (fun function_parameter =>
                         let '(res, ctxt') := function_parameter in
-                        Error_monad.__return (res, ctxt'))) n' stack)
+                        Error_monad.__return (res, ctxt'))) n' __stack_value)
                 (fun function_parameter =>
                   let '(aft, ctxt') := function_parameter in
                   logged_return (aft, ctxt')))
-        | (Script_typed_ir.Dropn n n', stack) =>
-          let 'existT _ __Dropn [n, n', stack] :=
+        | (Script_typed_ir.Dropn n n', __stack_value) =>
+          let 'existT _ __Dropn [n, n', __stack_value] :=
             existT
               (fun __Dropn : Set =>
                 [Z **
                   (Script_typed_ir.stack_prefix_preservation_witness a a b
-                    __Dropn) ** (stack b)]) _ [n, n', stack] in
+                    __Dropn) ** (stack b)]) _ [n, n', __stack_value] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)))
             (fun ctxt =>
               Error_monad.op_gtgteqquestion
                 (interp_stack_prefix_preserving_operation
-                  (fun stk => Error_monad.__return (stk, stk)) n' stack)
+                  (fun stk => Error_monad.__return (stk, stk)) n' __stack_value)
                 (fun function_parameter =>
                   let '(_, rest) := function_parameter in
                   logged_return (rest, ctxt)))
@@ -2447,22 +2453,24 @@ with interp {p r : Set}
   : p -> Lwt.t (Error_monad.tzresult (r * Alpha_context.context)) :=
   let '{| Script_typed_ir.lambda.lam := (code, _) |} := function_parameter in
   fun arg =>
-    let stack := Item arg Empty in
+    let __stack_value := Item arg Empty in
     Error_monad.op_gtgteqquestion
       match log with
       | None => Error_monad.return_unit
       | Some log =>
         Error_monad.op_gtgteqquestion
           (Error_monad.trace extensible_type_value
-            (unparse_stack ctxt (stack, code.(Script_typed_ir.descr.bef))))
-          (fun stack =>
+            (unparse_stack ctxt
+              (__stack_value, code.(Script_typed_ir.descr.bef))))
+          (fun __stack_value =>
             (* ❌ Sequences of instructions are ignored (operator ";") *)
             (* ❌ instruction_sequence ";" *)
             Error_monad.return_unit)
       end
       (fun function_parameter =>
         let '_ := function_parameter in
-        Error_monad.op_gtgteqquestion (step log ctxt step_constants code stack)
+        Error_monad.op_gtgteqquestion
+          (step log ctxt step_constants code __stack_value)
           (fun function_parameter =>
             let '(Item ret Empty, ctxt) := function_parameter in
             Error_monad.__return (ret, ctxt)))

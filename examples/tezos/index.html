@@ -54,9 +54,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35947 lines</li>
-      <li>Coq size: 52441 lines (+45% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 2704</li>
+      <li>OCaml size: 35966 lines</li>
+      <li>Coq size: 52522 lines (+46% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 2508</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -92,7 +92,7 @@
           11380,
           11380,
           13051,
-          23576,
+          25328,
         ],
         generated: [
           47563,
@@ -124,7 +124,7 @@
           51401,
           51401,
           51943,
-          52441,
+          52522,
         ],
         labels: [
           "01-14",
@@ -526,7 +526,7 @@
       </li>
       
       <li>
-        <a href="#script_interpreter.ml">script_interpreter.ml</a>&nbsp;<span class="label label-warning">30</span>
+        <a href="#script_interpreter.ml">script_interpreter.ml</a>&nbsp;<span class="label label-warning">28</span>
       </li>
       
       <li>
@@ -534,7 +534,7 @@
       </li>
       
       <li>
-        <a href="#script_ir_annot.ml">script_ir_annot.ml</a>&nbsp;<span class="label label-warning">189</span>
+        <a href="#script_ir_annot.ml">script_ir_annot.ml</a>&nbsp;<span class="label label-warning">14</span>
       </li>
       
       <li>
@@ -542,11 +542,11 @@
       </li>
       
       <li>
-        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-warning">196</span>
+        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-warning">182</span>
       </li>
       
       <li>
-        <a href="#script_ir_translator.mli">script_ir_translator.mli</a>&nbsp;<span class="label label-warning">3</span>
+        <a href="#script_ir_translator.mli">script_ir_translator.mli</a>&nbsp;<span class="label label-warning">1</span>
       </li>
       
       <li>
@@ -574,7 +574,7 @@
       </li>
       
       <li>
-        <a href="#script_typed_ir.ml">script_typed_ir.ml</a>&nbsp;<span class="label label-warning">3</span>
+        <a href="#script_typed_ir.ml">script_typed_ir.ml</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -689,7 +689,7 @@
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 450 lines (+61% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 477 lines (+70% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -990,18 +990,45 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Require Tezos.Block_header_repr.
+Require Tezos.Bootstrap_storage.
+Require Tezos.Commitment_repr.
+Require Tezos.Commitment_storage.
 Require Tezos.Constants_repr.
+Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
 Require Tezos.Contract_storage.
+Require Tezos.Cycle_repr.
+Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Fees_storage.
+Require Tezos.Fitness_repr.
+Require Tezos.Fitness_storage.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Init_storage.
+Require Tezos.Legacy_script_support_repr.
+Require Tezos.Level_repr.
+Require Tezos.Level_storage.
+Require Tezos.Michelson_v1_primitives.
+Require Tezos.Nonce_storage.
+Require Tezos.Operation_repr_mli. Module Operation_repr := Operation_repr_mli.
 Require Tezos.Period_repr.
 Require Tezos.Raw_context.
+Require Tezos.Raw_level_repr.
+Require Tezos.Roll_repr.
+Require Tezos.Roll_storage.
+Require Tezos.Script_int_repr.
 Require Tezos.Script_repr.
+Require Tezos.Script_timestamp_repr.
+Require Tezos.Seed_repr.
+Require Tezos.Seed_storage.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
 Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
+Require Tezos.Time_repr.
+Require Tezos.Vote_repr.
+Require Tezos.Vote_storage.
+Require Tezos.Voting_period_repr.
 
 Definition t := Raw_context.t.
 
@@ -5401,7 +5428,7 @@ Parameter description : Storage_description.t context.
     <h3>Alpha_services</h3>
     <ul>
       <li>OCaml size: 117 lines</li>
-      <li>Coq size: 190 lines (+62% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 195 lines (+66% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -5647,8 +5674,13 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
+Require Tezos.Contract_services.
+Require Tezos.Delegate_services.
+Require Tezos.Helpers_services.
 Require Tezos.Nonce_hash.
 Require Tezos.Services_registration.
+Require Tezos.Voting_services.
 
 Import Alpha_context.
 
@@ -6000,7 +6032,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
-Require Tezos.Constants_services.
+Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
 Require Tezos.Contract_services.
 Require Tezos.Delegate_services.
 Require Tezos.Helpers_services.
@@ -8509,7 +8541,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -10369,7 +10401,7 @@ Definition finalize_application
     <h3>Apply_results</h3>
     <ul>
       <li>OCaml size: 1187 lines</li>
-      <li>Coq size: 2155 lines (+81% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2140 lines (+80% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -10403,7 +10435,7 @@ Definition finalize_application
 open Alpha_context
 open Data_encoding
 
-let error_encoding =
+let[@coq_axiom] error_encoding =
   <abbr class="mark-warning" title="expected an argument">def
     &quot;error&quot;
     ~description:
@@ -11585,22 +11617,7 @@ Import Alpha_context.
 
 Import Data_encoding.
 
-Definition error_encoding : Data_encoding.encoding Error_monad.__error :=
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.def &quot;error&quot;
-        (* ❌ expected an argument *)
-        expected_argument
-        (Some
-          &quot;The full list of RPC errors would be too long to include.\nIt is available at RPC `/errors` (GET).\nErrors specific to protocol Alpha have an id that starts with `proto.alpha`.&quot;)
-      in
-    fun eta =&gt; arg None eta)
-    (Data_encoding.splitted
-      (Data_encoding.conv
-        (fun err =&gt; Data_encoding.Json.construct Error_monad.error_encoding err)
-        (fun __json_value =&gt;
-          Data_encoding.Json.destruct Error_monad.error_encoding __json_value)
-        None Data_encoding.__json_value) Error_monad.error_encoding).
+Definition error_encoding : Data_encoding.encoding Error_monad.__error := axiom.
 
 Module successful_manager_operation_result.
   Module Reveal_result.
@@ -20851,7 +20868,7 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
 
@@ -21029,7 +21046,7 @@ Module S.
         (RPC_path.op_divcolon big_map_root Alpha_context.Big_map.rpc_arg)
         Script_expr_hash.rpc_arg).
   
-  Definition info
+  Definition __info_value
     : RPC_service.service (* `GET *) unit RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit info :=
     RPC_service.get_service (Some &quot;Access the complete status of a contract.&quot;)
@@ -21156,7 +21173,7 @@ Definition register (function_parameter : unit) : unit :=
   (* ❌ instruction_sequence &quot;;&quot; *)
   (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
-  register_field S.info
+  register_field S.__info_value
     (fun ctxt =&gt;
       fun contract =&gt;
         Error_monad.op_gtgteqquestion
@@ -21238,7 +21255,7 @@ Definition __list_value {D E G I K L a b c i o q : Set}
   : Lwt.t (Error_monad.shell_tzresult (list Alpha_context.Contract.t)) :=
   RPC_context.make_call0 S.__list_value ctxt block tt tt.
 
-Definition info {D E G I K L a b c i o q : Set}
+Definition __info_value {D E G I K L a b c i o q : Set}
   (ctxt :
     (((RPC_service.t
       ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
@@ -21262,7 +21279,7 @@ Definition info {D E G I K L a b c i o q : Set}
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult info) :=
-  RPC_context.make_call1 S.info ctxt block contract tt tt.
+  RPC_context.make_call1 S.__info_value ctxt block contract tt tt.
 
 Definition balance {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -22533,7 +22550,7 @@ Definition info := info.record.
 
 Parameter info_encoding : Data_encoding.t info.
 
-Parameter info : forall {E F H J K a b c i o q : Set},
+Parameter __info_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
     ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit +
       (* `PATCH *) unit) RPC_context.t RPC_context.t q i o -&gt; a -&gt; q -&gt; i -&gt;
@@ -26889,7 +26906,7 @@ Module S.
     RPC_path.op_divcolon path
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg).
   
-  Definition info
+  Definition __info_value
     : RPC_service.service (* `GET *) unit Updater.rpc_context
       (Updater.rpc_context *
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) unit unit info :=
@@ -27057,7 +27074,7 @@ Definition __list_value {D E G I K L a b c i o q : Set}
         {| S.list_query.active := active; S.list_query.inactive := inactive |}
         tt.
 
-Definition info {D E G I K L a b c i o q : Set}
+Definition __info_value {D E G I K L a b c i o q : Set}
   (ctxt :
     (((RPC_service.t
       ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
@@ -27081,7 +27098,7 @@ Definition info {D E G I K L a b c i o q : Set}
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult info) :=
-  RPC_context.make_call1 S.info ctxt block pkh tt tt.
+  RPC_context.make_call1 S.__info_value ctxt block pkh tt tt.
 
 Definition balance {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -29134,7 +29151,7 @@ Definition info := info.record.
 
 Parameter info_encoding : Data_encoding.t info.
 
-Parameter info : forall {E F H J K a b c i o q : Set},
+Parameter __info_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
     ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit +
       (* `PATCH *) unit) RPC_context.t RPC_context.t q i o -&gt; a -&gt; q -&gt; i -&gt;
@@ -35203,7 +35220,7 @@ Require Tezos.Constants_repr.
 Require Tezos.Contract_services.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_tc_errors_registration.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
@@ -42596,7 +42613,7 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Apply.
 Require Tezos.Apply_results.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
 
@@ -43738,8 +43755,8 @@ Parameter encoding : Data_encoding.encoding t.
   <div style="margin: 20px;">
     <h3>Michelson_v1_gas</h3>
     <ul>
-      <li>OCaml size: 766 lines</li>
-      <li>Coq size: 951 lines (+24% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 779 lines</li>
+      <li>Coq size: 951 lines (+22% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -43792,26 +43809,26 @@ module Cost_of = struct
   let rec size_of_comparable :
       type a b. (a, b) Script_typed_ir.comparable_struct -&gt; a -&gt; int =
    fun wit v -&gt;
-    match[@coq_match_gadt] wit, v with
-    | Int_key _, (v : _ Script_int_repr.num) -&gt;
+    match[@coq_match_gadt] (wit, v) with
+    | (Int_key _, (v : _ Script_int_repr.num)) -&gt;
         int_bytes v
-    | Nat_key _, (v : _ Script_int_repr.num) -&gt;
+    | (Nat_key _, (v : _ Script_int_repr.num)) -&gt;
         int_bytes v
-    | String_key _, (v : string) -&gt;
+    | (String_key _, (v : string)) -&gt;
         String.length v
-    | Bytes_key _, (v : MBytes.t) -&gt;
+    | (Bytes_key _, (v : MBytes.t)) -&gt;
         MBytes.length v
-    | Bool_key _, _ -&gt;
+    | (Bool_key _, _) -&gt;
         8
-    | Key_hash_key _, _ -&gt;
+    | (Key_hash_key _, _) -&gt;
         Signature.Public_key_hash.size
-    | Timestamp_key _, (v : Script_timestamp.t) -&gt;
+    | (Timestamp_key _, (v : Script_timestamp.t)) -&gt;
         timestamp_bytes v
-    | Address_key _, _ -&gt;
+    | (Address_key _, _) -&gt;
         Signature.Public_key_hash.size
-    | Mutez_key _, _ -&gt;
+    | (Mutez_key _, _) -&gt;
         8
-    | Pair_key ((l, _), (r, _), _), (v : _ * _) -&gt;
+    | (Pair_key ((l, _), (r, _), _), (v : _ * _)) -&gt;
         let (lval, rval) = v in
         size_of_comparable l lval + size_of_comparable r rval
 
@@ -43879,12 +43896,16 @@ module Cost_of = struct
 
     let set_mem : type elt. elt -&gt; elt Script_typed_ir.set -&gt; cost =
      fun elt (module Box) -&gt;
-      let elt_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.elt_ty elt in
+      let elt_bytes =
+        (size_of_comparable [@coq_implicit &quot;(b := unit)&quot;]) Box.elt_ty elt
+      in
       atomic_step_cost ((1 + (elt_bytes / 82)) * log2 Box.size)
 
     let set_update : type elt. elt -&gt; bool -&gt; elt Script_typed_ir.set -&gt; cost =
      fun elt _ (module Box) -&gt;
-      let elt_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.elt_ty elt in
+      let elt_bytes =
+        (size_of_comparable [@coq_implicit &quot;(b := unit)&quot;]) Box.elt_ty elt
+      in
       atomic_step_cost ((1 + (elt_bytes / 82)) * log2 Box.size)
 
     let set_size = atomic_step_cost 10
@@ -43901,7 +43922,9 @@ module Cost_of = struct
         type key value. key -&gt; (key, value) Script_typed_ir.map -&gt; cost =
      fun key (module Box) -&gt;
       let map_card = snd Box.boxed in
-      let key_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.key_ty key in
+      let key_bytes =
+        (size_of_comparable [@coq_implicit &quot;(b := unit)&quot;]) Box.key_ty key
+      in
       atomic_step_cost ((1 + (key_bytes / 70)) * log2 map_card)
 
     let map_mem = map_access
@@ -43913,7 +43936,9 @@ module Cost_of = struct
         key -&gt; value option -&gt; (key, value) Script_typed_ir.map -&gt; cost =
      fun key _value (module Box) -&gt;
       let map_card = snd Box.boxed in
-      let key_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.key_ty key in
+      let key_bytes =
+        (size_of_comparable [@coq_implicit &quot;(b := unit)&quot;]) Box.key_ty key
+      in
       atomic_step_cost ((1 + (key_bytes / 38)) * log2 map_card)
 
     let map_size = atomic_step_cost 10
@@ -44092,26 +44117,29 @@ module Cost_of = struct
     let rec compare :
         type a s. (a, s) Script_typed_ir.comparable_struct -&gt; a -&gt; a -&gt; cost =
      fun ty x y -&gt;
-      match[@coq_match_gadt] ty, x, y with
-      | Bool_key _, (x : bool), (y : bool) -&gt;
+      match[@coq_match_gadt] (ty, x, y) with
+      | (Bool_key _, (x : bool), (y : bool)) -&gt;
           compare_bool x y
-      | String_key _, (x : string), (y : string) -&gt;
+      | (String_key _, (x : string), (y : string)) -&gt;
           compare_string x y
-      | Bytes_key _, (x : MBytes.t), (y : MBytes.t) -&gt;
+      | (Bytes_key _, (x : MBytes.t), (y : MBytes.t)) -&gt;
           compare_bytes x y
-      | Mutez_key _, x, y -&gt;
+      | (Mutez_key _, x, y) -&gt;
           compare_tez x y
-      | Int_key _, (x : _ Script_int_repr.num), (y : _ Script_int_repr.num) -&gt;
+      | (Int_key _, (x : _ Script_int_repr.num), (y : _ Script_int_repr.num))
+        -&gt;
           compare_zint x y
-      | Nat_key _, (x : _ Script_int_repr.num), (y : _ Script_int_repr.num) -&gt;
+      | (Nat_key _, (x : _ Script_int_repr.num), (y : _ Script_int_repr.num))
+        -&gt;
           compare_zint x y
-      | Key_hash_key _, x, y -&gt;
+      | (Key_hash_key _, x, y) -&gt;
           compare_key_hash x y
-      | Timestamp_key _, (x : Script_timestamp.t), (y : Script_timestamp.t) -&gt;
+      | (Timestamp_key _, (x : Script_timestamp.t), (y : Script_timestamp.t))
+        -&gt;
           compare_timestamp x y
-      | Address_key _, x, y -&gt;
+      | (Address_key _, x, y) -&gt;
           compare_address x y
-      | Pair_key ((tl, _), (tr, _), _), (x : _ * _), (y : _ * _) -&gt;
+      | (Pair_key ((tl, _), (tr, _), _), (x : _ * _), (y : _ * _)) -&gt;
           (* Reasonable over-approximation of the cost of lexicographic comparison. *)
           let (xl, xr) = x in
           let (yl, yr) = y in
@@ -44474,7 +44502,9 @@ module Cost_of = struct
 
     let tez = Script.int_node_cost_of_numbits 60 (* int64 bound *)
 
-    let timestamp x = Script_timestamp.to_zint x |&gt; Script_int.of_zint |&gt; (int[@coq_implicit &quot;(A := unit)&quot;])
+    let timestamp x =
+      Script_timestamp.to_zint x |&gt; Script_int.of_zint
+      |&gt; (int [@coq_implicit &quot;(A := unit)&quot;])
 
     let operation bytes = Script.bytes_node_cost bytes
 
@@ -44533,7 +44563,7 @@ Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
-Import Gas.
+Import Alpha_context.Gas.
 
 Module Cost_of.
   Definition log2 : Z -&gt; Z :=
@@ -48965,8 +48995,8 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
   <div style="margin: 20px;">
     <h3>Operation_repr</h3>
     <ul>
-      <li>OCaml size: 856 lines</li>
-      <li>Coq size: 1446 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 857 lines</li>
+      <li>Coq size: 1450 lines (+69% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -49156,10 +49186,11 @@ type packed_internal_operation =
   | Internal_operation : 'kind internal_operation -&gt; packed_internal_operation
 
 let rec to_list = function
-  | Contents_list (Single o) -&gt;
-      [Contents o]
-  | Contents_list (Cons (o, os)) -&gt;
-      Contents o :: to_list (Contents_list os)
+  | Contents_list content -&gt;
+    begin match[@coq_match_gadt] content with
+    | Single o -&gt; [Contents o]
+    | Cons (o, os) -&gt; Contents o :: to_list (Contents_list os)
+    end
 
 let rec of_list = function
   | [] -&gt;
@@ -50217,20 +50248,24 @@ Inductive packed_internal_operation : Set :=
 
 Fixpoint to_list (function_parameter : packed_contents_list)
   {struct function_parameter} : list packed_contents :=
-  match function_parameter with
-  | Contents_list (Single o) =&gt;
-    let 'existT _ __Contents_list_'kind o :=
-      existT
-        (fun __Contents_list_'kind : Set =&gt; (contents __Contents_list_'kind)) _
-        o in
-    [ Contents o ]
-  | Contents_list (Cons o os) =&gt;
+  let 'Contents_list content := function_parameter in
+  let 'existT _ __Contents_list_'kind content :=
+    existT
+      (fun __Contents_list_'kind : Set =&gt; (contents_list __Contents_list_'kind))
+      _ content in
+  match content with
+  | Single o =&gt;
+    let 'existT _ tt o :=
+      obj_magic_exists (fun _ =&gt; (contents __Contents_list_'kind)) o in
+    obj_magic (list packed_contents) [ Contents o ]
+  | Cons o os =&gt;
     let 'existT _ [__0, __1] [o, os] :=
-      existT
+      obj_magic_exists
         (fun '[__0, __1] =&gt;
           [(contents (Kind.manager __0)) ** (contents_list (Kind.manager __1))])
-        _ [o, os] in
-    cons (Contents o) (to_list (Contents_list os))
+        [o, os] in
+    obj_magic (list packed_contents)
+      (cons (Contents o) (to_list (Contents_list os)))
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents)
@@ -59154,11 +59189,11 @@ Parameter logxor : num n -&gt; num n -&gt; num n.
     <h3>Script_interpreter</h3>
     <ul>
       <li>OCaml size: 1520 lines</li>
-      <li>Coq size: 2616 lines (+72% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2624 lines (+72% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#script_interpreter.ml"><code>script_interpreter.ml</code></a>&nbsp;<span class="label label-warning">30 warnings</span>
+    <a href="#script_interpreter.ml"><code>script_interpreter.ml</code></a>&nbsp;<span class="label label-warning">28 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -60352,7 +60387,7 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun (unparsed_param_type, ctxt) -&gt;
       let unparsed_param_type =
         Script_ir_translator.add_field_annot
-          (Option.map ~f:(fun n -&gt; <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">`Field_annot n</abbr>) root_name)
+          (Option.map ~f:(fun n -&gt; Field_annot n) root_name)
           None
           unparsed_param_type
       in
@@ -60426,7 +60461,7 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun (unparsed_param_type, ctxt) -&gt;
       let unparsed_param_type =
         Script_ir_translator.add_field_annot
-          (Option.map ~f:(fun n -&gt; <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">`Field_annot n</abbr>) root_name)
+          (Option.map ~f:(fun n -&gt; Field_annot n) root_name)
           None
           unparsed_param_type
       in
@@ -60725,14 +60760,15 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_ir_annot.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_repr.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
-Import Script.
+Import Alpha_context.Script.
 
 Import Script_typed_ir.
 
@@ -60782,7 +60818,7 @@ Definition unparse_stack {A : Set}
   (function_parameter : stack A * Script_typed_ir.stack_ty A)
   : Lwt.t
     (Error_monad.tzresult (list (Alpha_context.Script.expr * option string))) :=
-  let '(stack, stack_ty) := function_parameter in
+  let '(__stack_value, stack_ty) := function_parameter in
   let ctxt := Alpha_context.Gas.set_unlimited ctxt in
   let fix unparse_stack {a : Set}
     (function_parameter : stack a * Script_typed_ir.stack_ty a)
@@ -60817,7 +60853,7 @@ Definition unparse_stack {A : Set}
               let data := Micheline.strip_locations data in
               Error_monad.__return (cons (data, annot) rest)))
     end in
-  unparse_stack (stack, stack_ty).
+  unparse_stack (__stack_value, stack_ty).
 
 Module Interp_costs := Michelson_v1_gas.Cost_of.Interpreter.
 
@@ -60955,7 +60991,7 @@ Fixpoint step {a b : Set}
       Script_typed_ir.descr.loc := loc;
         Script_typed_ir.descr.instr := instr
         |} as __descr_value := function_parameter in
-  fun stack =&gt;
+  fun __stack_value =&gt;
     Error_monad.op_gtgteqquestion
       (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.cycle))
       (fun ctxt =&gt;
@@ -60971,7 +61007,7 @@ Fixpoint step {a b : Set}
               (Error_monad.trace extensible_type_value
                 (unparse_stack ctxt
                   (ret, __descr_value.(Script_typed_ir.descr.aft))))
-              (fun stack =&gt;
+              (fun __stack_value =&gt;
                 (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
                 (* ❌ instruction_sequence &quot;;&quot; *)
                 Error_monad.__return (ret, ctxt))
@@ -61032,7 +61068,7 @@ Fixpoint step {a b : Set}
                   (fun ctxt =&gt;
                     logged_return __descr_value ((Item (op arg) rest), ctxt)) in
         let logged_return := logged_return __descr_value in
-        match (instr, stack) with
+        match (instr, __stack_value) with
         | (Script_typed_ir.Drop, Item _ rest) =&gt;
           let 'existT _ __1 rest := existT (fun __1 : Set =&gt; (stack __1)) _ rest
             in
@@ -61259,21 +61295,21 @@ Fixpoint step {a b : Set}
                 [(Script_typed_ir.descr (__53 * __54) __54) ** (list __53) **
                   (stack __54)]) _ [body, l, init] in
           let fix loop
-            (ctxt : Alpha_context.context) (l : list __53) (stack : stack __54)
-            {struct ctxt}
+            (ctxt : Alpha_context.context) (l : list __53)
+            (__stack_value : stack __54) {struct ctxt}
             : Lwt.t (Error_monad.tzresult (stack __54 * Alpha_context.context)) :=
             Error_monad.op_gtgteqquestion
               (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter))
               (fun ctxt =&gt;
                 match l with
-                | [] =&gt; Error_monad.__return (stack, ctxt)
+                | [] =&gt; Error_monad.__return (__stack_value, ctxt)
                 | cons hd tl =&gt;
                   Error_monad.op_gtgteqquestion
-                    (step log ctxt step_constants body (Item hd stack))
+                    (step log ctxt step_constants body (Item hd __stack_value))
                     (fun function_parameter =&gt;
-                      let '(stack, ctxt) := function_parameter in
-                      loop ctxt tl stack)
+                      let '(__stack_value, ctxt) := function_parameter in
+                      loop ctxt tl __stack_value)
                 end) in
           Error_monad.op_gtgteqquestion (loop ctxt l init)
             (fun function_parameter =&gt;
@@ -61308,7 +61344,7 @@ Fixpoint step {a b : Set}
                     (fun e =&gt; fun acc =&gt; cons e acc) set nil) in
               let fix loop
                 (ctxt : Alpha_context.context) (l : list __56)
-                (stack : stack __57) {struct ctxt}
+                (__stack_value : stack __57) {struct ctxt}
                 : Lwt.t
                   (Error_monad.tzresult (stack __57 * Alpha_context.context)) :=
                 Error_monad.op_gtgteqquestion
@@ -61316,13 +61352,14 @@ Fixpoint step {a b : Set}
                     (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter))
                   (fun ctxt =&gt;
                     match l with
-                    | [] =&gt; Error_monad.__return (stack, ctxt)
+                    | [] =&gt; Error_monad.__return (__stack_value, ctxt)
                     | cons hd tl =&gt;
                       Error_monad.op_gtgteqquestion
-                        (step log ctxt step_constants body (Item hd stack))
+                        (step log ctxt step_constants body
+                          (Item hd __stack_value))
                         (fun function_parameter =&gt;
-                          let '(stack, ctxt) := function_parameter in
-                          loop ctxt tl stack)
+                          let '(__stack_value, ctxt) := function_parameter in
+                          loop ctxt tl __stack_value)
                     end) in
               Error_monad.op_gtgteqquestion (loop ctxt l init)
                 (fun function_parameter =&gt;
@@ -61427,7 +61464,7 @@ Fixpoint step {a b : Set}
                     (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map nil) in
               let fix loop
                 (ctxt : Alpha_context.context) (l : list (__70 * __71))
-                (stack : stack __72) {struct ctxt}
+                (__stack_value : stack __72) {struct ctxt}
                 : Lwt.t
                   (Error_monad.tzresult (stack __72 * Alpha_context.context)) :=
                 Error_monad.op_gtgteqquestion
@@ -61435,13 +61472,14 @@ Fixpoint step {a b : Set}
                     (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter))
                   (fun ctxt =&gt;
                     match l with
-                    | [] =&gt; Error_monad.__return (stack, ctxt)
+                    | [] =&gt; Error_monad.__return (__stack_value, ctxt)
                     | cons hd tl =&gt;
                       Error_monad.op_gtgteqquestion
-                        (step log ctxt step_constants body (Item hd stack))
+                        (step log ctxt step_constants body
+                          (Item hd __stack_value))
                         (fun function_parameter =&gt;
-                          let '(stack, ctxt) := function_parameter in
-                          loop ctxt tl stack)
+                          let '(__stack_value, ctxt) := function_parameter in
+                          loop ctxt tl __stack_value)
                     end) in
               Error_monad.op_gtgteqquestion (loop ctxt l init)
                 (fun function_parameter =&gt;
@@ -62125,14 +62163,15 @@ Fixpoint step {a b : Set}
                   (stack __145)]) _ [x, rest] in
           consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
             Interp_costs.lognot rest ctxt
-        | (Script_typed_ir.Seq hd tl, stack) =&gt;
-          let 'existT _ __Seq_'trans3 [hd, tl, stack] :=
+        | (Script_typed_ir.Seq hd tl, __stack_value) =&gt;
+          let 'existT _ __Seq_'trans3 [hd, tl, __stack_value] :=
             existT
               (fun __Seq_'trans3 : Set =&gt;
                 [(Script_typed_ir.descr b __Seq_'trans3) **
                   (Script_typed_ir.descr __Seq_'trans3 a) ** (stack b)]) _
-              [hd, tl, stack] in
-          Error_monad.op_gtgteqquestion (step log ctxt step_constants hd stack)
+              [hd, tl, __stack_value] in
+          Error_monad.op_gtgteqquestion
+            (step log ctxt step_constants hd __stack_value)
             (fun function_parameter =&gt;
               let '(trans, ctxt) := function_parameter in
               step log ctxt step_constants tl trans)
@@ -62337,7 +62376,8 @@ Fixpoint step {a b : Set}
               let '(v, _ctxt) := function_parameter in
               let v := Micheline.strip_locations v in
               Error_monad.fail extensible_type_value)
-        | (Script_typed_ir.Nop, stack) =&gt; logged_return (stack, ctxt)
+        | (Script_typed_ir.Nop, __stack_value) =&gt;
+          logged_return (__stack_value, ctxt)
         | (Script_typed_ir.Compare ty, Item a (Item b rest)) =&gt;
           let 'existT _ [__170, __171] [ty, a, b, rest] :=
             existT
@@ -62694,8 +62734,8 @@ Fixpoint step {a b : Set}
                   let '(unparsed_param_type, ctxt) := function_parameter in
                   let unparsed_param_type :=
                     Script_ir_translator.add_field_annot
-                      (Option.map (fun n =&gt; Field_annot n) root_name) None
-                      unparsed_param_type in
+                      (Option.map (fun n =&gt; Script_typed_ir.Field_annot n)
+                        root_name) None unparsed_param_type in
                   Error_monad.op_gtgteqquestion
                     (Script_ir_translator.unparse_ty ctxt storage_type)
                     (fun function_parameter =&gt;
@@ -62832,8 +62872,8 @@ Fixpoint step {a b : Set}
                   let '(unparsed_param_type, ctxt) := function_parameter in
                   let unparsed_param_type :=
                     Script_ir_translator.add_field_annot
-                      (Option.map (fun n =&gt; Field_annot n) root_name) None
-                      unparsed_param_type in
+                      (Option.map (fun n =&gt; Script_typed_ir.Field_annot n)
+                        root_name) None unparsed_param_type in
                   Error_monad.op_gtgteqquestion
                     (Script_ir_translator.unparse_ty ctxt storage_type)
                     (fun function_parameter =&gt;
@@ -63067,14 +63107,14 @@ Fixpoint step {a b : Set}
             (fun ctxt =&gt;
               logged_return
                 ((Item step_constants.(step_constants.amount) rest), ctxt))
-        | (Script_typed_ir.Dig n n', stack) =&gt;
-          let 'existT _ [__201, __202, __Dig_'rest] [n, n', stack] :=
+        | (Script_typed_ir.Dig n n', __stack_value) =&gt;
+          let 'existT _ [__201, __202, __Dig_'rest] [n, n', __stack_value] :=
             existT
               (fun '[__201, __202, __Dig_'rest] =&gt;
                 [Z **
                   (Script_typed_ir.stack_prefix_preservation_witness
                     (__201 * __Dig_'rest) __Dig_'rest b __202) ** (stack b)]) _
-              [n, n', stack] in
+              [n, n', __stack_value] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)))
@@ -63083,7 +63123,7 @@ Fixpoint step {a b : Set}
                 (interp_stack_prefix_preserving_operation
                   (fun function_parameter =&gt;
                     let 'Item v rest := function_parameter in
-                    Error_monad.__return (rest, v)) n' stack)
+                    Error_monad.__return (rest, v)) n' __stack_value)
                 (fun function_parameter =&gt;
                   let '(aft, x) := function_parameter in
                   logged_return ((Item x aft), ctxt)))
@@ -63105,15 +63145,16 @@ Fixpoint step {a b : Set}
                 (fun function_parameter =&gt;
                   let '(aft, _) := function_parameter in
                   logged_return (aft, ctxt)))
-        | (Script_typed_ir.Dipn n n' b, stack) =&gt;
-          let 'existT _ [__Dipn_'faft, __Dipn_'fbef] [n, n', b, stack] :=
+        | (Script_typed_ir.Dipn n n' b, __stack_value) =&gt;
+          let 'existT _ [__Dipn_'faft, __Dipn_'fbef] [n, n', b, __stack_value]
+            :=
             existT
               (fun '[__Dipn_'faft, __Dipn_'fbef] =&gt;
                 [Z **
                   (Script_typed_ir.stack_prefix_preservation_witness
                     __Dipn_'fbef __Dipn_'faft b a) **
                   (Script_typed_ir.descr __Dipn_'fbef __Dipn_'faft) **
-                  (stack b)]) _ [n, n', b, stack] in
+                  (stack b)]) _ [n, n', b, __stack_value] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)))
@@ -63125,24 +63166,24 @@ Fixpoint step {a b : Set}
                       (step log ctxt step_constants b stk)
                       (fun function_parameter =&gt;
                         let '(res, ctxt') := function_parameter in
-                        Error_monad.__return (res, ctxt'))) n' stack)
+                        Error_monad.__return (res, ctxt'))) n' __stack_value)
                 (fun function_parameter =&gt;
                   let '(aft, ctxt') := function_parameter in
                   logged_return (aft, ctxt')))
-        | (Script_typed_ir.Dropn n n', stack) =&gt;
-          let 'existT _ __Dropn [n, n', stack] :=
+        | (Script_typed_ir.Dropn n n', __stack_value) =&gt;
+          let 'existT _ __Dropn [n, n', __stack_value] :=
             existT
               (fun __Dropn : Set =&gt;
                 [Z **
                   (Script_typed_ir.stack_prefix_preservation_witness a a b
-                    __Dropn) ** (stack b)]) _ [n, n', stack] in
+                    __Dropn) ** (stack b)]) _ [n, n', __stack_value] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)))
             (fun ctxt =&gt;
               Error_monad.op_gtgteqquestion
                 (interp_stack_prefix_preserving_operation
-                  (fun stk =&gt; Error_monad.__return (stk, stk)) n' stack)
+                  (fun stk =&gt; Error_monad.__return (stk, stk)) n' __stack_value)
                 (fun function_parameter =&gt;
                   let '(_, rest) := function_parameter in
                   logged_return (rest, ctxt)))
@@ -63161,22 +63202,24 @@ with interp {p r : Set}
   : p -&gt; Lwt.t (Error_monad.tzresult (r * Alpha_context.context)) :=
   let '{| Script_typed_ir.lambda.lam := (code, _) |} := function_parameter in
   fun arg =&gt;
-    let stack := Item arg Empty in
+    let __stack_value := Item arg Empty in
     Error_monad.op_gtgteqquestion
       match log with
       | None =&gt; Error_monad.return_unit
       | Some log =&gt;
         Error_monad.op_gtgteqquestion
           (Error_monad.trace extensible_type_value
-            (unparse_stack ctxt (stack, code.(Script_typed_ir.descr.bef))))
-          (fun stack =&gt;
+            (unparse_stack ctxt
+              (__stack_value, code.(Script_typed_ir.descr.bef))))
+          (fun __stack_value =&gt;
             (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
             (* ❌ instruction_sequence &quot;;&quot; *)
             Error_monad.return_unit)
       end
       (fun function_parameter =&gt;
         let '_ := function_parameter in
-        Error_monad.op_gtgteqquestion (step log ctxt step_constants code stack)
+        Error_monad.op_gtgteqquestion
+          (step log ctxt step_constants code __stack_value)
           (fun function_parameter =&gt;
             let '(Item ret Empty, ctxt) := function_parameter in
             Error_monad.__return (ret, ctxt)))
@@ -63450,7 +63493,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -63544,12 +63587,12 @@ Parameter trace :
   <div style="margin: 20px;">
     <h3>Script_ir_annot</h3>
     <ul>
-      <li>OCaml size: 521 lines</li>
-      <li>Coq size: 704 lines (+35% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 526 lines</li>
+      <li>Coq size: 722 lines (+37% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#script_ir_annot.ml"><code>script_ir_annot.ml</code></a>&nbsp;<span class="label label-warning">189 warnings</span>
+    <a href="#script_ir_annot.ml"><code>script_ir_annot.ml</code></a>&nbsp;<span class="label label-warning">14 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -63581,93 +63624,93 @@ open Micheline
 open Script_tc_errors
 open Script_typed_ir
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_now_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;now&quot;)</abbr>
+let default_now_annot = Some (Var_annot &quot;now&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_amount_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;amount&quot;)</abbr>
+let default_amount_annot = Some (Var_annot &quot;amount&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_balance_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;balance&quot;)</abbr>
+let default_balance_annot = Some (Var_annot &quot;balance&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_steps_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;steps&quot;)</abbr>
+let default_steps_annot = Some (Var_annot &quot;steps&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_source_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;source&quot;)</abbr>
+let default_source_annot = Some (Var_annot &quot;source&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_sender_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;sender&quot;)</abbr>
+let default_sender_annot = Some (Var_annot &quot;sender&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_self_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;self&quot;)</abbr>
+let default_self_annot = Some (Var_annot &quot;self&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_arg_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;arg&quot;)</abbr>
+let default_arg_annot = Some (Var_annot &quot;arg&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_param_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;parameter&quot;)</abbr>
+let default_param_annot = Some (Var_annot &quot;parameter&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">default_storage_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;storage&quot;)</abbr>
+let default_storage_annot = Some (Var_annot &quot;storage&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_car_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;car&quot;)</abbr>
+let default_car_annot = Some (Field_annot &quot;car&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_cdr_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;cdr&quot;)</abbr>
+let default_cdr_annot = Some (Field_annot &quot;cdr&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_contract_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;contract&quot;)</abbr>
+let default_contract_annot = Some (Field_annot &quot;contract&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_addr_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;address&quot;)</abbr>
+let default_addr_annot = Some (Field_annot &quot;address&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_manager_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;manager&quot;)</abbr>
+let default_manager_annot = Some (Field_annot &quot;manager&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_pack_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;packed&quot;)</abbr>
+let default_pack_annot = Some (Field_annot &quot;packed&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_unpack_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;unpacked&quot;)</abbr>
+let default_unpack_annot = Some (Field_annot &quot;unpacked&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_slice_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;slice&quot;)</abbr>
+let default_slice_annot = Some (Field_annot &quot;slice&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_elt_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;elt&quot;)</abbr>
+let default_elt_annot = Some (Field_annot &quot;elt&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_key_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;key&quot;)</abbr>
+let default_key_annot = Some (Field_annot &quot;key&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_hd_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;hd&quot;)</abbr>
+let default_hd_annot = Some (Field_annot &quot;hd&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_tl_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;tl&quot;)</abbr>
+let default_tl_annot = Some (Field_annot &quot;tl&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_some_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;some&quot;)</abbr>
+let default_some_annot = Some (Field_annot &quot;some&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_left_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;left&quot;)</abbr>
+let default_left_annot = Some (Field_annot &quot;left&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_right_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;right&quot;)</abbr>
+let default_right_annot = Some (Field_annot &quot;right&quot;)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">default_binding_annot</abbr> = Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;bnd&quot;)</abbr>
+let default_binding_annot = Some (Field_annot &quot;bnd&quot;)
 
 let unparse_type_annot : type_annot option -&gt; string list = function
   | None -&gt;
       []
-  | Some <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown">(`Type_annot a)</abbr> -&gt;
+  | Some (Type_annot a) -&gt;
       [&quot;:&quot; ^ a]
 
 let unparse_var_annot : var_annot option -&gt; string list = function
   | None -&gt;
       []
-  | Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot a)</abbr> -&gt;
+  | Some (Var_annot a) -&gt;
       [&quot;@&quot; ^ a]
 
 let unparse_field_annot : field_annot option -&gt; string list = function
   | None -&gt;
       []
-  | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot a)</abbr> -&gt;
+  | Some (Field_annot a) -&gt;
       [&quot;%&quot; ^ a]
 
 let field_to_var_annot : field_annot option -&gt; var_annot option = function
   | None -&gt;
       None
-  | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot s)</abbr> -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot s)</abbr>
+  | Some (Field_annot s) -&gt;
+      Some (Var_annot s)
 
 let type_to_var_annot : type_annot option -&gt; var_annot option = function
   | None -&gt;
       None
-  | Some <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown">(`Type_annot s)</abbr> -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot s)</abbr>
+  | Some (Type_annot s) -&gt;
+      Some (Var_annot s)
 
 let var_to_field_annot : var_annot option -&gt; field_annot option = function
   | None -&gt;
       None
-  | Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot s)</abbr> -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot s)</abbr>
+  | Some (Var_annot s) -&gt;
+      Some (Field_annot s)
 
 let default_annot ~default = function None -&gt; default | annot -&gt; annot
 
@@ -63678,17 +63721,17 @@ let gen_access_annot :
     var_annot option =
  fun value_annot ?(default = None) field_annot -&gt;
   match (value_annot, field_annot, default) with
-  | (None, None, _) | (Some _, None, None) | (None, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;&quot;)</abbr>, _)
+  | (None, None, _) | (Some _, None, None) | (None, Some (Field_annot &quot;&quot;), _)
     -&gt;
       None
-  | (None, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot f)</abbr>, _) -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot f)</abbr>
-  | ( Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot v)</abbr>,
-      (None | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;&quot;)</abbr>),
-      Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot f)</abbr> ) -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot (String.concat &quot;.&quot; [v; f]))</abbr>
-  | (Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot v)</abbr>, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot f)</abbr>, _) -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot (String.concat &quot;.&quot; [v; f]))</abbr>
+  | (None, Some (Field_annot f), _) -&gt;
+      Some (Var_annot f)
+  | ( Some (Var_annot v),
+      (None | Some (Field_annot &quot;&quot;)),
+      Some (Field_annot f) ) -&gt;
+      Some (Var_annot (String.concat &quot;.&quot; [v; f]))
+  | (Some (Var_annot v), Some (Field_annot f), _) -&gt;
+      Some (Var_annot (String.concat &quot;.&quot; [v; f]))
 
 let merge_type_annot :
     legacy:bool -&gt;
@@ -63699,7 +63742,7 @@ let merge_type_annot :
   match (annot1, annot2) with
   | (None, None) | (Some _, None) | (None, Some _) -&gt;
       ok None
-  | (Some <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown">(`Type_annot a1)</abbr>, Some <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown">(`Type_annot a2)</abbr>) -&gt;
+  | (Some (Type_annot a1), Some (Type_annot a2)) -&gt;
       if legacy || String.equal a1 a2 then ok annot1
       else error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
@@ -63714,7 +63757,7 @@ let merge_field_annot :
   match (annot1, annot2) with
   | (None, None) | (Some _, None) | (None, Some _) -&gt;
       ok None
-  | (Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot a1)</abbr>, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot a2)</abbr>) -&gt;
+  | (Some (Field_annot a1), Some (Field_annot a2)) -&gt;
       if legacy || String.equal a1 a2 then ok annot1
       else error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
@@ -63726,7 +63769,7 @@ let merge_var_annot : var_annot option -&gt; var_annot option -&gt; var_annot op
   match (annot1, annot2) with
   | (None, None) | (Some _, None) | (None, Some _) -&gt;
       None
-  | (Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot a1)</abbr>, Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot a2)</abbr>) -&gt;
+  | (Some (Var_annot a1), Some (Var_annot a2)) -&gt;
       if String.equal a1 a2 then annot1 else None
 
 let error_unexpected_annot loc annot =
@@ -63737,7 +63780,12 @@ They are sent to a unit type.">(Unexpected_annotation loc)</abbr>
 let fail_unexpected_annot loc annot =
   Lwt.return (error_unexpected_annot loc annot)
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">parse_annots</abbr> loc ?(allow_special_var = false)
+type annot_opt =
+  | Field_annot_opt of string option
+  | Type_annot_opt of string option
+  | Var_annot_opt of string option
+
+let parse_annots loc ?(allow_special_var = false)
     ?(allow_special_field = false) l =
   (* allow emtpty annotations as wildcards but otherwise only accept
      annotations that start with [a-zA-Z_] *)
@@ -63772,21 +63820,21 @@ They are sent to a unit type.">(Unexpected_annotation loc)</abbr>
 They are sent to a unit type.">(Unexpected_annotation loc)</abbr>
       else
         match s.[0] with
-        | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">':'</abbr> -&gt;
-            sub_or_wildcard ~specials:[] (fun a -&gt; <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown">`Type_annot a</abbr>) s acc
-        | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">'@'</abbr> -&gt;
+        | ':' -&gt;
+            sub_or_wildcard ~specials:[] (fun a -&gt; Type_annot_opt a) s acc
+        | '@' -&gt;
             sub_or_wildcard
               ~specials:(if allow_special_var then ['%'] else [])
-              (fun a -&gt; <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">`Var_annot a</abbr>)
+              (fun a -&gt; Var_annot_opt a)
               s
               acc
-        | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">'%'</abbr> -&gt;
+        | '%' -&gt;
             sub_or_wildcard
               ~specials:(if allow_special_field then ['@'] else [])
-              (fun a -&gt; <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">`Field_annot a</abbr>)
+              (fun a -&gt; Field_annot_opt a)
               s
               acc
-        | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">_</abbr> -&gt;
+        | _ -&gt;
             error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Unexpected_annotation loc)</abbr>)
@@ -63794,721 +63842,47 @@ They are sent to a unit type.">(Unexpected_annotation loc)</abbr>)
     l
   &gt;|? List.rev
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">opt_var_of_var_opt</abbr> = function
-  | <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown
-
-——————————
-
-No type known for the following variants: `Var_annot">`Var_annot None</abbr> -&gt;
+let opt_var_of_var_opt = function
+  | None -&gt;
       None
-  | <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown
+  | Some a -&gt;
+      Some (Var_annot a)
 
-——————————
-
-No type known for the following variants: `Var_annot">`Var_annot (Some a)</abbr> -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot a)</abbr>
-
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Field_annot">opt_field_of_field_opt</abbr> = function
-  | <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown
-
-——————————
-
-No type known for the following variants: `Field_annot">`Field_annot None</abbr> -&gt;
+let opt_field_of_field_opt = function
+  | None -&gt;
       None
-  | <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown
+  | Some a -&gt;
+      Some (Field_annot a)
 
-——————————
-
-No type known for the following variants: `Field_annot">`Field_annot (Some a)</abbr> -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot a)</abbr>
-
-let <abbr class="mark-warning" title="No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Type_annot">opt_type_of_type_opt</abbr> = function
-  | <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown
-
-——————————
-
-No type known for the following variants: `Type_annot">`Type_annot None</abbr> -&gt;
+let opt_type_of_type_opt = function
+  | None -&gt;
       None
-  | <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown
+  | Some a -&gt;
+      Some (Type_annot a)
 
-——————————
-
-No type known for the following variants: `Type_annot">`Type_annot (Some a)</abbr> -&gt;
-      Some <abbr class="mark-warning" title="Constructor of the variant `Type_annot unknown">(`Type_annot a)</abbr>
-
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">classify_annot</abbr> loc l :
+let classify_annot loc l :
     (var_annot option list * type_annot option list * field_annot option list)
     tzresult =
   <abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">try
-    </abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">let (_, rv, _, rt, _, rf) =
+    let (_, rv, _, rt, _, rf) =
       List.fold_left
-        (fun </abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">(in_v, rv, in_t, rt, in_f, rf)</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot"> a -&gt;
+        (fun (in_v, rv, in_t, rt, in_f, rf) a -&gt;
           match (a, in_v, rv, in_t, rt, in_f, rf) with
-          | </abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-Constructor of the variant `Var_annot unknown
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">`Var_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot"> as a), true, _, _, _, _, _)
-          | ((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-Constructor of the variant `Var_annot unknown">`Var_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot"> as a), false, [], _, _, _, _)</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot"> -&gt;
+          | (Var_annot_opt a, true, _, _, _, _, _)
+          | (Var_annot_opt a, false, [], _, _, _, _) -&gt;
               (true, opt_var_of_var_opt a :: rv, false, rt, false, rf)
-          | </abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Type_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-Constructor of the variant `Type_annot unknown
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Type_annot">`Type_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Type_annot"> as a), _, _, true, _, _, _)
-          | ((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-Constructor of the variant `Type_annot unknown">`Type_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Type_annot"> as a), _, _, false, [], _, _)</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot"> -&gt;
+          | (Type_annot_opt a, _, _, true, _, _, _)
+          | (Type_annot_opt a, _, _, false, [], _, _) -&gt;
               (false, rv, true, opt_type_of_type_opt a :: rt, false, rf)
-          | </abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot">((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-Constructor of the variant `Field_annot unknown
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot">`Field_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot"> as a), _, _, _, _, true, _)
-          | ((</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-Constructor of the variant `Field_annot unknown">`Field_annot _</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot"> as a), _, _, _, _, false, [])</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot"> -&gt;
+          | (Field_annot_opt a, _, _, _, _, true, _)
+          | (Field_annot_opt a, _, _, _, _, false, []) -&gt;
               (false, rv, false, rt, true, opt_field_of_field_opt a :: rf)
-          | </abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">_</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot"> -&gt;
+          | _ -&gt;
               raise </abbr><abbr class="mark-warning" title="Try-with are not handled
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
 
 ——————————
 
@@ -64516,25 +63890,11 @@ Values of extensible types are ignored.
 
 They are sent to a unit type.">Exit</abbr><abbr class="mark-warning" title="Try-with are not handled
 
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Type_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">)
+Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">)
         (false, [], false, [], false, [])
         l
     in
-    ok (List.rev rv, List.rev rt, List.rev rf)</abbr><abbr class="mark-warning" title="Try-with are not handled
-
-Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">
+    ok (List.rev rv, List.rev rt, List.rev rf)
   with Exit -&gt; error (Ungrouped_annotations loc)</abbr>
 
 let get_one_annot loc = function
@@ -64609,28 +63969,16 @@ let extract_field_annot :
             else extract_first (s :: acc) rest
       in
       let (field_annot, annot) = extract_first [] annot in
-      <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">let field_annot =
+      let field_annot =
         match field_annot with
-        | </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Field_annot">None</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot"> -&gt;
+        | None -&gt;
             None
-        | </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Field_annot">Some field_annot</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot"> -&gt;
+        | Some field_annot -&gt;
             Some
-              </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-Constructor of the variant `Field_annot unknown">(`Field_annot
-                (String.sub field_annot 1 (String.length field_annot - 1)))</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot">
+              (Field_annot
+                (String.sub field_annot 1 (String.length field_annot - 1)))
       in
-      ok (Prim (loc, prim, args, annot), field_annot)</abbr>
+      ok (Prim (loc, prim, args, annot), field_annot)
   | expr -&gt;
       ok (expr, None)
 
@@ -64640,7 +63988,7 @@ let check_correct_field :
   match (f1, f2) with
   | (None, _) | (_, None) -&gt;
       ok ()
-  | (Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot s1)</abbr>, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot s2)</abbr>) -&gt;
+  | (Some (Field_annot s1), Some (Field_annot s2)) -&gt;
       if String.equal s1 s2 then ok ()
       else error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
@@ -64665,89 +64013,33 @@ let parse_var_annot :
   | None -&gt; (
     match default with Some a -&gt; a | None -&gt; None )
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot">split_last_dot</abbr> = function
-  | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">None</abbr> -&gt;
+let split_last_dot = function
+  | None -&gt;
       (None, None)
-  | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">Some </abbr><abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown
-
-——————————
-
-No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">(`Field_annot s)</abbr> -&gt; (
+  | Some (Field_annot s) -&gt; (
     match String.rindex_opt s '.' with
-    | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">None</abbr> -&gt;
-        (None, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot s)</abbr>)
-    | <abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">Some i</abbr> -&gt;
+    | None -&gt;
+        (None, Some (Field_annot s))
+    | Some i -&gt;
         let s1 = String.sub s 0 i in
         let s2 = String.sub s (i + 1) (String.length s - i - 1) in
-        <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">let f =
+        let f =
           if Compare.String.equal s2 &quot;car&quot; || Compare.String.equal s2 &quot;cdr&quot;
           then None
-          else Some </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
-
-——————————
-
-Constructor of the variant `Field_annot unknown">(`Field_annot s2)</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot">
+          else Some (Field_annot s2)
         in
-        (Some </abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot
+        (Some (Var_annot s1), f) )
 
-——————————
-
-Constructor of the variant `Var_annot unknown">(`Var_annot s1)</abbr><abbr class="mark-warning" title="No type known for the following variants: `Field_annot">, f)</abbr> )
-
-let <abbr class="mark-warning" title="No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Var_annot">common_prefix</abbr> v1 v2 =
+let common_prefix v1 v2 =
   match (v1, v2) with
-  | <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">(Some </abbr><abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown
-
-——————————
-
-No type known for the following variants: `Var_annot">(`Var_annot s1)</abbr><abbr class="mark-warning" title="No type known for the following variants: `Var_annot">, Some </abbr><abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown
-
-——————————
-
-No type known for the following variants: `Var_annot">(`Var_annot s2)</abbr><abbr class="mark-warning" title="No type known for the following variants: `Var_annot">)</abbr>
+  | (Some (Var_annot s1), Some (Var_annot s2))
     when Compare.String.equal s1 s2 -&gt;
       v1
-  | <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">(Some _, None)</abbr> -&gt;
+  | (Some _, None) -&gt;
       v1
-  | <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">(None, Some _)</abbr> -&gt;
+  | (None, Some _) -&gt;
       v2
-  | <abbr class="mark-warning" title="No type known for the following variants: `Var_annot">(_, _)</abbr> -&gt;
+  | (_, _) -&gt;
       None
 
 let parse_constr_annot :
@@ -64771,9 +64063,9 @@ let parse_constr_annot :
   get_two_annot loc fields
   &gt;&gt;? fun (f1, f2) -&gt;
   ( match (if_special_first, f1) with
-  | (Some special_var, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;@&quot;)</abbr>) -&gt;
+  | (Some special_var, Some (Field_annot &quot;@&quot;)) -&gt;
       ok (split_last_dot special_var)
-  | (None, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;@&quot;)</abbr>) -&gt;
+  | (None, Some (Field_annot &quot;@&quot;)) -&gt;
       error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Unexpected_annotation loc)</abbr>
@@ -64781,9 +64073,9 @@ They are sent to a unit type.">(Unexpected_annotation loc)</abbr>
       ok (v, f1) )
   &gt;&gt;? fun (v1, f1) -&gt;
   ( match (if_special_second, f2) with
-  | (Some special_var, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;@&quot;)</abbr>) -&gt;
+  | (Some special_var, Some (Field_annot &quot;@&quot;)) -&gt;
       ok (split_last_dot special_var)
-  | (None, Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;@&quot;)</abbr>) -&gt;
+  | (None, Some (Field_annot &quot;@&quot;)) -&gt;
       error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Unexpected_annotation loc)</abbr>
@@ -64825,9 +64117,9 @@ let parse_destr_annot :
   in
   let v =
     match v with
-    | Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;%&quot;)</abbr> -&gt;
+    | Some (Var_annot &quot;%&quot;) -&gt;
         field_to_var_annot field_name
-    | Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;%%&quot;)</abbr> -&gt;
+    | Some (Var_annot &quot;%%&quot;) -&gt;
         default
     | Some _ -&gt;
         v
@@ -64881,6 +64173,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Script_tc_errors.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -64891,103 +64184,103 @@ Import Script_tc_errors.
 
 Import Script_typed_ir.
 
-Definition default_now_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;now&quot;).
+Definition default_now_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;now&quot;).
 
-Definition default_amount_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;amount&quot;).
+Definition default_amount_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;amount&quot;).
 
-Definition default_balance_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;balance&quot;).
+Definition default_balance_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;balance&quot;).
 
-Definition default_steps_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;steps&quot;).
+Definition default_steps_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;steps&quot;).
 
-Definition default_source_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;source&quot;).
+Definition default_source_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;source&quot;).
 
-Definition default_sender_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;sender&quot;).
+Definition default_sender_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;sender&quot;).
 
-Definition default_self_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;self&quot;).
+Definition default_self_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;self&quot;).
 
-Definition default_arg_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;arg&quot;).
+Definition default_arg_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;arg&quot;).
 
-Definition default_param_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;parameter&quot;).
+Definition default_param_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;parameter&quot;).
 
-Definition default_storage_annot : option (* `Var_annot *) string :=
-  Some (Var_annot &quot;storage&quot;).
+Definition default_storage_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot &quot;storage&quot;).
 
-Definition default_car_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;car&quot;).
+Definition default_car_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;car&quot;).
 
-Definition default_cdr_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;cdr&quot;).
+Definition default_cdr_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;cdr&quot;).
 
-Definition default_contract_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;contract&quot;).
+Definition default_contract_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;contract&quot;).
 
-Definition default_addr_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;address&quot;).
+Definition default_addr_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;address&quot;).
 
-Definition default_manager_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;manager&quot;).
+Definition default_manager_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;manager&quot;).
 
-Definition default_pack_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;packed&quot;).
+Definition default_pack_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;packed&quot;).
 
-Definition default_unpack_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;unpacked&quot;).
+Definition default_unpack_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;unpacked&quot;).
 
-Definition default_slice_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;slice&quot;).
+Definition default_slice_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;slice&quot;).
 
-Definition default_elt_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;elt&quot;).
+Definition default_elt_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;elt&quot;).
 
-Definition default_key_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;key&quot;).
+Definition default_key_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;key&quot;).
 
-Definition default_hd_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;hd&quot;).
+Definition default_hd_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;hd&quot;).
 
-Definition default_tl_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;tl&quot;).
+Definition default_tl_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;tl&quot;).
 
-Definition default_some_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;some&quot;).
+Definition default_some_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;some&quot;).
 
-Definition default_left_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;left&quot;).
+Definition default_left_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;left&quot;).
 
-Definition default_right_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;right&quot;).
+Definition default_right_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;right&quot;).
 
-Definition default_binding_annot : option (* `Field_annot *) string :=
-  Some (Field_annot &quot;bnd&quot;).
+Definition default_binding_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot &quot;bnd&quot;).
 
 Definition unparse_type_annot
   (function_parameter : option Script_typed_ir.type_annot) : list string :=
   match function_parameter with
   | None =&gt; nil
-  | Some (Type_annot a) =&gt; [ Pervasives.op_caret &quot;:&quot; a ]
+  | Some (Script_typed_ir.Type_annot a) =&gt; [ Pervasives.op_caret &quot;:&quot; a ]
   end.
 
 Definition unparse_var_annot
   (function_parameter : option Script_typed_ir.var_annot) : list string :=
   match function_parameter with
   | None =&gt; nil
-  | Some (Var_annot a) =&gt; [ Pervasives.op_caret &quot;@&quot; a ]
+  | Some (Script_typed_ir.Var_annot a) =&gt; [ Pervasives.op_caret &quot;@&quot; a ]
   end.
 
 Definition unparse_field_annot
   (function_parameter : option Script_typed_ir.field_annot) : list string :=
   match function_parameter with
   | None =&gt; nil
-  | Some (Field_annot a) =&gt; [ Pervasives.op_caret &quot;%&quot; a ]
+  | Some (Script_typed_ir.Field_annot a) =&gt; [ Pervasives.op_caret &quot;%&quot; a ]
   end.
 
 Definition field_to_var_annot
@@ -64995,7 +64288,7 @@ Definition field_to_var_annot
   : option Script_typed_ir.var_annot :=
   match function_parameter with
   | None =&gt; None
-  | Some (Field_annot s) =&gt; Some (Var_annot s)
+  | Some (Script_typed_ir.Field_annot s) =&gt; Some (Script_typed_ir.Var_annot s)
   end.
 
 Definition type_to_var_annot
@@ -65003,7 +64296,7 @@ Definition type_to_var_annot
   : option Script_typed_ir.var_annot :=
   match function_parameter with
   | None =&gt; None
-  | Some (Type_annot s) =&gt; Some (Var_annot s)
+  | Some (Script_typed_ir.Type_annot s) =&gt; Some (Script_typed_ir.Var_annot s)
   end.
 
 Definition var_to_field_annot
@@ -65011,7 +64304,7 @@ Definition var_to_field_annot
   : option Script_typed_ir.field_annot :=
   match function_parameter with
   | None =&gt; None
-  | Some (Var_annot s) =&gt; Some (Field_annot s)
+  | Some (Script_typed_ir.Var_annot s) =&gt; Some (Script_typed_ir.Field_annot s)
   end.
 
 Definition default_annot {A : Set}
@@ -65033,13 +64326,18 @@ Definition gen_access_annot
   fun field_annot =&gt;
     match (value_annot, field_annot, default) with
     |
-      ((None, None, _) | (Some _, None, None) | (None, Some (Field_annot &quot;&quot;), _))
-      =&gt; None
-    | (None, Some (Field_annot f), _) =&gt; Some (Var_annot f)
-    | (Some (Var_annot v), (None | Some (Field_annot &quot;&quot;)), Some (Field_annot f))
-      =&gt; Some (Var_annot (String.concat &quot;.&quot; [ v; f ]))
-    | (Some (Var_annot v), Some (Field_annot f), _) =&gt;
-      Some (Var_annot (String.concat &quot;.&quot; [ v; f ]))
+      ((None, None, _) | (Some _, None, None) |
+      (None, Some (Script_typed_ir.Field_annot &quot;&quot;), _)) =&gt; None
+    | (None, Some (Script_typed_ir.Field_annot f), _) =&gt;
+      Some (Script_typed_ir.Var_annot f)
+    |
+      (Some (Script_typed_ir.Var_annot v),
+        (None | Some (Script_typed_ir.Field_annot &quot;&quot;)),
+        Some (Script_typed_ir.Field_annot f)) =&gt;
+      Some (Script_typed_ir.Var_annot (String.concat &quot;.&quot; [ v; f ]))
+    |
+      (Some (Script_typed_ir.Var_annot v), Some (Script_typed_ir.Field_annot f),
+        _) =&gt; Some (Script_typed_ir.Var_annot (String.concat &quot;.&quot; [ v; f ]))
     end.
 
 Definition merge_type_annot
@@ -65048,7 +64346,8 @@ Definition merge_type_annot
   : Error_monad.tzresult (option Script_typed_ir.type_annot) :=
   match (annot1, annot2) with
   | ((None, None) | (Some _, None) | (None, Some _)) =&gt; Error_monad.ok None
-  | (Some (Type_annot a1), Some (Type_annot a2)) =&gt;
+  | (Some (Script_typed_ir.Type_annot a1), Some (Script_typed_ir.Type_annot a2))
+    =&gt;
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
     else
@@ -65061,7 +64360,9 @@ Definition merge_field_annot
   : Error_monad.tzresult (option Script_typed_ir.field_annot) :=
   match (annot1, annot2) with
   | ((None, None) | (Some _, None) | (None, Some _)) =&gt; Error_monad.ok None
-  | (Some (Field_annot a1), Some (Field_annot a2)) =&gt;
+  |
+    (Some (Script_typed_ir.Field_annot a1),
+      Some (Script_typed_ir.Field_annot a2)) =&gt;
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
     else
@@ -65074,7 +64375,8 @@ Definition merge_var_annot
   : option Script_typed_ir.var_annot :=
   match (annot1, annot2) with
   | ((None, None) | (Some _, None) | (None, Some _)) =&gt; None
-  | (Some (Var_annot a1), Some (Var_annot a2)) =&gt;
+  | (Some (Script_typed_ir.Var_annot a1), Some (Script_typed_ir.Var_annot a2))
+    =&gt;
     if String.equal a1 a2 then
       annot1
     else
@@ -65094,10 +64396,14 @@ Definition fail_unexpected_annot {A : Set}
   : Lwt.t (Error_monad.tzresult unit) :=
   Lwt.__return (error_unexpected_annot loc annot).
 
+Inductive annot_opt : Set :=
+| Field_annot_opt : option string -&gt; annot_opt
+| Type_annot_opt : option string -&gt; annot_opt
+| Var_annot_opt : option string -&gt; annot_opt.
+
 Definition parse_annots
   (loc : Alpha_context.Script.location) (op_staroptstar : option bool)
-  : option bool -&gt; list string -&gt;
-  Error_monad.tzresult (list (* `Field_annot *) (option string)) :=
+  : option bool -&gt; list string -&gt; Error_monad.tzresult (list annot_opt) :=
   let allow_special_var :=
     match op_staroptstar with
     | Some op_starsthstar =&gt; op_starsthstar
@@ -65170,49 +64476,45 @@ Definition parse_annots
                   else
                     match String.get s 0 with
                     | &quot;:&quot; % char =&gt;
-                      sub_or_wildcard nil (fun a =&gt; Type_annot a) s acc
+                      sub_or_wildcard nil (fun a =&gt; Type_annot_opt a) s acc
                     | &quot;@&quot; % char =&gt;
                       sub_or_wildcard
                         (if allow_special_var then
                           [ &quot;%&quot; % char ]
                         else
-                          nil) (fun a =&gt; Var_annot a) s acc
+                          nil) (fun a =&gt; Var_annot_opt a) s acc
                     | &quot;%&quot; % char =&gt;
                       sub_or_wildcard
                         (if allow_special_field then
                           [ &quot;@&quot; % char ]
                         else
-                          nil) (fun a =&gt; Field_annot a) s acc
+                          nil) (fun a =&gt; Field_annot_opt a) s acc
                     | _ =&gt; Error_monad.__error_value extensible_type_value
                     end)) (Error_monad.ok nil) l) List.rev.
 
-Definition opt_var_of_var_opt {A : Set}
-  (function_parameter : (* `Var_annot *) option A)
-  : option (* `Var_annot *) A :=
+Definition opt_var_of_var_opt (function_parameter : option string)
+  : option Script_typed_ir.var_annot :=
   match function_parameter with
-  | Var_annot None =&gt; None
-  | Var_annot (Some a) =&gt; Some (Var_annot a)
+  | None =&gt; None
+  | Some a =&gt; Some (Script_typed_ir.Var_annot a)
   end.
 
-Definition opt_field_of_field_opt {A : Set}
-  (function_parameter : (* `Field_annot *) option A)
-  : option (* `Field_annot *) A :=
+Definition opt_field_of_field_opt (function_parameter : option string)
+  : option Script_typed_ir.field_annot :=
   match function_parameter with
-  | Field_annot None =&gt; None
-  | Field_annot (Some a) =&gt; Some (Field_annot a)
+  | None =&gt; None
+  | Some a =&gt; Some (Script_typed_ir.Field_annot a)
   end.
 
-Definition opt_type_of_type_opt {A : Set}
-  (function_parameter : (* `Type_annot *) option A)
-  : option (* `Type_annot *) A :=
+Definition opt_type_of_type_opt (function_parameter : option string)
+  : option Script_typed_ir.type_annot :=
   match function_parameter with
-  | Type_annot None =&gt; None
-  | Type_annot (Some a) =&gt; Some (Type_annot a)
+  | None =&gt; None
+  | Some a =&gt; Some (Script_typed_ir.Type_annot a)
   end.
 
 Definition classify_annot
-  (loc : Alpha_context.Script.location)
-  (l : list (* `Var_annot *) (option string))
+  (loc : Alpha_context.Script.location) (l : list annot_opt)
   : Error_monad.tzresult
     (list (option Script_typed_ir.var_annot) *
       list (option Script_typed_ir.type_annot) *
@@ -65226,16 +64528,16 @@ Definition classify_annot
           fun a =&gt;
             match (a, in_v, rv, in_t, rt, in_f, rf) with
             |
-              (((Var_annot _) as a, true, _, _, _, _, _) |
-              ((Var_annot _) as a, false, [], _, _, _, _)) =&gt;
+              ((Var_annot_opt a, true, _, _, _, _, _) |
+              (Var_annot_opt a, false, [], _, _, _, _)) =&gt;
               (true, (cons (opt_var_of_var_opt a) rv), false, rt, false, rf)
             |
-              (((Type_annot _) as a, _, _, true, _, _, _) |
-              ((Type_annot _) as a, _, _, false, [], _, _)) =&gt;
+              ((Type_annot_opt a, _, _, true, _, _, _) |
+              (Type_annot_opt a, _, _, false, [], _, _)) =&gt;
               (false, rv, true, (cons (opt_type_of_type_opt a) rt), false, rf)
             |
-              (((Field_annot _) as a, _, _, _, _, true, _) |
-              ((Field_annot _) as a, _, _, _, _, false, [])) =&gt;
+              ((Field_annot_opt a, _, _, _, _, true, _) |
+              (Field_annot_opt a, _, _, _, _, false, [])) =&gt;
               (false, rv, false, rt, true, (cons (opt_field_of_field_opt a) rf))
             | _ =&gt; Pervasives.raise extensible_type_value
             end) (false, nil, false, nil, false, nil) l in
@@ -65350,7 +64652,7 @@ Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
       | None =&gt; None
       | Some field_annot =&gt;
         Some
-          (Field_annot
+          (Script_typed_ir.Field_annot
             (String.sub field_annot 1
               (Pervasives.op_minus (String.length field_annot) 1)))
       end in
@@ -65363,7 +64665,9 @@ Definition check_correct_field
   (f2 : option Script_typed_ir.field_annot) : Error_monad.tzresult unit :=
   match (f1, f2) with
   | ((None, _) | (_, None)) =&gt; Error_monad.ok tt
-  | (Some (Field_annot s1), Some (Field_annot s2)) =&gt;
+  |
+    (Some (Script_typed_ir.Field_annot s1),
+      Some (Script_typed_ir.Field_annot s2)) =&gt;
     if String.equal s1 s2 then
       Error_monad.ok tt
     else
@@ -65397,13 +64701,13 @@ Definition parse_var_annot
                   end)))).
 
 Definition split_last_dot
-  (function_parameter : option (* `Field_annot *) string)
-  : option (* `Var_annot *) string * option (* `Field_annot *) string :=
+  (function_parameter : option Script_typed_ir.field_annot)
+  : option Script_typed_ir.var_annot * option Script_typed_ir.field_annot :=
   match function_parameter with
   | None =&gt; (None, None)
-  | Some (Field_annot s) =&gt;
+  | Some (Script_typed_ir.Field_annot s) =&gt;
     match String.rindex_opt s &quot;.&quot; % char with
-    | None =&gt; (None, (Some (Field_annot s)))
+    | None =&gt; (None, (Some (Script_typed_ir.Field_annot s)))
     | Some i =&gt;
       let s1 := String.sub s 0 i in
       let s2 :=
@@ -65415,23 +64719,26 @@ Definition split_last_dot
             ((|Compare.String|).(Compare.S.equal) s2 &quot;cdr&quot;) then
           None
         else
-          Some (Field_annot s2) in
-      ((Some (Var_annot s1)), f)
+          Some (Script_typed_ir.Field_annot s2) in
+      ((Some (Script_typed_ir.Var_annot s1)), f)
     end
   end.
 
 Definition common_prefix
-  (v1 : option (* `Var_annot *) (|Compare.String|).(Compare.S.t))
-  (v2 : option (* `Var_annot *) (|Compare.String|).(Compare.S.t))
-  : option (* `Var_annot *) (|Compare.String|).(Compare.S.t) :=
+  (v1 : option Script_typed_ir.var_annot)
+  (v2 : option Script_typed_ir.var_annot) : option Script_typed_ir.var_annot :=
   match
     ((v1, v2),
       match (v1, v2) with
-      | (Some (Var_annot s1), Some (Var_annot s2)) =&gt;
+      |
+        (Some (Script_typed_ir.Var_annot s1),
+          Some (Script_typed_ir.Var_annot s2)) =&gt;
         (|Compare.String|).(Compare.S.equal) s1 s2
       | _ =&gt; false
       end) with
-  | ((Some (Var_annot s1), Some (Var_annot s2)), true) =&gt; v1
+  |
+    ((Some (Script_typed_ir.Var_annot s1), Some (Script_typed_ir.Var_annot s2)),
+      true) =&gt; v1
   | ((Some _, None), _) =&gt; v1
   | ((None, Some _), _) =&gt; v2
   | ((_, _), _) =&gt; None
@@ -65458,9 +64765,9 @@ Definition parse_constr_annot
                   let '(f1, f2) := function_parameter in
                   Error_monad.op_gtgtquestion
                     match (if_special_first, f1) with
-                    | (Some special_var, Some (Field_annot &quot;@&quot;)) =&gt;
-                      Error_monad.ok (split_last_dot special_var)
-                    | (None, Some (Field_annot &quot;@&quot;)) =&gt;
+                    | (Some special_var, Some (Script_typed_ir.Field_annot &quot;@&quot;))
+                      =&gt; Error_monad.ok (split_last_dot special_var)
+                    | (None, Some (Script_typed_ir.Field_annot &quot;@&quot;)) =&gt;
                       Error_monad.__error_value extensible_type_value
                     | (_, _) =&gt; Error_monad.ok (v, f1)
                     end
@@ -65468,9 +64775,11 @@ Definition parse_constr_annot
                       let '(v1, f1) := function_parameter in
                       Error_monad.op_gtpipequestion
                         match (if_special_second, f2) with
-                        | (Some special_var, Some (Field_annot &quot;@&quot;)) =&gt;
+                        |
+                          (Some special_var,
+                            Some (Script_typed_ir.Field_annot &quot;@&quot;)) =&gt;
                           Error_monad.ok (split_last_dot special_var)
-                        | (None, Some (Field_annot &quot;@&quot;)) =&gt;
+                        | (None, Some (Script_typed_ir.Field_annot &quot;@&quot;)) =&gt;
                           Error_monad.__error_value extensible_type_value
                         | (_, _) =&gt; Error_monad.ok (v, f2)
                         end
@@ -65524,8 +64833,9 @@ Definition parse_destr_annot
                       field_name in
                   let v :=
                     match v with
-                    | Some (Var_annot &quot;%&quot;) =&gt; field_to_var_annot field_name
-                    | Some (Var_annot &quot;%%&quot;) =&gt; default
+                    | Some (Script_typed_ir.Var_annot &quot;%&quot;) =&gt;
+                      field_to_var_annot field_name
+                    | Some (Script_typed_ir.Var_annot &quot;%%&quot;) =&gt; default
                     | Some _ =&gt; v
                     | None =&gt; value_annot
                     end in
@@ -65972,11 +65282,11 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5996 lines</li>
-      <li>Coq size: 9890 lines (+64% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 9923 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-warning">196 warnings</span>
+    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-warning">182 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -68057,14 +67367,14 @@ let find_entrypoint (type full) (full : full ty) ~root_name entrypoint =
           match al with
           | None -&gt;
               false
-          | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot l)</abbr> -&gt;
+          | Some (Field_annot l) -&gt;
               Compare.String.(l = entrypoint)
         then ((fun e -&gt; Prim (0, D_Left, [e], [])), Ex_ty tl)
         else if
           match ar with
           | None -&gt;
               false
-          | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot r)</abbr> -&gt;
+          | Some (Field_annot r) -&gt;
               Compare.String.(r = entrypoint)
         then ((fun e -&gt; Prim (0, D_Right, [e], [])), Ex_ty tr)
         else
@@ -68135,10 +67445,10 @@ Alternative: using sum types (&quot;option&quot;, &quot;result&quot;, ...) to re
 Alternative: using sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent error cases.">exception Too_long of string</abbr>
 
 let well_formed_entrypoints (type full) (full : full ty) ~root_name =
-  let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">merge</abbr> path annot (type t) (ty : t ty) reachable
+  let merge path annot (type t) (ty : t ty) reachable
       ((first_unreachable, all) as acc) =
     match annot with
-    | None | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;&quot;)</abbr> -&gt; (
+    | None | Some (Field_annot &quot;&quot;) -&gt; (
         if reachable then acc
         else
           match ty with
@@ -68150,7 +67460,7 @@ let well_formed_entrypoints (type full) (full : full ty) ~root_name =
                 (Some (List.rev path), all)
             | Some _ -&gt;
                 acc ) )
-    | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot name)</abbr> -&gt;
+    | Some (Field_annot name) -&gt;
         if Compare.Int.(String.length name &gt; 31) then raise <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Too_long name)</abbr>
@@ -68679,7 +67989,7 @@ They are sent to a unit type.">Invalid_arity (loc, D_Right, 1, List.length l)</a
            ?type_logger
            ctxt
            ~legacy
-           (ta, Some <abbr class="mark-warning" title="Constructor of the variant `Var_annot unknown">(`Var_annot &quot;@arg&quot;)</abbr>)
+           (ta, Some (Var_annot &quot;@arg&quot;))
            tr
            script_instr
   | (Lambda_t _, expr) -&gt;
@@ -70465,11 +69775,11 @@ They are sent to a unit type.">(Comparable_type_expected (loc, t))</abbr>
       match entrypoint with
       | None -&gt;
           Ok &quot;default&quot;
-      | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;default&quot;)</abbr> -&gt;
+      | Some (Field_annot &quot;default&quot;) -&gt;
           error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Unexpected_annotation loc)</abbr>
-      | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot entrypoint)</abbr> -&gt;
+      | Some (Field_annot entrypoint) -&gt;
           if Compare.Int.(String.length entrypoint &gt; 31) then
             error <abbr class="mark-warning" title="Values of extensible types are ignored.
 
@@ -70797,7 +70107,7 @@ They are sent to a unit type.">(Deprecated_instruction I_STEPS_TO_QUOTA)</abbr>
       &gt;&gt;=? fun (annot, entrypoint) -&gt;
       let entrypoint =
         Option.unopt_map
-          ~f:(fun <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot annot)</abbr> -&gt; annot)
+          ~f:(fun (Field_annot annot) -&gt; annot)
           ~default:&quot;default&quot;
           entrypoint
       in
@@ -71386,7 +70696,7 @@ They are sent to a unit type.">(Missing_field K_code)</abbr>
             Script_ir_annot.extract_field_annot p
             &gt;&gt;? fun (p, root_name) -&gt;
             match root_name with
-            | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot root_name)</abbr> -&gt;
+            | Some (Field_annot root_name) -&gt;
                 ok (p, pannot, Some root_name)
             | None -&gt; (
               match pannot with
@@ -71596,10 +70906,10 @@ They are sent to a unit type.">Ill_typed_data (None, data, exp_ty)</abbr>)
 module Entrypoints_map = Map.Make (String)
 
 let list_entrypoints (type full) (full : full ty) ctxt ~root_name =
-  let <abbr class="mark-warning" title="No type known for the following variants: `Field_annot">merge</abbr> path annot (type t) (ty : t ty) reachable
+  let merge path annot (type t) (ty : t ty) reachable
       ((unreachables, all) as acc) =
     match annot with
-    | None | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot &quot;&quot;)</abbr> -&gt; (
+    | None | Some (Field_annot &quot;&quot;) -&gt; (
         ok
         @@
         if reachable then acc
@@ -71609,7 +70919,7 @@ let list_entrypoints (type full) (full : full ty) ctxt ~root_name =
               acc
           | _ -&gt;
               (List.rev path :: unreachables, all) )
-    | Some <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">(`Field_annot name)</abbr> -&gt;
+    | Some (Field_annot name) -&gt;
         if Compare.Int.(String.length name &gt; 31) then
           ok (List.rev path :: unreachables, all)
         else if Entrypoints_map.mem name all then
@@ -71943,7 +71253,7 @@ let unparse_script ctxt mode {code; arg_type; storage; storage_type; root_name}
   &gt;&gt;=? fun (storage_type, ctxt) -&gt;
   let arg_type =
     add_field_annot
-      (Option.map ~f:(fun n -&gt; <abbr class="mark-warning" title="Constructor of the variant `Field_annot unknown">`Field_annot n</abbr>) root_name)
+      (Option.map ~f:(fun n -&gt; Field_annot n) root_name)
       None
       arg_type
   in
@@ -72363,7 +71673,7 @@ Import Alpha_context.
 
 Import Micheline.
 
-Import Script.
+Import Alpha_context.Script.
 
 Import Script_typed_ir.
 
@@ -72431,11 +71741,11 @@ Definition add_dip {A : Set}
   match prev with
   | (Lambda | Toplevel _) =&gt;
     Dip (Script_typed_ir.Item_t ty Script_typed_ir.Empty_t annot) prev
-  | Dip stack _ =&gt;
-    let 'existT _ __Dip_'a stack :=
-      existT (fun __Dip_'a : Set =&gt; (Script_typed_ir.stack_ty __Dip_'a)) _ stack
-      in
-    Dip (Script_typed_ir.Item_t ty stack annot) prev
+  | Dip __stack_value _ =&gt;
+    let 'existT _ __Dip_'a __stack_value :=
+      existT (fun __Dip_'a : Set =&gt; (Script_typed_ir.stack_ty __Dip_'a)) _
+        __stack_value in
+    Dip (Script_typed_ir.Item_t ty __stack_value annot) prev
   end.
 
 Fixpoint comparable_type_size {a t : Set}
@@ -72528,8 +71838,9 @@ Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : Z :=
   end.
 
 Fixpoint type_size_of_stack_head {st : Set}
-  (stack : Script_typed_ir.stack_ty st) (up_to : Z) {struct stack} : Z :=
-  match stack with
+  (__stack_value : Script_typed_ir.stack_ty st) (up_to : Z)
+  {struct __stack_value} : Z :=
+  match __stack_value with
   | Script_typed_ir.Empty_t =&gt; 0
   | Script_typed_ir.Item_t head tail _annot =&gt;
     let 'existT _ [__0, __1] [head, tail, _annot] :=
@@ -75039,7 +74350,7 @@ Definition find_entrypoint {A : Set}
       if
         match al with
         | None =&gt; false
-        | Some (Field_annot l) =&gt;
+        | Some (Script_typed_ir.Field_annot l) =&gt;
           (|Compare.String|).(Compare.S.op_eq) l entrypoint
         end then
         ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Left [ e ] nil),
@@ -75048,7 +74359,7 @@ Definition find_entrypoint {A : Set}
         if
           match ar with
           | None =&gt; false
-          | Some (Field_annot r) =&gt;
+          | Some (Script_typed_ir.Field_annot r) =&gt;
             (|Compare.String|).(Compare.S.op_eq) r entrypoint
           end then
           ((fun e =&gt; Micheline.Prim 0 Alpha_context.Script.D_Right [ e ] nil),
@@ -75133,14 +74444,13 @@ Definition well_formed_entrypoints {A : Set}
   (full : Script_typed_ir.ty A) (root_name : option (|Entrypoints|).(S.SET.elt))
   : Error_monad.tzresult unit :=
   let merge {B C : Set}
-    (path : list B)
-    (annot : option (* `Field_annot *) (|Entrypoints|).(S.SET.elt))
+    (path : list B) (annot : option Script_typed_ir.field_annot)
     (ty : Script_typed_ir.ty C) (reachable : bool)
     (function_parameter : option (list B) * (|Entrypoints|).(S.SET.t))
     : option (list B) * (|Entrypoints|).(S.SET.t) :=
     let '(first_unreachable, all) as acc := function_parameter in
     match annot with
-    | (None | Some (Field_annot &quot;&quot;)) =&gt;
+    | (None | Some (Script_typed_ir.Field_annot &quot;&quot;)) =&gt;
       if reachable then
         acc
       else
@@ -75152,7 +74462,7 @@ Definition well_formed_entrypoints {A : Set}
           | Some _ =&gt; acc
           end
         end
-    | Some (Field_annot name) =&gt;
+    | Some (Script_typed_ir.Field_annot name) =&gt;
       if (|Compare.Int|).(Compare.S.op_gt) (String.length name) 31 then
         Pervasives.raise extensible_type_value
       else
@@ -75830,7 +75140,7 @@ Fixpoint parse_data {a : Set}
           (fun ctxt =&gt;
             Pervasives.op_atat traced
               (parse_returning type_logger Lambda ctxt legacy
-                (ta, (Some (Var_annot &quot;@arg&quot;))) tr script_instr))
+                (ta, (Some (Script_typed_ir.Var_annot &quot;@arg&quot;))) tr script_instr))
       | (Script_typed_ir.Lambda_t _ _ _, expr) =&gt;
         traced (Error_monad.fail extensible_type_value)
       |
@@ -76335,7 +75645,7 @@ with parse_instr {bef : Set}
           match (script_instr, stack_ty) with
           |
             (Micheline.Prim loc Alpha_context.Script.I_DIP
-              (cons n (cons code [])) result_annot, stack) =&gt;
+              (cons n (cons code [])) result_annot, __stack_value) =&gt;
             match parse_int32 n with
             | Pervasives.Ok _ =&gt; true
             | Pervasives.Error _ =&gt; false
@@ -76458,7 +75768,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Item_t v rest stack_annot) annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
-          stack), _) =&gt;
+          __stack_value), _) =&gt;
         let fix make_proof_argument {tstk : Set}
           (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
           : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
@@ -76504,7 +75814,8 @@ with parse_instr {bef : Set}
                     ((Script_typed_ir.Prefix n'), (x, xv),
                       (Script_typed_ir.Item_t v aft' annot))))
           | (_, _) =&gt;
-            Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            Error_monad.op_gtgteqquestion
+              (serialize_stack_for_error ctxt __stack_value)
               (fun function_parameter =&gt;
                 let '(whole_stack, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value)
@@ -76515,7 +75826,8 @@ with parse_instr {bef : Set}
               (Script_ir_annot.fail_unexpected_annot loc result_annot)
               (fun function_parameter =&gt;
                 let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion (make_proof_argument n stack)
+                Error_monad.op_gtgteqquestion
+                  (make_proof_argument n __stack_value)
                   (fun function_parameter =&gt;
                     let 'Dig_proof_argument (n', (x, stack_annot), aft) :=
                       function_parameter in
@@ -76631,14 +75943,15 @@ with parse_instr {bef : Set}
                     typed ctxt loc (Script_typed_ir.Dug whole_n n') aft)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons _ []) result_annot,
-          Script_typed_ir.Empty_t as stack), _) =&gt;
+          Script_typed_ir.Empty_t as __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc result_annot)
           (fun function_parameter =&gt;
             let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            Error_monad.op_gtgteqquestion
+              (serialize_stack_for_error ctxt __stack_value)
               (fun function_parameter =&gt;
-                let '(stack, _ctxt) := function_parameter in
+                let '(__stack_value, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DUG
@@ -76667,7 +75980,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Item_t v rest cur_top_annot) stack_annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_PUSH
-          (cons __t_value (cons d [])) annot, stack), _) =&gt;
+          (cons __t_value (cons d [])) annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
@@ -76685,14 +75998,16 @@ with parse_instr {bef : Set}
                   (fun function_parameter =&gt;
                     let '(v, ctxt) := function_parameter in
                     typed ctxt loc (Script_typed_ir.Const v)
-                      (Script_typed_ir.Item_t __t_value stack annot))))
-      | ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, stack), _) =&gt;
+                      (Script_typed_ir.Item_t __t_value __stack_value annot))))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, __stack_value),
+          _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
           (fun function_parameter =&gt;
             let '(annot, ty_name) := function_parameter in
             typed ctxt loc (Script_typed_ir.Const tt)
-              (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name) stack
-                annot))
+              (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name)
+                __stack_value annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_SOME [] annot,
           Script_typed_ir.Item_t __t_value rest _), _) =&gt;
@@ -76711,7 +76026,7 @@ with parse_instr {bef : Set}
                   (has_big_map __t_value)) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_NONE (cons __t_value [])
-          annot, stack), _) =&gt;
+          annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy __t_value))
           (fun function_parameter =&gt;
@@ -76727,7 +76042,7 @@ with parse_instr {bef : Set}
                 typed ctxt loc (Script_typed_ir.Cons_none __t_value)
                   (Script_typed_ir.Item_t
                     (Script_typed_ir.Option_t __t_value ty_name
-                      (has_big_map __t_value)) stack annot)))
+                      (has_big_map __t_value)) __stack_value annot)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_IF_NONE
           (cons bt (cons bf [])) annot,
@@ -77006,7 +76321,7 @@ with parse_instr {bef : Set}
                                 __return ctxt judgement))))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_NIL (cons __t_value [])
-          annot, stack), _) =&gt;
+          annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy __t_value))
           (fun function_parameter =&gt;
@@ -77022,7 +76337,7 @@ with parse_instr {bef : Set}
                 typed ctxt loc Script_typed_ir.Nil
                   (Script_typed_ir.Item_t
                     (Script_typed_ir.List_t __t_value ty_name
-                      (has_big_map __t_value)) stack annot)))
+                      (has_big_map __t_value)) __stack_value annot)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_CONS [] annot,
           Script_typed_ir.Item_t tv
@@ -77442,7 +76757,7 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP
-          (cons tk (cons tv [])) annot, stack), _) =&gt;
+          (cons tk (cons tv [])) annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =&gt;
@@ -77467,7 +76782,7 @@ with parse_instr {bef : Set}
                     typed ctxt loc (Script_typed_ir.Empty_map tk tv)
                       (Script_typed_ir.Item_t
                         (Script_typed_ir.Map_t tk tv ty_name (has_big_map tv))
-                        stack annot))))
+                        __stack_value annot))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.Map_t ck __elt_value _ _)
@@ -77733,7 +77048,7 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
-          (cons tk (cons tv [])) annot, stack), _) =&gt;
+          (cons tk (cons tv [])) annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =&gt;
@@ -77758,7 +77073,8 @@ with parse_instr {bef : Set}
                     let '(annot, ty_name) := function_parameter in
                     typed ctxt loc (Script_typed_ir.Empty_big_map tk tv)
                       (Script_typed_ir.Item_t
-                        (Script_typed_ir.Big_map_t tk tv ty_name) stack annot))))
+                        (Script_typed_ir.Big_map_t tk tv ty_name) __stack_value
+                        annot))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
           Script_typed_ir.Item_t set_key
@@ -77846,11 +77162,11 @@ with parse_instr {bef : Set}
                       (Script_typed_ir.Item_t
                         (Script_typed_ir.Big_map_t map_key map_value map_name)
                         rest annot))))
-      | ((Micheline.Seq loc [], stack), _) =&gt;
-        typed ctxt loc Script_typed_ir.Nop stack
-      | ((Micheline.Seq loc (cons single []), stack), _) =&gt;
+      | ((Micheline.Seq loc [], __stack_value), _) =&gt;
+        typed ctxt loc Script_typed_ir.Nop __stack_value
+      | ((Micheline.Seq loc (cons single []), __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (parse_instr type_logger tc_context ctxt legacy single stack)
+          (parse_instr type_logger tc_context ctxt legacy single __stack_value)
           (fun function_parameter =&gt;
             let '(judgement, ctxt) := function_parameter in
             match judgement with
@@ -77881,9 +77197,9 @@ with parse_instr {bef : Set}
               __return ctxt
                 (Failed {| judgement.Failed.descr := __descr_value |})
             end)
-      | ((Micheline.Seq loc (cons hd tl), stack), _) =&gt;
+      | ((Micheline.Seq loc (cons hd tl), __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (parse_instr type_logger tc_context ctxt legacy hd stack)
+          (parse_instr type_logger tc_context ctxt legacy hd __stack_value)
           (fun function_parameter =&gt;
             let '(judgement, ctxt) := function_parameter in
             match judgement with
@@ -77906,7 +77222,7 @@ with parse_instr {bef : Set}
                       (ret : Script_typed_ir.stack_ty B)
                       : Script_typed_ir.descr bef B :=
                       {| Script_typed_ir.descr.loc := loc;
-                        Script_typed_ir.descr.bef := stack;
+                        Script_typed_ir.descr.bef := __stack_value;
                         Script_typed_ir.descr.aft := ret;
                         Script_typed_ir.descr.instr :=
                           Script_typed_ir.Seq ihd (__descr_value ret) |} in
@@ -77978,8 +77294,9 @@ with parse_instr {bef : Set}
       |
         ((Micheline.Prim loc Alpha_context.Script.I_LOOP (cons body []) annot,
           (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _stack_annot)
-            as stack), _) =&gt;
-        let 'existT _ __171 [loc, body, annot, rest, _stack_annot, stack] :=
+            as __stack_value), _) =&gt;
+        let 'existT _ __171
+          [loc, body, annot, rest, _stack_annot, __stack_value] :=
           existT
             (fun __171 : Set =&gt;
               [Alpha_context.Script.location **
@@ -77988,7 +77305,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.stack_ty __171) **
                 (option Script_typed_ir.var_annot) **
                 (Script_typed_ir.stack_ty (bool * __171))]) _
-            [loc, body, annot, rest, _stack_annot, stack] in
+            [loc, body, annot, rest, _stack_annot, __stack_value] in
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
@@ -78017,26 +77334,28 @@ with parse_instr {bef : Set}
                           (fun function_parameter =&gt;
                             let '(aft, ctxt) := function_parameter in
                             Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt stack)
+                              (serialize_stack_for_error ctxt __stack_value)
                               (fun function_parameter =&gt;
-                                let '(stack, _ctxt) := function_parameter in
+                                let '(__stack_value, _ctxt) :=
+                                  function_parameter in
                                 extensible_type_value)) in
                       Error_monad.trace_eval unmatched_branches
                         (Error_monad.op_gtgteqquestion
                           (Pervasives.op_atat Lwt.__return
                             (stack_ty_eq ctxt 1
-                              ibody.(Script_typed_ir.descr.aft) stack))
+                              ibody.(Script_typed_ir.descr.aft) __stack_value))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
                               (Pervasives.op_atat Lwt.__return
                                 (merge_stacks legacy loc ctxt
-                                  ibody.(Script_typed_ir.descr.aft) stack))
+                                  ibody.(Script_typed_ir.descr.aft)
+                                  __stack_value))
                               (fun function_parameter =&gt;
                                 let '(_stack, ctxt) := function_parameter in
                                 typed ctxt loc (Script_typed_ir.Loop ibody) rest)))
                     | Failed {| judgement.Failed.descr := __descr_value |} =&gt;
-                      let ibody := __descr_value stack in
+                      let ibody := __descr_value __stack_value in
                       typed ctxt loc (Script_typed_ir.Loop ibody) rest
                     end)))
       |
@@ -78044,9 +77363,10 @@ with parse_instr {bef : Set}
           annot,
           (Script_typed_ir.Item_t
             (Script_typed_ir.Union_t (tl, l_field) (tr, _) _ _) rest union_annot)
-            as stack), _) =&gt;
+            as __stack_value), _) =&gt;
         let 'existT _ [__173, __174, __175]
-          [loc, body, annot, tl, l_field, tr, rest, union_annot, stack] :=
+          [loc, body, annot, tl, l_field, tr, rest, union_annot, __stack_value]
+          :=
           existT
             (fun '[__173, __174, __175] =&gt;
               [Alpha_context.Script.location **
@@ -78058,7 +77378,8 @@ with parse_instr {bef : Set}
                 ** (option Script_typed_ir.var_annot) **
                 (Script_typed_ir.stack_ty
                   (Script_typed_ir.union __174 __175 * __173))]) _
-            [loc, body, annot, tl, l_field, tr, rest, union_annot, stack] in
+            [loc, body, annot, tl, l_field, tr, rest, union_annot,
+              __stack_value] in
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
@@ -78089,33 +77410,35 @@ with parse_instr {bef : Set}
                           (fun function_parameter =&gt;
                             let '(aft, ctxt) := function_parameter in
                             Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt stack)
+                              (serialize_stack_for_error ctxt __stack_value)
                               (fun function_parameter =&gt;
-                                let '(stack, _ctxt) := function_parameter in
+                                let '(__stack_value, _ctxt) :=
+                                  function_parameter in
                                 extensible_type_value)) in
                       Error_monad.trace_eval unmatched_branches
                         (Error_monad.op_gtgteqquestion
                           (Pervasives.op_atat Lwt.__return
                             (stack_ty_eq ctxt 1
-                              ibody.(Script_typed_ir.descr.aft) stack))
+                              ibody.(Script_typed_ir.descr.aft) __stack_value))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
                               (Pervasives.op_atat Lwt.__return
                                 (merge_stacks legacy loc ctxt
-                                  ibody.(Script_typed_ir.descr.aft) stack))
+                                  ibody.(Script_typed_ir.descr.aft)
+                                  __stack_value))
                               (fun function_parameter =&gt;
                                 let '(_stack, ctxt) := function_parameter in
                                 typed ctxt loc (Script_typed_ir.Loop_left ibody)
                                   (Script_typed_ir.Item_t tr rest annot))))
                     | Failed {| judgement.Failed.descr := __descr_value |} =&gt;
-                      let ibody := __descr_value stack in
+                      let ibody := __descr_value __stack_value in
                       typed ctxt loc (Script_typed_ir.Loop_left ibody)
                         (Script_typed_ir.Item_t tr rest annot)
                     end)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
-          (cons arg (cons ret (cons code []))) annot, stack), _) =&gt;
+          (cons arg (cons ret (cons code []))) annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy arg))
           (fun function_parameter =&gt;
@@ -78148,8 +77471,8 @@ with parse_instr {bef : Set}
                             let '(lambda, ctxt) := function_parameter in
                             typed ctxt loc (Script_typed_ir.Lambda lambda)
                               (Script_typed_ir.Item_t
-                                (Script_typed_ir.Lambda_t arg ret None) stack
-                                annot))))))
+                                (Script_typed_ir.Lambda_t arg ret None)
+                                __stack_value annot))))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_EXEC [] annot,
           Script_typed_ir.Item_t arg
@@ -78242,7 +77565,7 @@ with parse_instr {bef : Set}
                     end)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
-          result_annot, stack), true) =&gt;
+          result_annot, __stack_value), true) =&gt;
         let fix make_proof_argument {tstk : Set}
           (n : Z) (inner_tc_context : tc_context)
           (stk : Script_typed_ir.stack_ty tstk) {struct n}
@@ -78299,7 +77622,8 @@ with parse_instr {bef : Set}
                     ((Script_typed_ir.Prefix n'), __descr_value,
                       (Script_typed_ir.Item_t v aft' annot))))
           | (_, _) =&gt;
-            Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            Error_monad.op_gtgteqquestion
+              (serialize_stack_for_error ctxt __stack_value)
               (fun function_parameter =&gt;
                 let '(whole_stack, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value)
@@ -78311,7 +77635,7 @@ with parse_instr {bef : Set}
               (fun function_parameter =&gt;
                 let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
-                  (make_proof_argument n tc_context stack)
+                  (make_proof_argument n tc_context __stack_value)
                   (fun function_parameter =&gt;
                     let
                       'Dipn_proof_argument (n', (new_ctxt, __descr_value), aft) :=
@@ -79431,9 +78755,9 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_CAST (cons cast_t []) annot,
-          Script_typed_ir.Item_t __t_value stack item_annot), _) =&gt;
+          Script_typed_ir.Item_t __t_value __stack_value item_annot), _) =&gt;
         let 'existT _ [__396, __397]
-          [loc, cast_t, annot, __t_value, stack, item_annot] :=
+          [loc, cast_t, annot, __t_value, __stack_value, item_annot] :=
           existT
             (fun '[__396, __397] =&gt;
               [Alpha_context.Script.location **
@@ -79441,7 +78765,7 @@ with parse_instr {bef : Set}
                   Alpha_context.Script.prim) ** Micheline.annot **
                 (Script_typed_ir.ty __396) ** (Script_typed_ir.stack_ty __397)
                 ** (option Script_typed_ir.var_annot)]) _
-            [loc, cast_t, annot, __t_value, stack, item_annot] in
+            [loc, cast_t, annot, __t_value, __stack_value, item_annot] in
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some item_annot) annot)
           (fun annot =&gt;
@@ -79464,20 +78788,20 @@ with parse_instr {bef : Set}
                       (fun function_parameter =&gt;
                         let '(_, ctxt) := function_parameter in
                         typed ctxt loc Script_typed_ir.Nop
-                          (Script_typed_ir.Item_t cast_t stack annot)))))
+                          (Script_typed_ir.Item_t cast_t __stack_value annot)))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_RENAME [] annot,
-          Script_typed_ir.Item_t __t_value stack _), _) =&gt;
-        let 'existT _ [__398, __399] [loc, annot, __t_value, stack] :=
+          Script_typed_ir.Item_t __t_value __stack_value _), _) =&gt;
+        let 'existT _ [__398, __399] [loc, annot, __t_value, __stack_value] :=
           existT
             (fun '[__398, __399] =&gt;
               [Alpha_context.Script.location ** Micheline.annot **
                 (Script_typed_ir.ty __398) ** (Script_typed_ir.stack_ty __399)])
-            _ [loc, annot, __t_value, stack] in
+            _ [loc, annot, __t_value, __stack_value] in
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Nop
-              (Script_typed_ir.Item_t __t_value stack annot))
+              (Script_typed_ir.Item_t __t_value __stack_value annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_PACK [] annot,
           Script_typed_ir.Item_t __t_value rest unpacked_annot), _) =&gt;
@@ -79588,9 +78912,9 @@ with parse_instr {bef : Set}
                   (Pervasives.op_atat Lwt.__return
                     match entrypoint with
                     | None =&gt; Pervasives.Ok &quot;default&quot;
-                    | Some (Field_annot &quot;default&quot;) =&gt;
+                    | Some (Script_typed_ir.Field_annot &quot;default&quot;) =&gt;
                       Error_monad.__error_value extensible_type_value
-                    | Some (Field_annot entrypoint) =&gt;
+                    | Some (Script_typed_ir.Field_annot entrypoint) =&gt;
                       if
                         (|Compare.Int|).(Compare.S.op_gt)
                           (String.length entrypoint) 31 then
@@ -80025,36 +79349,42 @@ with parse_instr {bef : Set}
                                                                 None) rest
                                                               addr_annot)
                                                             op_annot)))))))))))))
-      | ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, stack), _) =&gt;
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, __stack_value),
+          _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_now_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Now
-              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot, stack), _)
-        =&gt;
+              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot,
+          __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_amount_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Amount
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) stack annot))
+              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None)
+                __stack_value annot))
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot, stack), _)
-        =&gt;
+        ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot,
+          __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.ChainId
-              (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot, stack), _)
-        =&gt;
+              (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot,
+          __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_balance_annot)
             annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Balance
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) stack annot))
+              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None)
+                __stack_value annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_HASH_KEY [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Key_t _) rest _), _) =&gt;
@@ -80121,33 +79451,38 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_STEPS_TO_QUOTA [] annot,
-          stack), _) =&gt;
+          __stack_value), _) =&gt;
         if legacy then
           Error_monad.op_gtgteqquestion
             (parse_var_annot loc (Some Script_ir_annot.default_steps_annot)
               annot)
             (fun annot =&gt;
               typed ctxt loc Script_typed_ir.Steps_to_quota
-                (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) stack annot))
+                (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None)
+                  __stack_value annot))
         else
           Error_monad.fail extensible_type_value
-      | ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot, stack), _)
-        =&gt;
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot,
+          __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_source_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Source
-              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot, stack), _)
-        =&gt;
+              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot,
+          __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_sender_annot) annot)
           (fun annot =&gt;
             typed ctxt loc Script_typed_ir.Sender
-              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, stack), _) =&gt;
+              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, __stack_value),
+          _) =&gt;
         Error_monad.op_gtgteqquestion
           (parse_entrypoint_annot loc (Some Script_ir_annot.default_self_annot)
             annot)
@@ -80156,7 +79491,8 @@ with parse_instr {bef : Set}
             let entrypoint :=
               Option.unopt_map
                 (fun function_parameter =&gt;
-                  let 'Field_annot annot := function_parameter in
+                  let 'Script_typed_ir.Field_annot annot := function_parameter
+                    in
                   annot) &quot;default&quot; entrypoint in
             let fix get_toplevel_type (function_parameter : tc_context)
               {struct function_parameter}
@@ -80187,7 +79523,8 @@ with parse_instr {bef : Set}
                           (Script_typed_ir.ty __Ex_ty_'a17)) _ param_type in
                     typed ctxt loc (Script_typed_ir.Self param_type entrypoint)
                       (Script_typed_ir.Item_t
-                        (Script_typed_ir.Contract_t param_type None) stack annot))
+                        (Script_typed_ir.Contract_t param_type None)
+                        __stack_value annot))
               |
                 Toplevel {|
                   tc_context.Toplevel.param_type := param_type;
@@ -80200,7 +79537,8 @@ with parse_instr {bef : Set}
                       (Script_typed_ir.ty __Toplevel_'param1)) _ param_type in
                 typed ctxt loc (Script_typed_ir.Self param_type &quot;default&quot;)
                   (Script_typed_ir.Item_t
-                    (Script_typed_ir.Contract_t param_type None) stack annot)
+                    (Script_typed_ir.Contract_t param_type None) __stack_value
+                    annot)
               end in
             get_toplevel_type tc_context)
       |
@@ -80302,31 +79640,35 @@ with parse_instr {bef : Set}
       |
         ((Micheline.Prim loc
           ((Alpha_context.Script.I_UPDATE | Alpha_context.Script.I_SLICE) as
-            name) [] _, stack), _) =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            name) [] _, __stack_value), _) =&gt;
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _, stack),
-          _) =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _,
+          __stack_value), _) =&gt;
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _, stack),
-          _) =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _,
+          __stack_value), _) =&gt;
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _, stack),
-          _) =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _,
+          __stack_value), _) =&gt;
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
         ((Micheline.Prim loc
@@ -80344,10 +79686,11 @@ with parse_instr {bef : Set}
           Alpha_context.Script.I_EQ | Alpha_context.Script.I_NEQ |
           Alpha_context.Script.I_LT | Alpha_context.Script.I_GT |
           Alpha_context.Script.I_LE | Alpha_context.Script.I_GE) as name) _ _,
-          stack), _) =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+          __stack_value), _) =&gt;
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
         ((Micheline.Prim loc
@@ -80359,10 +79702,11 @@ with parse_instr {bef : Set}
           Alpha_context.Script.I_EDIV | Alpha_context.Script.I_AND |
           Alpha_context.Script.I_OR | Alpha_context.Script.I_XOR |
           Alpha_context.Script.I_LSL | Alpha_context.Script.I_LSR) as name) _ _,
-          stack), _) =&gt;
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+          __stack_value), _) =&gt;
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =&gt;
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       | ((expr, _), _) =&gt;
         Pervasives.op_atat Error_monad.fail
@@ -80750,7 +80094,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                 (fun function_parameter =&gt;
                   let '(p, root_name) := function_parameter in
                   match root_name with
-                  | Some (Field_annot root_name) =&gt;
+                  | Some (Script_typed_ir.Field_annot root_name) =&gt;
                     Error_monad.ok (p, pannot, (Some root_name))
                   | None =&gt;
                     match
@@ -81045,8 +80389,7 @@ Definition list_entrypoints {A : Set}
       (|Entrypoints_map|).(S.MAP.t)
         (list Alpha_context.Script.prim * Alpha_context.Script.node)) :=
   let merge {B C : Set}
-    (path : list B)
-    (annot : option (* `Field_annot *) (|Entrypoints_map|).(S.MAP.key))
+    (path : list B) (annot : option Script_typed_ir.field_annot)
     (ty : Script_typed_ir.ty C) (reachable : bool)
     (function_parameter :
       list (list B) *
@@ -81056,7 +80399,7 @@ Definition list_entrypoints {A : Set}
         (|Entrypoints_map|).(S.MAP.t) (list B * Alpha_context.Script.node)) :=
     let '(unreachables, all) as acc := function_parameter in
     match annot with
-    | (None | Some (Field_annot &quot;&quot;)) =&gt;
+    | (None | Some (Script_typed_ir.Field_annot &quot;&quot;)) =&gt;
       Pervasives.op_atat Error_monad.ok
         (if reachable then
           acc
@@ -81065,7 +80408,7 @@ Definition list_entrypoints {A : Set}
           | Script_typed_ir.Union_t _ _ _ _ =&gt; acc
           | _ =&gt; ((cons (List.rev path) unreachables), all)
           end)
-    | Some (Field_annot name) =&gt;
+    | Some (Script_typed_ir.Field_annot name) =&gt;
       if (|Compare.Int|).(Compare.S.op_gt) (String.length name) 31 then
         Error_monad.ok ((cons (List.rev path) unreachables), all)
       else
@@ -81643,8 +80986,8 @@ Definition unparse_script {A B : Set}
                   let '(storage_type, ctxt) := function_parameter in
                   let arg_type :=
                     add_field_annot
-                      (Option.map (fun n =&gt; Field_annot n) root_name) None
-                      arg_type in
+                      (Option.map (fun n =&gt; Script_typed_ir.Field_annot n)
+                        root_name) None arg_type in
                   let code :=
                     Micheline.Seq (-1)
                       [
@@ -82244,7 +81587,7 @@ Definition list_of_big_map_ids (ids : (|Ids|).(S.SET.t))
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#script_ir_translator.mli"><code>script_ir_translator.mli</code></a>&nbsp;<span class="label label-warning">3 warnings</span>
+    <a href="#script_ir_translator.mli"><code>script_ir_translator.mli</code></a>&nbsp;<span class="label label-warning">1 warning</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -82425,15 +81768,11 @@ val parse_toplevel :
   Script.expr -&gt;
   (Script.node * Script.node * Script.node * string option) tzresult
 
-<abbr class="mark-warning" title="No type known for the following variants: `Var_annot
-
-——————————
-
-No type known for the following variants: `Field_annot">val add_field_annot :
-  [`Field_annot of string] option -&gt;
-  [`Var_annot of string] option -&gt;
+val add_field_annot :
+  Script_typed_ir.field_annot option -&gt;
+  Script_typed_ir.var_annot option -&gt;
   Script.node -&gt;
-  Script.node</abbr>
+  Script.node
 
 val typecheck_code :
   context -&gt; Script.expr -&gt; (type_map * context) tzresult Lwt.t
@@ -82737,7 +82076,7 @@ Parameter parse_toplevel :
       Alpha_context.Script.node * option string).
 
 Parameter add_field_annot :
-  option (* `Field_annot *) string -&gt; option (* `Var_annot *) string -&gt;
+  option Script_typed_ir.field_annot -&gt; option Script_typed_ir.var_annot -&gt;
   Alpha_context.Script.node -&gt; Alpha_context.Script.node.
 
 Parameter typecheck_code :
@@ -83759,7 +83098,7 @@ Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
-Import Script.
+Import Alpha_context.Script.
 
 Inductive namespace : Set :=
 | Type_namespace : namespace
@@ -83926,7 +83265,7 @@ Definition type_map := list (Z * (unparsed_stack_ty * unparsed_stack_ty)).
     <h3>Script_tc_errors_registration</h3>
     <ul>
       <li>OCaml size: 652 lines</li>
-      <li>Coq size: 54 lines (-92% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 55 lines (-92% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -84601,10 +83940,11 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Script_tc_errors.
 
 Import Alpha_context.
 
-Import Script.
+Import Alpha_context.Script.
 
 Import Script_tc_errors.
 
@@ -84907,7 +84247,7 @@ Parameter of_zint : Z.t -&gt; t.
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#script_typed_ir.ml"><code>script_typed_ir.ml</code></a>&nbsp;<span class="label label-warning">3 warnings</span>
+    <a href="#script_typed_ir.ml"><code>script_typed_ir.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -84939,11 +84279,11 @@ open Script_int
 
 (* ---- Auxiliary types -----------------------------------------------------*)
 
-<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type var_annot = [`Var_annot of string]</abbr>
+type var_annot = Var_annot of string
 
-<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type type_annot = [`Type_annot of string]</abbr>
+type type_annot = Type_annot of string
 
-<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type field_annot = [`Field_annot of string]</abbr>
+type field_annot = Field_annot of string
 
 type address = Contract.t * string
 
@@ -85348,7 +84688,7 @@ Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
-Import Script_int.
+Import Alpha_context.Script_int.
 
 Inductive var_annot : Set :=
 | Var_annot : string -&gt; var_annot.

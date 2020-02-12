@@ -11,8 +11,13 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
+Require Tezos.Contract_services.
+Require Tezos.Delegate_services.
+Require Tezos.Helpers_services.
 Require Tezos.Nonce_hash.
 Require Tezos.Services_registration.
+Require Tezos.Voting_services.
 
 Import Alpha_context.
 

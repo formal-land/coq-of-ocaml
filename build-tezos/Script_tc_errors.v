@@ -14,7 +14,7 @@ Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
-Import Script.
+Import Alpha_context.Script.
 
 Inductive namespace : Set :=
 | Type_namespace : namespace

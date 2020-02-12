@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
 
@@ -191,7 +191,7 @@ Module S.
         (RPC_path.op_divcolon big_map_root Alpha_context.Big_map.rpc_arg)
         Script_expr_hash.rpc_arg).
   
-  Definition info
+  Definition __info_value
     : RPC_service.service (* `GET *) unit RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit info :=
     RPC_service.get_service (Some "Access the complete status of a contract.")
@@ -318,7 +318,7 @@ Definition register (function_parameter : unit) : unit :=
   (* ❌ instruction_sequence ";" *)
   (* ❌ Sequences of instructions are ignored (operator ";") *)
   (* ❌ instruction_sequence ";" *)
-  register_field S.info
+  register_field S.__info_value
     (fun ctxt =>
       fun contract =>
         Error_monad.op_gtgteqquestion
@@ -400,7 +400,7 @@ Definition __list_value {D E G I K L a b c i o q : Set}
   : Lwt.t (Error_monad.shell_tzresult (list Alpha_context.Contract.t)) :=
   RPC_context.make_call0 S.__list_value ctxt block tt tt.
 
-Definition info {D E G I K L a b c i o q : Set}
+Definition __info_value {D E G I K L a b c i o q : Set}
   (ctxt :
     (((RPC_service.t
       ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
@@ -424,7 +424,7 @@ Definition info {D E G I K L a b c i o q : Set}
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult info) :=
-  RPC_context.make_call1 S.info ctxt block contract tt tt.
+  RPC_context.make_call1 S.__info_value ctxt block contract tt tt.
 
 Definition balance {D E G I K L a b c i o q : Set}
   (ctxt :

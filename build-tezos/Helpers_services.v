@@ -16,7 +16,7 @@ Require Tezos.Constants_repr.
 Require Tezos.Contract_services.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_tc_errors_registration.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.

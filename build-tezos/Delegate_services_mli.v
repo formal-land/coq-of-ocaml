@@ -90,7 +90,7 @@ Definition info := info.record.
 
 Parameter info_encoding : Data_encoding.t info.
 
-Parameter info : forall {E F H J K a b c i o q : Set},
+Parameter __info_value : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
     ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit +
       (* `PATCH *) unit) RPC_context.t RPC_context.t q i o -> a -> q -> i ->

@@ -16,7 +16,7 @@ Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
-Import Gas.
+Import Alpha_context.Gas.
 
 Module Cost_of.
   Definition log2 : Z -> Z :=

@@ -21,7 +21,7 @@ Import Alpha_context.
 
 Import Micheline.
 
-Import Script.
+Import Alpha_context.Script.
 
 Import Script_typed_ir.
 
@@ -89,11 +89,11 @@ Definition add_dip {A : Set}
   match prev with
   | (Lambda | Toplevel _) =>
     Dip (Script_typed_ir.Item_t ty Script_typed_ir.Empty_t annot) prev
-  | Dip stack _ =>
-    let 'existT _ __Dip_'a stack :=
-      existT (fun __Dip_'a : Set => (Script_typed_ir.stack_ty __Dip_'a)) _ stack
-      in
-    Dip (Script_typed_ir.Item_t ty stack annot) prev
+  | Dip __stack_value _ =>
+    let 'existT _ __Dip_'a __stack_value :=
+      existT (fun __Dip_'a : Set => (Script_typed_ir.stack_ty __Dip_'a)) _
+        __stack_value in
+    Dip (Script_typed_ir.Item_t ty __stack_value annot) prev
   end.
 
 Fixpoint comparable_type_size {a t : Set}
@@ -186,8 +186,9 @@ Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : Z :=
   end.
 
 Fixpoint type_size_of_stack_head {st : Set}
-  (stack : Script_typed_ir.stack_ty st) (up_to : Z) {struct stack} : Z :=
-  match stack with
+  (__stack_value : Script_typed_ir.stack_ty st) (up_to : Z)
+  {struct __stack_value} : Z :=
+  match __stack_value with
   | Script_typed_ir.Empty_t => 0
   | Script_typed_ir.Item_t head tail _annot =>
     let 'existT _ [__0, __1] [head, tail, _annot] :=
@@ -2697,7 +2698,7 @@ Definition find_entrypoint {A : Set}
       if
         match al with
         | None => false
-        | Some (Field_annot l) =>
+        | Some (Script_typed_ir.Field_annot l) =>
           (|Compare.String|).(Compare.S.op_eq) l entrypoint
         end then
         ((fun e => Micheline.Prim 0 Alpha_context.Script.D_Left [ e ] nil),
@@ -2706,7 +2707,7 @@ Definition find_entrypoint {A : Set}
         if
           match ar with
           | None => false
-          | Some (Field_annot r) =>
+          | Some (Script_typed_ir.Field_annot r) =>
             (|Compare.String|).(Compare.S.op_eq) r entrypoint
           end then
           ((fun e => Micheline.Prim 0 Alpha_context.Script.D_Right [ e ] nil),
@@ -2791,14 +2792,13 @@ Definition well_formed_entrypoints {A : Set}
   (full : Script_typed_ir.ty A) (root_name : option (|Entrypoints|).(S.SET.elt))
   : Error_monad.tzresult unit :=
   let merge {B C : Set}
-    (path : list B)
-    (annot : option (* `Field_annot *) (|Entrypoints|).(S.SET.elt))
+    (path : list B) (annot : option Script_typed_ir.field_annot)
     (ty : Script_typed_ir.ty C) (reachable : bool)
     (function_parameter : option (list B) * (|Entrypoints|).(S.SET.t))
     : option (list B) * (|Entrypoints|).(S.SET.t) :=
     let '(first_unreachable, all) as acc := function_parameter in
     match annot with
-    | (None | Some (Field_annot "")) =>
+    | (None | Some (Script_typed_ir.Field_annot "")) =>
       if reachable then
         acc
       else
@@ -2810,7 +2810,7 @@ Definition well_formed_entrypoints {A : Set}
           | Some _ => acc
           end
         end
-    | Some (Field_annot name) =>
+    | Some (Script_typed_ir.Field_annot name) =>
       if (|Compare.Int|).(Compare.S.op_gt) (String.length name) 31 then
         Pervasives.raise extensible_type_value
       else
@@ -3488,7 +3488,7 @@ Fixpoint parse_data {a : Set}
           (fun ctxt =>
             Pervasives.op_atat traced
               (parse_returning type_logger Lambda ctxt legacy
-                (ta, (Some (Var_annot "@arg"))) tr script_instr))
+                (ta, (Some (Script_typed_ir.Var_annot "@arg"))) tr script_instr))
       | (Script_typed_ir.Lambda_t _ _ _, expr) =>
         traced (Error_monad.fail extensible_type_value)
       |
@@ -3993,7 +3993,7 @@ with parse_instr {bef : Set}
           match (script_instr, stack_ty) with
           |
             (Micheline.Prim loc Alpha_context.Script.I_DIP
-              (cons n (cons code [])) result_annot, stack) =>
+              (cons n (cons code [])) result_annot, __stack_value) =>
             match parse_int32 n with
             | Pervasives.Ok _ => true
             | Pervasives.Error _ => false
@@ -4116,7 +4116,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Item_t v rest stack_annot) annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
-          stack), _) =>
+          __stack_value), _) =>
         let fix make_proof_argument {tstk : Set}
           (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
           : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
@@ -4162,7 +4162,8 @@ with parse_instr {bef : Set}
                     ((Script_typed_ir.Prefix n'), (x, xv),
                       (Script_typed_ir.Item_t v aft' annot))))
           | (_, _) =>
-            Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            Error_monad.op_gtgteqquestion
+              (serialize_stack_for_error ctxt __stack_value)
               (fun function_parameter =>
                 let '(whole_stack, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value)
@@ -4173,7 +4174,8 @@ with parse_instr {bef : Set}
               (Script_ir_annot.fail_unexpected_annot loc result_annot)
               (fun function_parameter =>
                 let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion (make_proof_argument n stack)
+                Error_monad.op_gtgteqquestion
+                  (make_proof_argument n __stack_value)
                   (fun function_parameter =>
                     let 'Dig_proof_argument (n', (x, stack_annot), aft) :=
                       function_parameter in
@@ -4289,14 +4291,15 @@ with parse_instr {bef : Set}
                     typed ctxt loc (Script_typed_ir.Dug whole_n n') aft)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons _ []) result_annot,
-          Script_typed_ir.Empty_t as stack), _) =>
+          Script_typed_ir.Empty_t as __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (Script_ir_annot.fail_unexpected_annot loc result_annot)
           (fun function_parameter =>
             let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            Error_monad.op_gtgteqquestion
+              (serialize_stack_for_error ctxt __stack_value)
               (fun function_parameter =>
-                let '(stack, _ctxt) := function_parameter in
+                let '(__stack_value, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DUG
@@ -4325,7 +4328,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.Item_t v rest cur_top_annot) stack_annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_PUSH
-          (cons __t_value (cons d [])) annot, stack), _) =>
+          (cons __t_value (cons d [])) annot, __stack_value), _) =>
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =>
             Error_monad.op_gtgteqquestion
@@ -4343,14 +4346,16 @@ with parse_instr {bef : Set}
                   (fun function_parameter =>
                     let '(v, ctxt) := function_parameter in
                     typed ctxt loc (Script_typed_ir.Const v)
-                      (Script_typed_ir.Item_t __t_value stack annot))))
-      | ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, stack), _) =>
+                      (Script_typed_ir.Item_t __t_value __stack_value annot))))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, __stack_value),
+          _) =>
         Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
           (fun function_parameter =>
             let '(annot, ty_name) := function_parameter in
             typed ctxt loc (Script_typed_ir.Const tt)
-              (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name) stack
-                annot))
+              (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name)
+                __stack_value annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_SOME [] annot,
           Script_typed_ir.Item_t __t_value rest _), _) =>
@@ -4369,7 +4374,7 @@ with parse_instr {bef : Set}
                   (has_big_map __t_value)) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_NONE (cons __t_value [])
-          annot, stack), _) =>
+          annot, __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy __t_value))
           (fun function_parameter =>
@@ -4385,7 +4390,7 @@ with parse_instr {bef : Set}
                 typed ctxt loc (Script_typed_ir.Cons_none __t_value)
                   (Script_typed_ir.Item_t
                     (Script_typed_ir.Option_t __t_value ty_name
-                      (has_big_map __t_value)) stack annot)))
+                      (has_big_map __t_value)) __stack_value annot)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_IF_NONE
           (cons bt (cons bf [])) annot,
@@ -4664,7 +4669,7 @@ with parse_instr {bef : Set}
                                 __return ctxt judgement))))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_NIL (cons __t_value [])
-          annot, stack), _) =>
+          annot, __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy __t_value))
           (fun function_parameter =>
@@ -4680,7 +4685,7 @@ with parse_instr {bef : Set}
                 typed ctxt loc Script_typed_ir.Nil
                   (Script_typed_ir.Item_t
                     (Script_typed_ir.List_t __t_value ty_name
-                      (has_big_map __t_value)) stack annot)))
+                      (has_big_map __t_value)) __stack_value annot)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_CONS [] annot,
           Script_typed_ir.Item_t tv
@@ -5100,7 +5105,7 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP
-          (cons tk (cons tv [])) annot, stack), _) =>
+          (cons tk (cons tv [])) annot, __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =>
@@ -5125,7 +5130,7 @@ with parse_instr {bef : Set}
                     typed ctxt loc (Script_typed_ir.Empty_map tk tv)
                       (Script_typed_ir.Item_t
                         (Script_typed_ir.Map_t tk tv ty_name (has_big_map tv))
-                        stack annot))))
+                        __stack_value annot))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
           Script_typed_ir.Item_t (Script_typed_ir.Map_t ck __elt_value _ _)
@@ -5391,7 +5396,7 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
-          (cons tk (cons tv [])) annot, stack), _) =>
+          (cons tk (cons tv [])) annot, __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =>
@@ -5416,7 +5421,8 @@ with parse_instr {bef : Set}
                     let '(annot, ty_name) := function_parameter in
                     typed ctxt loc (Script_typed_ir.Empty_big_map tk tv)
                       (Script_typed_ir.Item_t
-                        (Script_typed_ir.Big_map_t tk tv ty_name) stack annot))))
+                        (Script_typed_ir.Big_map_t tk tv ty_name) __stack_value
+                        annot))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
           Script_typed_ir.Item_t set_key
@@ -5504,11 +5510,11 @@ with parse_instr {bef : Set}
                       (Script_typed_ir.Item_t
                         (Script_typed_ir.Big_map_t map_key map_value map_name)
                         rest annot))))
-      | ((Micheline.Seq loc [], stack), _) =>
-        typed ctxt loc Script_typed_ir.Nop stack
-      | ((Micheline.Seq loc (cons single []), stack), _) =>
+      | ((Micheline.Seq loc [], __stack_value), _) =>
+        typed ctxt loc Script_typed_ir.Nop __stack_value
+      | ((Micheline.Seq loc (cons single []), __stack_value), _) =>
         Error_monad.op_gtgteqquestion
-          (parse_instr type_logger tc_context ctxt legacy single stack)
+          (parse_instr type_logger tc_context ctxt legacy single __stack_value)
           (fun function_parameter =>
             let '(judgement, ctxt) := function_parameter in
             match judgement with
@@ -5539,9 +5545,9 @@ with parse_instr {bef : Set}
               __return ctxt
                 (Failed {| judgement.Failed.descr := __descr_value |})
             end)
-      | ((Micheline.Seq loc (cons hd tl), stack), _) =>
+      | ((Micheline.Seq loc (cons hd tl), __stack_value), _) =>
         Error_monad.op_gtgteqquestion
-          (parse_instr type_logger tc_context ctxt legacy hd stack)
+          (parse_instr type_logger tc_context ctxt legacy hd __stack_value)
           (fun function_parameter =>
             let '(judgement, ctxt) := function_parameter in
             match judgement with
@@ -5564,7 +5570,7 @@ with parse_instr {bef : Set}
                       (ret : Script_typed_ir.stack_ty B)
                       : Script_typed_ir.descr bef B :=
                       {| Script_typed_ir.descr.loc := loc;
-                        Script_typed_ir.descr.bef := stack;
+                        Script_typed_ir.descr.bef := __stack_value;
                         Script_typed_ir.descr.aft := ret;
                         Script_typed_ir.descr.instr :=
                           Script_typed_ir.Seq ihd (__descr_value ret) |} in
@@ -5636,8 +5642,9 @@ with parse_instr {bef : Set}
       |
         ((Micheline.Prim loc Alpha_context.Script.I_LOOP (cons body []) annot,
           (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _stack_annot)
-            as stack), _) =>
-        let 'existT _ __171 [loc, body, annot, rest, _stack_annot, stack] :=
+            as __stack_value), _) =>
+        let 'existT _ __171
+          [loc, body, annot, rest, _stack_annot, __stack_value] :=
           existT
             (fun __171 : Set =>
               [Alpha_context.Script.location **
@@ -5646,7 +5653,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.stack_ty __171) **
                 (option Script_typed_ir.var_annot) **
                 (Script_typed_ir.stack_ty (bool * __171))]) _
-            [loc, body, annot, rest, _stack_annot, stack] in
+            [loc, body, annot, rest, _stack_annot, __stack_value] in
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =>
@@ -5675,26 +5682,28 @@ with parse_instr {bef : Set}
                           (fun function_parameter =>
                             let '(aft, ctxt) := function_parameter in
                             Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt stack)
+                              (serialize_stack_for_error ctxt __stack_value)
                               (fun function_parameter =>
-                                let '(stack, _ctxt) := function_parameter in
+                                let '(__stack_value, _ctxt) :=
+                                  function_parameter in
                                 extensible_type_value)) in
                       Error_monad.trace_eval unmatched_branches
                         (Error_monad.op_gtgteqquestion
                           (Pervasives.op_atat Lwt.__return
                             (stack_ty_eq ctxt 1
-                              ibody.(Script_typed_ir.descr.aft) stack))
+                              ibody.(Script_typed_ir.descr.aft) __stack_value))
                           (fun function_parameter =>
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
                               (Pervasives.op_atat Lwt.__return
                                 (merge_stacks legacy loc ctxt
-                                  ibody.(Script_typed_ir.descr.aft) stack))
+                                  ibody.(Script_typed_ir.descr.aft)
+                                  __stack_value))
                               (fun function_parameter =>
                                 let '(_stack, ctxt) := function_parameter in
                                 typed ctxt loc (Script_typed_ir.Loop ibody) rest)))
                     | Failed {| judgement.Failed.descr := __descr_value |} =>
-                      let ibody := __descr_value stack in
+                      let ibody := __descr_value __stack_value in
                       typed ctxt loc (Script_typed_ir.Loop ibody) rest
                     end)))
       |
@@ -5702,9 +5711,10 @@ with parse_instr {bef : Set}
           annot,
           (Script_typed_ir.Item_t
             (Script_typed_ir.Union_t (tl, l_field) (tr, _) _ _) rest union_annot)
-            as stack), _) =>
+            as __stack_value), _) =>
         let 'existT _ [__173, __174, __175]
-          [loc, body, annot, tl, l_field, tr, rest, union_annot, stack] :=
+          [loc, body, annot, tl, l_field, tr, rest, union_annot, __stack_value]
+          :=
           existT
             (fun '[__173, __174, __175] =>
               [Alpha_context.Script.location **
@@ -5716,7 +5726,8 @@ with parse_instr {bef : Set}
                 ** (option Script_typed_ir.var_annot) **
                 (Script_typed_ir.stack_ty
                   (Script_typed_ir.union __174 __175 * __173))]) _
-            [loc, body, annot, tl, l_field, tr, rest, union_annot, stack] in
+            [loc, body, annot, tl, l_field, tr, rest, union_annot,
+              __stack_value] in
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =>
@@ -5747,33 +5758,35 @@ with parse_instr {bef : Set}
                           (fun function_parameter =>
                             let '(aft, ctxt) := function_parameter in
                             Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt stack)
+                              (serialize_stack_for_error ctxt __stack_value)
                               (fun function_parameter =>
-                                let '(stack, _ctxt) := function_parameter in
+                                let '(__stack_value, _ctxt) :=
+                                  function_parameter in
                                 extensible_type_value)) in
                       Error_monad.trace_eval unmatched_branches
                         (Error_monad.op_gtgteqquestion
                           (Pervasives.op_atat Lwt.__return
                             (stack_ty_eq ctxt 1
-                              ibody.(Script_typed_ir.descr.aft) stack))
+                              ibody.(Script_typed_ir.descr.aft) __stack_value))
                           (fun function_parameter =>
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
                               (Pervasives.op_atat Lwt.__return
                                 (merge_stacks legacy loc ctxt
-                                  ibody.(Script_typed_ir.descr.aft) stack))
+                                  ibody.(Script_typed_ir.descr.aft)
+                                  __stack_value))
                               (fun function_parameter =>
                                 let '(_stack, ctxt) := function_parameter in
                                 typed ctxt loc (Script_typed_ir.Loop_left ibody)
                                   (Script_typed_ir.Item_t tr rest annot))))
                     | Failed {| judgement.Failed.descr := __descr_value |} =>
-                      let ibody := __descr_value stack in
+                      let ibody := __descr_value __stack_value in
                       typed ctxt loc (Script_typed_ir.Loop_left ibody)
                         (Script_typed_ir.Item_t tr rest annot)
                     end)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
-          (cons arg (cons ret (cons code []))) annot, stack), _) =>
+          (cons arg (cons ret (cons code []))) annot, __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy arg))
           (fun function_parameter =>
@@ -5806,8 +5819,8 @@ with parse_instr {bef : Set}
                             let '(lambda, ctxt) := function_parameter in
                             typed ctxt loc (Script_typed_ir.Lambda lambda)
                               (Script_typed_ir.Item_t
-                                (Script_typed_ir.Lambda_t arg ret None) stack
-                                annot))))))
+                                (Script_typed_ir.Lambda_t arg ret None)
+                                __stack_value annot))))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_EXEC [] annot,
           Script_typed_ir.Item_t arg
@@ -5900,7 +5913,7 @@ with parse_instr {bef : Set}
                     end)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
-          result_annot, stack), true) =>
+          result_annot, __stack_value), true) =>
         let fix make_proof_argument {tstk : Set}
           (n : Z) (inner_tc_context : tc_context)
           (stk : Script_typed_ir.stack_ty tstk) {struct n}
@@ -5957,7 +5970,8 @@ with parse_instr {bef : Set}
                     ((Script_typed_ir.Prefix n'), __descr_value,
                       (Script_typed_ir.Item_t v aft' annot))))
           | (_, _) =>
-            Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            Error_monad.op_gtgteqquestion
+              (serialize_stack_for_error ctxt __stack_value)
               (fun function_parameter =>
                 let '(whole_stack, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value)
@@ -5969,7 +5983,7 @@ with parse_instr {bef : Set}
               (fun function_parameter =>
                 let '_ := function_parameter in
                 Error_monad.op_gtgteqquestion
-                  (make_proof_argument n tc_context stack)
+                  (make_proof_argument n tc_context __stack_value)
                   (fun function_parameter =>
                     let
                       'Dipn_proof_argument (n', (new_ctxt, __descr_value), aft) :=
@@ -7089,9 +7103,9 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_CAST (cons cast_t []) annot,
-          Script_typed_ir.Item_t __t_value stack item_annot), _) =>
+          Script_typed_ir.Item_t __t_value __stack_value item_annot), _) =>
         let 'existT _ [__396, __397]
-          [loc, cast_t, annot, __t_value, stack, item_annot] :=
+          [loc, cast_t, annot, __t_value, __stack_value, item_annot] :=
           existT
             (fun '[__396, __397] =>
               [Alpha_context.Script.location **
@@ -7099,7 +7113,7 @@ with parse_instr {bef : Set}
                   Alpha_context.Script.prim) ** Micheline.annot **
                 (Script_typed_ir.ty __396) ** (Script_typed_ir.stack_ty __397)
                 ** (option Script_typed_ir.var_annot)]) _
-            [loc, cast_t, annot, __t_value, stack, item_annot] in
+            [loc, cast_t, annot, __t_value, __stack_value, item_annot] in
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some item_annot) annot)
           (fun annot =>
@@ -7122,20 +7136,20 @@ with parse_instr {bef : Set}
                       (fun function_parameter =>
                         let '(_, ctxt) := function_parameter in
                         typed ctxt loc Script_typed_ir.Nop
-                          (Script_typed_ir.Item_t cast_t stack annot)))))
+                          (Script_typed_ir.Item_t cast_t __stack_value annot)))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_RENAME [] annot,
-          Script_typed_ir.Item_t __t_value stack _), _) =>
-        let 'existT _ [__398, __399] [loc, annot, __t_value, stack] :=
+          Script_typed_ir.Item_t __t_value __stack_value _), _) =>
+        let 'existT _ [__398, __399] [loc, annot, __t_value, __stack_value] :=
           existT
             (fun '[__398, __399] =>
               [Alpha_context.Script.location ** Micheline.annot **
                 (Script_typed_ir.ty __398) ** (Script_typed_ir.stack_ty __399)])
-            _ [loc, annot, __t_value, stack] in
+            _ [loc, annot, __t_value, __stack_value] in
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =>
             typed ctxt loc Script_typed_ir.Nop
-              (Script_typed_ir.Item_t __t_value stack annot))
+              (Script_typed_ir.Item_t __t_value __stack_value annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_PACK [] annot,
           Script_typed_ir.Item_t __t_value rest unpacked_annot), _) =>
@@ -7246,9 +7260,9 @@ with parse_instr {bef : Set}
                   (Pervasives.op_atat Lwt.__return
                     match entrypoint with
                     | None => Pervasives.Ok "default"
-                    | Some (Field_annot "default") =>
+                    | Some (Script_typed_ir.Field_annot "default") =>
                       Error_monad.__error_value extensible_type_value
-                    | Some (Field_annot entrypoint) =>
+                    | Some (Script_typed_ir.Field_annot entrypoint) =>
                       if
                         (|Compare.Int|).(Compare.S.op_gt)
                           (String.length entrypoint) 31 then
@@ -7683,36 +7697,42 @@ with parse_instr {bef : Set}
                                                                 None) rest
                                                               addr_annot)
                                                             op_annot)))))))))))))
-      | ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, stack), _) =>
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, __stack_value),
+          _) =>
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_now_annot) annot)
           (fun annot =>
             typed ctxt loc Script_typed_ir.Now
-              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot, stack), _)
-        =>
+              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot,
+          __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_amount_annot) annot)
           (fun annot =>
             typed ctxt loc Script_typed_ir.Amount
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) stack annot))
+              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None)
+                __stack_value annot))
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot, stack), _)
-        =>
+        ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot,
+          __stack_value), _) =>
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =>
             typed ctxt loc Script_typed_ir.ChainId
-              (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot, stack), _)
-        =>
+              (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot,
+          __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_balance_annot)
             annot)
           (fun annot =>
             typed ctxt loc Script_typed_ir.Balance
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) stack annot))
+              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None)
+                __stack_value annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_HASH_KEY [] annot,
           Script_typed_ir.Item_t (Script_typed_ir.Key_t _) rest _), _) =>
@@ -7779,33 +7799,38 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_STEPS_TO_QUOTA [] annot,
-          stack), _) =>
+          __stack_value), _) =>
         if legacy then
           Error_monad.op_gtgteqquestion
             (parse_var_annot loc (Some Script_ir_annot.default_steps_annot)
               annot)
             (fun annot =>
               typed ctxt loc Script_typed_ir.Steps_to_quota
-                (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) stack annot))
+                (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None)
+                  __stack_value annot))
         else
           Error_monad.fail extensible_type_value
-      | ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot, stack), _)
-        =>
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot,
+          __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_source_annot) annot)
           (fun annot =>
             typed ctxt loc Script_typed_ir.Source
-              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot, stack), _)
-        =>
+              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot,
+          __stack_value), _) =>
         Error_monad.op_gtgteqquestion
           (parse_var_annot loc (Some Script_ir_annot.default_sender_annot) annot)
           (fun annot =>
             typed ctxt loc Script_typed_ir.Sender
-              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) stack
-                annot))
-      | ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, stack), _) =>
+              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None)
+                __stack_value annot))
+      |
+        ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, __stack_value),
+          _) =>
         Error_monad.op_gtgteqquestion
           (parse_entrypoint_annot loc (Some Script_ir_annot.default_self_annot)
             annot)
@@ -7814,7 +7839,8 @@ with parse_instr {bef : Set}
             let entrypoint :=
               Option.unopt_map
                 (fun function_parameter =>
-                  let 'Field_annot annot := function_parameter in
+                  let 'Script_typed_ir.Field_annot annot := function_parameter
+                    in
                   annot) "default" entrypoint in
             let fix get_toplevel_type (function_parameter : tc_context)
               {struct function_parameter}
@@ -7845,7 +7871,8 @@ with parse_instr {bef : Set}
                           (Script_typed_ir.ty __Ex_ty_'a17)) _ param_type in
                     typed ctxt loc (Script_typed_ir.Self param_type entrypoint)
                       (Script_typed_ir.Item_t
-                        (Script_typed_ir.Contract_t param_type None) stack annot))
+                        (Script_typed_ir.Contract_t param_type None)
+                        __stack_value annot))
               |
                 Toplevel {|
                   tc_context.Toplevel.param_type := param_type;
@@ -7858,7 +7885,8 @@ with parse_instr {bef : Set}
                       (Script_typed_ir.ty __Toplevel_'param1)) _ param_type in
                 typed ctxt loc (Script_typed_ir.Self param_type "default")
                   (Script_typed_ir.Item_t
-                    (Script_typed_ir.Contract_t param_type None) stack annot)
+                    (Script_typed_ir.Contract_t param_type None) __stack_value
+                    annot)
               end in
             get_toplevel_type tc_context)
       |
@@ -7960,31 +7988,35 @@ with parse_instr {bef : Set}
       |
         ((Micheline.Prim loc
           ((Alpha_context.Script.I_UPDATE | Alpha_context.Script.I_SLICE) as
-            name) [] _, stack), _) =>
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+            name) [] _, __stack_value), _) =>
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =>
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _, stack),
-          _) =>
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _,
+          __stack_value), _) =>
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =>
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _, stack),
-          _) =>
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _,
+          __stack_value), _) =>
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =>
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _, stack),
-          _) =>
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _,
+          __stack_value), _) =>
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =>
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
         ((Micheline.Prim loc
@@ -8002,10 +8034,11 @@ with parse_instr {bef : Set}
           Alpha_context.Script.I_EQ | Alpha_context.Script.I_NEQ |
           Alpha_context.Script.I_LT | Alpha_context.Script.I_GT |
           Alpha_context.Script.I_LE | Alpha_context.Script.I_GE) as name) _ _,
-          stack), _) =>
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+          __stack_value), _) =>
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =>
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       |
         ((Micheline.Prim loc
@@ -8017,10 +8050,11 @@ with parse_instr {bef : Set}
           Alpha_context.Script.I_EDIV | Alpha_context.Script.I_AND |
           Alpha_context.Script.I_OR | Alpha_context.Script.I_XOR |
           Alpha_context.Script.I_LSL | Alpha_context.Script.I_LSR) as name) _ _,
-          stack), _) =>
-        Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt stack)
+          __stack_value), _) =>
+        Error_monad.op_gtgteqquestion
+          (serialize_stack_for_error ctxt __stack_value)
           (fun function_parameter =>
-            let '(stack, _ctxt) := function_parameter in
+            let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       | ((expr, _), _) =>
         Pervasives.op_atat Error_monad.fail
@@ -8408,7 +8442,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                 (fun function_parameter =>
                   let '(p, root_name) := function_parameter in
                   match root_name with
-                  | Some (Field_annot root_name) =>
+                  | Some (Script_typed_ir.Field_annot root_name) =>
                     Error_monad.ok (p, pannot, (Some root_name))
                   | None =>
                     match
@@ -8703,8 +8737,7 @@ Definition list_entrypoints {A : Set}
       (|Entrypoints_map|).(S.MAP.t)
         (list Alpha_context.Script.prim * Alpha_context.Script.node)) :=
   let merge {B C : Set}
-    (path : list B)
-    (annot : option (* `Field_annot *) (|Entrypoints_map|).(S.MAP.key))
+    (path : list B) (annot : option Script_typed_ir.field_annot)
     (ty : Script_typed_ir.ty C) (reachable : bool)
     (function_parameter :
       list (list B) *
@@ -8714,7 +8747,7 @@ Definition list_entrypoints {A : Set}
         (|Entrypoints_map|).(S.MAP.t) (list B * Alpha_context.Script.node)) :=
     let '(unreachables, all) as acc := function_parameter in
     match annot with
-    | (None | Some (Field_annot "")) =>
+    | (None | Some (Script_typed_ir.Field_annot "")) =>
       Pervasives.op_atat Error_monad.ok
         (if reachable then
           acc
@@ -8723,7 +8756,7 @@ Definition list_entrypoints {A : Set}
           | Script_typed_ir.Union_t _ _ _ _ => acc
           | _ => ((cons (List.rev path) unreachables), all)
           end)
-    | Some (Field_annot name) =>
+    | Some (Script_typed_ir.Field_annot name) =>
       if (|Compare.Int|).(Compare.S.op_gt) (String.length name) 31 then
         Error_monad.ok ((cons (List.rev path) unreachables), all)
       else
@@ -9301,8 +9334,8 @@ Definition unparse_script {A B : Set}
                   let '(storage_type, ctxt) := function_parameter in
                   let arg_type :=
                     add_field_annot
-                      (Option.map (fun n => Field_annot n) root_name) None
-                      arg_type in
+                      (Option.map (fun n => Script_typed_ir.Field_annot n)
+                        root_name) None arg_type in
                   let code :=
                     Micheline.Seq (-1)
                       [

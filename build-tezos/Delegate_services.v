@@ -153,7 +153,7 @@ Module S.
     RPC_path.op_divcolon path
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg).
   
-  Definition info
+  Definition __info_value
     : RPC_service.service (* `GET *) unit Updater.rpc_context
       (Updater.rpc_context *
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) unit unit info :=
@@ -321,7 +321,7 @@ Definition __list_value {D E G I K L a b c i o q : Set}
         {| S.list_query.active := active; S.list_query.inactive := inactive |}
         tt.
 
-Definition info {D E G I K L a b c i o q : Set}
+Definition __info_value {D E G I K L a b c i o q : Set}
   (ctxt :
     (((RPC_service.t
       ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
@@ -345,7 +345,7 @@ Definition info {D E G I K L a b c i o q : Set}
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult info) :=
-  RPC_context.make_call1 S.info ctxt block pkh tt tt.
+  RPC_context.make_call1 S.__info_value ctxt block pkh tt tt.
 
 Definition balance {D E G I K L a b c i o q : Set}
   (ctxt :

@@ -18,7 +18,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.

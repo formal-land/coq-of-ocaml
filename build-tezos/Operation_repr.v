@@ -377,20 +377,24 @@ Inductive packed_internal_operation : Set :=
 
 Fixpoint to_list (function_parameter : packed_contents_list)
   {struct function_parameter} : list packed_contents :=
-  match function_parameter with
-  | Contents_list (Single o) =>
-    let 'existT _ __Contents_list_'kind o :=
-      existT
-        (fun __Contents_list_'kind : Set => (contents __Contents_list_'kind)) _
-        o in
-    [ Contents o ]
-  | Contents_list (Cons o os) =>
+  let 'Contents_list content := function_parameter in
+  let 'existT _ __Contents_list_'kind content :=
+    existT
+      (fun __Contents_list_'kind : Set => (contents_list __Contents_list_'kind))
+      _ content in
+  match content with
+  | Single o =>
+    let 'existT _ tt o :=
+      obj_magic_exists (fun _ => (contents __Contents_list_'kind)) o in
+    obj_magic (list packed_contents) [ Contents o ]
+  | Cons o os =>
     let 'existT _ [__0, __1] [o, os] :=
-      existT
+      obj_magic_exists
         (fun '[__0, __1] =>
           [(contents (Kind.manager __0)) ** (contents_list (Kind.manager __1))])
-        _ [o, os] in
-    cons (Contents o) (to_list (Contents_list os))
+        [o, os] in
+    obj_magic (list packed_contents)
+      (cons (Contents o) (to_list (Contents_list os)))
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents)

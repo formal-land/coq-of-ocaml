@@ -14,7 +14,7 @@ Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
-Import Script_int.
+Import Alpha_context.Script_int.
 
 Inductive var_annot : Set :=
 | Var_annot : string -> var_annot.

@@ -11,6 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Script_tc_errors.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -21,103 +22,103 @@ Import Script_tc_errors.
 
 Import Script_typed_ir.
 
-Definition default_now_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "now").
+Definition default_now_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "now").
 
-Definition default_amount_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "amount").
+Definition default_amount_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "amount").
 
-Definition default_balance_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "balance").
+Definition default_balance_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "balance").
 
-Definition default_steps_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "steps").
+Definition default_steps_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "steps").
 
-Definition default_source_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "source").
+Definition default_source_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "source").
 
-Definition default_sender_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "sender").
+Definition default_sender_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "sender").
 
-Definition default_self_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "self").
+Definition default_self_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "self").
 
-Definition default_arg_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "arg").
+Definition default_arg_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "arg").
 
-Definition default_param_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "parameter").
+Definition default_param_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "parameter").
 
-Definition default_storage_annot : option (* `Var_annot *) string :=
-  Some (Var_annot "storage").
+Definition default_storage_annot : option Script_typed_ir.var_annot :=
+  Some (Script_typed_ir.Var_annot "storage").
 
-Definition default_car_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "car").
+Definition default_car_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "car").
 
-Definition default_cdr_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "cdr").
+Definition default_cdr_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "cdr").
 
-Definition default_contract_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "contract").
+Definition default_contract_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "contract").
 
-Definition default_addr_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "address").
+Definition default_addr_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "address").
 
-Definition default_manager_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "manager").
+Definition default_manager_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "manager").
 
-Definition default_pack_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "packed").
+Definition default_pack_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "packed").
 
-Definition default_unpack_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "unpacked").
+Definition default_unpack_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "unpacked").
 
-Definition default_slice_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "slice").
+Definition default_slice_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "slice").
 
-Definition default_elt_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "elt").
+Definition default_elt_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "elt").
 
-Definition default_key_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "key").
+Definition default_key_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "key").
 
-Definition default_hd_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "hd").
+Definition default_hd_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "hd").
 
-Definition default_tl_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "tl").
+Definition default_tl_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "tl").
 
-Definition default_some_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "some").
+Definition default_some_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "some").
 
-Definition default_left_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "left").
+Definition default_left_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "left").
 
-Definition default_right_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "right").
+Definition default_right_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "right").
 
-Definition default_binding_annot : option (* `Field_annot *) string :=
-  Some (Field_annot "bnd").
+Definition default_binding_annot : option Script_typed_ir.field_annot :=
+  Some (Script_typed_ir.Field_annot "bnd").
 
 Definition unparse_type_annot
   (function_parameter : option Script_typed_ir.type_annot) : list string :=
   match function_parameter with
   | None => nil
-  | Some (Type_annot a) => [ Pervasives.op_caret ":" a ]
+  | Some (Script_typed_ir.Type_annot a) => [ Pervasives.op_caret ":" a ]
   end.
 
 Definition unparse_var_annot
   (function_parameter : option Script_typed_ir.var_annot) : list string :=
   match function_parameter with
   | None => nil
-  | Some (Var_annot a) => [ Pervasives.op_caret "@" a ]
+  | Some (Script_typed_ir.Var_annot a) => [ Pervasives.op_caret "@" a ]
   end.
 
 Definition unparse_field_annot
   (function_parameter : option Script_typed_ir.field_annot) : list string :=
   match function_parameter with
   | None => nil
-  | Some (Field_annot a) => [ Pervasives.op_caret "%" a ]
+  | Some (Script_typed_ir.Field_annot a) => [ Pervasives.op_caret "%" a ]
   end.
 
 Definition field_to_var_annot
@@ -125,7 +126,7 @@ Definition field_to_var_annot
   : option Script_typed_ir.var_annot :=
   match function_parameter with
   | None => None
-  | Some (Field_annot s) => Some (Var_annot s)
+  | Some (Script_typed_ir.Field_annot s) => Some (Script_typed_ir.Var_annot s)
   end.
 
 Definition type_to_var_annot
@@ -133,7 +134,7 @@ Definition type_to_var_annot
   : option Script_typed_ir.var_annot :=
   match function_parameter with
   | None => None
-  | Some (Type_annot s) => Some (Var_annot s)
+  | Some (Script_typed_ir.Type_annot s) => Some (Script_typed_ir.Var_annot s)
   end.
 
 Definition var_to_field_annot
@@ -141,7 +142,7 @@ Definition var_to_field_annot
   : option Script_typed_ir.field_annot :=
   match function_parameter with
   | None => None
-  | Some (Var_annot s) => Some (Field_annot s)
+  | Some (Script_typed_ir.Var_annot s) => Some (Script_typed_ir.Field_annot s)
   end.
 
 Definition default_annot {A : Set}
@@ -163,13 +164,18 @@ Definition gen_access_annot
   fun field_annot =>
     match (value_annot, field_annot, default) with
     |
-      ((None, None, _) | (Some _, None, None) | (None, Some (Field_annot ""), _))
-      => None
-    | (None, Some (Field_annot f), _) => Some (Var_annot f)
-    | (Some (Var_annot v), (None | Some (Field_annot "")), Some (Field_annot f))
-      => Some (Var_annot (String.concat "." [ v; f ]))
-    | (Some (Var_annot v), Some (Field_annot f), _) =>
-      Some (Var_annot (String.concat "." [ v; f ]))
+      ((None, None, _) | (Some _, None, None) |
+      (None, Some (Script_typed_ir.Field_annot ""), _)) => None
+    | (None, Some (Script_typed_ir.Field_annot f), _) =>
+      Some (Script_typed_ir.Var_annot f)
+    |
+      (Some (Script_typed_ir.Var_annot v),
+        (None | Some (Script_typed_ir.Field_annot "")),
+        Some (Script_typed_ir.Field_annot f)) =>
+      Some (Script_typed_ir.Var_annot (String.concat "." [ v; f ]))
+    |
+      (Some (Script_typed_ir.Var_annot v), Some (Script_typed_ir.Field_annot f),
+        _) => Some (Script_typed_ir.Var_annot (String.concat "." [ v; f ]))
     end.
 
 Definition merge_type_annot
@@ -178,7 +184,8 @@ Definition merge_type_annot
   : Error_monad.tzresult (option Script_typed_ir.type_annot) :=
   match (annot1, annot2) with
   | ((None, None) | (Some _, None) | (None, Some _)) => Error_monad.ok None
-  | (Some (Type_annot a1), Some (Type_annot a2)) =>
+  | (Some (Script_typed_ir.Type_annot a1), Some (Script_typed_ir.Type_annot a2))
+    =>
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
     else
@@ -191,7 +198,9 @@ Definition merge_field_annot
   : Error_monad.tzresult (option Script_typed_ir.field_annot) :=
   match (annot1, annot2) with
   | ((None, None) | (Some _, None) | (None, Some _)) => Error_monad.ok None
-  | (Some (Field_annot a1), Some (Field_annot a2)) =>
+  |
+    (Some (Script_typed_ir.Field_annot a1),
+      Some (Script_typed_ir.Field_annot a2)) =>
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
     else
@@ -204,7 +213,8 @@ Definition merge_var_annot
   : option Script_typed_ir.var_annot :=
   match (annot1, annot2) with
   | ((None, None) | (Some _, None) | (None, Some _)) => None
-  | (Some (Var_annot a1), Some (Var_annot a2)) =>
+  | (Some (Script_typed_ir.Var_annot a1), Some (Script_typed_ir.Var_annot a2))
+    =>
     if String.equal a1 a2 then
       annot1
     else
@@ -224,10 +234,14 @@ Definition fail_unexpected_annot {A : Set}
   : Lwt.t (Error_monad.tzresult unit) :=
   Lwt.__return (error_unexpected_annot loc annot).
 
+Inductive annot_opt : Set :=
+| Field_annot_opt : option string -> annot_opt
+| Type_annot_opt : option string -> annot_opt
+| Var_annot_opt : option string -> annot_opt.
+
 Definition parse_annots
   (loc : Alpha_context.Script.location) (op_staroptstar : option bool)
-  : option bool -> list string ->
-  Error_monad.tzresult (list (* `Field_annot *) (option string)) :=
+  : option bool -> list string -> Error_monad.tzresult (list annot_opt) :=
   let allow_special_var :=
     match op_staroptstar with
     | Some op_starsthstar => op_starsthstar
@@ -300,49 +314,45 @@ Definition parse_annots
                   else
                     match String.get s 0 with
                     | ":" % char =>
-                      sub_or_wildcard nil (fun a => Type_annot a) s acc
+                      sub_or_wildcard nil (fun a => Type_annot_opt a) s acc
                     | "@" % char =>
                       sub_or_wildcard
                         (if allow_special_var then
                           [ "%" % char ]
                         else
-                          nil) (fun a => Var_annot a) s acc
+                          nil) (fun a => Var_annot_opt a) s acc
                     | "%" % char =>
                       sub_or_wildcard
                         (if allow_special_field then
                           [ "@" % char ]
                         else
-                          nil) (fun a => Field_annot a) s acc
+                          nil) (fun a => Field_annot_opt a) s acc
                     | _ => Error_monad.__error_value extensible_type_value
                     end)) (Error_monad.ok nil) l) List.rev.
 
-Definition opt_var_of_var_opt {A : Set}
-  (function_parameter : (* `Var_annot *) option A)
-  : option (* `Var_annot *) A :=
+Definition opt_var_of_var_opt (function_parameter : option string)
+  : option Script_typed_ir.var_annot :=
   match function_parameter with
-  | Var_annot None => None
-  | Var_annot (Some a) => Some (Var_annot a)
+  | None => None
+  | Some a => Some (Script_typed_ir.Var_annot a)
   end.
 
-Definition opt_field_of_field_opt {A : Set}
-  (function_parameter : (* `Field_annot *) option A)
-  : option (* `Field_annot *) A :=
+Definition opt_field_of_field_opt (function_parameter : option string)
+  : option Script_typed_ir.field_annot :=
   match function_parameter with
-  | Field_annot None => None
-  | Field_annot (Some a) => Some (Field_annot a)
+  | None => None
+  | Some a => Some (Script_typed_ir.Field_annot a)
   end.
 
-Definition opt_type_of_type_opt {A : Set}
-  (function_parameter : (* `Type_annot *) option A)
-  : option (* `Type_annot *) A :=
+Definition opt_type_of_type_opt (function_parameter : option string)
+  : option Script_typed_ir.type_annot :=
   match function_parameter with
-  | Type_annot None => None
-  | Type_annot (Some a) => Some (Type_annot a)
+  | None => None
+  | Some a => Some (Script_typed_ir.Type_annot a)
   end.
 
 Definition classify_annot
-  (loc : Alpha_context.Script.location)
-  (l : list (* `Var_annot *) (option string))
+  (loc : Alpha_context.Script.location) (l : list annot_opt)
   : Error_monad.tzresult
     (list (option Script_typed_ir.var_annot) *
       list (option Script_typed_ir.type_annot) *
@@ -356,16 +366,16 @@ Definition classify_annot
           fun a =>
             match (a, in_v, rv, in_t, rt, in_f, rf) with
             |
-              (((Var_annot _) as a, true, _, _, _, _, _) |
-              ((Var_annot _) as a, false, [], _, _, _, _)) =>
+              ((Var_annot_opt a, true, _, _, _, _, _) |
+              (Var_annot_opt a, false, [], _, _, _, _)) =>
               (true, (cons (opt_var_of_var_opt a) rv), false, rt, false, rf)
             |
-              (((Type_annot _) as a, _, _, true, _, _, _) |
-              ((Type_annot _) as a, _, _, false, [], _, _)) =>
+              ((Type_annot_opt a, _, _, true, _, _, _) |
+              (Type_annot_opt a, _, _, false, [], _, _)) =>
               (false, rv, true, (cons (opt_type_of_type_opt a) rt), false, rf)
             |
-              (((Field_annot _) as a, _, _, _, _, true, _) |
-              ((Field_annot _) as a, _, _, _, _, false, [])) =>
+              ((Field_annot_opt a, _, _, _, _, true, _) |
+              (Field_annot_opt a, _, _, _, _, false, [])) =>
               (false, rv, false, rt, true, (cons (opt_field_of_field_opt a) rf))
             | _ => Pervasives.raise extensible_type_value
             end) (false, nil, false, nil, false, nil) l in
@@ -480,7 +490,7 @@ Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
       | None => None
       | Some field_annot =>
         Some
-          (Field_annot
+          (Script_typed_ir.Field_annot
             (String.sub field_annot 1
               (Pervasives.op_minus (String.length field_annot) 1)))
       end in
@@ -493,7 +503,9 @@ Definition check_correct_field
   (f2 : option Script_typed_ir.field_annot) : Error_monad.tzresult unit :=
   match (f1, f2) with
   | ((None, _) | (_, None)) => Error_monad.ok tt
-  | (Some (Field_annot s1), Some (Field_annot s2)) =>
+  |
+    (Some (Script_typed_ir.Field_annot s1),
+      Some (Script_typed_ir.Field_annot s2)) =>
     if String.equal s1 s2 then
       Error_monad.ok tt
     else
@@ -527,13 +539,13 @@ Definition parse_var_annot
                   end)))).
 
 Definition split_last_dot
-  (function_parameter : option (* `Field_annot *) string)
-  : option (* `Var_annot *) string * option (* `Field_annot *) string :=
+  (function_parameter : option Script_typed_ir.field_annot)
+  : option Script_typed_ir.var_annot * option Script_typed_ir.field_annot :=
   match function_parameter with
   | None => (None, None)
-  | Some (Field_annot s) =>
+  | Some (Script_typed_ir.Field_annot s) =>
     match String.rindex_opt s "." % char with
-    | None => (None, (Some (Field_annot s)))
+    | None => (None, (Some (Script_typed_ir.Field_annot s)))
     | Some i =>
       let s1 := String.sub s 0 i in
       let s2 :=
@@ -545,23 +557,26 @@ Definition split_last_dot
             ((|Compare.String|).(Compare.S.equal) s2 "cdr") then
           None
         else
-          Some (Field_annot s2) in
-      ((Some (Var_annot s1)), f)
+          Some (Script_typed_ir.Field_annot s2) in
+      ((Some (Script_typed_ir.Var_annot s1)), f)
     end
   end.
 
 Definition common_prefix
-  (v1 : option (* `Var_annot *) (|Compare.String|).(Compare.S.t))
-  (v2 : option (* `Var_annot *) (|Compare.String|).(Compare.S.t))
-  : option (* `Var_annot *) (|Compare.String|).(Compare.S.t) :=
+  (v1 : option Script_typed_ir.var_annot)
+  (v2 : option Script_typed_ir.var_annot) : option Script_typed_ir.var_annot :=
   match
     ((v1, v2),
       match (v1, v2) with
-      | (Some (Var_annot s1), Some (Var_annot s2)) =>
+      |
+        (Some (Script_typed_ir.Var_annot s1),
+          Some (Script_typed_ir.Var_annot s2)) =>
         (|Compare.String|).(Compare.S.equal) s1 s2
       | _ => false
       end) with
-  | ((Some (Var_annot s1), Some (Var_annot s2)), true) => v1
+  |
+    ((Some (Script_typed_ir.Var_annot s1), Some (Script_typed_ir.Var_annot s2)),
+      true) => v1
   | ((Some _, None), _) => v1
   | ((None, Some _), _) => v2
   | ((_, _), _) => None
@@ -588,9 +603,9 @@ Definition parse_constr_annot
                   let '(f1, f2) := function_parameter in
                   Error_monad.op_gtgtquestion
                     match (if_special_first, f1) with
-                    | (Some special_var, Some (Field_annot "@")) =>
-                      Error_monad.ok (split_last_dot special_var)
-                    | (None, Some (Field_annot "@")) =>
+                    | (Some special_var, Some (Script_typed_ir.Field_annot "@"))
+                      => Error_monad.ok (split_last_dot special_var)
+                    | (None, Some (Script_typed_ir.Field_annot "@")) =>
                       Error_monad.__error_value extensible_type_value
                     | (_, _) => Error_monad.ok (v, f1)
                     end
@@ -598,9 +613,11 @@ Definition parse_constr_annot
                       let '(v1, f1) := function_parameter in
                       Error_monad.op_gtpipequestion
                         match (if_special_second, f2) with
-                        | (Some special_var, Some (Field_annot "@")) =>
+                        |
+                          (Some special_var,
+                            Some (Script_typed_ir.Field_annot "@")) =>
                           Error_monad.ok (split_last_dot special_var)
-                        | (None, Some (Field_annot "@")) =>
+                        | (None, Some (Script_typed_ir.Field_annot "@")) =>
                           Error_monad.__error_value extensible_type_value
                         | (_, _) => Error_monad.ok (v, f2)
                         end
@@ -654,8 +671,9 @@ Definition parse_destr_annot
                       field_name in
                   let v :=
                     match v with
-                    | Some (Var_annot "%") => field_to_var_annot field_name
-                    | Some (Var_annot "%%") => default
+                    | Some (Script_typed_ir.Var_annot "%") =>
+                      field_to_var_annot field_name
+                    | Some (Script_typed_ir.Var_annot "%%") => default
                     | Some _ => v
                     | None => value_annot
                     end in

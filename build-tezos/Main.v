@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Apply.
 Require Tezos.Apply_results.
-Require Tezos.Script_ir_translator.
+Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
 
