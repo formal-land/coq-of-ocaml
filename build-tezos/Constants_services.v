@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Services_registration.
 
 Import Alpha_context.
@@ -51,7 +51,7 @@ Definition register (function_parameter : unit) : unit :=
               Alpha_context.Constants.t.fixed :=
                 Alpha_context.Constants.__fixed_value;
               Alpha_context.Constants.t.parametric :=
-                Alpha_context.Constants.parametric ctxt |}).
+                Alpha_context.Constants.__parametric_value ctxt |}).
 
 Definition errors {D E G I K L a b c i o q : Set}
   (ctxt :

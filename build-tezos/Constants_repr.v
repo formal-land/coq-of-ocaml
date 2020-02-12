@@ -596,10 +596,10 @@ Definition t := t.record.
 Definition encoding : Data_encoding.encoding t :=
   Data_encoding.conv
     (fun function_parameter =>
-      let '{| t.fixed := __fixed_value; t.parametric := parametric |} :=
+      let '{| t.fixed := __fixed_value; t.parametric := __parametric_value |} :=
         function_parameter in
-      (__fixed_value, parametric))
+      (__fixed_value, __parametric_value))
     (fun function_parameter =>
-      let '(__fixed_value, parametric) := function_parameter in
-      {| t.fixed := __fixed_value; t.parametric := parametric |}) None
+      let '(__fixed_value, __parametric_value) := function_parameter in
+      {| t.fixed := __fixed_value; t.parametric := __parametric_value |}) None
     (Data_encoding.merge_objs fixed_encoding parametric_encoding).

@@ -55,8 +55,8 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35948 lines</li>
-      <li>Coq size: 52348 lines (+45% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 2715</li>
+      <li>Coq size: 52384 lines (+45% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 2714</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -92,7 +92,7 @@
           11380,
           11380,
           13051,
-          17954,
+          21458,
         ],
         generated: [
           47563,
@@ -124,7 +124,7 @@
           51401,
           51401,
           51943,
-          52348,
+          52384,
         ],
         labels: [
           "01-14",
@@ -182,7 +182,7 @@
       </li>
       
       <li>
-        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">11</span>
+        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">10</span>
       </li>
       
       <li>
@@ -1438,11 +1438,11 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1390 lines</li>
-      <li>Coq size: 2582 lines (+85% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2618 lines (+88% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">11 warnings</span>
+    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">10 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -1663,7 +1663,7 @@ module Gas : sig
   val block_level : context -&gt; Z.t
 end
 
-<abbr class="mark-warning" title="The typeof in module types is not handled">module Script_int : module type of Script_int_repr</abbr>
+module Script_int : module type of Script_int_repr
 
 module Script_timestamp : sig
   open Script_int
@@ -2406,15 +2406,15 @@ module Vote : sig
 end
 
 module Block_header : sig
-  type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
-
-  and protocol_data = {contents : contents; signature : Signature.t}
-
-  and contents = {
+  type contents = {
     priority : int;
     seed_nonce_hash : Nonce_hash.t option;
     proof_of_work_nonce : MBytes.t;
   }
+
+  type protocol_data = {contents : contents; signature : Signature.t}
+
+  type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
 
   type block_header = t
 
@@ -2474,21 +2474,21 @@ module Kind : sig
     | Delegation_manager_kind : delegation manager
 end
 
-type 'kind operation = {
-  shell : Operation.shell_header;
-  protocol_data : 'kind protocol_data;
-}
+type _ contents_list =
+  | Single : 'kind contents -&gt; 'kind contents_list
+  | Cons :
+      'kind Kind.manager contents * 'rest Kind.manager contents_list
+      -&gt; ('kind * 'rest) Kind.manager contents_list
 
 and 'kind protocol_data = {
   contents : 'kind contents_list;
   signature : Signature.t option;
 }
 
-and _ contents_list =
-  | Single : 'kind contents -&gt; 'kind contents_list
-  | Cons :
-      'kind Kind.manager contents * 'rest Kind.manager contents_list
-      -&gt; ('kind * 'rest) Kind.manager contents_list
+and 'kind operation = {
+  shell : Operation.shell_header;
+  protocol_data : 'kind protocol_data;
+}
 
 and _ contents =
   | Endorsement : {level : Raw_level.t} -&gt; Kind.endorsement contents
@@ -3262,7 +3262,73 @@ Module Gas.
   Parameter block_level : context -&gt; Z.t.
 End Gas.
 
-Parameter Script_int : typeof.
+Module Script_int.
+  Parameter num : forall (t : Set), Set.
+  
+  Parameter n : Set.
+  
+  Parameter z : Set.
+  
+  Parameter zero_n : num n.
+  
+  Parameter zero : num z.
+  
+  Parameter compare : forall {a : Set}, num a -&gt; num a -&gt; Z.
+  
+  Parameter to_string : forall {A : Set}, num A -&gt; string.
+  
+  Parameter of_string : string -&gt; option (num z).
+  
+  Parameter to_int64 : forall {A : Set}, num A -&gt; option int64.
+  
+  Parameter of_int64 : int64 -&gt; num z.
+  
+  Parameter to_int : forall {A : Set}, num A -&gt; option Z.
+  
+  Parameter of_int : Z -&gt; num z.
+  
+  Parameter of_zint : Z.t -&gt; num z.
+  
+  Parameter to_zint : forall {a : Set}, num a -&gt; Z.t.
+  
+  Parameter add_n : num n -&gt; num n -&gt; num n.
+  
+  Parameter mul_n : num n -&gt; num n -&gt; num n.
+  
+  Parameter ediv_n : num n -&gt; num n -&gt; option (num n * num n).
+  
+  Parameter add : forall {A B : Set}, num A -&gt; num B -&gt; num z.
+  
+  Parameter sub : forall {A B : Set}, num A -&gt; num B -&gt; num z.
+  
+  Parameter mul : forall {A B : Set}, num A -&gt; num B -&gt; num z.
+  
+  Parameter ediv : forall {A B : Set}, num A -&gt; num B -&gt; option (num z * num n).
+  
+  Parameter abs : num z -&gt; num n.
+  
+  Parameter is_nat : num z -&gt; option (num n).
+  
+  Parameter neg : forall {A : Set}, num A -&gt; num z.
+  
+  Parameter int : num n -&gt; num z.
+  
+  Parameter lognot : forall {A : Set}, num A -&gt; num z.
+  
+  Parameter shift_left_n : num n -&gt; num n -&gt; option (num n).
+  
+  Parameter shift_right_n : num n -&gt; num n -&gt; option (num n).
+  
+  Parameter shift_left : forall {a : Set}, num a -&gt; num n -&gt; option (num a).
+  
+  Parameter shift_right : forall {a : Set}, num a -&gt; num n -&gt; option (num a).
+  
+  Parameter logor : forall {a : Set}, num a -&gt; num a -&gt; num a.
+  
+  Parameter logand : forall {A : Set}, num A -&gt; num n -&gt; num n.
+  
+  Parameter logxor : num n -&gt; num n -&gt; num n.
+End Script_int.
 
 Module Script_timestamp.
   Import Script_int.
@@ -3933,7 +3999,7 @@ Module Constants.
   
   Parameter parametric_encoding : Data_encoding.t parametric.
   
-  Parameter parametric : context -&gt; parametric.
+  Parameter __parametric_value : context -&gt; parametric.
   
   Parameter preserved_cycles : context -&gt; Z.
   
@@ -4661,70 +4727,40 @@ End Vote.
 
 Module Block_header.
   Module contents.
-    Record record {priority seed_nonce_hash proof_of_work_nonce : Set} := Build {
-      priority : priority;
-      seed_nonce_hash : seed_nonce_hash;
-      proof_of_work_nonce : proof_of_work_nonce }.
-    Arguments record : clear implicits.
-    Definition with_priority
-      {t_priority t_seed_nonce_hash t_proof_of_work_nonce} priority
-      (r : record t_priority t_seed_nonce_hash t_proof_of_work_nonce) :=
-      Build t_priority t_seed_nonce_hash t_proof_of_work_nonce priority
-        r.(seed_nonce_hash) r.(proof_of_work_nonce).
-    Definition with_seed_nonce_hash
-      {t_priority t_seed_nonce_hash t_proof_of_work_nonce} seed_nonce_hash
-      (r : record t_priority t_seed_nonce_hash t_proof_of_work_nonce) :=
-      Build t_priority t_seed_nonce_hash t_proof_of_work_nonce r.(priority)
-        seed_nonce_hash r.(proof_of_work_nonce).
-    Definition with_proof_of_work_nonce
-      {t_priority t_seed_nonce_hash t_proof_of_work_nonce} proof_of_work_nonce
-      (r : record t_priority t_seed_nonce_hash t_proof_of_work_nonce) :=
-      Build t_priority t_seed_nonce_hash t_proof_of_work_nonce r.(priority)
-        r.(seed_nonce_hash) proof_of_work_nonce.
+    Record record := Build {
+      priority : Z;
+      seed_nonce_hash : option Nonce_hash.t;
+      proof_of_work_nonce : MBytes.t }.
+    Definition with_priority priority (r : record) :=
+      Build priority r.(seed_nonce_hash) r.(proof_of_work_nonce).
+    Definition with_seed_nonce_hash seed_nonce_hash (r : record) :=
+      Build r.(priority) seed_nonce_hash r.(proof_of_work_nonce).
+    Definition with_proof_of_work_nonce proof_of_work_nonce (r : record) :=
+      Build r.(priority) r.(seed_nonce_hash) proof_of_work_nonce.
   End contents.
-  Definition contents_skeleton := contents.record.
+  Definition contents := contents.record.
   
   Module protocol_data.
-    Record record {contents signature : Set} := Build {
+    Record record := Build {
       contents : contents;
-      signature : signature }.
-    Arguments record : clear implicits.
-    Definition with_contents {t_contents t_signature} contents
-      (r : record t_contents t_signature) :=
-      Build t_contents t_signature contents r.(signature).
-    Definition with_signature {t_contents t_signature} signature
-      (r : record t_contents t_signature) :=
-      Build t_contents t_signature r.(contents) signature.
+      signature : Signature.t }.
+    Definition with_contents contents (r : record) :=
+      Build contents r.(signature).
+    Definition with_signature signature (r : record) :=
+      Build r.(contents) signature.
   End protocol_data.
-  Definition protocol_data_skeleton := protocol_data.record.
+  Definition protocol_data := protocol_data.record.
   
   Module t.
-    Record record {shell protocol_data : Set} := Build {
-      shell : shell;
+    Record record := Build {
+      shell : Block_header.shell_header;
       protocol_data : protocol_data }.
-    Arguments record : clear implicits.
-    Definition with_shell {t_shell t_protocol_data} shell
-      (r : record t_shell t_protocol_data) :=
-      Build t_shell t_protocol_data shell r.(protocol_data).
-    Definition with_protocol_data {t_shell t_protocol_data} protocol_data
-      (r : record t_shell t_protocol_data) :=
-      Build t_shell t_protocol_data r.(shell) protocol_data.
+    Definition with_shell shell (r : record) :=
+      Build shell r.(protocol_data).
+    Definition with_protocol_data protocol_data (r : record) :=
+      Build r.(shell) protocol_data.
   End t.
-  Definition t_skeleton := t.record.
-  
-  Reserved Notation &quot;'t&quot;.
-  Reserved Notation &quot;'protocol_data&quot;.
-  Reserved Notation &quot;'contents&quot;.
-  
-  
-  
-  where &quot;'t&quot; := (t_skeleton Block_header.shell_header 'protocol_data)
-  and &quot;'protocol_data&quot; := (protocol_data_skeleton 'contents Signature.t)
-  and &quot;'contents&quot; := (contents_skeleton Z (option Nonce_hash.t) MBytes.t).
-  
-  Definition t := 't.
-  Definition protocol_data := 'protocol_data.
-  Definition contents := 'contents.
+  Definition t := t.record.
   
   Definition block_header := t.
   
@@ -4895,20 +4931,6 @@ Module manager_operation.
   Definition Origination_skeleton := Origination.record.
 End manager_operation.
 
-Module protocol_data.
-  Record record {contents signature : Set} := Build {
-    contents : contents;
-    signature : signature }.
-  Arguments record : clear implicits.
-  Definition with_contents {t_contents t_signature} contents
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature contents r.(signature).
-  Definition with_signature {t_contents t_signature} signature
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature r.(contents) signature.
-End protocol_data.
-Definition protocol_data_skeleton := protocol_data.record.
-
 Module operation.
   Record record {shell protocol_data : Set} := Build {
     shell : shell;
@@ -4923,6 +4945,20 @@ Module operation.
 End operation.
 Definition operation_skeleton := operation.record.
 
+Module protocol_data.
+  Record record {contents signature : Set} := Build {
+    contents : contents;
+    signature : signature }.
+  Arguments record : clear implicits.
+  Definition with_contents {t_contents t_signature} contents
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature contents r.(signature).
+  Definition with_signature {t_contents t_signature} signature
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature r.(contents) signature.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
+
 Reserved Notation &quot;'contents.Endorsement&quot;.
 Reserved Notation &quot;'contents.Seed_nonce_revelation&quot;.
 Reserved Notation &quot;'contents.Double_endorsement_evidence&quot;.
@@ -4933,9 +4969,9 @@ Reserved Notation &quot;'contents.Ballot&quot;.
 Reserved Notation &quot;'contents.Manager_operation&quot;.
 Reserved Notation &quot;'manager_operation.Transaction&quot;.
 Reserved Notation &quot;'manager_operation.Origination&quot;.
-Reserved Notation &quot;'operation&quot;.
-Reserved Notation &quot;'protocol_data&quot;.
 Reserved Notation &quot;'contents_list&quot;.
+Reserved Notation &quot;'protocol_data&quot;.
+Reserved Notation &quot;'operation&quot;.
 Reserved Notation &quot;'contents&quot;.
 Reserved Notation &quot;'manager_operation&quot;.
 Reserved Notation &quot;'counter&quot;.
@@ -4965,11 +5001,11 @@ with manager_operation_gadt : Set :=
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   manager_operation_gadt
 
-where &quot;'operation&quot; := (fun (t_kind : Set) =&gt;
-  operation_skeleton Operation.shell_header ('protocol_data t_kind))
+where &quot;'contents_list&quot; := (fun (_ : Set) =&gt; contents_list_gadt)
 and &quot;'protocol_data&quot; := (fun (t_kind : Set) =&gt;
   protocol_data_skeleton ('contents_list t_kind) (option Signature.t))
-and &quot;'contents_list&quot; := (fun (_ : Set) =&gt; contents_list_gadt)
+and &quot;'operation&quot; := (fun (t_kind : Set) =&gt;
+  operation_skeleton Operation.shell_header ('protocol_data t_kind))
 and &quot;'contents&quot; := (fun (_ : Set) =&gt; contents_gadt)
 and &quot;'manager_operation&quot; := (fun (_ : Set) =&gt; manager_operation_gadt)
 and &quot;'counter&quot; := (Z.t)
@@ -5026,9 +5062,9 @@ End
 Import
   ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
 
-Definition operation := 'operation.
-Definition protocol_data := 'protocol_data.
 Definition contents_list := 'contents_list.
+Definition protocol_data := 'protocol_data.
+Definition operation := 'operation.
 Definition contents := 'contents.
 Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.
@@ -5675,7 +5711,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Nonce_hash.
 Require Tezos.Services_registration.
 
@@ -6028,7 +6064,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Nonce_hash.
 
 Import Alpha_context.
@@ -6474,7 +6510,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
@@ -6908,7 +6944,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
@@ -8525,7 +8561,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Amendment.
 Require Tezos.Apply_results.
 Require Tezos.Baking.
@@ -11602,7 +11638,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Nonce_hash.
 
 Import Alpha_context.
@@ -13967,7 +14003,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Nonce_hash.
 
 Import Alpha_context.
@@ -14729,7 +14765,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Misc.
 
 Import Alpha_context.
@@ -15359,7 +15395,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Misc.
 
 Import Alpha_context.
@@ -18008,12 +18044,12 @@ Definition t := t.record.
 Definition encoding : Data_encoding.encoding t :=
   Data_encoding.conv
     (fun function_parameter =&gt;
-      let '{| t.fixed := __fixed_value; t.parametric := parametric |} :=
+      let '{| t.fixed := __fixed_value; t.parametric := __parametric_value |} :=
         function_parameter in
-      (__fixed_value, parametric))
+      (__fixed_value, __parametric_value))
     (fun function_parameter =&gt;
-      let '(__fixed_value, parametric) := function_parameter in
-      {| t.fixed := __fixed_value; t.parametric := parametric |}) None
+      let '(__fixed_value, __parametric_value) := function_parameter in
+      {| t.fixed := __fixed_value; t.parametric := __parametric_value |}) None
     (Data_encoding.merge_objs fixed_encoding parametric_encoding).
 </pre>
   </div>
@@ -18205,7 +18241,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Services_registration.
 
 Import Alpha_context.
@@ -18246,7 +18282,7 @@ Definition register (function_parameter : unit) : unit :=
               Alpha_context.Constants.t.fixed :=
                 Alpha_context.Constants.__fixed_value;
               Alpha_context.Constants.t.parametric :=
-                Alpha_context.Constants.parametric ctxt |}).
+                Alpha_context.Constants.__parametric_value ctxt |}).
 
 Definition errors {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -18461,7 +18497,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
@@ -18783,8 +18819,8 @@ Definition min_proposal_quorum (c : Raw_context.context) : int32 :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.min_proposal_quorum).
 
-Definition parametric (c : Raw_context.context) : Constants_repr.parametric :=
-  Raw_context.constants c.
+Definition __parametric_value (c : Raw_context.context)
+  : Constants_repr.parametric := Raw_context.constants c.
 </pre>
   </div>
 </div>
@@ -20871,7 +20907,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_ir_translator.
@@ -22507,7 +22543,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
 
@@ -26768,7 +26804,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Baking.
 Require Tezos.Contract_repr.
 Require Tezos.Misc.
@@ -29076,7 +29112,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Contract_repr.
 
 Import Alpha_context.
@@ -35219,7 +35255,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Apply_results.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_services.
@@ -38092,7 +38128,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Apply_results.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
@@ -42615,7 +42651,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Apply.
 Require Tezos.Apply_results.
 Require Tezos.Script_ir_translator.
@@ -43363,7 +43399,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Apply_results.
 
 Module validation_mode.
@@ -44548,7 +44584,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -45772,7 +45808,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -60680,7 +60716,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Script_ir_annot.
 Require Tezos.Script_ir_translator.
 Require Tezos.Script_repr.
@@ -63394,7 +63430,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Script_ir_translator.
 Require Tezos.Script_typed_ir.
 
@@ -64825,7 +64861,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -65747,7 +65783,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -72297,7 +72333,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_ir_annot.
@@ -82453,7 +82489,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_tc_errors.
@@ -83670,7 +83706,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
@@ -84515,7 +84551,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
@@ -85262,7 +85298,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 
@@ -86681,7 +86717,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Storage_description.
 
 Import Alpha_context.
@@ -98490,7 +98526,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 Require Tezos.Services_registration.
 
 Import Alpha_context.
@@ -99194,7 +99230,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context.
+Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
 
 Import Alpha_context.
 

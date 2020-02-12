@@ -422,7 +422,73 @@ Module Gas.
   Parameter block_level : context -> Z.t.
 End Gas.
 
-Parameter Script_int : typeof.
+Module Script_int.
+  Parameter num : forall (t : Set), Set.
+  
+  Parameter n : Set.
+  
+  Parameter z : Set.
+  
+  Parameter zero_n : num n.
+  
+  Parameter zero : num z.
+  
+  Parameter compare : forall {a : Set}, num a -> num a -> Z.
+  
+  Parameter to_string : forall {A : Set}, num A -> string.
+  
+  Parameter of_string : string -> option (num z).
+  
+  Parameter to_int64 : forall {A : Set}, num A -> option int64.
+  
+  Parameter of_int64 : int64 -> num z.
+  
+  Parameter to_int : forall {A : Set}, num A -> option Z.
+  
+  Parameter of_int : Z -> num z.
+  
+  Parameter of_zint : Z.t -> num z.
+  
+  Parameter to_zint : forall {a : Set}, num a -> Z.t.
+  
+  Parameter add_n : num n -> num n -> num n.
+  
+  Parameter mul_n : num n -> num n -> num n.
+  
+  Parameter ediv_n : num n -> num n -> option (num n * num n).
+  
+  Parameter add : forall {A B : Set}, num A -> num B -> num z.
+  
+  Parameter sub : forall {A B : Set}, num A -> num B -> num z.
+  
+  Parameter mul : forall {A B : Set}, num A -> num B -> num z.
+  
+  Parameter ediv : forall {A B : Set}, num A -> num B -> option (num z * num n).
+  
+  Parameter abs : num z -> num n.
+  
+  Parameter is_nat : num z -> option (num n).
+  
+  Parameter neg : forall {A : Set}, num A -> num z.
+  
+  Parameter int : num n -> num z.
+  
+  Parameter lognot : forall {A : Set}, num A -> num z.
+  
+  Parameter shift_left_n : num n -> num n -> option (num n).
+  
+  Parameter shift_right_n : num n -> num n -> option (num n).
+  
+  Parameter shift_left : forall {a : Set}, num a -> num n -> option (num a).
+  
+  Parameter shift_right : forall {a : Set}, num a -> num n -> option (num a).
+  
+  Parameter logor : forall {a : Set}, num a -> num a -> num a.
+  
+  Parameter logand : forall {A : Set}, num A -> num n -> num n.
+  
+  Parameter logxor : num n -> num n -> num n.
+End Script_int.
 
 Module Script_timestamp.
   Import Script_int.
@@ -1093,7 +1159,7 @@ Module Constants.
   
   Parameter parametric_encoding : Data_encoding.t parametric.
   
-  Parameter parametric : context -> parametric.
+  Parameter __parametric_value : context -> parametric.
   
   Parameter preserved_cycles : context -> Z.
   
@@ -1821,70 +1887,40 @@ End Vote.
 
 Module Block_header.
   Module contents.
-    Record record {priority seed_nonce_hash proof_of_work_nonce : Set} := Build {
-      priority : priority;
-      seed_nonce_hash : seed_nonce_hash;
-      proof_of_work_nonce : proof_of_work_nonce }.
-    Arguments record : clear implicits.
-    Definition with_priority
-      {t_priority t_seed_nonce_hash t_proof_of_work_nonce} priority
-      (r : record t_priority t_seed_nonce_hash t_proof_of_work_nonce) :=
-      Build t_priority t_seed_nonce_hash t_proof_of_work_nonce priority
-        r.(seed_nonce_hash) r.(proof_of_work_nonce).
-    Definition with_seed_nonce_hash
-      {t_priority t_seed_nonce_hash t_proof_of_work_nonce} seed_nonce_hash
-      (r : record t_priority t_seed_nonce_hash t_proof_of_work_nonce) :=
-      Build t_priority t_seed_nonce_hash t_proof_of_work_nonce r.(priority)
-        seed_nonce_hash r.(proof_of_work_nonce).
-    Definition with_proof_of_work_nonce
-      {t_priority t_seed_nonce_hash t_proof_of_work_nonce} proof_of_work_nonce
-      (r : record t_priority t_seed_nonce_hash t_proof_of_work_nonce) :=
-      Build t_priority t_seed_nonce_hash t_proof_of_work_nonce r.(priority)
-        r.(seed_nonce_hash) proof_of_work_nonce.
+    Record record := Build {
+      priority : Z;
+      seed_nonce_hash : option Nonce_hash.t;
+      proof_of_work_nonce : MBytes.t }.
+    Definition with_priority priority (r : record) :=
+      Build priority r.(seed_nonce_hash) r.(proof_of_work_nonce).
+    Definition with_seed_nonce_hash seed_nonce_hash (r : record) :=
+      Build r.(priority) seed_nonce_hash r.(proof_of_work_nonce).
+    Definition with_proof_of_work_nonce proof_of_work_nonce (r : record) :=
+      Build r.(priority) r.(seed_nonce_hash) proof_of_work_nonce.
   End contents.
-  Definition contents_skeleton := contents.record.
+  Definition contents := contents.record.
   
   Module protocol_data.
-    Record record {contents signature : Set} := Build {
+    Record record := Build {
       contents : contents;
-      signature : signature }.
-    Arguments record : clear implicits.
-    Definition with_contents {t_contents t_signature} contents
-      (r : record t_contents t_signature) :=
-      Build t_contents t_signature contents r.(signature).
-    Definition with_signature {t_contents t_signature} signature
-      (r : record t_contents t_signature) :=
-      Build t_contents t_signature r.(contents) signature.
+      signature : Signature.t }.
+    Definition with_contents contents (r : record) :=
+      Build contents r.(signature).
+    Definition with_signature signature (r : record) :=
+      Build r.(contents) signature.
   End protocol_data.
-  Definition protocol_data_skeleton := protocol_data.record.
+  Definition protocol_data := protocol_data.record.
   
   Module t.
-    Record record {shell protocol_data : Set} := Build {
-      shell : shell;
+    Record record := Build {
+      shell : Block_header.shell_header;
       protocol_data : protocol_data }.
-    Arguments record : clear implicits.
-    Definition with_shell {t_shell t_protocol_data} shell
-      (r : record t_shell t_protocol_data) :=
-      Build t_shell t_protocol_data shell r.(protocol_data).
-    Definition with_protocol_data {t_shell t_protocol_data} protocol_data
-      (r : record t_shell t_protocol_data) :=
-      Build t_shell t_protocol_data r.(shell) protocol_data.
+    Definition with_shell shell (r : record) :=
+      Build shell r.(protocol_data).
+    Definition with_protocol_data protocol_data (r : record) :=
+      Build r.(shell) protocol_data.
   End t.
-  Definition t_skeleton := t.record.
-  
-  Reserved Notation "'t".
-  Reserved Notation "'protocol_data".
-  Reserved Notation "'contents".
-  
-  
-  
-  where "'t" := (t_skeleton Block_header.shell_header 'protocol_data)
-  and "'protocol_data" := (protocol_data_skeleton 'contents Signature.t)
-  and "'contents" := (contents_skeleton Z (option Nonce_hash.t) MBytes.t).
-  
-  Definition t := 't.
-  Definition protocol_data := 'protocol_data.
-  Definition contents := 'contents.
+  Definition t := t.record.
   
   Definition block_header := t.
   
@@ -2055,20 +2091,6 @@ Module manager_operation.
   Definition Origination_skeleton := Origination.record.
 End manager_operation.
 
-Module protocol_data.
-  Record record {contents signature : Set} := Build {
-    contents : contents;
-    signature : signature }.
-  Arguments record : clear implicits.
-  Definition with_contents {t_contents t_signature} contents
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature contents r.(signature).
-  Definition with_signature {t_contents t_signature} signature
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature r.(contents) signature.
-End protocol_data.
-Definition protocol_data_skeleton := protocol_data.record.
-
 Module operation.
   Record record {shell protocol_data : Set} := Build {
     shell : shell;
@@ -2083,6 +2105,20 @@ Module operation.
 End operation.
 Definition operation_skeleton := operation.record.
 
+Module protocol_data.
+  Record record {contents signature : Set} := Build {
+    contents : contents;
+    signature : signature }.
+  Arguments record : clear implicits.
+  Definition with_contents {t_contents t_signature} contents
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature contents r.(signature).
+  Definition with_signature {t_contents t_signature} signature
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature r.(contents) signature.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
+
 Reserved Notation "'contents.Endorsement".
 Reserved Notation "'contents.Seed_nonce_revelation".
 Reserved Notation "'contents.Double_endorsement_evidence".
@@ -2093,9 +2129,9 @@ Reserved Notation "'contents.Ballot".
 Reserved Notation "'contents.Manager_operation".
 Reserved Notation "'manager_operation.Transaction".
 Reserved Notation "'manager_operation.Origination".
-Reserved Notation "'operation".
-Reserved Notation "'protocol_data".
 Reserved Notation "'contents_list".
+Reserved Notation "'protocol_data".
+Reserved Notation "'operation".
 Reserved Notation "'contents".
 Reserved Notation "'manager_operation".
 Reserved Notation "'counter".
@@ -2125,11 +2161,11 @@ with manager_operation_gadt : Set :=
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   manager_operation_gadt
 
-where "'operation" := (fun (t_kind : Set) =>
-  operation_skeleton Operation.shell_header ('protocol_data t_kind))
+where "'contents_list" := (fun (_ : Set) => contents_list_gadt)
 and "'protocol_data" := (fun (t_kind : Set) =>
   protocol_data_skeleton ('contents_list t_kind) (option Signature.t))
-and "'contents_list" := (fun (_ : Set) => contents_list_gadt)
+and "'operation" := (fun (t_kind : Set) =>
+  operation_skeleton Operation.shell_header ('protocol_data t_kind))
 and "'contents" := (fun (_ : Set) => contents_gadt)
 and "'manager_operation" := (fun (_ : Set) => manager_operation_gadt)
 and "'counter" := (Z.t)
@@ -2186,9 +2222,9 @@ End
 Import
   ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
 
-Definition operation := 'operation.
-Definition protocol_data := 'protocol_data.
 Definition contents_list := 'contents_list.
+Definition protocol_data := 'protocol_data.
+Definition operation := 'operation.
 Definition contents := 'contents.
 Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.

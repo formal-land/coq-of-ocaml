@@ -121,5 +121,5 @@ Definition min_proposal_quorum (c : Raw_context.context) : int32 :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.min_proposal_quorum).
 
-Definition parametric (c : Raw_context.context) : Constants_repr.parametric :=
-  Raw_context.constants c.
+Definition __parametric_value (c : Raw_context.context)
+  : Constants_repr.parametric := Raw_context.constants c.
