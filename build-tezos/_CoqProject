@@ -17,11 +17,11 @@ Blinded_public_key_hash.v
 Block_header_repr_mli.v
 #Block_header_repr.v
 Bootstrap_storage_mli.v
-#Bootstrap_storage.v
+Bootstrap_storage.v
 #Commitment_repr_mli.v
 Commitment_repr.v
 Commitment_storage_mli.v
-#Commitment_storage.v
+Commitment_storage.v
 Constants_repr.v
 #Constants_services_mli.v
 #Constants_services.v
@@ -32,7 +32,7 @@ Contract_repr.v
 #Contract_services_mli.v
 #Contract_services.v
 Contract_storage_mli.v
-#Contract_storage.v
+Contract_storage.v
 Cycle_repr_mli.v
 Cycle_repr.v
 #Delegate_services_mli.v
@@ -41,14 +41,14 @@ Delegate_storage_mli.v
 #Delegate_storage.v
 Environment.v
 Fees_storage_mli.v
-#Fees_storage.v
+Fees_storage.v
 Fitness_repr.v
-#Fitness_storage.v
+Fitness_storage.v
 Gas_limit_repr_mli.v
 Gas_limit_repr.v
 #Helpers_services_mli.v
 #Helpers_services.v
-#Init_storage.v
+Init_storage.v
 Legacy_script_support_repr_mli.v
 Legacy_script_support_repr.v
 Level_repr_mli.v
@@ -67,7 +67,7 @@ Misc_mli.v
 Misc.v
 Nonce_hash.v
 Nonce_storage_mli.v
-#Nonce_storage.v
+Nonce_storage.v
 #Operation_repr_mli.v
 #Operation_repr.v
 Parameters_repr_mli.v
@@ -82,7 +82,7 @@ Raw_level_repr.v
 Roll_repr_mli.v
 Roll_repr.v
 Roll_storage_mli.v
-#Roll_storage.v
+Roll_storage.v
 Script_expr_hash.v
 Script_int_repr_mli.v
 Script_int_repr.v
@@ -102,7 +102,7 @@ Script_timestamp_repr_mli.v
 Seed_repr_mli.v
 Seed_repr.v
 Seed_storage_mli.v
-#Seed_storage.v
+Seed_storage.v
 #Services_registration.v
 State_hash.v
 Storage_description_mli.v
@@ -119,7 +119,7 @@ Time_repr_mli.v
 Vote_repr_mli.v
 Vote_repr.v
 Vote_storage_mli.v
-#Vote_storage.v
+Vote_storage.v
 Voting_period_repr_mli.v
 Voting_period_repr.v
 #Voting_services_mli.v

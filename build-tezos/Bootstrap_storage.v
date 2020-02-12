@@ -12,7 +12,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Contract_storage.
 Require Tezos.Cycle_repr.
 Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
 Require Tezos.Misc.
@@ -20,6 +20,7 @@ Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
 Require Tezos.Script_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Import Misc.
@@ -106,8 +107,8 @@ Definition init
                       (Constants_repr.parametric.with_block_reward Tez_repr.zero
                         c)))
                 (fun ctxt =>
-                  Storage.Ramp_up.Rewards.init ctxt
-                    (Cycle_repr.of_int32_exn (Int32.of_int cycles))
+                  (|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.init)
+                    ctxt (Cycle_repr.of_int32_exn (Int32.of_int cycles))
                     (constants.(Constants_repr.parametric.block_reward),
                       constants.(Constants_repr.parametric.endorsement_reward)))
             end
@@ -154,7 +155,7 @@ Definition init
                                             let cycle :=
                                               Cycle_repr.of_int32_exn
                                                 (Int32.of_int cycle) in
-                                            Storage.Ramp_up.Security_deposits.init
+                                            (|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.init)
                                               ctxt cycle
                                               (block_security_deposit,
                                                 endorsement_security_deposit))))
@@ -163,7 +164,8 @@ Definition init
                                   (Pervasives.op_minus cycles 1)))
                               (fun ctxt =>
                                 Error_monad.op_gtgteqquestion
-                                  (Storage.Ramp_up.Security_deposits.init ctxt
+                                  ((|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.init)
+                                    ctxt
                                     (Cycle_repr.of_int32_exn
                                       (Int32.of_int cycles))
                                     (constants.(Constants_repr.parametric.block_security_deposit),
@@ -172,18 +174,24 @@ Definition init
               end))).
 
 Definition cycle_end
-  (ctxt : Storage.Ramp_up.Rewards.context) (last_cycle : Cycle_repr.cycle)
-  : Lwt.t (Error_monad.tzresult Storage.Ramp_up.Rewards.context) :=
+  (ctxt :
+    (|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.context))
+  (last_cycle : Cycle_repr.cycle)
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.context)) :=
   let next_cycle := Cycle_repr.succ last_cycle in
   Error_monad.op_gtgteqquestion
     (Error_monad.op_gtgteqquestion
-      (Storage.Ramp_up.Rewards.get_option ctxt next_cycle)
+      ((|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.get_option)
+        ctxt next_cycle)
       (fun function_parameter =>
         match function_parameter with
         | None => Error_monad.__return ctxt
         | Some (block_reward, endorsement_reward) =>
           Error_monad.op_gtgteqquestion
-            (Storage.Ramp_up.Rewards.delete ctxt next_cycle)
+            ((|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.delete)
+              ctxt next_cycle)
             (fun ctxt =>
               Error_monad.op_gtgteq
                 (Raw_context.patch_constants ctxt
@@ -195,13 +203,15 @@ Definition cycle_end
         end))
     (fun ctxt =>
       Error_monad.op_gtgteqquestion
-        (Storage.Ramp_up.Security_deposits.get_option ctxt next_cycle)
+        ((|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.get_option)
+          ctxt next_cycle)
         (fun function_parameter =>
           match function_parameter with
           | None => Error_monad.__return ctxt
           | Some (block_security_deposit, endorsement_security_deposit) =>
             Error_monad.op_gtgteqquestion
-              (Storage.Ramp_up.Security_deposits.delete ctxt next_cycle)
+              ((|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.delete)
+                ctxt next_cycle)
               (fun ctxt =>
                 Error_monad.op_gtgteq
                   (Raw_context.patch_constants ctxt

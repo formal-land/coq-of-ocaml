@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
-Require Tezos.Block_header_repr.
+Require Tezos.Block_header_repr_mli. Module Block_header_repr := Block_header_repr_mli.
 Require Tezos.Contract_repr.
 Require Tezos.Raw_level_repr.
 Require Tezos.Script_repr.

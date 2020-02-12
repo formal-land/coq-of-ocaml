@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Require Tezos.Storage_description.
 
 Definition t := int32.
 
@@ -94,25 +95,24 @@ Definition of_int32 (l : (|Compare.Int32|).(Compare.S.t))
   (* ❌ Try-with are not handled *)
   try (Pervasives.Ok (of_int32_exn l)).
 
-Module Index.
-  Definition t := raw_level.
-  
-  Definition path_length : Z := 1.
-  
-  Definition to_path (level : int32) (l : list string) : list string :=
-    cons (Int32.to_string level) l.
-  
-  Definition of_path (function_parameter : list string) : option int32 :=
+Definition Index :=
+  let t := raw_level in
+  let path_length := 1 in
+  let to_path (level : int32) (l : list string) : list string :=
+    cons (Int32.to_string level) l in
+  let of_path (function_parameter : list string) : option int32 :=
     match function_parameter with
     | cons s [] =>
       (* ❌ Try-with are not handled *)
       try (Some (Int32.of_string s))
     | _ => None
-    end.
-  
-  Definition rpc_arg : RPC_arg.arg int32 := rpc_arg.
-  
-  Definition encoding : Data_encoding.encoding int32 := encoding.
-  
-  Definition compare : t -> t -> Z := compare.
-End Index.
+    end in
+  existT (A := unit) (fun _ => _) tt
+    {|
+      Storage_description.INDEX.path_length := path_length;
+      Storage_description.INDEX.to_path := to_path;
+      Storage_description.INDEX.of_path := of_path;
+      Storage_description.INDEX.rpc_arg := rpc_arg;
+      Storage_description.INDEX.encoding := encoding;
+      Storage_description.INDEX.compare := compare
+    |}.

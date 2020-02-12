@@ -12,17 +12,23 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_storage.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Roll_storage.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
 
 Definition recorded_proposal_count_for_delegate
-  (ctxt : Storage.Vote.Proposals_count.context)
-  (proposer : Storage.Vote.Proposals_count.key)
-  : Lwt.t (Error_monad.tzresult Storage.Vote.Proposals_count.value) :=
+  (ctxt :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.context))
+  (proposer :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.key))
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.value)) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Vote.Proposals_count.get_option ctxt proposer)
+    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.get_option)
+      ctxt proposer)
     (fun function_parameter =>
       match function_parameter with
       | None => Error_monad.__return 0
@@ -30,31 +36,36 @@ Definition recorded_proposal_count_for_delegate
       end).
 
 Definition record_proposal
-  (ctxt : Storage.Vote.Proposals_count.context)
+  (ctxt :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.context))
   (proposal : (|Protocol_hash|).(S.HASH.t))
-  (proposer : Storage.Vote.Proposals_count.key)
+  (proposer :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   Error_monad.op_gtgteqquestion
     (recorded_proposal_count_for_delegate ctxt proposer)
     (fun count =>
       Error_monad.op_gtgteq
-        (Storage.Vote.Proposals_count.init_set ctxt proposer
-          (Pervasives.op_plus count 1))
+        ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.init_set)
+          ctxt proposer (Pervasives.op_plus count 1))
         (fun ctxt =>
           Error_monad.op_gtgteq
-            (Storage.Vote.Proposals.add ctxt (proposal, proposer))
-            (fun ctxt => Error_monad.__return ctxt))).
+            ((|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.add) ctxt
+              (proposal, proposer)) (fun ctxt => Error_monad.__return ctxt))).
 
-Definition get_proposals (ctxt : Storage.Vote.Proposals.context)
+Definition get_proposals
+  (ctxt : (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.context))
   : Lwt.t
     (Error_monad.tzresult
       ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.t) int32)) :=
-  Storage.Vote.Proposals.fold ctxt
+  (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.fold) ctxt
     (Error_monad.ok (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.empty))
     (fun function_parameter =>
       let '(proposal, delegate) := function_parameter in
       fun acc =>
-        Error_monad.op_gtgteqquestion (Storage.Vote.Listings.get ctxt delegate)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
+            ctxt delegate)
           (fun weight =>
             Lwt.__return
               (Error_monad.op_gtgtquestion acc
@@ -72,10 +83,15 @@ Definition get_proposals (ctxt : Storage.Vote.Proposals.context)
                     ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.add) proposal
                       (Int32.add weight previous) acc))))).
 
-Definition clear_proposals (ctxt : Storage.Vote.Proposals_count.context)
+Definition clear_proposals
+  (ctxt :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t Raw_context.t :=
-  Error_monad.op_gtgteq (Storage.Vote.Proposals_count.clear ctxt)
-    (fun ctxt => Storage.Vote.Proposals.clear ctxt).
+  Error_monad.op_gtgteq
+    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.clear)
+      ctxt)
+    (fun ctxt =>
+      (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.clear) ctxt).
 
 Module ballots.
   Record record := Build {
@@ -110,17 +126,21 @@ Definition ballots_encoding : Data_encoding.encoding ballots :=
       (Data_encoding.req None None "pass" Data_encoding.__int32_value)).
 
 Definition has_recorded_ballot
-  : Storage.Vote.Ballots.context -> Storage.Vote.Ballots.key -> Lwt.t bool :=
-  Storage.Vote.Ballots.mem.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) ->
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.key) -> Lwt.t bool :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.mem).
 
 Definition record_ballot
-  : Storage.Vote.Ballots.context -> Storage.Vote.Ballots.key ->
-  Storage.Vote.Ballots.value -> Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Ballots.init.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) ->
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.key) ->
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.value) ->
+  Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.init).
 
-Definition get_ballots (ctxt : Storage.Vote.Ballots.context)
+Definition get_ballots
+  (ctxt : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t (Error_monad.tzresult ballots) :=
-  Storage.Vote.Ballots.fold ctxt
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.fold) ctxt
     (Error_monad.ok
       {|
         ballots.yay :=
@@ -136,7 +156,8 @@ Definition get_ballots (ctxt : Storage.Vote.Ballots.context)
       fun ballot =>
         fun ballots =>
           Error_monad.op_gtgteqquestion
-            (Storage.Vote.Listings.get ctxt delegate)
+            ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
+              ctxt delegate)
             (fun weight =>
               let count := Int32.add weight in
               Lwt.__return
@@ -156,13 +177,17 @@ Definition get_ballots (ctxt : Storage.Vote.Ballots.context)
                     end)))).
 
 Definition get_ballot_list
-  : Storage.Vote.Ballots.context ->
-  Lwt.t (list (Storage.Vote.Ballots.key * Storage.Vote.Ballots.value)) :=
-  Storage.Vote.Ballots.bindings.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) ->
+  Lwt.t
+    (list
+      ((|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.key) *
+        (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.value))) :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.bindings).
 
 Definition clear_ballots
-  : Storage.Vote.Ballots.context -> Lwt.t Raw_context.t :=
-  Storage.Vote.Ballots.clear.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) ->
+  Lwt.t Raw_context.t :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.clear).
 
 Definition listings_encoding
   : Data_encoding.encoding
@@ -185,7 +210,8 @@ Definition freeze_listings (ctxt : Raw_context.t)
               (|Signature.Public_key|).(S.SPublic_key.__hash_value) delegate in
             Error_monad.op_gtgteqquestion
               (Error_monad.op_gtgteqquestion
-                (Storage.Vote.Listings.get_option ctxt delegate)
+                ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get_option)
+                  ctxt delegate)
                 (fun function_parameter =>
                   match function_parameter with
                   | None =>
@@ -196,52 +222,71 @@ Definition freeze_listings (ctxt : Raw_context.t)
                   end))
               (fun count =>
                 Error_monad.op_gtgteq
-                  (Storage.Vote.Listings.init_set ctxt delegate
-                    (Int32.succ count))
+                  ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.init_set)
+                    ctxt delegate (Int32.succ count))
                   (fun ctxt => Error_monad.__return (ctxt, (Int32.succ total)))))
       (ctxt,
         (* ❌ Constant of type int32 is converted to int *)
         0))
     (fun function_parameter =>
       let '(ctxt, total) := function_parameter in
-      Error_monad.op_gtgteqquestion (Storage.Vote.Listings_size.init ctxt total)
-        (fun ctxt => Error_monad.__return ctxt)).
+      Error_monad.op_gtgteqquestion
+        ((|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.init)
+          ctxt total) (fun ctxt => Error_monad.__return ctxt)).
 
 Definition listing_size
-  : Storage.Vote.Listings_size.context ->
-  Lwt.t (Error_monad.tzresult Storage.Vote.Listings_size.value) :=
-  Storage.Vote.Listings_size.get.
+  : (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.context) ->
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.get).
 
 Definition in_listings
-  : Storage.Vote.Listings.context -> Storage.Vote.Listings.key -> Lwt.t bool :=
-  Storage.Vote.Listings.mem.
+  : (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.context) ->
+  (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.key) ->
+  Lwt.t bool :=
+  (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.mem).
 
 Definition get_listings
-  : Storage.Vote.Listings.context ->
-  Lwt.t (list (Storage.Vote.Listings.key * Storage.Vote.Listings.value)) :=
-  Storage.Vote.Listings.bindings.
+  : (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.context) ->
+  Lwt.t
+    (list
+      ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.key) *
+        (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.value))) :=
+  (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.bindings).
 
-Definition clear_listings (ctxt : Storage.Vote.Listings.context)
+Definition clear_listings
+  (ctxt : (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteq (Storage.Vote.Listings.clear ctxt)
+  Error_monad.op_gtgteq
+    ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.clear) ctxt)
     (fun ctxt =>
-      Error_monad.op_gtgteq (Storage.Vote.Listings_size.remove ctxt)
-        (fun ctxt => Error_monad.__return ctxt)).
+      Error_monad.op_gtgteq
+        ((|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.remove)
+          ctxt) (fun ctxt => Error_monad.__return ctxt)).
 
 Definition get_current_period_kind
-  : Storage.Vote.Current_period_kind.context ->
-  Lwt.t (Error_monad.tzresult Storage.Vote.Current_period_kind.value) :=
-  Storage.Vote.Current_period_kind.get.
+  : (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.context)
+  ->
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.get).
 
 Definition set_current_period_kind
-  : Storage.Vote.Current_period_kind.context ->
-  Storage.Vote.Current_period_kind.value ->
-  Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Current_period_kind.set.
+  : (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.context)
+  ->
+  (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.value)
+  -> Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.set).
 
-Definition get_current_quorum (ctxt : Storage.Vote.Participation_ema.context)
+Definition get_current_quorum
+  (ctxt :
+    (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context))
   : Lwt.t (Error_monad.tzresult int32) :=
-  Error_monad.op_gtgteqquestion (Storage.Vote.Participation_ema.get ctxt)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.get)
+      ctxt)
     (fun participation_ema =>
       let quorum_min := Constants_storage.quorum_min ctxt in
       let quorum_max := Constants_storage.quorum_max ctxt in
@@ -253,38 +298,48 @@ Definition get_current_quorum (ctxt : Storage.Vote.Participation_ema.context)
             10000))).
 
 Definition get_participation_ema
-  : Storage.Vote.Participation_ema.context ->
-  Lwt.t (Error_monad.tzresult Storage.Vote.Participation_ema.value) :=
-  Storage.Vote.Participation_ema.get.
+  : (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context)
+  ->
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.get).
 
 Definition set_participation_ema
-  : Storage.Vote.Participation_ema.context ->
-  Storage.Vote.Participation_ema.value ->
+  : (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context)
+  ->
+  (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.value) ->
   Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Participation_ema.set.
+  (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.set).
 
 Definition get_current_proposal
-  : Storage.Vote.Current_proposal.context ->
-  Lwt.t (Error_monad.tzresult Storage.Vote.Current_proposal.value) :=
-  Storage.Vote.Current_proposal.get.
+  : (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.context)
+  ->
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.get).
 
 Definition init_current_proposal
-  : Storage.Vote.Current_proposal.context ->
-  Storage.Vote.Current_proposal.value ->
+  : (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.context)
+  ->
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.value) ->
   Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Current_proposal.init.
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.init).
 
 Definition clear_current_proposal
-  : Storage.Vote.Current_proposal.context ->
-  Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Current_proposal.delete.
+  : (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.context)
+  -> Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.delete).
 
 Definition init (ctxt : Raw_context.context)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let participation_ema := Constants_storage.quorum_max ctxt in
   Error_monad.op_gtgteqquestion
-    (Storage.Vote.Participation_ema.init ctxt participation_ema)
+    ((|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.init)
+      ctxt participation_ema)
     (fun ctxt =>
       Error_monad.op_gtgteqquestion
-        (Storage.Vote.Current_period_kind.init ctxt Voting_period_repr.Proposal)
+        ((|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.init)
+          ctxt Voting_period_repr.Proposal)
         (fun ctxt => Error_monad.__return ctxt)).

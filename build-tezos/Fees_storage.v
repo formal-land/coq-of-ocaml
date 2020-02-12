@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Contract_storage.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 

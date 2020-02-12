@@ -18,6 +18,7 @@ Require Tezos.Misc.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 
 Import Misc.
 
@@ -39,25 +40,31 @@ Definition compute_for_cycle
     let levels := Level_storage.levels_with_commitments_in_cycle c revealed in
     let combine
       (function_parameter :
-        Storage.Seed.Nonce.context * Seed_repr.seed *
-          list Storage.Seed.unrevealed_nonce)
+        (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
+          * Seed_repr.seed * list Storage.Seed.unrevealed_nonce)
       : Level_repr.t ->
       Lwt.t
         (Error_monad.tzresult
           (Raw_context.t * Seed_repr.seed * list Storage.Seed.unrevealed_nonce)) :=
       let '(c, random_seed, unrevealed) := function_parameter in
       fun level =>
-        Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.get c level)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
+            c level)
           (fun function_parameter =>
             match function_parameter with
             | Storage.Seed.Revealed __nonce_value =>
-              Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.delete c level)
+              Error_monad.op_gtgteqquestion
+                ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
+                  c level)
                 (fun c =>
                   Error_monad.__return
                     (c, (Seed_repr.__nonce_value random_seed __nonce_value),
                       unrevealed))
             | Storage.Seed.Unrevealed u =>
-              Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.delete c level)
+              Error_monad.op_gtgteqquestion
+                ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
+                  c level)
                 (fun c =>
                   Error_monad.__return (c, random_seed, (cons u unrevealed)))
             end) in

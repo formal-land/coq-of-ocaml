@@ -12,7 +12,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Contract_storage.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Init_storage.
 Require Tezos.Period_repr.
@@ -20,6 +20,7 @@ Require Tezos.Raw_context.
 Require Tezos.Script_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Definition t := Raw_context.t.
@@ -228,16 +229,24 @@ Module Big_map.
     Raw_context.fresh_temporary_big_map.
   
   Definition mem
-    (c : Raw_context.t) (m : Z.t) (k : Storage.Big_map.Contents.key)
+    (c : Raw_context.t) (m : Z.t)
+    (k :
+      (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
     : Lwt.t (Error_monad.tzresult (Raw_context.t * bool)) :=
-    Storage.Big_map.Contents.mem (c, m) k.
+    (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.mem)
+      (c, m) k.
   
   Definition get_opt
-    (c : Raw_context.t) (m : Z.t) (k : Storage.Big_map.Contents.key)
+    (c : Raw_context.t) (m : Z.t)
+    (k :
+      (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
     : Lwt.t
       (Error_monad.tzresult
-        (Raw_context.t * option Storage.Big_map.Contents.value)) :=
-    Storage.Big_map.Contents.get_option (c, m) k.
+        (Raw_context.t *
+          option
+            (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))) :=
+    (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
+      (c, m) k.
   
   Definition rpc_arg : RPC_arg.t Z.t := Storage.Big_map.rpc_arg.
   
@@ -248,24 +257,29 @@ Module Big_map.
       (fun c => Lwt.__return (Raw_context.reset_temporary_big_map c)).
   
   Definition __exists
-    (c : Raw_context.context) (id : Storage.Big_map.Key_type.key)
+    (c : Raw_context.context)
+    (id : (|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.key))
     : Lwt.t
       (Error_monad.tzresult
         (Raw_context.context *
           option
-            (Storage.Big_map.Key_type.value * Storage.Big_map.Value_type.value))) :=
+            ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.value)
+              *
+              (|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.value)))) :=
     Error_monad.op_gtgteqquestion
       (Lwt.__return
         (Raw_context.consume_gas c (Gas_limit_repr.read_bytes_cost Z.zero)))
       (fun c =>
-        Error_monad.op_gtgteqquestion (Storage.Big_map.Key_type.get_option c id)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.get_option)
+            c id)
           (fun kt =>
             match kt with
             | None => Error_monad.__return (c, None)
             | Some kt =>
               Error_monad.op_gtgteqquestion
-                (Storage.Big_map.Value_type.get c id)
-                (fun kv => Error_monad.__return (c, (Some (kt, kv))))
+                ((|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.get)
+                  c id) (fun kv => Error_monad.__return (c, (Some (kt, kv))))
             end)).
 End Big_map.
 
@@ -326,7 +340,9 @@ End Fitness.
 Module Bootstrap := Bootstrap_storage.
 
 Module Commitment.
-  Include Commitment_repr.
+  Definition t := (|Commitment_repr|).(Storage_sigs.VALUE.t).
+  
+  Definition encoding := (|Commitment_repr|).(Storage_sigs.VALUE.encoding).
   
   Include Commitment_storage.
 End Commitment.

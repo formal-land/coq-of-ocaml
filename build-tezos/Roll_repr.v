@@ -11,6 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Seed_repr.
+Require Tezos.Storage_description.
 
 Definition t := (|Compare.Int32|).(Compare.S.t).
 
@@ -53,30 +54,29 @@ Definition rpc_arg : RPC_arg.arg int32 :=
 
 Definition to_int32 {A : Set} (v : A) : A := v.
 
-Module Index.
-  Definition t := roll.
-  
-  Definition path_length : Z := 3.
-  
-  Definition to_path (roll : int32) (l : list string) : list string :=
+Definition Index :=
+  let t := roll in
+  let path_length := 3 in
+  let to_path (roll : int32) (l : list string) : list string :=
     cons
       (Pervasives.op_atat Int32.to_string (Int32.logand roll (Int32.of_int 255)))
       (cons
         (Pervasives.op_atat Int32.to_string
           (Int32.logand (Int32.shift_right_logical roll 8) (Int32.of_int 255)))
-        (cons (Int32.to_string roll) l)).
-  
-  Definition of_path (function_parameter : list string) : option int32 :=
+        (cons (Int32.to_string roll) l)) in
+  let of_path (function_parameter : list string) : option int32 :=
     match function_parameter with
     | cons _ (cons _ (cons s _)) =>
       (* ❌ Try-with are not handled *)
       try (Some (Int32.of_string s))
     | _ => None
-    end.
-  
-  Definition rpc_arg : RPC_arg.arg int32 := rpc_arg.
-  
-  Definition encoding : Data_encoding.encoding int32 := encoding.
-  
-  Definition compare : t -> t -> Z := compare.
-End Index.
+    end in
+  existT (A := unit) (fun _ => _) tt
+    {|
+      Storage_description.INDEX.path_length := path_length;
+      Storage_description.INDEX.to_path := to_path;
+      Storage_description.INDEX.of_path := of_path;
+      Storage_description.INDEX.rpc_arg := rpc_arg;
+      Storage_description.INDEX.encoding := encoding;
+      Storage_description.INDEX.compare := compare
+    |}.

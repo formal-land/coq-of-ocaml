@@ -14,29 +14,39 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Commitment_repr.
 Require Tezos.Raw_context.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Definition get_opt
-  : Storage.Commitments.context -> Storage.Commitments.key ->
-  Lwt.t (Error_monad.tzresult (option Storage.Commitments.value)) :=
-  Storage.Commitments.get_option.
+  : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context) ->
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.key) ->
+  Lwt.t
+    (Error_monad.tzresult
+      (option (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.value))) :=
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.get_option).
 
 Definition delete
-  : Storage.Commitments.context -> Storage.Commitments.key ->
-  Lwt.t (Error_monad.tzresult Raw_context.t) := Storage.Commitments.delete.
+  : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context) ->
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.key) ->
+  Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.delete).
 
 Definition init
-  (ctxt : Storage.Commitments.context) (commitments : list Commitment_repr.t)
-  : Lwt.t (Error_monad.tzresult Storage.Commitments.context) :=
+  (ctxt : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context))
+  (commitments : list Commitment_repr.t)
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context)) :=
   let init_commitment
-    (ctxt : Storage.Commitments.context)
+    (ctxt : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context))
     (function_parameter : Commitment_repr.t)
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     let '{|
       Commitment_repr.t.blinded_public_key_hash := blinded_public_key_hash;
         Commitment_repr.t.amount := amount
         |} := function_parameter in
-    Storage.Commitments.init ctxt blinded_public_key_hash amount in
+    (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.init) ctxt
+      blinded_public_key_hash amount in
   Error_monad.op_gtgteqquestion
     (Error_monad.fold_left_s init_commitment ctxt commitments)
     (fun ctxt => Error_monad.__return ctxt).

@@ -17,6 +17,7 @@ Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Definition t := Seed_repr.nonce.
@@ -44,7 +45,9 @@ Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
       if Cycle_repr.op_lt level.(Level_repr.t.cycle) revealed_cycle then
         Error_monad.fail extensible_type_value
       else
-        Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.get ctxt level)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
+            ctxt level)
           (fun function_parameter =>
             match function_parameter with
             | Storage.Seed.Revealed _ => Error_monad.fail extensible_type_value
@@ -56,7 +59,8 @@ Definition record_hash
   (ctxt : Raw_context.t) (unrevealed : Storage.Seed.unrevealed_nonce)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let level := Level_storage.current ctxt in
-  Storage.Seed.Nonce.init ctxt level (Storage.Seed.Unrevealed unrevealed).
+  (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.init)
+    ctxt level (Storage.Seed.Unrevealed unrevealed).
 
 Definition reveal
   (ctxt : Raw_context.t) (level : Level_repr.t)
@@ -72,8 +76,8 @@ Definition reveal
         (fun function_parameter =>
           let '_ := function_parameter in
           Error_monad.op_gtgteqquestion
-            (Storage.Seed.Nonce.set ctxt level
-              (Storage.Seed.Revealed __nonce_value))
+            ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.set)
+              ctxt level (Storage.Seed.Revealed __nonce_value))
             (fun ctxt => Error_monad.__return ctxt))).
 
 Module unrevealed.
@@ -98,9 +102,9 @@ Inductive status : Set :=
 | Revealed : Seed_repr.nonce -> status.
 
 Definition get
-  : Storage.Seed.Nonce.context -> Level_repr.t ->
-  Lwt.t (Error_monad.tzresult Storage.Seed.nonce_status) :=
-  Storage.Seed.Nonce.get.
+  : (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
+  -> Level_repr.t -> Lwt.t (Error_monad.tzresult Storage.Seed.nonce_status) :=
+  (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get).
 
 Definition of_bytes : MBytes.t -> Error_monad.tzresult Seed_repr.nonce :=
   Seed_repr.make_nonce.

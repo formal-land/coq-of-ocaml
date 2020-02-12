@@ -55,7 +55,7 @@
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
       <li>OCaml size: 35950 lines</li>
-      <li>Coq size: 51943 lines (+44% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 52347 lines (+45% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2715</li>
     </ul>
     
@@ -92,6 +92,7 @@
           11380,
           11380,
           13051,
+          15966,
         ],
         generated: [
           47563,
@@ -123,6 +124,7 @@
           51401,
           51401,
           51943,
+          52347,
         ],
         labels: [
           "01-14",
@@ -154,6 +156,7 @@
           "02-09",
           "02-10",
           "02-11",
+          "02-12",
         ]
       }
 ;
@@ -686,7 +689,7 @@
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 434 lines (+55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 450 lines (+61% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -989,7 +992,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Contract_storage.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Init_storage.
 Require Tezos.Period_repr.
@@ -997,6 +1000,7 @@ Require Tezos.Raw_context.
 Require Tezos.Script_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Definition t := Raw_context.t.
@@ -1205,16 +1209,24 @@ Module Big_map.
     Raw_context.fresh_temporary_big_map.
   
   Definition mem
-    (c : Raw_context.t) (m : Z.t) (k : Storage.Big_map.Contents.key)
+    (c : Raw_context.t) (m : Z.t)
+    (k :
+      (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
     : Lwt.t (Error_monad.tzresult (Raw_context.t * bool)) :=
-    Storage.Big_map.Contents.mem (c, m) k.
+    (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.mem)
+      (c, m) k.
   
   Definition get_opt
-    (c : Raw_context.t) (m : Z.t) (k : Storage.Big_map.Contents.key)
+    (c : Raw_context.t) (m : Z.t)
+    (k :
+      (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
     : Lwt.t
       (Error_monad.tzresult
-        (Raw_context.t * option Storage.Big_map.Contents.value)) :=
-    Storage.Big_map.Contents.get_option (c, m) k.
+        (Raw_context.t *
+          option
+            (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))) :=
+    (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
+      (c, m) k.
   
   Definition rpc_arg : RPC_arg.t Z.t := Storage.Big_map.rpc_arg.
   
@@ -1225,24 +1237,29 @@ Module Big_map.
       (fun c =&gt; Lwt.__return (Raw_context.reset_temporary_big_map c)).
   
   Definition __exists
-    (c : Raw_context.context) (id : Storage.Big_map.Key_type.key)
+    (c : Raw_context.context)
+    (id : (|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.key))
     : Lwt.t
       (Error_monad.tzresult
         (Raw_context.context *
           option
-            (Storage.Big_map.Key_type.value * Storage.Big_map.Value_type.value))) :=
+            ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.value)
+              *
+              (|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.value)))) :=
     Error_monad.op_gtgteqquestion
       (Lwt.__return
         (Raw_context.consume_gas c (Gas_limit_repr.read_bytes_cost Z.zero)))
       (fun c =&gt;
-        Error_monad.op_gtgteqquestion (Storage.Big_map.Key_type.get_option c id)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.get_option)
+            c id)
           (fun kt =&gt;
             match kt with
             | None =&gt; Error_monad.__return (c, None)
             | Some kt =&gt;
               Error_monad.op_gtgteqquestion
-                (Storage.Big_map.Value_type.get c id)
-                (fun kv =&gt; Error_monad.__return (c, (Some (kt, kv))))
+                ((|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.get)
+                  c id) (fun kv =&gt; Error_monad.__return (c, (Some (kt, kv))))
             end)).
 End Big_map.
 
@@ -1303,7 +1320,9 @@ End Fitness.
 Module Bootstrap := Bootstrap_storage.
 
 Module Commitment.
-  Include Commitment_repr.
+  Definition t := (|Commitment_repr|).(Storage_sigs.VALUE.t).
+  
+  Definition encoding := (|Commitment_repr|).(Storage_sigs.VALUE.encoding).
   
   Include Commitment_storage.
 End Commitment.
@@ -16291,7 +16310,7 @@ Parameter hash_raw : raw -&gt; (|Block_hash|).(S.HASH.t).
     <h3>Bootstrap_storage</h3>
     <ul>
       <li>OCaml size: 152 lines</li>
-      <li>Coq size: 214 lines (+40% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 224 lines (+47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16467,7 +16486,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Contract_storage.
 Require Tezos.Cycle_repr.
 Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
 Require Tezos.Misc.
@@ -16475,6 +16494,7 @@ Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
 Require Tezos.Script_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Import Misc.
@@ -16561,8 +16581,8 @@ Definition init
                       (Constants_repr.parametric.with_block_reward Tez_repr.zero
                         c)))
                 (fun ctxt =&gt;
-                  Storage.Ramp_up.Rewards.init ctxt
-                    (Cycle_repr.of_int32_exn (Int32.of_int cycles))
+                  (|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.init)
+                    ctxt (Cycle_repr.of_int32_exn (Int32.of_int cycles))
                     (constants.(Constants_repr.parametric.block_reward),
                       constants.(Constants_repr.parametric.endorsement_reward)))
             end
@@ -16609,7 +16629,7 @@ Definition init
                                             let cycle :=
                                               Cycle_repr.of_int32_exn
                                                 (Int32.of_int cycle) in
-                                            Storage.Ramp_up.Security_deposits.init
+                                            (|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.init)
                                               ctxt cycle
                                               (block_security_deposit,
                                                 endorsement_security_deposit))))
@@ -16618,7 +16638,8 @@ Definition init
                                   (Pervasives.op_minus cycles 1)))
                               (fun ctxt =&gt;
                                 Error_monad.op_gtgteqquestion
-                                  (Storage.Ramp_up.Security_deposits.init ctxt
+                                  ((|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.init)
+                                    ctxt
                                     (Cycle_repr.of_int32_exn
                                       (Int32.of_int cycles))
                                     (constants.(Constants_repr.parametric.block_security_deposit),
@@ -16627,18 +16648,24 @@ Definition init
               end))).
 
 Definition cycle_end
-  (ctxt : Storage.Ramp_up.Rewards.context) (last_cycle : Cycle_repr.cycle)
-  : Lwt.t (Error_monad.tzresult Storage.Ramp_up.Rewards.context) :=
+  (ctxt :
+    (|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.context))
+  (last_cycle : Cycle_repr.cycle)
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.context)) :=
   let next_cycle := Cycle_repr.succ last_cycle in
   Error_monad.op_gtgteqquestion
     (Error_monad.op_gtgteqquestion
-      (Storage.Ramp_up.Rewards.get_option ctxt next_cycle)
+      ((|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.get_option)
+        ctxt next_cycle)
       (fun function_parameter =&gt;
         match function_parameter with
         | None =&gt; Error_monad.__return ctxt
         | Some (block_reward, endorsement_reward) =&gt;
           Error_monad.op_gtgteqquestion
-            (Storage.Ramp_up.Rewards.delete ctxt next_cycle)
+            ((|Storage.Ramp_up.Rewards|).(Storage_sigs.Indexed_data_storage.delete)
+              ctxt next_cycle)
             (fun ctxt =&gt;
               Error_monad.op_gtgteq
                 (Raw_context.patch_constants ctxt
@@ -16650,13 +16677,15 @@ Definition cycle_end
         end))
     (fun ctxt =&gt;
       Error_monad.op_gtgteqquestion
-        (Storage.Ramp_up.Security_deposits.get_option ctxt next_cycle)
+        ((|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.get_option)
+          ctxt next_cycle)
         (fun function_parameter =&gt;
           match function_parameter with
           | None =&gt; Error_monad.__return ctxt
           | Some (block_security_deposit, endorsement_security_deposit) =&gt;
             Error_monad.op_gtgteqquestion
-              (Storage.Ramp_up.Security_deposits.delete ctxt next_cycle)
+              ((|Storage.Ramp_up.Security_deposits|).(Storage_sigs.Indexed_data_storage.delete)
+                ctxt next_cycle)
               (fun ctxt =&gt;
                 Error_monad.op_gtgteq
                   (Raw_context.patch_constants ctxt
@@ -16739,7 +16768,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Contract_storage.
 Require Tezos.Cycle_repr.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
@@ -16944,7 +16973,7 @@ Parameter encoding : Data_encoding.t t.
     <h3>Commitment_storage</h3>
     <ul>
       <li>OCaml size: 34 lines</li>
-      <li>Coq size: 42 lines (+23% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 52 lines (+52% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -17004,29 +17033,39 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Commitment_repr.
 Require Tezos.Raw_context.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Definition get_opt
-  : Storage.Commitments.context -&gt; Storage.Commitments.key -&gt;
-  Lwt.t (Error_monad.tzresult (option Storage.Commitments.value)) :=
-  Storage.Commitments.get_option.
+  : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.key) -&gt;
+  Lwt.t
+    (Error_monad.tzresult
+      (option (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.value))) :=
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.get_option).
 
 Definition delete
-  : Storage.Commitments.context -&gt; Storage.Commitments.key -&gt;
-  Lwt.t (Error_monad.tzresult Raw_context.t) := Storage.Commitments.delete.
+  : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.key) -&gt;
+  Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.delete).
 
 Definition init
-  (ctxt : Storage.Commitments.context) (commitments : list Commitment_repr.t)
-  : Lwt.t (Error_monad.tzresult Storage.Commitments.context) :=
+  (ctxt : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context))
+  (commitments : list Commitment_repr.t)
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context)) :=
   let init_commitment
-    (ctxt : Storage.Commitments.context)
+    (ctxt : (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.context))
     (function_parameter : Commitment_repr.t)
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     let '{|
       Commitment_repr.t.blinded_public_key_hash := blinded_public_key_hash;
         Commitment_repr.t.amount := amount
         |} := function_parameter in
-    Storage.Commitments.init ctxt blinded_public_key_hash amount in
+    (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.init) ctxt
+      blinded_public_key_hash amount in
   Error_monad.op_gtgteqquestion
     (Error_monad.fold_left_s init_commitment ctxt commitments)
     (fun ctxt =&gt; Error_monad.__return ctxt).
@@ -22853,7 +22892,7 @@ Parameter register : unit -&gt; unit.
     <h3>Contract_storage</h3>
     <ul>
       <li>OCaml size: 733 lines</li>
-      <li>Coq size: 799 lines (+9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 890 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -23642,10 +23681,11 @@ Require Tezos.Gas_limit_repr.
 Require Tezos.Manager_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Roll_storage.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 (* ❌ Structure item `typext` not handled. *)
@@ -23801,9 +23841,13 @@ Definition big_map_key_cost : Z := 65.
 Definition big_map_cost : Z := 33.
 
 Definition update_script_big_map
-  (c : Storage.Big_map.Total_bytes.context)
+  (c :
+    (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.context))
   (function_parameter : option (list big_map_diff_item))
-  : Lwt.t (Error_monad.tzresult (Storage.Big_map.Total_bytes.context * Z.t)) :=
+  : Lwt.t
+    (Error_monad.tzresult
+      ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.context)
+        * Z.t)) :=
   match function_parameter with
   | None =&gt; Error_monad.__return (c, Z.zero)
   | Some diff =&gt;
@@ -23813,7 +23857,9 @@ Definition update_script_big_map
         fun function_parameter =&gt;
           match function_parameter with
           | Clear id =&gt;
-            Error_monad.op_gtgteqquestion (Storage.Big_map.Total_bytes.get c id)
+            Error_monad.op_gtgteqquestion
+              ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
+                c id)
               (fun size =&gt;
                 Error_monad.op_gtgteq (Storage.Big_map.remove_rec c id)
                   (fun c =&gt;
@@ -23829,7 +23875,8 @@ Definition update_script_big_map
                   Error_monad.__return (c, total)
                 else
                   Error_monad.op_gtgteqquestion
-                    (Storage.Big_map.Total_bytes.get c from)
+                    ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
+                      c from)
                     (fun size =&gt;
                       Error_monad.__return
                         (c, (Z.add (Z.add total size) (Z.of_int big_map_cost)))))
@@ -23840,7 +23887,8 @@ Definition update_script_big_map
                 big_map_diff_item.Alloc.value_type := value_type
                 |} =&gt;
             Error_monad.op_gtgteqquestion
-              (Storage.Big_map.Total_bytes.init c big_map Z.zero)
+              ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.init)
+                c big_map Z.zero)
               (fun c =&gt;
                 let key_type :=
                   Micheline.strip_locations
@@ -23850,10 +23898,12 @@ Definition update_script_big_map
                     (Script_repr.strip_annotations (Micheline.root value_type))
                   in
                 Error_monad.op_gtgteqquestion
-                  (Storage.Big_map.Key_type.init c big_map key_type)
+                  ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.init)
+                    c big_map key_type)
                   (fun c =&gt;
                     Error_monad.op_gtgteqquestion
-                      (Storage.Big_map.Value_type.init c big_map value_type)
+                      ((|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.init)
+                        c big_map value_type)
                       (fun c =&gt;
                         if (|Compare.Z|).(Compare.S.op_lt) big_map Z.zero then
                           Error_monad.__return (c, total)
@@ -23867,7 +23917,8 @@ Definition update_script_big_map
                 big_map_diff_item.Update.diff_value := None
                 |} =&gt;
             Error_monad.op_gtgteqquestion
-              (Storage.Big_map.Contents.remove (c, big_map) diff_key_hash)
+              ((|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove)
+                (c, big_map) diff_key_hash)
               (fun function_parameter =&gt;
                 let '(c, freed, existed) := function_parameter in
                 let freed :=
@@ -23876,11 +23927,12 @@ Definition update_script_big_map
                   else
                     freed in
                 Error_monad.op_gtgteqquestion
-                  (Storage.Big_map.Total_bytes.get c big_map)
+                  ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
+                    c big_map)
                   (fun size =&gt;
                     Error_monad.op_gtgteqquestion
-                      (Storage.Big_map.Total_bytes.set c big_map
-                        (Z.sub size (Z.of_int freed)))
+                      ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.set)
+                        c big_map (Z.sub size (Z.of_int freed)))
                       (fun c =&gt;
                         if (|Compare.Z|).(Compare.S.op_lt) big_map Z.zero then
                           Error_monad.__return (c, total)
@@ -23894,7 +23946,8 @@ Definition update_script_big_map
                 big_map_diff_item.Update.diff_value := Some v
                 |} =&gt;
             Error_monad.op_gtgteqquestion
-              (Storage.Big_map.Contents.init_set (c, big_map) diff_key_hash v)
+              ((|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init_set)
+                (c, big_map) diff_key_hash v)
               (fun function_parameter =&gt;
                 let '(c, size_diff, existed) := function_parameter in
                 let size_diff :=
@@ -23903,11 +23956,12 @@ Definition update_script_big_map
                   else
                     Pervasives.op_plus size_diff big_map_key_cost in
                 Error_monad.op_gtgteqquestion
-                  (Storage.Big_map.Total_bytes.get c big_map)
+                  ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
+                    c big_map)
                   (fun size =&gt;
                     Error_monad.op_gtgteqquestion
-                      (Storage.Big_map.Total_bytes.set c big_map
-                        (Z.add size (Z.of_int size_diff)))
+                      ((|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.set)
+                        c big_map (Z.add size (Z.of_int size_diff)))
                       (fun c =&gt;
                         if (|Compare.Z|).(Compare.S.op_lt) big_map Z.zero then
                           Error_monad.__return (c, total)
@@ -23918,7 +23972,8 @@ Definition update_script_big_map
   end.
 
 Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
-  : Contract_repr.contract -&gt; Storage.Contract.Balance.value -&gt;
+  : Contract_repr.contract -&gt;
+  (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.value) -&gt;
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   option (Script_repr.t * option (list big_map_diff_item)) -&gt; unit -&gt;
@@ -23942,17 +23997,19 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                   Error_monad.op_gtgteqquestion
                     (Storage.Contract.Global_counter.get c)
                     (fun counter =&gt;
-                      Storage.Contract.Counter.init c contract counter)
+                      (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.init)
+                        c contract counter)
                 end
                 (fun c =&gt;
                   Error_monad.op_gtgteqquestion
-                    (Storage.Contract.Balance.init c contract balance)
+                    ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.init)
+                      c contract balance)
                     (fun c =&gt;
                       Error_monad.op_gtgteqquestion
                         match manager with
                         | Some manager =&gt;
-                          Storage.Contract.Manager.init c contract
-                            (Manager_repr.Hash manager)
+                          (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.init)
+                            c contract (Manager_repr.Hash manager)
                         | None =&gt; Error_monad.__return c
                         end
                         (fun c =&gt;
@@ -23971,12 +24028,13 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                                       Script_repr.t.storage := storage
                                       |}, big_map_diff) =&gt;
                                 Error_monad.op_gtgteqquestion
-                                  (Storage.Contract.Code.init c contract code)
+                                  ((|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init)
+                                    c contract code)
                                   (fun function_parameter =&gt;
                                     let '(c, code_size) := function_parameter in
                                     Error_monad.op_gtgteqquestion
-                                      (Storage.Contract.Storage.init c contract
-                                        storage)
+                                      ((|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init)
+                                        c contract storage)
                                       (fun function_parameter =&gt;
                                         let '(c, storage_size) :=
                                           function_parameter in
@@ -23998,18 +24056,20 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                                               else
                                                 Z.zero in
                                             Error_monad.op_gtgteqquestion
-                                              (Storage.Contract.Paid_storage_space.init
+                                              ((|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.init)
                                                 c contract
                                                 prepaid_bootstrap_storage)
                                               (fun c =&gt;
-                                                Storage.Contract.Used_storage_space.init
+                                                (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.init)
                                                   c contract total_size))))
                               | None =&gt; Error_monad.__return c
                               end)))).
 
 Definition originate
   (c : Raw_context.t) (prepaid_bootstrap_storage : option bool)
-  (contract : Contract_repr.contract) (balance : Storage.Contract.Balance.value)
+  (contract : Contract_repr.contract)
+  (balance :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.value))
   (script : Script_repr.t * option (list big_map_diff_item))
   (delegate : option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
@@ -24019,7 +24079,8 @@ Definition originate
 Definition create_implicit
   (c : Raw_context.t)
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (balance : Storage.Contract.Balance.value)
+  (balance :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.value))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   create_base c None (Contract_repr.implicit_contract manager) balance
     (Some manager) None None tt.
@@ -24032,36 +24093,45 @@ Definition delete (c : Raw_context.t) (contract : Contract_repr.contract)
     Error_monad.op_gtgteqquestion (Delegate_storage.remove c contract)
       (fun c =&gt;
         Error_monad.op_gtgteqquestion
-          (Storage.Contract.Balance.delete c contract)
+          ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.delete)
+            c contract)
           (fun c =&gt;
             Error_monad.op_gtgteqquestion
-              (Storage.Contract.Manager.delete c contract)
+              ((|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.delete)
+                c contract)
               (fun c =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Storage.Contract.Counter.delete c contract)
+                  ((|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.delete)
+                    c contract)
                   (fun c =&gt;
                     Error_monad.op_gtgteqquestion
-                      (Storage.Contract.Code.remove c contract)
+                      ((|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove)
+                        c contract)
                       (fun function_parameter =&gt;
                         let '(c, _, _) := function_parameter in
                         Error_monad.op_gtgteqquestion
-                          (Storage.Contract.Storage.remove c contract)
+                          ((|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove)
+                            c contract)
                           (fun function_parameter =&gt;
                             let '(c, _, _) := function_parameter in
                             Error_monad.op_gtgteq
-                              (Storage.Contract.Paid_storage_space.remove c
-                                contract)
+                              ((|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.remove)
+                                c contract)
                               (fun c =&gt;
                                 Error_monad.op_gtgteq
-                                  (Storage.Contract.Used_storage_space.remove c
-                                    contract) (fun c =&gt; Error_monad.__return c))))))))
+                                  ((|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.remove)
+                                    c contract)
+                                  (fun c =&gt; Error_monad.__return c))))))))
   end.
 
 Definition allocated
-  (c : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key)
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult bool) :=
-  Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get_option c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.return_false
@@ -24069,16 +24139,16 @@ Definition allocated
       end).
 
 Definition __exists
-  (c : Storage.Contract.Balance.context) (contract : Contract_repr.contract)
-  : Lwt.t (Error_monad.tzresult bool) :=
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract : Contract_repr.contract) : Lwt.t (Error_monad.tzresult bool) :=
   match Contract_repr.is_implicit contract with
   | Some _ =&gt; Error_monad.return_true
   | None =&gt; allocated c contract
   end.
 
 Definition must_exist
-  (c : Storage.Contract.Balance.context) (contract : Contract_repr.contract)
-  : Lwt.t (Error_monad.tzresult unit) :=
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract : Contract_repr.contract) : Lwt.t (Error_monad.tzresult unit) :=
   Error_monad.op_gtgteqquestion (__exists c contract)
     (fun function_parameter =&gt;
       match function_parameter with
@@ -24087,8 +24157,9 @@ Definition must_exist
       end).
 
 Definition must_be_allocated
-  (c : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key)
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult unit) :=
   Error_monad.op_gtgteqquestion (allocated c contract)
     (fun function_parameter =&gt;
@@ -24132,11 +24203,13 @@ Definition originated_from_current_nonce
                   end)) (Contract_repr.originated_contracts since until))).
 
 Definition check_counter_increment
-  (c : Storage.Contract.Counter.context)
+  (c : (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.context))
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (counter : (|Compare.Z|).(Compare.S.t)) : Lwt.t (Error_monad.tzresult unit) :=
   let contract := Contract_repr.implicit_contract manager in
-  Error_monad.op_gtgteqquestion (Storage.Contract.Counter.get c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.get) c
+      contract)
     (fun contract_counter =&gt;
       let expected := Z.succ contract_counter in
       if (|Compare.Z|).(Compare.S.op_eq) expected counter then
@@ -24158,24 +24231,39 @@ Definition increment_counter
         (Storage.Contract.Global_counter.set c (Z.succ global_counter))
         (fun c =&gt;
           Error_monad.op_gtgteqquestion
-            (Storage.Contract.Counter.get c contract)
+            ((|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.get)
+              c contract)
             (fun contract_counter =&gt;
-              Storage.Contract.Counter.set c contract (Z.succ contract_counter)))).
+              (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.set)
+                c contract (Z.succ contract_counter)))).
 
 Definition get_script_code
-  (c : Storage.Contract.Code.context) (contract : Storage.Contract.Code.key)
+  (c :
+    (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context))
+  (contract :
+    (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
   : Lwt.t
-    (Error_monad.tzresult (Raw_context.t * option Storage.Contract.Code.value)) :=
-  Storage.Contract.Code.get_option c contract.
+    (Error_monad.tzresult
+      (Raw_context.t *
+        option
+          (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))) :=
+  (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
+    c contract.
 
 Definition get_script
-  (c : Storage.Contract.Code.context) (contract : Storage.Contract.Code.key)
+  (c :
+    (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context))
+  (contract :
+    (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
   : Lwt.t (Error_monad.tzresult (Raw_context.t * option Script_repr.t)) :=
-  Error_monad.op_gtgteqquestion (Storage.Contract.Code.get_option c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       let '(c, code) := function_parameter in
       Error_monad.op_gtgteqquestion
-        (Storage.Contract.Storage.get_option c contract)
+        ((|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
+          c contract)
         (fun function_parameter =&gt;
           let '(c, storage) := function_parameter in
           match (code, storage) with
@@ -24190,11 +24278,14 @@ Definition get_script
           end)).
 
 Definition get_storage
-  (ctxt : Storage.Contract.Storage.context)
-  (contract : Storage.Contract.Storage.key)
+  (ctxt :
+    (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context))
+  (contract :
+    (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
   : Lwt.t (Error_monad.tzresult (Raw_context.t * option Script_repr.expr)) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Storage.get_option ctxt contract)
+    ((|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
+      ctxt contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | (ctxt, None) =&gt; Error_monad.__return (ctxt, None)
@@ -24209,11 +24300,13 @@ Definition get_storage
       end).
 
 Definition get_counter
-  (c : Storage.Contract.Counter.context)
+  (c : (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.context))
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Z.t) :=
   let contract := Contract_repr.implicit_contract manager in
-  Error_monad.op_gtgteqquestion (Storage.Contract.Counter.get_option c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt;
@@ -24225,11 +24318,13 @@ Definition get_counter
       end).
 
 Definition get_manager_key
-  (c : Storage.Contract.Manager.context)
+  (c : (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.context))
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult (|Signature.Public_key|).(S.SPublic_key.t)) :=
   let contract := Contract_repr.implicit_contract manager in
-  Error_monad.op_gtgteqquestion (Storage.Contract.Manager.get_option c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; failwith &quot;get_manager_key&quot;
@@ -24238,11 +24333,13 @@ Definition get_manager_key
       end).
 
 Definition is_manager_key_revealed
-  (c : Storage.Contract.Manager.context)
+  (c : (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.context))
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult bool) :=
   let contract := Contract_repr.implicit_contract manager in
-  Error_monad.op_gtgteqquestion (Storage.Contract.Manager.get_option c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.return_false
@@ -24251,12 +24348,14 @@ Definition is_manager_key_revealed
       end).
 
 Definition reveal_manager_key
-  (c : Storage.Contract.Manager.context)
+  (c : (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.context))
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (public_key : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract manager in
-  Error_monad.op_gtgteqquestion (Storage.Contract.Manager.get c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get) c
+      contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | Manager_repr.Public_key _ =&gt; Error_monad.fail extensible_type_value
@@ -24268,17 +24367,20 @@ Definition reveal_manager_key
           then
           let v := Manager_repr.Public_key public_key in
           Error_monad.op_gtgteqquestion
-            (Storage.Contract.Manager.set c contract v)
-            (fun c =&gt; Error_monad.__return c)
+            ((|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.set)
+              c contract v) (fun c =&gt; Error_monad.__return c)
         else
           Error_monad.fail extensible_type_value
       end).
 
 Definition get_balance
-  (c : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key)
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
-  Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get_option c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt;
@@ -24290,37 +24392,46 @@ Definition get_balance
       end).
 
 Definition update_script_storage
-  (c : Storage.Big_map.Total_bytes.context)
-  (contract : Storage.Contract.Storage.key) (storage : Script_repr.expr)
-  (big_map_diff : option (list big_map_diff_item))
+  (c :
+    (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
+  (storage : Script_repr.expr) (big_map_diff : option (list big_map_diff_item))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let storage := Script_repr.__lazy_expr_value storage in
   Error_monad.op_gtgteqquestion (update_script_big_map c big_map_diff)
     (fun function_parameter =&gt;
       let '(c, big_map_size_diff) := function_parameter in
       Error_monad.op_gtgteqquestion
-        (Storage.Contract.Storage.set c contract storage)
+        ((|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set)
+          c contract storage)
         (fun function_parameter =&gt;
           let '(c, size_diff) := function_parameter in
           Error_monad.op_gtgteqquestion
-            (Storage.Contract.Used_storage_space.get c contract)
+            ((|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.get)
+              c contract)
             (fun previous_size =&gt;
               let new_size :=
                 Z.add previous_size
                   (Z.add big_map_size_diff (Z.of_int size_diff)) in
-              Storage.Contract.Used_storage_space.set c contract new_size))).
+              (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.set)
+                c contract new_size))).
 
 Definition spend
-  (c : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key) (amount : Tez_repr.t)
-  : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get c contract)
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
+  (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) c
+      contract)
     (fun balance =&gt;
       match Tez_repr.op_minusquestion balance amount with
       | Pervasives.Error _ =&gt; Error_monad.fail extensible_type_value
       | Pervasives.Ok new_balance =&gt;
         Error_monad.op_gtgteqquestion
-          (Storage.Contract.Balance.set c contract new_balance)
+          ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set)
+            c contract new_balance)
           (fun c =&gt;
             Error_monad.op_gtgteqquestion
               (Roll_storage.Contract.remove_amount c contract amount)
@@ -24345,13 +24456,18 @@ Definition spend
       end).
 
 Definition credit
-  (c : Storage.Contract.Code.context) (contract : Storage.Contract.Code.key)
+  (c :
+    (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context))
+  (contract :
+    (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   Error_monad.op_gtgteqquestion
     (if Tez_repr.op_ltgt amount Tez_repr.zero then
       Error_monad.__return c
     else
-      Error_monad.op_gtgteqquestion (Storage.Contract.Code.mem c contract)
+      Error_monad.op_gtgteqquestion
+        ((|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.mem)
+          c contract)
         (fun function_parameter =&gt;
           let '(c, target_has_code) := function_parameter in
           Error_monad.op_gtgteqquestion
@@ -24361,7 +24477,8 @@ Definition credit
               Error_monad.__return c)))
     (fun c =&gt;
       Error_monad.op_gtgteqquestion
-        (Storage.Contract.Balance.get_option c contract)
+        ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get_option)
+          c contract)
         (fun function_parameter =&gt;
           match function_parameter with
           | None =&gt;
@@ -24374,7 +24491,8 @@ Definition credit
               (Lwt.__return (Tez_repr.op_plusquestion amount balance))
               (fun balance =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Storage.Contract.Balance.set c contract balance)
+                  ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set)
+                    c contract balance)
                   (fun c =&gt; Roll_storage.Contract.add_amount c contract amount))
           end)).
 
@@ -24383,11 +24501,14 @@ Definition init (c : Raw_context.t)
   Storage.Contract.Global_counter.init c Z.zero.
 
 Definition used_storage_space
-  (c : Storage.Contract.Used_storage_space.context)
-  (contract : Storage.Contract.Used_storage_space.key)
+  (c :
+    (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Z.t) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Used_storage_space.get_option c contract)
+    ((|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return Z.zero
@@ -24395,11 +24516,14 @@ Definition used_storage_space
       end).
 
 Definition paid_storage_space
-  (c : Storage.Contract.Paid_storage_space.context)
-  (contract : Storage.Contract.Paid_storage_space.key)
+  (c :
+    (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Z.t) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Paid_storage_space.get_option c contract)
+    ((|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.get_option)
+      c contract)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return Z.zero
@@ -24407,13 +24531,18 @@ Definition paid_storage_space
       end).
 
 Definition set_paid_storage_space_and_return_fees_to_pay
-  (c : Storage.Contract.Paid_storage_space.context)
-  (contract : Storage.Contract.Paid_storage_space.key)
+  (c :
+    (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.key))
   (new_storage_space : (|Compare.Z|).(Compare.S.t))
   : Lwt.t
-    (Error_monad.tzresult (Z.t * Storage.Contract.Paid_storage_space.context)) :=
+    (Error_monad.tzresult
+      (Z.t *
+        (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.context))) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Paid_storage_space.get c contract)
+    ((|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.get)
+      c contract)
     (fun already_paid_space =&gt;
       if (|Compare.Z|).(Compare.S.op_gteq) already_paid_space new_storage_space
         then
@@ -24421,7 +24550,8 @@ Definition set_paid_storage_space_and_return_fees_to_pay
       else
         let to_pay := Z.sub new_storage_space already_paid_space in
         Error_monad.op_gtgteqquestion
-          (Storage.Contract.Paid_storage_space.set c contract new_storage_space)
+          ((|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.set)
+            c contract new_storage_space)
           (fun c =&gt; Error_monad.__return (to_pay, c))).
 </pre>
   </div>
@@ -29434,7 +29564,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 985 lines (+38% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1048 lines (+46% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -30193,10 +30323,11 @@ Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
 Require Tezos.Level_storage.
 Require Tezos.Manager_repr.
-Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Roll_storage.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Inductive balance : Set :=
@@ -30372,28 +30503,37 @@ Definition frozen_balance_encoding : Data_encoding.encoding frozen_balance :=
 (* top_level_evaluation *)
 
 Definition link
-  (c : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key)
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get c contract)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) c
+      contract)
     (fun balance =&gt;
       Error_monad.op_gtgteqquestion
         (Roll_storage.Delegate.add_amount c delegate balance)
         (fun c =&gt;
           Error_monad.op_gtgteq
-            (Storage.Contract.Delegated.add
+            ((|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.add)
               (c, (Contract_repr.implicit_contract delegate)) contract)
             (fun c =&gt; Error_monad.__return c))).
 
 Definition unlink
-  (c : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key)
-  : Lwt.t (Error_monad.tzresult Storage.Contract.Balance.context) :=
-  Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get c contract)
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context)) :=
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) c
+      contract)
     (fun balance =&gt;
       Error_monad.op_gtgteqquestion
-        (Storage.Contract.Delegate.get_option c contract)
+        ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.get_option)
+          c contract)
         (fun function_parameter =&gt;
           match function_parameter with
           | None =&gt; Error_monad.__return c
@@ -30402,18 +30542,18 @@ Definition unlink
               (Roll_storage.Delegate.remove_amount c delegate balance)
               (fun c =&gt;
                 Error_monad.op_gtgteq
-                  (Storage.Contract.Delegated.del
+                  ((|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.del)
                     (c, (Contract_repr.implicit_contract delegate)) contract)
                   (fun c =&gt; Error_monad.__return c))
           end)).
 
 Definition known
-  (c : Storage.Contract.Manager.context)
+  (c : (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.context))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult bool) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Manager.get_option c
-      (Contract_repr.implicit_contract delegate))
+    ((|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get_option)
+      c (Contract_repr.implicit_contract delegate))
     (fun function_parameter =&gt;
       match function_parameter with
       | None | Some (Manager_repr.Hash _) =&gt; Error_monad.return_false
@@ -30421,12 +30561,12 @@ Definition known
       end).
 
 Definition registered
-  (c : Storage.Contract.Delegate.context)
+  (c : (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.context))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult bool) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Delegate.get_option c
-      (Contract_repr.implicit_contract delegate))
+    ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.get_option)
+      c (Contract_repr.implicit_contract delegate))
     (fun function_parameter =&gt;
       match function_parameter with
       | Some current_delegate =&gt;
@@ -30437,8 +30577,10 @@ Definition registered
       end).
 
 Definition init
-  (ctxt : Storage.Contract.Manager.context)
-  (contract : Storage.Contract.Delegate.key)
+  (ctxt :
+    (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.key))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   Error_monad.op_gtgteqquestion (known ctxt delegate)
@@ -30454,7 +30596,8 @@ Definition init
                 (fun function_parameter =&gt;
                   let '_ := function_parameter in
                   Error_monad.op_gtgteqquestion
-                    (Storage.Contract.Delegate.init ctxt contract delegate)
+                    ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.init)
+                      ctxt contract delegate)
                     (fun ctxt =&gt; link ctxt contract delegate))))).
 
 Definition get
@@ -30465,8 +30608,9 @@ Definition get
   Roll_storage.get_contract_delegate.
 
 Definition set
-  (c : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key)
+  (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   (delegate : option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   match delegate with
@@ -30476,8 +30620,9 @@ Definition set
       let '_ := function_parameter in
       Error_monad.op_gtgteqquestion (unlink c contract)
         (fun c =&gt;
-          Error_monad.op_gtgteq (Storage.Contract.Delegate.remove c contract)
-            (fun c =&gt; Error_monad.__return c)) in
+          Error_monad.op_gtgteq
+            ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.remove)
+              c contract) (fun c =&gt; Error_monad.__return c)) in
     match Contract_repr.is_implicit contract with
     | Some pkh =&gt;
       Error_monad.op_gtgteqquestion (registered c pkh)
@@ -30509,7 +30654,8 @@ Definition set
             else
               Error_monad.op_gtgteqquestion
                 (Error_monad.op_gtgteqquestion
-                  (Storage.Contract.Delegate.get_option c contract)
+                  ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.get_option)
+                    c contract)
                   (fun function_parameter =&gt;
                     match
                       (function_parameter,
@@ -30551,7 +30697,8 @@ Definition set
                     (fun function_parameter =&gt;
                       let '_ := function_parameter in
                       Error_monad.op_gtgteq
-                        (Storage.Contract.Balance.mem c contract)
+                        ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.mem)
+                          c contract)
                         (fun __exists =&gt;
                           Error_monad.op_gtgteqquestion
                             (Error_monad.fail_when
@@ -30562,8 +30709,8 @@ Definition set
                               Error_monad.op_gtgteqquestion (unlink c contract)
                                 (fun c =&gt;
                                   Error_monad.op_gtgteq
-                                    (Storage.Contract.Delegate.init_set c
-                                      contract delegate)
+                                    ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.init_set)
+                                      c contract delegate)
                                     (fun c =&gt;
                                       Error_monad.op_gtgteqquestion
                                         (link c contract delegate)
@@ -30571,8 +30718,8 @@ Definition set
                                           Error_monad.op_gtgteqquestion
                                             (if self_delegation then
                                               Error_monad.op_gtgteq
-                                                (Storage.Delegates.add c
-                                                  delegate)
+                                                ((|Storage.Delegates|).(Storage_sigs.Data_set_storage.add)
+                                                  c delegate)
                                                 (fun c =&gt;
                                                   Error_monad.op_gtgteqquestion
                                                     (Roll_storage.Delegate.set_active
@@ -30585,24 +30732,32 @@ Definition set
   end.
 
 Definition remove
-  (ctxt : Storage.Contract.Balance.context)
-  (contract : Storage.Contract.Balance.key)
-  : Lwt.t (Error_monad.tzresult Storage.Contract.Balance.context) :=
+  (ctxt :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context)) :=
   unlink ctxt contract.
 
 Definition delegated_contracts
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  : Lwt.t (list Storage.Contract.Delegated.elt) :=
+  : Lwt.t
+    (list (|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.elt)) :=
   let contract := Contract_repr.implicit_contract delegate in
-  Storage.Contract.Delegated.elements (ctxt, contract).
+  (|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.elements)
+    (ctxt, contract).
 
 Definition get_frozen_deposit
   (ctxt : Raw_context.t) (contract : Contract_repr.t)
-  (cycle : Storage.Contract.Frozen_deposits.key)
+  (cycle :
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Frozen_deposits.get_option (ctxt, contract) cycle)
+    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.get_option)
+      (ctxt, contract) cycle)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return Tez_repr.zero
@@ -30612,8 +30767,9 @@ Definition get_frozen_deposit
 Definition credit_frozen_deposit
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_deposits.key) (amount : Tez_repr.t)
-  : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (cycle :
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
+  (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (get_frozen_deposit ctxt contract cycle)
     (fun old_amount =&gt;
@@ -30621,12 +30777,13 @@ Definition credit_frozen_deposit
         (Lwt.__return (Tez_repr.op_plusquestion old_amount amount))
         (fun new_amount =&gt;
           Error_monad.op_gtgteq
-            (Storage.Contract.Frozen_deposits.init_set (ctxt, contract) cycle
-              new_amount)
+            ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.init_set)
+              (ctxt, contract) cycle new_amount)
             (fun ctxt =&gt;
               Error_monad.op_gtgteq
-                (Storage.Delegates_with_frozen_balance.add (ctxt, cycle)
-                  delegate) (fun ctxt =&gt; Error_monad.__return ctxt)))).
+                ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
+                  (ctxt, cycle) delegate)
+                (fun ctxt =&gt; Error_monad.__return ctxt)))).
 
 Definition freeze_deposit
   (ctxt : Raw_context.t)
@@ -30636,7 +30793,9 @@ Definition freeze_deposit
   Error_monad.op_gtgteqquestion (Roll_storage.Delegate.set_active ctxt delegate)
     (fun ctxt =&gt;
       let contract := Contract_repr.implicit_contract delegate in
-      Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get ctxt contract)
+      Error_monad.op_gtgteqquestion
+        ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get)
+          ctxt contract)
         (fun balance =&gt;
           Error_monad.op_gtgteqquestion
             (Lwt.__return
@@ -30644,15 +30803,18 @@ Definition freeze_deposit
                 (Tez_repr.op_minusquestion balance amount)))
             (fun new_balance =&gt;
               Error_monad.op_gtgteqquestion
-                (Storage.Contract.Balance.set ctxt contract new_balance)
+                ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set)
+                  ctxt contract new_balance)
                 (fun ctxt =&gt; credit_frozen_deposit ctxt delegate cycle amount)))).
 
 Definition get_frozen_fees
   (ctxt : Raw_context.t) (contract : Contract_repr.t)
-  (cycle : Storage.Contract.Frozen_fees.key)
+  (cycle :
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Frozen_fees.get_option (ctxt, contract) cycle)
+    ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.get_option)
+      (ctxt, contract) cycle)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return Tez_repr.zero
@@ -30662,8 +30824,9 @@ Definition get_frozen_fees
 Definition credit_frozen_fees
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_fees.key) (amount : Tez_repr.t)
-  : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (cycle :
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.key))
+  (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (get_frozen_fees ctxt contract cycle)
     (fun old_amount =&gt;
@@ -30671,12 +30834,13 @@ Definition credit_frozen_fees
         (Lwt.__return (Tez_repr.op_plusquestion old_amount amount))
         (fun new_amount =&gt;
           Error_monad.op_gtgteq
-            (Storage.Contract.Frozen_fees.init_set (ctxt, contract) cycle
-              new_amount)
+            ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.init_set)
+              (ctxt, contract) cycle new_amount)
             (fun ctxt =&gt;
               Error_monad.op_gtgteq
-                (Storage.Delegates_with_frozen_balance.add (ctxt, cycle)
-                  delegate) (fun ctxt =&gt; Error_monad.__return ctxt)))).
+                ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
+                  (ctxt, cycle) delegate)
+                (fun ctxt =&gt; Error_monad.__return ctxt)))).
 
 Definition freeze_fees
   (ctxt : Raw_context.t)
@@ -30690,8 +30854,9 @@ Definition freeze_fees
 Definition burn_fees
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_fees.key) (amount : Tez_repr.t)
-  : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (cycle :
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.key))
+  (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (get_frozen_fees ctxt contract cycle)
     (fun old_amount =&gt;
@@ -30709,15 +30874,18 @@ Definition burn_fees
         (fun function_parameter =&gt;
           let '(new_amount, ctxt) := function_parameter in
           Error_monad.op_gtgteq
-            (Storage.Contract.Frozen_fees.init_set (ctxt, contract) cycle
-              new_amount) (fun ctxt =&gt; Error_monad.__return ctxt))).
+            ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.init_set)
+              (ctxt, contract) cycle new_amount)
+            (fun ctxt =&gt; Error_monad.__return ctxt))).
 
 Definition get_frozen_rewards
   (ctxt : Raw_context.t) (contract : Contract_repr.t)
-  (cycle : Storage.Contract.Frozen_rewards.key)
+  (cycle :
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Frozen_rewards.get_option (ctxt, contract) cycle)
+    ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.get_option)
+      (ctxt, contract) cycle)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return Tez_repr.zero
@@ -30727,8 +30895,9 @@ Definition get_frozen_rewards
 Definition credit_frozen_rewards
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_rewards.key) (amount : Tez_repr.t)
-  : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (cycle :
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.key))
+  (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (get_frozen_rewards ctxt contract cycle)
     (fun old_amount =&gt;
@@ -30736,12 +30905,13 @@ Definition credit_frozen_rewards
         (Lwt.__return (Tez_repr.op_plusquestion old_amount amount))
         (fun new_amount =&gt;
           Error_monad.op_gtgteq
-            (Storage.Contract.Frozen_rewards.init_set (ctxt, contract) cycle
-              new_amount)
+            ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.init_set)
+              (ctxt, contract) cycle new_amount)
             (fun ctxt =&gt;
               Error_monad.op_gtgteq
-                (Storage.Delegates_with_frozen_balance.add (ctxt, cycle)
-                  delegate) (fun ctxt =&gt; Error_monad.__return ctxt)))).
+                ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
+                  (ctxt, cycle) delegate)
+                (fun ctxt =&gt; Error_monad.__return ctxt)))).
 
 Definition freeze_rewards
   (ctxt : Raw_context.t)
@@ -30753,8 +30923,9 @@ Definition freeze_rewards
 Definition burn_rewards
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_rewards.key) (amount : Tez_repr.t)
-  : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (cycle :
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.key))
+  (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (get_frozen_rewards ctxt contract cycle)
     (fun old_amount =&gt;
@@ -30764,13 +30935,15 @@ Definition burn_rewards
         | Pervasives.Ok new_amount =&gt; new_amount
         end in
       Error_monad.op_gtgteq
-        (Storage.Contract.Frozen_rewards.init_set (ctxt, contract) cycle
-          new_amount) (fun ctxt =&gt; Error_monad.__return ctxt)).
+        ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.init_set)
+          (ctxt, contract) cycle new_amount)
+        (fun ctxt =&gt; Error_monad.__return ctxt)).
 
 Definition unfreeze
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_deposits.key)
+  (cycle :
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t
     (Error_monad.tzresult (Raw_context.t * list (balance * balance_update))) :=
   let contract := Contract_repr.implicit_contract delegate in
@@ -30781,7 +30954,8 @@ Definition unfreeze
           Error_monad.op_gtgteqquestion (get_frozen_rewards ctxt contract cycle)
             (fun rewards =&gt;
               Error_monad.op_gtgteqquestion
-                (Storage.Contract.Balance.get ctxt contract)
+                ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get)
+                  ctxt contract)
                 (fun balance =&gt;
                   Error_monad.op_gtgteqquestion
                     (Lwt.__return (Tez_repr.op_plusquestion deposit fees))
@@ -30795,23 +30969,23 @@ Definition unfreeze
                               (Tez_repr.op_plusquestion balance unfrozen_amount))
                             (fun balance =&gt;
                               Error_monad.op_gtgteqquestion
-                                (Storage.Contract.Balance.set ctxt contract
-                                  balance)
+                                ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set)
+                                  ctxt contract balance)
                                 (fun ctxt =&gt;
                                   Error_monad.op_gtgteqquestion
                                     (Roll_storage.Delegate.add_amount ctxt
                                       delegate rewards)
                                     (fun ctxt =&gt;
                                       Error_monad.op_gtgteq
-                                        (Storage.Contract.Frozen_deposits.remove
+                                        ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.remove)
                                           (ctxt, contract) cycle)
                                         (fun ctxt =&gt;
                                           Error_monad.op_gtgteq
-                                            (Storage.Contract.Frozen_fees.remove
+                                            ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.remove)
                                               (ctxt, contract) cycle)
                                             (fun ctxt =&gt;
                                               Error_monad.op_gtgteq
-                                                (Storage.Contract.Frozen_rewards.remove
+                                                ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.remove)
                                                   (ctxt, contract) cycle)
                                                 (fun ctxt =&gt;
                                                   Error_monad.__return
@@ -30842,7 +31016,8 @@ Definition cycle_end
   : Lwt.t
     (Error_monad.tzresult
       (Raw_context.context * list (balance * balance_update) *
-        list Storage.Active_delegates_with_rolls.elt)) :=
+        list
+          (|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.elt))) :=
   let preserved := Constants_storage.preserved_cycles ctxt in
   Error_monad.op_gtgteqquestion
     match Cycle_repr.pred last_cycle with
@@ -30883,8 +31058,8 @@ Definition cycle_end
       | None =&gt; Error_monad.__return (ctxt, balance_updates, nil)
       | Some unfrozen_cycle =&gt;
         Error_monad.op_gtgteqquestion
-          (Storage.Delegates_with_frozen_balance.fold (ctxt, unfrozen_cycle)
-            (Pervasives.Ok (ctxt, balance_updates))
+          ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.fold)
+            (ctxt, unfrozen_cycle) (Pervasives.Ok (ctxt, balance_updates))
             (fun delegate =&gt;
               fun acc =&gt;
                 Error_monad.op_gtgteqquestion (Lwt.__return acc)
@@ -30899,20 +31074,20 @@ Definition cycle_end
           (fun function_parameter =&gt;
             let '(ctxt, balance_updates) := function_parameter in
             Error_monad.op_gtgteq
-              (Storage.Delegates_with_frozen_balance.clear
+              ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.clear)
                 (ctxt, unfrozen_cycle))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Storage.Active_delegates_with_rolls.fold ctxt
-                    (Pervasives.Ok (ctxt, nil))
+                  ((|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.fold)
+                    ctxt (Pervasives.Ok (ctxt, nil))
                     (fun delegate =&gt;
                       fun acc =&gt;
                         Error_monad.op_gtgteqquestion (Lwt.__return acc)
                           (fun function_parameter =&gt;
                             let '(ctxt, deactivated) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Storage.Contract.Delegate_desactivation.get ctxt
-                                (Contract_repr.implicit_contract delegate))
+                              ((|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.get)
+                                ctxt (Contract_repr.implicit_contract delegate))
                               (fun cycle =&gt;
                                 if Cycle_repr.op_lteq cycle last_cycle then
                                   Error_monad.op_gtgteqquestion
@@ -30931,7 +31106,8 @@ Definition cycle_end
 Definition punish
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_deposits.key)
+  (cycle :
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult (Raw_context.t * frozen_balance)) :=
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (get_frozen_deposit ctxt contract cycle)
@@ -30947,15 +31123,15 @@ Definition punish
                     (Roll_storage.Delegate.remove_amount ctxt delegate fees)
                     (fun ctxt =&gt;
                       Error_monad.op_gtgteq
-                        (Storage.Contract.Frozen_deposits.remove
+                        ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.remove)
                           (ctxt, contract) cycle)
                         (fun ctxt =&gt;
                           Error_monad.op_gtgteq
-                            (Storage.Contract.Frozen_fees.remove
+                            ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.remove)
                               (ctxt, contract) cycle)
                             (fun ctxt =&gt;
                               Error_monad.op_gtgteq
-                                (Storage.Contract.Frozen_rewards.remove
+                                ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.remove)
                                   (ctxt, contract) cycle)
                                 (fun ctxt =&gt;
                                   Error_monad.__return
@@ -30967,7 +31143,8 @@ Definition punish
 Definition has_frozen_balance
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (cycle : Storage.Contract.Frozen_deposits.key)
+  (cycle :
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult bool) :=
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (get_frozen_deposit ctxt contract cycle)
@@ -31013,7 +31190,8 @@ Definition frozen_balance_by_cycle
   let map {A : Set} : (|Cycle_repr.Map|).(S.MAP.t) A :=
     (|Cycle_repr.Map|).(S.MAP.empty) in
   Error_monad.op_gtgteq
-    (Storage.Contract.Frozen_deposits.fold (ctxt, contract) map
+    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) map
       (fun cycle =&gt;
         fun amount =&gt;
           fun map =&gt;
@@ -31022,7 +31200,8 @@ Definition frozen_balance_by_cycle
                 (frozen_balance.with_deposit amount empty_frozen_balance) map)))
     (fun map =&gt;
       Error_monad.op_gtgteq
-        (Storage.Contract.Frozen_fees.fold (ctxt, contract) map
+        ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
+          (ctxt, contract) map
           (fun cycle =&gt;
             fun amount =&gt;
               fun map =&gt;
@@ -31036,7 +31215,8 @@ Definition frozen_balance_by_cycle
                     (frozen_balance.with_fees amount balance) map)))
         (fun map =&gt;
           Error_monad.op_gtgteq
-            (Storage.Contract.Frozen_rewards.fold (ctxt, contract) map
+            ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.fold)
+              (ctxt, contract) map
               (fun cycle =&gt;
                 fun amount =&gt;
                   fun map =&gt;
@@ -31058,7 +31238,8 @@ Definition __frozen_balance_value
   let balance {A : Set} : Pervasives.result Tez_repr.t A :=
     Pervasives.Ok Tez_repr.zero in
   Error_monad.op_gtgteq
-    (Storage.Contract.Frozen_deposits.fold (ctxt, contract) balance
+    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) balance
       (fun _cycle =&gt;
         fun amount =&gt;
           fun acc =&gt;
@@ -31066,7 +31247,8 @@ Definition __frozen_balance_value
               (fun acc =&gt; Lwt.__return (Tez_repr.op_plusquestion acc amount))))
     (fun balance =&gt;
       Error_monad.op_gtgteq
-        (Storage.Contract.Frozen_fees.fold (ctxt, contract) balance
+        ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
+          (ctxt, contract) balance
           (fun _cycle =&gt;
             fun amount =&gt;
               fun acc =&gt;
@@ -31074,7 +31256,8 @@ Definition __frozen_balance_value
                   (fun acc =&gt; Lwt.__return (Tez_repr.op_plusquestion acc amount))))
         (fun balance =&gt;
           Error_monad.op_gtgteq
-            (Storage.Contract.Frozen_rewards.fold (ctxt, contract) balance
+            ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.fold)
+              (ctxt, contract) balance
               (fun _cycle =&gt;
                 fun amount =&gt;
                   fun acc =&gt;
@@ -31090,7 +31273,9 @@ Definition full_balance
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (__frozen_balance_value ctxt delegate)
     (fun __frozen_balance_value =&gt;
-      Error_monad.op_gtgteqquestion (Storage.Contract.Balance.get ctxt contract)
+      Error_monad.op_gtgteqquestion
+        ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get)
+          ctxt contract)
         (fun balance =&gt;
           Lwt.__return (Tez_repr.op_plusquestion __frozen_balance_value balance))).
 
@@ -31099,11 +31284,15 @@ Definition deactivated
   Lwt.t (Error_monad.tzresult bool) := Roll_storage.Delegate.is_inactive.
 
 Definition grace_period
-  (ctxt : Storage.Contract.Delegate_desactivation.context)
+  (ctxt :
+    (|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.context))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  : Lwt.t (Error_monad.tzresult Storage.Contract.Delegate_desactivation.value) :=
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.value)) :=
   let contract := Contract_repr.implicit_contract delegate in
-  Storage.Contract.Delegate_desactivation.get ctxt contract.
+  (|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.get)
+    ctxt contract.
 
 Definition staking_balance
   (ctxt : Raw_context.context)
@@ -31127,11 +31316,13 @@ Definition delegated_balance
   let contract := Contract_repr.implicit_contract delegate in
   Error_monad.op_gtgteqquestion (staking_balance ctxt delegate)
     (fun staking_balance =&gt;
-      Error_monad.op_gtgteq (Storage.Contract.Balance.get ctxt contract)
+      Error_monad.op_gtgteq
+        ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get)
+          ctxt contract)
         (fun self_staking_balance =&gt;
           Error_monad.op_gtgteq
-            (Storage.Contract.Frozen_deposits.fold (ctxt, contract)
-              self_staking_balance
+            ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
+              (ctxt, contract) self_staking_balance
               (fun _cycle =&gt;
                 fun amount =&gt;
                   fun acc =&gt;
@@ -31140,8 +31331,8 @@ Definition delegated_balance
                         Lwt.__return (Tez_repr.op_plusquestion acc amount))))
             (fun self_staking_balance =&gt;
               Error_monad.op_gtgteqquestion
-                (Storage.Contract.Frozen_fees.fold (ctxt, contract)
-                  self_staking_balance
+                ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
+                  (ctxt, contract) self_staking_balance
                   (fun _cycle =&gt;
                     fun amount =&gt;
                       fun acc =&gt;
@@ -31154,12 +31345,14 @@ Definition delegated_balance
                       self_staking_balance))))).
 
 Definition fold {A : Set}
-  : Storage.Delegates.context -&gt; A -&gt; (Storage.Delegates.elt -&gt; A -&gt; Lwt.t A) -&gt;
-  Lwt.t A := Storage.Delegates.fold.
+  : (|Storage.Delegates|).(Storage_sigs.Data_set_storage.context) -&gt; A -&gt;
+  ((|Storage.Delegates|).(Storage_sigs.Data_set_storage.elt) -&gt; A -&gt; Lwt.t A) -&gt;
+  Lwt.t A := (|Storage.Delegates|).(Storage_sigs.Data_set_storage.fold).
 
 Definition __list_value
-  : Storage.Delegates.context -&gt; Lwt.t (list Storage.Delegates.elt) :=
-  Storage.Delegates.elements.
+  : (|Storage.Delegates|).(Storage_sigs.Data_set_storage.context) -&gt;
+  Lwt.t (list (|Storage.Delegates|).(Storage_sigs.Data_set_storage.elt)) :=
+  (|Storage.Delegates|).(Storage_sigs.Data_set_storage.elements).
 </pre>
   </div>
 </div>
@@ -31385,7 +31578,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
@@ -31684,7 +31877,7 @@ Require Import Tezos.Environment.
 Require Tezos.Constants_repr.
 Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Contract_storage.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
@@ -38632,16 +38825,16 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Bootstrap_storage_mli. Module Bootstrap_storage := Bootstrap_storage_mli.
-Require Tezos.Commitment_storage_mli. Module Commitment_storage := Commitment_storage_mli.
-Require Tezos.Contract_storage_mli. Module Contract_storage := Contract_storage_mli.
+Require Tezos.Bootstrap_storage.
+Require Tezos.Commitment_storage.
+Require Tezos.Contract_storage.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Roll_storage.
 Require Tezos.Script_repr.
-Require Tezos.Seed_storage_mli. Module Seed_storage := Seed_storage_mli.
+Require Tezos.Seed_storage.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
-Require Tezos.Vote_storage_mli. Module Vote_storage := Vote_storage_mli.
+Require Tezos.Vote_storage.
 
 Definition prepare_first_block
   (ctxt : Context.t)
@@ -48309,7 +48502,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Nonce_storage</h3>
     <ul>
       <li>OCaml size: 134 lines</li>
-      <li>Coq size: 112 lines (-17% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 116 lines (-14% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -48482,6 +48675,7 @@ Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Definition t := Seed_repr.nonce.
@@ -48509,7 +48703,9 @@ Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
       if Cycle_repr.op_lt level.(Level_repr.t.cycle) revealed_cycle then
         Error_monad.fail extensible_type_value
       else
-        Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.get ctxt level)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
+            ctxt level)
           (fun function_parameter =&gt;
             match function_parameter with
             | Storage.Seed.Revealed _ =&gt; Error_monad.fail extensible_type_value
@@ -48521,7 +48717,8 @@ Definition record_hash
   (ctxt : Raw_context.t) (unrevealed : Storage.Seed.unrevealed_nonce)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let level := Level_storage.current ctxt in
-  Storage.Seed.Nonce.init ctxt level (Storage.Seed.Unrevealed unrevealed).
+  (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.init)
+    ctxt level (Storage.Seed.Unrevealed unrevealed).
 
 Definition reveal
   (ctxt : Raw_context.t) (level : Level_repr.t)
@@ -48537,8 +48734,8 @@ Definition reveal
         (fun function_parameter =&gt;
           let '_ := function_parameter in
           Error_monad.op_gtgteqquestion
-            (Storage.Seed.Nonce.set ctxt level
-              (Storage.Seed.Revealed __nonce_value))
+            ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.set)
+              ctxt level (Storage.Seed.Revealed __nonce_value))
             (fun ctxt =&gt; Error_monad.__return ctxt))).
 
 Module unrevealed.
@@ -48563,9 +48760,9 @@ Inductive status : Set :=
 | Revealed : Seed_repr.nonce -&gt; status.
 
 Definition get
-  : Storage.Seed.Nonce.context -&gt; Level_repr.t -&gt;
-  Lwt.t (Error_monad.tzresult Storage.Seed.nonce_status) :=
-  Storage.Seed.Nonce.get.
+  : (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
+  -&gt; Level_repr.t -&gt; Lwt.t (Error_monad.tzresult Storage.Seed.nonce_status) :=
+  (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get).
 
 Definition of_bytes : MBytes.t -&gt; Error_monad.tzresult Seed_repr.nonce :=
   Seed_repr.make_nonce.
@@ -49610,7 +49807,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
-Require Tezos.Block_header_repr.
+Require Tezos.Block_header_repr_mli. Module Block_header_repr := Block_header_repr_mli.
 Require Tezos.Contract_repr.
 Require Tezos.Raw_level_repr.
 Require Tezos.Script_repr.
@@ -51343,7 +51540,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
-Require Tezos.Block_header_repr.
+Require Tezos.Block_header_repr_mli. Module Block_header_repr := Block_header_repr_mli.
 Require Tezos.Contract_repr.
 Require Tezos.Raw_level_repr.
 Require Tezos.Script_repr.
@@ -55919,6 +56116,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Require Tezos.Storage_description.
 
 Definition t := int32.
 
@@ -56003,28 +56201,27 @@ Definition of_int32 (l : (|Compare.Int32|).(Compare.S.t))
   (* ❌ Try-with are not handled *)
   try (Pervasives.Ok (of_int32_exn l)).
 
-Module Index.
-  Definition t := raw_level.
-  
-  Definition path_length : Z := 1.
-  
-  Definition to_path (level : int32) (l : list string) : list string :=
-    cons (Int32.to_string level) l.
-  
-  Definition of_path (function_parameter : list string) : option int32 :=
+Definition Index :=
+  let t := raw_level in
+  let path_length := 1 in
+  let to_path (level : int32) (l : list string) : list string :=
+    cons (Int32.to_string level) l in
+  let of_path (function_parameter : list string) : option int32 :=
     match function_parameter with
     | cons s [] =&gt;
       (* ❌ Try-with are not handled *)
       try (Some (Int32.of_string s))
     | _ =&gt; None
-    end.
-  
-  Definition rpc_arg : RPC_arg.arg int32 := rpc_arg.
-  
-  Definition encoding : Data_encoding.encoding int32 := encoding.
-  
-  Definition compare : t -&gt; t -&gt; Z := compare.
-End Index.
+    end in
+  existT (A := unit) (fun _ =&gt; _) tt
+    {|
+      Storage_description.INDEX.path_length := path_length;
+      Storage_description.INDEX.to_path := to_path;
+      Storage_description.INDEX.of_path := of_path;
+      Storage_description.INDEX.rpc_arg := rpc_arg;
+      Storage_description.INDEX.encoding := encoding;
+      Storage_description.INDEX.compare := compare
+    |}.
 </pre>
   </div>
 </div>
@@ -56271,6 +56468,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Seed_repr.
+Require Tezos.Storage_description.
 
 Definition t := (|Compare.Int32|).(Compare.S.t).
 
@@ -56313,33 +56511,32 @@ Definition rpc_arg : RPC_arg.arg int32 :=
 
 Definition to_int32 {A : Set} (v : A) : A := v.
 
-Module Index.
-  Definition t := roll.
-  
-  Definition path_length : Z := 3.
-  
-  Definition to_path (roll : int32) (l : list string) : list string :=
+Definition Index :=
+  let t := roll in
+  let path_length := 3 in
+  let to_path (roll : int32) (l : list string) : list string :=
     cons
       (Pervasives.op_atat Int32.to_string (Int32.logand roll (Int32.of_int 255)))
       (cons
         (Pervasives.op_atat Int32.to_string
           (Int32.logand (Int32.shift_right_logical roll 8) (Int32.of_int 255)))
-        (cons (Int32.to_string roll) l)).
-  
-  Definition of_path (function_parameter : list string) : option int32 :=
+        (cons (Int32.to_string roll) l)) in
+  let of_path (function_parameter : list string) : option int32 :=
     match function_parameter with
     | cons _ (cons _ (cons s _)) =&gt;
       (* ❌ Try-with are not handled *)
       try (Some (Int32.of_string s))
     | _ =&gt; None
-    end.
-  
-  Definition rpc_arg : RPC_arg.arg int32 := rpc_arg.
-  
-  Definition encoding : Data_encoding.encoding int32 := encoding.
-  
-  Definition compare : t -&gt; t -&gt; Z := compare.
-End Index.
+    end in
+  existT (A := unit) (fun _ =&gt; _) tt
+    {|
+      Storage_description.INDEX.path_length := path_length;
+      Storage_description.INDEX.to_path := to_path;
+      Storage_description.INDEX.of_path := of_path;
+      Storage_description.INDEX.rpc_arg := rpc_arg;
+      Storage_description.INDEX.encoding := encoding;
+      Storage_description.INDEX.compare := compare
+    |}.
 </pre>
   </div>
 </div>
@@ -56448,7 +56645,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature roll}.
     <h3>Roll_storage</h3>
     <ul>
       <li>OCaml size: 604 lines</li>
-      <li>Coq size: 787 lines (+30% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 935 lines (+54% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -57094,8 +57291,9 @@ Require Tezos.Misc.
 Require Tezos.Raw_context.
 Require Tezos.Roll_repr.
 Require Tezos.Seed_repr.
-Require Tezos.Seed_storage_mli. Module Seed_storage := Seed_storage_mli.
+Require Tezos.Seed_storage.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
 Import Misc.
@@ -57107,18 +57305,24 @@ Import Misc.
 (* top_level_evaluation *)
 
 Definition get_contract_delegate
-  (c : Storage.Contract.Delegate.context)
-  (contract : Storage.Contract.Delegate.key)
-  : Lwt.t (Error_monad.tzresult (option Storage.Contract.Delegate.value)) :=
-  Storage.Contract.Delegate.get_option c contract.
+  (c : (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.context))
+  (contract :
+    (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.key))
+  : Lwt.t
+    (Error_monad.tzresult
+      (option
+        (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.value))) :=
+  (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.get_option) c
+    contract.
 
 Definition delegate_pubkey
-  (ctxt : Storage.Contract.Manager.context)
+  (ctxt :
+    (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.context))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult (|Signature.Public_key|).(S.SPublic_key.t)) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Contract.Manager.get_option ctxt
-      (Contract_repr.implicit_contract delegate))
+    ((|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get_option)
+      ctxt (Contract_repr.implicit_contract delegate))
     (fun function_parameter =&gt;
       match function_parameter with
       | None | Some (Manager_repr.Hash _) =&gt;
@@ -57127,40 +57331,50 @@ Definition delegate_pubkey
       end).
 
 Definition clear_cycle
-  (c : Storage.Roll.Snapshot_for_cycle.context)
-  (cycle : Storage.Roll.Snapshot_for_cycle.key)
+  (c :
+    (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.context))
+  (cycle :
+    (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteqquestion (Storage.Roll.Snapshot_for_cycle.get c cycle)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.get)
+      c cycle)
     (fun index =&gt;
       Error_monad.op_gtgteqquestion
-        (Storage.Roll.Snapshot_for_cycle.delete c cycle)
+        ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.delete)
+          c cycle)
         (fun c =&gt;
           Error_monad.op_gtgteqquestion
-            (Storage.Roll.Last_for_snapshot.delete (c, cycle) index)
+            ((|Storage.Roll.Last_for_snapshot|).(Storage_sigs.Indexed_data_storage.delete)
+              (c, cycle) index)
             (fun c =&gt;
               Error_monad.op_gtgteq
-                (Storage.Roll.Owner.delete_snapshot c (cycle, index))
-                (fun c =&gt; Error_monad.__return c)))).
+                ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.delete_snapshot)
+                  c (cycle, index)) (fun c =&gt; Error_monad.__return c)))).
 
 Definition fold {A : Set}
-  (ctxt : Storage.Roll.Next.context)
+  (ctxt : (|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.context))
   (f :
-    Roll_repr.roll -&gt; Storage.Roll.Owner.value -&gt; A -&gt;
-    Lwt.t (Error_monad.tzresult A)) (init : A)
+    Roll_repr.roll -&gt;
+    (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.value)
+    -&gt; A -&gt; Lwt.t (Error_monad.tzresult A)) (init : A)
   : Lwt.t (Error_monad.tzresult A) :=
-  Error_monad.op_gtgteqquestion (Storage.Roll.Next.get ctxt)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.get) ctxt)
     (fun last =&gt;
       let fix loop
-        (ctxt : Storage.Roll.Owner.context) (roll : Roll_repr.roll)
-        (acc : Lwt.t (Error_monad.tzresult A)) {struct ctxt}
-        : Lwt.t (Error_monad.tzresult A) :=
+        (ctxt :
+          (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.context))
+        (roll : Roll_repr.roll) (acc : Lwt.t (Error_monad.tzresult A))
+        {struct ctxt} : Lwt.t (Error_monad.tzresult A) :=
         Error_monad.op_gtgteqquestion acc
           (fun acc =&gt;
             if Roll_repr.op_eq roll last then
               Error_monad.__return acc
             else
               Error_monad.op_gtgteqquestion
-                (Storage.Roll.Owner.get_option ctxt roll)
+                ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.get_option)
+                  ctxt roll)
                 (fun function_parameter =&gt;
                   match function_parameter with
                   | None =&gt;
@@ -57171,29 +57385,43 @@ Definition fold {A : Set}
       loop ctxt Roll_repr.first (Error_monad.__return init)).
 
 Definition snapshot_rolls_for_cycle
-  (ctxt : Storage.Roll.Snapshot_for_cycle.context)
-  (cycle : Storage.Roll.Snapshot_for_cycle.key)
+  (ctxt :
+    (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.context))
+  (cycle :
+    (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteqquestion (Storage.Roll.Snapshot_for_cycle.get ctxt cycle)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.get)
+      ctxt cycle)
     (fun index =&gt;
       Error_monad.op_gtgteqquestion
-        (Storage.Roll.Snapshot_for_cycle.set ctxt cycle
-          (Pervasives.op_plus index 1))
+        ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.set)
+          ctxt cycle (Pervasives.op_plus index 1))
         (fun ctxt =&gt;
           Error_monad.op_gtgteqquestion
-            (Storage.Roll.Owner.__snapshot_value ctxt (cycle, index))
+            ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.__snapshot_value)
+              ctxt (cycle, index))
             (fun ctxt =&gt;
-              Error_monad.op_gtgteqquestion (Storage.Roll.Next.get ctxt)
+              Error_monad.op_gtgteqquestion
+                ((|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.get)
+                  ctxt)
                 (fun last =&gt;
                   Error_monad.op_gtgteqquestion
-                    (Storage.Roll.Last_for_snapshot.init (ctxt, cycle) index
-                      last) (fun ctxt =&gt; Error_monad.__return ctxt))))).
+                    ((|Storage.Roll.Last_for_snapshot|).(Storage_sigs.Indexed_data_storage.init)
+                      (ctxt, cycle) index last)
+                    (fun ctxt =&gt; Error_monad.__return ctxt))))).
 
 Definition freeze_rolls_for_cycle
-  (ctxt : Storage.Roll.Snapshot_for_cycle.context)
-  (cycle : Storage.Roll.Snapshot_for_cycle.key)
-  : Lwt.t (Error_monad.tzresult Storage.Roll.Owner.context) :=
-  Error_monad.op_gtgteqquestion (Storage.Roll.Snapshot_for_cycle.get ctxt cycle)
+  (ctxt :
+    (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.context))
+  (cycle :
+    (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.key))
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.context)) :=
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.get)
+      ctxt cycle)
     (fun max_index =&gt;
       Error_monad.op_gtgteqquestion (Storage.Seed.For_cycle.get ctxt cycle)
         (fun __seed_value =&gt;
@@ -57210,7 +57438,8 @@ Definition freeze_rolls_for_cycle
                 (Seed_repr.take_int32 seq (Int32.of_int max_index))
                 Pervasives.fst) Int32.to_int in
           Error_monad.op_gtgteqquestion
-            (Storage.Roll.Snapshot_for_cycle.set ctxt cycle selected_index)
+            ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.set)
+              ctxt cycle selected_index)
             (fun ctxt =&gt;
               Error_monad.op_gtgteqquestion
                 (Error_monad.fold_left_s
@@ -57221,11 +57450,11 @@ Definition freeze_rolls_for_cycle
                         Error_monad.__return ctxt
                       else
                         Error_monad.op_gtgteq
-                          (Storage.Roll.Owner.delete_snapshot ctxt
-                            (cycle, index))
+                          ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.delete_snapshot)
+                            ctxt (cycle, index))
                           (fun ctxt =&gt;
                             Error_monad.op_gtgteqquestion
-                              (Storage.Roll.Last_for_snapshot.delete
+                              ((|Storage.Roll.Last_for_snapshot|).(Storage_sigs.Indexed_data_storage.delete)
                                 (ctxt, cycle) index)
                               (fun ctxt =&gt; Error_monad.__return ctxt))) ctxt
                   (Misc.op_minusminusgt 0 (Pervasives.op_minus max_index 1)))
@@ -57251,7 +57480,9 @@ Module Random.
   
   Definition owner
     (c : Raw_context.t) (kind : string) (level : Level_repr.t) (offset : Z)
-    : Lwt.t (Error_monad.tzresult Storage.Roll.Owner.Snapshot.value) :=
+    : Lwt.t
+      (Error_monad.tzresult
+        (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
     let cycle := level.(Level_repr.t.cycle) in
     Error_monad.op_gtgteqquestion (Seed_storage.for_cycle c cycle)
       (fun random_seed =&gt;
@@ -57259,27 +57490,31 @@ Module Random.
         let __sequence_value :=
           Seed_repr.__sequence_value rd (Int32.of_int offset) in
         Error_monad.op_gtgteqquestion
-          (Storage.Roll.Snapshot_for_cycle.get c cycle)
+          ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.get)
+            c cycle)
           (fun index =&gt;
             Error_monad.op_gtgteqquestion
-              (Storage.Roll.Last_for_snapshot.get (c, cycle) index)
+              ((|Storage.Roll.Last_for_snapshot|).(Storage_sigs.Indexed_data_storage.get)
+                (c, cycle) index)
               (fun bound =&gt;
                 let fix loop (__sequence_value : Seed_repr.sequence)
                   {struct __sequence_value}
                   : Lwt.t
-                    (Error_monad.tzresult Storage.Roll.Owner.Snapshot.value) :=
+                    (Error_monad.tzresult
+                      (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
                   let '(roll, __sequence_value) :=
                     Roll_repr.random __sequence_value bound in
                   Error_monad.op_gtgteqquestion
-                    (Storage.Roll.Owner.Snapshot.get_option c
-                      ((cycle, index), roll))
+                    ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.get_option)
+                      c ((cycle, index), roll))
                     (fun function_parameter =&gt;
                       match function_parameter with
                       | None =&gt; loop __sequence_value
                       | Some delegate =&gt; Error_monad.__return delegate
                       end) in
                 Error_monad.op_gtgteq
-                  (Storage.Roll.Owner.snapshot_exists c (cycle, index))
+                  ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.snapshot_exists)
+                    c (cycle, index))
                   (fun snapshot_exists =&gt;
                     Error_monad.op_gtgteqquestion
                       (Error_monad.fail_unless snapshot_exists
@@ -57291,22 +57526,36 @@ End Random.
 
 Definition baking_rights_owner
   (c : Raw_context.t) (level : Level_repr.t) (priority : Z)
-  : Lwt.t (Error_monad.tzresult Storage.Roll.Owner.Snapshot.value) :=
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
   Random.owner c &quot;baking&quot; level priority.
 
 Definition endorsement_rights_owner
   (c : Raw_context.t) (level : Level_repr.t) (slot : Z)
-  : Lwt.t (Error_monad.tzresult Storage.Roll.Owner.Snapshot.value) :=
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
   Random.owner c &quot;endorsement&quot; level slot.
 
 Definition traverse_rolls
-  (ctxt : Storage.Roll.Successor.context) (head : Storage.Roll.Successor.value)
-  : Lwt.t (Error_monad.tzresult (list Storage.Roll.Successor.value)) :=
+  (ctxt : (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.context))
+  (head : (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.value))
+  : Lwt.t
+    (Error_monad.tzresult
+      (list (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.value))) :=
   let fix loop
-    (acc : list Storage.Roll.Successor.value)
-    (roll : Storage.Roll.Successor.key) {struct acc}
-    : Lwt.t (Error_monad.tzresult (list Storage.Roll.Successor.value)) :=
-    Error_monad.op_gtgteqquestion (Storage.Roll.Successor.get_option ctxt roll)
+    (acc :
+      list (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.value))
+    (roll : (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.key))
+    {struct acc}
+    : Lwt.t
+      (Error_monad.tzresult
+        (list
+          (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.value))) :=
+    Error_monad.op_gtgteqquestion
+      ((|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.get_option)
+        ctxt roll)
       (fun function_parameter =&gt;
         match function_parameter with
         | None =&gt; Error_monad.__return (List.rev acc)
@@ -57315,11 +57564,16 @@ Definition traverse_rolls
   loop [ head ] head.
 
 Definition get_rolls
-  (ctxt : Storage.Roll.Delegate_roll_list.context)
-  (delegate : Storage.Roll.Delegate_roll_list.key)
-  : Lwt.t (Error_monad.tzresult (list Storage.Roll.Successor.value)) :=
+  (ctxt :
+    (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.context))
+  (delegate :
+    (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.key))
+  : Lwt.t
+    (Error_monad.tzresult
+      (list (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.value))) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Roll.Delegate_roll_list.get_option ctxt delegate)
+    ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
+      ctxt delegate)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.return_nil
@@ -57327,19 +57581,26 @@ Definition get_rolls
       end).
 
 Definition count_rolls
-  (ctxt : Storage.Roll.Delegate_roll_list.context)
-  (delegate : Storage.Roll.Delegate_roll_list.key)
+  (ctxt :
+    (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.context))
+  (delegate :
+    (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Z) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Roll.Delegate_roll_list.get_option ctxt delegate)
+    ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
+      ctxt delegate)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return 0
       | Some head_roll =&gt;
-        let fix loop (acc : Z) (roll : Storage.Roll.Successor.key) {struct acc}
-          : Lwt.t (Error_monad.tzresult Z) :=
+        let fix loop
+          (acc : Z)
+          (roll :
+            (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.key))
+          {struct acc} : Lwt.t (Error_monad.tzresult Z) :=
           Error_monad.op_gtgteqquestion
-            (Storage.Roll.Successor.get_option ctxt roll)
+            ((|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.get_option)
+              ctxt roll)
             (fun function_parameter =&gt;
               match function_parameter with
               | None =&gt; Error_monad.__return acc
@@ -57349,11 +57610,14 @@ Definition count_rolls
       end).
 
 Definition get_change
-  (c : Storage.Roll.Delegate_change.context)
-  (delegate : Storage.Roll.Delegate_change.key)
+  (c :
+    (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.context))
+  (delegate :
+    (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Roll.Delegate_change.get_option c delegate)
+    ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.get_option)
+      c delegate)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return Tez_repr.zero
@@ -57361,140 +57625,186 @@ Definition get_change
       end).
 
 Module Delegate.
-  Definition fresh_roll (c : Storage.Roll.Next.context)
-    : Lwt.t (Error_monad.tzresult (Storage.Roll.Next.value * Raw_context.t)) :=
-    Error_monad.op_gtgteqquestion (Storage.Roll.Next.get c)
+  Definition fresh_roll
+    (c : (|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.context))
+    : Lwt.t
+      (Error_monad.tzresult
+        ((|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.value) *
+          Raw_context.t)) :=
+    Error_monad.op_gtgteqquestion
+      ((|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.get) c)
       (fun roll =&gt;
         Error_monad.op_gtgteqquestion
-          (Storage.Roll.Next.set c (Roll_repr.succ roll))
-          (fun c =&gt; Error_monad.__return (roll, c))).
+          ((|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.set) c
+            (Roll_repr.succ roll)) (fun c =&gt; Error_monad.__return (roll, c))).
   
-  Definition get_limbo_roll (c : Storage.Roll.Limbo.context)
-    : Lwt.t (Error_monad.tzresult (Storage.Roll.Next.value * Raw_context.t)) :=
-    Error_monad.op_gtgteqquestion (Storage.Roll.Limbo.get_option c)
+  Definition get_limbo_roll
+    (c : (|Storage.Roll.Limbo|).(Storage_sigs.Single_data_storage.context))
+    : Lwt.t
+      (Error_monad.tzresult
+        ((|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.value) *
+          Raw_context.t)) :=
+    Error_monad.op_gtgteqquestion
+      ((|Storage.Roll.Limbo|).(Storage_sigs.Single_data_storage.get_option) c)
       (fun function_parameter =&gt;
         match function_parameter with
         | None =&gt;
           Error_monad.op_gtgteqquestion (fresh_roll c)
             (fun function_parameter =&gt;
               let '(roll, c) := function_parameter in
-              Error_monad.op_gtgteqquestion (Storage.Roll.Limbo.init c roll)
-                (fun c =&gt; Error_monad.__return (roll, c)))
+              Error_monad.op_gtgteqquestion
+                ((|Storage.Roll.Limbo|).(Storage_sigs.Single_data_storage.init)
+                  c roll) (fun c =&gt; Error_monad.__return (roll, c)))
         | Some roll =&gt; Error_monad.__return (roll, c)
         end).
   
   Definition consume_roll_change
-    (c : Raw_context.context) (delegate : Storage.Roll.Delegate_change.key)
+    (c : Raw_context.context)
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     let tokens_per_roll := Constants_storage.tokens_per_roll c in
-    Error_monad.op_gtgteqquestion (Storage.Roll.Delegate_change.get c delegate)
+    Error_monad.op_gtgteqquestion
+      ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.get)
+        c delegate)
       (fun change =&gt;
         Error_monad.op_gtgteqquestion
           (Error_monad.trace extensible_type_value
             (Lwt.__return (Tez_repr.op_minusquestion change tokens_per_roll)))
           (fun new_change =&gt;
-            Storage.Roll.Delegate_change.set c delegate new_change)).
+            (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.set)
+              c delegate new_change)).
   
   Definition recover_roll_change
-    (c : Raw_context.context) (delegate : Storage.Roll.Delegate_change.key)
+    (c : Raw_context.context)
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     let tokens_per_roll := Constants_storage.tokens_per_roll c in
-    Error_monad.op_gtgteqquestion (Storage.Roll.Delegate_change.get c delegate)
+    Error_monad.op_gtgteqquestion
+      ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.get)
+        c delegate)
       (fun change =&gt;
         Error_monad.op_gtgteqquestion
           (Lwt.__return (Tez_repr.op_plusquestion change tokens_per_roll))
           (fun new_change =&gt;
-            Storage.Roll.Delegate_change.set c delegate new_change)).
+            (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.set)
+              c delegate new_change)).
   
   Definition pop_roll_from_delegate
-    (c : Raw_context.context) (delegate : Storage.Roll.Delegate_change.key)
+    (c : Raw_context.context)
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
     : Lwt.t
       (Error_monad.tzresult
-        (Storage.Roll.Delegate_roll_list.value * Raw_context.t)) :=
+        ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.value)
+          * Raw_context.t)) :=
     Error_monad.op_gtgteqquestion (recover_roll_change c delegate)
       (fun c =&gt;
-        Error_monad.op_gtgteqquestion (Storage.Roll.Limbo.get_option c)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Roll.Limbo|).(Storage_sigs.Single_data_storage.get_option)
+            c)
           (fun limbo_head =&gt;
             Error_monad.op_gtgteqquestion
-              (Storage.Roll.Delegate_roll_list.get_option c delegate)
+              ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
+                c delegate)
               (fun function_parameter =&gt;
                 match function_parameter with
                 | None =&gt; Error_monad.fail extensible_type_value
                 | Some roll =&gt;
                   Error_monad.op_gtgteqquestion
-                    (Storage.Roll.Owner.delete c roll)
+                    ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.delete)
+                      c roll)
                     (fun c =&gt;
                       Error_monad.op_gtgteqquestion
-                        (Storage.Roll.Successor.get_option c roll)
+                        ((|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.get_option)
+                          c roll)
                         (fun successor_roll =&gt;
                           Error_monad.op_gtgteq
-                            (Storage.Roll.Delegate_roll_list.set_option c
-                              delegate successor_roll)
+                            ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.set_option)
+                              c delegate successor_roll)
                             (fun c =&gt;
                               Error_monad.op_gtgteq
-                                (Storage.Roll.Successor.set_option c roll
-                                  limbo_head)
+                                ((|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.set_option)
+                                  c roll limbo_head)
                                 (fun c =&gt;
                                   Error_monad.op_gtgteq
-                                    (Storage.Roll.Limbo.init_set c roll)
+                                    ((|Storage.Roll.Limbo|).(Storage_sigs.Single_data_storage.init_set)
+                                      c roll)
                                     (fun c =&gt; Error_monad.__return (roll, c))))))
                 end))).
   
   Definition create_roll_in_delegate
-    (c : Raw_context.context) (delegate : Storage.Roll.Delegate_change.key)
-    (delegate_pk : Storage.Roll.Owner.value)
+    (c : Raw_context.context)
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
+    (delegate_pk :
+      (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.value))
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     Error_monad.op_gtgteqquestion (consume_roll_change c delegate)
       (fun c =&gt;
         Error_monad.op_gtgteqquestion
-          (Storage.Roll.Delegate_roll_list.get_option c delegate)
+          ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
+            c delegate)
           (fun delegate_head =&gt;
             Error_monad.op_gtgteqquestion (get_limbo_roll c)
               (fun function_parameter =&gt;
                 let '(roll, c) := function_parameter in
                 Error_monad.op_gtgteqquestion
-                  (Storage.Roll.Owner.init c roll delegate_pk)
+                  ((|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.init)
+                    c roll delegate_pk)
                   (fun c =&gt;
                     Error_monad.op_gtgteqquestion
-                      (Storage.Roll.Successor.get_option c roll)
+                      ((|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.get_option)
+                        c roll)
                       (fun limbo_successor =&gt;
                         Error_monad.op_gtgteq
-                          (Storage.Roll.Limbo.set_option c limbo_successor)
+                          ((|Storage.Roll.Limbo|).(Storage_sigs.Single_data_storage.set_option)
+                            c limbo_successor)
                           (fun c =&gt;
                             Error_monad.op_gtgteq
-                              (Storage.Roll.Successor.set_option c roll
-                                delegate_head)
+                              ((|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.set_option)
+                                c roll delegate_head)
                               (fun c =&gt;
                                 Error_monad.op_gtgteq
-                                  (Storage.Roll.Delegate_roll_list.init_set c
-                                    delegate roll)
+                                  ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.init_set)
+                                    c delegate roll)
                                   (fun c =&gt; Error_monad.__return c)))))))).
   
   Definition ensure_inited
-    (c : Storage.Roll.Delegate_change.context)
-    (delegate : Storage.Roll.Delegate_change.key)
-    : Lwt.t (Error_monad.tzresult Storage.Roll.Delegate_change.context) :=
-    Error_monad.op_gtgteq (Storage.Roll.Delegate_change.mem c delegate)
+    (c :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.context))
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
+    : Lwt.t
+      (Error_monad.tzresult
+        (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.context)) :=
+    Error_monad.op_gtgteq
+      ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.mem)
+        c delegate)
       (fun function_parameter =&gt;
         match function_parameter with
         | true =&gt; Error_monad.__return c
-        | false =&gt; Storage.Roll.Delegate_change.init c delegate Tez_repr.zero
+        | false =&gt;
+          (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.init)
+            c delegate Tez_repr.zero
         end).
   
   Definition is_inactive
-    (c : Storage.Contract.Inactive_delegate.context)
+    (c :
+      (|Storage.Contract.Inactive_delegate|).(Storage_sigs.Data_set_storage.context))
     (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     : Lwt.t (Error_monad.tzresult bool) :=
     Error_monad.op_gtgteq
-      (Storage.Contract.Inactive_delegate.mem c
-        (Contract_repr.implicit_contract delegate))
+      ((|Storage.Contract.Inactive_delegate|).(Storage_sigs.Data_set_storage.mem)
+        c (Contract_repr.implicit_contract delegate))
       (fun inactive =&gt;
         if inactive then
           Error_monad.__return inactive
         else
           Error_monad.op_gtgteqquestion
-            (Storage.Contract.Delegate_desactivation.get_option c
-              (Contract_repr.implicit_contract delegate))
+            ((|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.get_option)
+              c (Contract_repr.implicit_contract delegate))
             (fun function_parameter =&gt;
               match function_parameter with
               | Some last_active_cycle =&gt;
@@ -57506,20 +57816,24 @@ Module Delegate.
               end)).
   
   Definition add_amount
-    (c : Storage.Roll.Delegate_change.context)
-    (delegate : Storage.Roll.Delegate_change.key) (amount : Tez_repr.t)
-    : Lwt.t (Error_monad.tzresult Raw_context.t) :=
+    (c :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.context))
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
+    (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     Error_monad.op_gtgteqquestion (ensure_inited c delegate)
       (fun c =&gt;
         let tokens_per_roll := Constants_storage.tokens_per_roll c in
         Error_monad.op_gtgteqquestion
-          (Storage.Roll.Delegate_change.get c delegate)
+          ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.get)
+            c delegate)
           (fun change =&gt;
             Error_monad.op_gtgteqquestion
               (Lwt.__return (Tez_repr.op_plusquestion amount change))
               (fun change =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Storage.Roll.Delegate_change.set c delegate change)
+                  ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.set)
+                    c delegate change)
                   (fun c =&gt;
                     Error_monad.op_gtgteqquestion (delegate_pubkey c delegate)
                       (fun delegate_pk =&gt;
@@ -57546,20 +57860,22 @@ Module Delegate.
                               Error_monad.op_gtgteqquestion (loop c change)
                                 (fun c =&gt;
                                   Error_monad.op_gtgteqquestion
-                                    (Storage.Roll.Delegate_roll_list.get_option
+                                    ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
                                       c delegate)
                                     (fun rolls =&gt;
                                       match rolls with
                                       | None =&gt; Error_monad.__return c
                                       | Some _ =&gt;
                                         Error_monad.op_gtgteq
-                                          (Storage.Active_delegates_with_rolls.add
+                                          ((|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.add)
                                             c delegate)
                                           (fun c =&gt; Error_monad.__return c)
                                       end)))))))).
   
   Definition remove_amount
-    (c : Raw_context.context) (delegate : Storage.Roll.Delegate_change.key)
+    (c : Raw_context.context)
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
     (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     let tokens_per_roll := Constants_storage.tokens_per_roll c in
     let fix loop (c : Raw_context.context) (change : Tez_repr.t) {struct c}
@@ -57573,7 +57889,9 @@ Module Delegate.
             Error_monad.op_gtgteqquestion
               (Lwt.__return (Tez_repr.op_plusquestion change tokens_per_roll))
               (fun change =&gt; loop c change)) in
-    Error_monad.op_gtgteqquestion (Storage.Roll.Delegate_change.get c delegate)
+    Error_monad.op_gtgteqquestion
+      ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.get)
+        c delegate)
       (fun change =&gt;
         Error_monad.op_gtgteqquestion (is_inactive c delegate)
           (fun inactive =&gt;
@@ -57585,12 +57903,14 @@ Module Delegate.
                   (fun function_parameter =&gt;
                     let '(c, change) := function_parameter in
                     Error_monad.op_gtgteqquestion
-                      (Storage.Roll.Delegate_roll_list.get_option c delegate)
+                      ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
+                        c delegate)
                       (fun rolls =&gt;
                         match rolls with
                         | None =&gt;
                           Error_monad.op_gtgteq
-                            (Storage.Active_delegates_with_rolls.del c delegate)
+                            ((|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.del)
+                              c delegate)
                             (fun c =&gt; Error_monad.__return (c, change))
                         | Some _ =&gt; Error_monad.__return (c, change)
                         end)))
@@ -57599,34 +57919,41 @@ Module Delegate.
                 Error_monad.op_gtgteqquestion
                   (Lwt.__return (Tez_repr.op_minusquestion change amount))
                   (fun change =&gt;
-                    Storage.Roll.Delegate_change.set c delegate change)))).
+                    (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.set)
+                      c delegate change)))).
   
   Definition set_inactive
-    (ctxt : Storage.Roll.Delegate_change.context)
-    (delegate : Storage.Roll.Delegate_change.key)
+    (ctxt :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.context))
+    (delegate :
+      (|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.key))
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     Error_monad.op_gtgteqquestion (ensure_inited ctxt delegate)
       (fun ctxt =&gt;
         let tokens_per_roll := Constants_storage.tokens_per_roll ctxt in
         Error_monad.op_gtgteqquestion
-          (Storage.Roll.Delegate_change.get ctxt delegate)
+          ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.get)
+            ctxt delegate)
           (fun change =&gt;
             Error_monad.op_gtgteq
-              (Storage.Contract.Inactive_delegate.add ctxt
-                (Contract_repr.implicit_contract delegate))
+              ((|Storage.Contract.Inactive_delegate|).(Storage_sigs.Data_set_storage.add)
+                ctxt (Contract_repr.implicit_contract delegate))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteq
-                  (Storage.Active_delegates_with_rolls.del ctxt delegate)
+                  ((|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.del)
+                    ctxt delegate)
                   (fun ctxt =&gt;
                     let fix loop
-                      (ctxt : Storage.Roll.Delegate_roll_list.context)
+                      (ctxt :
+                        (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.context))
                       (change : Tez_repr.t) {struct ctxt}
                       : Lwt.t
                         (Error_monad.tzresult
-                          (Storage.Roll.Delegate_roll_list.context * Tez_repr.t)) :=
+                          ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.context)
+                            * Tez_repr.t)) :=
                       Error_monad.op_gtgteqquestion
-                        (Storage.Roll.Delegate_roll_list.get_option ctxt
-                          delegate)
+                        ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
+                          ctxt delegate)
                         (fun function_parameter =&gt;
                           match function_parameter with
                           | None =&gt; Error_monad.__return (ctxt, change)
@@ -57645,11 +57972,13 @@ Module Delegate.
                       (fun function_parameter =&gt;
                         let '(ctxt, change) := function_parameter in
                         Error_monad.op_gtgteqquestion
-                          (Storage.Roll.Delegate_change.set ctxt delegate change)
+                          ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.set)
+                            ctxt delegate change)
                           (fun ctxt =&gt; Error_monad.__return ctxt)))))).
   
   Definition set_active
-    (ctxt : Storage.Contract.Inactive_delegate.context)
+    (ctxt :
+      (|Storage.Contract.Inactive_delegate|).(Storage_sigs.Data_set_storage.context))
     (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
     Error_monad.op_gtgteqquestion (is_inactive ctxt delegate)
@@ -57658,8 +57987,8 @@ Module Delegate.
           (Raw_context.current_level ctxt).(Level_repr.t.cycle) in
         let preserved_cycles := Constants_storage.preserved_cycles ctxt in
         Error_monad.op_gtgteqquestion
-          (Storage.Contract.Delegate_desactivation.get_option ctxt
-            (Contract_repr.implicit_contract delegate))
+          ((|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.get_option)
+            ctxt (Contract_repr.implicit_contract delegate))
           (fun current_expiration =&gt;
             let expiration :=
               match current_expiration with
@@ -57676,8 +58005,8 @@ Module Delegate.
                 Cycle_repr.max current_expiration updated
               end in
             Error_monad.op_gtgteq
-              (Storage.Contract.Delegate_desactivation.init_set ctxt
-                (Contract_repr.implicit_contract delegate) expiration)
+              ((|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.init_set)
+                ctxt (Contract_repr.implicit_contract delegate) expiration)
               (fun ctxt =&gt;
                 if Pervasives.not inactive then
                   Error_monad.__return ctxt
@@ -57687,11 +58016,12 @@ Module Delegate.
                       let tokens_per_roll :=
                         Constants_storage.tokens_per_roll ctxt in
                       Error_monad.op_gtgteqquestion
-                        (Storage.Roll.Delegate_change.get ctxt delegate)
+                        ((|Storage.Roll.Delegate_change|).(Storage_sigs.Indexed_data_storage.get)
+                          ctxt delegate)
                         (fun change =&gt;
                           Error_monad.op_gtgteq
-                            (Storage.Contract.Inactive_delegate.del ctxt
-                              (Contract_repr.implicit_contract delegate))
+                            ((|Storage.Contract.Inactive_delegate|).(Storage_sigs.Data_set_storage.del)
+                              ctxt (Contract_repr.implicit_contract delegate))
                             (fun ctxt =&gt;
                               Error_monad.op_gtgteqquestion
                                 (delegate_pubkey ctxt delegate)
@@ -57718,14 +58048,14 @@ Module Delegate.
                                     (loop ctxt change)
                                     (fun ctxt =&gt;
                                       Error_monad.op_gtgteqquestion
-                                        (Storage.Roll.Delegate_roll_list.get_option
+                                        ((|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
                                           ctxt delegate)
                                         (fun rolls =&gt;
                                           match rolls with
                                           | None =&gt; Error_monad.__return ctxt
                                           | Some _ =&gt;
                                             Error_monad.op_gtgteq
-                                              (Storage.Active_delegates_with_rolls.add
+                                              ((|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.add)
                                                 ctxt delegate)
                                               (fun ctxt =&gt;
                                                 Error_monad.__return ctxt)
@@ -57734,9 +58064,14 @@ End Delegate.
 
 Module Contract.
   Definition add_amount
-    (c : Storage.Contract.Delegate.context)
-    (contract : Storage.Contract.Delegate.key) (amount : Tez_repr.t)
-    : Lwt.t (Error_monad.tzresult Storage.Contract.Delegate.context) :=
+    (c :
+      (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.context))
+    (contract :
+      (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.key))
+    (amount : Tez_repr.t)
+    : Lwt.t
+      (Error_monad.tzresult
+        (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.context)) :=
     Error_monad.op_gtgteqquestion (get_contract_delegate c contract)
       (fun function_parameter =&gt;
         match function_parameter with
@@ -57745,9 +58080,14 @@ Module Contract.
         end).
   
   Definition remove_amount
-    (c : Storage.Contract.Delegate.context)
-    (contract : Storage.Contract.Delegate.key) (amount : Tez_repr.t)
-    : Lwt.t (Error_monad.tzresult Storage.Contract.Delegate.context) :=
+    (c :
+      (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.context))
+    (contract :
+      (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.key))
+    (amount : Tez_repr.t)
+    : Lwt.t
+      (Error_monad.tzresult
+        (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.context)) :=
     Error_monad.op_gtgteqquestion (get_contract_delegate c contract)
       (fun function_parameter =&gt;
         match function_parameter with
@@ -57756,9 +58096,11 @@ Module Contract.
         end).
 End Contract.
 
-Definition init (ctxt : Storage.Roll.Next.context)
+Definition init
+  (ctxt : (|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.context))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Roll.Next.init ctxt Roll_repr.first.
+  (|Storage.Roll.Next|).(Storage_sigs.Single_data_storage.init) ctxt
+    Roll_repr.first.
 
 Definition init_first_cycles (ctxt : Raw_context.context)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
@@ -57771,7 +58113,8 @@ Definition init_first_cycles (ctxt : Raw_context.context)
             (fun ctxt =&gt;
               let cycle := Cycle_repr.of_int32_exn (Int32.of_int c) in
               Error_monad.op_gtgteqquestion
-                (Storage.Roll.Snapshot_for_cycle.init ctxt cycle 0)
+                ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.init)
+                  ctxt cycle 0)
                 (fun ctxt =&gt;
                   Error_monad.op_gtgteqquestion
                     (snapshot_rolls_for_cycle ctxt cycle)
@@ -57782,7 +58125,8 @@ Definition init_first_cycles (ctxt : Raw_context.context)
         Cycle_repr.of_int32_exn (Int32.of_int (Pervasives.op_plus preserved 1))
         in
       Error_monad.op_gtgteqquestion
-        (Storage.Roll.Snapshot_for_cycle.init ctxt cycle 0)
+        ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.init)
+          ctxt cycle 0)
         (fun ctxt =&gt;
           Error_monad.op_gtgteqquestion (snapshot_rolls_for_cycle ctxt cycle)
             (fun ctxt =&gt;
@@ -57790,8 +58134,8 @@ Definition init_first_cycles (ctxt : Raw_context.context)
                 Cycle_repr.of_int32_exn
                   (Int32.of_int (Pervasives.op_plus preserved 2)) in
               Error_monad.op_gtgteqquestion
-                (Storage.Roll.Snapshot_for_cycle.init ctxt cycle 0)
-                (fun ctxt =&gt; Error_monad.__return ctxt)))).
+                ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.init)
+                  ctxt cycle 0) (fun ctxt =&gt; Error_monad.__return ctxt)))).
 
 Definition snapshot_rolls (ctxt : Raw_context.context)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
@@ -57818,8 +58162,8 @@ Definition cycle_end
         (freeze_rolls_for_cycle ctxt frozen_roll_cycle)
         (fun ctxt =&gt;
           Error_monad.op_gtgteqquestion
-            (Storage.Roll.Snapshot_for_cycle.init ctxt
-              (Cycle_repr.succ (Cycle_repr.succ frozen_roll_cycle)) 0)
+            ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.init)
+              ctxt (Cycle_repr.succ (Cycle_repr.succ frozen_roll_cycle)) 0)
             (fun ctxt =&gt; Error_monad.__return ctxt))).
 
 Definition update_tokens_per_roll
@@ -57843,7 +58187,8 @@ Definition update_tokens_per_roll
           Lwt.__return
             (Tez_repr.op_minusquestion new_tokens_per_roll old_tokens_per_roll))
         (fun abs_diff =&gt;
-          Storage.Delegates.fold ctxt (Pervasives.Ok ctxt)
+          (|Storage.Delegates|).(Storage_sigs.Data_set_storage.fold) ctxt
+            (Pervasives.Ok ctxt)
             (fun pkh =&gt;
               fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion (Lwt.__return ctxt)
@@ -85810,7 +86155,7 @@ Parameter seed_encoding : Data_encoding.t seed.
     <h3>Seed_storage</h3>
     <ul>
       <li>OCaml size: 148 lines</li>
-      <li>Coq size: 136 lines (-9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 143 lines (-4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85990,6 +86335,7 @@ Require Tezos.Misc.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 
 Import Misc.
 
@@ -86011,25 +86357,31 @@ Definition compute_for_cycle
     let levels := Level_storage.levels_with_commitments_in_cycle c revealed in
     let combine
       (function_parameter :
-        Storage.Seed.Nonce.context * Seed_repr.seed *
-          list Storage.Seed.unrevealed_nonce)
+        (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
+          * Seed_repr.seed * list Storage.Seed.unrevealed_nonce)
       : Level_repr.t -&gt;
       Lwt.t
         (Error_monad.tzresult
           (Raw_context.t * Seed_repr.seed * list Storage.Seed.unrevealed_nonce)) :=
       let '(c, random_seed, unrevealed) := function_parameter in
       fun level =&gt;
-        Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.get c level)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
+            c level)
           (fun function_parameter =&gt;
             match function_parameter with
             | Storage.Seed.Revealed __nonce_value =&gt;
-              Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.delete c level)
+              Error_monad.op_gtgteqquestion
+                ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
+                  c level)
                 (fun c =&gt;
                   Error_monad.__return
                     (c, (Seed_repr.__nonce_value random_seed __nonce_value),
                       unrevealed))
             | Storage.Seed.Unrevealed u =&gt;
-              Error_monad.op_gtgteqquestion (Storage.Seed.Nonce.delete c level)
+              Error_monad.op_gtgteqquestion
+                ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
+                  c level)
                 (fun c =&gt;
                   Error_monad.__return (c, random_seed, (cons u unrevealed)))
             end) in
@@ -86186,7 +86538,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Cycle_repr.
-Require Tezos.Nonce_storage_mli. Module Nonce_storage := Nonce_storage_mli.
+Require Tezos.Nonce_storage.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 
@@ -96503,7 +96855,7 @@ Parameter ballot_encoding : Data_encoding.t ballot.
     <h3>Vote_storage</h3>
     <ul>
       <li>OCaml size: 156 lines</li>
-      <li>Coq size: 290 lines (+85% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 345 lines (+121% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96683,17 +97035,23 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Constants_storage.
 Require Tezos.Raw_context.
-Require Tezos.Roll_storage_mli. Module Roll_storage := Roll_storage_mli.
+Require Tezos.Roll_storage.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
+Require Tezos.Storage_sigs.
 Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
 
 Definition recorded_proposal_count_for_delegate
-  (ctxt : Storage.Vote.Proposals_count.context)
-  (proposer : Storage.Vote.Proposals_count.key)
-  : Lwt.t (Error_monad.tzresult Storage.Vote.Proposals_count.value) :=
+  (ctxt :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.context))
+  (proposer :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.key))
+  : Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.value)) :=
   Error_monad.op_gtgteqquestion
-    (Storage.Vote.Proposals_count.get_option ctxt proposer)
+    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.get_option)
+      ctxt proposer)
     (fun function_parameter =&gt;
       match function_parameter with
       | None =&gt; Error_monad.__return 0
@@ -96701,31 +97059,36 @@ Definition recorded_proposal_count_for_delegate
       end).
 
 Definition record_proposal
-  (ctxt : Storage.Vote.Proposals_count.context)
+  (ctxt :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.context))
   (proposal : (|Protocol_hash|).(S.HASH.t))
-  (proposer : Storage.Vote.Proposals_count.key)
+  (proposer :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   Error_monad.op_gtgteqquestion
     (recorded_proposal_count_for_delegate ctxt proposer)
     (fun count =&gt;
       Error_monad.op_gtgteq
-        (Storage.Vote.Proposals_count.init_set ctxt proposer
-          (Pervasives.op_plus count 1))
+        ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.init_set)
+          ctxt proposer (Pervasives.op_plus count 1))
         (fun ctxt =&gt;
           Error_monad.op_gtgteq
-            (Storage.Vote.Proposals.add ctxt (proposal, proposer))
-            (fun ctxt =&gt; Error_monad.__return ctxt))).
+            ((|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.add) ctxt
+              (proposal, proposer)) (fun ctxt =&gt; Error_monad.__return ctxt))).
 
-Definition get_proposals (ctxt : Storage.Vote.Proposals.context)
+Definition get_proposals
+  (ctxt : (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.context))
   : Lwt.t
     (Error_monad.tzresult
       ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.t) int32)) :=
-  Storage.Vote.Proposals.fold ctxt
+  (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.fold) ctxt
     (Error_monad.ok (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.empty))
     (fun function_parameter =&gt;
       let '(proposal, delegate) := function_parameter in
       fun acc =&gt;
-        Error_monad.op_gtgteqquestion (Storage.Vote.Listings.get ctxt delegate)
+        Error_monad.op_gtgteqquestion
+          ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
+            ctxt delegate)
           (fun weight =&gt;
             Lwt.__return
               (Error_monad.op_gtgtquestion acc
@@ -96743,10 +97106,15 @@ Definition get_proposals (ctxt : Storage.Vote.Proposals.context)
                     ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.add) proposal
                       (Int32.add weight previous) acc))))).
 
-Definition clear_proposals (ctxt : Storage.Vote.Proposals_count.context)
+Definition clear_proposals
+  (ctxt :
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t Raw_context.t :=
-  Error_monad.op_gtgteq (Storage.Vote.Proposals_count.clear ctxt)
-    (fun ctxt =&gt; Storage.Vote.Proposals.clear ctxt).
+  Error_monad.op_gtgteq
+    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.clear)
+      ctxt)
+    (fun ctxt =&gt;
+      (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.clear) ctxt).
 
 Module ballots.
   Record record := Build {
@@ -96781,17 +97149,21 @@ Definition ballots_encoding : Data_encoding.encoding ballots :=
       (Data_encoding.req None None &quot;pass&quot; Data_encoding.__int32_value)).
 
 Definition has_recorded_ballot
-  : Storage.Vote.Ballots.context -&gt; Storage.Vote.Ballots.key -&gt; Lwt.t bool :=
-  Storage.Vote.Ballots.mem.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.key) -&gt; Lwt.t bool :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.mem).
 
 Definition record_ballot
-  : Storage.Vote.Ballots.context -&gt; Storage.Vote.Ballots.key -&gt;
-  Storage.Vote.Ballots.value -&gt; Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Ballots.init.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.key) -&gt;
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.value) -&gt;
+  Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.init).
 
-Definition get_ballots (ctxt : Storage.Vote.Ballots.context)
+Definition get_ballots
+  (ctxt : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t (Error_monad.tzresult ballots) :=
-  Storage.Vote.Ballots.fold ctxt
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.fold) ctxt
     (Error_monad.ok
       {|
         ballots.yay :=
@@ -96807,7 +97179,8 @@ Definition get_ballots (ctxt : Storage.Vote.Ballots.context)
       fun ballot =&gt;
         fun ballots =&gt;
           Error_monad.op_gtgteqquestion
-            (Storage.Vote.Listings.get ctxt delegate)
+            ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
+              ctxt delegate)
             (fun weight =&gt;
               let count := Int32.add weight in
               Lwt.__return
@@ -96827,13 +97200,17 @@ Definition get_ballots (ctxt : Storage.Vote.Ballots.context)
                     end)))).
 
 Definition get_ballot_list
-  : Storage.Vote.Ballots.context -&gt;
-  Lwt.t (list (Storage.Vote.Ballots.key * Storage.Vote.Ballots.value)) :=
-  Storage.Vote.Ballots.bindings.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  Lwt.t
+    (list
+      ((|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.key) *
+        (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.value))) :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.bindings).
 
 Definition clear_ballots
-  : Storage.Vote.Ballots.context -&gt; Lwt.t Raw_context.t :=
-  Storage.Vote.Ballots.clear.
+  : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  Lwt.t Raw_context.t :=
+  (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.clear).
 
 Definition listings_encoding
   : Data_encoding.encoding
@@ -96856,7 +97233,8 @@ Definition freeze_listings (ctxt : Raw_context.t)
               (|Signature.Public_key|).(S.SPublic_key.__hash_value) delegate in
             Error_monad.op_gtgteqquestion
               (Error_monad.op_gtgteqquestion
-                (Storage.Vote.Listings.get_option ctxt delegate)
+                ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get_option)
+                  ctxt delegate)
                 (fun function_parameter =&gt;
                   match function_parameter with
                   | None =&gt;
@@ -96867,52 +97245,71 @@ Definition freeze_listings (ctxt : Raw_context.t)
                   end))
               (fun count =&gt;
                 Error_monad.op_gtgteq
-                  (Storage.Vote.Listings.init_set ctxt delegate
-                    (Int32.succ count))
+                  ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.init_set)
+                    ctxt delegate (Int32.succ count))
                   (fun ctxt =&gt; Error_monad.__return (ctxt, (Int32.succ total)))))
       (ctxt,
         (* ❌ Constant of type int32 is converted to int *)
         0))
     (fun function_parameter =&gt;
       let '(ctxt, total) := function_parameter in
-      Error_monad.op_gtgteqquestion (Storage.Vote.Listings_size.init ctxt total)
-        (fun ctxt =&gt; Error_monad.__return ctxt)).
+      Error_monad.op_gtgteqquestion
+        ((|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.init)
+          ctxt total) (fun ctxt =&gt; Error_monad.__return ctxt)).
 
 Definition listing_size
-  : Storage.Vote.Listings_size.context -&gt;
-  Lwt.t (Error_monad.tzresult Storage.Vote.Listings_size.value) :=
-  Storage.Vote.Listings_size.get.
+  : (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.context) -&gt;
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.get).
 
 Definition in_listings
-  : Storage.Vote.Listings.context -&gt; Storage.Vote.Listings.key -&gt; Lwt.t bool :=
-  Storage.Vote.Listings.mem.
+  : (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.key) -&gt;
+  Lwt.t bool :=
+  (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.mem).
 
 Definition get_listings
-  : Storage.Vote.Listings.context -&gt;
-  Lwt.t (list (Storage.Vote.Listings.key * Storage.Vote.Listings.value)) :=
-  Storage.Vote.Listings.bindings.
+  : (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.context) -&gt;
+  Lwt.t
+    (list
+      ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.key) *
+        (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.value))) :=
+  (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.bindings).
 
-Definition clear_listings (ctxt : Storage.Vote.Listings.context)
+Definition clear_listings
+  (ctxt : (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteq (Storage.Vote.Listings.clear ctxt)
+  Error_monad.op_gtgteq
+    ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.clear) ctxt)
     (fun ctxt =&gt;
-      Error_monad.op_gtgteq (Storage.Vote.Listings_size.remove ctxt)
-        (fun ctxt =&gt; Error_monad.__return ctxt)).
+      Error_monad.op_gtgteq
+        ((|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.remove)
+          ctxt) (fun ctxt =&gt; Error_monad.__return ctxt)).
 
 Definition get_current_period_kind
-  : Storage.Vote.Current_period_kind.context -&gt;
-  Lwt.t (Error_monad.tzresult Storage.Vote.Current_period_kind.value) :=
-  Storage.Vote.Current_period_kind.get.
+  : (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.context)
+  -&gt;
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.get).
 
 Definition set_current_period_kind
-  : Storage.Vote.Current_period_kind.context -&gt;
-  Storage.Vote.Current_period_kind.value -&gt;
-  Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Current_period_kind.set.
+  : (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.context)
+  -&gt;
+  (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.value)
+  -&gt; Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.set).
 
-Definition get_current_quorum (ctxt : Storage.Vote.Participation_ema.context)
+Definition get_current_quorum
+  (ctxt :
+    (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context))
   : Lwt.t (Error_monad.tzresult int32) :=
-  Error_monad.op_gtgteqquestion (Storage.Vote.Participation_ema.get ctxt)
+  Error_monad.op_gtgteqquestion
+    ((|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.get)
+      ctxt)
     (fun participation_ema =&gt;
       let quorum_min := Constants_storage.quorum_min ctxt in
       let quorum_max := Constants_storage.quorum_max ctxt in
@@ -96924,40 +97321,50 @@ Definition get_current_quorum (ctxt : Storage.Vote.Participation_ema.context)
             10000))).
 
 Definition get_participation_ema
-  : Storage.Vote.Participation_ema.context -&gt;
-  Lwt.t (Error_monad.tzresult Storage.Vote.Participation_ema.value) :=
-  Storage.Vote.Participation_ema.get.
+  : (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context)
+  -&gt;
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.get).
 
 Definition set_participation_ema
-  : Storage.Vote.Participation_ema.context -&gt;
-  Storage.Vote.Participation_ema.value -&gt;
+  : (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context)
+  -&gt;
+  (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.value) -&gt;
   Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Participation_ema.set.
+  (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.set).
 
 Definition get_current_proposal
-  : Storage.Vote.Current_proposal.context -&gt;
-  Lwt.t (Error_monad.tzresult Storage.Vote.Current_proposal.value) :=
-  Storage.Vote.Current_proposal.get.
+  : (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.context)
+  -&gt;
+  Lwt.t
+    (Error_monad.tzresult
+      (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.value)) :=
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.get).
 
 Definition init_current_proposal
-  : Storage.Vote.Current_proposal.context -&gt;
-  Storage.Vote.Current_proposal.value -&gt;
+  : (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.context)
+  -&gt;
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.value) -&gt;
   Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Current_proposal.init.
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.init).
 
 Definition clear_current_proposal
-  : Storage.Vote.Current_proposal.context -&gt;
-  Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Vote.Current_proposal.delete.
+  : (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.context)
+  -&gt; Lwt.t (Error_monad.tzresult Raw_context.t) :=
+  (|Storage.Vote.Current_proposal|).(Storage_sigs.Single_data_storage.delete).
 
 Definition init (ctxt : Raw_context.context)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let participation_ema := Constants_storage.quorum_max ctxt in
   Error_monad.op_gtgteqquestion
-    (Storage.Vote.Participation_ema.init ctxt participation_ema)
+    ((|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.init)
+      ctxt participation_ema)
     (fun ctxt =&gt;
       Error_monad.op_gtgteqquestion
-        (Storage.Vote.Current_period_kind.init ctxt Voting_period_repr.Proposal)
+        ((|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.init)
+          ctxt Voting_period_repr.Proposal)
         (fun ctxt =&gt; Error_monad.__return ctxt)).
 </pre>
   </div>
