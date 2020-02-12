@@ -57,6 +57,7 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "exists" -> "__exists"
   | "exists2" -> "__exists2"
   | "float" -> escape_if_value s
+  | "int" -> escape_if_value s
   | "int32" -> escape_if_value s
   | "int64" -> escape_if_value s
   | "left" -> "__left"
