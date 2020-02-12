@@ -1082,7 +1082,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Match (e, cases, default_value) ->
     begin match (cases, default_value) with
     | ([(pattern, existential_cast, e2)], None)
-      when List.length (Pattern.flatten_or pattern) = 1 ->
+      when not (Pattern.has_or_patterns pattern) ->
       Pp.parens paren @@ nest (
         !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
         to_coq false e ^^ !^ "in" ^^ newline ^^

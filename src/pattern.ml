@@ -101,6 +101,17 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     of_pattern p >>= fun pattern ->
     raise pattern NotSupported "Lazy patterns are not supported")
 
+let rec has_or_patterns (p : t) : bool =
+  match p with
+  | Any -> false
+  | Constant _ -> false
+  | Variable _ -> false
+  | Tuple ps -> List.exists has_or_patterns ps
+  | Constructor (_, ps) -> List.exists has_or_patterns ps
+  | Alias (p, _) -> has_or_patterns p
+  | Record fields -> fields |> List.map snd |> List.exists has_or_patterns
+  | Or _ -> true
+
 let rec flatten_or (p : t) : t list =
   match p with
   | Or (p1, p2) -> flatten_or p1 @ flatten_or p2
@@ -131,6 +142,6 @@ let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
     ^^ !^ "|}"
   | Or _ ->
     let ps = flatten_or p in
-    Pp.parens paren @@ group (
+    parens @@ group (
       separate (space ^^ !^ "|" ^^ space) (ps |> List.map (to_coq false))
     )
