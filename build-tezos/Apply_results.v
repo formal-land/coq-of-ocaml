@@ -244,7 +244,7 @@ Module Manager_result.
                 encoding)
               (fun o =>
                 match o with
-                | Skipped _ | Failed _ _ | Backtracked _ _ =>
+                | (Skipped _ | Failed _ _ | Backtracked _ _) =>
                   None
                 | Applied o =>
                   match
@@ -298,7 +298,7 @@ Module Manager_result.
                 encoding)
               (fun o =>
                 match o with
-                | Skipped _ | Failed _ _ | Applied _ => None
+                | (Skipped _ | Failed _ _ | Applied _) => None
                 | Backtracked o errs =>
                   match
                     select

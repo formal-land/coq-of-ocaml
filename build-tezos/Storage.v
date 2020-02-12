@@ -65,7 +65,7 @@ Definition Int_index :=
     cons (Pervasives.string_of_int c) l in
   let of_path (function_parameter : list string) : option Z :=
     match function_parameter with
-    | [] | cons _ (cons _ _) => None
+    | ([] | cons _ (cons _ _)) => None
     | cons c [] => Pervasives.int_of_string_opt c
     end in
   let ipath (a : Set) := a * t in
@@ -690,11 +690,11 @@ Module Big_map.
       : option Z.t :=
       match function_parameter with
       |
-        [] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
+        ([] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
         cons _ (cons _ (cons _ (cons _ []))) |
         cons _ (cons _ (cons _ (cons _ (cons _ [])))) |
         cons _ (cons _ (cons _ (cons _ (cons _ (cons _ []))))) |
-        cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _)))))))
+        cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _))))))))
         => None
       |
         cons index1
@@ -1421,12 +1421,12 @@ Module Roll.
       match
         Misc.take (|Cycle_repr.Index|).(Storage_description.INDEX.path_length) l
         with
-      | None | Some (_, [] | cons _ (cons _ _)) => None
+      | (None | Some (_, ([] | cons _ (cons _ _)))) => None
       | Some (l1, cons l2 []) =>
         match
           (((|Cycle_repr.Index|).(Storage_description.INDEX.of_path) l1),
             (Pervasives.int_of_string_opt l2)) with
-        | (None, _) | (_, None) => None
+        | ((None, _) | (_, None)) => None
         | (Some c, Some i) => Some (c, i)
         end
       end.

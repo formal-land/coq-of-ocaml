@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
-Require Tezos.Block_header_repr_mli. Module Block_header_repr := Block_header_repr_mli.
+Require Tezos.Block_header_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Raw_level_repr.
 Require Tezos.Script_repr.
@@ -175,20 +175,6 @@ Module manager_operation.
   Definition Origination_skeleton := Origination.record.
 End manager_operation.
 
-Module protocol_data.
-  Record record {contents signature : Set} := Build {
-    contents : contents;
-    signature : signature }.
-  Arguments record : clear implicits.
-  Definition with_contents {t_contents t_signature} contents
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature contents r.(signature).
-  Definition with_signature {t_contents t_signature} signature
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature r.(contents) signature.
-End protocol_data.
-Definition protocol_data_skeleton := protocol_data.record.
-
 Module operation.
   Record record {shell protocol_data : Set} := Build {
     shell : shell;
@@ -203,6 +189,20 @@ Module operation.
 End operation.
 Definition operation_skeleton := operation.record.
 
+Module protocol_data.
+  Record record {contents signature : Set} := Build {
+    contents : contents;
+    signature : signature }.
+  Arguments record : clear implicits.
+  Definition with_contents {t_contents t_signature} contents
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature contents r.(signature).
+  Definition with_signature {t_contents t_signature} signature
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature r.(contents) signature.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
+
 Reserved Notation "'contents.Endorsement".
 Reserved Notation "'contents.Seed_nonce_revelation".
 Reserved Notation "'contents.Double_endorsement_evidence".
@@ -213,9 +213,9 @@ Reserved Notation "'contents.Ballot".
 Reserved Notation "'contents.Manager_operation".
 Reserved Notation "'manager_operation.Transaction".
 Reserved Notation "'manager_operation.Origination".
-Reserved Notation "'operation".
-Reserved Notation "'protocol_data".
 Reserved Notation "'contents_list".
+Reserved Notation "'protocol_data".
+Reserved Notation "'operation".
 Reserved Notation "'contents".
 Reserved Notation "'manager_operation".
 Reserved Notation "'counter".
@@ -245,11 +245,11 @@ with manager_operation_gadt : Set :=
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   manager_operation_gadt
 
-where "'operation" := (fun (t_kind : Set) =>
-  operation_skeleton Operation.shell_header ('protocol_data t_kind))
+where "'contents_list" := (fun (_ : Set) => contents_list_gadt)
 and "'protocol_data" := (fun (t_kind : Set) =>
   protocol_data_skeleton ('contents_list t_kind) (option Signature.t))
-and "'contents_list" := (fun (_ : Set) => contents_list_gadt)
+and "'operation" := (fun (t_kind : Set) =>
+  operation_skeleton Operation.shell_header ('protocol_data t_kind))
 and "'contents" := (fun (_ : Set) => contents_gadt)
 and "'manager_operation" := (fun (_ : Set) => manager_operation_gadt)
 and "'counter" := (Z.t)
@@ -306,9 +306,9 @@ End
 Import
   ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
 
-Definition operation := 'operation.
-Definition protocol_data := 'protocol_data.
 Definition contents_list := 'contents_list.
+Definition protocol_data := 'protocol_data.
+Definition operation := 'operation.
 Definition contents := 'contents.
 Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.

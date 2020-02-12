@@ -1295,7 +1295,7 @@ Definition has_default_entrypoint (expr : Script_repr.lazy_expr) : bool :=
           | _ => false
           end in
         has_default parameter_expr
-      | Some _ | None => false
+      | (Some _ | None) => false
       end
     | _ => false
     end

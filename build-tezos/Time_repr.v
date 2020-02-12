@@ -29,8 +29,6 @@ Definition of_seconds_string (s : string) : option t :=
   (* ❌ Try-with are not handled *)
   try (Some (of_seconds (Int64.of_string s))).
 
-Definition to_seconds : t -> int64 := to_seconds.
-
 Definition to_seconds_string (s : t) : string := Int64.to_string (to_seconds s).
 
 Definition pp : Format.formatter -> t -> unit := pp_hum.

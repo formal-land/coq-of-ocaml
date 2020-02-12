@@ -1295,7 +1295,7 @@ Definition Make_indexed_subcontext :=
                   (Lwt_list.map_s
                     (fun function_parameter =>
                       match function_parameter with
-                      | Context.Key prefix | Context.Dir prefix =>
+                      | (Context.Key prefix | Context.Dir prefix) =>
                         loop (Pervasives.op_plus i 1) prefix nil
                       end) prefixes) List.flatten)
           | (cons d [], _, true) =>
@@ -1307,7 +1307,7 @@ Definition Make_indexed_subcontext :=
                   (Lwt_list.map_s
                     (fun function_parameter =>
                       match function_parameter with
-                      | Context.Key prefix | Context.Dir prefix =>
+                      | (Context.Key prefix | Context.Dir prefix) =>
                         match Misc.remove_prefix d (List.hd (List.rev prefix))
                           with
                         | None => Lwt.return_nil
@@ -1321,7 +1321,7 @@ Definition Make_indexed_subcontext :=
                   (Lwt_list.map_s
                     (fun function_parameter =>
                       match function_parameter with
-                      | Context.Key prefix | Context.Dir prefix =>
+                      | (Context.Key prefix | Context.Dir prefix) =>
                         loop (Pervasives.op_plus i 1) prefix ds
                       end) prefixes) List.flatten)
           | (cons d ds, _, _) =>

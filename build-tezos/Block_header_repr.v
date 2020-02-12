@@ -134,7 +134,7 @@ Definition encoding : Data_encoding.encoding t :=
         protocol_data_encoding)).
 
 Definition max_header_length : Z :=
-  let fake_shell : Block_header.shell_header :=
+  let fake_shell :=
     {|
       Block_header.shell_header.level :=
         (* ❌ Constant of type int32 is converted to int *)
@@ -150,8 +150,8 @@ Definition max_header_length : Z :=
         Fitness_repr.from_int64
           (* ❌ Constant of type int64 is converted to int *)
           0; Block_header.shell_header.context := (|Context_hash|).(S.HASH.zero)
-      |}
-  with fake_contents : contents :=
+      |} in
+  let fake_contents :=
     {| contents.priority := 0; contents.seed_nonce_hash := Some Nonce_hash.zero;
       contents.proof_of_work_nonce :=
         MBytes.create Constants_repr.proof_of_work_nonce_size |} in

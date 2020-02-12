@@ -609,7 +609,7 @@ Definition get_script
                 (Some
                   {| Script_repr.t.code := code;
                     Script_repr.t.storage := storage |}))
-          | (None, Some _) | (Some _, None) => failwith "get_script"
+          | ((None, Some _) | (Some _, None)) => failwith "get_script"
           end)).
 
 Definition get_storage

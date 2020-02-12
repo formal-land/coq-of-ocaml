@@ -1800,8 +1800,8 @@ Fixpoint step {a b : Set}
             (fun ctxt =>
               match (contract, entrypoint) with
               |
-                ((contract, "default"), entrypoint) |
-                ((contract, entrypoint), "default") =>
+                (((contract, "default"), entrypoint) |
+                ((contract, entrypoint), "default")) =>
                 Error_monad.op_gtgteqquestion
                   (Script_ir_translator.parse_contract_for_script false ctxt loc
                     __t_value contract entrypoint)

@@ -162,10 +162,11 @@ Definition gen_access_annot
     end in
   fun field_annot =>
     match (value_annot, field_annot, default) with
-    | (None, None, _) | (Some _, None, None) | (None, Some (Field_annot ""), _)
+    |
+      ((None, None, _) | (Some _, None, None) | (None, Some (Field_annot ""), _))
       => None
     | (None, Some (Field_annot f), _) => Some (Var_annot f)
-    | (Some (Var_annot v), None | Some (Field_annot ""), Some (Field_annot f))
+    | (Some (Var_annot v), (None | Some (Field_annot "")), Some (Field_annot f))
       => Some (Var_annot (String.concat "." [ v; f ]))
     | (Some (Var_annot v), Some (Field_annot f), _) =>
       Some (Var_annot (String.concat "." [ v; f ]))
@@ -176,7 +177,7 @@ Definition merge_type_annot
   (annot2 : option Script_typed_ir.type_annot)
   : Error_monad.tzresult (option Script_typed_ir.type_annot) :=
   match (annot1, annot2) with
-  | (None, None) | (Some _, None) | (None, Some _) => Error_monad.ok None
+  | ((None, None) | (Some _, None) | (None, Some _)) => Error_monad.ok None
   | (Some (Type_annot a1), Some (Type_annot a2)) =>
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
@@ -189,7 +190,7 @@ Definition merge_field_annot
   (annot2 : option Script_typed_ir.field_annot)
   : Error_monad.tzresult (option Script_typed_ir.field_annot) :=
   match (annot1, annot2) with
-  | (None, None) | (Some _, None) | (None, Some _) => Error_monad.ok None
+  | ((None, None) | (Some _, None) | (None, Some _)) => Error_monad.ok None
   | (Some (Field_annot a1), Some (Field_annot a2)) =>
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
@@ -202,7 +203,7 @@ Definition merge_var_annot
   (annot2 : option Script_typed_ir.var_annot)
   : option Script_typed_ir.var_annot :=
   match (annot1, annot2) with
-  | (None, None) | (Some _, None) | (None, Some _) => None
+  | ((None, None) | (Some _, None) | (None, Some _)) => None
   | (Some (Var_annot a1), Some (Var_annot a2)) =>
     if String.equal a1 a2 then
       annot1
@@ -259,7 +260,7 @@ Definition parse_annots
               | _ => false
               end) with
           |
-            ("a" % char | "b" % char | "c" % char | "d" % char | "e" % char |
+            (("a" % char | "b" % char | "c" % char | "d" % char | "e" % char |
             "f" % char | "g" % char | "h" % char | "i" % char | "j" % char |
             "k" % char | "l" % char | "m" % char | "n" % char | "o" % char |
             "p" % char | "q" % char | "r" % char | "s" % char | "t" % char |
@@ -269,7 +270,7 @@ Definition parse_annots
             "J" % char | "K" % char | "L" % char | "M" % char | "N" % char |
             "O" % char | "P" % char | "Q" % char | "R" % char | "S" % char |
             "T" % char | "U" % char | "V" % char | "W" % char | "X" % char |
-            "Y" % char | "Z" % char | "_" % char, _, _) =>
+            "Y" % char | "Z" % char | "_" % char), _, _) =>
             Pervasives.op_atat Error_monad.ok
               (cons (wrap (Some (String.sub s 1 (Pervasives.op_minus len 1))))
                 acc)
@@ -355,16 +356,16 @@ Definition classify_annot
           fun a =>
             match (a, in_v, rv, in_t, rt, in_f, rf) with
             |
-              ((Var_annot _) as a, true, _, _, _, _, _) |
-              ((Var_annot _) as a, false, [], _, _, _, _) =>
+              (((Var_annot _) as a, true, _, _, _, _, _) |
+              ((Var_annot _) as a, false, [], _, _, _, _)) =>
               (true, (cons (opt_var_of_var_opt a) rv), false, rt, false, rf)
             |
-              ((Type_annot _) as a, _, _, true, _, _, _) |
-              ((Type_annot _) as a, _, _, false, [], _, _) =>
+              (((Type_annot _) as a, _, _, true, _, _, _) |
+              ((Type_annot _) as a, _, _, false, [], _, _)) =>
               (false, rv, true, (cons (opt_type_of_type_opt a) rt), false, rf)
             |
-              ((Field_annot _) as a, _, _, _, _, true, _) |
-              ((Field_annot _) as a, _, _, _, _, false, []) =>
+              (((Field_annot _) as a, _, _, _, _, true, _) |
+              ((Field_annot _) as a, _, _, _, _, false, [])) =>
               (false, rv, false, rt, true, (cons (opt_field_of_field_opt a) rf))
             | _ => Pervasives.raise extensible_type_value
             end) (false, nil, false, nil, false, nil) l in
@@ -491,7 +492,7 @@ Definition check_correct_field
   (f1 : option Script_typed_ir.field_annot)
   (f2 : option Script_typed_ir.field_annot) : Error_monad.tzresult unit :=
   match (f1, f2) with
-  | (None, _) | (_, None) => Error_monad.ok tt
+  | ((None, _) | (_, None)) => Error_monad.ok tt
   | (Some (Field_annot s1), Some (Field_annot s2)) =>
     if String.equal s1 s2 then
       Error_monad.ok tt

@@ -277,9 +277,9 @@ Definition record_proposals
                 else
                   Error_monad.fail extensible_type_value)
           |
-            Alpha_context.Voting_period.Testing_vote |
+            (Alpha_context.Voting_period.Testing_vote |
             Alpha_context.Voting_period.Testing |
-            Alpha_context.Voting_period.Promotion_vote =>
+            Alpha_context.Voting_period.Promotion_vote) =>
             Error_monad.fail extensible_type_value
           end)).
 
@@ -292,8 +292,8 @@ Definition record_ballot
     (fun function_parameter =>
       match function_parameter with
       |
-        Alpha_context.Voting_period.Testing_vote |
-        Alpha_context.Voting_period.Promotion_vote =>
+        (Alpha_context.Voting_period.Testing_vote |
+        Alpha_context.Voting_period.Promotion_vote) =>
         Error_monad.op_gtgteqquestion
           (Alpha_context.Vote.get_current_proposal ctxt)
           (fun current_proposal =>
@@ -319,8 +319,8 @@ Definition record_ballot
                             else
                               Error_monad.fail extensible_type_value)))))
       |
-        Alpha_context.Voting_period.Testing |
-        Alpha_context.Voting_period.Proposal =>
+        (Alpha_context.Voting_period.Testing |
+        Alpha_context.Voting_period.Proposal) =>
         Error_monad.fail extensible_type_value
       end).
 

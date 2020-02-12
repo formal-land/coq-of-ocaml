@@ -706,7 +706,7 @@ Module Forge.
                           storage_limit |})) operations in
             let ops :=
               match (sourcePubKey, revealed) with
-              | (None, _) | (_, Some _) => ops
+              | ((None, _) | (_, Some _)) => ops
               | (Some pk, None) =>
                 let operation := Alpha_context.Reveal pk in
                 cons

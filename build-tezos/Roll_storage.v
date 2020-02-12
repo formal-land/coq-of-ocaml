@@ -54,7 +54,7 @@ Definition delegate_pubkey
       ctxt (Contract_repr.implicit_contract delegate))
     (fun function_parameter =>
       match function_parameter with
-      | None | Some (Manager_repr.Hash _) =>
+      | (None | Some (Manager_repr.Hash _)) =>
         Error_monad.fail extensible_type_value
       | Some (Manager_repr.Public_key pk) => Error_monad.__return pk
       end).

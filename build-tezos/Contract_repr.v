@@ -214,12 +214,12 @@ Definition Index :=
     : option t :=
     match function_parameter with
     |
-      [] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
+      ([] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
       cons _ (cons _ (cons _ (cons _ []))) |
       cons _ (cons _ (cons _ (cons _ (cons _ [])))) |
       cons _ (cons _ (cons _ (cons _ (cons _ (cons _ []))))) |
-      cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _))))))) =>
-      None
+      cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _))))))))
+      => None
     |
       cons index1
         (cons index2

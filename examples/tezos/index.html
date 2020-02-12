@@ -54,8 +54,8 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35950 lines</li>
-      <li>Coq size: 52347 lines (+45% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 35948 lines</li>
+      <li>Coq size: 52348 lines (+45% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2715</li>
     </ul>
     
@@ -92,7 +92,7 @@
           11380,
           11380,
           13051,
-          15966,
+          17954,
         ],
         generated: [
           47563,
@@ -124,7 +124,7 @@
           51401,
           51401,
           51943,
-          52347,
+          52348,
         ],
         labels: [
           "01-14",
@@ -6741,9 +6741,9 @@ Definition record_proposals
                 else
                   Error_monad.fail extensible_type_value)
           |
-            Alpha_context.Voting_period.Testing_vote |
+            (Alpha_context.Voting_period.Testing_vote |
             Alpha_context.Voting_period.Testing |
-            Alpha_context.Voting_period.Promotion_vote =&gt;
+            Alpha_context.Voting_period.Promotion_vote) =&gt;
             Error_monad.fail extensible_type_value
           end)).
 
@@ -6756,8 +6756,8 @@ Definition record_ballot
     (fun function_parameter =&gt;
       match function_parameter with
       |
-        Alpha_context.Voting_period.Testing_vote |
-        Alpha_context.Voting_period.Promotion_vote =&gt;
+        (Alpha_context.Voting_period.Testing_vote |
+        Alpha_context.Voting_period.Promotion_vote) =&gt;
         Error_monad.op_gtgteqquestion
           (Alpha_context.Vote.get_current_proposal ctxt)
           (fun current_proposal =&gt;
@@ -6783,8 +6783,8 @@ Definition record_ballot
                             else
                               Error_monad.fail extensible_type_value)))))
       |
-        Alpha_context.Voting_period.Testing |
-        Alpha_context.Voting_period.Proposal =&gt;
+        (Alpha_context.Voting_period.Testing |
+        Alpha_context.Voting_period.Proposal) =&gt;
         Error_monad.fail extensible_type_value
       end).
 
@@ -11836,7 +11836,7 @@ Module Manager_result.
                 encoding)
               (fun o =&gt;
                 match o with
-                | Skipped _ | Failed _ _ | Backtracked _ _ =&gt;
+                | (Skipped _ | Failed _ _ | Backtracked _ _) =&gt;
                   None
                 | Applied o =&gt;
                   match
@@ -11890,7 +11890,7 @@ Module Manager_result.
                 encoding)
               (fun o =&gt;
                 match o with
-                | Skipped _ | Failed _ _ | Applied _ =&gt; None
+                | (Skipped _ | Failed _ _ | Applied _) =&gt; None
                 | Backtracked o errs =&gt;
                   match
                     select
@@ -15938,8 +15938,8 @@ let max_header_length =
       operations_hash = Operation_list_list_hash.zero;
       fitness = Fitness_repr.from_int64 0L;
       context = Context_hash.zero;
-    }
-  and fake_contents =
+    } in
+  let fake_contents =
     {
       priority = 0;
       proof_of_work_nonce =
@@ -16105,7 +16105,7 @@ Definition encoding : Data_encoding.encoding t :=
         protocol_data_encoding)).
 
 Definition max_header_length : Z :=
-  let fake_shell : Block_header.shell_header :=
+  let fake_shell :=
     {|
       Block_header.shell_header.level :=
         (* ❌ Constant of type int32 is converted to int *)
@@ -16121,8 +16121,8 @@ Definition max_header_length : Z :=
         Fitness_repr.from_int64
           (* ❌ Constant of type int64 is converted to int *)
           0; Block_header.shell_header.context := (|Context_hash|).(S.HASH.zero)
-      |}
-  with fake_contents : contents :=
+      |} in
+  let fake_contents :=
     {| contents.priority := 0; contents.seed_nonce_hash := Some Nonce_hash.zero;
       contents.proof_of_work_nonce :=
         MBytes.create Constants_repr.proof_of_work_nonce_size |} in
@@ -19438,12 +19438,12 @@ Definition Index :=
     : option t :=
     match function_parameter with
     |
-      [] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
+      ([] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
       cons _ (cons _ (cons _ (cons _ []))) |
       cons _ (cons _ (cons _ (cons _ (cons _ [])))) |
       cons _ (cons _ (cons _ (cons _ (cons _ (cons _ []))))) |
-      cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _))))))) =&gt;
-      None
+      cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _))))))))
+      =&gt; None
     |
       cons index1
         (cons index2
@@ -24274,7 +24274,7 @@ Definition get_script
                 (Some
                   {| Script_repr.t.code := code;
                     Script_repr.t.storage := storage |}))
-          | (None, Some _) | (Some _, None) =&gt; failwith &quot;get_script&quot;
+          | ((None, Some _) | (Some _, None)) =&gt; failwith &quot;get_script&quot;
           end)).
 
 Definition get_storage
@@ -29564,7 +29564,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 1048 lines (+46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1050 lines (+47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -30461,8 +30461,10 @@ Definition cleanup_balance_updates {A : Set}
   (balance_updates : list (A * balance_update)) : list (A * balance_update) :=
   List.filter
     (fun function_parameter =&gt;
-      let '(_, Credited update | Debited update) := function_parameter in
-      Pervasives.not (Tez_repr.equal update Tez_repr.zero)) balance_updates.
+      match function_parameter with
+      | (_, (Credited update | Debited update)) =&gt;
+        Pervasives.not (Tez_repr.equal update Tez_repr.zero)
+      end) balance_updates.
 
 Module frozen_balance.
   Record record := Build {
@@ -30556,7 +30558,7 @@ Definition known
       c (Contract_repr.implicit_contract delegate))
     (fun function_parameter =&gt;
       match function_parameter with
-      | None | Some (Manager_repr.Hash _) =&gt; Error_monad.return_false
+      | (None | Some (Manager_repr.Hash _)) =&gt; Error_monad.return_false
       | Some (Manager_repr.Public_key _) =&gt; Error_monad.return_true
       end).
 
@@ -30676,7 +30678,7 @@ Definition set
                             end)
                       else
                         Error_monad.fail extensible_type_value
-                    | (None | Some _, _) =&gt; Error_monad.return_unit
+                    | ((None | Some _), _) =&gt; Error_monad.return_unit
                     end))
                 (fun function_parameter =&gt;
                   let '_ := function_parameter in
@@ -35913,7 +35915,7 @@ Module Forge.
                           storage_limit |})) operations in
             let ops :=
               match (sourcePubKey, revealed) with
-              | (None, _) | (_, Some _) =&gt; ops
+              | ((None, _) | (_, Some _)) =&gt; ops
               | (Some pk, None) =&gt;
                 let operation := Alpha_context.Reveal pk in
                 cons
@@ -41037,7 +41039,7 @@ Definition has_default_entrypoint (expr : Script_repr.lazy_expr) : bool :=
           | _ =&gt; false
           end in
         has_default parameter_expr
-      | Some _ | None =&gt; false
+      | (Some _ | None) =&gt; false
       end
     | _ =&gt; false
     end
@@ -42955,7 +42957,7 @@ Definition apply_operation (function_parameter : validation_state)
       let '(predecessor, baker) :=
         match mode with
         |
-          Partial_application {|
+          (Partial_application {|
             validation_mode.Partial_application.block_header := {|
               block_header.shell := {|
                 Block_header.shell_header.predecessor := predecessor
@@ -42974,7 +42976,7 @@ Definition apply_operation (function_parameter : validation_state)
           Full_construction {|
             validation_mode.Full_construction.predecessor := predecessor;
               validation_mode.Full_construction.baker := baker
-              |} =&gt; (predecessor, baker)
+              |}) =&gt; (predecessor, baker)
         |
           Partial_construction {|
             validation_mode.Partial_construction.predecessor := predecessor
@@ -43061,7 +43063,7 @@ Definition finalize_block (function_parameter : validation_state)
                   Apply_results.block_metadata.deactivated := nil;
                   Apply_results.block_metadata.balance_updates := nil |})))
   |
-    Application {|
+    (Application {|
       validation_mode.Application.block_header := {|
         block_header.protocol_data := {|
           Alpha_context.Block_header.protocol_data.contents := protocol_data
@@ -43074,7 +43076,7 @@ Definition finalize_block (function_parameter : validation_state)
       validation_mode.Full_construction.protocol_data := protocol_data;
         validation_mode.Full_construction.baker := baker;
         validation_mode.Full_construction.block_delay := block_delay
-        |} =&gt;
+        |}) =&gt;
     Error_monad.op_gtgteqquestion
       (Apply.finalize_application ctxt protocol_data baker block_delay)
       (fun function_parameter =&gt;
@@ -47150,23 +47152,23 @@ Definition valid_case (name : string) : bool :=
   let is_lower (function_parameter : ascii) : bool :=
     match function_parameter with
     |
-      &quot;_&quot; % char | &quot;a&quot; % char | &quot;b&quot; % char | &quot;c&quot; % char | &quot;d&quot; % char |
+      (&quot;_&quot; % char | &quot;a&quot; % char | &quot;b&quot; % char | &quot;c&quot; % char | &quot;d&quot; % char |
       &quot;e&quot; % char | &quot;f&quot; % char | &quot;g&quot; % char | &quot;h&quot; % char | &quot;i&quot; % char |
       &quot;j&quot; % char | &quot;k&quot; % char | &quot;l&quot; % char | &quot;m&quot; % char | &quot;n&quot; % char |
       &quot;o&quot; % char | &quot;p&quot; % char | &quot;q&quot; % char | &quot;r&quot; % char | &quot;s&quot; % char |
       &quot;t&quot; % char | &quot;u&quot; % char | &quot;v&quot; % char | &quot;w&quot; % char | &quot;x&quot; % char |
-      &quot;y&quot; % char | &quot;z&quot; % char =&gt; true
+      &quot;y&quot; % char | &quot;z&quot; % char) =&gt; true
     | _ =&gt; false
     end in
   let is_upper (function_parameter : ascii) : bool :=
     match function_parameter with
     |
-      &quot;_&quot; % char | &quot;A&quot; % char | &quot;B&quot; % char | &quot;C&quot; % char | &quot;D&quot; % char |
+      (&quot;_&quot; % char | &quot;A&quot; % char | &quot;B&quot; % char | &quot;C&quot; % char | &quot;D&quot; % char |
       &quot;E&quot; % char | &quot;F&quot; % char | &quot;G&quot; % char | &quot;H&quot; % char | &quot;I&quot; % char |
       &quot;J&quot; % char | &quot;K&quot; % char | &quot;L&quot; % char | &quot;M&quot; % char | &quot;N&quot; % char |
       &quot;O&quot; % char | &quot;P&quot; % char | &quot;Q&quot; % char | &quot;R&quot; % char | &quot;S&quot; % char |
       &quot;T&quot; % char | &quot;U&quot; % char | &quot;V&quot; % char | &quot;W&quot; % char | &quot;X&quot; % char |
-      &quot;Y&quot; % char | &quot;Z&quot; % char =&gt; true
+      &quot;Y&quot; % char | &quot;Z&quot; % char) =&gt; true
     | _ =&gt; false
     end in
   let fix for_all
@@ -48989,21 +48991,21 @@ type raw = Operation.t = {shell : Operation.shell_header; proto : MBytes.t}
 
 let raw_encoding = Operation.encoding
 
-type 'kind operation = {
-  shell : Operation.shell_header;
-  protocol_data : 'kind protocol_data;
-}
+type _ contents_list =
+  | Single : 'kind contents -&gt; 'kind contents_list
+  | Cons :
+      'kind Kind.manager contents * 'rest Kind.manager contents_list
+      -&gt; ('kind * 'rest) Kind.manager contents_list
 
 and 'kind protocol_data = {
   contents : 'kind contents_list;
   signature : Signature.t option;
 }
 
-and _ contents_list =
-  | Single : 'kind contents -&gt; 'kind contents_list
-  | Cons :
-      'kind Kind.manager contents * 'rest Kind.manager contents_list
-      -&gt; ('kind * 'rest) Kind.manager contents_list
+and 'kind operation = {
+  shell : Operation.shell_header;
+  protocol_data : 'kind protocol_data;
+}
 
 and _ contents =
   | Endorsement : {level : Raw_level_repr.t} -&gt; Kind.endorsement contents
@@ -49807,7 +49809,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
-Require Tezos.Block_header_repr_mli. Module Block_header_repr := Block_header_repr_mli.
+Require Tezos.Block_header_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Raw_level_repr.
 Require Tezos.Script_repr.
@@ -49971,20 +49973,6 @@ Module manager_operation.
   Definition Origination_skeleton := Origination.record.
 End manager_operation.
 
-Module protocol_data.
-  Record record {contents signature : Set} := Build {
-    contents : contents;
-    signature : signature }.
-  Arguments record : clear implicits.
-  Definition with_contents {t_contents t_signature} contents
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature contents r.(signature).
-  Definition with_signature {t_contents t_signature} signature
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature r.(contents) signature.
-End protocol_data.
-Definition protocol_data_skeleton := protocol_data.record.
-
 Module operation.
   Record record {shell protocol_data : Set} := Build {
     shell : shell;
@@ -49999,6 +49987,20 @@ Module operation.
 End operation.
 Definition operation_skeleton := operation.record.
 
+Module protocol_data.
+  Record record {contents signature : Set} := Build {
+    contents : contents;
+    signature : signature }.
+  Arguments record : clear implicits.
+  Definition with_contents {t_contents t_signature} contents
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature contents r.(signature).
+  Definition with_signature {t_contents t_signature} signature
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature r.(contents) signature.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
+
 Reserved Notation &quot;'contents.Endorsement&quot;.
 Reserved Notation &quot;'contents.Seed_nonce_revelation&quot;.
 Reserved Notation &quot;'contents.Double_endorsement_evidence&quot;.
@@ -50009,9 +50011,9 @@ Reserved Notation &quot;'contents.Ballot&quot;.
 Reserved Notation &quot;'contents.Manager_operation&quot;.
 Reserved Notation &quot;'manager_operation.Transaction&quot;.
 Reserved Notation &quot;'manager_operation.Origination&quot;.
-Reserved Notation &quot;'operation&quot;.
-Reserved Notation &quot;'protocol_data&quot;.
 Reserved Notation &quot;'contents_list&quot;.
+Reserved Notation &quot;'protocol_data&quot;.
+Reserved Notation &quot;'operation&quot;.
 Reserved Notation &quot;'contents&quot;.
 Reserved Notation &quot;'manager_operation&quot;.
 Reserved Notation &quot;'counter&quot;.
@@ -50041,11 +50043,11 @@ with manager_operation_gadt : Set :=
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   manager_operation_gadt
 
-where &quot;'operation&quot; := (fun (t_kind : Set) =&gt;
-  operation_skeleton Operation.shell_header ('protocol_data t_kind))
+where &quot;'contents_list&quot; := (fun (_ : Set) =&gt; contents_list_gadt)
 and &quot;'protocol_data&quot; := (fun (t_kind : Set) =&gt;
   protocol_data_skeleton ('contents_list t_kind) (option Signature.t))
-and &quot;'contents_list&quot; := (fun (_ : Set) =&gt; contents_list_gadt)
+and &quot;'operation&quot; := (fun (t_kind : Set) =&gt;
+  operation_skeleton Operation.shell_header ('protocol_data t_kind))
 and &quot;'contents&quot; := (fun (_ : Set) =&gt; contents_gadt)
 and &quot;'manager_operation&quot; := (fun (_ : Set) =&gt; manager_operation_gadt)
 and &quot;'counter&quot; := (Z.t)
@@ -50102,9 +50104,9 @@ End
 Import
   ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
 
-Definition operation := 'operation.
-Definition protocol_data := 'protocol_data.
 Definition contents_list := 'contents_list.
+Definition protocol_data := 'protocol_data.
+Definition operation := 'operation.
 Definition contents := 'contents.
 Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.
@@ -51315,21 +51317,21 @@ type raw = Operation.t = {shell : Operation.shell_header; proto : MBytes.t}
 
 val raw_encoding : raw Data_encoding.t
 
-type 'kind operation = {
-  shell : Operation.shell_header;
-  protocol_data : 'kind protocol_data;
-}
+type _ contents_list =
+  | Single : 'kind contents -&gt; 'kind contents_list
+  | Cons :
+      'kind Kind.manager contents * 'rest Kind.manager contents_list
+      -&gt; ('kind * 'rest) Kind.manager contents_list
 
 and 'kind protocol_data = {
   contents : 'kind contents_list;
   signature : Signature.t option;
 }
 
-and _ contents_list =
-  | Single : 'kind contents -&gt; 'kind contents_list
-  | Cons :
-      'kind Kind.manager contents * 'rest Kind.manager contents_list
-      -&gt; ('kind * 'rest) Kind.manager contents_list
+and 'kind operation = {
+  shell : Operation.shell_header;
+  protocol_data : 'kind protocol_data;
+}
 
 and _ contents =
   | Endorsement : {level : Raw_level_repr.t} -&gt; Kind.endorsement contents
@@ -51540,7 +51542,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Blinded_public_key_hash.
-Require Tezos.Block_header_repr_mli. Module Block_header_repr := Block_header_repr_mli.
+Require Tezos.Block_header_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Raw_level_repr.
 Require Tezos.Script_repr.
@@ -51704,20 +51706,6 @@ Module manager_operation.
   Definition Origination_skeleton := Origination.record.
 End manager_operation.
 
-Module protocol_data.
-  Record record {contents signature : Set} := Build {
-    contents : contents;
-    signature : signature }.
-  Arguments record : clear implicits.
-  Definition with_contents {t_contents t_signature} contents
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature contents r.(signature).
-  Definition with_signature {t_contents t_signature} signature
-    (r : record t_contents t_signature) :=
-    Build t_contents t_signature r.(contents) signature.
-End protocol_data.
-Definition protocol_data_skeleton := protocol_data.record.
-
 Module operation.
   Record record {shell protocol_data : Set} := Build {
     shell : shell;
@@ -51732,6 +51720,20 @@ Module operation.
 End operation.
 Definition operation_skeleton := operation.record.
 
+Module protocol_data.
+  Record record {contents signature : Set} := Build {
+    contents : contents;
+    signature : signature }.
+  Arguments record : clear implicits.
+  Definition with_contents {t_contents t_signature} contents
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature contents r.(signature).
+  Definition with_signature {t_contents t_signature} signature
+    (r : record t_contents t_signature) :=
+    Build t_contents t_signature r.(contents) signature.
+End protocol_data.
+Definition protocol_data_skeleton := protocol_data.record.
+
 Reserved Notation &quot;'contents.Endorsement&quot;.
 Reserved Notation &quot;'contents.Seed_nonce_revelation&quot;.
 Reserved Notation &quot;'contents.Double_endorsement_evidence&quot;.
@@ -51742,9 +51744,9 @@ Reserved Notation &quot;'contents.Ballot&quot;.
 Reserved Notation &quot;'contents.Manager_operation&quot;.
 Reserved Notation &quot;'manager_operation.Transaction&quot;.
 Reserved Notation &quot;'manager_operation.Origination&quot;.
-Reserved Notation &quot;'operation&quot;.
-Reserved Notation &quot;'protocol_data&quot;.
 Reserved Notation &quot;'contents_list&quot;.
+Reserved Notation &quot;'protocol_data&quot;.
+Reserved Notation &quot;'operation&quot;.
 Reserved Notation &quot;'contents&quot;.
 Reserved Notation &quot;'manager_operation&quot;.
 Reserved Notation &quot;'counter&quot;.
@@ -51774,11 +51776,11 @@ with manager_operation_gadt : Set :=
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   manager_operation_gadt
 
-where &quot;'operation&quot; := (fun (t_kind : Set) =&gt;
-  operation_skeleton Operation.shell_header ('protocol_data t_kind))
+where &quot;'contents_list&quot; := (fun (_ : Set) =&gt; contents_list_gadt)
 and &quot;'protocol_data&quot; := (fun (t_kind : Set) =&gt;
   protocol_data_skeleton ('contents_list t_kind) (option Signature.t))
-and &quot;'contents_list&quot; := (fun (_ : Set) =&gt; contents_list_gadt)
+and &quot;'operation&quot; := (fun (t_kind : Set) =&gt;
+  operation_skeleton Operation.shell_header ('protocol_data t_kind))
 and &quot;'contents&quot; := (fun (_ : Set) =&gt; contents_gadt)
 and &quot;'manager_operation&quot; := (fun (_ : Set) =&gt; manager_operation_gadt)
 and &quot;'counter&quot; := (Z.t)
@@ -51836,9 +51838,9 @@ End
 Import
   ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
 
-Definition operation := 'operation.
-Definition protocol_data := 'protocol_data.
 Definition contents_list := 'contents_list.
+Definition protocol_data := 'protocol_data.
+Definition operation := 'operation.
 Definition contents := 'contents.
 Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.
@@ -54867,7 +54869,7 @@ Definition update_allocated_contracts_count (ctxt : t) : t :=
 
 Definition clear_storage_space_to_pay (ctxt : t) : t * Z.t * Z :=
   match (ctxt.(t.storage_space_to_pay), ctxt.(t.allocated_contracts)) with
-  | (None, _) | (_, None) =&gt;
+  | ((None, _) | (_, None)) =&gt;
     (* ❌ Assert instruction is not handled. *)
     assert false
   | (Some storage_space_to_pay, Some allocated_contracts) =&gt;
@@ -57325,7 +57327,7 @@ Definition delegate_pubkey
       ctxt (Contract_repr.implicit_contract delegate))
     (fun function_parameter =&gt;
       match function_parameter with
-      | None | Some (Manager_repr.Hash _) =&gt;
+      | (None | Some (Manager_repr.Hash _)) =&gt;
         Error_monad.fail extensible_type_value
       | Some (Manager_repr.Public_key pk) =&gt; Error_monad.__return pk
       end).
@@ -62468,8 +62470,8 @@ Fixpoint step {a b : Set}
             (fun ctxt =&gt;
               match (contract, entrypoint) with
               |
-                ((contract, &quot;default&quot;), entrypoint) |
-                ((contract, entrypoint), &quot;default&quot;) =&gt;
+                (((contract, &quot;default&quot;), entrypoint) |
+                ((contract, entrypoint), &quot;default&quot;)) =&gt;
                 Error_monad.op_gtgteqquestion
                   (Script_ir_translator.parse_contract_for_script false ctxt loc
                     __t_value contract entrypoint)
@@ -63488,7 +63490,7 @@ Parameter trace :
     <h3>Script_ir_annot</h3>
     <ul>
       <li>OCaml size: 521 lines</li>
-      <li>Coq size: 703 lines (+34% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 704 lines (+35% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -64975,10 +64977,11 @@ Definition gen_access_annot
     end in
   fun field_annot =&gt;
     match (value_annot, field_annot, default) with
-    | (None, None, _) | (Some _, None, None) | (None, Some (Field_annot &quot;&quot;), _)
+    |
+      ((None, None, _) | (Some _, None, None) | (None, Some (Field_annot &quot;&quot;), _))
       =&gt; None
     | (None, Some (Field_annot f), _) =&gt; Some (Var_annot f)
-    | (Some (Var_annot v), None | Some (Field_annot &quot;&quot;), Some (Field_annot f))
+    | (Some (Var_annot v), (None | Some (Field_annot &quot;&quot;)), Some (Field_annot f))
       =&gt; Some (Var_annot (String.concat &quot;.&quot; [ v; f ]))
     | (Some (Var_annot v), Some (Field_annot f), _) =&gt;
       Some (Var_annot (String.concat &quot;.&quot; [ v; f ]))
@@ -64989,7 +64992,7 @@ Definition merge_type_annot
   (annot2 : option Script_typed_ir.type_annot)
   : Error_monad.tzresult (option Script_typed_ir.type_annot) :=
   match (annot1, annot2) with
-  | (None, None) | (Some _, None) | (None, Some _) =&gt; Error_monad.ok None
+  | ((None, None) | (Some _, None) | (None, Some _)) =&gt; Error_monad.ok None
   | (Some (Type_annot a1), Some (Type_annot a2)) =&gt;
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
@@ -65002,7 +65005,7 @@ Definition merge_field_annot
   (annot2 : option Script_typed_ir.field_annot)
   : Error_monad.tzresult (option Script_typed_ir.field_annot) :=
   match (annot1, annot2) with
-  | (None, None) | (Some _, None) | (None, Some _) =&gt; Error_monad.ok None
+  | ((None, None) | (Some _, None) | (None, Some _)) =&gt; Error_monad.ok None
   | (Some (Field_annot a1), Some (Field_annot a2)) =&gt;
     if Pervasives.op_pipepipe legacy (String.equal a1 a2) then
       Error_monad.ok annot1
@@ -65015,7 +65018,7 @@ Definition merge_var_annot
   (annot2 : option Script_typed_ir.var_annot)
   : option Script_typed_ir.var_annot :=
   match (annot1, annot2) with
-  | (None, None) | (Some _, None) | (None, Some _) =&gt; None
+  | ((None, None) | (Some _, None) | (None, Some _)) =&gt; None
   | (Some (Var_annot a1), Some (Var_annot a2)) =&gt;
     if String.equal a1 a2 then
       annot1
@@ -65072,7 +65075,7 @@ Definition parse_annots
               | _ =&gt; false
               end) with
           |
-            (&quot;a&quot; % char | &quot;b&quot; % char | &quot;c&quot; % char | &quot;d&quot; % char | &quot;e&quot; % char |
+            ((&quot;a&quot; % char | &quot;b&quot; % char | &quot;c&quot; % char | &quot;d&quot; % char | &quot;e&quot; % char |
             &quot;f&quot; % char | &quot;g&quot; % char | &quot;h&quot; % char | &quot;i&quot; % char | &quot;j&quot; % char |
             &quot;k&quot; % char | &quot;l&quot; % char | &quot;m&quot; % char | &quot;n&quot; % char | &quot;o&quot; % char |
             &quot;p&quot; % char | &quot;q&quot; % char | &quot;r&quot; % char | &quot;s&quot; % char | &quot;t&quot; % char |
@@ -65082,7 +65085,7 @@ Definition parse_annots
             &quot;J&quot; % char | &quot;K&quot; % char | &quot;L&quot; % char | &quot;M&quot; % char | &quot;N&quot; % char |
             &quot;O&quot; % char | &quot;P&quot; % char | &quot;Q&quot; % char | &quot;R&quot; % char | &quot;S&quot; % char |
             &quot;T&quot; % char | &quot;U&quot; % char | &quot;V&quot; % char | &quot;W&quot; % char | &quot;X&quot; % char |
-            &quot;Y&quot; % char | &quot;Z&quot; % char | &quot;_&quot; % char, _, _) =&gt;
+            &quot;Y&quot; % char | &quot;Z&quot; % char | &quot;_&quot; % char), _, _) =&gt;
             Pervasives.op_atat Error_monad.ok
               (cons (wrap (Some (String.sub s 1 (Pervasives.op_minus len 1))))
                 acc)
@@ -65168,16 +65171,16 @@ Definition classify_annot
           fun a =&gt;
             match (a, in_v, rv, in_t, rt, in_f, rf) with
             |
-              ((Var_annot _) as a, true, _, _, _, _, _) |
-              ((Var_annot _) as a, false, [], _, _, _, _) =&gt;
+              (((Var_annot _) as a, true, _, _, _, _, _) |
+              ((Var_annot _) as a, false, [], _, _, _, _)) =&gt;
               (true, (cons (opt_var_of_var_opt a) rv), false, rt, false, rf)
             |
-              ((Type_annot _) as a, _, _, true, _, _, _) |
-              ((Type_annot _) as a, _, _, false, [], _, _) =&gt;
+              (((Type_annot _) as a, _, _, true, _, _, _) |
+              ((Type_annot _) as a, _, _, false, [], _, _)) =&gt;
               (false, rv, true, (cons (opt_type_of_type_opt a) rt), false, rf)
             |
-              ((Field_annot _) as a, _, _, _, _, true, _) |
-              ((Field_annot _) as a, _, _, _, _, false, []) =&gt;
+              (((Field_annot _) as a, _, _, _, _, true, _) |
+              ((Field_annot _) as a, _, _, _, _, false, [])) =&gt;
               (false, rv, false, rt, true, (cons (opt_field_of_field_opt a) rf))
             | _ =&gt; Pervasives.raise extensible_type_value
             end) (false, nil, false, nil, false, nil) l in
@@ -65304,7 +65307,7 @@ Definition check_correct_field
   (f1 : option Script_typed_ir.field_annot)
   (f2 : option Script_typed_ir.field_annot) : Error_monad.tzresult unit :=
   match (f1, f2) with
-  | (None, _) | (_, None) =&gt; Error_monad.ok tt
+  | ((None, _) | (_, None)) =&gt; Error_monad.ok tt
   | (Some (Field_annot s1), Some (Field_annot s2)) =&gt;
     if String.equal s1 s2 then
       Error_monad.ok tt
@@ -72371,7 +72374,7 @@ Definition add_dip {A : Set}
   (ty : Script_typed_ir.ty A) (annot : option Script_typed_ir.var_annot)
   (prev : tc_context) : tc_context :=
   match prev with
-  | Lambda | Toplevel _ =&gt;
+  | (Lambda | Toplevel _) =&gt;
     Dip (Script_typed_ir.Item_t ty Script_typed_ir.Empty_t annot) prev
   | Dip stack _ =&gt;
     let 'existT _ __Dip_'a stack :=
@@ -72621,8 +72624,8 @@ Definition number_of_generated_growing_types {a b : Set}
 Definition location {A B : Set} (function_parameter : Micheline.node A B) : A :=
   match function_parameter with
   |
-    Micheline.Prim loc _ _ _ | Micheline.Int loc _ | Micheline.String loc _ |
-    Micheline.Bytes loc _ | Micheline.Seq loc _ =&gt; loc
+    (Micheline.Prim loc _ _ _ | Micheline.Int loc _ | Micheline.String loc _ |
+    Micheline.Bytes loc _ | Micheline.Seq loc _) =&gt; loc
   end.
 
 Definition kind {A B : Set} (function_parameter : Micheline.node A B)
@@ -72639,16 +72642,16 @@ Definition namespace (function_parameter : Alpha_context.Script.prim)
   : Script_tc_errors.namespace :=
   match function_parameter with
   |
-    Alpha_context.Script.K_parameter | Alpha_context.Script.K_storage |
-    Alpha_context.Script.K_code =&gt; Script_tc_errors.Keyword_namespace
+    (Alpha_context.Script.K_parameter | Alpha_context.Script.K_storage |
+    Alpha_context.Script.K_code) =&gt; Script_tc_errors.Keyword_namespace
   |
-    Alpha_context.Script.D_False | Alpha_context.Script.D_Elt |
+    (Alpha_context.Script.D_False | Alpha_context.Script.D_Elt |
     Alpha_context.Script.D_Left | Alpha_context.Script.D_None |
     Alpha_context.Script.D_Pair | Alpha_context.Script.D_Right |
     Alpha_context.Script.D_Some | Alpha_context.Script.D_True |
-    Alpha_context.Script.D_Unit =&gt; Script_tc_errors.Constant_namespace
+    Alpha_context.Script.D_Unit) =&gt; Script_tc_errors.Constant_namespace
   |
-    Alpha_context.Script.I_PACK | Alpha_context.Script.I_UNPACK |
+    (Alpha_context.Script.I_PACK | Alpha_context.Script.I_UNPACK |
     Alpha_context.Script.I_BLAKE2B | Alpha_context.Script.I_SHA256 |
     Alpha_context.Script.I_SHA512 | Alpha_context.Script.I_ABS |
     Alpha_context.Script.I_ADD | Alpha_context.Script.I_AMOUNT |
@@ -72689,10 +72692,10 @@ Definition namespace (function_parameter : Alpha_context.Script.prim)
     Alpha_context.Script.I_LOOP_LEFT | Alpha_context.Script.I_ADDRESS |
     Alpha_context.Script.I_CONTRACT | Alpha_context.Script.I_ISNAT |
     Alpha_context.Script.I_CAST | Alpha_context.Script.I_RENAME |
-    Alpha_context.Script.I_DIG | Alpha_context.Script.I_DUG =&gt;
+    Alpha_context.Script.I_DIG | Alpha_context.Script.I_DUG) =&gt;
     Script_tc_errors.Instr_namespace
   |
-    Alpha_context.Script.T_bool | Alpha_context.Script.T_contract |
+    (Alpha_context.Script.T_bool | Alpha_context.Script.T_contract |
     Alpha_context.Script.T_int | Alpha_context.Script.T_key |
     Alpha_context.Script.T_key_hash | Alpha_context.Script.T_lambda |
     Alpha_context.Script.T_list | Alpha_context.Script.T_map |
@@ -72703,7 +72706,7 @@ Definition namespace (function_parameter : Alpha_context.Script.prim)
     Alpha_context.Script.T_bytes | Alpha_context.Script.T_mutez |
     Alpha_context.Script.T_timestamp | Alpha_context.Script.T_unit |
     Alpha_context.Script.T_operation | Alpha_context.Script.T_address |
-    Alpha_context.Script.T_chain_id =&gt; Script_tc_errors.Type_namespace
+    Alpha_context.Script.T_chain_id) =&gt; Script_tc_errors.Type_namespace
   end.
 
 Definition unexpected
@@ -72718,9 +72721,9 @@ Definition unexpected
   | Micheline.Prim loc name _ _ =&gt;
     match ((namespace name), exp_ns) with
     |
-      (Script_tc_errors.Type_namespace, Script_tc_errors.Type_namespace) |
+      ((Script_tc_errors.Type_namespace, Script_tc_errors.Type_namespace) |
       (Script_tc_errors.Instr_namespace, Script_tc_errors.Instr_namespace) |
-      (Script_tc_errors.Constant_namespace, Script_tc_errors.Constant_namespace)
+      (Script_tc_errors.Constant_namespace, Script_tc_errors.Constant_namespace))
       =&gt; extensible_type_value
     | (ns, _) =&gt; extensible_type_value
     end
@@ -75082,7 +75085,7 @@ Definition well_formed_entrypoints {A : Set}
     : option (list B) * (|Entrypoints|).(S.SET.t) :=
     let '(first_unreachable, all) as acc := function_parameter in
     match annot with
-    | None | Some (Field_annot &quot;&quot;) =&gt;
+    | (None | Some (Field_annot &quot;&quot;)) =&gt;
       if reachable then
         acc
       else
@@ -75138,7 +75141,7 @@ Definition well_formed_entrypoints {A : Set}
   try
     (let '(init, reachable) :=
       match root_name with
-      | None | Some &quot;&quot; =&gt; ((|Entrypoints|).(S.SET.empty), false)
+      | (None | Some &quot;&quot;) =&gt; ((|Entrypoints|).(S.SET.empty), false)
       | Some name =&gt; (((|Entrypoints|).(S.SET.singleton) name), true)
       end in
     let '(first_unreachable, all) := check full nil reachable (None, init) in
@@ -75237,8 +75240,8 @@ Fixpoint parse_data {a : Set}
                         Pervasives.op_atat Error_monad.fail
                           extensible_type_value
                       |
-                        Micheline.Int _ _ | Micheline.String _ _ |
-                        Micheline.Bytes _ _ | Micheline.Seq _ _ =&gt;
+                        (Micheline.Int _ _ | Micheline.String _ _ |
+                        Micheline.Bytes _ _ | Micheline.Seq _ _) =&gt;
                         Error_monad.op_gtgteqquestion (__error_value tt)
                           Error_monad.fail
                       end)) (None, (empty_map key_type), ctxt) items) traced)
@@ -75320,7 +75323,7 @@ Fixpoint parse_data {a : Set}
               else
                 match String.get v i with
                 |
-                  &quot;010&quot; % char | &quot; &quot; % char | &quot;!&quot; % char | &quot;&quot;&quot;&quot; % char |
+                  (&quot;010&quot; % char | &quot; &quot; % char | &quot;!&quot; % char | &quot;&quot;&quot;&quot; % char |
                   &quot;#&quot; % char | &quot;$&quot; % char | &quot;%&quot; % char | &quot;&amp;&quot; % char | &quot;'&quot; % char
                   | &quot;(&quot; % char | &quot;)&quot; % char | &quot;*&quot; % char | &quot;+&quot; % char |
                   &quot;,&quot; % char | &quot;-&quot; % char | &quot;.&quot; % char | &quot;/&quot; % char | &quot;0&quot; % char
@@ -75341,7 +75344,7 @@ Fixpoint parse_data {a : Set}
                   | &quot;p&quot; % char | &quot;q&quot; % char | &quot;r&quot; % char | &quot;s&quot; % char |
                   &quot;t&quot; % char | &quot;u&quot; % char | &quot;v&quot; % char | &quot;w&quot; % char | &quot;x&quot; % char
                   | &quot;y&quot; % char | &quot;z&quot; % char | &quot;{&quot; % char | &quot;|&quot; % char |
-                  &quot;}&quot; % char | &quot;~&quot; % char =&gt;
+                  &quot;}&quot; % char | &quot;~&quot; % char) =&gt;
                   check_printable_ascii (Pervasives.op_minus i 1)
                 | _ =&gt; false
                 end in
@@ -76203,11 +76206,11 @@ with parse_instr {bef : Set}
     : Lwt.t (Error_monad.tzresult unit) :=
     match (type_logger, script_instr) with
     |
-      (None, _) |
+      ((None, _) |
       (Some _,
-        Micheline.Seq (-1) _ | Micheline.Int _ _ | Micheline.String _ _ |
-        Micheline.Bytes _ _) =&gt; Error_monad.return_unit
-    | (Some log, Micheline.Prim _ _ _ _ | Micheline.Seq _ _) =&gt;
+        (Micheline.Seq (-1) _ | Micheline.Int _ _ | Micheline.String _ _ |
+        Micheline.Bytes _ _))) =&gt; Error_monad.return_unit
+    | (Some log, (Micheline.Prim _ _ _ _ | Micheline.Seq _ _)) =&gt;
       let ctxt := Alpha_context.Gas.set_unlimited ctxt in
       Error_monad.op_gtgteqquestion (unparse_stack ctxt stack_ty)
         (fun function_parameter =&gt;
@@ -80977,7 +80980,7 @@ Definition list_entrypoints {A : Set}
         (|Entrypoints_map|).(S.MAP.t) (list B * Alpha_context.Script.node)) :=
     let '(unreachables, all) as acc := function_parameter in
     match annot with
-    | None | Some (Field_annot &quot;&quot;) =&gt;
+    | (None | Some (Field_annot &quot;&quot;)) =&gt;
       Pervasives.op_atat Error_monad.ok
         (if reachable then
           acc
@@ -88039,7 +88042,7 @@ Definition Int_index :=
     cons (Pervasives.string_of_int c) l in
   let of_path (function_parameter : list string) : option Z :=
     match function_parameter with
-    | [] | cons _ (cons _ _) =&gt; None
+    | ([] | cons _ (cons _ _)) =&gt; None
     | cons c [] =&gt; Pervasives.int_of_string_opt c
     end in
   let ipath (a : Set) := a * t in
@@ -88664,11 +88667,11 @@ Module Big_map.
       : option Z.t :=
       match function_parameter with
       |
-        [] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
+        ([] | cons _ [] | cons _ (cons _ []) | cons _ (cons _ (cons _ [])) |
         cons _ (cons _ (cons _ (cons _ []))) |
         cons _ (cons _ (cons _ (cons _ (cons _ [])))) |
         cons _ (cons _ (cons _ (cons _ (cons _ (cons _ []))))) |
-        cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _)))))))
+        cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ (cons _ _))))))))
         =&gt; None
       |
         cons index1
@@ -89395,12 +89398,12 @@ Module Roll.
       match
         Misc.take (|Cycle_repr.Index|).(Storage_description.INDEX.path_length) l
         with
-      | None | Some (_, [] | cons _ (cons _ _)) =&gt; None
+      | (None | Some (_, ([] | cons _ (cons _ _)))) =&gt; None
       | Some (l1, cons l2 []) =&gt;
         match
           (((|Cycle_repr.Index|).(Storage_description.INDEX.of_path) l1),
             (Pervasives.int_of_string_opt l2)) with
-        | (None, _) | (_, None) =&gt; None
+        | ((None, _) | (_, None)) =&gt; None
         | (Some c, Some i) =&gt; Some (c, i)
         end
       end.
@@ -94460,7 +94463,7 @@ Definition Make_indexed_subcontext :=
                   (Lwt_list.map_s
                     (fun function_parameter =&gt;
                       match function_parameter with
-                      | Context.Key prefix | Context.Dir prefix =&gt;
+                      | (Context.Key prefix | Context.Dir prefix) =&gt;
                         loop (Pervasives.op_plus i 1) prefix nil
                       end) prefixes) List.flatten)
           | (cons d [], _, true) =&gt;
@@ -94472,7 +94475,7 @@ Definition Make_indexed_subcontext :=
                   (Lwt_list.map_s
                     (fun function_parameter =&gt;
                       match function_parameter with
-                      | Context.Key prefix | Context.Dir prefix =&gt;
+                      | (Context.Key prefix | Context.Dir prefix) =&gt;
                         match Misc.remove_prefix d (List.hd (List.rev prefix))
                           with
                         | None =&gt; Lwt.return_nil
@@ -94486,7 +94489,7 @@ Definition Make_indexed_subcontext :=
                   (Lwt_list.map_s
                     (fun function_parameter =&gt;
                       match function_parameter with
-                      | Context.Key prefix | Context.Dir prefix =&gt;
+                      | (Context.Key prefix | Context.Dir prefix) =&gt;
                         loop (Pervasives.op_plus i 1) prefix ds
                       end) prefixes) List.flatten)
           | (cons d ds, _, _) =&gt;
@@ -96411,8 +96414,8 @@ Parameter encoding : Data_encoding.t t.
   <div style="margin: 20px;">
     <h3>Time_repr</h3>
     <ul>
-      <li>OCaml size: 67 lines</li>
-      <li>Coq size: 46 lines (-32% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 65 lines</li>
+      <li>Coq size: 44 lines (-33% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96477,8 +96480,6 @@ let of_seconds_string s =
 
 Alternative: use sum types (&quot;option&quot;, &quot;result&quot;, ...) to represent an error case.">try Some (of_seconds (Int64.of_string s)) with _ -&gt; None</abbr>
 
-let to_seconds = to_seconds
-
 let to_seconds_string s = Int64.to_string (to_seconds s)
 
 let pp = pp_hum
@@ -96525,8 +96526,6 @@ Definition time := t.
 Definition of_seconds_string (s : string) : option t :=
   (* ❌ Try-with are not handled *)
   try (Some (of_seconds (Int64.of_string s))).
-
-Definition to_seconds : t -&gt; int64 := to_seconds.
 
 Definition to_seconds_string (s : t) : string := Int64.to_string (to_seconds s).
 

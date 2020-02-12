@@ -352,7 +352,7 @@ Definition apply_operation (function_parameter : validation_state)
       let '(predecessor, baker) :=
         match mode with
         |
-          Partial_application {|
+          (Partial_application {|
             validation_mode.Partial_application.block_header := {|
               block_header.shell := {|
                 Block_header.shell_header.predecessor := predecessor
@@ -371,7 +371,7 @@ Definition apply_operation (function_parameter : validation_state)
           Full_construction {|
             validation_mode.Full_construction.predecessor := predecessor;
               validation_mode.Full_construction.baker := baker
-              |} => (predecessor, baker)
+              |}) => (predecessor, baker)
         |
           Partial_construction {|
             validation_mode.Partial_construction.predecessor := predecessor
@@ -458,7 +458,7 @@ Definition finalize_block (function_parameter : validation_state)
                   Apply_results.block_metadata.deactivated := nil;
                   Apply_results.block_metadata.balance_updates := nil |})))
   |
-    Application {|
+    (Application {|
       validation_mode.Application.block_header := {|
         block_header.protocol_data := {|
           Alpha_context.Block_header.protocol_data.contents := protocol_data
@@ -471,7 +471,7 @@ Definition finalize_block (function_parameter : validation_state)
       validation_mode.Full_construction.protocol_data := protocol_data;
         validation_mode.Full_construction.baker := baker;
         validation_mode.Full_construction.block_delay := block_delay
-        |} =>
+        |}) =>
     Error_monad.op_gtgteqquestion
       (Apply.finalize_application ctxt protocol_data baker block_delay)
       (fun function_parameter =>

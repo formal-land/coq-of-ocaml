@@ -87,7 +87,7 @@ Definition add_dip {A : Set}
   (ty : Script_typed_ir.ty A) (annot : option Script_typed_ir.var_annot)
   (prev : tc_context) : tc_context :=
   match prev with
-  | Lambda | Toplevel _ =>
+  | (Lambda | Toplevel _) =>
     Dip (Script_typed_ir.Item_t ty Script_typed_ir.Empty_t annot) prev
   | Dip stack _ =>
     let 'existT _ __Dip_'a stack :=
@@ -337,8 +337,8 @@ Definition number_of_generated_growing_types {a b : Set}
 Definition location {A B : Set} (function_parameter : Micheline.node A B) : A :=
   match function_parameter with
   |
-    Micheline.Prim loc _ _ _ | Micheline.Int loc _ | Micheline.String loc _ |
-    Micheline.Bytes loc _ | Micheline.Seq loc _ => loc
+    (Micheline.Prim loc _ _ _ | Micheline.Int loc _ | Micheline.String loc _ |
+    Micheline.Bytes loc _ | Micheline.Seq loc _) => loc
   end.
 
 Definition kind {A B : Set} (function_parameter : Micheline.node A B)
@@ -355,16 +355,16 @@ Definition namespace (function_parameter : Alpha_context.Script.prim)
   : Script_tc_errors.namespace :=
   match function_parameter with
   |
-    Alpha_context.Script.K_parameter | Alpha_context.Script.K_storage |
-    Alpha_context.Script.K_code => Script_tc_errors.Keyword_namespace
+    (Alpha_context.Script.K_parameter | Alpha_context.Script.K_storage |
+    Alpha_context.Script.K_code) => Script_tc_errors.Keyword_namespace
   |
-    Alpha_context.Script.D_False | Alpha_context.Script.D_Elt |
+    (Alpha_context.Script.D_False | Alpha_context.Script.D_Elt |
     Alpha_context.Script.D_Left | Alpha_context.Script.D_None |
     Alpha_context.Script.D_Pair | Alpha_context.Script.D_Right |
     Alpha_context.Script.D_Some | Alpha_context.Script.D_True |
-    Alpha_context.Script.D_Unit => Script_tc_errors.Constant_namespace
+    Alpha_context.Script.D_Unit) => Script_tc_errors.Constant_namespace
   |
-    Alpha_context.Script.I_PACK | Alpha_context.Script.I_UNPACK |
+    (Alpha_context.Script.I_PACK | Alpha_context.Script.I_UNPACK |
     Alpha_context.Script.I_BLAKE2B | Alpha_context.Script.I_SHA256 |
     Alpha_context.Script.I_SHA512 | Alpha_context.Script.I_ABS |
     Alpha_context.Script.I_ADD | Alpha_context.Script.I_AMOUNT |
@@ -405,10 +405,10 @@ Definition namespace (function_parameter : Alpha_context.Script.prim)
     Alpha_context.Script.I_LOOP_LEFT | Alpha_context.Script.I_ADDRESS |
     Alpha_context.Script.I_CONTRACT | Alpha_context.Script.I_ISNAT |
     Alpha_context.Script.I_CAST | Alpha_context.Script.I_RENAME |
-    Alpha_context.Script.I_DIG | Alpha_context.Script.I_DUG =>
+    Alpha_context.Script.I_DIG | Alpha_context.Script.I_DUG) =>
     Script_tc_errors.Instr_namespace
   |
-    Alpha_context.Script.T_bool | Alpha_context.Script.T_contract |
+    (Alpha_context.Script.T_bool | Alpha_context.Script.T_contract |
     Alpha_context.Script.T_int | Alpha_context.Script.T_key |
     Alpha_context.Script.T_key_hash | Alpha_context.Script.T_lambda |
     Alpha_context.Script.T_list | Alpha_context.Script.T_map |
@@ -419,7 +419,7 @@ Definition namespace (function_parameter : Alpha_context.Script.prim)
     Alpha_context.Script.T_bytes | Alpha_context.Script.T_mutez |
     Alpha_context.Script.T_timestamp | Alpha_context.Script.T_unit |
     Alpha_context.Script.T_operation | Alpha_context.Script.T_address |
-    Alpha_context.Script.T_chain_id => Script_tc_errors.Type_namespace
+    Alpha_context.Script.T_chain_id) => Script_tc_errors.Type_namespace
   end.
 
 Definition unexpected
@@ -434,9 +434,9 @@ Definition unexpected
   | Micheline.Prim loc name _ _ =>
     match ((namespace name), exp_ns) with
     |
-      (Script_tc_errors.Type_namespace, Script_tc_errors.Type_namespace) |
+      ((Script_tc_errors.Type_namespace, Script_tc_errors.Type_namespace) |
       (Script_tc_errors.Instr_namespace, Script_tc_errors.Instr_namespace) |
-      (Script_tc_errors.Constant_namespace, Script_tc_errors.Constant_namespace)
+      (Script_tc_errors.Constant_namespace, Script_tc_errors.Constant_namespace))
       => extensible_type_value
     | (ns, _) => extensible_type_value
     end
@@ -2798,7 +2798,7 @@ Definition well_formed_entrypoints {A : Set}
     : option (list B) * (|Entrypoints|).(S.SET.t) :=
     let '(first_unreachable, all) as acc := function_parameter in
     match annot with
-    | None | Some (Field_annot "") =>
+    | (None | Some (Field_annot "")) =>
       if reachable then
         acc
       else
@@ -2854,7 +2854,7 @@ Definition well_formed_entrypoints {A : Set}
   try
     (let '(init, reachable) :=
       match root_name with
-      | None | Some "" => ((|Entrypoints|).(S.SET.empty), false)
+      | (None | Some "") => ((|Entrypoints|).(S.SET.empty), false)
       | Some name => (((|Entrypoints|).(S.SET.singleton) name), true)
       end in
     let '(first_unreachable, all) := check full nil reachable (None, init) in
@@ -2953,8 +2953,8 @@ Fixpoint parse_data {a : Set}
                         Pervasives.op_atat Error_monad.fail
                           extensible_type_value
                       |
-                        Micheline.Int _ _ | Micheline.String _ _ |
-                        Micheline.Bytes _ _ | Micheline.Seq _ _ =>
+                        (Micheline.Int _ _ | Micheline.String _ _ |
+                        Micheline.Bytes _ _ | Micheline.Seq _ _) =>
                         Error_monad.op_gtgteqquestion (__error_value tt)
                           Error_monad.fail
                       end)) (None, (empty_map key_type), ctxt) items) traced)
@@ -3036,7 +3036,7 @@ Fixpoint parse_data {a : Set}
               else
                 match String.get v i with
                 |
-                  "010" % char | " " % char | "!" % char | """" % char |
+                  ("010" % char | " " % char | "!" % char | """" % char |
                   "#" % char | "$" % char | "%" % char | "&" % char | "'" % char
                   | "(" % char | ")" % char | "*" % char | "+" % char |
                   "," % char | "-" % char | "." % char | "/" % char | "0" % char
@@ -3057,7 +3057,7 @@ Fixpoint parse_data {a : Set}
                   | "p" % char | "q" % char | "r" % char | "s" % char |
                   "t" % char | "u" % char | "v" % char | "w" % char | "x" % char
                   | "y" % char | "z" % char | "{" % char | "|" % char |
-                  "}" % char | "~" % char =>
+                  "}" % char | "~" % char) =>
                   check_printable_ascii (Pervasives.op_minus i 1)
                 | _ => false
                 end in
@@ -3919,11 +3919,11 @@ with parse_instr {bef : Set}
     : Lwt.t (Error_monad.tzresult unit) :=
     match (type_logger, script_instr) with
     |
-      (None, _) |
+      ((None, _) |
       (Some _,
-        Micheline.Seq (-1) _ | Micheline.Int _ _ | Micheline.String _ _ |
-        Micheline.Bytes _ _) => Error_monad.return_unit
-    | (Some log, Micheline.Prim _ _ _ _ | Micheline.Seq _ _) =>
+        (Micheline.Seq (-1) _ | Micheline.Int _ _ | Micheline.String _ _ |
+        Micheline.Bytes _ _))) => Error_monad.return_unit
+    | (Some log, (Micheline.Prim _ _ _ _ | Micheline.Seq _ _)) =>
       let ctxt := Alpha_context.Gas.set_unlimited ctxt in
       Error_monad.op_gtgteqquestion (unparse_stack ctxt stack_ty)
         (fun function_parameter =>
@@ -8693,7 +8693,7 @@ Definition list_entrypoints {A : Set}
         (|Entrypoints_map|).(S.MAP.t) (list B * Alpha_context.Script.node)) :=
     let '(unreachables, all) as acc := function_parameter in
     match annot with
-    | None | Some (Field_annot "") =>
+    | (None | Some (Field_annot "")) =>
       Pervasives.op_atat Error_monad.ok
         (if reachable then
           acc

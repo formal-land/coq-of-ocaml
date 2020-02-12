@@ -461,7 +461,7 @@ Definition update_allocated_contracts_count (ctxt : t) : t :=
 
 Definition clear_storage_space_to_pay (ctxt : t) : t * Z.t * Z :=
   match (ctxt.(t.storage_space_to_pay), ctxt.(t.allocated_contracts)) with
-  | (None, _) | (_, None) =>
+  | ((None, _) | (_, None)) =>
     (* ❌ Assert instruction is not handled. *)
     assert false
   | (Some storage_space_to_pay, Some allocated_contracts) =>

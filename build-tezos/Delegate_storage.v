@@ -154,8 +154,10 @@ Definition cleanup_balance_updates {A : Set}
   (balance_updates : list (A * balance_update)) : list (A * balance_update) :=
   List.filter
     (fun function_parameter =>
-      let '(_, Credited update | Debited update) := function_parameter in
-      Pervasives.not (Tez_repr.equal update Tez_repr.zero)) balance_updates.
+      match function_parameter with
+      | (_, (Credited update | Debited update)) =>
+        Pervasives.not (Tez_repr.equal update Tez_repr.zero)
+      end) balance_updates.
 
 Module frozen_balance.
   Record record := Build {
@@ -249,7 +251,7 @@ Definition known
       c (Contract_repr.implicit_contract delegate))
     (fun function_parameter =>
       match function_parameter with
-      | None | Some (Manager_repr.Hash _) => Error_monad.return_false
+      | (None | Some (Manager_repr.Hash _)) => Error_monad.return_false
       | Some (Manager_repr.Public_key _) => Error_monad.return_true
       end).
 
@@ -369,7 +371,7 @@ Definition set
                             end)
                       else
                         Error_monad.fail extensible_type_value
-                    | (None | Some _, _) => Error_monad.return_unit
+                    | ((None | Some _), _) => Error_monad.return_unit
                     end))
                 (fun function_parameter =>
                   let '_ := function_parameter in
