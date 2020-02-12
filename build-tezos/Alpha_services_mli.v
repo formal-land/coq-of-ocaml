@@ -11,7 +11,12 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Constants_services.
+Require Tezos.Contract_services.
+Require Tezos.Delegate_services.
+Require Tezos.Helpers_services.
 Require Tezos.Nonce_hash.
+Require Tezos.Voting_services.
 
 Import Alpha_context.
 
@@ -70,18 +75,18 @@ Module Nonce.
     Alpha_context.Raw_level.t -> Lwt.t (Error_monad.shell_tzresult info).
 End Nonce.
 
-Parameter Contract : alias.
+Module Contract := Contract_services.
 
-Parameter Constants : alias.
+Module Constants := Constants_services.
 
-Parameter Delegate : alias.
+Module Delegate := Delegate_services.
 
-Parameter Helpers : alias.
+Module Helpers := Helpers_services.
 
-Parameter Forge : alias.
+Module Forge := Helpers_services.Forge.
 
-Parameter Parse : alias.
+Module Parse := Helpers_services.Parse.
 
-Parameter Voting : alias.
+Module Voting := Voting_services.
 
 Parameter register : unit -> unit.

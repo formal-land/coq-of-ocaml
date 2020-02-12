@@ -255,7 +255,7 @@ Definition register (function_parameter : unit) : unit :=
               end)) in
   let do_big_map_get
     (ctxt : Alpha_context.context) (id : Alpha_context.Big_map.id)
-    (key : Script_expr_hash.t)
+    (__key_value : Script_expr_hash.t)
     : Lwt.t
       (Error_monad.tzresult (Micheline.canonical Alpha_context.Script.prim)) :=
     let ctxt := Alpha_context.Gas.set_unlimited ctxt in
@@ -278,7 +278,7 @@ Definition register (function_parameter : unit) : unit :=
                     [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context])
                   _ [value_type, ctxt] in
               Error_monad.op_gtgteqquestion
-                (Alpha_context.Big_map.get_opt ctxt id key)
+                (Alpha_context.Big_map.get_opt ctxt id __key_value)
                 (fun function_parameter =>
                   let '(_ctxt, value) := function_parameter in
                   match value with
@@ -745,9 +745,9 @@ Definition big_map_get {D E G I K L a b c i o q : Set}
             (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
           i -> Lwt.t (Error_monad.shell_tzresult o)) *
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
-  (id : Alpha_context.Big_map.id) (key : Script_expr_hash.t)
+  (id : Alpha_context.Big_map.id) (__key_value : Script_expr_hash.t)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Script.expr) :=
-  RPC_context.make_call2 S.big_map_get ctxt block id key tt tt.
+  RPC_context.make_call2 S.big_map_get ctxt block id __key_value tt tt.
 
 Definition contract_big_map_get_opt {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -772,6 +772,7 @@ Definition contract_big_map_get_opt {D E G I K L a b c i o q : Set}
           i -> Lwt.t (Error_monad.shell_tzresult o)) *
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
-  (key : Alpha_context.Script.expr * Alpha_context.Script.expr)
+  (__key_value : Alpha_context.Script.expr * Alpha_context.Script.expr)
   : Lwt.t (Error_monad.shell_tzresult (option Alpha_context.Script.expr)) :=
-  RPC_context.make_call1 S.contract_big_map_get_opt ctxt block contract tt key.
+  RPC_context.make_call1 S.contract_big_map_get_opt ctxt block contract tt
+    __key_value.

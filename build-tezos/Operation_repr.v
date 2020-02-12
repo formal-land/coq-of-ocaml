@@ -625,8 +625,9 @@ Module Encoding.
               end;
           case.MCase.proj :=
             fun function_parameter =>
-              let 'Delegation key := function_parameter in
-              key; case.MCase.inj := fun key => Delegation key |}.
+              let 'Delegation __key_value := function_parameter in
+              __key_value;
+          case.MCase.inj := fun __key_value => Delegation __key_value |}.
     
     Definition encoding : Data_encoding.encoding packed_manager_operation :=
       let make {A : Set} (function_parameter : case A)
@@ -1294,7 +1295,7 @@ Definition acceptable_passes (op : packed_operation) : list Z :=
 (* top_level_evaluation *)
 
 Definition check_signature_sync {A : Set}
-  (key : (|Signature.Public_key|).(S.SPublic_key.t))
+  (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   (chain_id : (|Chain_id|).(S.HASH.t)) (function_parameter : operation A)
   : Error_monad.tzresult unit :=
   let '{|
@@ -1307,7 +1308,8 @@ Definition check_signature_sync {A : Set}
     let unsigned_operation :=
       Data_encoding.Binary.to_bytes_exn unsigned_operation_encoding
         (shell, contents) in
-    if Signature.check (Some watermark) key signature unsigned_operation then
+    if Signature.check (Some watermark) __key_value signature unsigned_operation
+      then
       Pervasives.Ok tt
     else
       Error_monad.__error_value extensible_type_value in

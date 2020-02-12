@@ -343,10 +343,10 @@ Definition check_proof_of_work_stamp
 
 Definition check_signature
   (block : Alpha_context.Block_header.t) (chain_id : (|Chain_id|).(S.HASH.t))
-  (key : (|Signature.Public_key|).(S.SPublic_key.t))
+  (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult unit) :=
   let check_signature
-    (key : (|Signature.Public_key|).(S.SPublic_key.t))
+    (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
     (function_parameter : Alpha_context.Block_header.t) : bool :=
     let '{|
       Alpha_context.Block_header.t.shell := shell;
@@ -359,9 +359,9 @@ Definition check_signature
     let unsigned_header :=
       Data_encoding.Binary.to_bytes_exn
         Alpha_context.Block_header.unsigned_encoding (shell, contents) in
-    Signature.check (Some (Signature.Block_header chain_id)) key signature
-      unsigned_header in
-  if check_signature key block then
+    Signature.check (Some (Signature.Block_header chain_id)) __key_value
+      signature unsigned_header in
+  if check_signature __key_value block then
     Error_monad.return_unit
   else
     Error_monad.fail extensible_type_value.

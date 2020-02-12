@@ -55,7 +55,7 @@ Module Cost_of.
     
     Parameter pair_access : Alpha_context.Gas.cost.
     
-    Parameter cons : Alpha_context.Gas.cost.
+    Parameter __cons_value : Alpha_context.Gas.cost.
     
     Parameter variant_no_data : Alpha_context.Gas.cost.
     
@@ -112,7 +112,7 @@ Module Cost_of.
     Parameter neg : forall {a : Set},
       Alpha_context.Script_int.num a -> Alpha_context.Gas.cost.
     
-    Parameter int : forall {a : Set}, a -> Alpha_context.Gas.cost.
+    Parameter __int_value : forall {a : Set}, a -> Alpha_context.Gas.cost.
     
     Parameter add_timestamp : forall {a : Set},
       Alpha_context.Script_timestamp.t -> Alpha_context.Script_int.num a ->
@@ -235,7 +235,7 @@ Module Cost_of.
     
     Parameter string_timestamp : Alpha_context.Gas.cost.
     
-    Parameter key : Alpha_context.Gas.cost.
+    Parameter __key_value : Alpha_context.Gas.cost.
     
     Parameter key_hash : Alpha_context.Gas.cost.
     
@@ -293,7 +293,7 @@ Module Cost_of.
     
     Parameter z : Z.t -> Alpha_context.Gas.cost.
     
-    Parameter int : forall {a : Set},
+    Parameter __int_value : forall {a : Set},
       Alpha_context.Script_int.num a -> Alpha_context.Gas.cost.
     
     Parameter tez : Alpha_context.Gas.cost.
@@ -305,7 +305,7 @@ Module Cost_of.
     Parameter timestamp :
       Alpha_context.Script_timestamp.t -> Alpha_context.Gas.cost.
     
-    Parameter key : Alpha_context.Gas.cost.
+    Parameter __key_value : Alpha_context.Gas.cost.
     
     Parameter key_hash : Alpha_context.Gas.cost.
     

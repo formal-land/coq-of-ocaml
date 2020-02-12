@@ -43,7 +43,7 @@ End ENCODER.
 
 Definition Make_encoder :=
   fun (V : {t : _ & VALUE.signature t}) =>
-    ((let of_bytes (key : list string) (b : MBytes.t)
+    ((let of_bytes (__key_value : list string) (b : MBytes.t)
       : Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t) :=
       match Data_encoding.Binary.of_bytes (|V|).(Storage_sigs.VALUE.encoding) b
         with
@@ -70,7 +70,7 @@ Definition encode_len_value (__bytes_value : MBytes.t) : MBytes.t :=
   let length := MBytes.length __bytes_value in
   (Data_encoding.Binary.to_bytes_exn Data_encoding.int31) length.
 
-Definition decode_len_value (key : list string) (len : MBytes.t)
+Definition decode_len_value (__key_value : list string) (len : MBytes.t)
   : Lwt.t (Error_monad.tzresult Z) :=
   match (Data_encoding.Binary.of_bytes Data_encoding.int31) len with
   | None => Error_monad.fail extensible_type_value
@@ -218,10 +218,10 @@ Definition Make_single_data_storage :=
               ((|C|).(Raw_context.T.get) __t_value
                 (|N|).(Storage_sigs.NAME.name))
               (fun b =>
-                let key :=
+                let __key_value :=
                   (|C|).(Raw_context.T.absolute_key) __t_value
                     (|N|).(Storage_sigs.NAME.name) in
-                Lwt.__return (of_bytes key b)) in
+                Lwt.__return (of_bytes __key_value b)) in
           let get_option (__t_value : (|C|).(Raw_context.T.context))
             : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
             Error_monad.op_gtgteq
@@ -231,10 +231,10 @@ Definition Make_single_data_storage :=
                 match function_parameter with
                 | None => Error_monad.return_none
                 | Some b =>
-                  let key :=
+                  let __key_value :=
                     (|C|).(Raw_context.T.absolute_key) __t_value
                       (|N|).(Storage_sigs.NAME.name) in
-                  match of_bytes key b with
+                  match of_bytes __key_value b with
                   | Pervasives.Ok v => Error_monad.return_some v
                   | Pervasives.Error __error_value =>
                     Lwt.__return (Pervasives.Error __error_value)
@@ -463,10 +463,10 @@ Definition Make_indexed_data_storage :=
           Error_monad.op_gtgteqquestion
             ((|C|).(Raw_context.T.get) s ((|I|).(INDEX.to_path) i nil))
             (fun b =>
-              let key :=
+              let __key_value :=
                 (|C|).(Raw_context.T.absolute_key) s
                   ((|I|).(INDEX.to_path) i nil) in
-              Lwt.__return (of_bytes key b)) in
+              Lwt.__return (of_bytes __key_value b)) in
         let get_option (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
           Error_monad.op_gtgteq
@@ -475,10 +475,10 @@ Definition Make_indexed_data_storage :=
               match function_parameter with
               | None => Error_monad.return_none
               | Some b =>
-                let key :=
+                let __key_value :=
                   (|C|).(Raw_context.T.absolute_key) s
                     ((|I|).(INDEX.to_path) i nil) in
-                match of_bytes key b with
+                match of_bytes __key_value b with
                 | Pervasives.Ok v => Error_monad.return_some v
                 | Pervasives.Error __error_value =>
                   Lwt.__return (Pervasives.Error __error_value)
@@ -703,9 +703,10 @@ Definition Make_indexed_carbonated_data_storage :=
               Error_monad.op_gtgteqquestion
                 ((|C|).(Raw_context.T.get) s (data_key i))
                 (fun b =>
-                  let key := (|C|).(Raw_context.T.absolute_key) s (data_key i)
-                    in
-                  Error_monad.op_gtgteqquestion (Lwt.__return (of_bytes key b))
+                  let __key_value :=
+                    (|C|).(Raw_context.T.absolute_key) s (data_key i) in
+                  Error_monad.op_gtgteqquestion
+                    (Lwt.__return (of_bytes __key_value b))
                     (fun v =>
                       Error_monad.__return
                         (((|C|).(Raw_context.T.project) s), v)))) in
@@ -1435,10 +1436,10 @@ Definition Make_indexed_subcontext :=
                 ((|Raw_context|).(Raw_context.T.get) (pack s i)
                   (|N|).(Storage_sigs.NAME.name))
                 (fun b =>
-                  let key :=
+                  let __key_value :=
                     (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
                       (|N|).(Storage_sigs.NAME.name) in
-                  Lwt.__return (of_bytes key b)) in
+                  Lwt.__return (of_bytes __key_value b)) in
             let get_option
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
@@ -1450,10 +1451,10 @@ Definition Make_indexed_subcontext :=
                   match function_parameter with
                   | None => Error_monad.return_none
                   | Some b =>
-                    let key :=
+                    let __key_value :=
                       (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
                         (|N|).(Storage_sigs.NAME.name) in
-                    match of_bytes key b with
+                    match of_bytes __key_value b with
                     | Pervasives.Ok v => Error_monad.return_some v
                     | Pervasives.Error __error_value =>
                       Lwt.__return (Pervasives.Error __error_value)
@@ -1678,11 +1679,11 @@ Definition Make_indexed_subcontext :=
                   Error_monad.op_gtgteqquestion
                     ((|Raw_context|).(Raw_context.T.get) c data_name)
                     (fun b =>
-                      let key :=
+                      let __key_value :=
                         (|Raw_context|).(Raw_context.T.absolute_key) c data_name
                         in
                       Error_monad.op_gtgteqquestion
-                        (Lwt.__return (of_bytes key b))
+                        (Lwt.__return (of_bytes __key_value b))
                         (fun v =>
                           Error_monad.__return
                             (((|Raw_context|).(Raw_context.T.project) c), v))))

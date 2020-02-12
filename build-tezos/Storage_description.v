@@ -485,7 +485,7 @@ Definition depth_query : RPC_query.t query :=
   Pervasives.op_pipegt
     (RPC_query.op_pipeplus
       (RPC_query.__query_value (fun depth => {| query.depth := depth |}))
-      (RPC_query.__field_value None "depth" RPC_arg.int 0
+      (RPC_query.__field_value None "depth" RPC_arg.__int_value 0
         (fun __t_value => __t_value.(query.depth)))) RPC_query.seal.
 
 Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
@@ -610,9 +610,9 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               (Data_encoding.dynamic_size None arg_encoding)
               (fun function_parameter =>
                 match function_parameter with
-                | (key, None) => Some key
+                | (__key_value, None) => Some __key_value
                 | _ => None
-                end) (fun key => (key, None));
+                end) (fun __key_value => (__key_value, None));
             Data_encoding.__case_value "Dir" None (Data_encoding.Tag 1)
               (Data_encoding.tup2
                 (Data_encoding.dynamic_size None arg_encoding)
@@ -620,12 +620,14 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                   __handler_value.(opt_handler.Opt_handler.encoding)))
               (fun function_parameter =>
                 match function_parameter with
-                | (key, Some value) => Some (key, value)
+                | (__key_value, Some value) =>
+                  Some (__key_value, value)
                 | _ => None
                 end)
               (fun function_parameter =>
-                let '(key, value) := function_parameter in
-                (key, (Some value)))
+                let '(__key_value, value) := function_parameter
+                  in
+                (__key_value, (Some value)))
           ] in
       let get (k : ikey) (i : (|Compare.Int|).(Compare.S.t))
         : Lwt.t
@@ -641,14 +643,15 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               (fun keys =>
                 Error_monad.op_gtgteqquestion
                   (Error_monad.map_s
-                    (fun key =>
+                    (fun __key_value =>
                       if (|Compare.Int|).(Compare.S.op_eq) i 1 then
-                        Error_monad.__return (key, None)
+                        Error_monad.__return (__key_value, None)
                       else
                         Error_monad.op_gtgteqquestion
                           (__handler_value.(opt_handler.Opt_handler.get)
-                            (k, key) (Pervasives.op_minus i 1))
-                          (fun value => Error_monad.__return (key, value))) keys)
+                            (k, __key_value) (Pervasives.op_minus i 1))
+                          (fun value =>
+                            Error_monad.__return (__key_value, value))) keys)
                   (fun values => Error_monad.return_some values)) in
       let __handler_value :=
         Opt_handler

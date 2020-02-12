@@ -15,6 +15,7 @@ Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Level_repr.
+Require Tezos.Manager_repr.
 Require Tezos.Misc.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
@@ -74,7 +75,7 @@ Definition Int_index :=
       (A * (|Compare.Int|).(Compare.S.t)) :=
     let '_ := function_parameter in
     Storage_description.One
-      {| Storage_description.args.One.rpc_arg := RPC_arg.int;
+      {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare :=
           (|Compare.Int|).(Compare.S.compare) |} in
@@ -699,9 +700,10 @@ Module Big_map.
       |
         cons index1
           (cons index2
-            (cons index3 (cons index4 (cons index5 (cons index6 (cons key []))))))
+            (cons index3
+              (cons index4 (cons index5 (cons index6 (cons __key_value []))))))
         =>
-        let c := Z.of_string key in
+        let c := Z.of_string __key_value in
         let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
         let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key)
           in
@@ -1444,7 +1446,7 @@ Module Roll.
       : Storage_description.args A (|Compare.Int|).(Compare.S.t)
         (A * (|Compare.Int|).(Compare.S.t)) :=
       Storage_description.One
-        {| Storage_description.args.One.rpc_arg := RPC_arg.int;
+        {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
           Storage_description.args.One.encoding := Data_encoding.int31;
           Storage_description.args.One.compare :=
             (|Compare.Int|).(Compare.S.compare) |}.

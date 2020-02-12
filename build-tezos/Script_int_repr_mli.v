@@ -61,7 +61,7 @@ Parameter is_nat : num z -> option (num n).
 
 Parameter neg : forall {A : Set}, num A -> num z.
 
-Parameter int : num n -> num z.
+Parameter __int_value : num n -> num z.
 
 Parameter lognot : forall {A : Set}, num A -> num z.
 

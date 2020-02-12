@@ -137,10 +137,11 @@ Definition deterministic_seed (__seed_value : seed) : seed :=
 
 Definition initial_seeds (n : (|Compare.Int|).(Compare.S.t)) : list seed :=
   let fix loop
-    (acc : list seed) (elt : seed) (i : (|Compare.Int|).(Compare.S.t))
+    (acc : list seed) (__elt_value : seed) (i : (|Compare.Int|).(Compare.S.t))
     {struct acc} : list seed :=
     if (|Compare.Int|).(Compare.S.op_eq) i 1 then
-      List.rev (cons elt acc)
+      List.rev (cons __elt_value acc)
     else
-      loop (cons elt acc) (deterministic_seed elt) (Pervasives.op_minus i 1) in
+      loop (cons __elt_value acc) (deterministic_seed __elt_value)
+        (Pervasives.op_minus i 1) in
   loop nil (B (State_hash.hash_bytes None nil)) n.

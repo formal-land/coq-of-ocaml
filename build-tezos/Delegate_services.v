@@ -682,7 +682,7 @@ Module Baking_rights.
               (RPC_query.multi_field None "delegate"
                 (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg)
                 (fun __t_value => __t_value.(baking_rights_query.delegates))))
-            (RPC_query.opt_field None "max_priority" RPC_arg.int
+            (RPC_query.opt_field None "max_priority" RPC_arg.__int_value
               (fun __t_value => __t_value.(baking_rights_query.max_priority))))
           (RPC_query.flag None "all"
             (fun __t_value => __t_value.(baking_rights_query.all))))
@@ -1226,9 +1226,9 @@ Module Minimal_valid_time.
                 fun endorsing_power =>
                   {| t.priority := priority;
                     t.endorsing_power := endorsing_power |}))
-            (RPC_query.__field_value None "priority" RPC_arg.int 0
+            (RPC_query.__field_value None "priority" RPC_arg.__int_value 0
               (fun __t_value => __t_value.(t.priority))))
-          (RPC_query.__field_value None "endorsing_power" RPC_arg.int 0
+          (RPC_query.__field_value None "endorsing_power" RPC_arg.__int_value 0
             (fun __t_value => __t_value.(t.endorsing_power)))) RPC_query.seal.
     
     Definition minimal_valid_time

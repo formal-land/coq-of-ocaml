@@ -25,11 +25,6 @@ Inductive type_annot : Set :=
 Inductive field_annot : Set :=
 | Field_annot : string -> field_annot.
 
-Inductive annot : Set :=
-| Field_annot : string -> annot
-| Var_annot : string -> annot
-| Type_annot : string -> annot.
-
 Definition address := Alpha_context.Contract.t * string.
 
 Definition pair (a b : Set) := a * b.
@@ -101,6 +96,50 @@ Definition operation :=
   Alpha_context.packed_internal_operation *
     option Alpha_context.Contract.big_map_diff.
 
+Module script.
+  Record record {code arg_type storage storage_type root_name : Set} := Build {
+    code : code;
+    arg_type : arg_type;
+    storage : storage;
+    storage_type : storage_type;
+    root_name : root_name }.
+  Arguments record : clear implicits.
+  Definition with_code {t_code t_arg_type t_storage t_storage_type t_root_name}
+    code (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name code
+      r.(arg_type) r.(storage) r.(storage_type) r.(root_name).
+  Definition with_arg_type
+    {t_code t_arg_type t_storage t_storage_type t_root_name} arg_type
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      arg_type r.(storage) r.(storage_type) r.(root_name).
+  Definition with_storage
+    {t_code t_arg_type t_storage t_storage_type t_root_name} storage
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      r.(arg_type) storage r.(storage_type) r.(root_name).
+  Definition with_storage_type
+    {t_code t_arg_type t_storage t_storage_type t_root_name} storage_type
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      r.(arg_type) r.(storage) storage_type r.(root_name).
+  Definition with_root_name
+    {t_code t_arg_type t_storage t_storage_type t_root_name} root_name
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      r.(arg_type) r.(storage) r.(storage_type) root_name.
+End script.
+Definition script_skeleton := script.record.
+
+Module lambda.
+  Record record {lam : Set} := Build {
+    lam : lam }.
+  Arguments record : clear implicits.
+  Definition with_lam {t_lam} lam (r : record t_lam) :=
+    Build t_lam lam.
+End lambda.
+Definition lambda_skeleton := lambda.record.
+
 Module descr.
   Record record {loc bef aft instr : Set} := Build {
     loc : loc;
@@ -149,57 +188,18 @@ Module big_map.
 End big_map.
 Definition big_map_skeleton := big_map.record.
 
-Module script.
-  Record record {code arg_type storage storage_type root_name : Set} := Build {
-    code : code;
-    arg_type : arg_type;
-    storage : storage;
-    storage_type : storage_type;
-    root_name : root_name }.
-  Arguments record : clear implicits.
-  Definition with_code {t_code t_arg_type t_storage t_storage_type t_root_name}
-    code (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name code
-      r.(arg_type) r.(storage) r.(storage_type) r.(root_name).
-  Definition with_arg_type
-    {t_code t_arg_type t_storage t_storage_type t_root_name} arg_type
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      arg_type r.(storage) r.(storage_type) r.(root_name).
-  Definition with_storage
-    {t_code t_arg_type t_storage t_storage_type t_root_name} storage
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      r.(arg_type) storage r.(storage_type) r.(root_name).
-  Definition with_storage_type
-    {t_code t_arg_type t_storage t_storage_type t_root_name} storage_type
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      r.(arg_type) r.(storage) storage_type r.(root_name).
-  Definition with_root_name
-    {t_code t_arg_type t_storage t_storage_type t_root_name} root_name
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      r.(arg_type) r.(storage) r.(storage_type) root_name.
-End script.
-Definition script_skeleton := script.record.
-
-Reserved Notation "'script".
 Reserved Notation "'end_of_stack".
-Reserved Notation "'typed_contract".
 Reserved Notation "'ty".
 Reserved Notation "'stack_ty".
+Reserved Notation "'typed_contract".
 Reserved Notation "'big_map".
 Reserved Notation "'instr".
 Reserved Notation "'stack_prefix_preservation_witness".
 Reserved Notation "'descr".
+Reserved Notation "'lambda".
+Reserved Notation "'script".
 
-Inductive lambda (arg ret : Set) : Set :=
-| Lam :
-  'descr (arg * 'end_of_stack) (ret * 'end_of_stack) ->
-  Alpha_context.Script.node -> lambda arg ret
-
-with ty_gadt : Set :=
+Inductive ty_gadt : Set :=
 | Unit_t : option type_annot -> ty_gadt
 | Int_t : option type_annot -> ty_gadt
 | Nat_t : option type_annot -> ty_gadt
@@ -333,7 +333,7 @@ with instr_gadt : Set :=
 | Dip : forall {aft bef : Set}, 'descr bef aft -> instr_gadt
 | Exec : instr_gadt
 | Apply : forall {arg : Set}, 'ty arg -> instr_gadt
-| Lambda : forall {arg ret : Set}, lambda arg ret -> instr_gadt
+| Lambda : forall {arg ret : Set}, 'lambda arg ret -> instr_gadt
 | Failwith : forall {a : Set}, 'ty a -> instr_gadt
 | Nop : instr_gadt
 | Compare : forall {a : Set}, comparable_ty a -> instr_gadt
@@ -349,10 +349,10 @@ with instr_gadt : Set :=
 | Create_account : instr_gadt
 | Implicit_account : instr_gadt
 | Create_contract : forall {g p : Set},
-  'ty g -> 'ty p -> lambda (p * g) (list operation * g) -> option string ->
+  'ty g -> 'ty p -> 'lambda (p * g) (list operation * g) -> option string ->
   instr_gadt
 | Create_contract_2 : forall {g p : Set},
-  'ty g -> 'ty p -> lambda (p * g) (list operation * g) -> option string ->
+  'ty g -> 'ty p -> 'lambda (p * g) (list operation * g) -> option string ->
   instr_gadt
 | Set_delegate : instr_gadt
 | Now : instr_gadt
@@ -386,14 +386,10 @@ with stack_prefix_preservation_witness_gadt : Set :=
   stack_prefix_preservation_witness_gadt
 | Rest : stack_prefix_preservation_witness_gadt
 
-where "'script" := (fun (t_arg t_storage : Set) =>
-  script_skeleton
-    (lambda (pair t_arg t_storage) (pair (list operation) t_storage))
-    ('ty t_arg) t_storage ('ty t_storage) (option string))
-and "'end_of_stack" := (unit)
-and "'typed_contract" := (fun (t_arg : Set) => 'ty t_arg * address)
+where "'end_of_stack" := (unit)
 and "'ty" := (fun (_ : Set) => ty_gadt)
 and "'stack_ty" := (fun (_ : Set) => stack_ty_gadt)
+and "'typed_contract" := (fun (t_arg : Set) => 'ty t_arg * address)
 and "'big_map" := (fun (t_key t_value : Set) =>
   big_map_skeleton (option Z.t) (map t_key (option t_value)) ('ty t_key)
     ('ty t_value))
@@ -402,20 +398,27 @@ and "'stack_prefix_preservation_witness" := (fun (_ _ _ _ : Set) =>
   stack_prefix_preservation_witness_gadt)
 and "'descr" := (fun (t_bef t_aft : Set) =>
   descr_skeleton Alpha_context.Script.location ('stack_ty t_bef)
-    ('stack_ty t_aft) ('instr t_bef t_aft)).
+    ('stack_ty t_aft) ('instr t_bef t_aft))
+and "'lambda" := (fun (t_arg t_ret : Set) =>
+  lambda_skeleton
+    ('descr (t_arg * 'end_of_stack) (t_ret * 'end_of_stack) *
+      Alpha_context.Script.node))
+and "'script" := (fun (t_arg t_storage : Set) =>
+  script_skeleton
+    ('lambda (pair t_arg t_storage) (pair (list operation) t_storage))
+    ('ty t_arg) t_storage ('ty t_storage) (option string)).
 
-Definition script := 'script.
 Definition end_of_stack := 'end_of_stack.
-Definition typed_contract := 'typed_contract.
 Definition ty := 'ty.
 Definition stack_ty := 'stack_ty.
+Definition typed_contract := 'typed_contract.
 Definition big_map := 'big_map.
 Definition instr := 'instr.
 Definition stack_prefix_preservation_witness :=
   'stack_prefix_preservation_witness.
 Definition descr := 'descr.
-
-Arguments Lam {_ _}.
+Definition lambda := 'lambda.
+Definition script := 'script.
 
 Inductive ex_big_map : Set :=
 | Ex_bm : forall {key value : Set}, big_map key value -> ex_big_map.

@@ -14,6 +14,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_expr_hash.
+Require Tezos.Script_int_repr.
 Require Tezos.Storage_description.
 
 Module BASIC_DATA.
@@ -422,73 +423,7 @@ Module Gas.
   Parameter block_level : context -> Z.t.
 End Gas.
 
-Module Script_int.
-  Parameter num : forall (t : Set), Set.
-  
-  Parameter n : Set.
-  
-  Parameter z : Set.
-  
-  Parameter zero_n : num n.
-  
-  Parameter zero : num z.
-  
-  Parameter compare : forall {a : Set}, num a -> num a -> Z.
-  
-  Parameter to_string : forall {A : Set}, num A -> string.
-  
-  Parameter of_string : string -> option (num z).
-  
-  Parameter to_int64 : forall {A : Set}, num A -> option int64.
-  
-  Parameter of_int64 : int64 -> num z.
-  
-  Parameter to_int : forall {A : Set}, num A -> option Z.
-  
-  Parameter of_int : Z -> num z.
-  
-  Parameter of_zint : Z.t -> num z.
-  
-  Parameter to_zint : forall {a : Set}, num a -> Z.t.
-  
-  Parameter add_n : num n -> num n -> num n.
-  
-  Parameter mul_n : num n -> num n -> num n.
-  
-  Parameter ediv_n : num n -> num n -> option (num n * num n).
-  
-  Parameter add : forall {A B : Set}, num A -> num B -> num z.
-  
-  Parameter sub : forall {A B : Set}, num A -> num B -> num z.
-  
-  Parameter mul : forall {A B : Set}, num A -> num B -> num z.
-  
-  Parameter ediv : forall {A B : Set}, num A -> num B -> option (num z * num n).
-  
-  Parameter abs : num z -> num n.
-  
-  Parameter is_nat : num z -> option (num n).
-  
-  Parameter neg : forall {A : Set}, num A -> num z.
-  
-  Parameter int : num n -> num z.
-  
-  Parameter lognot : forall {A : Set}, num A -> num z.
-  
-  Parameter shift_left_n : num n -> num n -> option (num n).
-  
-  Parameter shift_right_n : num n -> num n -> option (num n).
-  
-  Parameter shift_left : forall {a : Set}, num a -> num n -> option (num a).
-  
-  Parameter shift_right : forall {a : Set}, num a -> num n -> option (num a).
-  
-  Parameter logor : forall {a : Set}, num a -> num a -> num a.
-  
-  Parameter logand : forall {A : Set}, num A -> num n -> num n.
-  
-  Parameter logxor : num n -> num n -> num n.
-End Script_int.
+Module Script_int := Script_int_repr.
 
 Module Script_timestamp.
   Import Script_int.

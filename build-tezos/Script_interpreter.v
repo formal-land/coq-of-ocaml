@@ -458,7 +458,8 @@ Fixpoint step {a b : Set}
             existT (fun '[__41, __42] => [__41 ** (list __41) ** (stack __42)])
               _ [hd, tl, rest] in
           Error_monad.op_gtgteqquestion
-            (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.cons))
+            (Lwt.__return
+              (Alpha_context.Gas.consume ctxt Interp_costs.__cons_value))
             (fun ctxt => logged_return ((Item (cons hd tl) rest), ctxt))
         | (Script_typed_ir.Nil, rest) =>
           Error_monad.op_gtgteqquestion
@@ -779,48 +780,51 @@ Fixpoint step {a b : Set}
             (fun ctxt =>
               logged_return
                 ((Item (Script_ir_translator.empty_big_map tk tv) rest), ctxt))
-        | (Script_typed_ir.Big_map_mem, Item key (Item map rest)) =>
-          let 'existT _ [__87, __88, __89] [key, map, rest] :=
+        | (Script_typed_ir.Big_map_mem, Item __key_value (Item map rest)) =>
+          let 'existT _ [__87, __88, __89] [__key_value, map, rest] :=
             existT
               (fun '[__87, __88, __89] =>
                 [__87 ** (Script_typed_ir.big_map __87 __88) ** (stack __89)]) _
-              [key, map, rest] in
+              [__key_value, map, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt
-                (Interp_costs.map_mem key map.(Script_typed_ir.big_map.diff))))
+                (Interp_costs.map_mem __key_value
+                  map.(Script_typed_ir.big_map.diff))))
             (fun ctxt =>
               Error_monad.op_gtgteqquestion
-                (Script_ir_translator.big_map_mem ctxt key map)
+                (Script_ir_translator.big_map_mem ctxt __key_value map)
                 (fun function_parameter =>
                   let '(res, ctxt) := function_parameter in
                   logged_return ((Item res rest), ctxt)))
-        | (Script_typed_ir.Big_map_get, Item key (Item map rest)) =>
-          let 'existT _ [__90, __91, __92] [key, map, rest] :=
+        | (Script_typed_ir.Big_map_get, Item __key_value (Item map rest)) =>
+          let 'existT _ [__90, __91, __92] [__key_value, map, rest] :=
             existT
               (fun '[__90, __91, __92] =>
                 [__90 ** (Script_typed_ir.big_map __90 __91) ** (stack __92)]) _
-              [key, map, rest] in
+              [__key_value, map, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt
-                (Interp_costs.map_get key map.(Script_typed_ir.big_map.diff))))
+                (Interp_costs.map_get __key_value
+                  map.(Script_typed_ir.big_map.diff))))
             (fun ctxt =>
               Error_monad.op_gtgteqquestion
-                (Script_ir_translator.big_map_get ctxt key map)
+                (Script_ir_translator.big_map_get ctxt __key_value map)
                 (fun function_parameter =>
                   let '(res, ctxt) := function_parameter in
                   logged_return ((Item res rest), ctxt)))
         |
           (Script_typed_ir.Big_map_update,
-            Item key (Item maybe_value (Item map rest))) =>
-          let 'existT _ [__93, __94, __95] [key, maybe_value, map, rest] :=
+            Item __key_value (Item maybe_value (Item map rest))) =>
+          let 'existT _ [__93, __94, __95] [__key_value, maybe_value, map, rest]
+            :=
             existT
               (fun '[__93, __94, __95] =>
                 [__93 ** (option __94) ** (Script_typed_ir.big_map __93 __94) **
-                  (stack __95)]) _ [key, maybe_value, map, rest] in
+                  (stack __95)]) _ [__key_value, maybe_value, map, rest] in
           consume_gas_terop __descr_value
-            (Script_ir_translator.big_map_update, key, maybe_value, map)
+            (Script_ir_translator.big_map_update, __key_value, maybe_value, map)
             (fun k =>
               fun v =>
                 fun m =>
@@ -1108,8 +1112,9 @@ Fixpoint step {a b : Set}
               (fun __118 : Set =>
                 [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
                   (stack __118)]) _ [x, rest] in
-          consume_gas_unop __descr_value (Alpha_context.Script_int.int, x)
-            Interp_costs.int rest ctxt
+          consume_gas_unop __descr_value
+            (Alpha_context.Script_int.__int_value, x) Interp_costs.__int_value
+            rest ctxt
         | (Script_typed_ir.Neg_int, Item x rest) =>
           let 'existT _ __119 [x, rest] :=
             existT
@@ -1517,7 +1522,8 @@ Fixpoint step {a b : Set}
           Error_monad.op_gtgteqquestion
             (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.apply))
             (fun ctxt =>
-              let 'Script_typed_ir.Lam __descr_value expr := lam in
+              let '{| Script_typed_ir.lambda.lam := (__descr_value, expr) |} :=
+                lam in
               let 'Script_typed_ir.Item_t full_arg_ty _ _ :=
                 __descr_value.(Script_typed_ir.descr.bef) in
               Error_monad.op_gtgteqquestion
@@ -1587,7 +1593,10 @@ Fixpoint step {a b : Set}
                                 nil;
                               expr
                             ] in
-                        let lam' := Script_typed_ir.Lam full_descr full_expr in
+                        let lam' :=
+                          {|
+                            Script_typed_ir.lambda.lam :=
+                              (full_descr, full_expr) |} in
                         logged_return ((Item lam' rest), ctxt)
                       | _ =>
                         (* ❌ Assert instruction is not handled. *)
@@ -1926,23 +1935,24 @@ Fixpoint step {a b : Set}
                               Alpha_context.internal_operation.nonce :=
                                 __nonce_value |}), None)
                           (Item (contract, "default") rest)), ctxt))))
-        | (Script_typed_ir.Implicit_account, Item key rest) =>
-          let 'existT _ __189 [key, rest] :=
+        | (Script_typed_ir.Implicit_account, Item __key_value rest) =>
+          let 'existT _ __189 [__key_value, rest] :=
             existT
               (fun __189 : Set =>
-                [Alpha_context.public_key_hash ** (stack __189)]) _ [key, rest]
-            in
+                [Alpha_context.public_key_hash ** (stack __189)]) _
+              [__key_value, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt Interp_costs.implicit_account))
             (fun ctxt =>
-              let contract := Alpha_context.Contract.implicit_contract key in
+              let contract :=
+                Alpha_context.Contract.implicit_contract __key_value in
               logged_return
                 ((Item ((Script_typed_ir.Unit_t None), (contract, "default"))
                   rest), ctxt))
         |
-          (Script_typed_ir.Create_contract storage_type param_type
-            (Script_typed_ir.Lam _ code) root_name,
+          (Script_typed_ir.Create_contract storage_type param_type {|
+            Script_typed_ir.lambda.lam := (_, code) |} root_name,
             Item manager
               (Item delegate
                 (Item spendable
@@ -2083,8 +2093,8 @@ Fixpoint step {a b : Set}
                                                   (Item (contract, "default")
                                                     rest)), ctxt))))))))))
         |
-          (Script_typed_ir.Create_contract_2 storage_type param_type
-            (Script_typed_ir.Lam _ code) root_name,
+          (Script_typed_ir.Create_contract_2 storage_type param_type {|
+            Script_typed_ir.lambda.lam := (_, code) |} root_name,
             Item delegate (Item credit (Item init rest))) =>
           let 'existT _ [__192, __193, __Create_contract_2_'p]
             [storage_type, param_type, code, root_name, delegate, credit, init,
@@ -2234,31 +2244,32 @@ Fixpoint step {a b : Set}
               logged_return ((Item now rest), ctxt))
         |
           (Script_typed_ir.Check_signature,
-            Item key (Item signature (Item message rest))) =>
-          let 'existT _ __195 [key, signature, message, rest] :=
+            Item __key_value (Item signature (Item message rest))) =>
+          let 'existT _ __195 [__key_value, signature, message, rest] :=
             existT
               (fun __195 : Set =>
                 [Alpha_context.public_key ** Alpha_context.signature ** MBytes.t
-                  ** (stack __195)]) _ [key, signature, message, rest] in
+                  ** (stack __195)]) _ [__key_value, signature, message, rest]
+            in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt
-                (Interp_costs.check_signature key message)))
+                (Interp_costs.check_signature __key_value message)))
             (fun ctxt =>
-              let res := Signature.check None key signature message in
+              let res := Signature.check None __key_value signature message in
               logged_return ((Item res rest), ctxt))
-        | (Script_typed_ir.Hash_key, Item key rest) =>
-          let 'existT _ __196 [key, rest] :=
+        | (Script_typed_ir.Hash_key, Item __key_value rest) =>
+          let 'existT _ __196 [__key_value, rest] :=
             existT
               (fun __196 : Set => [Alpha_context.public_key ** (stack __196)]) _
-              [key, rest] in
+              [__key_value, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.hash_key))
             (fun ctxt =>
               logged_return
                 ((Item
-                  ((|Signature.Public_key|).(S.SPublic_key.__hash_value) key)
-                  rest), ctxt))
+                  ((|Signature.Public_key|).(S.SPublic_key.__hash_value)
+                    __key_value) rest), ctxt))
         | (Script_typed_ir.Blake2b, Item __bytes_value rest) =>
           let 'existT _ __197 [__bytes_value, rest] :=
             existT (fun __197 : Set => [MBytes.t ** (stack __197)]) _
@@ -2434,7 +2445,7 @@ with interp {p r : Set}
   (step_constants : step_constants)
   (function_parameter : Script_typed_ir.lambda p r) {struct log}
   : p -> Lwt.t (Error_monad.tzresult (r * Alpha_context.context)) :=
-  let 'Script_typed_ir.Lam code _ := function_parameter in
+  let '{| Script_typed_ir.lambda.lam := (code, _) |} := function_parameter in
   fun arg =>
     let stack := Item arg Empty in
     Error_monad.op_gtgteqquestion

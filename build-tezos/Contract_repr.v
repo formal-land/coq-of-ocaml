@@ -202,14 +202,14 @@ Definition Index :=
   let path_length := 7 in
   let to_path (c : t) (l : list string) : list string :=
     let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
-    let 'MBytes.Hex key := MBytes.to_hex raw_key in
+    let 'MBytes.Hex __key_value := MBytes.to_hex raw_key in
     let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
     cons (String.sub index_key 0 2)
       (cons (String.sub index_key 2 2)
         (cons (String.sub index_key 4 2)
           (cons (String.sub index_key 6 2)
             (cons (String.sub index_key 8 2)
-              (cons (String.sub index_key 10 2) (cons key l)))))) in
+              (cons (String.sub index_key 10 2) (cons __key_value l)))))) in
   let of_path (function_parameter : list (|Compare.String|).(Compare.S.t))
     : option t :=
     match function_parameter with
@@ -223,9 +223,9 @@ Definition Index :=
     |
       cons index1
         (cons index2
-          (cons index3 (cons index4 (cons index5 (cons index6 (cons key []))))))
-      =>
-      let raw_key := MBytes.of_hex (MBytes.Hex key) in
+          (cons index3
+            (cons index4 (cons index5 (cons index6 (cons __key_value [])))))) =>
+      let raw_key := MBytes.of_hex (MBytes.Hex __key_value) in
       let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)

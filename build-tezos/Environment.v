@@ -158,7 +158,7 @@ Module List.
   
   Parameter compare_length_with : forall {a : Set}, list a -> Z -> Z.
   
-  Parameter cons : forall {a : Set}, a -> list a -> list a.
+  Parameter __cons_value : forall {a : Set}, a -> list a -> list a.
   
   Parameter hd : forall {a : Set}, list a -> a.
   
@@ -1469,7 +1469,7 @@ Module RPC_arg.
   
   Parameter __descr_value : forall {a : Set}, arg a -> descr.
   
-  Parameter int : arg Z.
+  Parameter __int_value : arg Z.
   
   Parameter __int32_value : arg int32.
   

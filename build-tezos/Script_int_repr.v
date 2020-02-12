@@ -76,7 +76,7 @@ Definition is_nat (x : (|Compare.Z|).(Compare.S.t))
 
 Definition neg (x : Z.t) : Z.t := Z.neg x.
 
-Definition int {A : Set} (x : A) : A := x.
+Definition __int_value {A : Set} (x : A) : A := x.
 
 Definition shift_left (x : Z.t) (y : Z.t) : option Z.t :=
   if (|Compare.Int|).(Compare.S.op_gt) (Z.compare y (Z.of_int 256)) 0 then

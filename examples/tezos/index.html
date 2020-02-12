@@ -54,9 +54,9 @@
 
     <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <ul>
-      <li>OCaml size: 35948 lines</li>
-      <li>Coq size: 52384 lines (+45% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 2714</li>
+      <li>OCaml size: 35947 lines</li>
+      <li>Coq size: 52441 lines (+45% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 2704</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -92,7 +92,7 @@
           11380,
           11380,
           13051,
-          21458,
+          23576,
         ],
         generated: [
           47563,
@@ -124,7 +124,7 @@
           51401,
           51401,
           51943,
-          52384,
+          52441,
         ],
         labels: [
           "01-14",
@@ -190,7 +190,7 @@
       </li>
       
       <li>
-        <a href="#alpha_services.mli">alpha_services.mli</a>&nbsp;<span class="label label-warning">33</span>
+        <a href="#alpha_services.mli">alpha_services.mli</a>&nbsp;<span class="label label-warning">26</span>
       </li>
       
       <li>
@@ -412,7 +412,7 @@
       </li>
       
       <li>
-        <a href="#michelson_v1_gas.ml">michelson_v1_gas.ml</a>&nbsp;<span class="label label-warning">2</span>
+        <a href="#michelson_v1_gas.ml">michelson_v1_gas.ml</a>&nbsp;<span class="label label-success">✓</span>
       </li>
       
       <li>
@@ -574,7 +574,7 @@
       </li>
       
       <li>
-        <a href="#script_typed_ir.ml">script_typed_ir.ml</a>&nbsp;<span class="label label-warning">4</span>
+        <a href="#script_typed_ir.ml">script_typed_ir.ml</a>&nbsp;<span class="label label-warning">3</span>
       </li>
       
       <li>
@@ -1438,7 +1438,7 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1390 lines</li>
-      <li>Coq size: 2618 lines (+88% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2553 lines (+83% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -1663,7 +1663,7 @@ module Gas : sig
   val block_level : context -&gt; Z.t
 end
 
-module Script_int : module type of Script_int_repr
+module Script_int = Script_int_repr
 
 module Script_timestamp : sig
   open Script_int
@@ -2854,6 +2854,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_expr_hash.
+Require Tezos.Script_int_repr.
 Require Tezos.Storage_description.
 
 Module BASIC_DATA.
@@ -3262,73 +3263,7 @@ Module Gas.
   Parameter block_level : context -&gt; Z.t.
 End Gas.
 
-Module Script_int.
-  Parameter num : forall (t : Set), Set.
-  
-  Parameter n : Set.
-  
-  Parameter z : Set.
-  
-  Parameter zero_n : num n.
-  
-  Parameter zero : num z.
-  
-  Parameter compare : forall {a : Set}, num a -&gt; num a -&gt; Z.
-  
-  Parameter to_string : forall {A : Set}, num A -&gt; string.
-  
-  Parameter of_string : string -&gt; option (num z).
-  
-  Parameter to_int64 : forall {A : Set}, num A -&gt; option int64.
-  
-  Parameter of_int64 : int64 -&gt; num z.
-  
-  Parameter to_int : forall {A : Set}, num A -&gt; option Z.
-  
-  Parameter of_int : Z -&gt; num z.
-  
-  Parameter of_zint : Z.t -&gt; num z.
-  
-  Parameter to_zint : forall {a : Set}, num a -&gt; Z.t.
-  
-  Parameter add_n : num n -&gt; num n -&gt; num n.
-  
-  Parameter mul_n : num n -&gt; num n -&gt; num n.
-  
-  Parameter ediv_n : num n -&gt; num n -&gt; option (num n * num n).
-  
-  Parameter add : forall {A B : Set}, num A -&gt; num B -&gt; num z.
-  
-  Parameter sub : forall {A B : Set}, num A -&gt; num B -&gt; num z.
-  
-  Parameter mul : forall {A B : Set}, num A -&gt; num B -&gt; num z.
-  
-  Parameter ediv : forall {A B : Set}, num A -&gt; num B -&gt; option (num z * num n).
-  
-  Parameter abs : num z -&gt; num n.
-  
-  Parameter is_nat : num z -&gt; option (num n).
-  
-  Parameter neg : forall {A : Set}, num A -&gt; num z.
-  
-  Parameter int : num n -&gt; num z.
-  
-  Parameter lognot : forall {A : Set}, num A -&gt; num z.
-  
-  Parameter shift_left_n : num n -&gt; num n -&gt; option (num n).
-  
-  Parameter shift_right_n : num n -&gt; num n -&gt; option (num n).
-  
-  Parameter shift_left : forall {a : Set}, num a -&gt; num n -&gt; option (num a).
-  
-  Parameter shift_right : forall {a : Set}, num a -&gt; num n -&gt; option (num a).
-  
-  Parameter logor : forall {a : Set}, num a -&gt; num a -&gt; num a.
-  
-  Parameter logand : forall {A : Set}, num A -&gt; num n -&gt; num n.
-  
-  Parameter logxor : num n -&gt; num n -&gt; num n.
-End Script_int.
+Module Script_int := Script_int_repr.
 
 Module Script_timestamp.
   Import Script_int.
@@ -5899,11 +5834,11 @@ Definition register (function_parameter : unit) : unit :=
     <h3>Alpha_services_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 87 lines (+85% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 92 lines (+95% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#alpha_services.mli"><code>alpha_services.mli</code></a>&nbsp;<span class="label label-warning">33 warnings</span>
+    <a href="#alpha_services.mli"><code>alpha_services.mli</code></a>&nbsp;<span class="label label-warning">26 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -6039,13 +5974,13 @@ No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH">va
     'a #RPC_context.simple -&gt; 'a -&gt; Raw_level.t -&gt; info shell_tzresult Lwt.t</abbr>
 end
 
-<abbr class="mark-warning" title="Aliases in module types are not handled">module Contract = Contract_services</abbr>
-<abbr class="mark-warning" title="Aliases in module types are not handled">module Constants = Constants_services</abbr>
-<abbr class="mark-warning" title="Aliases in module types are not handled">module Delegate = Delegate_services</abbr>
-<abbr class="mark-warning" title="Aliases in module types are not handled">module Helpers = Helpers_services</abbr>
-<abbr class="mark-warning" title="Aliases in module types are not handled">module Forge = Helpers_services.Forge</abbr>
-<abbr class="mark-warning" title="Aliases in module types are not handled">module Parse = Helpers_services.Parse</abbr>
-<abbr class="mark-warning" title="Aliases in module types are not handled">module Voting = Voting_services</abbr>
+module Contract = Contract_services
+module Constants = Constants_services
+module Delegate = Delegate_services
+module Helpers = Helpers_services
+module Forge = Helpers_services.Forge
+module Parse = Helpers_services.Parse
+module Voting = Voting_services
 
 val register : unit -&gt; unit
 </pre>
@@ -6065,7 +6000,12 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Constants_services.
+Require Tezos.Contract_services.
+Require Tezos.Delegate_services.
+Require Tezos.Helpers_services.
 Require Tezos.Nonce_hash.
+Require Tezos.Voting_services.
 
 Import Alpha_context.
 
@@ -6124,19 +6064,19 @@ Module Nonce.
     Alpha_context.Raw_level.t -&gt; Lwt.t (Error_monad.shell_tzresult info).
 End Nonce.
 
-Parameter Contract : alias.
+Module Contract := Contract_services.
 
-Parameter Constants : alias.
+Module Constants := Constants_services.
 
-Parameter Delegate : alias.
+Module Delegate := Delegate_services.
 
-Parameter Helpers : alias.
+Module Helpers := Helpers_services.
 
-Parameter Forge : alias.
+Module Forge := Helpers_services.Forge.
 
-Parameter Parse : alias.
+Module Parse := Helpers_services.Parse.
 
-Parameter Voting : alias.
+Module Voting := Voting_services.
 
 Parameter register : unit -&gt; unit.
 </pre>
@@ -15098,10 +15038,10 @@ Definition check_proof_of_work_stamp
 
 Definition check_signature
   (block : Alpha_context.Block_header.t) (chain_id : (|Chain_id|).(S.HASH.t))
-  (key : (|Signature.Public_key|).(S.SPublic_key.t))
+  (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult unit) :=
   let check_signature
-    (key : (|Signature.Public_key|).(S.SPublic_key.t))
+    (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
     (function_parameter : Alpha_context.Block_header.t) : bool :=
     let '{|
       Alpha_context.Block_header.t.shell := shell;
@@ -15114,9 +15054,9 @@ Definition check_signature
     let unsigned_header :=
       Data_encoding.Binary.to_bytes_exn
         Alpha_context.Block_header.unsigned_encoding (shell, contents) in
-    Signature.check (Some (Signature.Block_header chain_id)) key signature
-      unsigned_header in
-  if check_signature key block then
+    Signature.check (Some (Signature.Block_header chain_id)) __key_value
+      signature unsigned_header in
+  if check_signature __key_value block then
     Error_monad.return_unit
   else
     Error_monad.fail extensible_type_value.
@@ -15864,8 +15804,8 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
   <div style="margin: 20px;">
     <h3>Block_header_repr</h3>
     <ul>
-      <li>OCaml size: 130 lines</li>
-      <li>Coq size: 174 lines (+33% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 131 lines</li>
+      <li>Coq size: 174 lines (+32% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15974,7 +15914,8 @@ let max_header_length =
       operations_hash = Operation_list_list_hash.zero;
       fitness = Fitness_repr.from_int64 0L;
       context = Context_hash.zero;
-    } in
+    }
+  in
   let fake_contents =
     {
       priority = 0;
@@ -19462,14 +19403,14 @@ Definition Index :=
   let path_length := 7 in
   let to_path (c : t) (l : list string) : list string :=
     let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
-    let 'MBytes.Hex key := MBytes.to_hex raw_key in
+    let 'MBytes.Hex __key_value := MBytes.to_hex raw_key in
     let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
     cons (String.sub index_key 0 2)
       (cons (String.sub index_key 2 2)
         (cons (String.sub index_key 4 2)
           (cons (String.sub index_key 6 2)
             (cons (String.sub index_key 8 2)
-              (cons (String.sub index_key 10 2) (cons key l)))))) in
+              (cons (String.sub index_key 10 2) (cons __key_value l)))))) in
   let of_path (function_parameter : list (|Compare.String|).(Compare.S.t))
     : option t :=
     match function_parameter with
@@ -19483,9 +19424,9 @@ Definition Index :=
     |
       cons index1
         (cons index2
-          (cons index3 (cons index4 (cons index5 (cons index6 (cons key []))))))
-      =&gt;
-      let raw_key := MBytes.of_hex (MBytes.Hex key) in
+          (cons index3
+            (cons index4 (cons index5 (cons index6 (cons __key_value [])))))) =&gt;
+      let raw_key := MBytes.of_hex (MBytes.Hex __key_value) in
       let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key) in
       (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
@@ -19710,7 +19651,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Contract_services</h3>
     <ul>
       <li>OCaml size: 425 lines</li>
-      <li>Coq size: 777 lines (+82% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 778 lines (+83% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -21152,7 +21093,7 @@ Definition register (function_parameter : unit) : unit :=
               end)) in
   let do_big_map_get
     (ctxt : Alpha_context.context) (id : Alpha_context.Big_map.id)
-    (key : Script_expr_hash.t)
+    (__key_value : Script_expr_hash.t)
     : Lwt.t
       (Error_monad.tzresult (Micheline.canonical Alpha_context.Script.prim)) :=
     let ctxt := Alpha_context.Gas.set_unlimited ctxt in
@@ -21175,7 +21116,7 @@ Definition register (function_parameter : unit) : unit :=
                     [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context])
                   _ [value_type, ctxt] in
               Error_monad.op_gtgteqquestion
-                (Alpha_context.Big_map.get_opt ctxt id key)
+                (Alpha_context.Big_map.get_opt ctxt id __key_value)
                 (fun function_parameter =&gt;
                   let '(_ctxt, value) := function_parameter in
                   match value with
@@ -21642,9 +21583,9 @@ Definition big_map_get {D E G I K L a b c i o q : Set}
             (((RPC_context.t * a) * b) * c) q i o -&gt; D -&gt; a -&gt; b -&gt; c -&gt; q -&gt;
           i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
-  (id : Alpha_context.Big_map.id) (key : Script_expr_hash.t)
+  (id : Alpha_context.Big_map.id) (__key_value : Script_expr_hash.t)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Script.expr) :=
-  RPC_context.make_call2 S.big_map_get ctxt block id key tt tt.
+  RPC_context.make_call2 S.big_map_get ctxt block id __key_value tt tt.
 
 Definition contract_big_map_get_opt {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -21669,9 +21610,10 @@ Definition contract_big_map_get_opt {D E G I K L a b c i o q : Set}
           i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
             (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
-  (key : Alpha_context.Script.expr * Alpha_context.Script.expr)
+  (__key_value : Alpha_context.Script.expr * Alpha_context.Script.expr)
   : Lwt.t (Error_monad.shell_tzresult (option Alpha_context.Script.expr)) :=
-  RPC_context.make_call1 S.contract_big_map_get_opt ctxt block contract tt key.
+  RPC_context.make_call1 S.contract_big_map_get_opt ctxt block contract tt
+    __key_value.
 </pre>
   </div>
 </div>
@@ -27476,7 +27418,7 @@ Module Baking_rights.
               (RPC_query.multi_field None &quot;delegate&quot;
                 (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg)
                 (fun __t_value =&gt; __t_value.(baking_rights_query.delegates))))
-            (RPC_query.opt_field None &quot;max_priority&quot; RPC_arg.int
+            (RPC_query.opt_field None &quot;max_priority&quot; RPC_arg.__int_value
               (fun __t_value =&gt; __t_value.(baking_rights_query.max_priority))))
           (RPC_query.flag None &quot;all&quot;
             (fun __t_value =&gt; __t_value.(baking_rights_query.all))))
@@ -28020,9 +27962,9 @@ Module Minimal_valid_time.
                 fun endorsing_power =&gt;
                   {| t.priority := priority;
                     t.endorsing_power := endorsing_power |}))
-            (RPC_query.__field_value None &quot;priority&quot; RPC_arg.int 0
+            (RPC_query.__field_value None &quot;priority&quot; RPC_arg.__int_value 0
               (fun __t_value =&gt; __t_value.(t.priority))))
-          (RPC_query.__field_value None &quot;endorsing_power&quot; RPC_arg.int 0
+          (RPC_query.__field_value None &quot;endorsing_power&quot; RPC_arg.__int_value 0
             (fun __t_value =&gt; __t_value.(t.endorsing_power)))) RPC_query.seal.
     
     Definition minimal_valid_time
@@ -43796,12 +43738,12 @@ Parameter encoding : Data_encoding.encoding t.
   <div style="margin: 20px;">
     <h3>Michelson_v1_gas</h3>
     <ul>
-      <li>OCaml size: 765 lines</li>
-      <li>Coq size: 888 lines (+16% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 766 lines</li>
+      <li>Coq size: 951 lines (+24% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#michelson_v1_gas.ml"><code>michelson_v1_gas.ml</code></a>&nbsp;<span class="label label-warning">2 warnings</span>
+    <a href="#michelson_v1_gas.ml"><code>michelson_v1_gas.ml</code></a>&nbsp;<span class="label label-success">success</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -43850,26 +43792,26 @@ module Cost_of = struct
   let rec size_of_comparable :
       type a b. (a, b) Script_typed_ir.comparable_struct -&gt; a -&gt; int =
    fun wit v -&gt;
-    match wit with
-    | Int_key _ -&gt;
+    match[@coq_match_gadt] wit, v with
+    | Int_key _, (v : _ Script_int_repr.num) -&gt;
         int_bytes v
-    | Nat_key _ -&gt;
+    | Nat_key _, (v : _ Script_int_repr.num) -&gt;
         int_bytes v
-    | String_key _ -&gt;
+    | String_key _, (v : string) -&gt;
         String.length v
-    | Bytes_key _ -&gt;
+    | Bytes_key _, (v : MBytes.t) -&gt;
         MBytes.length v
-    | Bool_key _ -&gt;
+    | Bool_key _, _ -&gt;
         8
-    | Key_hash_key _ -&gt;
+    | Key_hash_key _, _ -&gt;
         Signature.Public_key_hash.size
-    | Timestamp_key _ -&gt;
+    | Timestamp_key _, (v : Script_timestamp.t) -&gt;
         timestamp_bytes v
-    | Address_key _ -&gt;
+    | Address_key _, _ -&gt;
         Signature.Public_key_hash.size
-    | Mutez_key _ -&gt;
+    | Mutez_key _, _ -&gt;
         8
-    | Pair_key ((l, _), (r, _), _) -&gt;
+    | Pair_key ((l, _), (r, _), _), (v : _ * _) -&gt;
         let (lval, rval) = v in
         size_of_comparable l lval + size_of_comparable r rval
 
@@ -43937,12 +43879,12 @@ module Cost_of = struct
 
     let set_mem : type elt. elt -&gt; elt Script_typed_ir.set -&gt; cost =
      fun elt (module Box) -&gt;
-      let elt_bytes = size_of_comparable Box.elt_ty elt in
+      let elt_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.elt_ty elt in
       atomic_step_cost ((1 + (elt_bytes / 82)) * log2 Box.size)
 
     let set_update : type elt. elt -&gt; bool -&gt; elt Script_typed_ir.set -&gt; cost =
      fun elt _ (module Box) -&gt;
-      let elt_bytes = size_of_comparable Box.elt_ty elt in
+      let elt_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.elt_ty elt in
       atomic_step_cost ((1 + (elt_bytes / 82)) * log2 Box.size)
 
     let set_size = atomic_step_cost 10
@@ -43959,7 +43901,7 @@ module Cost_of = struct
         type key value. key -&gt; (key, value) Script_typed_ir.map -&gt; cost =
      fun key (module Box) -&gt;
       let map_card = snd Box.boxed in
-      let key_bytes = size_of_comparable Box.key_ty key in
+      let key_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.key_ty key in
       atomic_step_cost ((1 + (key_bytes / 70)) * log2 map_card)
 
     let map_mem = map_access
@@ -43971,7 +43913,7 @@ module Cost_of = struct
         key -&gt; value option -&gt; (key, value) Script_typed_ir.map -&gt; cost =
      fun key _value (module Box) -&gt;
       let map_card = snd Box.boxed in
-      let key_bytes = size_of_comparable Box.key_ty key in
+      let key_bytes = (size_of_comparable[@coq_implicit &quot;(b := unit)&quot;]) Box.key_ty key in
       atomic_step_cost ((1 + (key_bytes / 38)) * log2 map_card)
 
     let map_size = atomic_step_cost 10
@@ -44150,28 +44092,29 @@ module Cost_of = struct
     let rec compare :
         type a s. (a, s) Script_typed_ir.comparable_struct -&gt; a -&gt; a -&gt; cost =
      fun ty x y -&gt;
-      match ty with
-      | Bool_key _ -&gt;
+      match[@coq_match_gadt] ty, x, y with
+      | Bool_key _, (x : bool), (y : bool) -&gt;
           compare_bool x y
-      | String_key _ -&gt;
+      | String_key _, (x : string), (y : string) -&gt;
           compare_string x y
-      | Bytes_key _ -&gt;
+      | Bytes_key _, (x : MBytes.t), (y : MBytes.t) -&gt;
           compare_bytes x y
-      | Mutez_key _ -&gt;
+      | Mutez_key _, x, y -&gt;
           compare_tez x y
-      | Int_key _ -&gt;
+      | Int_key _, (x : _ Script_int_repr.num), (y : _ Script_int_repr.num) -&gt;
           compare_zint x y
-      | Nat_key _ -&gt;
+      | Nat_key _, (x : _ Script_int_repr.num), (y : _ Script_int_repr.num) -&gt;
           compare_zint x y
-      | Key_hash_key _ -&gt;
+      | Key_hash_key _, x, y -&gt;
           compare_key_hash x y
-      | Timestamp_key _ -&gt;
+      | Timestamp_key _, (x : Script_timestamp.t), (y : Script_timestamp.t) -&gt;
           compare_timestamp x y
-      | Address_key _ -&gt;
+      | Address_key _, x, y -&gt;
           compare_address x y
-      | Pair_key ((tl, _), (tr, _), _) -&gt;
+      | Pair_key ((tl, _), (tr, _), _), (x : _ * _), (y : _ * _) -&gt;
           (* Reasonable over-approximation of the cost of lexicographic comparison. *)
-          let <abbr class="mark-warning" title="A variable name instead of a pattern was expected.">(xl, xr)</abbr> = x and <abbr class="mark-warning" title="A variable name instead of a pattern was expected.">(yl, yr)</abbr> = y in
+          let (xl, xr) = x in
+          let (yl, yr) = y in
           compare tl xl yl +@ compare tr xr yr
   end
 
@@ -44531,7 +44474,7 @@ module Cost_of = struct
 
     let tez = Script.int_node_cost_of_numbits 60 (* int64 bound *)
 
-    let timestamp x = Script_timestamp.to_zint x |&gt; Script_int.of_zint |&gt; int
+    let timestamp x = Script_timestamp.to_zint x |&gt; Script_int.of_zint |&gt; (int[@coq_implicit &quot;(A := unit)&quot;])
 
     let operation bytes = Script.bytes_node_cost bytes
 
@@ -44585,6 +44528,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Script_int_repr.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -44614,26 +44558,44 @@ Module Cost_of.
   
   Fixpoint size_of_comparable {a b : Set}
     (wit : Script_typed_ir.comparable_struct a b) (v : a) {struct wit} : Z :=
-    match wit with
-    | Script_typed_ir.Int_key _ =&gt; int_bytes v
-    | Script_typed_ir.Nat_key _ =&gt; int_bytes v
-    | Script_typed_ir.String_key _ =&gt; String.length v
-    | Script_typed_ir.Bytes_key _ =&gt; MBytes.length v
-    | Script_typed_ir.Bool_key _ =&gt; 8
-    | Script_typed_ir.Key_hash_key _ =&gt;
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
-    | Script_typed_ir.Timestamp_key _ =&gt; timestamp_bytes v
-    | Script_typed_ir.Address_key _ =&gt;
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
-    | Script_typed_ir.Mutez_key _ =&gt; 8
-    | Script_typed_ir.Pair_key (l, _) (r, _) _ =&gt;
-      let 'existT _ [__0, __1, __Pair_key] [l, r] :=
-        existT
+    match (wit, v) with
+    | (Script_typed_ir.Int_key _, _ as v) =&gt;
+      let 'existT _ tt v :=
+        obj_magic_exists
+          (fun _ =&gt; (Script_int_repr.num Alpha_context.Script_int.z)) v in
+      obj_magic Z (int_bytes v)
+    | (Script_typed_ir.Nat_key _, _ as v) =&gt;
+      let 'existT _ tt v :=
+        obj_magic_exists
+          (fun _ =&gt; (Script_int_repr.num Alpha_context.Script_int.n)) v in
+      obj_magic Z (int_bytes v)
+    | (Script_typed_ir.String_key _, _ as v) =&gt;
+      let 'existT _ tt v := obj_magic_exists (fun _ =&gt; string) v in
+      obj_magic Z (String.length v)
+    | (Script_typed_ir.Bytes_key _, _ as v) =&gt;
+      let 'existT _ tt v := obj_magic_exists (fun _ =&gt; MBytes.t) v in
+      obj_magic Z (MBytes.length v)
+    | (Script_typed_ir.Bool_key _, _) =&gt; obj_magic Z 8
+    | (Script_typed_ir.Key_hash_key _, _) =&gt;
+      obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+    | (Script_typed_ir.Timestamp_key _, _ as v) =&gt;
+      let 'existT _ tt v :=
+        obj_magic_exists (fun _ =&gt; Alpha_context.Script_timestamp.t) v in
+      obj_magic Z (timestamp_bytes v)
+    | (Script_typed_ir.Address_key _, _) =&gt;
+      obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+    | (Script_typed_ir.Mutez_key _, _) =&gt; obj_magic Z 8
+    | (Script_typed_ir.Pair_key (l, _) (r, _) _, _ as v) =&gt;
+      let 'existT _ [__0, __1, __Pair_key] [l, r, v] :=
+        obj_magic_exists
           (fun '[__0, __1, __Pair_key] =&gt;
             [(Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf) **
-              (Script_typed_ir.comparable_struct __1 __Pair_key)]) _ [l, r] in
-      let '(lval, rval) := v in
-      Pervasives.op_plus (size_of_comparable l lval) (size_of_comparable r rval)
+              (Script_typed_ir.comparable_struct __1 __Pair_key) ** (__0 * __1)])
+          [l, r, v] in
+      obj_magic Z
+        (let '(lval, rval) := v in
+        Pervasives.op_plus (size_of_comparable l lval)
+          (size_of_comparable r rval))
     end.
   
   Definition __string_value (length : Z) : Alpha_context.Gas.cost :=
@@ -44675,9 +44637,9 @@ Module Cost_of.
       Pervasives.op_atat log2 (|Box|).(Script_typed_ir.Boxed_set.size).
     
     Definition set_update {A B : Set}
-      (key : A) (_presence : B) (set : Script_typed_ir.set A)
+      (__key_value : A) (_presence : B) (set : Script_typed_ir.set A)
       : Alpha_context.Gas.cost :=
-      Alpha_context.Gas.op_starat (set_access key set)
+      Alpha_context.Gas.op_starat (set_access __key_value set)
         (Alpha_context.Gas.alloc_cost 3).
   End Legacy.
   
@@ -44708,7 +44670,7 @@ Module Cost_of.
     Definition pair_access : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost 10.
     
-    Definition cons : Alpha_context.Gas.cost :=
+    Definition __cons_value : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost 10.
     
     Definition loop_size : Alpha_context.Gas.cost :=
@@ -44731,21 +44693,25 @@ Module Cost_of.
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star (|Box|).(Script_typed_ir.Boxed_set.size) 20).
     
-    Definition set_mem {elt : Set} (elt : elt) (Box : Script_typed_ir.set elt)
+    Definition set_mem {elt : Set}
+      (__elt_value : elt) (Box : Script_typed_ir.set elt)
       : Alpha_context.Gas.cost :=
       let elt_bytes :=
-        size_of_comparable (|Box|).(Script_typed_ir.Boxed_set.elt_ty) elt in
+        (size_of_comparable (b := unit))
+          (|Box|).(Script_typed_ir.Boxed_set.elt_ty) __elt_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div elt_bytes 82))
           (log2 (|Box|).(Script_typed_ir.Boxed_set.size))).
     
-    Definition set_update {elt : Set} (elt : elt) (function_parameter : bool)
+    Definition set_update {elt : Set}
+      (__elt_value : elt) (function_parameter : bool)
       : Script_typed_ir.set elt -&gt; Alpha_context.Gas.cost :=
       let '_ := function_parameter in
       fun Box =&gt;
         let elt_bytes :=
-          size_of_comparable (|Box|).(Script_typed_ir.Boxed_set.elt_ty) elt in
+          (size_of_comparable (b := unit))
+            (|Box|).(Script_typed_ir.Boxed_set.elt_ty) __elt_value in
         Alpha_context.Gas.atomic_step_cost
           (Pervasives.op_star
             (Pervasives.op_plus 1 (Pervasives.op_div elt_bytes 82))
@@ -44763,12 +44729,13 @@ Module Cost_of.
       Alpha_context.Gas.atomic_step_cost (Pervasives.op_star size 20).
     
     Definition map_access {key value : Set}
-      (key : key) (Box : Script_typed_ir.map key value)
+      (__key_value : key) (Box : Script_typed_ir.map key value)
       : Alpha_context.Gas.cost :=
       let map_card := Pervasives.snd (|Box|).(Script_typed_ir.Boxed_map.boxed)
         in
       let key_bytes :=
-        size_of_comparable (|Box|).(Script_typed_ir.Boxed_map.key_ty) key in
+        (size_of_comparable (b := unit))
+          (|Box|).(Script_typed_ir.Boxed_map.key_ty) __key_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div key_bytes 70))
@@ -44781,12 +44748,13 @@ Module Cost_of.
       : A -&gt; Script_typed_ir.map A B -&gt; Alpha_context.Gas.cost := map_access.
     
     Definition map_update {key value : Set}
-      (key : key) (_value : option value) (Box : Script_typed_ir.map key value)
-      : Alpha_context.Gas.cost :=
+      (__key_value : key) (_value : option value)
+      (Box : Script_typed_ir.map key value) : Alpha_context.Gas.cost :=
       let map_card := Pervasives.snd (|Box|).(Script_typed_ir.Boxed_map.boxed)
         in
       let key_bytes :=
-        size_of_comparable (|Box|).(Script_typed_ir.Boxed_map.key_ty) key in
+        (size_of_comparable (b := unit))
+          (|Box|).(Script_typed_ir.Boxed_map.key_ty) __key_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div key_bytes 38))
@@ -44856,12 +44824,12 @@ Module Cost_of.
       let '_ := function_parameter in
       Alpha_context.Gas.atomic_step_cost 10.
     
-    Definition abs {A : Set} (int : Alpha_context.Script_int.num A)
+    Definition abs {A : Set} (__int_value : Alpha_context.Script_int.num A)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
-        (Pervasives.op_plus 61 (Pervasives.op_div (int_bytes Z) 70)).
+        (Pervasives.op_plus 61 (Pervasives.op_div (int_bytes __int_value) 70)).
     
-    Definition int {A : Set} (_int : A) : Alpha_context.Gas.cost :=
+    Definition __int_value {A : Set} (_int : A) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.free.
     
     Definition neg {A : Set}
@@ -45120,25 +45088,63 @@ Module Cost_of.
     Fixpoint compare {a s : Set}
       (ty : Script_typed_ir.comparable_struct a s) (x : a) (y : a) {struct ty}
       : Alpha_context.Gas.cost :=
-      match ty with
-      | Script_typed_ir.Bool_key _ =&gt; compare_bool x y
-      | Script_typed_ir.String_key _ =&gt; compare_string x y
-      | Script_typed_ir.Bytes_key _ =&gt; compare_bytes x y
-      | Script_typed_ir.Mutez_key _ =&gt; compare_tez x y
-      | Script_typed_ir.Int_key _ =&gt; compare_zint x y
-      | Script_typed_ir.Nat_key _ =&gt; compare_zint x y
-      | Script_typed_ir.Key_hash_key _ =&gt; compare_key_hash x y
-      | Script_typed_ir.Timestamp_key _ =&gt; compare_timestamp x y
-      | Script_typed_ir.Address_key _ =&gt; compare_address x y
-      | Script_typed_ir.Pair_key (tl, _) (tr, _) _ =&gt;
-        let 'existT _ [__0, __1, __Pair_key] [tl, tr] :=
-          existT
+      match (ty, x, y) with
+      | (Script_typed_ir.Bool_key _, _ as x, _ as y) =&gt;
+        let 'existT _ tt [x, y] :=
+          obj_magic_exists (fun _ =&gt; [bool ** bool]) [x, y] in
+        obj_magic Alpha_context.Gas.cost (compare_bool x y)
+      | (Script_typed_ir.String_key _, _ as x, _ as y) =&gt;
+        let 'existT _ tt [x, y] :=
+          obj_magic_exists (fun _ =&gt; [string ** string]) [x, y] in
+        obj_magic Alpha_context.Gas.cost (compare_string x y)
+      | (Script_typed_ir.Bytes_key _, _ as x, _ as y) =&gt;
+        let 'existT _ tt [x, y] :=
+          obj_magic_exists (fun _ =&gt; [MBytes.t ** MBytes.t]) [x, y] in
+        obj_magic Alpha_context.Gas.cost (compare_bytes x y)
+      | (Script_typed_ir.Mutez_key _, x, y) =&gt;
+        let 'existT _ tt [x, y] := obj_magic_exists (fun _ =&gt; [a ** a]) [x, y]
+          in
+        obj_magic Alpha_context.Gas.cost (compare_tez x y)
+      | (Script_typed_ir.Int_key _, _ as x, _ as y) =&gt;
+        let 'existT _ tt [x, y] :=
+          obj_magic_exists
+            (fun _ =&gt;
+              [(Script_int_repr.num Alpha_context.Script_int.z) **
+                (Script_int_repr.num Alpha_context.Script_int.z)]) [x, y] in
+        obj_magic Alpha_context.Gas.cost (compare_zint x y)
+      | (Script_typed_ir.Nat_key _, _ as x, _ as y) =&gt;
+        let 'existT _ tt [x, y] :=
+          obj_magic_exists
+            (fun _ =&gt;
+              [(Script_int_repr.num Alpha_context.Script_int.n) **
+                (Script_int_repr.num Alpha_context.Script_int.n)]) [x, y] in
+        obj_magic Alpha_context.Gas.cost (compare_zint x y)
+      | (Script_typed_ir.Key_hash_key _, x, y) =&gt;
+        let 'existT _ tt [x, y] := obj_magic_exists (fun _ =&gt; [a ** a]) [x, y]
+          in
+        obj_magic Alpha_context.Gas.cost (compare_key_hash x y)
+      | (Script_typed_ir.Timestamp_key _, _ as x, _ as y) =&gt;
+        let 'existT _ tt [x, y] :=
+          obj_magic_exists
+            (fun _ =&gt;
+              [Alpha_context.Script_timestamp.t **
+                Alpha_context.Script_timestamp.t]) [x, y] in
+        obj_magic Alpha_context.Gas.cost (compare_timestamp x y)
+      | (Script_typed_ir.Address_key _, x, y) =&gt;
+        let 'existT _ tt [x, y] := obj_magic_exists (fun _ =&gt; [a ** a]) [x, y]
+          in
+        obj_magic Alpha_context.Gas.cost (compare_address x y)
+      | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =&gt;
+        let 'existT _ [__0, __1, __Pair_key] [tl, tr, x, y] :=
+          obj_magic_exists
             (fun '[__0, __1, __Pair_key] =&gt;
               [(Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf) **
-                (Script_typed_ir.comparable_struct __1 __Pair_key)]) _ [tl, tr]
-          in
-        in
-        Alpha_context.Gas.op_plusat (compare tl xl yl) (compare tr xr yr)
+                (Script_typed_ir.comparable_struct __1 __Pair_key) **
+                (__0 * __1) ** (__0 * __1)]) [tl, tr, x, y] in
+        obj_magic Alpha_context.Gas.cost
+          (let '(xl, xr) := x in
+          let '(yl, yr) := y in
+          Alpha_context.Gas.op_plusat (compare tl xl yl) (compare tr xr yr))
       end.
   End Interpreter.
   
@@ -45167,7 +45173,7 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.step_cost 3)
         (Alpha_context.Gas.alloc_cost 3).
     
-    Definition key : Alpha_context.Gas.cost :=
+    Definition __key_value : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.step_cost 3)
         (Alpha_context.Gas.alloc_cost 3).
     
@@ -45403,7 +45409,7 @@ Module Cost_of.
     Definition z (i : Z.t) : Alpha_context.Gas.cost :=
       Alpha_context.Script.int_node_cost i.
     
-    Definition int {A : Set} (i : Alpha_context.Script_int.num A)
+    Definition __int_value {A : Set} (i : Alpha_context.Script_int.num A)
       : Alpha_context.Gas.cost :=
       Alpha_context.Script.int_node_cost (Alpha_context.Script_int.to_zint i).
     
@@ -45414,7 +45420,7 @@ Module Cost_of.
       : Alpha_context.Gas.cost :=
       Pervasives.op_pipegt
         (Pervasives.op_pipegt (Alpha_context.Script_timestamp.to_zint x)
-          Alpha_context.Script_int.of_zint) Z.
+          Alpha_context.Script_int.of_zint) (__int_value (A := unit)).
     
     Definition operation (__bytes_value : MBytes.t) : Alpha_context.Gas.cost :=
       Alpha_context.Script.bytes_node_cost __bytes_value.
@@ -45422,7 +45428,7 @@ Module Cost_of.
     Definition chain_id (__bytes_value : MBytes.t) : Alpha_context.Gas.cost :=
       Alpha_context.Script.bytes_node_cost __bytes_value.
     
-    Definition key : Alpha_context.Gas.cost := string_cost 54.
+    Definition __key_value : Alpha_context.Gas.cost := string_cost 54.
     
     Definition key_hash : Alpha_context.Gas.cost := string_cost 36.
     
@@ -45853,7 +45859,7 @@ Module Cost_of.
     
     Parameter pair_access : Alpha_context.Gas.cost.
     
-    Parameter cons : Alpha_context.Gas.cost.
+    Parameter __cons_value : Alpha_context.Gas.cost.
     
     Parameter variant_no_data : Alpha_context.Gas.cost.
     
@@ -45910,7 +45916,7 @@ Module Cost_of.
     Parameter neg : forall {a : Set},
       Alpha_context.Script_int.num a -&gt; Alpha_context.Gas.cost.
     
-    Parameter int : forall {a : Set}, a -&gt; Alpha_context.Gas.cost.
+    Parameter __int_value : forall {a : Set}, a -&gt; Alpha_context.Gas.cost.
     
     Parameter add_timestamp : forall {a : Set},
       Alpha_context.Script_timestamp.t -&gt; Alpha_context.Script_int.num a -&gt;
@@ -46033,7 +46039,7 @@ Module Cost_of.
     
     Parameter string_timestamp : Alpha_context.Gas.cost.
     
-    Parameter key : Alpha_context.Gas.cost.
+    Parameter __key_value : Alpha_context.Gas.cost.
     
     Parameter key_hash : Alpha_context.Gas.cost.
     
@@ -46091,7 +46097,7 @@ Module Cost_of.
     
     Parameter z : Z.t -&gt; Alpha_context.Gas.cost.
     
-    Parameter int : forall {a : Set},
+    Parameter __int_value : forall {a : Set},
       Alpha_context.Script_int.num a -&gt; Alpha_context.Gas.cost.
     
     Parameter tez : Alpha_context.Gas.cost.
@@ -46103,7 +46109,7 @@ Module Cost_of.
     Parameter timestamp :
       Alpha_context.Script_timestamp.t -&gt; Alpha_context.Gas.cost.
     
-    Parameter key : Alpha_context.Gas.cost.
+    Parameter __key_value : Alpha_context.Gas.cost.
     
     Parameter key_hash : Alpha_context.Gas.cost.
     
@@ -48960,7 +48966,7 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
     <h3>Operation_repr</h3>
     <ul>
       <li>OCaml size: 856 lines</li>
-      <li>Coq size: 1444 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1446 lines (+68% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -50459,8 +50465,9 @@ Module Encoding.
               end;
           case.MCase.proj :=
             fun function_parameter =&gt;
-              let 'Delegation key := function_parameter in
-              key; case.MCase.inj := fun key =&gt; Delegation key |}.
+              let 'Delegation __key_value := function_parameter in
+              __key_value;
+          case.MCase.inj := fun __key_value =&gt; Delegation __key_value |}.
     
     Definition encoding : Data_encoding.encoding packed_manager_operation :=
       let make {A : Set} (function_parameter : case A)
@@ -51128,7 +51135,7 @@ Definition acceptable_passes (op : packed_operation) : list Z :=
 (* top_level_evaluation *)
 
 Definition check_signature_sync {A : Set}
-  (key : (|Signature.Public_key|).(S.SPublic_key.t))
+  (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   (chain_id : (|Chain_id|).(S.HASH.t)) (function_parameter : operation A)
   : Error_monad.tzresult unit :=
   let '{|
@@ -51141,7 +51148,8 @@ Definition check_signature_sync {A : Set}
     let unsigned_operation :=
       Data_encoding.Binary.to_bytes_exn unsigned_operation_encoding
         (shell, contents) in
-    if Signature.check (Some watermark) key signature unsigned_operation then
+    if Signature.check (Some watermark) __key_value signature unsigned_operation
+      then
       Pervasives.Ok tt
     else
       Error_monad.__error_value extensible_type_value in
@@ -54952,30 +54960,30 @@ Definition storage_error_encoding : Data_encoding.encoding storage_error :=
               ])))
         (fun function_parameter =&gt;
           match function_parameter with
-          | Missing_key key f =&gt; Some (key, f)
+          | Missing_key __key_value f =&gt; Some (__key_value, f)
           | _ =&gt; None
           end)
         (fun function_parameter =&gt;
-          let '(key, f) := function_parameter in
-          Missing_key key f);
+          let '(__key_value, f) := function_parameter in
+          Missing_key __key_value f);
       Data_encoding.__case_value &quot;Existing_key&quot; None (Data_encoding.Tag 2)
         (Data_encoding.obj1
           (Data_encoding.req None None &quot;existing_key&quot;
             (Data_encoding.__list_value None Data_encoding.__string_value)))
         (fun function_parameter =&gt;
           match function_parameter with
-          | Existing_key key =&gt; Some key
+          | Existing_key __key_value =&gt; Some __key_value
           | _ =&gt; None
-          end) (fun key =&gt; Existing_key key);
+          end) (fun __key_value =&gt; Existing_key __key_value);
       Data_encoding.__case_value &quot;Corrupted_data&quot; None (Data_encoding.Tag 3)
         (Data_encoding.obj1
           (Data_encoding.req None None &quot;corrupted_data&quot;
             (Data_encoding.__list_value None Data_encoding.__string_value)))
         (fun function_parameter =&gt;
           match function_parameter with
-          | Corrupted_data key =&gt; Some key
+          | Corrupted_data __key_value =&gt; Some __key_value
           | _ =&gt; None
-          end) (fun key =&gt; Corrupted_data key)
+          end) (fun __key_value =&gt; Corrupted_data __key_value)
     ].
 
 Definition pp_storage_error
@@ -54990,39 +54998,39 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
         &quot;Found a context with an unexpected version '%s'.&quot;) version
-  | Missing_key key Get =&gt;
+  | Missing_key __key_value Get =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
         (CamlinternalFormatBasics.String_literal &quot;Missing key '&quot;
           (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format))) &quot;Missing key '%s'.&quot;)
-      (String.concat &quot;/&quot; key)
-  | Missing_key key __Set =&gt;
+      (String.concat &quot;/&quot; __key_value)
+  | Missing_key __key_value __Set =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
         (CamlinternalFormatBasics.String_literal &quot;Cannot set undefined key '&quot;
           (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
-        &quot;Cannot set undefined key '%s'.&quot;) (String.concat &quot;/&quot; key)
-  | Missing_key key Del =&gt;
+        &quot;Cannot set undefined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
+  | Missing_key __key_value Del =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
         (CamlinternalFormatBasics.String_literal &quot;Cannot delete undefined key '&quot;
           (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
-        &quot;Cannot delete undefined key '%s'.&quot;) (String.concat &quot;/&quot; key)
-  | Missing_key key Copy =&gt;
+        &quot;Cannot delete undefined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
+  | Missing_key __key_value Copy =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
         (CamlinternalFormatBasics.String_literal &quot;Cannot copy undefined key '&quot;
           (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
-        &quot;Cannot copy undefined key '%s'.&quot;) (String.concat &quot;/&quot; key)
-  | Existing_key key =&gt;
+        &quot;Cannot copy undefined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
+  | Existing_key __key_value =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
         (CamlinternalFormatBasics.String_literal
@@ -55030,15 +55038,15 @@ Definition pp_storage_error
           (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
-        &quot;Cannot initialize defined key '%s'.&quot;) (String.concat &quot;/&quot; key)
-  | Corrupted_data key =&gt;
+        &quot;Cannot initialize defined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
+  | Corrupted_data __key_value =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
         (CamlinternalFormatBasics.String_literal &quot;Failed to parse the data at '&quot;
           (CamlinternalFormatBasics.String CamlinternalFormatBasics.No_padding
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
-        &quot;Failed to parse the data at '%s'.&quot;) (String.concat &quot;/&quot; key)
+        &quot;Failed to parse the data at '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
   end.
 
 (* ❌ Structure item `typext` not handled. *)
@@ -58866,7 +58874,7 @@ Definition is_nat (x : (|Compare.Z|).(Compare.S.t))
 
 Definition neg (x : Z.t) : Z.t := Z.neg x.
 
-Definition int {A : Set} (x : A) : A := x.
+Definition __int_value {A : Set} (x : A) : A := x.
 
 Definition shift_left (x : Z.t) (y : Z.t) : option Z.t :=
   if (|Compare.Int|).(Compare.S.op_gt) (Z.compare y (Z.of_int 256)) 0 then
@@ -59119,7 +59127,7 @@ Parameter is_nat : num z -&gt; option (num n).
 
 Parameter neg : forall {A : Set}, num A -&gt; num z.
 
-Parameter int : num n -&gt; num z.
+Parameter __int_value : num n -&gt; num z.
 
 Parameter lognot : forall {A : Set}, num A -&gt; num z.
 
@@ -59146,7 +59154,7 @@ Parameter logxor : num n -&gt; num n -&gt; num n.
     <h3>Script_interpreter</h3>
     <ul>
       <li>OCaml size: 1520 lines</li>
-      <li>Coq size: 2605 lines (+71% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2616 lines (+72% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -60097,7 +60105,7 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
   | (Apply capture_ty, Item (capture, Item (lam, rest))) -&gt; (
       Lwt.return (Gas.consume ctxt Interp_costs.apply)
       &gt;&gt;=? fun ctxt -&gt;
-      let (Lam (descr, expr)) = lam in
+      let {lam = (descr, expr)} = lam in
       let (Item_t (full_arg_ty, _, _)) = descr.bef in
       unparse_data ctxt Optimized capture_ty capture
       &gt;&gt;=? fun (const_expr, ctxt) -&gt;
@@ -60149,7 +60157,7 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
                   Prim (0, I_PAIR, [], []);
                   expr ] )
           in
-          let lam' = Lam (full_descr, full_expr) in
+          let lam' = {lam = (full_descr, full_expr)} in
           logged_return (Item (lam', rest), ctxt)
       | _ -&gt;
           <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr> )
@@ -60329,7 +60337,7 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun ctxt -&gt;
       let contract = Contract.implicit_contract key in
       logged_return (Item ((Unit_t None, (contract, &quot;default&quot;)), rest), ctxt)
-  | ( Create_contract (storage_type, param_type, Lam (_, code), root_name),
+  | ( Create_contract (storage_type, param_type, {lam = (_, code)}, root_name),
       Item
         ( manager,
           Item
@@ -60409,7 +60417,7 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
                 big_map_diff ),
               Item ((contract, &quot;default&quot;), rest) ),
           ctxt )
-  | ( Create_contract_2 (storage_type, param_type, Lam (_, code), root_name),
+  | ( Create_contract_2 (storage_type, param_type, {lam = (_, code)}, root_name),
       (* Removed the instruction's arguments manager, spendable and delegatable *)
     Item (delegate, Item (credit, Item (init, rest))) ) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.create_contract)
@@ -60591,7 +60599,7 @@ and interp :
     (p, r) lambda -&gt;
     p -&gt;
     (r * context) tzresult Lwt.t =
- fun ?log ctxt step_constants (Lam (code, _)) arg -&gt;
+ fun ?log ctxt step_constants {lam = (code, _)} arg -&gt;
   let stack = Item (arg, Empty) in
   ( match log with
   | None -&gt;
@@ -61164,7 +61172,8 @@ Fixpoint step {a b : Set}
             existT (fun '[__41, __42] =&gt; [__41 ** (list __41) ** (stack __42)])
               _ [hd, tl, rest] in
           Error_monad.op_gtgteqquestion
-            (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.cons))
+            (Lwt.__return
+              (Alpha_context.Gas.consume ctxt Interp_costs.__cons_value))
             (fun ctxt =&gt; logged_return ((Item (cons hd tl) rest), ctxt))
         | (Script_typed_ir.Nil, rest) =&gt;
           Error_monad.op_gtgteqquestion
@@ -61485,48 +61494,51 @@ Fixpoint step {a b : Set}
             (fun ctxt =&gt;
               logged_return
                 ((Item (Script_ir_translator.empty_big_map tk tv) rest), ctxt))
-        | (Script_typed_ir.Big_map_mem, Item key (Item map rest)) =&gt;
-          let 'existT _ [__87, __88, __89] [key, map, rest] :=
+        | (Script_typed_ir.Big_map_mem, Item __key_value (Item map rest)) =&gt;
+          let 'existT _ [__87, __88, __89] [__key_value, map, rest] :=
             existT
               (fun '[__87, __88, __89] =&gt;
                 [__87 ** (Script_typed_ir.big_map __87 __88) ** (stack __89)]) _
-              [key, map, rest] in
+              [__key_value, map, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt
-                (Interp_costs.map_mem key map.(Script_typed_ir.big_map.diff))))
+                (Interp_costs.map_mem __key_value
+                  map.(Script_typed_ir.big_map.diff))))
             (fun ctxt =&gt;
               Error_monad.op_gtgteqquestion
-                (Script_ir_translator.big_map_mem ctxt key map)
+                (Script_ir_translator.big_map_mem ctxt __key_value map)
                 (fun function_parameter =&gt;
                   let '(res, ctxt) := function_parameter in
                   logged_return ((Item res rest), ctxt)))
-        | (Script_typed_ir.Big_map_get, Item key (Item map rest)) =&gt;
-          let 'existT _ [__90, __91, __92] [key, map, rest] :=
+        | (Script_typed_ir.Big_map_get, Item __key_value (Item map rest)) =&gt;
+          let 'existT _ [__90, __91, __92] [__key_value, map, rest] :=
             existT
               (fun '[__90, __91, __92] =&gt;
                 [__90 ** (Script_typed_ir.big_map __90 __91) ** (stack __92)]) _
-              [key, map, rest] in
+              [__key_value, map, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt
-                (Interp_costs.map_get key map.(Script_typed_ir.big_map.diff))))
+                (Interp_costs.map_get __key_value
+                  map.(Script_typed_ir.big_map.diff))))
             (fun ctxt =&gt;
               Error_monad.op_gtgteqquestion
-                (Script_ir_translator.big_map_get ctxt key map)
+                (Script_ir_translator.big_map_get ctxt __key_value map)
                 (fun function_parameter =&gt;
                   let '(res, ctxt) := function_parameter in
                   logged_return ((Item res rest), ctxt)))
         |
           (Script_typed_ir.Big_map_update,
-            Item key (Item maybe_value (Item map rest))) =&gt;
-          let 'existT _ [__93, __94, __95] [key, maybe_value, map, rest] :=
+            Item __key_value (Item maybe_value (Item map rest))) =&gt;
+          let 'existT _ [__93, __94, __95] [__key_value, maybe_value, map, rest]
+            :=
             existT
               (fun '[__93, __94, __95] =&gt;
                 [__93 ** (option __94) ** (Script_typed_ir.big_map __93 __94) **
-                  (stack __95)]) _ [key, maybe_value, map, rest] in
+                  (stack __95)]) _ [__key_value, maybe_value, map, rest] in
           consume_gas_terop __descr_value
-            (Script_ir_translator.big_map_update, key, maybe_value, map)
+            (Script_ir_translator.big_map_update, __key_value, maybe_value, map)
             (fun k =&gt;
               fun v =&gt;
                 fun m =&gt;
@@ -61814,8 +61826,9 @@ Fixpoint step {a b : Set}
               (fun __118 : Set =&gt;
                 [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
                   (stack __118)]) _ [x, rest] in
-          consume_gas_unop __descr_value (Alpha_context.Script_int.int, x)
-            Interp_costs.int rest ctxt
+          consume_gas_unop __descr_value
+            (Alpha_context.Script_int.__int_value, x) Interp_costs.__int_value
+            rest ctxt
         | (Script_typed_ir.Neg_int, Item x rest) =&gt;
           let 'existT _ __119 [x, rest] :=
             existT
@@ -62223,7 +62236,8 @@ Fixpoint step {a b : Set}
           Error_monad.op_gtgteqquestion
             (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.apply))
             (fun ctxt =&gt;
-              let 'Script_typed_ir.Lam __descr_value expr := lam in
+              let '{| Script_typed_ir.lambda.lam := (__descr_value, expr) |} :=
+                lam in
               let 'Script_typed_ir.Item_t full_arg_ty _ _ :=
                 __descr_value.(Script_typed_ir.descr.bef) in
               Error_monad.op_gtgteqquestion
@@ -62293,7 +62307,10 @@ Fixpoint step {a b : Set}
                                 nil;
                               expr
                             ] in
-                        let lam' := Script_typed_ir.Lam full_descr full_expr in
+                        let lam' :=
+                          {|
+                            Script_typed_ir.lambda.lam :=
+                              (full_descr, full_expr) |} in
                         logged_return ((Item lam' rest), ctxt)
                       | _ =&gt;
                         (* ❌ Assert instruction is not handled. *)
@@ -62632,23 +62649,24 @@ Fixpoint step {a b : Set}
                               Alpha_context.internal_operation.nonce :=
                                 __nonce_value |}), None)
                           (Item (contract, &quot;default&quot;) rest)), ctxt))))
-        | (Script_typed_ir.Implicit_account, Item key rest) =&gt;
-          let 'existT _ __189 [key, rest] :=
+        | (Script_typed_ir.Implicit_account, Item __key_value rest) =&gt;
+          let 'existT _ __189 [__key_value, rest] :=
             existT
               (fun __189 : Set =&gt;
-                [Alpha_context.public_key_hash ** (stack __189)]) _ [key, rest]
-            in
+                [Alpha_context.public_key_hash ** (stack __189)]) _
+              [__key_value, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt Interp_costs.implicit_account))
             (fun ctxt =&gt;
-              let contract := Alpha_context.Contract.implicit_contract key in
+              let contract :=
+                Alpha_context.Contract.implicit_contract __key_value in
               logged_return
                 ((Item ((Script_typed_ir.Unit_t None), (contract, &quot;default&quot;))
                   rest), ctxt))
         |
-          (Script_typed_ir.Create_contract storage_type param_type
-            (Script_typed_ir.Lam _ code) root_name,
+          (Script_typed_ir.Create_contract storage_type param_type {|
+            Script_typed_ir.lambda.lam := (_, code) |} root_name,
             Item manager
               (Item delegate
                 (Item spendable
@@ -62789,8 +62807,8 @@ Fixpoint step {a b : Set}
                                                   (Item (contract, &quot;default&quot;)
                                                     rest)), ctxt))))))))))
         |
-          (Script_typed_ir.Create_contract_2 storage_type param_type
-            (Script_typed_ir.Lam _ code) root_name,
+          (Script_typed_ir.Create_contract_2 storage_type param_type {|
+            Script_typed_ir.lambda.lam := (_, code) |} root_name,
             Item delegate (Item credit (Item init rest))) =&gt;
           let 'existT _ [__192, __193, __Create_contract_2_'p]
             [storage_type, param_type, code, root_name, delegate, credit, init,
@@ -62940,31 +62958,32 @@ Fixpoint step {a b : Set}
               logged_return ((Item now rest), ctxt))
         |
           (Script_typed_ir.Check_signature,
-            Item key (Item signature (Item message rest))) =&gt;
-          let 'existT _ __195 [key, signature, message, rest] :=
+            Item __key_value (Item signature (Item message rest))) =&gt;
+          let 'existT _ __195 [__key_value, signature, message, rest] :=
             existT
               (fun __195 : Set =&gt;
                 [Alpha_context.public_key ** Alpha_context.signature ** MBytes.t
-                  ** (stack __195)]) _ [key, signature, message, rest] in
+                  ** (stack __195)]) _ [__key_value, signature, message, rest]
+            in
           Error_monad.op_gtgteqquestion
             (Lwt.__return
               (Alpha_context.Gas.consume ctxt
-                (Interp_costs.check_signature key message)))
+                (Interp_costs.check_signature __key_value message)))
             (fun ctxt =&gt;
-              let res := Signature.check None key signature message in
+              let res := Signature.check None __key_value signature message in
               logged_return ((Item res rest), ctxt))
-        | (Script_typed_ir.Hash_key, Item key rest) =&gt;
-          let 'existT _ __196 [key, rest] :=
+        | (Script_typed_ir.Hash_key, Item __key_value rest) =&gt;
+          let 'existT _ __196 [__key_value, rest] :=
             existT
               (fun __196 : Set =&gt; [Alpha_context.public_key ** (stack __196)]) _
-              [key, rest] in
+              [__key_value, rest] in
           Error_monad.op_gtgteqquestion
             (Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.hash_key))
             (fun ctxt =&gt;
               logged_return
                 ((Item
-                  ((|Signature.Public_key|).(S.SPublic_key.__hash_value) key)
-                  rest), ctxt))
+                  ((|Signature.Public_key|).(S.SPublic_key.__hash_value)
+                    __key_value) rest), ctxt))
         | (Script_typed_ir.Blake2b, Item __bytes_value rest) =&gt;
           let 'existT _ __197 [__bytes_value, rest] :=
             existT (fun __197 : Set =&gt; [MBytes.t ** (stack __197)]) _
@@ -63140,7 +63159,7 @@ with interp {p r : Set}
   (step_constants : step_constants)
   (function_parameter : Script_typed_ir.lambda p r) {struct log}
   : p -&gt; Lwt.t (Error_monad.tzresult (r * Alpha_context.context)) :=
-  let 'Script_typed_ir.Lam code _ := function_parameter in
+  let '{| Script_typed_ir.lambda.lam := (code, _) |} := function_parameter in
   fun arg =&gt;
     let stack := Item arg Empty in
     Error_monad.op_gtgteqquestion
@@ -65953,7 +65972,7 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5996 lines</li>
-      <li>Coq size: 9860 lines (+64% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 9890 lines (+64% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -68832,7 +68851,7 @@ They are sent to a unit type.">Bad_return (loc, stack_ty, ret)</abbr>)
         &gt;&gt;=? fun (Eq, ctxt) -&gt;
         Lwt.return (merge_types ~legacy ctxt loc ty ret)
         &gt;&gt;=? fun (_ret, ctxt) -&gt;
-        return ((Lam (descr, script_instr) : (arg, ret) lambda), ctxt) )
+        return (({lam = (descr, script_instr)} : (arg, ret) lambda), ctxt) )
   | (Typed {loc; aft = stack_ty; _}, ctxt) -&gt;
       Lwt.return (serialize_ty_for_error ctxt ret)
       &gt;&gt;=? fun (ret, ctxt) -&gt;
@@ -68842,7 +68861,7 @@ They are sent to a unit type.">Bad_return (loc, stack_ty, ret)</abbr>)
 They are sent to a unit type.">(Bad_return (loc, stack_ty, ret))</abbr>
   | (Failed {descr}, ctxt) -&gt;
       return
-        ( ( Lam (descr (Item_t (ret, Empty_t, None)), script_instr)
+        ( ( {lam = (descr (Item_t (ret, Empty_t, None)), script_instr)}
             : (arg, ret) lambda ),
           ctxt )
 
@@ -70589,11 +70608,11 @@ They are sent to a unit type.">(Ill_typed_contract (cannonical_code, []))</abbr>
              (arg_type_full, None)
              ret_type_full
              code_field)
-        &gt;&gt;=? fun ( ( Lam
-                       ( { bef = Item_t (arg, Empty_t, _);
-                           aft = Item_t (ret, Empty_t, _);
-                           _ },
-                         _ ) as lambda ),
+        &gt;&gt;=? fun ( ( { lam =
+                         ( { bef = Item_t (arg, Empty_t, _);
+                             aft = Item_t (ret, Empty_t, _);
+                             _ },
+                           _ ) } as lambda ),
                    ctxt ) -&gt;
         Lwt.return @@ ty_eq ctxt arg arg_type_full
         &gt;&gt;=? fun (Eq, ctxt) -&gt;
@@ -70689,11 +70708,11 @@ They are sent to a unit type.">(Ill_typed_contract (cannonical_code, []))</abbr>
            (arg_type_full, None)
            ret_type_full
            code_field)
-      &gt;&gt;=? fun ( ( Lam
-                     ( { bef = Item_t (arg, Empty_t, _);
-                         aft = Item_t (ret, Empty_t, _);
-                         _ },
-                       _ ) as lambda ),
+      &gt;&gt;=? fun ( ( { lam =
+                       ( { bef = Item_t (arg, Empty_t, _);
+                           aft = Item_t (ret, Empty_t, _);
+                           _ },
+                         _ ) } as lambda ),
                  ctxt ) -&gt;
       Lwt.return @@ ty_eq ctxt arg arg_type_full
       &gt;&gt;=? fun (Eq, ctxt) -&gt;
@@ -71550,7 +71569,7 @@ They are sent to a unit type.">(Ill_formed_type (Some &quot;storage&quot;, code,
   trace <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Ill_typed_contract (code, !type_map))</abbr> result
-  &gt;&gt;=? fun (Lam _, ctxt) -&gt; return (!type_map, ctxt)
+  &gt;&gt;=? fun ({lam = _}, ctxt) -&gt; return (!type_map, ctxt)
 
 let typecheck_data :
     ?type_logger:type_logger -&gt;
@@ -71870,7 +71889,7 @@ let rec unparse_data :
         (* this can only be the result of an execution and the map
              must have been flushed at this point *)
         <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr>
-  | (Lambda_t _, Lam (_, original_code)) -&gt;
+  | (Lambda_t _, {lam = (_, original_code)}) -&gt;
       unparse_code ctxt mode original_code
 
 (* Gas accounting may not be perfect in this function, as it is only called by RPCs. *)
@@ -71913,7 +71932,7 @@ and unparse_code ctxt mode =
 (* Gas accounting may not be perfect in this function, as it is only called by RPCs. *)
 let unparse_script ctxt mode {code; arg_type; storage; storage_type; root_name}
     =
-  let (Lam (_, original_code)) = code in
+  let {lam = (_, original_code)} = code in
   unparse_code ctxt mode original_code
   &gt;&gt;=? fun (code, ctxt) -&gt;
   unparse_data ctxt mode storage_type storage
@@ -75457,7 +75476,8 @@ Fixpoint parse_data {a : Set}
         traced (Error_monad.fail extensible_type_value)
       | (Script_typed_ir.Key_t _, Micheline.Bytes _ __bytes_value) =&gt;
         Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key))
+          (Lwt.__return
+            (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value))
           (fun ctxt =&gt;
             match
               Data_encoding.Binary.of_bytes
@@ -75469,7 +75489,8 @@ Fixpoint parse_data {a : Set}
             end)
       | (Script_typed_ir.Key_t _, Micheline.String _ s) =&gt;
         Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key))
+          (Lwt.__return
+            (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value))
           (fun ctxt =&gt;
             match (|Signature.Public_key|).(S.SPublic_key.of_b58check_opt) s
               with
@@ -76117,7 +76138,9 @@ with parse_returning {arg ret : Set}
                     (fun function_parameter =&gt;
                       let '(_ret, ctxt) := function_parameter in
                       Error_monad.__return
-                        ((Script_typed_ir.Lam __descr_value script_instr), ctxt))))
+                        ({|
+                          Script_typed_ir.lambda.lam :=
+                            (__descr_value, script_instr) |}, ctxt))))
           |
             (Typed {|
               Script_typed_ir.descr.loc := loc;
@@ -76140,10 +76163,11 @@ with parse_returning {arg ret : Set}
                     Error_monad.fail extensible_type_value))
           | (Failed {| judgement.Failed.descr := __descr_value |}, ctxt) =&gt;
             Error_monad.__return
-              ((Script_typed_ir.Lam
-                (__descr_value
-                  (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None))
-                script_instr), ctxt)
+              ({|
+                Script_typed_ir.lambda.lam :=
+                  ((__descr_value
+                    (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None)),
+                    script_instr) |}, ctxt)
           end)
 
 with parse_int32
@@ -77110,10 +77134,10 @@ with parse_instr {bef : Set}
               (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.List_t elt _ _) starting_rest
-            list_annot), _) =&gt;
+          Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _)
+            starting_rest list_annot), _) =&gt;
         let 'existT _ [__91, __92]
-          [loc, body, annot, elt, starting_rest, list_annot] :=
+          [loc, body, annot, __elt_value, starting_rest, list_annot] :=
           existT
             (fun '[__91, __92] =&gt;
               [Alpha_context.Script.location **
@@ -77121,7 +77145,7 @@ with parse_instr {bef : Set}
                   Alpha_context.Script.prim) ** Micheline.annot **
                 (Script_typed_ir.ty __92) ** (Script_typed_ir.stack_ty __91) **
                 (option Script_typed_ir.var_annot)]) _
-            [loc, body, annot, elt, starting_rest, list_annot] in
+            [loc, body, annot, __elt_value, starting_rest, list_annot] in
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
@@ -77134,7 +77158,7 @@ with parse_instr {bef : Set}
                     Script_ir_annot.default_elt_annot in
                 Error_monad.op_gtgteqquestion
                   (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t elt starting_rest elt_annot))
+                    (Script_typed_ir.Item_t __elt_value starting_rest elt_annot))
                   (fun function_parameter =&gt;
                     let '(judgement, ctxt) := function_parameter in
                     match judgement with
@@ -77189,9 +77213,10 @@ with parse_instr {bef : Set}
                     end)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.List_t elt _ _) rest
+          Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _) rest
             list_annot), _) =&gt;
-        let 'existT _ [__94, __95] [loc, body, annot, elt, rest, list_annot] :=
+        let 'existT _ [__94, __95]
+          [loc, body, annot, __elt_value, rest, list_annot] :=
           existT
             (fun '[__94, __95] =&gt;
               [Alpha_context.Script.location **
@@ -77199,7 +77224,7 @@ with parse_instr {bef : Set}
                   Alpha_context.Script.prim) ** Micheline.annot **
                 (Script_typed_ir.ty __95) ** (Script_typed_ir.stack_ty __94) **
                 (option Script_typed_ir.var_annot)]) _
-            [loc, body, annot, elt, rest, list_annot] in
+            [loc, body, annot, __elt_value, rest, list_annot] in
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
           (fun function_parameter =&gt;
@@ -77213,7 +77238,7 @@ with parse_instr {bef : Set}
                     Script_ir_annot.default_elt_annot in
                 Error_monad.op_gtgteqquestion
                   (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t elt rest elt_annot))
+                    (Script_typed_ir.Item_t __elt_value rest elt_annot))
                   (fun function_parameter =&gt;
                     let '(judgement, ctxt) := function_parameter in
                     match judgement with
@@ -77298,10 +77323,10 @@ with parse_instr {bef : Set}
                 let elt_annot :=
                   Script_ir_annot.gen_access_annot set_annot None
                     Script_ir_annot.default_elt_annot in
-                let elt := ty_of_comparable_ty comp_elt in
+                let __elt_value := ty_of_comparable_ty comp_elt in
                 Error_monad.op_gtgteqquestion
                   (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t elt rest elt_annot))
+                    (Script_typed_ir.Item_t __elt_value rest elt_annot))
                   (fun function_parameter =&gt;
                     let '(judgement, ctxt) := function_parameter in
                     match judgement with
@@ -77345,22 +77370,23 @@ with parse_instr {bef : Set}
       |
         ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
           Script_typed_ir.Item_t v
-            (Script_typed_ir.Item_t (Script_typed_ir.Set_t elt _) rest _) _), _)
-        =&gt;
-        let 'existT _ [__102, __103, __99] [loc, annot, v, elt, rest] :=
+            (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value _) rest _)
+            _), _) =&gt;
+        let 'existT _ [__102, __103, __99] [loc, annot, v, __elt_value, rest] :=
           existT
             (fun '[__102, __103, __99] =&gt;
               [Alpha_context.Script.location ** Micheline.annot **
                 (Script_typed_ir.ty __99) **
                 (Script_typed_ir.comparable_ty __103) **
-                (Script_typed_ir.stack_ty __102)]) _ [loc, annot, v, elt, rest]
-          in
-        let elt := ty_of_comparable_ty elt in
+                (Script_typed_ir.stack_ty __102)]) _
+            [loc, annot, v, __elt_value, rest] in
+        let __elt_value := ty_of_comparable_ty __elt_value in
         Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
           (fun function_parameter =&gt;
             let '(annot, tname) := function_parameter in
             Error_monad.op_gtgteqquestion
-              (check_item_ty ctxt elt v loc Alpha_context.Script.I_MEM 1 2)
+              (check_item_ty ctxt __elt_value v loc Alpha_context.Script.I_MEM 1
+                2)
               (fun function_parameter =&gt;
                 let '(Eq, _, ctxt) := function_parameter in
                 typed ctxt loc Script_typed_ir.Set_mem
@@ -77370,10 +77396,10 @@ with parse_instr {bef : Set}
         ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
           Script_typed_ir.Item_t v
             (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Set_t elt tname) rest
-                set_annot) _) _), _) =&gt;
+              (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value tname)
+                rest set_annot) _) _), _) =&gt;
         let 'existT _ [__104, __109, __110]
-          [loc, annot, v, elt, tname, rest, set_annot] :=
+          [loc, annot, v, __elt_value, tname, rest, set_annot] :=
           existT
             (fun '[__104, __109, __110] =&gt;
               [Alpha_context.Script.location ** Micheline.annot **
@@ -77382,7 +77408,7 @@ with parse_instr {bef : Set}
                 (option Script_typed_ir.type_annot) **
                 (Script_typed_ir.stack_ty __109) **
                 (option Script_typed_ir.var_annot)]) _
-            [loc, annot, v, elt, tname, rest, set_annot] in
+            [loc, annot, v, __elt_value, tname, rest, set_annot] in
         match comparable_ty_of_ty v with
         | None =&gt;
           Error_monad.op_gtgteqquestion (unparse_ty ctxt v)
@@ -77394,13 +77420,13 @@ with parse_instr {bef : Set}
             (parse_var_annot loc (Some set_annot) annot)
             (fun annot =&gt;
               Error_monad.op_gtgteqquestion
-                (check_item_comparable_ty elt v loc
+                (check_item_comparable_ty __elt_value v loc
                   Alpha_context.Script.I_UPDATE 1 3)
                 (fun function_parameter =&gt;
-                  let '(Eq, elt) := function_parameter in
+                  let '(Eq, __elt_value) := function_parameter in
                   typed ctxt loc Script_typed_ir.Set_update
-                    (Script_typed_ir.Item_t (Script_typed_ir.Set_t elt tname)
-                      rest annot)))
+                    (Script_typed_ir.Item_t
+                      (Script_typed_ir.Set_t __elt_value tname) rest annot)))
         end
       |
         ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
@@ -77444,10 +77470,10 @@ with parse_instr {bef : Set}
                         stack annot))))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Map_t ck elt _ _)
+          Script_typed_ir.Item_t (Script_typed_ir.Map_t ck __elt_value _ _)
             starting_rest _map_annot), _) =&gt;
         let 'existT _ [__115, __116, __117]
-          [loc, body, annot, ck, elt, starting_rest, _map_annot] :=
+          [loc, body, annot, ck, __elt_value, starting_rest, _map_annot] :=
           existT
             (fun '[__115, __116, __117] =&gt;
               [Alpha_context.Script.location **
@@ -77456,7 +77482,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.comparable_ty __116) **
                 (Script_typed_ir.ty __117) ** (Script_typed_ir.stack_ty __115)
                 ** (option Script_typed_ir.var_annot)]) _
-            [loc, body, annot, ck, elt, starting_rest, _map_annot] in
+            [loc, body, annot, ck, __elt_value, starting_rest, _map_annot] in
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_kind [ Script_tc_errors.Seq_kind ] body)
@@ -77475,8 +77501,8 @@ with parse_instr {bef : Set}
                   (parse_instr type_logger tc_context ctxt legacy body
                     (Script_typed_ir.Item_t
                       (Script_typed_ir.Pair_t (k, None, k_name)
-                        (elt, None, e_name) None (has_big_map elt))
-                      starting_rest None))
+                        (__elt_value, None, e_name) None
+                        (has_big_map __elt_value)) starting_rest None))
                   (fun function_parameter =&gt;
                     let '(judgement, ctxt) := function_parameter in
                     match judgement with
@@ -77559,11 +77585,11 @@ with parse_instr {bef : Set}
                 let e_name :=
                   Script_ir_annot.field_to_var_annot
                     Script_ir_annot.default_elt_annot in
-                let key := ty_of_comparable_ty comp_elt in
+                let __key_value := ty_of_comparable_ty comp_elt in
                 Error_monad.op_gtgteqquestion
                   (parse_instr type_logger tc_context ctxt legacy body
                     (Script_typed_ir.Item_t
-                      (Script_typed_ir.Pair_t (key, None, k_name)
+                      (Script_typed_ir.Pair_t (__key_value, None, k_name)
                         (element_ty, None, e_name) None (has_big_map element_ty))
                       rest None))
                   (fun function_parameter =&gt;
@@ -77633,10 +77659,11 @@ with parse_instr {bef : Set}
       |
         ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
           Script_typed_ir.Item_t vk
-            (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck elt _ has_big_map)
-              rest _) _), _) =&gt;
+            (Script_typed_ir.Item_t
+              (Script_typed_ir.Map_t ck __elt_value _ has_big_map) rest _) _), _)
+        =&gt;
         let 'existT _ [__128, __131, __132, __133]
-          [loc, annot, vk, ck, elt, has_big_map, rest] :=
+          [loc, annot, vk, ck, __elt_value, has_big_map, rest] :=
           existT
             (fun '[__128, __131, __132, __133] =&gt;
               [Alpha_context.Script.location ** Micheline.annot **
@@ -77644,7 +77671,7 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.comparable_ty __132) **
                 (Script_typed_ir.ty __133) ** bool **
                 (Script_typed_ir.stack_ty __131)]) _
-            [loc, annot, vk, ck, elt, has_big_map, rest] in
+            [loc, annot, vk, ck, __elt_value, has_big_map, rest] in
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2)
@@ -77654,7 +77681,8 @@ with parse_instr {bef : Set}
               (fun annot =&gt;
                 typed ctxt loc Script_typed_ir.Map_get
                   (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t elt None has_big_map) rest annot)))
+                    (Script_typed_ir.Option_t __elt_value None has_big_map) rest
+                    annot)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
           Script_typed_ir.Item_t vk
@@ -77758,17 +77786,17 @@ with parse_instr {bef : Set}
       |
         ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
           Script_typed_ir.Item_t vk
-            (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t ck elt _) rest _)
-            _), _) =&gt;
+            (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t ck __elt_value _)
+              rest _) _), _) =&gt;
         let 'existT _ [__153, __156, __157, __158]
-          [loc, annot, vk, ck, elt, rest] :=
+          [loc, annot, vk, ck, __elt_value, rest] :=
           existT
             (fun '[__153, __156, __157, __158] =&gt;
               [Alpha_context.Script.location ** Micheline.annot **
                 (Script_typed_ir.ty __153) **
                 (Script_typed_ir.comparable_ty __157) **
                 (Script_typed_ir.ty __158) ** (Script_typed_ir.stack_ty __156)])
-            _ [loc, annot, vk, ck, elt, rest] in
+            _ [loc, annot, vk, ck, __elt_value, rest] in
         let k := ty_of_comparable_ty ck in
         Error_monad.op_gtgteqquestion
           (check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2)
@@ -77778,8 +77806,8 @@ with parse_instr {bef : Set}
               (fun annot =&gt;
                 typed ctxt loc Script_typed_ir.Big_map_get
                   (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t elt None (has_big_map elt)) rest
-                    annot)))
+                    (Script_typed_ir.Option_t __elt_value None
+                      (has_big_map __elt_value)) rest annot)))
       |
         ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
           Script_typed_ir.Item_t set_key
@@ -79324,8 +79352,8 @@ with parse_instr {bef : Set}
                     (fun function_parameter =&gt;
                       let '(__t_value, _ctxt) := function_parameter in
                       Error_monad.fail extensible_type_value)
-                | Some key =&gt;
-                  typed ctxt loc (Script_typed_ir.Compare key)
+                | Some __key_value =&gt;
+                  typed ctxt loc (Script_typed_ir.Compare __key_value)
                     (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest
                       annot)
                 end))
@@ -79755,17 +79783,23 @@ with parse_instr {bef : Set}
                                     code_field))
                                 (fun function_parameter =&gt;
                                   let
-                                    '((Script_typed_ir.Lam {|
-                                      Script_typed_ir.descr.bef :=
-                                        Script_typed_ir.Item_t arg
-                                          Script_typed_ir.Empty_t
-                                          _;
-                                        Script_typed_ir.descr.aft :=
-                                          Script_typed_ir.Item_t
-                                            ret
-                                            Script_typed_ir.Empty_t
-                                            _
-                                        |} _) as lambda, ctxt) :=
+                                    '({|
+                                      Script_typed_ir.lambda.lam :=
+                                        ({|
+                                          Script_typed_ir.descr.bef :=
+                                            Script_typed_ir.Item_t
+                                              arg
+                                              Script_typed_ir.Empty_t
+                                              _;
+                                            Script_typed_ir.descr.aft
+                                              :=
+                                              Script_typed_ir.Item_t
+                                                ret
+                                                Script_typed_ir.Empty_t
+                                                _
+                                            |},
+                                          _)
+                                        |} as lambda, ctxt) :=
                                     function_parameter in
                                   Error_monad.op_gtgteqquestion
                                     (Pervasives.op_atat Lwt.__return
@@ -79920,18 +79954,24 @@ with parse_instr {bef : Set}
                                   (arg_type_full, None) ret_type_full code_field))
                               (fun function_parameter =&gt;
                                 let
-                                  '((Script_typed_ir.Lam {|
-                                    Script_typed_ir.descr.bef :=
-                                      Script_typed_ir.Item_t arg
-                                        Script_typed_ir.Empty_t
-                                        _;
-                                      Script_typed_ir.descr.aft :=
-                                        Script_typed_ir.Item_t
-                                          ret
-                                          Script_typed_ir.Empty_t
-                                          _
-                                      |} _) as lambda, ctxt) :=
-                                  function_parameter in
+                                  '({|
+                                    Script_typed_ir.lambda.lam :=
+                                      ({|
+                                        Script_typed_ir.descr.bef :=
+                                          Script_typed_ir.Item_t
+                                            arg
+                                            Script_typed_ir.Empty_t
+                                            _;
+                                          Script_typed_ir.descr.aft
+                                            :=
+                                            Script_typed_ir.Item_t
+                                              ret
+                                              Script_typed_ir.Empty_t
+                                              _
+                                          |},
+                                        _)
+                                      |} as lambda, ctxt) := function_parameter
+                                  in
                                 Error_monad.op_gtgteqquestion
                                   (Pervasives.op_atat Lwt.__return
                                     (ty_eq ctxt arg arg_type_full))
@@ -80953,8 +80993,8 @@ Definition typecheck_code
                   Error_monad.op_gtgteqquestion
                     (Error_monad.trace extensible_type_value __result_value)
                     (fun function_parameter =&gt;
-                      let '(Script_typed_ir.Lam _ _, ctxt) := function_parameter
-                        in
+                      let '({| Script_typed_ir.lambda.lam := _ |}, ctxt) :=
+                        function_parameter in
                       Error_monad.__return
                         ((Pervasives.op_exclamation type_map), ctxt)))))).
 
@@ -81104,13 +81144,15 @@ Fixpoint unparse_data {a : Set}
               ((Micheline.Prim (-1) Alpha_context.Script.D_Unit nil nil), ctxt))
       | (Script_typed_ir.Int_t _, v) =&gt;
         Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt (Unparse_costs.int v)))
+          (Lwt.__return
+            (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)))
           (fun ctxt =&gt;
             Error_monad.__return
               ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt))
       | (Script_typed_ir.Nat_t _, v) =&gt;
         Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt (Unparse_costs.int v)))
+          (Lwt.__return
+            (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)))
           (fun ctxt =&gt;
             Error_monad.__return
               ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt))
@@ -81231,7 +81273,8 @@ Fixpoint unparse_data {a : Set}
                 ctxt))
       | (Script_typed_ir.Key_t _, k) =&gt;
         Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.key))
+          (Lwt.__return
+            (Alpha_context.Gas.consume ctxt Unparse_costs.__key_value))
           (fun ctxt =&gt;
             match mode with
             | Optimized =&gt;
@@ -81409,7 +81452,7 @@ Fixpoint unparse_data {a : Set}
                   (fun ctxt =&gt;
                     Error_monad.op_gtgteqquestion (unparse_data ctxt mode kt k)
                       (fun function_parameter =&gt;
-                        let '(key, ctxt) := function_parameter in
+                        let '(__key_value, ctxt) := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (unparse_data ctxt mode vt v)
                           (fun function_parameter =&gt;
@@ -81417,7 +81460,8 @@ Fixpoint unparse_data {a : Set}
                             Error_monad.__return
                               ((cons
                                 (Micheline.Prim (-1) Alpha_context.Script.D_Elt
-                                  [ key; value ] nil) l), ctxt))))) (nil, ctxt)
+                                  [ __key_value; value ] nil) l), ctxt)))))
+            (nil, ctxt)
             (map_fold (fun k =&gt; fun v =&gt; fun acc =&gt; cons (k, v) acc) map nil))
           (fun function_parameter =&gt;
             let '(items, ctxt) := function_parameter in
@@ -81446,7 +81490,7 @@ Fixpoint unparse_data {a : Set}
                   (fun ctxt =&gt;
                     Error_monad.op_gtgteqquestion (unparse_data ctxt mode kt k)
                       (fun function_parameter =&gt;
-                        let '(key, ctxt) := function_parameter in
+                        let '(__key_value, ctxt) := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (unparse_data ctxt mode vt v)
                           (fun function_parameter =&gt;
@@ -81454,7 +81498,8 @@ Fixpoint unparse_data {a : Set}
                             Error_monad.__return
                               ((cons
                                 (Micheline.Prim (-1) Alpha_context.Script.D_Elt
-                                  [ key; value ] nil) l), ctxt))))) (nil, ctxt)
+                                  [ __key_value; value ] nil) l), ctxt)))))
+            (nil, ctxt)
             ((|Diff|).(Script_typed_ir.Boxed_map.OPS).(S.MAP.fold)
               (fun k =&gt;
                 fun v =&gt;
@@ -81487,7 +81532,9 @@ Fixpoint unparse_data {a : Set}
         else
           (* ❌ Assert instruction is not handled. *)
           assert false
-      | (Script_typed_ir.Lambda_t _ _ _, Script_typed_ir.Lam _ original_code) =&gt;
+      |
+        (Script_typed_ir.Lambda_t _ _ _, {|
+          Script_typed_ir.lambda.lam := (_, original_code) |}) =&gt;
         unparse_code ctxt mode original_code
       end)
 
@@ -81580,7 +81627,7 @@ Definition unparse_script {A B : Set}
       Script_typed_ir.script.storage_type := storage_type;
       Script_typed_ir.script.root_name := root_name
       |} := function_parameter in
-  let 'Script_typed_ir.Lam _ original_code := code in
+  let '{| Script_typed_ir.lambda.lam := (_, original_code) |} := code in
   Error_monad.op_gtgteqquestion (unparse_code ctxt mode original_code)
     (fun function_parameter =&gt;
       let '(code, ctxt) := function_parameter in
@@ -81680,7 +81727,7 @@ Definition empty_big_map {A B : Set}
     Script_typed_ir.big_map.value_type := tv |}.
 
 Definition big_map_mem {A B : Set}
-  (ctxt : Alpha_context.context) (key : A)
+  (ctxt : Alpha_context.context) (__key_value : A)
   (function_parameter : Script_typed_ir.big_map A B)
   : Lwt.t (Error_monad.tzresult (bool * Alpha_context.context)) :=
   let '{|
@@ -81688,10 +81735,10 @@ Definition big_map_mem {A B : Set}
       Script_typed_ir.big_map.diff := diff;
       Script_typed_ir.big_map.key_type := key_type
       |} := function_parameter in
-  match ((map_get key diff), id) with
+  match ((map_get __key_value diff), id) with
   | (None, None) =&gt; Error_monad.__return (false, ctxt)
   | (None, Some id) =&gt;
-    Error_monad.op_gtgteqquestion (hash_data ctxt key_type key)
+    Error_monad.op_gtgteqquestion (hash_data ctxt key_type __key_value)
       (fun function_parameter =&gt;
         let '(__hash_value, ctxt) := function_parameter in
         Error_monad.op_gtgteqquestion
@@ -81704,7 +81751,7 @@ Definition big_map_mem {A B : Set}
   end.
 
 Definition big_map_get {A B : Set}
-  (ctxt : Alpha_context.context) (key : A)
+  (ctxt : Alpha_context.context) (__key_value : A)
   (function_parameter : Script_typed_ir.big_map A B)
   : Lwt.t (Error_monad.tzresult (option B * Alpha_context.context)) :=
   let '{|
@@ -81713,11 +81760,11 @@ Definition big_map_get {A B : Set}
       Script_typed_ir.big_map.key_type := key_type;
       Script_typed_ir.big_map.value_type := value_type
       |} := function_parameter in
-  match ((map_get key diff), id) with
+  match ((map_get __key_value diff), id) with
   | (Some x, _) =&gt; Error_monad.__return (x, ctxt)
   | (None, None) =&gt; Error_monad.__return (None, ctxt)
   | (None, Some id) =&gt;
-    Error_monad.op_gtgteqquestion (hash_data ctxt key_type key)
+    Error_monad.op_gtgteqquestion (hash_data ctxt key_type __key_value)
       (fun function_parameter =&gt;
         let '(__hash_value, ctxt) := function_parameter in
         Error_monad.op_gtgteqquestion
@@ -81735,12 +81782,12 @@ Definition big_map_get {A B : Set}
   end.
 
 Definition big_map_update {A B : Set}
-  (key : A) (value : option B)
+  (__key_value : A) (value : option B)
   (function_parameter : Script_typed_ir.big_map A B)
   : Script_typed_ir.big_map A B :=
   let '{| Script_typed_ir.big_map.diff := diff |} as map := function_parameter
     in
-  Script_typed_ir.big_map.with_diff (map_set key value diff) map.
+  Script_typed_ir.big_map.with_diff (map_set __key_value value diff) map.
 
 Definition Ids :=
   __Set.Make
@@ -81816,24 +81863,26 @@ Definition diff_of_big_map {A B : Set}
         (fun function_parameter =&gt;
           let '(ctxt, init, big_map) := function_parameter in
           let pairs :=
-            map_fold (fun key =&gt; fun value =&gt; fun acc =&gt; cons (key, value) acc)
-              diff nil in
+            map_fold
+              (fun __key_value =&gt;
+                fun value =&gt; fun acc =&gt; cons (__key_value, value) acc) diff nil
+            in
           Error_monad.op_gtgteqquestion
             (Error_monad.fold_left_s
               (fun function_parameter =&gt;
                 let '(acc, ctxt) := function_parameter in
                 fun function_parameter =&gt;
-                  let '(key, value) := function_parameter in
+                  let '(__key_value, value) := function_parameter in
                   Error_monad.op_gtgteqquestion
                     (Lwt.__return
                       (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
                     (fun ctxt =&gt;
                       Error_monad.op_gtgteqquestion
-                        (hash_data ctxt key_type key)
+                        (hash_data ctxt key_type __key_value)
                         (fun function_parameter =&gt;
                           let '(diff_key_hash, ctxt) := function_parameter in
                           Error_monad.op_gtgteqquestion
-                            (unparse_data ctxt mode key_type key)
+                            (unparse_data ctxt mode key_type __key_value)
                             (fun function_parameter =&gt;
                               let '(key_node, ctxt) := function_parameter in
                               let diff_key := Micheline.strip_locations key_node
@@ -84853,12 +84902,12 @@ Parameter of_zint : Z.t -&gt; t.
   <div style="margin: 20px;">
     <h3>Script_typed_ir</h3>
     <ul>
-      <li>OCaml size: 422 lines</li>
-      <li>Coq size: 421 lines (-1% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 419 lines</li>
+      <li>Coq size: 424 lines (+1% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#script_typed_ir.ml"><code>script_typed_ir.ml</code></a>&nbsp;<span class="label label-warning">4 warnings</span>
+    <a href="#script_typed_ir.ml"><code>script_typed_ir.ml</code></a>&nbsp;<span class="label label-warning">3 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -84895,8 +84944,6 @@ open Script_int
 <abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type type_annot = [`Type_annot of string]</abbr>
 
 <abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type field_annot = [`Field_annot of string]</abbr>
-
-<abbr class="mark-warning" title="Polymorphic variant types are defined as standard algebraic types">type annot = [var_annot | type_annot | field_annot]</abbr>
 
 type address = Contract.t * string
 
@@ -84959,22 +85006,7 @@ type ('key, 'value) map =
 
 type operation = packed_internal_operation * Contract.big_map_diff option
 
-type ('arg, 'storage) script = {
-  code : (('arg, 'storage) pair, (operation list, 'storage) pair) lambda;
-  arg_type : 'arg ty;
-  storage : 'storage;
-  storage_type : 'storage ty;
-  root_name : string option;
-}
-
-and end_of_stack = unit
-
-and ('arg, 'ret) lambda =
-  | Lam :
-      ('arg * end_of_stack, 'ret * end_of_stack) descr * Script.node
-      -&gt; ('arg, 'ret) lambda
-
-and 'arg typed_contract = 'arg ty * address
+type end_of_stack = unit
 
 and 'ty ty =
   | Unit_t : type_annot option -&gt; unit ty
@@ -85020,6 +85052,8 @@ and 'ty stack_ty =
       'ty ty * 'rest stack_ty * var_annot option
       -&gt; ('ty * 'rest) stack_ty
   | Empty_t : end_of_stack stack_ty
+
+and 'arg typed_contract = 'arg ty * address
 
 and ('key, 'value) big_map = {
   id : Z.t option;
@@ -85281,6 +85315,18 @@ and ('bef, 'aft) descr = {
   instr : ('bef, 'aft) instr;
 }
 
+and ('arg, 'ret) lambda = {
+  lam : ('arg * end_of_stack, 'ret * end_of_stack) descr * Script.node;
+}
+
+and ('arg, 'storage) script = {
+  code : (('arg, 'storage) pair, (operation list, 'storage) pair) lambda;
+  arg_type : 'arg ty;
+  storage : 'storage;
+  storage_type : 'storage ty;
+  root_name : string option;
+}
+
 type ex_big_map = Ex_bm : ('key, 'value) big_map -&gt; ex_big_map
 </pre>
   </div>
@@ -85312,11 +85358,6 @@ Inductive type_annot : Set :=
 
 Inductive field_annot : Set :=
 | Field_annot : string -&gt; field_annot.
-
-Inductive annot : Set :=
-| Field_annot : string -&gt; annot
-| Var_annot : string -&gt; annot
-| Type_annot : string -&gt; annot.
 
 Definition address := Alpha_context.Contract.t * string.
 
@@ -85389,6 +85430,50 @@ Definition operation :=
   Alpha_context.packed_internal_operation *
     option Alpha_context.Contract.big_map_diff.
 
+Module script.
+  Record record {code arg_type storage storage_type root_name : Set} := Build {
+    code : code;
+    arg_type : arg_type;
+    storage : storage;
+    storage_type : storage_type;
+    root_name : root_name }.
+  Arguments record : clear implicits.
+  Definition with_code {t_code t_arg_type t_storage t_storage_type t_root_name}
+    code (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name code
+      r.(arg_type) r.(storage) r.(storage_type) r.(root_name).
+  Definition with_arg_type
+    {t_code t_arg_type t_storage t_storage_type t_root_name} arg_type
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      arg_type r.(storage) r.(storage_type) r.(root_name).
+  Definition with_storage
+    {t_code t_arg_type t_storage t_storage_type t_root_name} storage
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      r.(arg_type) storage r.(storage_type) r.(root_name).
+  Definition with_storage_type
+    {t_code t_arg_type t_storage t_storage_type t_root_name} storage_type
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      r.(arg_type) r.(storage) storage_type r.(root_name).
+  Definition with_root_name
+    {t_code t_arg_type t_storage t_storage_type t_root_name} root_name
+    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
+    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
+      r.(arg_type) r.(storage) r.(storage_type) root_name.
+End script.
+Definition script_skeleton := script.record.
+
+Module lambda.
+  Record record {lam : Set} := Build {
+    lam : lam }.
+  Arguments record : clear implicits.
+  Definition with_lam {t_lam} lam (r : record t_lam) :=
+    Build t_lam lam.
+End lambda.
+Definition lambda_skeleton := lambda.record.
+
 Module descr.
   Record record {loc bef aft instr : Set} := Build {
     loc : loc;
@@ -85437,57 +85522,18 @@ Module big_map.
 End big_map.
 Definition big_map_skeleton := big_map.record.
 
-Module script.
-  Record record {code arg_type storage storage_type root_name : Set} := Build {
-    code : code;
-    arg_type : arg_type;
-    storage : storage;
-    storage_type : storage_type;
-    root_name : root_name }.
-  Arguments record : clear implicits.
-  Definition with_code {t_code t_arg_type t_storage t_storage_type t_root_name}
-    code (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name code
-      r.(arg_type) r.(storage) r.(storage_type) r.(root_name).
-  Definition with_arg_type
-    {t_code t_arg_type t_storage t_storage_type t_root_name} arg_type
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      arg_type r.(storage) r.(storage_type) r.(root_name).
-  Definition with_storage
-    {t_code t_arg_type t_storage t_storage_type t_root_name} storage
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      r.(arg_type) storage r.(storage_type) r.(root_name).
-  Definition with_storage_type
-    {t_code t_arg_type t_storage t_storage_type t_root_name} storage_type
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      r.(arg_type) r.(storage) storage_type r.(root_name).
-  Definition with_root_name
-    {t_code t_arg_type t_storage t_storage_type t_root_name} root_name
-    (r : record t_code t_arg_type t_storage t_storage_type t_root_name) :=
-    Build t_code t_arg_type t_storage t_storage_type t_root_name r.(code)
-      r.(arg_type) r.(storage) r.(storage_type) root_name.
-End script.
-Definition script_skeleton := script.record.
-
-Reserved Notation &quot;'script&quot;.
 Reserved Notation &quot;'end_of_stack&quot;.
-Reserved Notation &quot;'typed_contract&quot;.
 Reserved Notation &quot;'ty&quot;.
 Reserved Notation &quot;'stack_ty&quot;.
+Reserved Notation &quot;'typed_contract&quot;.
 Reserved Notation &quot;'big_map&quot;.
 Reserved Notation &quot;'instr&quot;.
 Reserved Notation &quot;'stack_prefix_preservation_witness&quot;.
 Reserved Notation &quot;'descr&quot;.
+Reserved Notation &quot;'lambda&quot;.
+Reserved Notation &quot;'script&quot;.
 
-Inductive lambda (arg ret : Set) : Set :=
-| Lam :
-  'descr (arg * 'end_of_stack) (ret * 'end_of_stack) -&gt;
-  Alpha_context.Script.node -&gt; lambda arg ret
-
-with ty_gadt : Set :=
+Inductive ty_gadt : Set :=
 | Unit_t : option type_annot -&gt; ty_gadt
 | Int_t : option type_annot -&gt; ty_gadt
 | Nat_t : option type_annot -&gt; ty_gadt
@@ -85621,7 +85667,7 @@ with instr_gadt : Set :=
 | Dip : forall {aft bef : Set}, 'descr bef aft -&gt; instr_gadt
 | Exec : instr_gadt
 | Apply : forall {arg : Set}, 'ty arg -&gt; instr_gadt
-| Lambda : forall {arg ret : Set}, lambda arg ret -&gt; instr_gadt
+| Lambda : forall {arg ret : Set}, 'lambda arg ret -&gt; instr_gadt
 | Failwith : forall {a : Set}, 'ty a -&gt; instr_gadt
 | Nop : instr_gadt
 | Compare : forall {a : Set}, comparable_ty a -&gt; instr_gadt
@@ -85637,10 +85683,10 @@ with instr_gadt : Set :=
 | Create_account : instr_gadt
 | Implicit_account : instr_gadt
 | Create_contract : forall {g p : Set},
-  'ty g -&gt; 'ty p -&gt; lambda (p * g) (list operation * g) -&gt; option string -&gt;
+  'ty g -&gt; 'ty p -&gt; 'lambda (p * g) (list operation * g) -&gt; option string -&gt;
   instr_gadt
 | Create_contract_2 : forall {g p : Set},
-  'ty g -&gt; 'ty p -&gt; lambda (p * g) (list operation * g) -&gt; option string -&gt;
+  'ty g -&gt; 'ty p -&gt; 'lambda (p * g) (list operation * g) -&gt; option string -&gt;
   instr_gadt
 | Set_delegate : instr_gadt
 | Now : instr_gadt
@@ -85674,14 +85720,10 @@ with stack_prefix_preservation_witness_gadt : Set :=
   stack_prefix_preservation_witness_gadt
 | Rest : stack_prefix_preservation_witness_gadt
 
-where &quot;'script&quot; := (fun (t_arg t_storage : Set) =&gt;
-  script_skeleton
-    (lambda (pair t_arg t_storage) (pair (list operation) t_storage))
-    ('ty t_arg) t_storage ('ty t_storage) (option string))
-and &quot;'end_of_stack&quot; := (unit)
-and &quot;'typed_contract&quot; := (fun (t_arg : Set) =&gt; 'ty t_arg * address)
+where &quot;'end_of_stack&quot; := (unit)
 and &quot;'ty&quot; := (fun (_ : Set) =&gt; ty_gadt)
 and &quot;'stack_ty&quot; := (fun (_ : Set) =&gt; stack_ty_gadt)
+and &quot;'typed_contract&quot; := (fun (t_arg : Set) =&gt; 'ty t_arg * address)
 and &quot;'big_map&quot; := (fun (t_key t_value : Set) =&gt;
   big_map_skeleton (option Z.t) (map t_key (option t_value)) ('ty t_key)
     ('ty t_value))
@@ -85690,20 +85732,27 @@ and &quot;'stack_prefix_preservation_witness&quot; := (fun (_ _ _ _ : Set) =&gt;
   stack_prefix_preservation_witness_gadt)
 and &quot;'descr&quot; := (fun (t_bef t_aft : Set) =&gt;
   descr_skeleton Alpha_context.Script.location ('stack_ty t_bef)
-    ('stack_ty t_aft) ('instr t_bef t_aft)).
+    ('stack_ty t_aft) ('instr t_bef t_aft))
+and &quot;'lambda&quot; := (fun (t_arg t_ret : Set) =&gt;
+  lambda_skeleton
+    ('descr (t_arg * 'end_of_stack) (t_ret * 'end_of_stack) *
+      Alpha_context.Script.node))
+and &quot;'script&quot; := (fun (t_arg t_storage : Set) =&gt;
+  script_skeleton
+    ('lambda (pair t_arg t_storage) (pair (list operation) t_storage))
+    ('ty t_arg) t_storage ('ty t_storage) (option string)).
 
-Definition script := 'script.
 Definition end_of_stack := 'end_of_stack.
-Definition typed_contract := 'typed_contract.
 Definition ty := 'ty.
 Definition stack_ty := 'stack_ty.
+Definition typed_contract := 'typed_contract.
 Definition big_map := 'big_map.
 Definition instr := 'instr.
 Definition stack_prefix_preservation_witness :=
   'stack_prefix_preservation_witness.
 Definition descr := 'descr.
-
-Arguments Lam {_ _}.
+Definition lambda := 'lambda.
+Definition script := 'script.
 
 Inductive ex_big_map : Set :=
 | Ex_bm : forall {key value : Set}, big_map key value -&gt; ex_big_map.
@@ -85717,7 +85766,7 @@ Inductive ex_big_map : Set :=
     <h3>Seed_repr</h3>
     <ul>
       <li>OCaml size: 134 lines</li>
-      <li>Coq size: 146 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 147 lines (+9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86004,12 +86053,13 @@ Definition deterministic_seed (__seed_value : seed) : seed :=
 
 Definition initial_seeds (n : (|Compare.Int|).(Compare.S.t)) : list seed :=
   let fix loop
-    (acc : list seed) (elt : seed) (i : (|Compare.Int|).(Compare.S.t))
+    (acc : list seed) (__elt_value : seed) (i : (|Compare.Int|).(Compare.S.t))
     {struct acc} : list seed :=
     if (|Compare.Int|).(Compare.S.op_eq) i 1 then
-      List.rev (cons elt acc)
+      List.rev (cons __elt_value acc)
     else
-      loop (cons elt acc) (deterministic_seed elt) (Pervasives.op_minus i 1) in
+      loop (cons __elt_value acc) (deterministic_seed __elt_value)
+        (Pervasives.op_minus i 1) in
   loop nil (B (State_hash.hash_bytes None nil)) n.
 </pre>
   </div>
@@ -87084,7 +87134,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Storage</h3>
     <ul>
       <li>OCaml size: 903 lines</li>
-      <li>Coq size: 1969 lines (+118% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1971 lines (+118% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -88028,6 +88078,7 @@ Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Level_repr.
+Require Tezos.Manager_repr.
 Require Tezos.Misc.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
@@ -88087,7 +88138,7 @@ Definition Int_index :=
       (A * (|Compare.Int|).(Compare.S.t)) :=
     let '_ := function_parameter in
     Storage_description.One
-      {| Storage_description.args.One.rpc_arg := RPC_arg.int;
+      {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare :=
           (|Compare.Int|).(Compare.S.compare) |} in
@@ -88712,9 +88763,10 @@ Module Big_map.
       |
         cons index1
           (cons index2
-            (cons index3 (cons index4 (cons index5 (cons index6 (cons key []))))))
+            (cons index3
+              (cons index4 (cons index5 (cons index6 (cons __key_value []))))))
         =&gt;
-        let c := Z.of_string key in
+        let c := Z.of_string __key_value in
         let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
         let 'MBytes.Hex index_key := MBytes.to_hex (Raw_hashes.blake2b raw_key)
           in
@@ -89457,7 +89509,7 @@ Module Roll.
       : Storage_description.args A (|Compare.Int|).(Compare.S.t)
         (A * (|Compare.Int|).(Compare.S.t)) :=
       Storage_description.One
-        {| Storage_description.args.One.rpc_arg := RPC_arg.int;
+        {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
           Storage_description.args.One.encoding := Data_encoding.int31;
           Storage_description.args.One.compare :=
             (|Compare.Int|).(Compare.S.compare) |}.
@@ -90713,7 +90765,7 @@ End Ramp_up.
     <h3>Storage_description</h3>
     <ul>
       <li>OCaml size: 353 lines</li>
-      <li>Coq size: 666 lines (+88% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 669 lines (+89% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -91583,7 +91635,7 @@ Definition depth_query : RPC_query.t query :=
   Pervasives.op_pipegt
     (RPC_query.op_pipeplus
       (RPC_query.__query_value (fun depth =&gt; {| query.depth := depth |}))
-      (RPC_query.__field_value None &quot;depth&quot; RPC_arg.int 0
+      (RPC_query.__field_value None &quot;depth&quot; RPC_arg.__int_value 0
         (fun __t_value =&gt; __t_value.(query.depth)))) RPC_query.seal.
 
 Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
@@ -91708,9 +91760,9 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               (Data_encoding.dynamic_size None arg_encoding)
               (fun function_parameter =&gt;
                 match function_parameter with
-                | (key, None) =&gt; Some key
+                | (__key_value, None) =&gt; Some __key_value
                 | _ =&gt; None
-                end) (fun key =&gt; (key, None));
+                end) (fun __key_value =&gt; (__key_value, None));
             Data_encoding.__case_value &quot;Dir&quot; None (Data_encoding.Tag 1)
               (Data_encoding.tup2
                 (Data_encoding.dynamic_size None arg_encoding)
@@ -91718,12 +91770,14 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                   __handler_value.(opt_handler.Opt_handler.encoding)))
               (fun function_parameter =&gt;
                 match function_parameter with
-                | (key, Some value) =&gt; Some (key, value)
+                | (__key_value, Some value) =&gt;
+                  Some (__key_value, value)
                 | _ =&gt; None
                 end)
               (fun function_parameter =&gt;
-                let '(key, value) := function_parameter in
-                (key, (Some value)))
+                let '(__key_value, value) := function_parameter
+                  in
+                (__key_value, (Some value)))
           ] in
       let get (k : ikey) (i : (|Compare.Int|).(Compare.S.t))
         : Lwt.t
@@ -91739,14 +91793,15 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               (fun keys =&gt;
                 Error_monad.op_gtgteqquestion
                   (Error_monad.map_s
-                    (fun key =&gt;
+                    (fun __key_value =&gt;
                       if (|Compare.Int|).(Compare.S.op_eq) i 1 then
-                        Error_monad.__return (key, None)
+                        Error_monad.__return (__key_value, None)
                       else
                         Error_monad.op_gtgteqquestion
                           (__handler_value.(opt_handler.Opt_handler.get)
-                            (k, key) (Pervasives.op_minus i 1))
-                          (fun value =&gt; Error_monad.__return (key, value))) keys)
+                            (k, __key_value) (Pervasives.op_minus i 1))
+                          (fun value =&gt;
+                            Error_monad.__return (__key_value, value))) keys)
                   (fun values =&gt; Error_monad.return_some values)) in
       let __handler_value :=
         Opt_handler
@@ -91972,7 +92027,7 @@ End INDEX.
     <h3>Storage_functors</h3>
     <ul>
       <li>OCaml size: 1212 lines</li>
-      <li>Coq size: 2007 lines (+65% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2008 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -93247,7 +93302,7 @@ End ENCODER.
 
 Definition Make_encoder :=
   fun (V : {t : _ &amp; VALUE.signature t}) =&gt;
-    ((let of_bytes (key : list string) (b : MBytes.t)
+    ((let of_bytes (__key_value : list string) (b : MBytes.t)
       : Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t) :=
       match Data_encoding.Binary.of_bytes (|V|).(Storage_sigs.VALUE.encoding) b
         with
@@ -93274,7 +93329,7 @@ Definition encode_len_value (__bytes_value : MBytes.t) : MBytes.t :=
   let length := MBytes.length __bytes_value in
   (Data_encoding.Binary.to_bytes_exn Data_encoding.int31) length.
 
-Definition decode_len_value (key : list string) (len : MBytes.t)
+Definition decode_len_value (__key_value : list string) (len : MBytes.t)
   : Lwt.t (Error_monad.tzresult Z) :=
   match (Data_encoding.Binary.of_bytes Data_encoding.int31) len with
   | None =&gt; Error_monad.fail extensible_type_value
@@ -93422,10 +93477,10 @@ Definition Make_single_data_storage :=
               ((|C|).(Raw_context.T.get) __t_value
                 (|N|).(Storage_sigs.NAME.name))
               (fun b =&gt;
-                let key :=
+                let __key_value :=
                   (|C|).(Raw_context.T.absolute_key) __t_value
                     (|N|).(Storage_sigs.NAME.name) in
-                Lwt.__return (of_bytes key b)) in
+                Lwt.__return (of_bytes __key_value b)) in
           let get_option (__t_value : (|C|).(Raw_context.T.context))
             : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
             Error_monad.op_gtgteq
@@ -93435,10 +93490,10 @@ Definition Make_single_data_storage :=
                 match function_parameter with
                 | None =&gt; Error_monad.return_none
                 | Some b =&gt;
-                  let key :=
+                  let __key_value :=
                     (|C|).(Raw_context.T.absolute_key) __t_value
                       (|N|).(Storage_sigs.NAME.name) in
-                  match of_bytes key b with
+                  match of_bytes __key_value b with
                   | Pervasives.Ok v =&gt; Error_monad.return_some v
                   | Pervasives.Error __error_value =&gt;
                     Lwt.__return (Pervasives.Error __error_value)
@@ -93667,10 +93722,10 @@ Definition Make_indexed_data_storage :=
           Error_monad.op_gtgteqquestion
             ((|C|).(Raw_context.T.get) s ((|I|).(INDEX.to_path) i nil))
             (fun b =&gt;
-              let key :=
+              let __key_value :=
                 (|C|).(Raw_context.T.absolute_key) s
                   ((|I|).(INDEX.to_path) i nil) in
-              Lwt.__return (of_bytes key b)) in
+              Lwt.__return (of_bytes __key_value b)) in
         let get_option (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
           Error_monad.op_gtgteq
@@ -93679,10 +93734,10 @@ Definition Make_indexed_data_storage :=
               match function_parameter with
               | None =&gt; Error_monad.return_none
               | Some b =&gt;
-                let key :=
+                let __key_value :=
                   (|C|).(Raw_context.T.absolute_key) s
                     ((|I|).(INDEX.to_path) i nil) in
-                match of_bytes key b with
+                match of_bytes __key_value b with
                 | Pervasives.Ok v =&gt; Error_monad.return_some v
                 | Pervasives.Error __error_value =&gt;
                   Lwt.__return (Pervasives.Error __error_value)
@@ -93907,9 +93962,10 @@ Definition Make_indexed_carbonated_data_storage :=
               Error_monad.op_gtgteqquestion
                 ((|C|).(Raw_context.T.get) s (data_key i))
                 (fun b =&gt;
-                  let key := (|C|).(Raw_context.T.absolute_key) s (data_key i)
-                    in
-                  Error_monad.op_gtgteqquestion (Lwt.__return (of_bytes key b))
+                  let __key_value :=
+                    (|C|).(Raw_context.T.absolute_key) s (data_key i) in
+                  Error_monad.op_gtgteqquestion
+                    (Lwt.__return (of_bytes __key_value b))
                     (fun v =&gt;
                       Error_monad.__return
                         (((|C|).(Raw_context.T.project) s), v)))) in
@@ -94639,10 +94695,10 @@ Definition Make_indexed_subcontext :=
                 ((|Raw_context|).(Raw_context.T.get) (pack s i)
                   (|N|).(Storage_sigs.NAME.name))
                 (fun b =&gt;
-                  let key :=
+                  let __key_value :=
                     (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
                       (|N|).(Storage_sigs.NAME.name) in
-                  Lwt.__return (of_bytes key b)) in
+                  Lwt.__return (of_bytes __key_value b)) in
             let get_option
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
@@ -94654,10 +94710,10 @@ Definition Make_indexed_subcontext :=
                   match function_parameter with
                   | None =&gt; Error_monad.return_none
                   | Some b =&gt;
-                    let key :=
+                    let __key_value :=
                       (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
                         (|N|).(Storage_sigs.NAME.name) in
-                    match of_bytes key b with
+                    match of_bytes __key_value b with
                     | Pervasives.Ok v =&gt; Error_monad.return_some v
                     | Pervasives.Error __error_value =&gt;
                       Lwt.__return (Pervasives.Error __error_value)
@@ -94882,11 +94938,11 @@ Definition Make_indexed_subcontext :=
                   Error_monad.op_gtgteqquestion
                     ((|Raw_context|).(Raw_context.T.get) c data_name)
                     (fun b =&gt;
-                      let key :=
+                      let __key_value :=
                         (|Raw_context|).(Raw_context.T.absolute_key) c data_name
                         in
                       Error_monad.op_gtgteqquestion
-                        (Lwt.__return (of_bytes key b))
+                        (Lwt.__return (of_bytes __key_value b))
                         (fun v =&gt;
                           Error_monad.__return
                             (((|Raw_context|).(Raw_context.T.project) c), v))))
