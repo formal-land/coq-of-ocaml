@@ -4,7 +4,9 @@ open Monad.Notations
 
 type item =
   | Error of string
-  | IncludedField of Name.t * Name.t * PathName.t * bool
+  | IncludedFieldModule of Name.t * Name.t * PathName.t
+  | IncludedFieldType of Name.t * Name.t * PathName.t
+  | IncludedFieldValue of Name.t * Name.t list * Type.t * Name.t * PathName.t
   | Module of Name.t * t
   | Open of Open.t
   | Signature of Name.t * Signature.t
@@ -32,7 +34,7 @@ let rec string_of_included_module_typ (module_typ : Typedtree.module_type)
   | Tmty_signature _ -> "signature"
   | Tmty_functor (ident, _, _, _) -> Ident.name ident
   | Tmty_with (module_typ, _) -> string_of_included_module_typ module_typ
-  | Tmty_typeof _ -> "typedof"
+  | Tmty_typeof _ -> "typeof"
 
 let name_of_included_module_typ (module_typ : Typedtree.module_type)
   : Name.t =
@@ -67,26 +69,35 @@ let of_first_class_types_signature
   (module_name : Name.t)
   (signature_path : Path.t)
   (signature : Types.signature)
+  (final_env : Env.t)
   : t Monad.t =
   let field_path_name name =
     PathName.of_path_and_name_with_convert signature_path name in
+  set_env final_env (
   signature |> Monad.List.filter_map (function
-    | Types.Sig_value (ident, _) ->
+    | Types.Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
+      Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, new_typ_vars) ->
       return (Some (
-        IncludedField (name, module_name, field_path_name name, false)
+        IncludedFieldValue (
+          name,
+          Name.Set.elements new_typ_vars,
+          typ,
+          module_name,
+          field_path_name name
+        )
       ))
     | Sig_type (ident, _, _) ->
       let name = Name.of_ident false ident in
       return (Some (
-        IncludedField (name, module_name, field_path_name name, false)
+        IncludedFieldType (name, module_name, field_path_name name)
       ))
     | Sig_typext _ ->
       raise None NotSupported "Type extension not handled"
     | Sig_module (ident, _, _) ->
       let name = Name.of_ident false ident in
       return (Some (
-        IncludedField (name, module_name, field_path_name name, true)
+        IncludedFieldModule (name, module_name, field_path_name name)
       ))
     | Sig_modtype _ ->
       raise None NotSupported "Module type not handled in included signature"
@@ -94,10 +105,11 @@ let of_first_class_types_signature
       raise None NotSupported "Class not handled"
     | Sig_class_type _ ->
       raise None NotSupported "Class type not handled"
-  )
+  ))
 
 let rec of_signature (signature : Typedtree.signature) : t Monad.t =
-  let of_signature_item (signature_item : Typedtree.signature_item)
+  let of_signature_item
+    (signature_item : Typedtree.signature_item) (final_env : Env.t)
     : item list Monad.t =
     set_env signature_item.sig_env (
     set_loc (Loc.of_location signature_item.sig_loc) (
@@ -131,7 +143,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
         let typ = ModuleTyp.to_typ module_typ in
         of_first_class_types_signature
-          module_name signature_path incl_type >>= fun fields ->
+          module_name signature_path incl_type final_env >>= fun fields ->
         return (Value (module_name, [], typ) :: fields)
       end
     | Tsig_modtype { mtd_type = None; _ } ->
@@ -184,24 +196,53 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->
       let typ_vars = Name.Set.elements (Type.typ_args typ) in
       return [Value (name, typ_vars, typ)])) in
-  signature.sig_items |> Monad.List.flatten_map of_signature_item
+  Monad.List.fold_right
+    (fun signature_item (signature, final_env) ->
+      let env = signature_item.Typedtree.sig_env in
+      of_signature_item signature_item final_env >>= fun signature_item ->
+      return (signature_item @ signature, env)
+    )
+    signature.sig_items
+    ([], signature.sig_final_env) >>= fun (signature, _) ->
+  return signature
+
+let to_coq_included_field (module_name : Name.t) (field_name : PathName.t)
+  : SmartPrint.t =
+  MixedPath.to_coq (
+    MixedPath.Access (PathName.of_name [] module_name, [field_name], false)
+  )
 
 let rec to_coq (signature : t) : SmartPrint.t =
   let to_coq_item (signature_item : item) : SmartPrint.t =
     match signature_item with
     | Error message -> !^ ("(* " ^ message ^ " *)")
-    | IncludedField (name, module_name, field_name, is_module) ->
-      let field =
-        MixedPath.to_coq (
-          MixedPath.Access (PathName.of_name [] module_name, [field_name], false)
-        ) in
-      let field_as_module =
-        if is_module then
-          nest (!^ "existT" ^^ !^ "(fun _ => _)" ^^ !^ "tt" ^^ field)
-        else
-          field in
-      !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
-      field_as_module ^-^ !^ "."
+    | IncludedFieldModule (name, module_name, field_name) ->
+      let field = to_coq_included_field module_name field_name in
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+        nest (!^ "existT" ^^ !^ "(fun _ => _)" ^^ !^ "tt" ^^ field) ^-^ !^ "."
+      )
+    | IncludedFieldType (name, module_name, field_name) ->
+      let field = to_coq_included_field module_name field_name in
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+        field ^-^ !^ "."
+      )
+    | IncludedFieldValue (name, typ_params, typ, module_name, field_name) ->
+      let field = to_coq_included_field module_name field_name in
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^
+        begin match typ_params with
+        | [] -> empty
+        | _ :: _ ->
+          nest (braces (
+            separate space (List.map Name.to_coq typ_params) ^^ !^ ":" ^^ !^ "Set"
+          ))
+        end ^^
+        !^ ":" ^^ Type.to_coq None None typ ^^
+        !^ ":=" ^^
+        field ^-^ !^ "."
+      )
     | Module (name, signature) ->
       !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
       indent (to_coq signature) ^^ newline ^^
