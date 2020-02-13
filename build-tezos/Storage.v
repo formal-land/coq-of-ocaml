@@ -33,8 +33,6 @@ Require Tezos.Voting_period_repr.
 
 Import Storage_functors.
 
-Definition depends_on_sigs : unit -> unit := Storage_sigs.depend_on_me.
-
 Definition Int :=
   let t := Z in
   let encoding := Data_encoding.uint16 in

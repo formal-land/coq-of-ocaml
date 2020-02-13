@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Coq of OCaml - Examples</title>
-    <link rel="icon" data-emoji="🐓" type="image/png">
+    <title>coq-of-ocaml – Examples</title>
+    <link rel="shortcut icon" href="../img/favicon.ico">
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/custom.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
@@ -26,7 +26,9 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-              <a class="navbar-brand" href="../">🐓🐫 Coq of OCaml <span class="hidden-xs">- Examples</span></a>
+            <a class="navbar-brand" href="../">
+              <img alt="logo" height="24px" src="../img/favicon.ico" />
+              coq-of-ocaml <span class="hidden-xs">- Examples</span></a>
           </div>
 
           <div class="collapse navbar-collapse" id="navbar-collapse-list">
@@ -50,12 +52,15 @@
       </small>
     </h2>
     <p>These are the sources of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.</p>
-    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-02-05) The file storage_description.ml is now completely imported, with automatic handling of existential types and semi-automatic handling of GADTs using axioms. We are currently working on the functors of the storage.</p></blockquote>
+    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-02-13) We did a lot of progress on the number of valid imported lines. This progress is mainly thanks to the use of the <code>.mli</code> files instead of <code>.ml</code> files when we are stuck. We are now writing documenation on the features we added.</p></blockquote>
 
-    <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>To install the latest development version of <a href="https://clarus.github.io/coq-of-ocaml/">coq-of-ocaml</a> with <a href="https://opam.ocaml.org/">opam</a>:</p>
+    <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
+opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 35966 lines</li>
-      <li>Coq size: 52522 lines (+46% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 35956 lines</li>
+      <li>Coq size: 52514 lines (+46% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2508</li>
     </ul>
     
@@ -93,7 +98,7 @@
           11380,
           13051,
           25328,
-          25328,
+          25322,
         ],
         generated: [
           47563,
@@ -126,7 +131,7 @@
           51401,
           51943,
           52522,
-          52522,
+          52514,
         ],
         labels: [
           "01-14",
@@ -18958,8 +18963,8 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Contract_repr</h3>
     <ul>
-      <li>OCaml size: 234 lines</li>
-      <li>Coq size: 252 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 232 lines</li>
+      <li>Coq size: 249 lines (+7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19160,8 +19165,6 @@ let rpc_arg =
     ~construct
     ~destruct
     ()
-
-let depends_on_storage_description = Storage_description.depends_on_me
 
 module Index : Storage_description.INDEX with type t = contract = struct
   type t = contract
@@ -19414,9 +19417,6 @@ Definition rpc_arg : RPC_arg.arg t :=
     end in
   RPC_arg.make (Some &quot;A contract identifier encoded in b58check.&quot;) &quot;contract_id&quot;
     destruct construct tt.
-
-Definition depends_on_storage_description : unit -&gt; unit :=
-  Storage_description.depends_on_me.
 
 Definition Index :=
   let t := contract in
@@ -24908,8 +24908,8 @@ Parameter set_paid_storage_space_and_return_fees_to_pay :
   <div style="margin: 20px;">
     <h3>Cycle_repr</h3>
     <ul>
-      <li>OCaml size: 95 lines</li>
-      <li>Coq size: 130 lines (+36% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 93 lines</li>
+      <li>Coq size: 127 lines (+36% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -24994,8 +24994,6 @@ let to_int32 i = i
 let of_int32_exn l =
   if Compare.Int32.(l &gt;= 0l) then l
   else invalid_arg &quot;Level_repr.Cycle.of_int32&quot;
-
-let depends_on_storage_description = Storage_description.depends_on_me
 
 module Index : Storage_description.INDEX with type t = cycle = struct
   type t = cycle
@@ -25127,9 +25125,6 @@ Definition of_int32_exn (l : (|Compare.Int32|).(Compare.S.t))
     l
   else
     Pervasives.invalid_arg &quot;Level_repr.Cycle.of_int32&quot;.
-
-Definition depends_on_storage_description : unit -&gt; unit :=
-  Storage_description.depends_on_me.
 
 Definition Index :=
   let t := cycle in
@@ -48998,8 +48993,8 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
   <div style="margin: 20px;">
     <h3>Operation_repr</h3>
     <ul>
-      <li>OCaml size: 857 lines</li>
-      <li>Coq size: 1450 lines (+69% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 858 lines</li>
+      <li>Coq size: 1450 lines (+68% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -49189,11 +49184,12 @@ type packed_internal_operation =
   | Internal_operation : 'kind internal_operation -&gt; packed_internal_operation
 
 let rec to_list = function
-  | Contents_list content -&gt;
-    begin match[@coq_match_gadt] content with
-    | Single o -&gt; [Contents o]
-    | Cons (o, os) -&gt; Contents o :: to_list (Contents_list os)
-    end
+  | Contents_list content -&gt; (
+    match[@coq_match_gadt] content with
+    | Single o -&gt;
+        [Contents o]
+    | Cons (o, os) -&gt;
+        Contents o :: to_list (Contents_list os) )
 
 let rec of_list = function
   | [] -&gt;
@@ -63590,8 +63586,8 @@ Parameter trace :
   <div style="margin: 20px;">
     <h3>Script_ir_annot</h3>
     <ul>
-      <li>OCaml size: 526 lines</li>
-      <li>Coq size: 722 lines (+37% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 521 lines</li>
+      <li>Coq size: 722 lines (+38% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -63729,9 +63725,8 @@ let gen_access_annot :
       None
   | (None, Some (Field_annot f), _) -&gt;
       Some (Var_annot f)
-  | ( Some (Var_annot v),
-      (None | Some (Field_annot &quot;&quot;)),
-      Some (Field_annot f) ) -&gt;
+  | (Some (Var_annot v), (None | Some (Field_annot &quot;&quot;)), Some (Field_annot f))
+    -&gt;
       Some (Var_annot (String.concat &quot;.&quot; [v; f]))
   | (Some (Var_annot v), Some (Field_annot f), _) -&gt;
       Some (Var_annot (String.concat &quot;.&quot; [v; f]))
@@ -63845,11 +63840,7 @@ They are sent to a unit type.">(Unexpected_annotation loc)</abbr>)
     l
   &gt;|? List.rev
 
-let opt_var_of_var_opt = function
-  | None -&gt;
-      None
-  | Some a -&gt;
-      Some (Var_annot a)
+let opt_var_of_var_opt = function None -&gt; None | Some a -&gt; Some (Var_annot a)
 
 let opt_field_of_field_opt = function
   | None -&gt;
@@ -63979,7 +63970,7 @@ let extract_field_annot :
         | Some field_annot -&gt;
             Some
               (Field_annot
-                (String.sub field_annot 1 (String.length field_annot - 1)))
+                 (String.sub field_annot 1 (String.length field_annot - 1)))
       in
       ok (Prim (loc, prim, args, annot), field_annot)
   | expr -&gt;
@@ -64035,8 +64026,8 @@ let split_last_dot = function
 
 let common_prefix v1 v2 =
   match (v1, v2) with
-  | (Some (Var_annot s1), Some (Var_annot s2))
-    when Compare.String.equal s1 s2 -&gt;
+  | (Some (Var_annot s1), Some (Var_annot s2)) when Compare.String.equal s1 s2
+    -&gt;
       v1
   | (Some _, None) -&gt;
       v1
@@ -86476,8 +86467,8 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Storage</h3>
     <ul>
-      <li>OCaml size: 903 lines</li>
-      <li>Coq size: 1971 lines (+118% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 901 lines</li>
+      <li>Coq size: 1969 lines (+118% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86509,8 +86500,6 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
 (*****************************************************************************)
 
 open Storage_functors
-
-let depends_on_sigs = Storage_sigs.depend_on_me
 
 module Int = struct
   type t = int
@@ -87438,8 +87427,6 @@ Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
 
 Import Storage_functors.
-
-Definition depends_on_sigs : unit -&gt; unit := Storage_sigs.depend_on_me.
 
 Definition Int :=
   let t := Z in
@@ -98816,7 +98803,6 @@ Parameter register : unit -&gt; unit.
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/favicon.js"></script>
   </body>
 </html>
 

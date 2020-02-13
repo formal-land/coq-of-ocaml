@@ -104,9 +104,6 @@ Definition of_int32_exn (l : (|Compare.Int32|).(Compare.S.t))
   else
     Pervasives.invalid_arg "Level_repr.Cycle.of_int32".
 
-Definition depends_on_storage_description : unit -> unit :=
-  Storage_description.depends_on_me.
-
 Definition Index :=
   let t := cycle in
   let path_length := 1 in

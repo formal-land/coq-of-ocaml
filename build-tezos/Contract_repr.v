@@ -194,9 +194,6 @@ Definition rpc_arg : RPC_arg.arg t :=
   RPC_arg.make (Some "A contract identifier encoded in b58check.") "contract_id"
     destruct construct tt.
 
-Definition depends_on_storage_description : unit -> unit :=
-  Storage_description.depends_on_me.
-
 Definition Index :=
   let t := contract in
   let path_length := 7 in

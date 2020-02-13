@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Coq of OCaml - Examples</title>
-    <link rel="icon" data-emoji="🐓" type="image/png">
+    <title>coq-of-ocaml – Examples</title>
+    <link rel="shortcut icon" href="../img/favicon.ico">
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/custom.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
@@ -26,7 +26,9 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-              <a class="navbar-brand" href="../">🐓🐫 Coq of OCaml <span class="hidden-xs">- Examples</span></a>
+            <a class="navbar-brand" href="../">
+              <img alt="logo" height="24px" src="../img/favicon.ico" />
+              coq-of-ocaml <span class="hidden-xs">- Examples</span></a>
           </div>
 
           <div class="collapse navbar-collapse" id="navbar-collapse-list">
@@ -52,7 +54,10 @@
     <p>This is a demo of the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a> on the <a href="https://github.com/coq/coq/tree/master/kernel">kernel</a> of <a =href="https://coq.inria.fr/">Coq</a>. Coq is written in <a =href="https://ocaml.org/">OCaml</a>.</p>
     
 
-    <p>We show the original&nbsp;OCaml code on the left and the imported&nbsp;Coq code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Write at <code>web [at] clarus [dot] me</code> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>To install the latest development version of <a href="https://clarus.github.io/coq-of-ocaml/">coq-of-ocaml</a> with <a href="https://opam.ocaml.org/">opam</a>:</p>
+    <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
+opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 30556 lines</li>
       <li>Coq size: 41317 lines (+35% compared to&nbsp;OCaml)</li>
@@ -83810,7 +83815,6 @@ Definition write_uint63 (function_parameter : unit) : unit :=
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/favicon.js"></script>
   </body>
 </html>
 
