@@ -4,7 +4,7 @@ open Typedtree
 type t = Name.t list
 
 let of_ocaml (open_description : open_description) : t =
-  let o = PathName.of_long_ident false open_description.open_txt.txt in
+  let o = PathName.of_path_with_convert false open_description.open_path in
   o.PathName.path @ [o.PathName.base]
 
 (** Pretty-print an open construct to Coq. *)

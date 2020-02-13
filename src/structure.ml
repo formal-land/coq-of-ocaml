@@ -169,14 +169,14 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_module {
         mb_id = name;
         mb_expr = {
-          mod_desc = Tmod_ident (_, long_ident);
+          mod_desc = Tmod_ident (path, _);
           mod_type;
           _
         };
         _
       } ->
       let name = Name.of_ident false name in
-      let reference = PathName.of_long_ident false long_ident.txt in
+      let reference = PathName.of_path_with_convert false path in
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | Found _ ->
@@ -244,18 +244,18 @@ let rec of_structure (structure : structure) : t list Monad.t =
         NotSupported
         "Structure item `class_type` not handled."
     | Tstr_include {
-        incl_mod = { mod_desc = Tmod_ident (_, long_ident); mod_type; _ };
+        incl_mod = { mod_desc = Tmod_ident (path, _); mod_type; _ };
         _
       }
     | Tstr_include {
         incl_mod = {
-          mod_desc = Tmod_constraint ({ mod_desc = Tmod_ident (_, long_ident); _ }, _, _, _);
+          mod_desc = Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _);
           mod_type;
           _
         };
         _
       } ->
-      let reference = PathName.of_long_ident false long_ident.txt in
+      let reference = PathName.of_path_with_convert false path in
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | IsFirstClassModule.Found mod_type_path ->
