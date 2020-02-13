@@ -35,13 +35,13 @@ type ('first, 'second) poly = {
 
 let p = { first = 12; second = false }
 
-module ConstructorWithRecords = struct
+module ConstructorWithRecord = struct
   type t =
     | Foo of { name : string; size : int }
     | Bar of loc
 
-  and 'a gadt =
-    | Ex : { x : 'a } -> 'a gadt
+  and exi =
+    | Ex : { x : 'a } -> exi
 
   and loc = { x : int; y : int }
 
@@ -55,4 +55,11 @@ module ConstructorWithRecords = struct
     match x with
     | Foo { size } -> size
     | Bar { y } -> y
+end
+
+module ConstructorWithPolymorphicRecord = struct
+  type ('loc, 'a) t =
+    | Foo of { location : 'loc; payload : 'a; size : int }
+
+  let foo = Foo { location = 12; payload = "hi"; size = 23 }
 end

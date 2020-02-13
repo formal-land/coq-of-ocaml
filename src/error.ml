@@ -92,11 +92,11 @@ let display_errors_human
   (errors : t list)
   : string =
   let source_lines = String.split_on_char '\n' source_file_content in
-  let error_messages = errors |>
-  List.sort (fun error1 error2 -> compare error1.loc.start.line error2.loc.start.line) |>
-  List.map (fun { category; loc; message } ->
-    display_error source_file_name source_lines loc category message) |>
-  String.concat "" in
+  let error_messages =
+    errors |>
+    List.map (fun { category; loc; message } ->
+      display_error source_file_name source_lines loc category message) |>
+    String.concat "" in
   let nb_errors = List.length errors in
   error_messages ^
   colorize "34;1" (
@@ -119,7 +119,7 @@ let display_errors_json (errors : t list) : string =
         ("message", `String message);
       ]
     ))
-  )
+  ) ^ "\n"
 
 let display_errors
   (json_mode : bool)
@@ -127,6 +127,10 @@ let display_errors
   (source_file_content : string)
   (errors : t list)
   : string =
+  let errors =
+    errors |> List.sort (fun error1 error2 ->
+      compare error1.loc.start.line error2.loc.start.line
+    ) in
   if not json_mode then
     display_errors_human source_file_name source_file_content errors
   else

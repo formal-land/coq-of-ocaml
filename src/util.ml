@@ -1,3 +1,10 @@
+module File = struct
+  let write (file_name : string) (file_content : string) : unit =
+    let output_channel = open_out file_name in
+    output_string output_channel file_content;
+    close_out output_channel
+end
+
 module List = struct
   let rec filter_map (f : 'a -> 'b option) (l : 'a list) : 'b list =
     match l with

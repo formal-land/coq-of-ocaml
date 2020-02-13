@@ -11,10 +11,11 @@ type t =
   | Apply of MixedPath.t * t list
   | Package of PathName.t * t option Tree.t
   | ForallModule of Name.t * t * t
-  | ForallTyps of Name.t list * t
+  | FunTyps of Name.t list * t
   | Error of string
 
-let type_exprs_of_row_field (row_field : Types.row_field) : Types.type_expr list =
+let type_exprs_of_row_field (row_field : Types.row_field)
+  : Types.type_expr list =
   match row_field with
   | Rpresent None -> []
   | Rpresent (Some typ) -> [typ]
@@ -86,22 +87,29 @@ let rec of_typ_expr
       "Nil type is not handled"
   | Tlink typ | Tsubst typ -> of_typ_expr with_free_vars typ_vars typ
   | Tvariant { row_fields; _ } ->
-    Monad.List.fold_left
-      (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
-        let typs = type_exprs_of_row_field row_field in
-        of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
-        return (
-          (name, Tuple typs) :: fields,
-          typ_vars,
-          Name.Set.union new_typ_vars new_typ_vars'
-        )
+    PathName.typ_of_variants (List.map fst row_fields) >>= fun path_name ->
+    begin match path_name with
+    | Some path_name ->
+      return (
+        Apply (MixedPath.PathName path_name, []),
+        typ_vars,
+        Name.Set.empty
       )
-      ([], typ_vars, Name.Set.empty)
-      row_fields >>= fun (fields, typ_vars, new_typ_vars) ->
-    raise
-      (Sum (List.rev fields), typ_vars, new_typ_vars)
-      NotSupported
-      "Polymorphic variant types are not handled"
+    | None ->
+      Monad.List.fold_left
+        (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
+          let typs = type_exprs_of_row_field row_field in
+          of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
+          return (
+            (name, Tuple typs) :: fields,
+            typ_vars,
+            Name.Set.union new_typ_vars new_typ_vars'
+          )
+        )
+        ([], typ_vars, Name.Set.empty)
+        row_fields >>= fun (fields, typ_vars, new_typ_vars) ->
+      return (Sum (List.rev fields), typ_vars, new_typ_vars)
+    end
   | Tpoly (typ, []) -> of_typ_expr with_free_vars typ_vars typ
   | Tpoly (typ, typs) ->
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
@@ -156,14 +164,62 @@ let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
   of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
   return typ
 
-let of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
+let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with
-  | Tvar (Some x) -> return (Name.of_string false x)
+  | Tvar (Some x) | Tunivar (Some x) -> return (Name.of_string false x)
+  | Tlink typ | Tsubst typ -> of_type_expr_variable typ
   | _ ->
     raise
       (Name.of_string false "expected_variable")
       NotSupported
       "Only type variables are supported as parameters"
+
+(** We do not generate error messages for this function. Indeed, if there are
+    errors for the following types, they should be noticed elsewhere (by the
+    conversion function to Coq for example). *)
+let rec existential_typs_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
+  match typ.desc with
+  | Tvar _ | Tunivar _ -> return Name.Set.empty
+  | Tarrow (_, typ_x, typ_y, _) -> existential_typs_of_typs [typ_x; typ_y]
+  | Ttuple typs -> existential_typs_of_typs typs
+  | Tconstr (path, typs, _) ->
+    get_env >>= fun env ->
+    let path_existential =
+      match path with
+      | Path.Pident ident ->
+        begin match Env.find_type path env with
+        | _ -> Name.Set.empty
+        | exception Not_found -> Name.Set.singleton (Name.of_ident false ident)
+        end
+      | _ -> Name.Set.empty in
+    existential_typs_of_typs typs >>= fun existentials ->
+    return (Name.Set.union path_existential existentials)
+  | Tobject (typ, params) ->
+    let param_typs =
+      match !params with
+      | None -> []
+      | Some (_, param_typs) -> param_typs in
+    existential_typs_of_typs (typ :: param_typs)
+  | Tfield (_, _, typ1, typ2) -> existential_typs_of_typs [typ1; typ2]
+  | Tnil -> return Name.Set.empty
+  | Tlink typ | Tsubst typ -> existential_typs_of_typ typ
+  | Tvariant { row_fields; _ } ->
+    existential_typs_of_typs (
+      row_fields |>
+      List.map (fun (_, row_field) -> type_exprs_of_row_field row_field) |>
+      List.concat
+    )
+  | Tpoly (typ, typs) -> existential_typs_of_typs (typ :: typs)
+  | Tpackage (_, _, typs) -> existential_typs_of_typs typs
+
+and existential_typs_of_typs (typs : Types.type_expr list)
+  : Name.Set.t Monad.t =
+  Monad.List.fold_left
+    (fun existentials typ ->
+      existential_typs_of_typ typ >>= fun existentials_typ ->
+      return (Name.Set.union existentials existentials_typ)
+    )
+    Name.Set.empty typs
 
 (** The free variables of a type. *)
 let rec typ_args (typ : t) : Name.Set.t =
@@ -182,7 +238,7 @@ let rec typ_args (typ : t) : Name.Set.t =
     List.fold_left Name.Set.union Name.Set.empty
   | ForallModule (name, param, result) ->
     Name.Set.union (typ_args param) (Name.Set.remove name (typ_args result))
-  | ForallTyps (typ_params, typ) ->
+  | FunTyps (typ_params, typ) ->
     Name.Set.diff (typ_args typ) (Name.Set.of_list typ_params)
   | Error _ -> Name.Set.empty
 
@@ -241,15 +297,23 @@ let rec accumulate_nested_arrows (typ : t) : t list * t =
     (typ_x :: typ_xs, typ_y)
   | _ -> ([], typ)
 
+module Subst = struct
+  type t = {
+    name : Name.t -> Name.t;
+    path_name : PathName.t -> PathName.t }
+end
+
 (** Pretty-print a type. Use the [context] parameter to know if we should add
     parenthesis. *)
-let rec to_coq
-  (subst : (Name.t -> Name.t) option)
-  (context : Context.t option)
-  (typ : t)
+let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
   : SmartPrint.t =
   match typ with
-  | Variable x -> Name.to_coq x
+  | Variable x ->
+    let x =
+      match subst with
+      | None -> x
+      | Some subst -> subst.name x in
+    Name.to_coq x
   | Arrow _ ->
     let (typ_xs, typ_y) = accumulate_nested_arrows typ in
     Context.parens context Context.Arrow @@ group (
@@ -285,7 +349,8 @@ let rec to_coq
       | None -> path
       | Some subst ->
         begin match path with
-        | MixedPath.PathName { path = []; base = name } -> MixedPath.of_name (subst name)
+        | MixedPath.PathName path_name ->
+          MixedPath.PathName (subst.path_name path_name)
         | _ -> path
         end in
     Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
@@ -299,11 +364,11 @@ let rec to_coq
         Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
       ) in
     nest (braces (
-      (match existential_typs with
-      | [] -> !^ "_" ^^ !^ ":" ^^ !^ "unit"
-      | [typ] -> typ ^^ !^ ":" ^^ !^ "_"
-      | _ -> !^ "'" ^-^ brakets (separate (!^ "," ^^ space) existential_typs) ^^ !^ ":" ^^ !^ "_"
-      ) ^^ !^ "&" ^^
+      Pp.primitive_tuple_pattern existential_typs ^^ !^ ":" ^^
+      begin match existential_typs with
+      | [] -> !^ "unit"
+      | _ :: _ -> !^ "_"
+      end ^^ !^ "&" ^^
       nest (
         separate space (
           nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::
@@ -322,16 +387,16 @@ let rec to_coq
       ) ^-^ !^ "," ^^
       to_coq subst (Some Context.Forall) result
     )
-  | ForallTyps (typ_args, typ) ->
+  | FunTyps (typ_args, typ) ->
     begin match typ_args with
     | [] -> to_coq subst context typ
     | _ :: _ ->
       Context.parens context Context.Forall @@ nest (
-        !^ "forall" ^^ braces (
+        !^ "fun" ^^ parens (
           nest (
             separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set
           )
-        ) ^-^ !^ "," ^^
+        ) ^^ !^ "=>" ^^
         to_coq subst (Some Context.Forall) typ
       )
     end

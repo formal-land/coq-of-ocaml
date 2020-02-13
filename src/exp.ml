@@ -17,31 +17,42 @@ module Definition = struct
     cases : (Header.t * 'a) list }
 end
 
+type match_existential_cast = {
+  new_typ_vars : Name.t list;
+  bound_vars : (Name.t * Type.t) list;
+  return_typ : Type.t;
+  cast_with_axioms : bool }
+
 (** The simplified OCaml AST we use. We do not use a mutualy recursive type to
     simplify the importation in Coq. *)
 type t =
   | Constant of Constant.t
-  | Variable of MixedPath.t
+  | Variable of MixedPath.t * string list
   | Tuple of t list (** A tuple of expressions. *)
-  | Constructor of PathName.t * t list
-    (** A constructor name and a list of arguments. *)
+  | Constructor of PathName.t * string list * t list
+    (** A constructor name, some implicits and a list of arguments. *)
   | Apply of t * t list (** An application. *)
   | Function of Name.t * t (** An argument name and a body. *)
-  | LetVar of Name.t * t * t
+  | LetVar of Name.t * Name.t list * t * t
+    (** The let of a variable, with optionally a list of polymorphic variables. *)
   | LetFun of t option Definition.t * t
   | LetTyp of Name.t * Name.t list * Type.t * t
     (** The definition of a type. It is used to represent module values. *)
-  | Match of t * (Pattern.t * t) list * t option
+  | Match of t * (Pattern.t * match_existential_cast option * t) list * t option
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of int * (PathName.t * int * t) list
+  | Module of int Tree.t * (PathName.t * int * t) list
     (** The value of a first-class module. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module
-        (no existentials). There may be error messages. *)
+        (no existentials). There may be error messages.
+        TODO: see if still useful. *)
+  | ModuleCast of int Tree.t * MixedPath.t
+    (** The cast of a module to another module type with potentially more
+        existentials. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
   | TypeAnnotation of t * Type.t
@@ -49,7 +60,8 @@ type t =
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
   | ErrorTyp of Type.t (** An error composed of a type. *)
-  | ErrorMessage of t * string (** An expression together with an error message. *)
+  | ErrorMessage of t * string
+    (** An expression together with an error message. *)
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -71,21 +83,37 @@ let error_message_in_module
   : (string option * Name.t option * t) option Monad.t =
   raise (Some (Some message, field, e)) category message
 
-let get_module_typ_values
-  (typ_vars : Name.t Name.Map.t)
-  (module_typ : Types.module_type)
-  : (Name.t * int) list Monad.t =
-  get_env >>= fun env ->
-  match Mtype.scrape env module_typ with
-  | Mty_signature signature ->
-    signature |> Monad.List.filter_map (fun item ->
-      match item with
-      | Types.Sig_value (ident, { val_type; _ }) ->
-        Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
-        return (Some (Name.of_ident true ident, Name.Set.cardinal new_typ_vars))
-      | _ -> return None
-    )
-  | _ -> return []
+module ModuleTypValues = struct
+  type t =
+    | Module of Name.t
+    | ModuleFunctor of Name.t
+    | Value of Name.t * int
+
+  let get
+    (typ_vars : Name.t Name.Map.t)
+    (module_typ : Types.module_type)
+    : t list Monad.t =
+    get_env >>= fun env ->
+    match Mtype.scrape env module_typ with
+    | Mty_signature signature ->
+      signature |> Monad.List.filter_map (fun item ->
+        match item with
+        | Types.Sig_value (ident, { val_type; _ }) ->
+          Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
+          return (Some (Value (
+            Name.of_ident true ident,
+            Name.Set.cardinal new_typ_vars
+          )))
+        | Sig_module (ident, { Types.md_type = Mty_functor _; _ }, _) ->
+          let name = Name.of_ident false ident in
+          return (Some (ModuleFunctor name))
+        | Sig_module (ident, _, _) ->
+          let name = Name.of_ident false ident in
+          return (Some (Module name))
+        | _ -> return None
+      )
+    | _ -> return []
+end
 
 let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
   : Pattern.t list =
@@ -102,12 +130,14 @@ let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
+  Attribute.of_attributes e.exp_attributes >>= fun attributes ->
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
   | Texp_ident (path, loc, _) ->
+    let implicits = Attribute.get_implicits attributes in
     MixedPath.of_path true path (Some loc.txt) >>= fun x ->
-    return (Variable x)
+    return (Variable (x, implicits))
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
     return (Constant constant)
@@ -134,7 +164,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
   | Texp_function { cases; _ } ->
-    open_cases typ_vars cases >>= fun (x, e) ->
+    let is_gadt_match = Attribute.have_match_gadt attributes in
+    open_cases typ_vars cases is_gadt_match >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
@@ -149,38 +180,41 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     )) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
+    let is_gadt_match = Attribute.have_match_gadt attributes in
     of_expression typ_vars e >>= fun e ->
-    of_match typ_vars e cases exception_cases
+    of_match typ_vars e cases exception_cases is_gadt_match
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
   | Texp_construct (_, constructor_description, es) ->
+    let implicits = Attribute.get_implicits attributes in
     begin match constructor_description.cstr_tag with
     | Cstr_extension _ ->
       raise
         (Variable (
-          MixedPath.of_name (Name.of_string true "extensible_type_value")
+          MixedPath.of_name (Name.of_string true "extensible_type_value"),
+          []
         ))
         NotSupported
-        "Values of extensible types are not handled"
+        (
+          "Values of extensible types are ignored.\n\n" ^
+          "They are sent to a unit type."
+        )
     | _ ->
       let x = PathName.of_constructor_description constructor_description in
       Monad.List.map (of_expression typ_vars) es >>= fun es ->
-      return (Constructor (x, es))
+      return (Constructor (x, implicits, es))
     end
   | Texp_variant (label, e) ->
+    PathName.constructor_of_variant label >>= fun path_name ->
     let constructor =
-      Variable (MixedPath.PathName (PathName.of_variant label)) in
+      Variable (MixedPath.PathName path_name, []) in
     begin match e with
     | None -> return constructor
     | Some e ->
       of_expression typ_vars e >>= fun e ->
       return (Apply (constructor, [e]))
-    end >>= fun e ->
-    error_message
-      (ErrorMessage (e, "`" ^ label))
-      NotSupported
-      "Variants not supported"
+    end
   | Texp_record { fields; extended_expression; _ } ->
       Array.to_list fields |> Monad.List.filter_map (
         fun (label_description, definition) ->
@@ -204,8 +238,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           List.fold_left
             (fun extended_e (x, e) ->
               Apply (
-                Variable (MixedPath.PathName (PathName.prefix_by_with x)),
-                [extended_e; e])
+                Variable (MixedPath.PathName (PathName.prefix_by_with x), []),
+                [e; extended_e]
+              )
             )
             extended_e
             fields
@@ -222,15 +257,17 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     | None -> return (Tuple [])
     | Some e3 -> of_expression typ_vars e3) >>= fun e3 ->
     return (IfThenElse (e1, e2, e3))
-  | Texp_sequence (_, e2) ->
+  | Texp_sequence (e1, e2) ->
     of_expression typ_vars e2 >>= fun e2 ->
+    set_loc (Loc.of_location e1.exp_loc) (
     error_message
       (ErrorMessage (e2, "instruction_sequence \";\""))
       SideEffect
       (
-        "Sequences of instructions are not handled (operator \";\")\n\n" ^
+        "Sequences of instructions are ignored (operator \";\")\n\n" ^
         "Alternative: use a monad to sequence side-effects."
       )
+    )
   | Texp_try (e, _) ->
     of_expression typ_vars e >>= fun e ->
     error_message
@@ -244,7 +281,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_expression typ_vars e_record >>= fun e_record ->
     of_expression typ_vars e >>= fun e ->
     error_message
-      (Apply (Error "set_record_field", [e_record; Constant (Constant.String lbl_name); e]))
+      (Apply (
+        Error "set_record_field",
+        [e_record; Constant (Constant.String lbl_name); e]
+      ))
       SideEffect
       "Set record field not handled."
   | Texp_array es ->
@@ -280,7 +320,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let x = Name.of_ident true x in
     of_module_expr typ_vars module_expr None >>= fun value ->
     of_expression typ_vars e >>= fun e ->
-    return (LetVar (x, value, e))
+    return (LetVar (x, [], value, e))
   | Texp_letexception _ ->
     error_message
       (Error "let_exception")
@@ -320,9 +360,33 @@ and of_match
   (e : t)
   (cases : case list)
   (exception_cases : case list)
+  (is_gadt_match : bool)
   : t Monad.t =
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
+    let bound_vars =
+      Typedtree.pat_bound_idents c_lhs |> List.rev |> List.map
+        (fun ident ->
+          let { Types.val_type; _ } =
+            Env.find_value (Path.Pident ident) c_rhs.exp_env in
+          let name = Name.of_ident true ident in
+          (name, val_type)
+        ) in
+    Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
+    Monad.List.map
+      (fun (name, typ) ->
+        Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
+        return (name, typ)
+      )
+      bound_vars >>= fun bound_vars ->
+    Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
+    let existential_cast =
+      Some {
+        new_typ_vars = Name.Set.elements existentials;
+        bound_vars;
+        return_typ = typ;
+        cast_with_axioms = is_gadt_match;
+      } in
     begin match c_guard with
     | Some guard ->
       of_expression typ_vars guard >>= fun guard ->
@@ -330,14 +394,15 @@ and of_match
     | None -> return None
     end >>= fun guard ->
     Pattern.of_pattern c_lhs >>= fun pattern ->
-    of_expression typ_vars c_rhs >>= fun c_rhs ->
+    of_expression typ_vars c_rhs >>= fun e ->
     return (
-      Util.Option.map pattern (fun pattern -> (pattern, guard, c_rhs))
+      Util.Option.map pattern (fun pattern ->
+      (pattern, existential_cast, guard, e))
     ))
   )) >>= fun cases_with_guards ->
   let guards =
     cases_with_guards |> Util.List.filter_map (function
-      | (p, Some guard, _) -> Some (p, guard)
+      | (p, _, Some guard, _) -> Some (p, guard)
       | _ -> None
     ) in
   let guard_checks =
@@ -345,8 +410,12 @@ and of_match
       Match (
         e,
         [
-          (p, guard);
-          (Pattern.Any, Variable (MixedPath.PathName PathName.false_value))
+          (p, None, guard);
+          (
+            Pattern.Any,
+            None,
+            Variable (MixedPath.PathName PathName.false_value, [])
+          )
         ],
         None
       )
@@ -357,27 +426,28 @@ and of_match
     | _ :: _ -> Tuple (e :: guard_checks) in
   let i = ref (-1) in
   let nb_guards = List.length guard_checks in
-  let cases = cases_with_guards |> List.map (fun (p, guard, rhs) ->
-    let is_guarded = match guard with Some _ -> true | None -> false in
-    begin if is_guarded then
-      i := !i + 1
-    end;
-    let p =
-      if nb_guards = 0 then
-        p
-      else
-        Pattern.Tuple (
-          p :: any_patterns_with_ith_true is_guarded !i nb_guards
-        ) in
-    (p, rhs)
-  ) in
+  let cases =
+    cases_with_guards |> List.map (fun (p, existential_cast, guard, rhs) ->
+      let is_guarded = match guard with Some _ -> true | None -> false in
+      begin if is_guarded then
+        i := !i + 1
+      end;
+      let p =
+        if nb_guards = 0 then
+          p
+        else
+          Pattern.Tuple (
+            p :: any_patterns_with_ith_true is_guarded !i nb_guards
+          ) in
+      (p, existential_cast, rhs)
+    ) in
   (exception_cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
     match c_guard with
     | Some guard_exp ->
       of_expression typ_vars guard_exp >>= fun guard_exp ->
       begin match guard_exp with
-      | Constructor ({ PathName.path = []; base = Name.Make "false" }, []) ->
+      | Constructor ({ PathName.path = []; base = Name.Make "false" }, _, []) ->
         of_expression typ_vars c_rhs >>= fun c_rhs ->
         return (Some c_rhs)
       | _ ->
@@ -404,10 +474,11 @@ and of_match
 and open_cases
   (typ_vars : Name.t Name.Map.t)
   (cases : case list)
+  (is_gadt_match : bool)
   : (Name.t * t) Monad.t =
   let name = Name.of_string false "function_parameter" in
-  let e = Variable (MixedPath.of_name name) in
-  of_match typ_vars e cases [] >>= fun e ->
+  let e = Variable (MixedPath.of_name name, []) in
+  of_match typ_vars e cases [] is_gadt_match >>= fun e ->
   return (name, e)
 
 and import_let_fun
@@ -418,9 +489,8 @@ and import_let_fun
   : t option Definition.t Monad.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
-    let attributes =
-      vb_attributes |> List.map (fun attr -> (fst attr).Asttypes.txt) in
-    let is_axiom = List.mem "axiom" attributes in
+    Attribute.of_attributes vb_attributes >>= fun attributes ->
+    let is_axiom = Attribute.have_axiom attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
@@ -478,22 +548,31 @@ and of_let
      raise
       (ErrorMessage (e2, "top_level_evaluation"))
       SideEffect
-      "Top-level evaluations are not handled"
-  | [{ vb_pat = p; vb_expr = e1; _ }] when
-    begin match e1.exp_desc with
-    | Texp_function _ -> false
-    | _ -> true
-    end ->
-    Pattern.of_pattern p >>= fun p ->
-    of_expression typ_vars e1 >>= fun e1 ->
-    begin match p with
-    | Some (Pattern.Variable x) -> return (LetVar (x, e1, e2))
-    | Some p -> return (Match (e1, [p, e2], None))
-    | None -> return (Match (e1, [], None))
-    end
+      "Top-level evaluations are ignored"
   | _ ->
-    import_let_fun typ_vars false is_rec cases >>= fun def ->
-    return (LetFun (def, e2))
+    begin match cases with
+    | [{ vb_expr = { exp_desc; exp_type; _ }; _ }] when
+      begin match exp_desc with
+      | Texp_function _ -> false
+      | _ -> true
+      end ->
+      Type.of_typ_expr true typ_vars exp_type >>= fun (_, _, new_typ_vars) ->
+      return (Name.Set.cardinal new_typ_vars <> 0)
+    | _ -> return true
+    end >>= fun is_function ->
+    begin match cases with
+    | [{ vb_pat = p; vb_expr = e1; _ }] when not is_function ->
+      Pattern.of_pattern p >>= fun p ->
+      of_expression typ_vars e1 >>= fun e1 ->
+      begin match p with
+      | Some (Pattern.Variable x) -> return (LetVar (x, [], e1, e2))
+      | Some p -> return (Match (e1, [p, None, e2], None))
+      | None -> return (Match (e1, [], None))
+      end
+    | _ ->
+      import_let_fun typ_vars false is_rec cases >>= fun def ->
+      return (LetFun (def, e2))
+    end
 
 and of_module_expr
   (typ_vars : Name.t Name.Map.t)
@@ -505,51 +584,84 @@ and of_module_expr
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
   | Tmod_ident (path, loc) ->
-    let default_result =
-      MixedPath.of_path true path (Some loc.txt) >>= fun path ->
-      return (Variable path) in
+    MixedPath.of_path false path (Some loc.txt) >>= fun mixed_path ->
+    let default_result = return (Variable (mixed_path, [])) in
     IsFirstClassModule.is_module_typ_first_class local_module_type >>= fun is_first_class ->
     let local_module_type_path =
       match is_first_class with
       | Found local_module_type_path -> Some local_module_type_path
       | Not_found _ -> None in
-      begin match module_type with
-      | None -> default_result
-      | Some module_type ->
-        IsFirstClassModule.is_module_typ_first_class
-          module_type >>= fun is_first_class ->
-        begin match is_first_class with
-        | Found module_type_path ->
-          ModuleTypParams.get_module_typ_nb_of_existential_variables
-            module_type >>= fun nb_of_existential_variables ->
-          get_module_typ_values typ_vars module_type >>= fun values ->
+    begin match module_type with
+    | None -> default_result
+    | Some module_type ->
+      IsFirstClassModule.is_module_typ_first_class
+        module_type >>= fun is_first_class ->
+      begin match is_first_class with
+      | Found module_type_path ->
+        ModuleTypParams.get_module_typ_typ_params_arity module_type
+          >>= fun module_typ_params_arity ->
+        let are_module_paths_similar =
+          match local_module_type_path with
+          | None -> false
+          | Some local_module_type_path ->
+            PathName.compare_paths local_module_type_path module_type_path = 0 in
+        if are_module_paths_similar then
+          return (
+            ModuleCast (
+              module_typ_params_arity,
+              mixed_path
+            )
+          )
+        else
+          ModuleTypValues.get typ_vars module_type >>= fun values ->
           let fields =
-            values |> List.map (fun (value, nb_free_vars) ->
-              (
-                PathName.of_path_and_name_with_convert module_type_path value,
-                nb_free_vars,
-                Variable (
-                  match local_module_type_path with
-                  | Some local_module_type_path ->
-                    MixedPath.Access (
-                      MixedPath.PathName
-                        (PathName.of_path_with_convert false path),
-                      PathName.of_path_and_name_with_convert
-                        local_module_type_path
-                        value,
-                      false
-                    )
-                  | None ->
-                    MixedPath.PathName (
-                      PathName.of_path_and_name_with_convert path value
-                    )
+            values |> List.map (function
+              | ModuleTypValues.Value (value, nb_free_vars) ->
+                (
+                  PathName.of_path_and_name_with_convert module_type_path value,
+                  nb_free_vars,
+                  Variable (
+                    begin match local_module_type_path with
+                    | Some local_module_type_path ->
+                      MixedPath.Access (
+                        PathName.of_path_with_convert false path,
+                        [PathName.of_path_and_name_with_convert
+                          local_module_type_path
+                          value
+                        ],
+                        false
+                      )
+                    | None ->
+                      MixedPath.PathName (
+                        PathName.of_path_and_name_with_convert path value
+                      )
+                    end,
+                    []
+                  )
                 )
-              )
+              | Module modul ->
+                (
+                  PathName.of_path_and_name_with_convert module_type_path modul,
+                  0,
+                  Variable (
+                    MixedPath.Access (PathName.of_name [] modul, [], false),
+                    []
+                  )
+                )
+              | ModuleFunctor functo ->
+                (
+                  PathName.of_path_and_name_with_convert module_type_path functo,
+                  0,
+                  Variable (
+                    MixedPath.PathName (PathName.of_name [] functo),
+                    []
+                  )
+                )
             ) in
-          return (Module (nb_of_existential_variables, fields))
-        | Not_found _ -> default_result
-        end
+          return (Module (module_typ_params_arity, fields))
+      | Not_found _ -> default_result
       end
+    end
   | Tmod_structure structure ->
     let module_type =
       match module_type with
@@ -559,7 +671,7 @@ and of_module_expr
       module_type >>= fun is_first_class ->
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
-      of_structure typ_vars signature_path module_type structure.str_items
+      of_structure typ_vars signature_path module_type structure.str_items structure.str_final_env
     | IsFirstClassModule.Not_found reason ->
       error_message
         (Error "first_class_module_value_of_unknown_signature")
@@ -583,13 +695,44 @@ and of_module_expr
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
     end
   | Tmod_apply (e1, e2, _) ->
-    let expected_module_type_for_e2 =
+    let expected_module_typ_for_e2 =
       match e1.mod_type with
-      | Mty_functor (_, mod_typ_arg, _) -> mod_typ_arg
+      | Mty_functor (_, module_typ_arg, _) -> module_typ_arg
+      | _ -> None in
+    let module_typ_for_application =
+      match e1.mod_type with
+      | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
       | _ -> None in
     of_module_expr typ_vars e1 None >>= fun e1 ->
-    of_module_expr typ_vars e2 expected_module_type_for_e2 >>= fun e2 ->
-    return (Apply (e1, [e2]))
+    of_module_expr typ_vars e2 expected_module_typ_for_e2 >>= fun e2 ->
+    let application = Apply (e1, [e2]) in
+    begin match (module_type, module_typ_for_application) with
+    | (None, _) | (_, None) -> return application
+    | (Some module_type, Some module_typ_for_application) ->
+      ModuleTypParams.get_module_typ_typ_params_arity module_type
+        >>= fun module_typ_params_arity ->
+      ModuleTypParams.get_module_typ_typ_params_arity module_typ_for_application
+        >>= fun module_typ_params_arity_for_application ->
+      if module_typ_params_arity = module_typ_params_arity_for_application then
+        return application
+      else
+        let functor_result_name = Name.of_string false "functor_result" in
+        return (
+          LetVar (
+            functor_result_name,
+            [],
+            application,
+            ModuleCast (
+              module_typ_params_arity,
+              MixedPath.Access (
+                { path = []; base = functor_result_name },
+                [],
+                false
+              )
+            )
+          )
+        )
+    end
   | Tmod_constraint (module_expr, mod_type, annotation, _) ->
     let module_type =
       match module_type with
@@ -610,29 +753,52 @@ and of_structure
   (signature_path : Path.t)
   (module_type : Types.module_type)
   (items : Typedtree.structure_item list)
+  (final_env : Env.t)
   : t Monad.t =
-  ModuleTypParams.get_module_typ_nb_of_existential_variables
-    module_type >>= fun nb_of_existential_variables ->
-  get_module_typ_values typ_vars module_type >>= fun values ->
-  let fields =
-    values |> List.map (fun (value, nb_free_vars) ->
-      (
-        PathName.of_path_and_name_with_convert signature_path value,
-        nb_free_vars,
-        Variable (MixedPath.of_name value)
-      )
-    ) in
-  let e_next = Module (nb_of_existential_variables, fields) in
-  Monad.List.fold_right
-    (fun item e_next ->
+  match items with
+  | [] ->
+    set_env final_env (
+    ModuleTypParams.get_module_typ_typ_params_arity module_type >>=
+      fun module_typ_params_arity ->
+    ModuleTypValues.get typ_vars module_type >>= fun values ->
+    let fields =
+      values |> List.map (function
+        | ModuleTypValues.Value (value, nb_free_vars) ->
+          (
+            PathName.of_path_and_name_with_convert signature_path value,
+            nb_free_vars,
+            Variable (MixedPath.of_name value, [])
+          )
+        | Module modul ->
+          (
+            PathName.of_path_and_name_with_convert signature_path modul,
+            0,
+            Variable (
+              MixedPath.Access (PathName.of_name [] modul, [], false),
+              []
+            )
+          )
+        | ModuleFunctor functo ->
+          (
+            PathName.of_path_and_name_with_convert signature_path functo,
+            0,
+            Variable (
+              MixedPath.PathName (PathName.of_name [] functo),
+              []
+            )
+          )
+      ) in
+    return (Module (module_typ_params_arity, fields)))
+  | item :: items ->
       set_env item.str_env (
       set_loc (Loc.of_location item.str_loc) (
+      of_structure typ_vars signature_path module_type items final_env >>= fun e_next ->
       match item.str_desc with
       | Tstr_eval _ ->
         raise
           (ErrorMessage (e_next, "top_level_evaluation"))
           SideEffect
-          "Top-level evaluation is not handled"
+          "Top-level evaluations are ignored"
       | Tstr_value (rec_flag, cases) -> of_let typ_vars rec_flag cases e_next
       | Tstr_primitive _ ->
         raise
@@ -681,8 +847,8 @@ and of_structure
           "Exception not handled"
       | Tstr_module { mb_id; mb_expr; _ } ->
         let name = Name.of_ident false mb_id in
-        of_module_expr typ_vars mb_expr None >>= fun value ->
-        return (LetVar (name, value, e_next))
+        of_module_expr typ_vars mb_expr (Some mb_expr.mod_type) >>= fun value ->
+        return (LetVar (name, [], value, e_next))
       | Tstr_recmodule _ ->
         raise
           (ErrorMessage (e_next, "recursive_module"))
@@ -718,7 +884,7 @@ and of_structure
           begin match is_first_class with
           | Found incl_signature_path ->
             let path_name = PathName.of_path_with_convert false path in
-            of_include path_name incl_signature_path incl_type e_next
+            of_include typ_vars path_name incl_signature_path incl_type e_next
           | Not_found reason ->
             raise
               (ErrorMessage (e_next, "include_without_named_signature"))
@@ -732,14 +898,15 @@ and of_structure
           raise
             (ErrorMessage (e_next, "unhandled_include"))
             NotSupported
-            "The include of this kind of module is not supported"
+            (
+              "The include of this kind of module is not supported.\n\n" ^
+              "Try to name this module and then include this name."
+            )
         end
       | Tstr_attribute _ -> return e_next))
-    )
-    items
-    e_next
 
 and of_include
+  (typ_vars : Name.t Name.Map.t)
   (module_path_name : PathName.t)
   (signature_path : Path.t)
   (signature : Types.signature)
@@ -748,22 +915,33 @@ and of_include
   match signature with
   | [] -> return e_next
   | signature_item :: signature ->
-    of_include module_path_name signature_path signature e_next >>= fun e_next ->
+    of_include typ_vars module_path_name signature_path signature e_next >>= fun e_next ->
     begin match signature_item with
     | Sig_value (ident, _) | Sig_type (ident, _, _) ->
       let is_value =
         match signature_item with Sig_value _ -> true | _ -> false in
+      begin match signature_item with
+      | Sig_value (_, { Types.val_type; _ }) ->
+        Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
+        return (Name.Set.elements new_typ_vars)
+      | _ -> return []
+      end >>= fun typ_vars ->
       let name = Name.of_ident is_value ident in
       return (
         LetVar (
           name,
-          Variable (MixedPath.Access (
-            MixedPath.PathName module_path_name,
-            PathName.of_path_and_name_with_convert
-              signature_path
-              name,
-            false
-          )),
+          typ_vars,
+          Variable (
+            MixedPath.Access (
+              module_path_name,
+              [PathName.of_path_and_name_with_convert
+                signature_path
+                name
+              ],
+              false
+            ),
+            []
+          ),
           e_next
         )
       )
@@ -779,7 +957,7 @@ let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
 
 let rec flatten_list (e : t) : t list option =
   match e with
-  | Constructor (x, es) ->
+  | Constructor (x, _, es) ->
     begin match (x, es) with
     | ({ PathName.path = []; base = Name.Make "[]" }, []) -> Some []
     | ({ PathName.path = []; base = Name.Make "cons" }, [e; es]) ->
@@ -796,34 +974,61 @@ let rec flatten_list (e : t) : t list option =
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   match e with
   | Constant c -> Constant.to_coq c
-  | Variable x -> MixedPath.to_coq x
+  | Variable (x, implicits) ->
+    let x = MixedPath.to_coq x in
+    begin match implicits with
+    | [] -> x
+    | _ :: _ ->
+      parens (separate space (
+        x :: List.map (fun implicit -> !^ implicit) implicits)
+      )
+    end
   | Tuple es ->
     if es = [] then
       !^ "tt"
     else
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
-  | Constructor (x, es) ->
+  | Constructor (x, implicits, es) ->
+    let implicits = List.map (fun implicit -> !^ implicit) implicits in
     begin match flatten_list e with
-    | Some [] -> !^ "[]"
+    | Some [] ->
+      let nil = !^ "nil" in
+      begin match implicits with
+      | [] -> nil
+      | _ :: _ -> parens (separate space (nil :: implicits))
+      end
     | Some es -> OCaml.list (to_coq false) es
     | None ->
-      if es = [] then
-        PathName.to_coq x
-      else
-        Pp.parens paren @@ nest @@ separate space
-          (PathName.to_coq x :: List.map (to_coq true) es)
+      let arguments = implicits @ List.map (to_coq true) es in
+      begin match arguments with
+      | [] -> PathName.to_coq x
+      | _ :: _ ->
+        Pp.parens paren @@ nest @@
+          separate space (PathName.to_coq x :: arguments)
+      end
     end
   | Apply (e_f, e_xs) ->
-    Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
+    Pp.parens paren @@ nest @@ (separate space (
+      List.map (to_coq true) (e_f :: e_xs)
+    ))
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
-  | LetVar (x, e1, e2) ->
+  | LetVar (x, typ_params, e1, e2) ->
     begin match e1 with
-    | Variable (PathName { path = []; base }) when Name.equal base x ->
+    | Variable (PathName { path = []; base }, []) when Name.equal base x ->
       to_coq paren e2
     | _ ->
       Pp.parens paren @@ nest (
-        !^ "let" ^^ Name.to_coq x ^-^ !^ " :=" ^^ to_coq false e1 ^^ !^ "in" ^^
+        !^ "let" ^^ Name.to_coq x ^^
+        begin match typ_params with
+        | [] -> empty
+        | _ :: _ ->
+          braces (nest (
+            separate space (typ_params |> List.map Name.to_coq) ^^
+            !^ ":" ^^ !^ "Set"
+          ))
+        end ^^
+        !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^
         newline ^^ to_coq false e2
       )
     end
@@ -876,16 +1081,21 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )
   | Match (e, cases, default_value) ->
     begin match (cases, default_value) with
-    | ([(pattern, e2)], None) ->
+    | ([(pattern, existential_cast, e2)], None)
+      when not (Pattern.has_or_patterns pattern) ->
       Pp.parens paren @@ nest (
         !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
-        to_coq false e ^^ !^ "in" ^^ newline ^^ to_coq false e2
+        to_coq false e ^^ !^ "in" ^^ newline ^^
+        to_coq_cast_existentials existential_cast e2
       )
     | _ ->
       nest (
         !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
-        separate space (cases |> List.map (fun (p, e) ->
-          nest (!^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^ to_coq false e ^^ newline)
+        separate space (cases |> List.map (fun (p, existential_cast, e) ->
+          nest (
+            !^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^
+            to_coq_cast_existentials existential_cast e ^^ newline
+          )
         )) ^^
         (match default_value with
         | None -> empty
@@ -898,8 +1108,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       )
     end
   | Record fields ->
-    nest (!^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
-      nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e))) ^^ !^ "|}")
+    nest (
+      !^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
+        nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e)
+      )) ^^ !^ "|}"
+    )
   | Field (e, x) -> to_coq true e ^-^ !^ ".(" ^-^ PathName.to_coq x ^-^ !^ ")"
   | IfThenElse (e1, e2, e3) ->
     Pp.parens paren @@ nest (
@@ -907,17 +1120,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Module (nb_of_existential_variables, fields) ->
-    Pp.parens paren @@ nest (
-      !^ "existT" ^^ !^ "_" ^^
-      begin match to_coq_n_underscores nb_of_existential_variables with
-      | [] -> !^ "tt"
-      | [_] -> !^ "_"
-      | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
-      end ^^
-      nest (
+  | Module (module_typ_params_arity, fields) ->
+    to_coq_exist_t paren module_typ_params_arity (
+      group (
         !^ "{|" ^^ newline ^^
-        indent @@ separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, nb_free_vars, e) ->
+        indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, nb_free_vars, e) ->
           nest (
             group (
               nest (
@@ -931,7 +1138,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
             ) ^^
             to_coq false e)
           )
-        ) ^^ newline ^^
+        )) ^^ newline ^^
         !^ "|}"
       )
     )
@@ -943,9 +1150,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         | None -> empty
         | Some error_message -> Error.to_comment error_message ^^ newline) ^^
         nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e)
-    )) ^^ newline ^^
+      )) ^^ newline ^^
       !^ "|}"
     )
+  | ModuleCast (module_typ_params_arity, module_path) ->
+    to_coq_exist_t paren module_typ_params_arity (MixedPath.to_coq module_path)
   | Functor (x, typ, e) ->
     Pp.parens paren @@ nest (
       !^ "fun" ^^
@@ -953,9 +1162,101 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "=>" ^^ to_coq false e
     )
   | TypeAnnotation (e, typ) ->
-    parens @@ nest (to_coq false e ^^ !^ ":" ^^ Type.to_coq None None typ)
+    parens @@ nest (to_coq true e ^^ !^ ":" ^^ Type.to_coq None None typ)
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
   | ErrorMessage (e, error_message) ->
     group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
+
+and to_coq_cast_existentials
+  (existential_cast : match_existential_cast option)
+  (e : t)
+  : SmartPrint.t =
+  let e =
+    match existential_cast with
+    | Some { return_typ; cast_with_axioms = true; _ } ->
+      nest (
+        !^ "obj_magic" ^^ Type.to_coq None (Some Type.Context.Apply) return_typ ^^
+        to_coq true e
+      )
+    | _ -> to_coq false e in
+  match existential_cast with
+  | None
+  | Some { bound_vars = []; _ }
+  | Some { new_typ_vars = []; cast_with_axioms = false; _ } -> e
+  | Some { new_typ_vars; bound_vars; cast_with_axioms; _ } ->
+    let existential_names =
+      Pp.primitive_tuple (List.map Name.to_coq new_typ_vars) in
+    let existential_names_pattern =
+      Pp.primitive_tuple_pattern (List.map Name.to_coq new_typ_vars) in
+    let variable_names =
+      Pp.primitive_tuple (bound_vars |> List.map (fun (name, _) ->
+        Name.to_coq name
+      )) in
+    let variable_typ =
+      Pp.primitive_tuple_type (bound_vars |> List.map (fun (_, typ) ->
+        Type.to_coq None (Some Type.Context.Apply) typ
+      )) in
+    nest (
+      !^ "let" ^^
+      !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
+      variable_names ^^ !^ ":=" ^^
+      nest (
+        begin if cast_with_axioms then
+          !^ "obj_magic_exists"
+        else
+          !^ "existT"
+        end ^^
+        parens (nest (
+          !^ "fun" ^^ existential_names_pattern ^^
+          (* TODO: try to remove this annotation once in Coq 8.11 *)
+          begin match new_typ_vars with
+          | [_] -> !^ ":" ^^ !^ "Set"
+          | _ -> empty
+          end ^^
+          !^ "=>" ^^ variable_typ
+        )) ^^
+        begin if cast_with_axioms then
+          empty
+        else
+          !^ "_"
+        end ^^
+        variable_names
+      ) ^^ !^ "in" ^^ newline ^^
+      e
+    )
+
+and to_coq_arity (arity : int) : SmartPrint.t =
+  match arity with
+  | 0 -> !^ "Set"
+  | arity -> !^ "Set" ^^ !^ "->" ^^ (to_coq_arity (arity - 1))
+
+and to_coq_exist_t
+  (paren : bool) (module_typ_params_arity : int Tree.t) (e : SmartPrint.t)
+  : SmartPrint.t =
+  let arities = Tree.flatten module_typ_params_arity |> List.map snd in
+  let nb_of_existential_variables = List.length arities in
+  Pp.parens paren @@ nest (
+    !^ "existT" ^^
+    parens (nest (
+      !^ "A :=" ^^
+      match arities with
+      | [] -> !^ "unit"
+      | [arity] -> to_coq_arity arity
+      | _ :: _ :: _ ->
+        brakets (separate (space ^^ !^ "**" ^^ space) (arities |> List.map (fun arity ->
+          nest (to_coq_arity arity)
+        )))
+    )) ^^
+    begin match nb_of_existential_variables with
+    | 0 -> !^ "(fun _ => _)"
+    | _ -> !^ "_"
+    end ^^
+    begin match to_coq_n_underscores nb_of_existential_variables with
+    | [] -> !^ "tt"
+    | [_] -> !^ "_"
+    | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
+    end ^^
+    e
+  )

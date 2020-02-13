@@ -66,10 +66,7 @@ class HomeSplash extends React.Component {
           <PromoSection>
             <Button href={docUrl('introduction.html')}>Introduction</Button>
             <Button href={docUrl('install.html')}>Getting started</Button>
-            <Button
-              href="https://clarus.github.io/coq-of-ocaml/examples/"
-              target="_blank"
-            >
+            <Button href="https://clarus.github.io/coq-of-ocaml/examples/tezos/">
               Examples
             </Button>
           </PromoSection>
@@ -114,7 +111,7 @@ class Index extends React.Component {
           Developed at [Nomadic Labs](https://www.nomadic-labs.com/) to formally verify the crypto-currency [Tezos](https://tezos.com/).
         </MarkdownBlock>
         <Button
-          href="https://www.nomadic-labs.com/"
+          href="https://www.nomadic-labs.com/jobs.html"
           target="_blank"
         >
           We are hiring

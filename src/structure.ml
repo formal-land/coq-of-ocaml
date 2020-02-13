@@ -95,7 +95,7 @@ let top_level_evaluation_error : t list Monad.t =
   error_message
     (Error "top_level_evaluation")
     SideEffect
-    "Top-level evaluations are not handled"
+    "Top-level evaluations are ignored"
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -152,7 +152,6 @@ let rec of_structure (structure : structure) : t list Monad.t =
         _
       } ->
       let name = Name.of_ident false name in
-      of_structure structure >>= fun structures ->
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | Found md_type_path ->
@@ -160,25 +159,30 @@ let rec of_structure (structure : structure) : t list Monad.t =
           Name.Map.empty
           md_type_path
           mod_type
-          structure.str_items >>= fun module_exp ->
+          structure.str_items
+          structure.str_final_env >>= fun module_exp ->
         return [simple_value name module_exp]
-      | Not_found _ -> return [Module (name, structures)]
+      | Not_found _ ->
+        of_structure structure >>= fun structures ->
+        return [Module (name, structures)]
       end
     | Tstr_module {
         mb_id = name;
         mb_expr = {
-          mod_desc = Tmod_ident (_, long_ident);
+          mod_desc = Tmod_ident (path, _);
           mod_type;
           _
         };
         _
       } ->
       let name = Name.of_ident false name in
-      let reference = PathName.of_long_ident false long_ident.txt in
+      let reference = PathName.of_path_with_convert false path in
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | Found _ ->
-        return [simple_value name (Exp.Variable (MixedPath.PathName reference))]
+        return [
+          simple_value name (Exp.Variable (MixedPath.PathName reference, []))
+        ]
       | Not_found _ -> return [ModuleSynonym (name, reference)]
       end
     | Tstr_module {
@@ -240,18 +244,18 @@ let rec of_structure (structure : structure) : t list Monad.t =
         NotSupported
         "Structure item `class_type` not handled."
     | Tstr_include {
-        incl_mod = { mod_desc = Tmod_ident (_, long_ident); mod_type; _ };
+        incl_mod = { mod_desc = Tmod_ident (path, _); mod_type; _ };
         _
       }
     | Tstr_include {
         incl_mod = {
-          mod_desc = Tmod_constraint ({ mod_desc = Tmod_ident (_, long_ident); _ }, _, _, _);
+          mod_desc = Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _);
           mod_type;
           _
         };
         _
       } ->
-      let reference = PathName.of_long_ident false long_ident.txt in
+      let reference = PathName.of_path_with_convert false path in
       IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
       begin match is_first_class with
       | IsFirstClassModule.Found mod_type_path ->
@@ -282,10 +286,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
                     name
                     (Exp.Variable (
                       MixedPath.Access (
-                        MixedPath.PathName reference,
-                        field,
+                        reference,
+                        [field],
                         false
-                      )
+                      ),
+                      []
                     ))
                 )
               | _ -> None

@@ -19,8 +19,10 @@ Module Primitive.
   Unset Primitive Projections.
 End Primitive.
 
-Notation "[ X * Y * .. * Z ]" := (Primitive.prod .. (Primitive.prod X Y) .. Z).
-Notation "[ x , y , .. , z ]" := (Primitive.pair .. (Primitive.pair x y) .. z).
+Notation "[ X ** Y ** .. ** Z ]" :=
+  (Primitive.prod .. (Primitive.prod X Y) .. Z) : type_scope.
+Notation "[ x , y , .. , z ]" :=
+  (Primitive.pair .. (Primitive.pair x y) .. z).
 
 (* TODO: add floats, add the different integer types (int32, int64, ...). *)
 Class OrderDec {A R} `(StrictOrder A R) := {
@@ -34,7 +36,16 @@ Parameter axiom : forall {A : Set}, A.
 
 Parameter assert : forall {A : Set}, bool -> A.
 
-Parameter exn : Set.
+Axiom obj_magic : forall {A : Set} (B : Set), A -> B.
+
+Axiom obj_magic_exists : forall {A : Set} {Es : Type} (T : Es -> Set),
+  A -> {vs : Es & T vs}.
+
+Axiom obj_magic_eval : forall {A : Set} {x : A}, obj_magic A x = x.
+
+Axiom obj_magic_exists_eval
+  : forall {Es : Type} {T : Es -> Set} {vs : Es} {x : T vs},
+  obj_magic_exists T x = existT _ vs x.
 
 Parameter extensible_type : Set.
 

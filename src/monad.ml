@@ -10,7 +10,7 @@ module Command = struct
   type 'a t =
     | GetEnv : Env.t t
     | GetLoc : Loc.t t
-    | GetScopingEnv : Env.t option t
+    | GetScopingEnv : bool -> Env.t option t
     | Raise : 'a * Error.Category.t * string -> 'a t
     | Warn : string -> unit t
 end
@@ -19,7 +19,7 @@ module Wrapper = struct
   type t =
     | Env of Env.t
     | Loc of Loc.t
-    | ScopingEnv
+    | ScopingEnv of bool
 end
 
 type 'a t =
@@ -44,8 +44,8 @@ module Notations = struct
   let get_loc : Loc.t t =
     Command Command.GetLoc
 
-  let get_scoping_env : Env.t option t =
-    Command Command.GetScopingEnv
+  let get_scoping_env (is_inner : bool) : Env.t option t =
+    Command (Command.GetScopingEnv is_inner)
 
   let set_env (env : Env.t) (x : 'a t) : 'a t =
     Wrapper (Wrapper.Env env, x)
@@ -53,8 +53,8 @@ module Notations = struct
   let set_loc (loc : Loc.t) (x : 'a t) : 'a t =
     Wrapper (Wrapper.Loc loc, x)
 
-  let set_scoping_env (x : 'a t) : 'a t =
-    Wrapper (Wrapper.ScopingEnv, x)
+  let set_scoping_env (is_inner : bool) (x : 'a t) : 'a t =
+    Wrapper (Wrapper.ScopingEnv is_inner, x)
 
   let raise (value : 'a) (category : Error.Category.t) (message : string) : 'a t =
     Command (Command.Raise (value, category, message))

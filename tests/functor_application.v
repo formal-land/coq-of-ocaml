@@ -6,7 +6,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Require Import TypingFlags.Loader.
+Unset Positivity Checking.
 Unset Guard Checking.
 
 Module Source.
@@ -28,34 +28,34 @@ End Target.
 Definition M :=
   let t := Z in
   let x := 12 in
-  existT _ _
+  existT (A := Set) _ _
     {|
       Source.x := x
-      |}.
+    |}.
 
 Definition F :=
   fun (X : {t : _ & Source.signature t}) =>
-    (let t := (|X|).(Source.t) in
+    ((let t := (|X|).(Source.t) in
     let y := (|X|).(Source.x) in
-    existT _ tt
+    existT (A := unit) (fun _ => _) tt
       {|
         Target.y := y
-        |} : {_ : unit & Target.signature (|X|).(Source.t)}).
+      |}) : {_ : unit & Target.signature (|X|).(Source.t)}).
 
 Definition FSubst :=
   fun (X : {t : _ & Source.signature t}) =>
-    (let y := (|X|).(Source.x) in
-    existT _ tt
+    ((let y := (|X|).(Source.x) in
+    existT (A := unit) (fun _ => _) tt
       {|
         Target.y := y
-        |} : {_ : unit & Target.signature (|X|).(Source.t)}).
+      |}) : {_ : unit & Target.signature (|X|).(Source.t)}).
 
 Definition Sum :=
   fun (X : {_ : unit & Source.signature Z}) =>
     fun (Y : {_ : unit & Source.signature Z}) =>
-      (let t := Z in
+      ((let t := Z in
       let y := Z.add (|X|).(Source.x) (|Y|).(Source.x) in
-      existT _ _
+      existT (A := Set) _ _
         {|
           Target.y := y
-          |} : {t : _ & Target.signature t}).
+        |}) : {t : _ & Target.signature t}).

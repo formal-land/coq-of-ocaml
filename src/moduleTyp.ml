@@ -35,10 +35,11 @@ let of_ocaml_module_with_substitutions
     | Typedtree.Twith_type typ_declaration | Twith_typesubst typ_declaration ->
       let { Typedtree.typ_loc; typ_type; _ } = typ_declaration in
       begin match typ_type with
-      | { type_kind = Type_abstract; type_manifest = Some typ; _ } ->
+      | { type_kind = Type_abstract; type_manifest = Some typ; type_params; _ } ->
         set_loc (Loc.of_location typ_loc) (
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        return (Some (PathName.of_path_without_convert false path, typ)))
+        Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_params ->
+        return (Some (PathName.of_path_without_convert false path, typ_params, typ)))
       | _ ->
         raise None NotSupported (
           "Can only do `with` on types in module types using type expressions " ^
@@ -47,10 +48,12 @@ let of_ocaml_module_with_substitutions
       end
     | _ -> raise None NotSupported "Can only do `with` on types in module types"
     end
-  )) >>= fun (typ_substitutions : (PathName.t * Type.t) list) ->
+  )) >>= fun (typ_substitutions : (PathName.t * Name.t list * Type.t) list) ->
   let typ_values = List.fold_left
-    (fun typ_values (path_name, typ) ->
-      Tree.map_at typ_values path_name (fun _ -> Some typ)
+    (fun typ_values (path_name, typ_params, typ) ->
+      Tree.map_at typ_values path_name (fun _ ->
+        Some (Type.FunTyps (typ_params, typ))
+      )
     )
     (signature_typ_params |> Tree.map (fun _ -> None))
     typ_substitutions in
@@ -73,7 +76,10 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
   | Tmty_ident (_, long_ident_loc) ->
     of_ocaml_module_with_substitutions long_ident_loc []
   | Tmty_signature _ ->
-    raise (Error "signature") NotSupported "Anonymous definition of signatures is not handled"
+    raise
+      (Error "anonymous_signature")
+      NotSupported
+      "Anonymous definition of signatures is not handled"
   | Tmty_typeof _ ->
     raise (Error "typeof") NotSupported "The typeof in module types is not handled"
   | Tmty_with ({ mty_desc = Tmty_ident (_, long_ident_loc); _ }, substitutions) ->

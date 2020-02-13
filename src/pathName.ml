@@ -1,13 +1,10 @@
 (** Global identifiers with a module path, used to reference a definition for example. *)
 open SmartPrint
+open Monad.Notations
 
 type t = {
   path : Name.t list;
   base : Name.t }
-
-type t' = t
-module Set = Set.Make (struct type t = t' let compare = compare end)
-module Map = Map.Make (struct type t = t' let compare = compare end)
 
 let stdlib_name =
   if Sys.ocaml_version >= "4.07" then
@@ -52,6 +49,7 @@ let try_convert (path_name : t) : t option =
     | "Some" -> make [] "Some"
     | "Ok" -> make [] "inl"
     | "Error" -> make [] "inr"
+    | "exn" -> make [] "extensible_type"
 
     (* Predefined exceptions *)
     | "Match_failure" -> make ["OCaml"] "Match_failure"
@@ -224,10 +222,24 @@ let of_long_ident (is_value : bool) (long_ident : Longident.t) : t =
 let of_path_without_convert (is_value : bool) (path : Path.t) : t =
   let rec aux path : (Name.t list * Name.t) =
     match path with
-    | Path.Pident x -> ([], Name.of_ident is_value x)
-    | Path.Pdot (path, s, _) ->
+    | Path.Pident ident ->
+      let ident_elements =
+        Str.split (Str.regexp_string "__") (Ident.name ident) |>
+        List.rev in
+      begin match ident_elements with
+      | base :: path ->
+        let base =
+          match path with
+          | [] -> base
+          | _ :: _ -> String.capitalize_ascii base in
+        let path = List.map (Name.of_string is_value) path in
+        let base = Name.of_string is_value base in
+        (path, base)
+      | [] -> assert false
+      end
+    | Path.Pdot (path, field, _) ->
       let (path, base) = aux path in
-      (base :: path, Name.of_string is_value s)
+      (base :: path, Name.of_string is_value field)
     | Path.Papply _ -> failwith "Unexpected path application" in
   let (path, base) = aux path in
   of_name (List.rev path) base
@@ -266,10 +278,14 @@ let of_label_description (label_description : Types.label_description) : t =
     convert path_name
   | _ -> failwith "Unexpected label description without a type constructor"
 
-let of_variant (label : string) : t =
+let constructor_of_variant (label : string) : t Monad.t =
   match label with
   (* Custom variants to add here. *)
-  | _ -> { path = []; base = Name.of_string false label }
+  | _ ->
+    raise
+      { path = []; base = Name.of_string false label }
+      NotSupported
+      ("Constructor of the variant `" ^ label ^ " unknown")
 
 let get_head_and_tail (path_name : t) : Name.t * t option =
   let { path; base } = path_name in
@@ -301,5 +317,38 @@ let prefix_by_with (path_name : t) : t =
   let { path; base } = path_name in
   { path; base = Name.prefix_by_with base }
 
+let compare_paths (path1 : Path.t) (path2 : Path.t) : int =
+  let import_path (path : Path.t) : t = of_path_without_convert false path in
+  compare (import_path path1) (import_path path2)
+
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
+
+let typ_of_variant (label : string) : t option =
+  match label with
+  (* Custom variants to add here. *)
+  | _ -> None
+
+let typ_of_variants (labels : string list) : t option Monad.t =
+  let typs = labels |> Util.List.filter_map typ_of_variant in
+  let typs = typs |> List.sort_uniq compare in
+  let variants_message =
+    String.concat ", " (labels |> List.map (fun label -> "`" ^ label)) in
+  match typs with
+  | [] ->
+    raise
+      None
+      NotSupported
+      ("No type known for the following variants: " ^ variants_message)
+  | [typ] -> return (Some typ)
+  | typ :: _ :: _ ->
+    raise
+      (Some typ)
+      NotSupported
+      (
+        "At least two types found for the variants " ^ variants_message ^
+        ":\n" ^
+        String.concat "\n" (typs |> List.map (fun typ ->
+          "- " ^ Pp.to_string (to_coq typ)
+        ))
+      )

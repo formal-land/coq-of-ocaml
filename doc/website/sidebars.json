@@ -10,7 +10,8 @@
     "Concepts": [
       "ocaml-core",
       "type-definitions",
-      "module-system"
+      "module-system",
+      "gadts"
     ]
   }
 }

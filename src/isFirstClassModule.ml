@@ -5,9 +5,9 @@ open Monad.Notations
 (** Recursively get all the module type declarations inside a module declaration.
     We retreive the path and definition of each. *)
 let get_modtype_declarations_of_module_declaration
-  (module_declaration : Types.module_declaration)
+  (env : Env.t) (module_declaration : Types.module_declaration)
   : (Ident.t list * Types.modtype_declaration) list =
-  match module_declaration.md_type with
+  match Env.scrape_alias env module_declaration.md_type with
   | Mty_signature signature ->
     signature |> Util.List.filter_map (function
       | Types.Sig_modtype (module_type_ident, module_type) ->
@@ -31,6 +31,13 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
     Path.Pdot (path, Ident.name ident, 0)
   ) path idents
 
+let is_black_list (path : Path.t) : bool =
+  match PathName.of_path_without_convert false path with
+  | _ -> false
+
+let merge_similar_paths (paths : Path.t list) : Path.t list =
+  paths |> List.sort_uniq PathName.compare_paths
+
 (** Find the [Path.t] of all the signature definitions which are found to be similar
     to [signature]. If the signature is the one of a module used as a namespace there
     should be none. If the signature is the one a first-class module there should be
@@ -52,19 +59,29 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature)
       None env [] in
   (* We explore signatures in modules in the current namespace. *)
   let similar_signature_paths_in_modules =
-    Env.fold_modules
-      (fun _ module_path module_declaration signature_paths ->
-        let modtype_declarations = get_modtype_declarations_of_module_declaration module_declaration in
-        let similar_modtype_declarations =
-          modtype_declarations |> List.filter (fun (_, modtype_declaration) ->
-            is_modtype_declaration_similar_to_shape modtype_declaration shape
-          ) in
-        (similar_modtype_declarations |> List.map (fun (idents, _) ->
-          apply_idents_on_path module_path idents
-        )) @ signature_paths
-      )
-      None env [] in
-  (similar_signature_paths @ similar_signature_paths_in_modules, shape)
+    (* We favor locally defined signatures. *)
+    match similar_signature_paths with
+    | _ :: _ -> []
+    | [] ->
+      Env.fold_modules
+        (fun _ module_path module_declaration signature_paths ->
+          let similar_modtype_declarations =
+            get_modtype_declarations_of_module_declaration
+              env module_declaration |>
+            List.filter (fun (_, modtype_declaration) ->
+              is_modtype_declaration_similar_to_shape modtype_declaration shape
+            ) |>
+            List.map (fun (idents, _) ->
+              apply_idents_on_path module_path idents
+            ) in
+          similar_modtype_declarations @ signature_paths
+        )
+        None env [] in
+  let paths =
+    (similar_signature_paths @ similar_signature_paths_in_modules) |>
+    merge_similar_paths |>
+    List.filter (fun path -> not (is_black_list path)) in
+  (paths, shape)
 
 type maybe_found =
   | Found of Path.t
@@ -92,19 +109,19 @@ let rec is_module_typ_first_class
         Not_found (
           "Did not find a module signature name for the following shape:\n" ^
           Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
-          "(a shape is a list of names of values)\n\n" ^
+          "(a shape is a list of names of values and sub-modules)\n\n" ^
           "We use the concept of shape to find the name of a signature for Coq."
         )
       )
     | [signature_path] -> return (Found signature_path)
     | signature_path :: (_ :: _) ->
       raise (Found signature_path) FirstClassModule (
-        "It is unclear which first-class module this projection is from. At least two similar\n" ^
-        "module signatures found, namely:\n" ^
+        "It is unclear which name has this signature. At least two similar\n" ^
+        "signatures found, namely:\n" ^
         String.concat ", " (signature_paths |> List.map Path.name) ^ "\n\n" ^
         "We were looking for a module signature name for the following shape:\n" ^
         Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
-        "(a shape is a list of names of values)\n\n" ^
+        "(a shape is a list of names of values and sub-modules)\n\n" ^
         "We use the concept of shape to find the name of a signature for Coq."
       )
     end

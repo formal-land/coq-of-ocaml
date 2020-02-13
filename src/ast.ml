@@ -49,7 +49,7 @@ let to_coq (ast : t) : SmartPrint.t =
     !^ "Local Open Scope Z_scope.";
     !^ "Local Open Scope type_scope.";
     !^ "Import ListNotations." ^^ newline;
-    !^ "Require Import TypingFlags.Loader.";
+    !^ "Unset Positivity Checking.";
     !^ "Unset Guard Checking."
   ]) ^^ newline ^^
   (match ast with

@@ -6,12 +6,12 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Require Import TypingFlags.Loader.
+Unset Positivity Checking.
 Unset Guard Checking.
 
 Fixpoint map {A B : Set} (f : A -> B) (l : list A) {struct f} : list B :=
   match l with
-  | [] => []
+  | [] => nil
   | cons x xs => cons (f x) (map f xs)
   end.
 

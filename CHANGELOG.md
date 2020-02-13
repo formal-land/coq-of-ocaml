@@ -1,4 +1,20 @@
 ## [Unreleased]
+* Add basic handling of module alias and typeof in `.mli` files.
+* Add more type annotations on values to better support polymorphic values.
+* Add better support for include of signatures in `.mli` files.
+* Add support of `open` in `.mli` files.
+* Upgrade to Coq 8.11.
+* Add support for functors inside signatures.
+* Add a special treatment with no axioms for the matching of algebraic types with existentials which are not GADTs (with the same type parameters for all the constructors).
+* Add an annotation mechanism for implicits for Coq.
+* Generate the JSON output in a default file.
+* Optimize the execution time to find the name of a signature.
+* Name the type of the records of constructors.
+* Add an annotation mechanism to generate axioms for the `match` of GADTs.
+* Use `record.(field)` to access record fields.
+* Add an axiom for `assert`.
+* Add basic support for includes of module types with sub-modules.
+* Add `with` notation for records.
 * Ignore patterns with extensible types.
 * Replace the generation of `Export` by `Included` (fix).
 * Add support of `include` in first-class module values.

@@ -4,9 +4,15 @@ open SmartPrint
 (** Just a [string]. *)
 type t = Make of string
 
-type t' = t
-module Set = Set.Make (struct type t = t' let compare = compare end)
-module Map = Map.Make (struct type t = t' let compare = compare end)
+module Set = Set.Make (struct
+  type nonrec t = t
+  let compare = compare
+end)
+
+module Map = Map.Make (struct
+  type nonrec t = t
+  let compare = compare
+end)
 
 let equal (name1 : t) (name2 : t) : bool =
   match (name1, name2) with
@@ -51,6 +57,7 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "exists" -> "__exists"
   | "exists2" -> "__exists2"
   | "float" -> escape_if_value s
+  | "int" -> escape_if_value s
   | "int32" -> escape_if_value s
   | "int64" -> escape_if_value s
   | "left" -> "__left"
@@ -68,7 +75,14 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "Variable" -> "__Variable"
   | _ -> s
 
+let substitute_first_dollar (s : string) : string =
+  if String.length s <> 0 && String.get s 0 = '$' then
+    "__" ^ String.sub s 1 (String.length s - 1)
+  else
+    s
+
 let convert (is_value : bool) (s : string) : string =
+  let s = substitute_first_dollar s in
   let s_escaped_operator = escape_operator s in
   if s_escaped_operator <> s then
     "op_" ^ s_escaped_operator
@@ -91,6 +105,10 @@ let prefix_by_single_quote (name : t) : t =
   let Make name = name in
   Make ("'" ^ name)
 
+let prefix_by_t (name : t) : t =
+  let Make name = name in
+  Make ("t_" ^ name)
+
 let prefix_by_with (name : t) : t =
   let Make name = name in
   Make ("with_" ^ name)
@@ -102,10 +120,6 @@ let suffix_by_gadt (name : t) : t =
 let suffix_by_skeleton (name : t) : t =
   let Make name = name in
   Make (name ^ "_skeleton")
-
-let suffix_by_type (name : t) : t =
-  let Make name = name in
-  Make (name ^ "_type")
 
 (** Pretty-print a name to Coq. *)
 let to_coq (name : t) : SmartPrint.t =
