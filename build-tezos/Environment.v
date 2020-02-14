@@ -2299,7 +2299,7 @@ Module S.
       to_short_b58check : t -> string;
       of_b58check_exn : string -> t;
       of_b58check_opt : string -> option t;
-      (* extensible_type Base58.data *)
+      (* extensible_type_definition `Base58.data` *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -2344,7 +2344,7 @@ Module S.
       to_short_b58check : t -> string;
       of_b58check_exn : string -> t;
       of_b58check_opt : string -> option t;
-      (* extensible_type Base58.data *)
+      (* extensible_type_definition `Base58.data` *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -2388,7 +2388,7 @@ Module S.
       to_short_b58check : t -> string;
       of_b58check_exn : string -> t;
       of_b58check_opt : string -> option t;
-      (* extensible_type Base58.data *)
+      (* extensible_type_definition `Base58.data` *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -2422,7 +2422,7 @@ Module S.
       to_short_b58check : t -> string;
       of_b58check_exn : string -> t;
       of_b58check_opt : string -> option t;
-      (* extensible_type Base58.data *)
+      (* extensible_type_definition `Base58.data` *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -2460,7 +2460,7 @@ Module S.
       to_short_b58check : t -> string;
       of_b58check_exn : string -> t;
       of_b58check_opt : string -> option t;
-      (* extensible_type Base58.data *)
+      (* extensible_type_definition `Base58.data` *)
       b58check_encoding : Base58.encoding t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;

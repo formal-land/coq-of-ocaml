@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Apply_results.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
@@ -19,7 +19,7 @@ Require Tezos.Script_tc_errors.
 
 Import Alpha_context.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter current_level : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t

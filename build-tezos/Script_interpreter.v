@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_ir_annot.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
@@ -2519,7 +2519,7 @@ with execute
             (fun function_parameter =>
               let '(arg, ctxt) := function_parameter in
               Error_monad.op_gtgteqquestion
-                (Alpha_context.Script.force_decode ctxt
+                (Alpha_context.Script.force_decode_in_context ctxt
                   unparsed_script.(Alpha_context.Script.t.code))
                 (fun function_parameter =>
                   let '(script_code, ctxt) := function_parameter in

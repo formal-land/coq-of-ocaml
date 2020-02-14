@@ -28,7 +28,7 @@ Definition nonce := MBytes.t.
 Definition nonce_encoding : Data_encoding.encoding MBytes.t :=
   Data_encoding.Fixed.__bytes_value Constants_repr.nonce_length.
 
-Definition init : string := "Laissez-faire les proprietaires.".
+Definition initial_seed : string := "Laissez-faire les proprietaires.".
 
 Definition zero_bytes : MBytes.t :=
   MBytes.of_string (String.make Nonce_hash.size "000" % char).
@@ -44,7 +44,7 @@ Definition seed_encoding : Data_encoding.encoding seed :=
       b) (fun b => B b) None state_hash_encoding.
 
 Definition empty : seed :=
-  B (State_hash.hash_bytes None [ MBytes.of_string init ]).
+  B (State_hash.hash_bytes None [ MBytes.of_string initial_seed ]).
 
 Definition __nonce_value (function_parameter : seed) : MBytes.t -> seed :=
   let 'B state := function_parameter in

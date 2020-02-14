@@ -14,11 +14,11 @@ Require Tezos.Contract_repr.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter origination_burn :
   Raw_context.t -> Lwt.t (Error_monad.tzresult (Raw_context.t * Tez_repr.t)).

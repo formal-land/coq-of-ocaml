@@ -390,9 +390,9 @@ Parameter hash_packed : packed_operation -> (|Operation_hash|).(S.HASH.t).
 
 Parameter acceptable_passes : packed_operation -> list Z.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter check_signature : forall {A : Set},
   (|Signature.Public_key|).(S.SPublic_key.t) -> (|Chain_id|).(S.HASH.t) ->

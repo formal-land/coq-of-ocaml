@@ -211,7 +211,7 @@ Definition internal_gas_to_gas (__internal_gas_value : Z.t)
   let rest := Z.logand __internal_gas_value rescaling_mask in
   (gas, rest).
 
-Definition consume
+Definition consume_raw
   (block_gas : Z.t) (operation_gas : t) (__internal_gas_value : Z.t)
   (cost : cost) : Error_monad.tzresult (Z.t * t * Z.t) :=
   match operation_gas with
@@ -236,11 +236,11 @@ Definition consume
       Error_monad.ok (block_gas, operation_gas, total_internal_gas)
   end.
 
-Definition check_enough
+Definition check_enough_raw
   (block_gas : Z.t) (operation_gas : t) (__internal_gas_value : Z.t)
   (cost : cost) : Error_monad.tzresult unit :=
   Error_monad.op_gtpipequestion
-    (consume block_gas operation_gas __internal_gas_value cost)
+    (consume_raw block_gas operation_gas __internal_gas_value cost)
     (fun function_parameter =>
       let '(_block_remainig, _remaining, _internal_gas) := function_parameter in
       tt).

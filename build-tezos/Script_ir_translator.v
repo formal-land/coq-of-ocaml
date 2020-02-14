@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_ir_annot.
@@ -8176,7 +8176,7 @@ with parse_contract {arg : Set}
                             end))
                     | Some code =>
                       Error_monad.op_gtgteqquestion
-                        (Alpha_context.Script.force_decode ctxt code)
+                        (Alpha_context.Script.force_decode_in_context ctxt code)
                         (fun function_parameter =>
                           let '(code, ctxt) := function_parameter in
                           Lwt.__return
@@ -8272,7 +8272,7 @@ with parse_contract_for_script {arg : Set}
                       end
                     | Some code =>
                       Error_monad.op_gtgteqquestion
-                        (Alpha_context.Script.force_decode ctxt code)
+                        (Alpha_context.Script.force_decode_in_context ctxt code)
                         (fun function_parameter =>
                           let '(code, ctxt) := function_parameter in
                           Lwt.__return
@@ -8500,11 +8500,12 @@ Definition parse_script
     Alpha_context.Script.t.code := code;
       Alpha_context.Script.t.storage := storage
       |} := function_parameter in
-  Error_monad.op_gtgteqquestion (Alpha_context.Script.force_decode ctxt code)
+  Error_monad.op_gtgteqquestion
+    (Alpha_context.Script.force_decode_in_context ctxt code)
     (fun function_parameter =>
       let '(code, ctxt) := function_parameter in
       Error_monad.op_gtgteqquestion
-        (Alpha_context.Script.force_decode ctxt storage)
+        (Alpha_context.Script.force_decode_in_context ctxt storage)
         (fun function_parameter =>
           let '(storage, ctxt) := function_parameter in
           Error_monad.op_gtgteqquestion

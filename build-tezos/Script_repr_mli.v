@@ -19,7 +19,7 @@ Definition annot := Micheline.annot.
 
 Definition expr := Micheline.canonical Michelson_v1_primitives.prim.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Definition lazy_expr := Data_encoding.lazy_t expr.
 

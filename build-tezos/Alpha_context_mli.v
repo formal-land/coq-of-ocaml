@@ -378,11 +378,11 @@ Module Gas.
   
   Parameter pp_cost : Format.formatter -> cost -> unit.
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter free : cost.
   
@@ -637,10 +637,10 @@ Module Script.
   
   Parameter minimal_deserialize_cost : lazy_expr -> Gas.cost.
   
-  Parameter force_decode :
+  Parameter force_decode_in_context :
     context -> lazy_expr -> Lwt.t (Error_monad.tzresult (expr * context)).
   
-  Parameter force_bytes :
+  Parameter force_bytes_in_context :
     context -> lazy_expr -> Lwt.t (Error_monad.tzresult (MBytes.t * context)).
   
   Parameter unit_parameter : lazy_expr.
@@ -1403,7 +1403,7 @@ End Nonce.
 Module Seed.
   Parameter seed : Set.
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter for_cycle : context -> Cycle.t -> Lwt.t (Error_monad.tzresult seed).
   
@@ -1593,7 +1593,7 @@ Module Contract.
     context -> contract -> Tez.t -> Script.t * option big_map_diff ->
     option public_key_hash -> Lwt.t (Error_monad.tzresult context).
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter spend :
     context -> contract -> Tez.t -> Lwt.t (Error_monad.tzresult context).
@@ -2225,11 +2225,11 @@ Module Fees.
   Parameter burn_storage_fees :
     context -> Z.t -> Contract.t -> Lwt.t (Error_monad.tzresult context).
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter check_storage_limit : context -> Z.t -> Error_monad.tzresult unit.
 End Fees.
@@ -2292,9 +2292,9 @@ Module Operation.
   
   Parameter acceptable_passes : packed_operation -> list Z.
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter check_signature : forall {A : Set},
     public_key -> (|Chain_id|).(S.HASH.t) -> operation A ->

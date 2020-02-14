@@ -15,7 +15,7 @@ Require Tezos.Nonce_storage.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter init : Raw_context.t -> Lwt.t (Error_monad.tzresult Raw_context.t).
 

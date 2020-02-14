@@ -59,8 +59,8 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 35956 lines</li>
-      <li>Coq size: 52514 lines (+46% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 35960 lines</li>
+      <li>Coq size: 52518 lines (+46% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2508</li>
     </ul>
     
@@ -99,6 +99,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           13051,
           25328,
           25322,
+          26003,
         ],
         generated: [
           47563,
@@ -132,6 +133,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           51943,
           52522,
           52514,
+          52518,
         ],
         labels: [
           "01-14",
@@ -165,6 +167,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-11",
           "02-12",
           "02-13",
+          "02-14",
         ]
       }
 ;
@@ -697,7 +700,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 477 lines (+70% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 475 lines (+70% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -796,13 +799,13 @@ module Script = struct
   include Michelson_v1_primitives
   include Script_repr
 
-  let force_decode ctxt lexpr =
+  let force_decode_in_context ctxt lexpr =
     Lwt.return
       ( Script_repr.force_decode lexpr
       &gt;&gt;? fun (v, cost) -&gt;
       Raw_context.consume_gas ctxt cost &gt;|? fun ctxt -&gt; (v, ctxt) )
 
-  let force_bytes ctxt lexpr =
+  let force_bytes_in_context ctxt lexpr =
     Lwt.return
       ( Script_repr.force_bytes lexpr
       &gt;&gt;? fun (b, cost) -&gt;
@@ -858,7 +861,7 @@ module Contract = struct
   include Contract_storage
 
   let originate c contract ~balance ~script ~delegate =
-    originate c contract ~balance ~script ~delegate
+    originate_raw c contract ~balance ~script ~delegate
 
   let init_origination_nonce = Raw_context.init_origination_nonce
 
@@ -1007,7 +1010,7 @@ Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
 Require Tezos.Contract_storage.
 Require Tezos.Cycle_repr.
-Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Delegate_storage.
 Require Tezos.Fees_storage.
 Require Tezos.Fitness_repr.
 Require Tezos.Fitness_storage.
@@ -1135,7 +1138,7 @@ Module Script.
   
   Include Script_repr.
   
-  Definition force_decode
+  Definition force_decode_in_context
     (ctxt : Raw_context.context) (lexpr : Script_repr.lazy_expr)
     : Lwt.t (Error_monad.tzresult (Script_repr.expr * Raw_context.context)) :=
     Lwt.__return
@@ -1145,7 +1148,7 @@ Module Script.
           Error_monad.op_gtpipequestion (Raw_context.consume_gas ctxt cost)
             (fun ctxt =&gt; (v, ctxt)))).
   
-  Definition force_bytes
+  Definition force_bytes_in_context
     (ctxt : Raw_context.context) (lexpr : Script_repr.lazy_expr)
     : Lwt.t (Error_monad.tzresult (MBytes.t * Raw_context.context)) :=
     Lwt.__return
@@ -1222,7 +1225,7 @@ Module Contract.
     (script : Script_repr.t * option big_map_diff)
     (delegate : option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-    originate c None contract balance script delegate.
+    originate_raw c None contract balance script delegate.
   
   Definition init_origination_nonce
     : Raw_context.t -&gt; (|Operation_hash|).(S.HASH.t) -&gt; Raw_context.t :=
@@ -1355,9 +1358,7 @@ End Fitness.
 Module Bootstrap := Bootstrap_storage.
 
 Module Commitment.
-  Definition t := (|Commitment_repr|).(Storage_sigs.VALUE.t).
-  
-  Definition encoding := (|Commitment_repr|).(Storage_sigs.VALUE.encoding).
+  Include Commitment_repr.
   
   Include Commitment_storage.
 End Commitment.
@@ -1903,9 +1904,9 @@ module Script : sig
 
   val minimal_deserialize_cost : lazy_expr -&gt; Gas.cost
 
-  val force_decode : context -&gt; lazy_expr -&gt; (expr * context) tzresult Lwt.t
+  val force_decode_in_context : context -&gt; lazy_expr -&gt; (expr * context) tzresult Lwt.t
 
-  val force_bytes : context -&gt; lazy_expr -&gt; (MBytes.t * context) tzresult Lwt.t
+  val force_bytes_in_context : context -&gt; lazy_expr -&gt; (MBytes.t * context) tzresult Lwt.t
 
   val unit_parameter : lazy_expr
 
@@ -3253,11 +3254,11 @@ Module Gas.
   
   Parameter pp_cost : Format.formatter -&gt; cost -&gt; unit.
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter free : cost.
   
@@ -3512,10 +3513,10 @@ Module Script.
   
   Parameter minimal_deserialize_cost : lazy_expr -&gt; Gas.cost.
   
-  Parameter force_decode :
+  Parameter force_decode_in_context :
     context -&gt; lazy_expr -&gt; Lwt.t (Error_monad.tzresult (expr * context)).
   
-  Parameter force_bytes :
+  Parameter force_bytes_in_context :
     context -&gt; lazy_expr -&gt; Lwt.t (Error_monad.tzresult (MBytes.t * context)).
   
   Parameter unit_parameter : lazy_expr.
@@ -4278,7 +4279,7 @@ End Nonce.
 Module Seed.
   Parameter seed : Set.
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter for_cycle : context -&gt; Cycle.t -&gt; Lwt.t (Error_monad.tzresult seed).
   
@@ -4468,7 +4469,7 @@ Module Contract.
     context -&gt; contract -&gt; Tez.t -&gt; Script.t * option big_map_diff -&gt;
     option public_key_hash -&gt; Lwt.t (Error_monad.tzresult context).
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter spend :
     context -&gt; contract -&gt; Tez.t -&gt; Lwt.t (Error_monad.tzresult context).
@@ -5100,11 +5101,11 @@ Module Fees.
   Parameter burn_storage_fees :
     context -&gt; Z.t -&gt; Contract.t -&gt; Lwt.t (Error_monad.tzresult context).
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter check_storage_limit : context -&gt; Z.t -&gt; Error_monad.tzresult unit.
 End Fees.
@@ -5167,9 +5168,9 @@ Module Operation.
   
   Parameter acceptable_passes : packed_operation -&gt; list Z.
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
-  (* extensible_type error *)
+  (* extensible_type_definition `error` *)
   
   Parameter check_signature : forall {A : Set},
     public_key -&gt; (|Chain_id|).(S.HASH.t) -&gt; operation A -&gt;
@@ -5681,7 +5682,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
 Require Tezos.Contract_services.
 Require Tezos.Delegate_services.
@@ -6039,7 +6040,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
 Require Tezos.Contract_services.
 Require Tezos.Delegate_services.
@@ -6490,7 +6491,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -6924,21 +6925,21 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
 Parameter may_start_new_voting_period :
   Alpha_context.context -&gt; Lwt.t (Error_monad.tzresult Alpha_context.context).
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter record_proposals :
   Alpha_context.context -&gt; Alpha_context.public_key_hash -&gt;
   list (|Protocol_hash|).(S.HASH.t) -&gt;
   Lwt.t (Error_monad.tzresult Alpha_context.context).
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter record_ballot :
   Alpha_context.context -&gt; Alpha_context.public_key_hash -&gt;
@@ -6954,7 +6955,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1487 lines</li>
-      <li>Coq size: 1870 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1871 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -7528,7 +7529,7 @@ let apply_manager_operation_content :
 
 They are sent to a unit type.">(Script_tc_errors.No_such_entrypoint entrypoint)</abbr> )
           &gt;&gt;=? (fun () -&gt;
-                 Script.force_decode ctxt parameters
+                 Script.force_decode_in_context ctxt parameters
                  &gt;&gt;=? fun (arg, ctxt) -&gt;
                  (* see [note] *)
                  (* [note]: for toplevel ops, cost is nil since the
@@ -7566,7 +7567,7 @@ They are sent to a unit type.">(Script_interpreter.Bad_contract_parameter destin
           in
           return (ctxt, result, [])
       | Some script -&gt;
-          Script.force_decode ctxt parameters
+          Script.force_decode_in_context ctxt parameters
           &gt;&gt;=? fun (parameter, ctxt) -&gt;
           (* see [note] *)
           let cost_parameter = Script.deserialized_cost parameter in
@@ -7611,12 +7612,12 @@ They are sent to a unit type.">(Script_interpreter.Bad_contract_parameter destin
           in
           return (ctxt, result, operations) )
   | Origination {delegate; script; preorigination; credit} -&gt;
-      Script.force_decode ctxt script.storage
+      Script.force_decode_in_context ctxt script.storage
       &gt;&gt;=? fun (unparsed_storage, ctxt) -&gt;
       (* see [note] *)
       Lwt.return (Gas.consume ctxt (Script.deserialized_cost unparsed_storage))
       &gt;&gt;=? fun ctxt -&gt;
-      Script.force_decode ctxt script.code
+      Script.force_decode_in_context ctxt script.code
       &gt;&gt;=? fun (unparsed_code, ctxt) -&gt;
       (* see [note] *)
       Lwt.return (Gas.consume ctxt (Script.deserialized_cost unparsed_code))
@@ -7769,7 +7770,7 @@ They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
       trace <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ Script.force_decode ctxt parameters
+      @@ Script.force_decode_in_context ctxt parameters
       &gt;&gt;|? fun (_arg, ctxt) -&gt; ctxt
   | Origination {script; _} -&gt;
       (* Fail quickly if not enough gas for minimal deserialization cost *)
@@ -7786,12 +7787,12 @@ They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
       trace <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ Script.force_decode ctxt script.code
+      @@ Script.force_decode_in_context ctxt script.code
       &gt;&gt;=? fun (_code, ctxt) -&gt;
       trace <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ Script.force_decode ctxt script.storage
+      @@ Script.force_decode_in_context ctxt script.storage
       &gt;&gt;|? fun (_storage, ctxt) -&gt; ctxt
   | _ -&gt;
       return ctxt )
@@ -8541,7 +8542,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Amendment.
 Require Tezos.Apply_results.
 Require Tezos.Baking.
@@ -8706,8 +8707,8 @@ Definition apply_manager_operation_content {kind : Set}
                                   (fun function_parameter =&gt;
                                     let '_ := function_parameter in
                                     Error_monad.op_gtgteqquestion
-                                      (Alpha_context.Script.force_decode ctxt
-                                        parameters)
+                                      (Alpha_context.Script.force_decode_in_context
+                                        ctxt parameters)
                                       (fun function_parameter =&gt;
                                         let '(arg, ctxt) := function_parameter
                                           in
@@ -8764,8 +8765,8 @@ Definition apply_manager_operation_content {kind : Set}
                                     (ctxt, __result_value, nil))
                             | Some script =&gt;
                               Error_monad.op_gtgteqquestion
-                                (Alpha_context.Script.force_decode ctxt
-                                  parameters)
+                                (Alpha_context.Script.force_decode_in_context
+                                  ctxt parameters)
                                 (fun function_parameter =&gt;
                                   let '(parameter, ctxt) := function_parameter
                                     in
@@ -8873,7 +8874,7 @@ Definition apply_manager_operation_content {kind : Set}
                   preorigination
                 |} =&gt;
             Error_monad.op_gtgteqquestion
-              (Alpha_context.Script.force_decode ctxt
+              (Alpha_context.Script.force_decode_in_context ctxt
                 script.(Alpha_context.Script.t.storage))
               (fun function_parameter =&gt;
                 let '(unparsed_storage, ctxt) := function_parameter in
@@ -8883,7 +8884,7 @@ Definition apply_manager_operation_content {kind : Set}
                       (Alpha_context.Script.deserialized_cost unparsed_storage)))
                   (fun ctxt =&gt;
                     Error_monad.op_gtgteqquestion
-                      (Alpha_context.Script.force_decode ctxt
+                      (Alpha_context.Script.force_decode_in_context ctxt
                         script.(Alpha_context.Script.t.code))
                       (fun function_parameter =&gt;
                         let '(unparsed_code, ctxt) := function_parameter in
@@ -9177,7 +9178,8 @@ Definition precheck_manager_contents {A B : Set}
                           Error_monad.op_gtgtpipequestion
                             (Pervasives.op_atat
                               (Error_monad.trace extensible_type_value)
-                              (Alpha_context.Script.force_decode ctxt parameters))
+                              (Alpha_context.Script.force_decode_in_context ctxt
+                                parameters))
                             (fun function_parameter =&gt;
                               let '(_arg, ctxt) := function_parameter in
                               ctxt))
@@ -9202,15 +9204,15 @@ Definition precheck_manager_contents {A B : Set}
                           Error_monad.op_gtgteqquestion
                             (Pervasives.op_atat
                               (Error_monad.trace extensible_type_value)
-                              (Alpha_context.Script.force_decode ctxt
+                              (Alpha_context.Script.force_decode_in_context ctxt
                                 script.(Alpha_context.Script.t.code)))
                             (fun function_parameter =&gt;
                               let '(_code, ctxt) := function_parameter in
                               Error_monad.op_gtgtpipequestion
                                 (Pervasives.op_atat
                                   (Error_monad.trace extensible_type_value)
-                                  (Alpha_context.Script.force_decode ctxt
-                                    script.(Alpha_context.Script.t.storage)))
+                                  (Alpha_context.Script.force_decode_in_context
+                                    ctxt script.(Alpha_context.Script.t.storage)))
                                 (fun function_parameter =&gt;
                                   let '(_storage, ctxt) := function_parameter in
                                   ctxt)))
@@ -11618,7 +11620,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Nonce_hash.
 
 Import Alpha_context.
@@ -13968,7 +13970,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Nonce_hash.
 
 Import Alpha_context.
@@ -14730,7 +14732,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Misc.
 
 Import Alpha_context.
@@ -15360,24 +15362,24 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Misc.
 
 Import Alpha_context.
 
 Import Misc.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter minimal_time :
   Alpha_context.context -&gt; Z -&gt; Time.t -&gt; Lwt.t (Error_monad.tzresult Time.t).
@@ -16366,7 +16368,7 @@ let init_contract ~typecheck ctxt
   &gt;&gt;=? fun (ctxt, contract) -&gt;
   typecheck ctxt script
   &gt;&gt;=? fun (script, ctxt) -&gt;
-  Contract_storage.originate
+  Contract_storage.originate_raw
     ctxt
     contract
     ~balance:amount
@@ -16490,7 +16492,7 @@ Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Contract_storage.
 Require Tezos.Cycle_repr.
-Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Delegate_storage.
 Require Tezos.Misc.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
@@ -16546,8 +16548,8 @@ Definition init_contract
         (fun function_parameter =&gt;
           let '(script, ctxt) := function_parameter in
           Error_monad.op_gtgteqquestion
-            (Contract_storage.originate ctxt (Some true) contract amount script
-              (Some delegate)) (fun ctxt =&gt; Error_monad.__return ctxt))).
+            (Contract_storage.originate_raw ctxt (Some true) contract amount
+              script (Some delegate)) (fun ctxt =&gt; Error_monad.__return ctxt))).
 
 Definition init
   (ctxt : Raw_context.t)
@@ -16797,8 +16799,8 @@ Parameter cycle_end :
   <div style="margin: 20px;">
     <h3>Commitment_repr</h3>
     <ul>
-      <li>OCaml size: 38 lines</li>
-      <li>Coq size: 40 lines (+5% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 40 lines</li>
+      <li>Coq size: 42 lines (+5% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16842,6 +16844,8 @@ let encoding =
     (fun (blinded_public_key_hash, amount) -&gt;
       {blinded_public_key_hash; amount})
     (tup2 Blinded_public_key_hash.encoding Tez_repr.encoding)
+
+let not_first_class_module = ()
 </pre>
   </div>
   <div class="col-md-6">
@@ -16886,6 +16890,8 @@ Definition encoding : Data_encoding.encoding t :=
       {| t.blinded_public_key_hash := blinded_public_key_hash;
         t.amount := amount |}) None
     (Data_encoding.tup2 Blinded_public_key_hash.encoding Tez_repr.encoding).
+
+Definition not_first_class_module : unit := tt.
 </pre>
   </div>
 </div>
@@ -16895,8 +16901,8 @@ Definition encoding : Data_encoding.encoding t :=
   <div style="margin: 20px;">
     <h3>Commitment_repr_mli</h3>
     <ul>
-      <li>OCaml size: 31 lines</li>
-      <li>Coq size: 28 lines (-10% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 33 lines</li>
+      <li>Coq size: 30 lines (-10% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16933,6 +16939,8 @@ type t = {
 }
 
 val encoding : t Data_encoding.t
+
+val not_first_class_module : unit
 </pre>
   </div>
   <div class="col-md-6">
@@ -16965,6 +16973,8 @@ End t.
 Definition t := t.record.
 
 Parameter encoding : Data_encoding.t t.
+
+Parameter not_first_class_module : unit.
 </pre>
   </div>
 </div>
@@ -18207,7 +18217,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Services_registration.
 
 Import Alpha_context.
@@ -18463,7 +18473,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -19644,7 +19654,7 @@ Parameter incr_origination_nonce : origination_nonce -&gt; origination_nonce.
 
 Parameter is_originated : contract -&gt; option Contract_hash.t.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter to_b58check : contract -&gt; string.
 
@@ -19937,7 +19947,7 @@ Alternative: use a monad to sequence side-effects.">register_opt_field S.storage
           &gt;&gt;=? fun (Ex_script script, ctxt) -&gt;
           unparse_script ctxt Readable script
           &gt;&gt;=? fun (script, ctxt) -&gt;
-          Script.force_decode ctxt script.storage
+          Script.force_decode_in_context ctxt script.storage
           &gt;&gt;=? fun (storage, _ctxt) -&gt; return_some storage)</abbr> ;
   <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
@@ -19951,7 +19961,7 @@ Alternative: use a monad to sequence side-effects.">register2 S.entrypoint_type 
           let ctxt = Gas.set_unlimited ctxt in
           let legacy = true in
           let open Script_ir_translator in
-          Script.force_decode ctxt expr
+          Script.force_decode_in_context ctxt expr
           &gt;&gt;=? fun (expr, _) -&gt;
           Lwt.return
             ( parse_toplevel ~legacy expr
@@ -19985,7 +19995,7 @@ Alternative: use a monad to sequence side-effects.">register1 S.list_entrypoints
           let ctxt = Gas.set_unlimited ctxt in
           let legacy = true in
           let open Script_ir_translator in
-          Script.force_decode ctxt expr
+          Script.force_decode_in_context ctxt expr
           &gt;&gt;=? fun (expr, _) -&gt;
           Lwt.return
             ( parse_toplevel ~legacy expr
@@ -20868,7 +20878,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
@@ -22505,7 +22515,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
 
@@ -23356,7 +23366,7 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.Z.(total_siz
   | None -&gt;
       return c
 
-let originate c ?prepaid_bootstrap_storage contract ~balance ~script ~delegate
+let originate_raw c ?prepaid_bootstrap_storage contract ~balance ~script ~delegate
     =
   create_base
     c
@@ -23674,7 +23684,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
-Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Delegate_storage.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Manager_repr.
 Require Tezos.Michelson_v1_primitives.
@@ -24063,7 +24073,7 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                               | None =&gt; Error_monad.__return c
                               end)))).
 
-Definition originate
+Definition originate_raw
   (c : Raw_context.t) (prepaid_bootstrap_storage : option bool)
   (contract : Contract_repr.contract)
   (balance :
@@ -24708,7 +24718,7 @@ val spend :
   Tez_repr.t -&gt;
   Raw_context.t tzresult Lwt.t
 
-val originate :
+val originate_raw :
   Raw_context.t -&gt;
   ?prepaid_bootstrap_storage:bool -&gt;
   Contract_repr.t -&gt;
@@ -24758,7 +24768,7 @@ Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter __exists :
   Raw_context.t -&gt; Contract_repr.t -&gt; Lwt.t (Error_monad.tzresult bool).
@@ -24874,7 +24884,7 @@ Parameter spend :
   Raw_context.t -&gt; Contract_repr.t -&gt; Tez_repr.t -&gt;
   Lwt.t (Error_monad.tzresult Raw_context.t).
 
-Parameter originate :
+Parameter originate_raw :
   Raw_context.t -&gt; option bool -&gt; Contract_repr.t -&gt; Tez_repr.t -&gt;
   Script_repr.t * option big_map_diff -&gt;
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
@@ -26761,7 +26771,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Baking.
 Require Tezos.Contract_repr.
 Require Tezos.Misc.
@@ -29069,7 +29079,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Contract_repr.
 
 Import Alpha_context.
@@ -31636,7 +31646,7 @@ Parameter set :
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
   Lwt.t (Error_monad.tzresult Raw_context.t).
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter fold : forall {a : Set},
   Raw_context.t -&gt; a -&gt;
@@ -32047,11 +32057,11 @@ Require Tezos.Contract_repr.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter origination_burn :
   Raw_context.t -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Tez_repr.t)).
@@ -32440,7 +32450,7 @@ let internal_gas_to_gas internal_gas : Z.t * internal_gas =
   let rest = Z.logand internal_gas rescaling_mask in
   (gas, rest)
 
-let consume block_gas operation_gas internal_gas cost =
+let consume_raw block_gas operation_gas internal_gas cost =
   match operation_gas with
   | Unaccounted -&gt;
       ok (block_gas, Unaccounted, internal_gas)
@@ -32461,8 +32471,8 @@ They are sent to a unit type.">Block_quota_exceeded</abbr>
         else ok (block_remaining, Limited {remaining}, rest)
       else ok (block_gas, operation_gas, total_internal_gas)
 
-let check_enough block_gas operation_gas internal_gas cost =
-  consume block_gas operation_gas internal_gas cost
+let check_enough_raw block_gas operation_gas internal_gas cost =
+  consume_raw block_gas operation_gas internal_gas cost
   &gt;|? fun (_block_remainig, _remaining, _internal_gas) -&gt; ()
 
 let internal_gas_zero : internal_gas = Z.zero
@@ -32792,7 +32802,7 @@ Definition internal_gas_to_gas (__internal_gas_value : Z.t)
   let rest := Z.logand __internal_gas_value rescaling_mask in
   (gas, rest).
 
-Definition consume
+Definition consume_raw
   (block_gas : Z.t) (operation_gas : t) (__internal_gas_value : Z.t)
   (cost : cost) : Error_monad.tzresult (Z.t * t * Z.t) :=
   match operation_gas with
@@ -32817,11 +32827,11 @@ Definition consume
       Error_monad.ok (block_gas, operation_gas, total_internal_gas)
   end.
 
-Definition check_enough
+Definition check_enough_raw
   (block_gas : Z.t) (operation_gas : t) (__internal_gas_value : Z.t)
   (cost : cost) : Error_monad.tzresult unit :=
   Error_monad.op_gtpipequestion
-    (consume block_gas operation_gas __internal_gas_value cost)
+    (consume_raw block_gas operation_gas __internal_gas_value cost)
     (fun function_parameter =&gt;
       let '(_block_remainig, _remaining, _internal_gas) := function_parameter in
       tt).
@@ -32945,10 +32955,10 @@ val pp_cost : Format.formatter -&gt; cost -&gt; unit
 
 <abbr class="mark-warning" title="Extensible types are not handled.">type error += Operation_quota_exceeded</abbr> (* `Temporary *)
 
-val consume :
+val consume_raw :
   Z.t -&gt; t -&gt; internal_gas -&gt; cost -&gt; (Z.t * t * internal_gas) tzresult
 
-val check_enough : Z.t -&gt; t -&gt; internal_gas -&gt; cost -&gt; unit tzresult
+val check_enough_raw : Z.t -&gt; t -&gt; internal_gas -&gt; cost -&gt; unit tzresult
 
 val internal_gas_zero : internal_gas
 
@@ -33026,15 +33036,15 @@ Parameter cost_encoding : Data_encoding.encoding cost.
 
 Parameter pp_cost : Format.formatter -&gt; cost -&gt; unit.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-Parameter consume :
+Parameter consume_raw :
   Z.t -&gt; t -&gt; internal_gas -&gt; cost -&gt;
   Error_monad.tzresult (Z.t * t * internal_gas).
 
-Parameter check_enough :
+Parameter check_enough_raw :
   Z.t -&gt; t -&gt; internal_gas -&gt; cost -&gt; Error_monad.tzresult unit.
 
 Parameter internal_gas_zero : internal_gas.
@@ -33483,7 +33493,7 @@ Alternative: use a monad to sequence side-effects.">register0
               &gt;&gt;=? fun () -&gt;
               (* Fail if not enough gas for complete deserialization cost *)
               trace Apply.Gas_quota_exceeded_init_deserialize
-              @@ Script.force_decode ctxt arg
+              @@ Script.force_decode_in_context ctxt arg
               &gt;&gt;|? fun (_arg, ctxt) -&gt; ctxt
           | Origination {script; _} -&gt;
               (* Here the data comes already deserialized, so we need to fake the deserialization to mimic apply *)
@@ -33512,10 +33522,10 @@ Alternative: use a monad to sequence side-effects.">register0
               &gt;&gt;=? fun () -&gt;
               (* Fail if not enough gas for complete deserialization cost *)
               trace Apply.Gas_quota_exceeded_init_deserialize
-              @@ Script.force_decode ctxt script.code
+              @@ Script.force_decode_in_context ctxt script.code
               &gt;&gt;=? fun (_code, ctxt) -&gt;
               trace Apply.Gas_quota_exceeded_init_deserialize
-              @@ Script.force_decode ctxt script.storage
+              @@ Script.force_decode_in_context ctxt script.storage
               &gt;&gt;|? fun (_storage, ctxt) -&gt; ctxt
           | _ -&gt;
               return ctxt )
@@ -35212,7 +35222,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Apply_results.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_services.
@@ -38085,7 +38095,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Apply_results.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
@@ -38094,7 +38104,7 @@ Require Tezos.Script_tc_errors.
 
 Import Alpha_context.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter current_level : forall {E F H J K a b c i o q : Set},
   (((RPC_service.t
@@ -41360,7 +41370,7 @@ let encoding =
              hash.&quot;
           bool))
 
-let root first_level =
+let root_level first_level =
   {
     level = first_level;
     level_position = 0l;
@@ -41371,7 +41381,7 @@ let root first_level =
     expected_commitment = false;
   }
 
-let from_raw ~first_level ~blocks_per_cycle ~blocks_per_voting_period
+let from_raw_level ~first_level ~blocks_per_cycle ~blocks_per_voting_period
     ~blocks_per_commitment level =
   let raw_level = Raw_level_repr.to_int32 level in
   let first_level = Raw_level_repr.to_int32 first_level in
@@ -41577,7 +41587,7 @@ Definition encoding : Data_encoding.encoding t :=
           &quot;Tells wether the baker of this block has to commit a seed nonce hash.&quot;)
         &quot;expected_commitment&quot; Data_encoding.__bool_value)).
 
-Definition root (first_level : Raw_level_repr.t) : t :=
+Definition root_level (first_level : Raw_level_repr.t) : t :=
   {| t.level := first_level;
     t.level_position :=
       (* ❌ Constant of type int32 is converted to int *)
@@ -41589,7 +41599,7 @@ Definition root (first_level : Raw_level_repr.t) : t :=
       (* ❌ Constant of type int32 is converted to int *)
       0; t.expected_commitment := false |}.
 
-Definition from_raw
+Definition from_raw_level
   (first_level : Raw_level_repr.raw_level) (blocks_per_cycle : int32)
   (blocks_per_voting_period : int32) (blocks_per_commitment : int32)
   (level : Raw_level_repr.raw_level) : t :=
@@ -41700,9 +41710,9 @@ val pp : Format.formatter -&gt; level -&gt; unit
 
 val pp_full : Format.formatter -&gt; level -&gt; unit
 
-val root : Raw_level_repr.t -&gt; level
+val root_level : Raw_level_repr.t -&gt; level
 
-val from_raw :
+val from_raw_level :
   first_level:Raw_level_repr.t -&gt;
   blocks_per_cycle:int32 -&gt;
   blocks_per_voting_period:int32 -&gt;
@@ -41797,9 +41807,9 @@ Parameter pp : Format.formatter -&gt; level -&gt; unit.
 
 Parameter pp_full : Format.formatter -&gt; level -&gt; unit.
 
-Parameter root : Raw_level_repr.t -&gt; level.
+Parameter root_level : Raw_level_repr.t -&gt; level.
 
-Parameter from_raw :
+Parameter from_raw_level :
   Raw_level_repr.t -&gt; int32 -&gt; int32 -&gt; int32 -&gt; Raw_level_repr.t -&gt; level.
 
 Parameter diff : level -&gt; level -&gt; int32.
@@ -41856,14 +41866,14 @@ let from_raw c ?offset l =
   in
   let constants = Raw_context.constants c in
   let first_level = Raw_context.first_level c in
-  Level_repr.from_raw
+  Level_repr.from_raw_level
     ~first_level
     ~blocks_per_cycle:constants.Constants_repr.blocks_per_cycle
     ~blocks_per_voting_period:constants.Constants_repr.blocks_per_voting_period
     ~blocks_per_commitment:constants.Constants_repr.blocks_per_commitment
     l
 
-let root c = Level_repr.root (Raw_context.first_level c)
+let root c = Level_repr.root_level (Raw_context.first_level c)
 
 let succ c l = from_raw c (Raw_level_repr.succ l.level)
 
@@ -41973,13 +41983,13 @@ Definition from_raw
     end in
   let constants := Raw_context.constants c in
   let first_level := Raw_context.first_level c in
-  Level_repr.from_raw first_level
+  Level_repr.from_raw_level first_level
     constants.(Constants_repr.parametric.blocks_per_cycle)
     constants.(Constants_repr.parametric.blocks_per_voting_period)
     constants.(Constants_repr.parametric.blocks_per_commitment) l.
 
 Definition root (c : Raw_context.context) : Level_repr.level :=
-  Level_repr.root (Raw_context.first_level c).
+  Level_repr.root_level (Raw_context.first_level c).
 
 Definition succ (c : Raw_context.context) (l : Level_repr.t)
   : Level_repr.level :=
@@ -42608,7 +42618,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Apply.
 Require Tezos.Apply_results.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
@@ -43356,7 +43366,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Apply_results.
 
 Module validation_mode.
@@ -44555,7 +44565,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Script_int_repr.
 Require Tezos.Script_typed_ir.
 
@@ -45842,7 +45852,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -47896,11 +47906,11 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Inductive prim : Set :=
 | K_parameter : prim
@@ -48940,7 +48950,7 @@ Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Definition t := Seed_repr.nonce.
 
@@ -51999,9 +52009,9 @@ Parameter hash_packed : packed_operation -&gt; (|Operation_hash|).(S.HASH.t).
 
 Parameter acceptable_passes : packed_operation -&gt; list Z.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter check_signature : forall {A : Set},
   (|Signature.Public_key|).(S.SPublic_key.t) -&gt; (|Chain_id|).(S.HASH.t) -&gt;
@@ -53951,7 +53961,7 @@ let set_gas_limit ctxt remaining =
 let set_gas_unlimited ctxt = {ctxt with operation_gas = Unaccounted}
 
 let consume_gas ctxt cost =
-  Gas_limit_repr.consume
+  Gas_limit_repr.consume_raw
     ctxt.block_gas
     ctxt.operation_gas
     ctxt.internal_gas
@@ -53960,7 +53970,7 @@ let consume_gas ctxt cost =
   ok {ctxt with block_gas; operation_gas; internal_gas}
 
 let check_enough_gas ctxt cost =
-  Gas_limit_repr.check_enough
+  Gas_limit_repr.check_enough_raw
     ctxt.block_gas
     ctxt.operation_gas
     ctxt.internal_gas
@@ -54252,7 +54262,7 @@ let prepare ~level ~predecessor_timestamp ~timestamp ~fitness ctxt =
   get_first_level ctxt
   &gt;&gt;=? fun first_level -&gt;
   let level =
-    Level_repr.from_raw
+    Level_repr.from_raw_level
       ~first_level
       ~blocks_per_cycle:constants.Constants_repr.blocks_per_cycle
       ~blocks_per_voting_period:
@@ -54890,7 +54900,7 @@ Definition set_gas_unlimited (ctxt : t) : t :=
 Definition consume_gas (ctxt : t) (cost : Gas_limit_repr.cost)
   : Error_monad.tzresult t :=
   Error_monad.op_gtgtquestion
-    (Gas_limit_repr.consume ctxt.(t.block_gas) ctxt.(t.operation_gas)
+    (Gas_limit_repr.consume_raw ctxt.(t.block_gas) ctxt.(t.operation_gas)
       ctxt.(t.internal_gas) cost)
     (fun function_parameter =&gt;
       let '(block_gas, operation_gas, __internal_gas_value) :=
@@ -54901,7 +54911,7 @@ Definition consume_gas (ctxt : t) (cost : Gas_limit_repr.cost)
 
 Definition check_enough_gas (ctxt : t) (cost : Gas_limit_repr.cost)
   : Error_monad.tzresult unit :=
-  Gas_limit_repr.check_enough ctxt.(t.block_gas) ctxt.(t.operation_gas)
+  Gas_limit_repr.check_enough_raw ctxt.(t.block_gas) ctxt.(t.operation_gas)
     ctxt.(t.internal_gas) cost.
 
 Definition gas_level (ctxt : t) : Gas_limit_repr.t := ctxt.(t.operation_gas).
@@ -55221,7 +55231,7 @@ Definition prepare
                   Error_monad.op_gtgteqquestion (get_first_level ctxt)
                     (fun first_level =&gt;
                       let level :=
-                        Level_repr.from_raw first_level
+                        Level_repr.from_raw_level first_level
                           constants.(Constants_repr.parametric.blocks_per_cycle)
                           constants.(Constants_repr.parametric.blocks_per_voting_period)
                           constants.(Constants_repr.parametric.blocks_per_commitment)
@@ -55809,7 +55819,7 @@ Require Tezos.Raw_level_repr.
 Require Tezos.Storage_description.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Inductive missing_key_kind : Set :=
 | Del : missing_key_kind
@@ -55823,11 +55833,11 @@ Inductive storage_error : Set :=
 | Existing_key : list string -&gt; storage_error
 | Corrupted_data : list string -&gt; storage_error.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter __storage_error_value : forall {a : Set},
   storage_error -&gt; Lwt.t (Error_monad.tzresult a).
@@ -55894,7 +55904,7 @@ Parameter get_deposits :
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
     Tez_repr.t.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter check_gas_limit : t -&gt; Z.t -&gt; Error_monad.tzresult unit.
 
@@ -55916,7 +55926,7 @@ Parameter update_allocated_contracts_count : t -&gt; t.
 
 Parameter clear_storage_space_to_pay : t -&gt; t * Z.t * Z.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter init_origination_nonce : t -&gt; (|Operation_hash|).(S.HASH.t) -&gt; t.
 
@@ -58455,7 +58465,7 @@ Require Tezos.Raw_context.
 Require Tezos.Roll_repr.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter init : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult Raw_context.t).
 
@@ -60673,7 +60683,7 @@ They are sent to a unit type.">(Bad_contract_parameter step_constants.self)</abb
 They are sent to a unit type.">(Bad_contract_parameter step_constants.self)</abbr>
     (parse_data ctxt ~legacy:false arg_type (box arg))
   &gt;&gt;=? fun (arg, ctxt) -&gt;
-  Script.force_decode ctxt unparsed_script.code
+  Script.force_decode_in_context ctxt unparsed_script.code
   &gt;&gt;=? fun (script_code, ctxt) -&gt;
   Script_ir_translator.collect_big_maps ctxt arg_type arg
   &gt;&gt;=? fun (to_duplicate, ctxt) -&gt;
@@ -60758,7 +60768,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_ir_annot.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
@@ -63267,7 +63277,7 @@ with execute
             (fun function_parameter =&gt;
               let '(arg, ctxt) := function_parameter in
               Error_monad.op_gtgteqquestion
-                (Alpha_context.Script.force_decode ctxt
+                (Alpha_context.Script.force_decode_in_context ctxt
                   unparsed_script.(Alpha_context.Script.t.code))
                 (fun function_parameter =&gt;
                   let '(script_code, ctxt) := function_parameter in
@@ -63491,7 +63501,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 
@@ -63502,19 +63512,19 @@ Definition execution_trace :=
     (Alpha_context.Script.location * Alpha_context.Gas.t *
       list (Alpha_context.Script.expr * option string)).
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Module execution_result.
   Record record := Build {
@@ -64166,7 +64176,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Script_tc_errors.
 Require Tezos.Script_typed_ir.
 
@@ -65106,7 +65116,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
@@ -65276,7 +65286,7 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5996 lines</li>
-      <li>Coq size: 9923 lines (+65% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 9924 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -70472,7 +70482,7 @@ They are sent to a unit type.">(Invalid_contract (loc, contract))</abbr>
 
 They are sent to a unit type.">(No_such_entrypoint entrypoint)</abbr> )
       | Some code -&gt;
-          Script.force_decode ctxt code
+          Script.force_decode_in_context ctxt code
           &gt;&gt;=? fun (code, ctxt) -&gt;
           Lwt.return
             ( parse_toplevel ~legacy:true code
@@ -70543,7 +70553,7 @@ They are sent to a unit type.">(Invalid_contract (loc, contract))</abbr>
         | _ -&gt;
             return (ctxt, None) )
       | Some code -&gt;
-          Script.force_decode ctxt code
+          Script.force_decode_in_context ctxt code
           &gt;&gt;=? fun (code, ctxt) -&gt;
           (* can only fail because of gas *)
           Lwt.return
@@ -70732,9 +70742,9 @@ let parse_script :
     Script.t -&gt;
     (ex_script * context) tzresult Lwt.t =
  fun ?type_logger ctxt ~legacy {code; storage} -&gt;
-  Script.force_decode ctxt code
+  Script.force_decode_in_context ctxt code
   &gt;&gt;=? fun (code, ctxt) -&gt;
-  Script.force_decode ctxt storage
+  Script.force_decode_in_context ctxt storage
   &gt;&gt;=? fun (storage, ctxt) -&gt;
   Lwt.return @@ parse_toplevel ~legacy code
   &gt;&gt;=? fun (arg_type, storage_type, code_field, root_name) -&gt;
@@ -71656,7 +71666,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_ir_annot.
@@ -79822,7 +79832,7 @@ with parse_contract {arg : Set}
                             end))
                     | Some code =&gt;
                       Error_monad.op_gtgteqquestion
-                        (Alpha_context.Script.force_decode ctxt code)
+                        (Alpha_context.Script.force_decode_in_context ctxt code)
                         (fun function_parameter =&gt;
                           let '(code, ctxt) := function_parameter in
                           Lwt.__return
@@ -79918,7 +79928,7 @@ with parse_contract_for_script {arg : Set}
                       end
                     | Some code =&gt;
                       Error_monad.op_gtgteqquestion
-                        (Alpha_context.Script.force_decode ctxt code)
+                        (Alpha_context.Script.force_decode_in_context ctxt code)
                         (fun function_parameter =&gt;
                           let '(code, ctxt) := function_parameter in
                           Lwt.__return
@@ -80146,11 +80156,12 @@ Definition parse_script
     Alpha_context.Script.t.code := code;
       Alpha_context.Script.t.storage := storage
       |} := function_parameter in
-  Error_monad.op_gtgteqquestion (Alpha_context.Script.force_decode ctxt code)
+  Error_monad.op_gtgteqquestion
+    (Alpha_context.Script.force_decode_in_context ctxt code)
     (fun function_parameter =&gt;
       let '(code, ctxt) := function_parameter in
       Error_monad.op_gtgteqquestion
-        (Alpha_context.Script.force_decode ctxt storage)
+        (Alpha_context.Script.force_decode_in_context ctxt storage)
         (fun function_parameter =&gt;
           let '(storage, ctxt) := function_parameter in
           Error_monad.op_gtgteqquestion
@@ -81871,7 +81882,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_tc_errors.
@@ -82826,7 +82837,7 @@ Definition annot := Micheline.annot.
 
 Definition expr := Micheline.canonical Michelson_v1_primitives.prim.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Definition lazy_expr := Data_encoding.lazy_t expr.
 
@@ -83088,7 +83099,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -83933,7 +83944,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Script_tc_errors.
 
 Import Alpha_context.
@@ -84678,7 +84689,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
@@ -85143,7 +85154,7 @@ type nonce = MBytes.t
 
 let nonce_encoding = Data_encoding.Fixed.bytes Constants_repr.nonce_length
 
-let init = &quot;Laissez-faire les proprietaires.&quot;
+let initial_seed = &quot;Laissez-faire les proprietaires.&quot;
 
 let zero_bytes = MBytes.of_string (String.make Nonce_hash.size '\000')
 
@@ -85158,7 +85169,7 @@ let seed_encoding =
   let open Data_encoding in
   conv (fun (B b) -&gt; b) (fun b -&gt; B b) state_hash_encoding
 
-let empty = B (State_hash.hash_bytes [MBytes.of_string init])
+let empty = B (State_hash.hash_bytes [MBytes.of_string initial_seed])
 
 let nonce (B state) nonce =
   B (State_hash.hash_bytes [State_hash.to_bytes state; nonce])
@@ -85278,7 +85289,7 @@ Definition nonce := MBytes.t.
 Definition nonce_encoding : Data_encoding.encoding MBytes.t :=
   Data_encoding.Fixed.__bytes_value Constants_repr.nonce_length.
 
-Definition init : string := &quot;Laissez-faire les proprietaires.&quot;.
+Definition initial_seed : string := &quot;Laissez-faire les proprietaires.&quot;.
 
 Definition zero_bytes : MBytes.t :=
   MBytes.of_string (String.make Nonce_hash.size &quot;000&quot; % char).
@@ -85294,7 +85305,7 @@ Definition seed_encoding : Data_encoding.encoding seed :=
       b) (fun b =&gt; B b) None state_hash_encoding.
 
 Definition empty : seed :=
-  B (State_hash.hash_bytes None [ MBytes.of_string init ]).
+  B (State_hash.hash_bytes None [ MBytes.of_string initial_seed ]).
 
 Definition __nonce_value (function_parameter : seed) : MBytes.t -&gt; seed :=
   let 'B state := function_parameter in
@@ -85965,7 +85976,7 @@ Require Tezos.Nonce_storage.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter init : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult Raw_context.t).
 
@@ -86101,7 +86112,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Storage_description.
 
 Import Alpha_context.
@@ -97912,7 +97923,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Services_registration.
 
 Import Alpha_context.
@@ -98616,7 +98627,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 

@@ -3,7 +3,7 @@
 -arg -type-in-type
 
 Alpha_context_mli.v
-#Alpha_context.v
+Alpha_context.v
 #Alpha_services_mli.v
 #Alpha_services.v
 Amendment_mli.v
@@ -104,7 +104,7 @@ Seed_repr_mli.v
 Seed_repr.v
 Seed_storage_mli.v
 Seed_storage.v
-#Services_registration.v
+Services_registration.v
 State_hash.v
 Storage_description_mli.v
 Storage_description.v

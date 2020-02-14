@@ -38,3 +38,5 @@ Definition encoding : Data_encoding.encoding t :=
       {| t.blinded_public_key_hash := blinded_public_key_hash;
         t.amount := amount |}) None
     (Data_encoding.tup2 Blinded_public_key_hash.encoding Tez_repr.encoding).
+
+Definition not_first_class_module : unit := tt.

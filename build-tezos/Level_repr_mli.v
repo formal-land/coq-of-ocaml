@@ -80,9 +80,9 @@ Parameter pp : Format.formatter -> level -> unit.
 
 Parameter pp_full : Format.formatter -> level -> unit.
 
-Parameter root : Raw_level_repr.t -> level.
+Parameter root_level : Raw_level_repr.t -> level.
 
-Parameter from_raw :
+Parameter from_raw_level :
   Raw_level_repr.t -> int32 -> int32 -> int32 -> Raw_level_repr.t -> level.
 
 Parameter diff : level -> level -> int32.

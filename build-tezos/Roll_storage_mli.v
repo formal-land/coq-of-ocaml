@@ -17,7 +17,7 @@ Require Tezos.Raw_context.
 Require Tezos.Roll_repr.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter init : Raw_context.t -> Lwt.t (Error_monad.tzresult Raw_context.t).
 

@@ -16,7 +16,7 @@ Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter __exists :
   Raw_context.t -> Contract_repr.t -> Lwt.t (Error_monad.tzresult bool).
@@ -132,7 +132,7 @@ Parameter spend :
   Raw_context.t -> Contract_repr.t -> Tez_repr.t ->
   Lwt.t (Error_monad.tzresult Raw_context.t).
 
-Parameter originate :
+Parameter originate_raw :
   Raw_context.t -> option bool -> Contract_repr.t -> Tez_repr.t ->
   Script_repr.t * option big_map_diff ->
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->

@@ -16,7 +16,7 @@ Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Definition t := Seed_repr.nonce.
 

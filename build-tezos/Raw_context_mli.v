@@ -19,7 +19,7 @@ Require Tezos.Raw_level_repr.
 Require Tezos.Storage_description.
 Require Tezos.Tez_repr.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Inductive missing_key_kind : Set :=
 | Del : missing_key_kind
@@ -33,11 +33,11 @@ Inductive storage_error : Set :=
 | Existing_key : list string -> storage_error
 | Corrupted_data : list string -> storage_error.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter __storage_error_value : forall {a : Set},
   storage_error -> Lwt.t (Error_monad.tzresult a).
@@ -104,7 +104,7 @@ Parameter get_deposits :
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
     Tez_repr.t.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter check_gas_limit : t -> Z.t -> Error_monad.tzresult unit.
 
@@ -126,7 +126,7 @@ Parameter update_allocated_contracts_count : t -> t.
 
 Parameter clear_storage_space_to_pay : t -> t * Z.t * Z.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter init_origination_nonce : t -> (|Operation_hash|).(S.HASH.t) -> t.
 

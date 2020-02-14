@@ -193,6 +193,7 @@ File.open("tezos/index.html", "w") do |file|
           13051,
           25328,
           25322,
+          26003,
         ],
         generated: [
           47563,
@@ -226,6 +227,7 @@ File.open("tezos/index.html", "w") do |file|
           51943,
           52522,
           52514,
+          52518,
         ],
         labels: [
           "01-14",
@@ -259,6 +261,7 @@ File.open("tezos/index.html", "w") do |file|
           "02-11",
           "02-12",
           "02-13",
+          "02-14",
         ]
       }
     END

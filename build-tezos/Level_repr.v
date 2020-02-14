@@ -165,7 +165,7 @@ Definition encoding : Data_encoding.encoding t :=
           "Tells wether the baker of this block has to commit a seed nonce hash.")
         "expected_commitment" Data_encoding.__bool_value)).
 
-Definition root (first_level : Raw_level_repr.t) : t :=
+Definition root_level (first_level : Raw_level_repr.t) : t :=
   {| t.level := first_level;
     t.level_position :=
       (* ❌ Constant of type int32 is converted to int *)
@@ -177,7 +177,7 @@ Definition root (first_level : Raw_level_repr.t) : t :=
       (* ❌ Constant of type int32 is converted to int *)
       0; t.expected_commitment := false |}.
 
-Definition from_raw
+Definition from_raw_level
   (first_level : Raw_level_repr.raw_level) (blocks_per_cycle : int32)
   (blocks_per_voting_period : int32) (blocks_per_commitment : int32)
   (level : Raw_level_repr.raw_level) : t :=

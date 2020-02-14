@@ -71,7 +71,7 @@ Parameter incr_origination_nonce : origination_nonce -> origination_nonce.
 
 Parameter is_originated : contract -> option Contract_hash.t.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter to_b58check : contract -> string.
 

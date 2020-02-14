@@ -11,11 +11,11 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Inductive prim : Set :=
 | K_parameter : prim

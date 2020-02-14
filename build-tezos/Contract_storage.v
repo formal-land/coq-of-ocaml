@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Contract_repr.
-Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Delegate_storage.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Manager_repr.
 Require Tezos.Michelson_v1_primitives.
@@ -400,7 +400,7 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                               | None => Error_monad.__return c
                               end)))).
 
-Definition originate
+Definition originate_raw
   (c : Raw_context.t) (prepaid_bootstrap_storage : option bool)
   (contract : Contract_repr.contract)
   (balance :

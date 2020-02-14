@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 Require Tezos.Amendment.
 Require Tezos.Apply_results.
 Require Tezos.Baking.
@@ -175,8 +175,8 @@ Definition apply_manager_operation_content {kind : Set}
                                   (fun function_parameter =>
                                     let '_ := function_parameter in
                                     Error_monad.op_gtgteqquestion
-                                      (Alpha_context.Script.force_decode ctxt
-                                        parameters)
+                                      (Alpha_context.Script.force_decode_in_context
+                                        ctxt parameters)
                                       (fun function_parameter =>
                                         let '(arg, ctxt) := function_parameter
                                           in
@@ -233,8 +233,8 @@ Definition apply_manager_operation_content {kind : Set}
                                     (ctxt, __result_value, nil))
                             | Some script =>
                               Error_monad.op_gtgteqquestion
-                                (Alpha_context.Script.force_decode ctxt
-                                  parameters)
+                                (Alpha_context.Script.force_decode_in_context
+                                  ctxt parameters)
                                 (fun function_parameter =>
                                   let '(parameter, ctxt) := function_parameter
                                     in
@@ -342,7 +342,7 @@ Definition apply_manager_operation_content {kind : Set}
                   preorigination
                 |} =>
             Error_monad.op_gtgteqquestion
-              (Alpha_context.Script.force_decode ctxt
+              (Alpha_context.Script.force_decode_in_context ctxt
                 script.(Alpha_context.Script.t.storage))
               (fun function_parameter =>
                 let '(unparsed_storage, ctxt) := function_parameter in
@@ -352,7 +352,7 @@ Definition apply_manager_operation_content {kind : Set}
                       (Alpha_context.Script.deserialized_cost unparsed_storage)))
                   (fun ctxt =>
                     Error_monad.op_gtgteqquestion
-                      (Alpha_context.Script.force_decode ctxt
+                      (Alpha_context.Script.force_decode_in_context ctxt
                         script.(Alpha_context.Script.t.code))
                       (fun function_parameter =>
                         let '(unparsed_code, ctxt) := function_parameter in
@@ -646,7 +646,8 @@ Definition precheck_manager_contents {A B : Set}
                           Error_monad.op_gtgtpipequestion
                             (Pervasives.op_atat
                               (Error_monad.trace extensible_type_value)
-                              (Alpha_context.Script.force_decode ctxt parameters))
+                              (Alpha_context.Script.force_decode_in_context ctxt
+                                parameters))
                             (fun function_parameter =>
                               let '(_arg, ctxt) := function_parameter in
                               ctxt))
@@ -671,15 +672,15 @@ Definition precheck_manager_contents {A B : Set}
                           Error_monad.op_gtgteqquestion
                             (Pervasives.op_atat
                               (Error_monad.trace extensible_type_value)
-                              (Alpha_context.Script.force_decode ctxt
+                              (Alpha_context.Script.force_decode_in_context ctxt
                                 script.(Alpha_context.Script.t.code)))
                             (fun function_parameter =>
                               let '(_code, ctxt) := function_parameter in
                               Error_monad.op_gtgtpipequestion
                                 (Pervasives.op_atat
                                   (Error_monad.trace extensible_type_value)
-                                  (Alpha_context.Script.force_decode ctxt
-                                    script.(Alpha_context.Script.t.storage)))
+                                  (Alpha_context.Script.force_decode_in_context
+                                    ctxt script.(Alpha_context.Script.t.storage)))
                                 (fun function_parameter =>
                                   let '(_storage, ctxt) := function_parameter in
                                   ctxt)))

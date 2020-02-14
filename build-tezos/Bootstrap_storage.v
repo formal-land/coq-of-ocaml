@@ -14,7 +14,7 @@ Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Contract_storage.
 Require Tezos.Cycle_repr.
-Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Delegate_storage.
 Require Tezos.Misc.
 Require Tezos.Parameters_repr.
 Require Tezos.Raw_context.
@@ -70,8 +70,8 @@ Definition init_contract
         (fun function_parameter =>
           let '(script, ctxt) := function_parameter in
           Error_monad.op_gtgteqquestion
-            (Contract_storage.originate ctxt (Some true) contract amount script
-              (Some delegate)) (fun ctxt => Error_monad.__return ctxt))).
+            (Contract_storage.originate_raw ctxt (Some true) contract amount
+              script (Some delegate)) (fun ctxt => Error_monad.__return ctxt))).
 
 Definition init
   (ctxt : Raw_context.t)

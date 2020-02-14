@@ -10,21 +10,21 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Require Tezos.Alpha_context_mli. Module Alpha_context := Alpha_context_mli.
+Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
 Parameter may_start_new_voting_period :
   Alpha_context.context -> Lwt.t (Error_monad.tzresult Alpha_context.context).
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter record_proposals :
   Alpha_context.context -> Alpha_context.public_key_hash ->
   list (|Protocol_hash|).(S.HASH.t) ->
   Lwt.t (Error_monad.tzresult Alpha_context.context).
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter record_ballot :
   Alpha_context.context -> Alpha_context.public_key_hash ->

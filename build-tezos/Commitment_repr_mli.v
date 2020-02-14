@@ -26,3 +26,5 @@ End t.
 Definition t := t.record.
 
 Parameter encoding : Data_encoding.t t.
+
+Parameter not_first_class_module : unit.

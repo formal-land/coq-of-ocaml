@@ -30,13 +30,13 @@ Definition from_raw
     end in
   let constants := Raw_context.constants c in
   let first_level := Raw_context.first_level c in
-  Level_repr.from_raw first_level
+  Level_repr.from_raw_level first_level
     constants.(Constants_repr.parametric.blocks_per_cycle)
     constants.(Constants_repr.parametric.blocks_per_voting_period)
     constants.(Constants_repr.parametric.blocks_per_commitment) l.
 
 Definition root (c : Raw_context.context) : Level_repr.level :=
-  Level_repr.root (Raw_context.first_level c).
+  Level_repr.root_level (Raw_context.first_level c).
 
 Definition succ (c : Raw_context.context) (l : Level_repr.t)
   : Level_repr.level :=

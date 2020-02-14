@@ -47,15 +47,15 @@ Parameter cost_encoding : Data_encoding.encoding cost.
 
 Parameter pp_cost : Format.formatter -> cost -> unit.
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
-Parameter consume :
+Parameter consume_raw :
   Z.t -> t -> internal_gas -> cost ->
   Error_monad.tzresult (Z.t * t * internal_gas).
 
-Parameter check_enough :
+Parameter check_enough_raw :
   Z.t -> t -> internal_gas -> cost -> Error_monad.tzresult unit.
 
 Parameter internal_gas_zero : internal_gas.

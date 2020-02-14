@@ -75,7 +75,7 @@ Parameter set :
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.tzresult Raw_context.t).
 
-(* extensible_type error *)
+(* extensible_type_definition `error` *)
 
 Parameter fold : forall {a : Set},
   Raw_context.t -> a ->

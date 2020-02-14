@@ -404,7 +404,7 @@ Definition set_gas_unlimited (ctxt : t) : t :=
 Definition consume_gas (ctxt : t) (cost : Gas_limit_repr.cost)
   : Error_monad.tzresult t :=
   Error_monad.op_gtgtquestion
-    (Gas_limit_repr.consume ctxt.(t.block_gas) ctxt.(t.operation_gas)
+    (Gas_limit_repr.consume_raw ctxt.(t.block_gas) ctxt.(t.operation_gas)
       ctxt.(t.internal_gas) cost)
     (fun function_parameter =>
       let '(block_gas, operation_gas, __internal_gas_value) :=
@@ -415,7 +415,7 @@ Definition consume_gas (ctxt : t) (cost : Gas_limit_repr.cost)
 
 Definition check_enough_gas (ctxt : t) (cost : Gas_limit_repr.cost)
   : Error_monad.tzresult unit :=
-  Gas_limit_repr.check_enough ctxt.(t.block_gas) ctxt.(t.operation_gas)
+  Gas_limit_repr.check_enough_raw ctxt.(t.block_gas) ctxt.(t.operation_gas)
     ctxt.(t.internal_gas) cost.
 
 Definition gas_level (ctxt : t) : Gas_limit_repr.t := ctxt.(t.operation_gas).
@@ -735,7 +735,7 @@ Definition prepare
                   Error_monad.op_gtgteqquestion (get_first_level ctxt)
                     (fun first_level =>
                       let level :=
-                        Level_repr.from_raw first_level
+                        Level_repr.from_raw_level first_level
                           constants.(Constants_repr.parametric.blocks_per_cycle)
                           constants.(Constants_repr.parametric.blocks_per_voting_period)
                           constants.(Constants_repr.parametric.blocks_per_commitment)

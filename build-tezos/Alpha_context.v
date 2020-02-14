@@ -19,7 +19,7 @@ Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
 Require Tezos.Contract_storage.
 Require Tezos.Cycle_repr.
-Require Tezos.Delegate_storage_mli. Module Delegate_storage := Delegate_storage_mli.
+Require Tezos.Delegate_storage.
 Require Tezos.Fees_storage.
 Require Tezos.Fitness_repr.
 Require Tezos.Fitness_storage.
@@ -147,7 +147,7 @@ Module Script.
   
   Include Script_repr.
   
-  Definition force_decode
+  Definition force_decode_in_context
     (ctxt : Raw_context.context) (lexpr : Script_repr.lazy_expr)
     : Lwt.t (Error_monad.tzresult (Script_repr.expr * Raw_context.context)) :=
     Lwt.__return
@@ -157,7 +157,7 @@ Module Script.
           Error_monad.op_gtpipequestion (Raw_context.consume_gas ctxt cost)
             (fun ctxt => (v, ctxt)))).
   
-  Definition force_bytes
+  Definition force_bytes_in_context
     (ctxt : Raw_context.context) (lexpr : Script_repr.lazy_expr)
     : Lwt.t (Error_monad.tzresult (MBytes.t * Raw_context.context)) :=
     Lwt.__return
@@ -234,7 +234,7 @@ Module Contract.
     (script : Script_repr.t * option big_map_diff)
     (delegate : option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-    originate c None contract balance script delegate.
+    originate_raw c None contract balance script delegate.
   
   Definition init_origination_nonce
     : Raw_context.t -> (|Operation_hash|).(S.HASH.t) -> Raw_context.t :=
@@ -367,9 +367,7 @@ End Fitness.
 Module Bootstrap := Bootstrap_storage.
 
 Module Commitment.
-  Definition t := (|Commitment_repr|).(Storage_sigs.VALUE.t).
-  
-  Definition encoding := (|Commitment_repr|).(Storage_sigs.VALUE.encoding).
+  Include Commitment_repr.
   
   Include Commitment_storage.
 End Commitment.
