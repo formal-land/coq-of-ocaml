@@ -164,7 +164,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
   | Texp_function { cases; _ } ->
-    let is_gadt_match = Attribute.have_match_gadt attributes in
+    let is_gadt_match = Attribute.has_match_gadt attributes in
     open_cases typ_vars cases is_gadt_match >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
@@ -180,7 +180,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     )) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
-    let is_gadt_match = Attribute.have_match_gadt attributes in
+    let is_gadt_match = Attribute.has_match_gadt attributes in
     of_expression typ_vars e >>= fun e ->
     of_match typ_vars e cases exception_cases is_gadt_match
   | Texp_tuple es ->
@@ -490,7 +490,7 @@ and import_let_fun
   let is_rec = Recursivity.of_rec_flag is_rec in
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
     Attribute.of_attributes vb_attributes >>= fun attributes ->
-    let is_axiom = Attribute.have_axiom attributes in
+    let is_axiom = Attribute.has_axiom attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
@@ -949,12 +949,6 @@ and of_include
       | Sig_class_type _ -> return e_next
     end
 
-let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
-  if n = 0 then
-    []
-  else
-    (!^ "_") :: to_coq_n_underscores (n - 1)
-
 let rec flatten_list (e : t) : t list option =
   match e with
   | Constructor (x, _, es) ->
@@ -1131,7 +1125,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                 PathName.to_coq x ^^
                 begin match nb_free_vars with
                 | 0 -> empty
-                | _ -> braces (nest (separate space (to_coq_n_underscores nb_free_vars)))
+                | _ -> braces (nest (separate space (Pp.to_coq_n_underscores nb_free_vars)))
                 end
               ) ^^
               !^ ":="
@@ -1220,7 +1214,7 @@ and to_coq_cast_existentials
         begin if cast_with_axioms then
           empty
         else
-          !^ "_"
+          Pp.primitive_tuple_infer (List.length new_typ_vars)
         end ^^
         variable_names
       ) ^^ !^ "in" ^^ newline ^^
@@ -1253,10 +1247,6 @@ and to_coq_exist_t
     | 0 -> !^ "(fun _ => _)"
     | _ -> !^ "_"
     end ^^
-    begin match to_coq_n_underscores nb_of_existential_variables with
-    | [] -> !^ "tt"
-    | [_] -> !^ "_"
-    | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
-    end ^^
+    Pp.primitive_tuple_infer nb_of_existential_variables ^^
     e
   )

@@ -35,7 +35,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
     | Sig_typext (_, { ext_type_path; _ }, _) ->
       let name = Path.name ext_type_path in
       raise
-        (Error ("extensible_type " ^ name))
+        (Error ("extensible_type_definition `" ^ name ^ "`"))
         NotSupported
         ("Extensible type '" ^ name ^ "' not handled")
     | Sig_module (ident, { md_type; _ }, _) ->

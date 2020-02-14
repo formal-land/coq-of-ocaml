@@ -3,6 +3,7 @@ open Monad.Notations
 
 type t =
   | Axiom
+  | ForceGadt
   | Implicit of string
   | MatchGadt
 
@@ -12,6 +13,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     let id = loc.Asttypes.txt in
     match id with
     | "coq_axiom" -> return (Some Axiom)
+    | "coq_force_gadt" -> return (Some ForceGadt)
     | "coq_implicit" ->
       begin match payload with
       | Parsetree.PStr [{
@@ -33,9 +35,15 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | _ -> return None)
   )
 
-let have_axiom (attributes : t list) : bool =
+let has_axiom (attributes : t list) : bool =
   attributes |> List.exists (function
     | Axiom -> true
+    | _ -> false
+  )
+
+let has_force_gadt (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | ForceGadt -> true
     | _ -> false
   )
 
@@ -45,7 +53,7 @@ let get_implicits (attributes : t list) : string list =
     | _ -> None
   )
 
-let have_match_gadt (attributes : t list) : bool =
+let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function
     | MatchGadt -> true
     | _ -> false

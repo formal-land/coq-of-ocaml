@@ -338,10 +338,14 @@ module Constructors = struct
   let of_ocaml
     (typ_name : Name.t)
     (defined_typ_params : Name.t option list)
+    (force_gadt : bool)
     (single_constructors : Single.t list)
     : (t * Name.t option list option) Monad.t =
     let merged_typ_params =
-      check_if_not_gadt defined_typ_params single_constructors in
+      if force_gadt then
+        None
+      else
+        check_if_not_gadt defined_typ_params single_constructors in
     let constructors = single_constructors |> List.map (
       fun { Single.constructor_name; param_typs; _ } ->
         match merged_typ_params with
@@ -672,7 +676,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         Monad.List.map
           (Constructors.Single.of_ocaml_row typ_args)
           row_fields >>= fun single_constructors ->
-        Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
+        Constructors.of_ocaml name typ_args false single_constructors >>= fun (constructors, _) ->
         raise
           (Inductive {
             constructor_records = [];
@@ -702,7 +706,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
           Monad.List.map (Constructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
-          Constructors.of_ocaml name typ_args single_constructors >>= fun (constructors, _) ->
+          Constructors.of_ocaml name typ_args false single_constructors >>= fun (constructors, _) ->
           raise
             (
               constructor_records,
@@ -753,7 +757,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
            } :: records,
           typs
         )
-      | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
+      | { typ_type = { type_kind = Type_variant cases; _ }; typ_attributes; _ } ->
+        Attribute.of_attributes typ_attributes >>= fun typ_attributes ->
         Monad.List.map (Constructors.Single.of_ocaml_case name typ_args) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
@@ -766,6 +771,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         Constructors.of_ocaml
           name
           typ_args
+          (Attribute.has_force_gadt typ_attributes)
           single_constructors >>= fun (constructors, merged_typ_params) ->
         let (gadt_notation, name, typ_args) =
           match merged_typ_params with
