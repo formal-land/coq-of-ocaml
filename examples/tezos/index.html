@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 35960 lines</li>
-      <li>Coq size: 52518 lines (+46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 52355 lines (+45% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2508</li>
     </ul>
     
@@ -99,7 +99,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           13051,
           25328,
           25322,
-          26003,
+          27076,
         ],
         generated: [
           47563,
@@ -133,7 +133,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           51943,
           52522,
           52514,
-          52518,
+          52355,
         ],
         labels: [
           "01-14",
@@ -5684,12 +5684,12 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
-Require Tezos.Contract_services.
-Require Tezos.Delegate_services.
-Require Tezos.Helpers_services.
+Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
+Require Tezos.Delegate_services_mli. Module Delegate_services := Delegate_services_mli.
+Require Tezos.Helpers_services_mli. Module Helpers_services := Helpers_services_mli.
 Require Tezos.Nonce_hash.
 Require Tezos.Services_registration.
-Require Tezos.Voting_services.
+Require Tezos.Voting_services_mli. Module Voting_services := Voting_services_mli.
 
 Import Alpha_context.
 
@@ -6042,11 +6042,11 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
-Require Tezos.Contract_services.
-Require Tezos.Delegate_services.
-Require Tezos.Helpers_services.
+Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
+Require Tezos.Delegate_services_mli. Module Delegate_services := Delegate_services_mli.
+Require Tezos.Helpers_services_mli. Module Helpers_services := Helpers_services_mli.
 Require Tezos.Nonce_hash.
-Require Tezos.Voting_services.
+Require Tezos.Voting_services_mli. Module Voting_services := Voting_services_mli.
 
 Import Alpha_context.
 
@@ -8544,12 +8544,12 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Amendment.
-Require Tezos.Apply_results.
-Require Tezos.Baking.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Baking_mli. Module Baking := Baking_mli.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.
-Require Tezos.Script_interpreter.
+Require Tezos.Script_interpreter_mli. Module Script_interpreter := Script_interpreter_mli.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 
@@ -13796,10 +13796,7 @@ Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
 
 open Alpha_context
 
-(** Result of applying a {!Operation.t}. Follows the same structure. *)
-type 'kind operation_metadata = {contents : 'kind contents_result_list}
-
-and packed_operation_metadata =
+type packed_operation_metadata =
   | Operation_metadata : 'kind operation_metadata -&gt; packed_operation_metadata
   | No_operation_metadata : packed_operation_metadata
 
@@ -13810,6 +13807,9 @@ and 'kind contents_result_list =
       'kind Kind.manager contents_result
       * 'rest Kind.manager contents_result_list
       -&gt; ('kind * 'rest) Kind.manager contents_result_list
+
+(** Result of applying a {!Operation.t}. Follows the same structure. *)
+and 'kind operation_metadata = {contents : 'kind contents_result_list}
 
 and packed_contents_result_list =
   | Contents_result_list :
@@ -13850,7 +13850,7 @@ and packed_contents_result =
 
 (** The result of an operation in the queue. [Skipped] ones should
     always be at the tail, and after a single [Failed]. *)
-and 'kind manager_operation_result =
+and[@coq_force_gadt] 'kind manager_operation_result =
   | Applied of 'kind successful_manager_operation_result
   | Backtracked of
       'kind successful_manager_operation_result * error list option
@@ -14057,9 +14057,10 @@ Reserved Notation &quot;'successful_manager_operation_result.Reveal_result&quot;
 Reserved Notation &quot;'successful_manager_operation_result.Transaction_result&quot;.
 Reserved Notation &quot;'successful_manager_operation_result.Origination_result&quot;.
 Reserved Notation &quot;'successful_manager_operation_result.Delegation_result&quot;.
-Reserved Notation &quot;'operation_metadata&quot;.
 Reserved Notation &quot;'contents_result_list&quot;.
+Reserved Notation &quot;'operation_metadata&quot;.
 Reserved Notation &quot;'contents_result&quot;.
+Reserved Notation &quot;'manager_operation_result&quot;.
 Reserved Notation &quot;'successful_manager_operation_result&quot;.
 
 Inductive packed_operation_metadata : Set :=
@@ -14098,16 +14099,17 @@ with packed_contents_result : Set :=
 | Contents_result : forall {kind : Set},
   'contents_result kind -&gt; packed_contents_result
 
-with manager_operation_result (kind : Set) : Set :=
-| Applied :
-  'successful_manager_operation_result kind -&gt; manager_operation_result kind
-| Backtracked :
+with manager_operation_result_gadt : Set :=
+| Applied : forall {kind : Set},
+  'successful_manager_operation_result kind -&gt; manager_operation_result_gadt
+| Backtracked : forall {kind : Set},
   'successful_manager_operation_result kind -&gt;
-  option (list Error_monad.__error) -&gt; manager_operation_result kind
-| Failed :
+  option (list Error_monad.__error) -&gt; manager_operation_result_gadt
+| Failed : forall {kind : Set},
   Alpha_context.Kind.manager kind -&gt; list Error_monad.__error -&gt;
-  manager_operation_result kind
-| Skipped : Alpha_context.Kind.manager kind -&gt; manager_operation_result kind
+  manager_operation_result_gadt
+| Skipped : forall {kind : Set},
+  Alpha_context.Kind.manager kind -&gt; manager_operation_result_gadt
 
 with successful_manager_operation_result_gadt : Set :=
 | Reveal_result :
@@ -14130,13 +14132,15 @@ with packed_successful_manager_operation_result : Set :=
 
 with packed_internal_operation_result : Set :=
 | Internal_operation_result : forall {kind : Set},
-  Alpha_context.internal_operation kind -&gt; manager_operation_result kind -&gt;
+  Alpha_context.internal_operation kind -&gt; 'manager_operation_result kind -&gt;
   packed_internal_operation_result
 
-where &quot;'operation_metadata&quot; := (fun (t_kind : Set) =&gt;
+where &quot;'contents_result_list&quot; := (fun (_ : Set) =&gt; contents_result_list_gadt)
+and &quot;'operation_metadata&quot; := (fun (t_kind : Set) =&gt;
   operation_metadata_skeleton ('contents_result_list t_kind))
-and &quot;'contents_result_list&quot; := (fun (_ : Set) =&gt; contents_result_list_gadt)
 and &quot;'contents_result&quot; := (fun (_ : Set) =&gt; contents_result_gadt)
+and &quot;'manager_operation_result&quot; := (fun (_ : Set) =&gt;
+  manager_operation_result_gadt)
 and &quot;'successful_manager_operation_result&quot; := (fun (_ : Set) =&gt;
   successful_manager_operation_result_gadt)
 and &quot;'contents_result.Endorsement_result&quot; :=
@@ -14145,7 +14149,7 @@ and &quot;'contents_result.Endorsement_result&quot; :=
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list Z))
 and &quot;'contents_result.Manager_operation_result&quot; := (fun (t_kind : Set) =&gt;
   contents_result.Manager_operation_result_skeleton
-    Alpha_context.Delegate.balance_updates (manager_operation_result t_kind)
+    Alpha_context.Delegate.balance_updates ('manager_operation_result t_kind)
     (list packed_internal_operation_result))
 and &quot;'successful_manager_operation_result.Reveal_result&quot; :=
   (successful_manager_operation_result.Reveal_result_skeleton Z.t)
@@ -14164,7 +14168,7 @@ and &quot;'successful_manager_operation_result.Delegation_result&quot; :=
   (successful_manager_operation_result.Delegation_result_skeleton Z.t).
 
 Module
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
   Module contents_result.
     Definition Endorsement_result := 'contents_result.Endorsement_result.
     Definition Manager_operation_result :=
@@ -14181,20 +14185,16 @@ Module
       'successful_manager_operation_result.Delegation_result.
   End successful_manager_operation_result.
 End
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
 Import
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
 
-Definition operation_metadata := 'operation_metadata.
 Definition contents_result_list := 'contents_result_list.
+Definition operation_metadata := 'operation_metadata.
 Definition contents_result := 'contents_result.
+Definition manager_operation_result := 'manager_operation_result.
 Definition successful_manager_operation_result :=
   'successful_manager_operation_result.
-
-Arguments Applied {_}.
-Arguments Backtracked {_}.
-Arguments Failed {_}.
-Arguments Skipped {_}.
 
 Parameter operation_metadata_encoding :
   Data_encoding.t packed_operation_metadata.
@@ -19681,7 +19681,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Contract_services</h3>
     <ul>
       <li>OCaml size: 425 lines</li>
-      <li>Coq size: 778 lines (+83% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 613 lines (+44% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19849,7 +19849,7 @@ module S = struct
       custom_root
 end
 
-let register () =
+let[@coq_axiom] register () =
   let open Services_registration in
   <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
@@ -21076,172 +21076,7 @@ Module S.
       custom_root.
 End S.
 
-Definition register (function_parameter : unit) : unit :=
-  let '_ := function_parameter in
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  let register_field {A : Set}
-    (s :
-      RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-        (Updater.rpc_context * Alpha_context.Contract.contract) unit unit A)
-    (f :
-      Alpha_context.t -&gt; Alpha_context.Contract.contract -&gt;
-      Lwt.t (Error_monad.tzresult A)) : unit :=
-    Services_registration.register1 s
-      (fun ctxt =&gt;
-        fun contract =&gt;
-          fun function_parameter =&gt;
-            let '_ := function_parameter in
-            fun function_parameter =&gt;
-              let '_ := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.Contract.__exists ctxt contract)
-                (fun function_parameter =&gt;
-                  match function_parameter with
-                  | true =&gt; f ctxt contract
-                  | false =&gt; Pervasives.raise extensible_type_value
-                  end)) in
-  let register_opt_field {A : Set}
-    (s :
-      RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-        (Updater.rpc_context * Alpha_context.Contract.contract) unit unit A)
-    (f :
-      Alpha_context.t -&gt; Alpha_context.Contract.contract -&gt;
-      Lwt.t (Error_monad.tzresult (option A))) : unit :=
-    register_field s
-      (fun ctxt =&gt;
-        fun a1 =&gt;
-          Error_monad.op_gtgteqquestion (f ctxt a1)
-            (fun function_parameter =&gt;
-              match function_parameter with
-              | None =&gt; Pervasives.raise extensible_type_value
-              | Some v =&gt; Error_monad.__return v
-              end)) in
-  let do_big_map_get
-    (ctxt : Alpha_context.context) (id : Alpha_context.Big_map.id)
-    (__key_value : Script_expr_hash.t)
-    : Lwt.t
-      (Error_monad.tzresult (Micheline.canonical Alpha_context.Script.prim)) :=
-    let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-    Error_monad.op_gtgteqquestion (Alpha_context.Big_map.__exists ctxt id)
-      (fun function_parameter =&gt;
-        let '(ctxt, types) := function_parameter in
-        match types with
-        | None =&gt; Pervasives.raise extensible_type_value
-        | Some (_, value_type) =&gt;
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return
-              (Script_ir_translator.parse_ty ctxt true false false true
-                (Micheline.root value_type)))
-            (fun function_parameter =&gt;
-              let '(Script_ir_translator.Ex_ty value_type, ctxt) :=
-                function_parameter in
-              let 'existT _ __Ex_ty_'a [value_type, ctxt] :=
-                existT
-                  (fun __Ex_ty_'a : Set =&gt;
-                    [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context])
-                  _ [value_type, ctxt] in
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.Big_map.get_opt ctxt id __key_value)
-                (fun function_parameter =&gt;
-                  let '(_ctxt, value) := function_parameter in
-                  match value with
-                  | None =&gt; Pervasives.raise extensible_type_value
-                  | Some value =&gt;
-                    Error_monad.op_gtgteqquestion
-                      (Script_ir_translator.parse_data None ctxt true value_type
-                        (Micheline.root value))
-                      (fun function_parameter =&gt;
-                        let '(value, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (Script_ir_translator.unparse_data ctxt
-                            Script_ir_translator.Readable value_type value)
-                          (fun function_parameter =&gt;
-                            let '(value, _ctxt) := function_parameter in
-                            Error_monad.__return
-                              (Micheline.strip_locations value)))
-                  end))
-        end) in
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
-  (* ❌ instruction_sequence &quot;;&quot; *)
-  register_field S.__info_value
-    (fun ctxt =&gt;
-      fun contract =&gt;
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.Contract.get_balance ctxt contract)
-          (fun balance =&gt;
-            Error_monad.op_gtgteqquestion
-              (Alpha_context.Delegate.get ctxt contract)
-              (fun delegate =&gt;
-                Error_monad.op_gtgteqquestion
-                  match Alpha_context.Contract.is_implicit contract with
-                  | Some manager =&gt;
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Contract.get_counter ctxt manager)
-                      (fun counter =&gt; Error_monad.return_some counter)
-                  | None =&gt; Error_monad.__return None
-                  end
-                  (fun counter =&gt;
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Contract.get_script ctxt contract)
-                      (fun function_parameter =&gt;
-                        let '(ctxt, script) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          match script with
-                          | None =&gt; Error_monad.__return (None, ctxt)
-                          | Some script =&gt;
-                            let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-                            Error_monad.op_gtgteqquestion
-                              (Script_ir_translator.parse_script None ctxt true
-                                script)
-                              (fun function_parameter =&gt;
-                                let
-                                  '(Script_ir_translator.Ex_script script, ctxt) :=
-                                  function_parameter in
-                                let 'existT _ [__Ex_script_'a2, __Ex_script_'b2]
-                                  [script, ctxt] :=
-                                  existT
-                                    (fun '[__Ex_script_'a2, __Ex_script_'b2] =&gt;
-                                      [(Script_typed_ir.script __Ex_script_'a2
-                                        __Ex_script_'b2) **
-                                        Alpha_context.context]) _ [script, ctxt]
-                                  in
-                                Error_monad.op_gtgteqquestion
-                                  (Script_ir_translator.unparse_script ctxt
-                                    Script_ir_translator.Readable script)
-                                  (fun function_parameter =&gt;
-                                    let '(script, ctxt) := function_parameter in
-                                    Error_monad.__return ((Some script), ctxt)))
-                          end
-                          (fun function_parameter =&gt;
-                            let '(script, _ctxt) := function_parameter in
-                            Error_monad.__return
-                              {| info.balance := balance;
-                                info.delegate := delegate;
-                                info.counter := counter; info.script := script
-                                |})))))).
+Definition register (function_parameter : unit) : unit := axiom.
 
 Definition __list_value {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -25304,7 +25139,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature cycle}.
     <h3>Delegate_services</h3>
     <ul>
       <li>OCaml size: 697 lines</li>
-      <li>Coq size: 1357 lines (+94% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1358 lines (+94% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -25396,7 +25231,7 @@ let info_encoding =
        (req &quot;grace_period&quot; Cycle.encoding))
 
 module S = struct
-  let path = RPC_path.(open_root / &quot;context&quot; / &quot;delegates&quot;)
+  let raw_path = RPC_path.(open_root / &quot;context&quot; / &quot;delegates&quot;)
 
   open Data_encoding
 
@@ -25414,9 +25249,9 @@ module S = struct
       ~description:&quot;Lists all registered delegates.&quot;
       ~query:list_query
       ~output:(list Signature.Public_key_hash.encoding)
-      path
+      raw_path
 
-  let path = RPC_path.(path /: Signature.Public_key_hash.rpc_arg)
+  let path = RPC_path.(raw_path /: Signature.Public_key_hash.rpc_arg)
 
   let <abbr class="mark-warning" title="No type known for the following variants: `GET">info</abbr> =
     RPC_service.get_service
@@ -26772,7 +26607,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
-Require Tezos.Baking.
+Require Tezos.Baking_mli. Module Baking := Baking_mli.
 Require Tezos.Contract_repr.
 Require Tezos.Misc.
 Require Tezos.Services_registration.
@@ -26869,7 +26704,7 @@ Definition info_encoding : Data_encoding.encoding info :=
       (Data_encoding.req None None &quot;grace_period&quot; Alpha_context.Cycle.encoding)).
 
 Module S.
-  Definition path : RPC_path.path Updater.rpc_context Updater.rpc_context :=
+  Definition raw_path : RPC_path.path Updater.rpc_context Updater.rpc_context :=
     RPC_path.op_div (RPC_path.op_div RPC_path.open_root &quot;context&quot;) &quot;delegates&quot;.
   
   Import Data_encoding.
@@ -26885,7 +26720,7 @@ Module S.
   End list_query.
   Definition list_query := list_query.record.
   
-  Definition list_query : RPC_query.t list_query :=
+  Definition __list_query_value : RPC_query.t list_query :=
     Pervasives.op_pipegt
       (RPC_query.op_pipeplus
         (RPC_query.op_pipeplus
@@ -26903,15 +26738,16 @@ Module S.
     : RPC_service.service (* `GET *) unit Updater.rpc_context
       Updater.rpc_context list_query unit
       (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) :=
-    RPC_service.get_service (Some &quot;Lists all registered delegates.&quot;) list_query
+    RPC_service.get_service (Some &quot;Lists all registered delegates.&quot;)
+      __list_query_value
       (Data_encoding.__list_value None
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)) path.
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)) raw_path.
   
   Definition path
     : RPC_path.path Updater.rpc_context
       (Updater.rpc_context *
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) :=
-    RPC_path.op_divcolon path
+    RPC_path.op_divcolon raw_path
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg).
   
   Definition __info_value
@@ -35223,9 +35059,9 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 Require Tezos.Constants_repr.
-Require Tezos.Contract_services.
+Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
@@ -38096,10 +37932,10 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
-Require Tezos.Script_interpreter.
+Require Tezos.Script_interpreter_mli. Module Script_interpreter := Script_interpreter_mli.
 Require Tezos.Script_tc_errors.
 
 Import Alpha_context.
@@ -42620,7 +42456,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Apply.
-Require Tezos.Apply_results.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
@@ -43367,7 +43203,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 
 Module validation_mode.
   Module Application.
@@ -97430,7 +97266,7 @@ Parameter kind_encoding : Data_encoding.t kind.
     <h3>Voting_services</h3>
     <ul>
       <li>OCaml size: 123 lines</li>
-      <li>Coq size: 294 lines (+139% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 295 lines (+139% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -97551,8 +97387,8 @@ Alternative: use a monad to sequence side-effects.">register0 S.listings (fun ct
           return_some p
       | Error (<abbr class="mark-warning" title="Patterns of extensible types are not handled">Raw_context.Storage_error (Missing_key _)</abbr> :: _) -&gt;
           return_none
-      | Error _ as e -&gt;
-          Lwt.return e)
+      | Error error -&gt;
+          Lwt.return (Error error))
 
 let <abbr class="mark-warning" title="Object types are not handled
 
@@ -98020,7 +97856,8 @@ Definition register (function_parameter : unit) : unit :=
             (fun function_parameter =&gt;
               match function_parameter with
               | Pervasives.Ok p =&gt; Error_monad.return_some p
-              | (Pervasives.Error _) as e =&gt; Lwt.__return e
+              | Pervasives.Error __error_value =&gt;
+                Lwt.__return (Pervasives.Error __error_value)
               end)).
 
 Definition ballots {D E G I K L a b c i o q : Set}

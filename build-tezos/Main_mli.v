@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 
 Module validation_mode.
   Module Application.

@@ -107,7 +107,8 @@ Definition register (function_parameter : unit) : unit :=
             (fun function_parameter =>
               match function_parameter with
               | Pervasives.Ok p => Error_monad.return_some p
-              | (Pervasives.Error _) as e => Lwt.__return e
+              | Pervasives.Error __error_value =>
+                Lwt.__return (Pervasives.Error __error_value)
               end)).
 
 Definition ballots {D E G I K L a b c i o q : Set}

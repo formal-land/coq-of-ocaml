@@ -97,9 +97,10 @@ Reserved Notation "'successful_manager_operation_result.Reveal_result".
 Reserved Notation "'successful_manager_operation_result.Transaction_result".
 Reserved Notation "'successful_manager_operation_result.Origination_result".
 Reserved Notation "'successful_manager_operation_result.Delegation_result".
-Reserved Notation "'operation_metadata".
 Reserved Notation "'contents_result_list".
+Reserved Notation "'operation_metadata".
 Reserved Notation "'contents_result".
+Reserved Notation "'manager_operation_result".
 Reserved Notation "'successful_manager_operation_result".
 
 Inductive packed_operation_metadata : Set :=
@@ -138,16 +139,17 @@ with packed_contents_result : Set :=
 | Contents_result : forall {kind : Set},
   'contents_result kind -> packed_contents_result
 
-with manager_operation_result (kind : Set) : Set :=
-| Applied :
-  'successful_manager_operation_result kind -> manager_operation_result kind
-| Backtracked :
+with manager_operation_result_gadt : Set :=
+| Applied : forall {kind : Set},
+  'successful_manager_operation_result kind -> manager_operation_result_gadt
+| Backtracked : forall {kind : Set},
   'successful_manager_operation_result kind ->
-  option (list Error_monad.__error) -> manager_operation_result kind
-| Failed :
+  option (list Error_monad.__error) -> manager_operation_result_gadt
+| Failed : forall {kind : Set},
   Alpha_context.Kind.manager kind -> list Error_monad.__error ->
-  manager_operation_result kind
-| Skipped : Alpha_context.Kind.manager kind -> manager_operation_result kind
+  manager_operation_result_gadt
+| Skipped : forall {kind : Set},
+  Alpha_context.Kind.manager kind -> manager_operation_result_gadt
 
 with successful_manager_operation_result_gadt : Set :=
 | Reveal_result :
@@ -170,13 +172,15 @@ with packed_successful_manager_operation_result : Set :=
 
 with packed_internal_operation_result : Set :=
 | Internal_operation_result : forall {kind : Set},
-  Alpha_context.internal_operation kind -> manager_operation_result kind ->
+  Alpha_context.internal_operation kind -> 'manager_operation_result kind ->
   packed_internal_operation_result
 
-where "'operation_metadata" := (fun (t_kind : Set) =>
+where "'contents_result_list" := (fun (_ : Set) => contents_result_list_gadt)
+and "'operation_metadata" := (fun (t_kind : Set) =>
   operation_metadata_skeleton ('contents_result_list t_kind))
-and "'contents_result_list" := (fun (_ : Set) => contents_result_list_gadt)
 and "'contents_result" := (fun (_ : Set) => contents_result_gadt)
+and "'manager_operation_result" := (fun (_ : Set) =>
+  manager_operation_result_gadt)
 and "'successful_manager_operation_result" := (fun (_ : Set) =>
   successful_manager_operation_result_gadt)
 and "'contents_result.Endorsement_result" :=
@@ -185,7 +189,7 @@ and "'contents_result.Endorsement_result" :=
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list Z))
 and "'contents_result.Manager_operation_result" := (fun (t_kind : Set) =>
   contents_result.Manager_operation_result_skeleton
-    Alpha_context.Delegate.balance_updates (manager_operation_result t_kind)
+    Alpha_context.Delegate.balance_updates ('manager_operation_result t_kind)
     (list packed_internal_operation_result))
 and "'successful_manager_operation_result.Reveal_result" :=
   (successful_manager_operation_result.Reveal_result_skeleton Z.t)
@@ -204,7 +208,7 @@ and "'successful_manager_operation_result.Delegation_result" :=
   (successful_manager_operation_result.Delegation_result_skeleton Z.t).
 
 Module
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
   Module contents_result.
     Definition Endorsement_result := 'contents_result.Endorsement_result.
     Definition Manager_operation_result :=
@@ -221,20 +225,16 @@ Module
       'successful_manager_operation_result.Delegation_result.
   End successful_manager_operation_result.
 End
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
 Import
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
 
-Definition operation_metadata := 'operation_metadata.
 Definition contents_result_list := 'contents_result_list.
+Definition operation_metadata := 'operation_metadata.
 Definition contents_result := 'contents_result.
+Definition manager_operation_result := 'manager_operation_result.
 Definition successful_manager_operation_result :=
   'successful_manager_operation_result.
-
-Arguments Applied {_}.
-Arguments Backtracked {_}.
-Arguments Failed {_}.
-Arguments Skipped {_}.
 
 Parameter operation_metadata_encoding :
   Data_encoding.t packed_operation_metadata.

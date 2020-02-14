@@ -12,12 +12,12 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
 Require Tezos.Amendment.
-Require Tezos.Apply_results.
-Require Tezos.Baking.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Baking_mli. Module Baking := Baking_mli.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.
-Require Tezos.Script_interpreter.
+Require Tezos.Script_interpreter_mli. Module Script_interpreter := Script_interpreter_mli.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 

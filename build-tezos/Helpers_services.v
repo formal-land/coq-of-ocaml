@@ -11,9 +11,9 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results.
+Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 Require Tezos.Constants_repr.
-Require Tezos.Contract_services.
+Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.

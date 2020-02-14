@@ -6,7 +6,7 @@ broken_file_names = commented_lines.map {|line| line[1..-1]}
 
 puts "#{broken_file_names.size} broken files"
 for broken_file_name in broken_file_names do
-  command = "coqc -R . Tezos -impredicative-set -type-in-type #{broken_file_name}"
+  command = "coqc -R . Tezos -impredicative-set -type-in-type -w -notation-overridden #{broken_file_name}"
   puts command
   system(command)
 end

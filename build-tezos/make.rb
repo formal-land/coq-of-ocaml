@@ -5,8 +5,16 @@ protocol_folder = "#{tezos_folder}/src/proto_alpha/lib_protocol"
 interface_file = "#{tezos_folder}/generated/Environment_mli.v"
 environment_file = "Environment.v"
 
-system("cp #{interface_file} #{environment_file}")
-system("cp #{protocol_folder}/*.v ./")
+def copy_if_different(source, target)
+  unless File.exist?(target) && File.read(source) == File.read(target) then
+    system("cp #{source} #{target}")
+  end
+end
+
+copy_if_different(interface_file, environment_file)
+for source_name in Dir.glob("#{protocol_folder}/*.v") do
+  copy_if_different(source_name, File.basename(source_name))
+end
 
 files = File.read("_CoqProject")
   .split("\n")

@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Require Tezos.Alpha_context.
-Require Tezos.Baking.
+Require Tezos.Baking_mli. Module Baking := Baking_mli.
 Require Tezos.Contract_repr.
 Require Tezos.Misc.
 Require Tezos.Services_registration.
@@ -108,7 +108,7 @@ Definition info_encoding : Data_encoding.encoding info :=
       (Data_encoding.req None None "grace_period" Alpha_context.Cycle.encoding)).
 
 Module S.
-  Definition path : RPC_path.path Updater.rpc_context Updater.rpc_context :=
+  Definition raw_path : RPC_path.path Updater.rpc_context Updater.rpc_context :=
     RPC_path.op_div (RPC_path.op_div RPC_path.open_root "context") "delegates".
   
   Import Data_encoding.
@@ -124,7 +124,7 @@ Module S.
   End list_query.
   Definition list_query := list_query.record.
   
-  Definition list_query : RPC_query.t list_query :=
+  Definition __list_query_value : RPC_query.t list_query :=
     Pervasives.op_pipegt
       (RPC_query.op_pipeplus
         (RPC_query.op_pipeplus
@@ -142,15 +142,16 @@ Module S.
     : RPC_service.service (* `GET *) unit Updater.rpc_context
       Updater.rpc_context list_query unit
       (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) :=
-    RPC_service.get_service (Some "Lists all registered delegates.") list_query
+    RPC_service.get_service (Some "Lists all registered delegates.")
+      __list_query_value
       (Data_encoding.__list_value None
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)) path.
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)) raw_path.
   
   Definition path
     : RPC_path.path Updater.rpc_context
       (Updater.rpc_context *
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) :=
-    RPC_path.op_divcolon path
+    RPC_path.op_divcolon raw_path
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg).
   
   Definition __info_value
