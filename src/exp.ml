@@ -38,7 +38,7 @@ type t =
   | LetFun of t option Definition.t * t
   | LetTyp of Name.t * Name.t list * Type.t * t
     (** The definition of a type. It is used to represent module values. *)
-  | Match of t * (Pattern.t * match_existential_cast option * t) list * t option
+  | Match of t * (Pattern.t * match_existential_cast option * t) list * t option * bool
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list
     (** Construct a record giving an expression for each field. *)
@@ -165,7 +165,8 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return (Function (x, e))
   | Texp_function { cases; _ } ->
     let is_gadt_match = Attribute.has_match_gadt attributes in
-    open_cases typ_vars cases is_gadt_match >>= fun (x, e) ->
+    let is_with_default_case = Attribute.has_match_with_default attributes in
+    open_cases typ_vars cases is_gadt_match is_with_default_case >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
@@ -181,8 +182,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
     let is_gadt_match = Attribute.has_match_gadt attributes in
+    let is_with_default_case = Attribute.has_match_with_default attributes in
     of_expression typ_vars e >>= fun e ->
-    of_match typ_vars e cases exception_cases is_gadt_match
+    of_match typ_vars e cases exception_cases is_gadt_match is_with_default_case
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
@@ -361,6 +363,7 @@ and of_match
   (cases : case list)
   (exception_cases : case list)
   (is_gadt_match : bool)
+  (is_with_default_case : bool)
   : t Monad.t =
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
@@ -417,7 +420,8 @@ and of_match
             Variable (MixedPath.PathName PathName.false_value, [])
           )
         ],
-        None
+        None,
+        false
       )
     ) in
   let e =
@@ -467,7 +471,7 @@ and of_match
     match default_values with
     | [default_value] -> Some default_value
     | _ -> None in
-  return (Match (e, cases, default_value))
+  return (Match (e, cases, default_value, is_with_default_case))
 
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
@@ -475,10 +479,11 @@ and open_cases
   (typ_vars : Name.t Name.Map.t)
   (cases : case list)
   (is_gadt_match : bool)
+  (is_with_default_case : bool)
   : (Name.t * t) Monad.t =
   let name = Name.of_string false "function_parameter" in
   let e = Variable (MixedPath.of_name name, []) in
-  of_match typ_vars e cases [] is_gadt_match >>= fun e ->
+  of_match typ_vars e cases [] is_gadt_match is_with_default_case >>= fun e ->
   return (name, e)
 
 and import_let_fun
@@ -566,8 +571,8 @@ and of_let
       of_expression typ_vars e1 >>= fun e1 ->
       begin match p with
       | Some (Pattern.Variable x) -> return (LetVar (x, [], e1, e2))
-      | Some p -> return (Match (e1, [p, None, e2], None))
-      | None -> return (Match (e1, [], None))
+      | Some p -> return (Match (e1, [p, None, e2], None, false))
+      | None -> return (Match (e1, [], None, false))
       end
     | _ ->
       import_let_fun typ_vars false is_rec cases >>= fun def ->
@@ -1073,9 +1078,9 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       end ^^ !^ ":=" ^^ Type.to_coq None None typ ^^ !^ "in" ^^
       newline ^^ to_coq false e
     )
-  | Match (e, cases, default_value) ->
-    begin match (cases, default_value) with
-    | ([(pattern, existential_cast, e2)], None)
+  | Match (e, cases, default_value, is_with_default_case) ->
+    begin match (cases, default_value, is_with_default_case) with
+    | ([(pattern, existential_cast, e2)], None, false)
       when not (Pattern.has_or_patterns pattern) ->
       Pp.parens paren @@ nest (
         !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
@@ -1097,6 +1102,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           nest (
             !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline
           )
+        ) ^^
+        (if is_with_default_case then
+          !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ !^ "unreachable_gadt_branch" ^^ newline
+        else
+          empty
         ) ^^
         !^ "end"
       )
@@ -1171,19 +1181,14 @@ and to_coq_cast_existentials
     match existential_cast with
     | Some { return_typ; cast_with_axioms = true; _ } ->
       nest (
-        !^ "obj_magic" ^^ Type.to_coq None (Some Type.Context.Apply) return_typ ^^
+        !^ "obj_magic" ^^
+        Type.to_coq None (Some Type.Context.Apply) return_typ ^^
         to_coq true e
       )
     | _ -> to_coq false e in
   match existential_cast with
-  | None
-  | Some { bound_vars = []; _ }
-  | Some { new_typ_vars = []; cast_with_axioms = false; _ } -> e
+  | None -> e
   | Some { new_typ_vars; bound_vars; cast_with_axioms; _ } ->
-    let existential_names =
-      Pp.primitive_tuple (List.map Name.to_coq new_typ_vars) in
-    let existential_names_pattern =
-      Pp.primitive_tuple_pattern (List.map Name.to_coq new_typ_vars) in
     let variable_names =
       Pp.primitive_tuple (bound_vars |> List.map (fun (name, _) ->
         Name.to_coq name
@@ -1192,34 +1197,55 @@ and to_coq_cast_existentials
       Pp.primitive_tuple_type (bound_vars |> List.map (fun (_, typ) ->
         Type.to_coq None (Some Type.Context.Apply) typ
       )) in
-    nest (
-      !^ "let" ^^
-      !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
-      variable_names ^^ !^ ":=" ^^
+    begin match (bound_vars, new_typ_vars) with
+    | ([], _) -> e
+    | (_, []) ->
+      if cast_with_axioms then
+        let variable_names_pattern =
+          match bound_vars with
+          | [_] -> variable_names
+          | _ -> !^ "'" ^-^ variable_names in
+        nest (
+          !^ "let" ^^ variable_names_pattern ^^ !^ ":=" ^^
+          nest (!^ "obj_magic" ^^ variable_typ ^^ variable_names) ^^
+          !^ "in" ^^ newline ^^
+          e
+        )
+      else
+        e
+    | _ ->
+      let existential_names =
+        Pp.primitive_tuple (List.map Name.to_coq new_typ_vars) in
+      let existential_names_pattern =
+        Pp.primitive_tuple_pattern (List.map Name.to_coq new_typ_vars) in
       nest (
-        begin if cast_with_axioms then
-          !^ "obj_magic_exists"
-        else
-          !^ "existT"
-        end ^^
-        parens (nest (
-          !^ "fun" ^^ existential_names_pattern ^^
-          (* TODO: try to remove this annotation once in Coq 8.11 *)
-          begin match new_typ_vars with
-          | [_] -> !^ ":" ^^ !^ "Set"
-          | _ -> empty
+        !^ "let" ^^ !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
+        variable_names ^^ !^ ":=" ^^
+        nest (
+          begin if cast_with_axioms then
+            !^ "obj_magic_exists"
+          else
+            !^ "existT"
           end ^^
-          !^ "=>" ^^ variable_typ
-        )) ^^
-        begin if cast_with_axioms then
-          empty
-        else
-          Pp.primitive_tuple_infer (List.length new_typ_vars)
-        end ^^
-        variable_names
-      ) ^^ !^ "in" ^^ newline ^^
-      e
-    )
+          parens (nest (
+            !^ "fun" ^^ existential_names_pattern ^^
+            (* TODO: try to remove this annotation once in Coq 8.11 *)
+            begin match new_typ_vars with
+            | [_] -> !^ ":" ^^ !^ "Set"
+            | _ -> empty
+            end ^^
+            !^ "=>" ^^ variable_typ
+          )) ^^
+          begin if cast_with_axioms then
+            empty
+          else
+            Pp.primitive_tuple_infer (List.length new_typ_vars)
+          end ^^
+          variable_names
+        ) ^^ !^ "in" ^^ newline ^^
+        e
+      )
+    end
 
 and to_coq_arity (arity : int) : SmartPrint.t =
   match arity with

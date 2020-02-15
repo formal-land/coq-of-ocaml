@@ -47,6 +47,8 @@ Axiom obj_magic_exists_eval
   : forall {Es : Type} {T : Es -> Set} {vs : Es} {x : T vs},
   obj_magic_exists T x = existT _ vs x.
 
+Parameter unreachable_gadt_branch : forall {A : Set}, A.
+
 Parameter extensible_type : Set.
 
 Parameter extensible_type_value : extensible_type.

@@ -6,6 +6,7 @@ type t =
   | ForceGadt
   | Implicit of string
   | MatchGadt
+  | MatchWithDefault
 
 let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
   attributes |> Monad.List.filter_map (fun (loc, payload) ->
@@ -32,6 +33,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
         raise None Unexpected "Expected a single string parameter for attribute"
       end
     | "coq_match_gadt" -> return (Some MatchGadt)
+    | "coq_match_with_default" -> return (Some MatchWithDefault)
     | _ -> return None)
   )
 
@@ -56,5 +58,11 @@ let get_implicits (attributes : t list) : string list =
 let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function
     | MatchGadt -> true
+    | _ -> false
+  )
+
+let has_match_with_default (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | MatchWithDefault -> true
     | _ -> false
   )
