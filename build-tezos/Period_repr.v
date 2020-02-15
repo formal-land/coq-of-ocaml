@@ -73,7 +73,7 @@ Definition of_seconds_exn (__t_value : (|Compare.Int64|).(Compare.S.t))
   | _ => Pervasives.invalid_arg "Period.of_seconds_exn"
   end.
 
-Definition mult (i : (|Compare.Int32|).(Compare.S.t)) (p : int64)
+Definition mult (i : (|Compare.Int32|).(Compare.S.t)) (__p_value : int64)
   : Error_monad.tzresult int64 :=
   if
     (|Compare.Int32|).(Compare.S.op_lt) i
@@ -81,7 +81,7 @@ Definition mult (i : (|Compare.Int32|).(Compare.S.t)) (p : int64)
       0 then
     Error_monad.__error_value extensible_type_value
   else
-    Error_monad.ok (Int64.mul (Int64.of_int32 i) p).
+    Error_monad.ok (Int64.mul (Int64.of_int32 i) __p_value).
 
 Definition zero : (|Compare.Int64|).(Compare.S.t) :=
   of_seconds_exn

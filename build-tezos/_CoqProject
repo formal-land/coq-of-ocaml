@@ -1,6 +1,8 @@
 -R . Tezos
 -arg -impredicative-set
 -arg -type-in-type
+-arg -w
+-arg -notation-overridden
 
 Alpha_context_mli.v
 Alpha_context.v
@@ -88,7 +90,7 @@ Script_expr_hash.v
 Script_int_repr_mli.v
 Script_int_repr.v
 Script_interpreter_mli.v
-#Script_interpreter.v
+Script_interpreter.v
 Script_ir_annot_mli.v
 Script_ir_annot.v
 Script_ir_translator_mli.v

@@ -163,9 +163,9 @@ Module Script.
     Lwt.__return
       (Error_monad.op_gtgtquestion (Script_repr.force_bytes lexpr)
         (fun function_parameter =>
-          let '(b, cost) := function_parameter in
+          let '(__b_value, cost) := function_parameter in
           Error_monad.op_gtpipequestion (Raw_context.consume_gas ctxt cost)
-            (fun ctxt => (b, ctxt)))).
+            (fun ctxt => (__b_value, ctxt)))).
   
   Module Legacy_support := Legacy_script_support_repr.
 End Script.

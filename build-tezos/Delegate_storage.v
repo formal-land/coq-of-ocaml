@@ -863,9 +863,9 @@ Definition frozen_balance_by_cycle_encoding
     (List.fold_left
       (fun m =>
         fun function_parameter =>
-          let '(c, b) := function_parameter in
-          (|Cycle_repr.Map|).(S.MAP.add) c b m) (|Cycle_repr.Map|).(S.MAP.empty))
-    None
+          let '(c, __b_value) := function_parameter in
+          (|Cycle_repr.Map|).(S.MAP.add) c __b_value m)
+      (|Cycle_repr.Map|).(S.MAP.empty)) None
     (Data_encoding.__list_value None
       (Data_encoding.merge_objs
         (Data_encoding.obj1

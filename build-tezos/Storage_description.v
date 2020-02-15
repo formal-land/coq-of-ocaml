@@ -134,34 +134,34 @@ Definition args := 'args.
 Fixpoint unpack {a b c : Set} (v : args a b c) (x : c) {struct v} : a * b :=
   match v with
   | One _ => obj_magic (a * b) x
-  | Pair l r =>
-    let 'existT _ [__0, __1, __Pair_'inter_key] [l, r] :=
+  | Pair l __r_value =>
+    let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
       obj_magic_exists
         (fun '[__0, __1, __Pair_'inter_key] =>
           [(args a __0 __Pair_'inter_key) ** (args __Pair_'inter_key __1 c)])
-        [l, r] in
+        [l, __r_value] in
     obj_magic (a * b)
       (let unpack_l := unpack l in
-      let unpack_r := unpack r in
+      let unpack_r := unpack __r_value in
       let '(c, d) := unpack_r x in
-      let '(b, a) := unpack_l c in
-      (b, (a, d)))
+      let '(__b_value, __a_value) := unpack_l c in
+      (__b_value, (__a_value, d)))
   end.
 
 Fixpoint pack {a b c : Set} (v : args a b c) (x : a) (y : b) {struct v} : c :=
   match (v, y) with
   | (One _, _) => obj_magic c (x, y)
-  | (Pair l r, _ as y) =>
-    let 'existT _ [__0, __1, __Pair_'inter_key] [l, r, y] :=
+  | (Pair l __r_value, _ as y) =>
+    let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value, y] :=
       obj_magic_exists
         (fun '[__0, __1, __Pair_'inter_key] =>
           [(args a __0 __Pair_'inter_key) ** (args __Pair_'inter_key __1 c) **
-            (__0 * __1)]) [l, r, y] in
+            (__0 * __1)]) [l, __r_value, y] in
     obj_magic c
       (let pack_l := pack l in
-      let pack_r := pack r in
-      let '(a, d) := y in
-      let c := pack_l x a in
+      let pack_r := pack __r_value in
+      let '(__a_value, d) := y in
+      let c := pack_l x __a_value in
       pack_r c d)
   end.
 
@@ -169,18 +169,17 @@ Fixpoint compare {a b c : Set} (function_parameter : args a b c)
   {struct function_parameter} : b -> b -> Z :=
   match function_parameter with
   | One {| args.One.compare := compare' |} =>
-    let 'existT _ tt compare' :=
-      obj_magic_exists (fun _ => (b -> b -> Z)) compare' in
+    let compare' := obj_magic (b -> b -> Z) compare' in
     obj_magic (b -> b -> Z) compare'
-  | Pair l r =>
-    let 'existT _ [__0, __1, __Pair_'inter_key] [l, r] :=
+  | Pair l __r_value =>
+    let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
       obj_magic_exists
         (fun '[__0, __1, __Pair_'inter_key] =>
           [(args a __0 __Pair_'inter_key) ** (args __Pair_'inter_key __1 c)])
-        [l, r] in
+        [l, __r_value] in
     obj_magic (b -> b -> Z)
       (let compare_l := compare l in
-      let compare_r := compare r in
+      let compare_r := compare __r_value in
       fun function_parameter =>
         let '(a1, b1) := function_parameter in
         fun function_parameter =>
@@ -226,13 +225,13 @@ Fixpoint register_indexed_subcontext {a b r : Set}
       (let compare_left := compare __left in
       let equal_left (x : __0) (y : __0) : bool :=
         (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
-      let list_left (r : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
-        Error_monad.op_gtgteqquestion (__list_value r)
+      let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
+        Error_monad.op_gtgteqquestion (__list_value __r_value)
           (fun l => Error_monad.__return (destutter equal_left l)) in
-      let list_right (r : __Pair_'inter_key)
+      let list_right (__r_value : __Pair_'inter_key)
         : Lwt.t (Error_monad.tzresult (list __1)) :=
-        let '(a, k) := unpack __left r in
-        Error_monad.op_gtgteqquestion (__list_value a)
+        let '(__a_value, k) := unpack __left __r_value in
+        Error_monad.op_gtgteqquestion (__list_value __a_value)
           (fun l =>
             Error_monad.__return
               (List.map Pervasives.snd
@@ -243,9 +242,8 @@ Fixpoint register_indexed_subcontext {a b r : Set}
       register_indexed_subcontext
         (register_indexed_subcontext dir list_left __left) list_right __right)
   | (One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |}, _) =>
-    let 'existT _ tt [arg, arg_encoding] :=
-      obj_magic_exists (fun _ => [(RPC_arg.t a) ** (Data_encoding.t a)])
-        [arg, arg_encoding] in
+    let '[arg, arg_encoding] :=
+      obj_magic [(RPC_arg.t a) ** (Data_encoding.t a)] [arg, arg_encoding] in
     obj_magic (t b)
       match Pervasives.op_exclamation dir with
       | Value _ => Pervasives.invalid_arg ""

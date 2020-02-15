@@ -180,7 +180,7 @@ Definition register2 {A B C D E : Set}
 Definition get_rpc_services (function_parameter : unit)
   : RPC_directory.directory Updater.rpc_context :=
   let '_ := function_parameter in
-  let p :=
+  let __p_value :=
     RPC_directory.map
       (fun c =>
         Error_monad.op_gtgteq (rpc_init c)
@@ -199,4 +199,4 @@ Definition get_rpc_services (function_parameter : unit)
       "json")
     (fun function_parameter =>
       let '_ := function_parameter in
-      Lwt.__return p).
+      Lwt.__return __p_value).

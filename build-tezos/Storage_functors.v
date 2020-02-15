@@ -43,17 +43,18 @@ End ENCODER.
 
 Definition Make_encoder :=
   fun (V : {t : _ & VALUE.signature t}) =>
-    ((let of_bytes (__key_value : list string) (b : MBytes.t)
+    ((let of_bytes (__key_value : list string) (__b_value : MBytes.t)
       : Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t) :=
-      match Data_encoding.Binary.of_bytes (|V|).(Storage_sigs.VALUE.encoding) b
-        with
+      match
+        Data_encoding.Binary.of_bytes (|V|).(Storage_sigs.VALUE.encoding)
+          __b_value with
       | None => Error_monad.__error_value extensible_type_value
       | Some v => Pervasives.Ok v
       end in
     let to_bytes (v : (|V|).(Storage_sigs.VALUE.t)) : MBytes.t :=
       match Data_encoding.Binary.to_bytes (|V|).(Storage_sigs.VALUE.encoding) v
         with
-      | Some b => b
+      | Some __b_value => __b_value
       | None => MBytes.create 0
       end in
     existT (A := unit) (fun _ => _) tt
@@ -217,11 +218,11 @@ Definition Make_single_data_storage :=
             Error_monad.op_gtgteqquestion
               ((|C|).(Raw_context.T.get) __t_value
                 (|N|).(Storage_sigs.NAME.name))
-              (fun b =>
+              (fun __b_value =>
                 let __key_value :=
                   (|C|).(Raw_context.T.absolute_key) __t_value
                     (|N|).(Storage_sigs.NAME.name) in
-                Lwt.__return (of_bytes __key_value b)) in
+                Lwt.__return (of_bytes __key_value __b_value)) in
           let get_option (__t_value : (|C|).(Raw_context.T.context))
             : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
             Error_monad.op_gtgteq
@@ -230,11 +231,11 @@ Definition Make_single_data_storage :=
               (fun function_parameter =>
                 match function_parameter with
                 | None => Error_monad.return_none
-                | Some b =>
+                | Some __b_value =>
                   let __key_value :=
                     (|C|).(Raw_context.T.absolute_key) __t_value
                       (|N|).(Storage_sigs.NAME.name) in
-                  match of_bytes __key_value b with
+                  match of_bytes __key_value __b_value with
                   | Pervasives.Ok v => Error_monad.return_some v
                   | Pervasives.Error __error_value =>
                     Lwt.__return (Pervasives.Error __error_value)
@@ -413,7 +414,7 @@ Definition Make_data_set_storage :=
                     | None =>
                       (* ❌ Assert instruction is not handled. *)
                       assert false
-                    | Some p => f p acc
+                    | Some __p_value => f __p_value acc
                     end
                   end)
           else
@@ -427,8 +428,8 @@ Definition Make_data_set_storage :=
         dig (|I|).(INDEX.path_length) nil init in
       let elements (s : (|C|).(Raw_context.T.context))
         : Lwt.t (list (|I|).(INDEX.t)) :=
-        fold s (nil (A := elt)) (fun p => fun acc => Lwt.__return (cons p acc))
-        in
+        fold s (nil (A := elt))
+          (fun __p_value => fun acc => Lwt.__return (cons __p_value acc)) in
       (* ❌ top_level_evaluation *)
       existT (A := unit) (fun _ => _) tt
         {|
@@ -462,11 +463,11 @@ Definition Make_indexed_data_storage :=
           : Lwt.t (Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t)) :=
           Error_monad.op_gtgteqquestion
             ((|C|).(Raw_context.T.get) s ((|I|).(INDEX.to_path) i nil))
-            (fun b =>
+            (fun __b_value =>
               let __key_value :=
                 (|C|).(Raw_context.T.absolute_key) s
                   ((|I|).(INDEX.to_path) i nil) in
-              Lwt.__return (of_bytes __key_value b)) in
+              Lwt.__return (of_bytes __key_value __b_value)) in
         let get_option (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
           Error_monad.op_gtgteq
@@ -474,11 +475,11 @@ Definition Make_indexed_data_storage :=
             (fun function_parameter =>
               match function_parameter with
               | None => Error_monad.return_none
-              | Some b =>
+              | Some __b_value =>
                 let __key_value :=
                   (|C|).(Raw_context.T.absolute_key) s
                     ((|I|).(INDEX.to_path) i nil) in
-                match of_bytes __key_value b with
+                match of_bytes __key_value __b_value with
                 | Pervasives.Ok v => Error_monad.return_some v
                 | Pervasives.Error __error_value =>
                   Lwt.__return (Pervasives.Error __error_value)
@@ -580,11 +581,12 @@ Definition Make_indexed_data_storage :=
         let bindings (s : (|C|).(Raw_context.T.context))
           : Lwt.t (list ((|I|).(INDEX.t) * (|V|).(Storage_sigs.VALUE.t))) :=
           fold s (nil (A := key * value))
-            (fun p => fun v => fun acc => Lwt.__return (cons (p, v) acc)) in
+            (fun __p_value =>
+              fun v => fun acc => Lwt.__return (cons (__p_value, v) acc)) in
         let keys (s : (|C|).(Raw_context.T.context))
           : Lwt.t (list (|I|).(INDEX.t)) :=
           fold_keys s (nil (A := key))
-            (fun p => fun acc => Lwt.__return (cons p acc)) in
+            (fun __p_value => fun acc => Lwt.__return (cons __p_value acc)) in
         (* ❌ top_level_evaluation *)
         existT (A := unit) (fun _ => _) tt
           {|
@@ -702,11 +704,11 @@ Definition Make_indexed_carbonated_data_storage :=
             (fun s =>
               Error_monad.op_gtgteqquestion
                 ((|C|).(Raw_context.T.get) s (data_key i))
-                (fun b =>
+                (fun __b_value =>
                   let __key_value :=
                     (|C|).(Raw_context.T.absolute_key) s (data_key i) in
                   Error_monad.op_gtgteqquestion
-                    (Lwt.__return (of_bytes __key_value b))
+                    (Lwt.__return (of_bytes __key_value __b_value))
                     (fun v =>
                       Error_monad.__return
                         (((|C|).(Raw_context.T.project) s), v)))) in
@@ -875,7 +877,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let keys_unaccounted (s : (|C|).(Raw_context.T.context))
           : Lwt.t (list (|I|).(INDEX.t)) :=
           fold_keys_unaccounted s (nil (A := key))
-            (fun p => fun acc => Lwt.__return (cons p acc)) in
+            (fun __p_value => fun acc => Lwt.__return (cons __p_value acc)) in
         (* ❌ top_level_evaluation *)
         existT (A := unit) (fun _ => _) tt
           {|
@@ -1403,7 +1405,8 @@ Definition Make_indexed_subcontext :=
             let elements (s : (|C|).(Raw_context.T.context))
               : Lwt.t (list (|I|).(INDEX.t)) :=
               fold s (nil (A := elt))
-                (fun p => fun acc => Lwt.__return (cons p acc)) in
+                (fun __p_value => fun acc => Lwt.__return (cons __p_value acc))
+              in
             (* ❌ top_level_evaluation *)
             existT (A := unit) (fun _ => _) tt
               {|
@@ -1435,11 +1438,11 @@ Definition Make_indexed_subcontext :=
               Error_monad.op_gtgteqquestion
                 ((|Raw_context|).(Raw_context.T.get) (pack s i)
                   (|N|).(Storage_sigs.NAME.name))
-                (fun b =>
+                (fun __b_value =>
                   let __key_value :=
                     (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
                       (|N|).(Storage_sigs.NAME.name) in
-                  Lwt.__return (of_bytes __key_value b)) in
+                  Lwt.__return (of_bytes __key_value __b_value)) in
             let get_option
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
@@ -1450,11 +1453,11 @@ Definition Make_indexed_subcontext :=
                 (fun function_parameter =>
                   match function_parameter with
                   | None => Error_monad.return_none
-                  | Some b =>
+                  | Some __b_value =>
                     let __key_value :=
                       (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
                         (|N|).(Storage_sigs.NAME.name) in
-                    match of_bytes __key_value b with
+                    match of_bytes __key_value __b_value with
                     | Pervasives.Ok v => Error_monad.return_some v
                     | Pervasives.Error __error_value =>
                       Lwt.__return (Pervasives.Error __error_value)
@@ -1547,7 +1550,8 @@ Definition Make_indexed_subcontext :=
             let bindings (s : (|C|).(Raw_context.T.context))
               : Lwt.t (list ((|I|).(INDEX.t) * (|V|).(Storage_sigs.VALUE.t))) :=
               fold s (nil (A := key * value))
-                (fun p => fun v => fun acc => Lwt.__return (cons (p, v) acc)) in
+                (fun __p_value =>
+                  fun v => fun acc => Lwt.__return (cons (__p_value, v) acc)) in
             let fold_keys {A : Set}
               (s : (|C|).(Raw_context.T.context)) (init : A)
               (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
@@ -1563,7 +1567,8 @@ Definition Make_indexed_subcontext :=
             let keys (s : (|C|).(Raw_context.T.context))
               : Lwt.t (list (|I|).(INDEX.t)) :=
               fold_keys s (nil (A := key))
-                (fun p => fun acc => Lwt.__return (cons p acc)) in
+                (fun __p_value => fun acc => Lwt.__return (cons __p_value acc))
+              in
             (* ❌ top_level_evaluation *)
             existT (A := unit) (fun _ => _) tt
               {|
@@ -1678,12 +1683,12 @@ Definition Make_indexed_subcontext :=
                 (fun c =>
                   Error_monad.op_gtgteqquestion
                     ((|Raw_context|).(Raw_context.T.get) c data_name)
-                    (fun b =>
+                    (fun __b_value =>
                       let __key_value :=
                         (|Raw_context|).(Raw_context.T.absolute_key) c data_name
                         in
                       Error_monad.op_gtgteqquestion
-                        (Lwt.__return (of_bytes __key_value b))
+                        (Lwt.__return (of_bytes __key_value __b_value))
                         (fun v =>
                           Error_monad.__return
                             (((|Raw_context|).(Raw_context.T.project) c), v))))
@@ -1968,7 +1973,8 @@ Definition Wrap_indexed_data_storage :=
           (list
             ((|K|).(WRAPPER.t) * (|C|).(Storage_sigs.Indexed_data_storage.value))) :=
         fold s (nil (A := key * value))
-          (fun p => fun v => fun acc => Lwt.__return (cons (p, v) acc)) in
+          (fun __p_value =>
+            fun v => fun acc => Lwt.__return (cons (__p_value, v) acc)) in
       let fold_keys {A : Set}
         (s : (|C|).(Storage_sigs.Indexed_data_storage.context)) (init : A)
         (f : (|K|).(WRAPPER.t) -> A -> Lwt.t A) : Lwt.t A :=
@@ -1982,7 +1988,7 @@ Definition Wrap_indexed_data_storage :=
       let keys (s : (|C|).(Storage_sigs.Indexed_data_storage.context))
         : Lwt.t (list (|K|).(WRAPPER.t)) :=
         fold_keys s (nil (A := key))
-          (fun p => fun acc => Lwt.__return (cons p acc)) in
+          (fun __p_value => fun acc => Lwt.__return (cons __p_value acc)) in
       existT (A := unit) (fun _ => _) tt
         {|
           Storage_sigs.Indexed_data_storage.tag_Non_iterable_indexed_data_storage :=

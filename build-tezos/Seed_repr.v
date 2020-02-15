@@ -40,8 +40,8 @@ Definition state_hash_encoding : Data_encoding.encoding State_hash.t :=
 Definition seed_encoding : Data_encoding.encoding seed :=
   Data_encoding.conv
     (fun function_parameter =>
-      let 'B b := function_parameter in
-      b) (fun b => B b) None state_hash_encoding.
+      let 'B __b_value := function_parameter in
+      __b_value) (fun __b_value => B __b_value) None state_hash_encoding.
 
 Definition empty : seed :=
   B (State_hash.hash_bytes None [ MBytes.of_string initial_seed ]).
@@ -58,10 +58,10 @@ Definition initialize_new (function_parameter : seed) : list MBytes.t -> t :=
       (State_hash.hash_bytes None
         (cons (State_hash.to_bytes state) (cons zero_bytes append))).
 
-Definition xor_higher_bits (i : int32) (b : MBytes.t) : MBytes.t :=
-  let higher := MBytes.get_int32 b 0 in
-  let r := Int32.logxor higher i in
-  let res := MBytes.copy b in
+Definition xor_higher_bits (i : int32) (__b_value : MBytes.t) : MBytes.t :=
+  let higher := MBytes.get_int32 __b_value 0 in
+  let __r_value := Int32.logxor higher i in
+  let res := MBytes.copy __b_value in
   (* ❌ Sequences of instructions are ignored (operator ";") *)
   (* ❌ instruction_sequence ";" *)
   res.
@@ -71,12 +71,12 @@ Definition __sequence_value (function_parameter : t) : int32 -> sequence :=
   fun n =>
     Pervasives.op_pipegt
       (Pervasives.op_pipegt (State_hash.to_bytes state) (xor_higher_bits n))
-      (fun b => S (State_hash.hash_bytes None [ b ])).
+      (fun __b_value => S (State_hash.hash_bytes None [ __b_value ])).
 
 Definition take (function_parameter : sequence) : MBytes.t * sequence :=
   let 'S state := function_parameter in
-  let b := State_hash.to_bytes state in
-  let h := State_hash.hash_bytes None [ b ] in
+  let __b_value := State_hash.to_bytes state in
+  let h := State_hash.hash_bytes None [ __b_value ] in
   ((State_hash.to_bytes h), (S h)).
 
 Definition take_int32 (s : sequence) (bound : (|Compare.Int32|).(Compare.S.t))
@@ -89,13 +89,13 @@ Definition take_int32 (s : sequence) (bound : (|Compare.Int32|).(Compare.S.t))
   else
     let fix loop (s : sequence) {struct s} : int32 * sequence :=
       let '(__bytes_value, s) := take s in
-      let r := Int32.abs (MBytes.get_int32 __bytes_value 0) in
+      let __r_value := Int32.abs (MBytes.get_int32 __bytes_value 0) in
       let drop_if_over :=
         Int32.sub Int32.max_int (Int32.rem Int32.max_int bound) in
-      if (|Compare.Int32|).(Compare.S.op_gteq) r drop_if_over then
+      if (|Compare.Int32|).(Compare.S.op_gteq) __r_value drop_if_over then
         loop s
       else
-        let v := Int32.rem r bound in
+        let v := Int32.rem __r_value bound in
         (v, s) in
     loop s.
 

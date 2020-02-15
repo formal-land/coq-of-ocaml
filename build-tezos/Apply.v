@@ -259,8 +259,8 @@ Definition apply_manager_operation_content {kind : Set}
                                           Script_interpreter.step_constants.chain_id :=
                                             chain_id |} in
                                       Error_monad.op_gtgteqquestion
-                                        (Script_interpreter.execute ctxt mode
-                                          step_constants script entrypoint
+                                        (Script_interpreter.execute_wrapper ctxt
+                                          mode step_constants script entrypoint
                                           parameter)
                                         (fun function_parameter =>
                                           let '{|
@@ -375,7 +375,7 @@ Definition apply_manager_operation_content {kind : Set}
                                     (fun '[__Ex_script_'a, __Ex_script_'b] =>
                                       [(Script_typed_ir.script __Ex_script_'a
                                         __Ex_script_'b) **
-                                        Alpha_context.context]) _
+                                        Alpha_context.context]) [_, _]
                                     [parsed_script, ctxt] in
                                 Error_monad.op_gtgteqquestion
                                   (Script_ir_translator.collect_big_maps ctxt
@@ -822,8 +822,8 @@ Fixpoint mark_skipped {kind : Set}
         (fun '[__0, __1] =>
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
             Alpha_context.Tez.tez ** (Alpha_context.manager_operation __0) **
-            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) _
-        [source, fee, operation, rest] in
+            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
+        _] [source, fee, operation, rest] in
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Cons_result
       (Apply_results.Manager_operation_result
@@ -856,8 +856,8 @@ Fixpoint precheck_manager_contents_list {A kind : Set}
       existT
         (fun '[__0, __1] =>
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
-            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) _
-        [op, rest] in
+            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
+        _] [op, rest] in
     Error_monad.op_gtgteqquestion
       (precheck_manager_contents ctxt chain_id raw_operation op)
       (fun ctxt =>
@@ -914,8 +914,8 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
             Alpha_context.Tez.tez **
             (Alpha_context.contents (Alpha_context.Kind.manager __0)) **
-            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) _
-        [source, fee, op, rest] in
+            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
+        _] [source, fee, op, rest] in
     let source := Alpha_context.Contract.implicit_contract source in
     Error_monad.op_gtgteq (apply_manager_contents ctxt mode chain_id op)
       (fun function_parameter =>
@@ -996,7 +996,7 @@ Definition mark_backtracked {A : Set}
           (fun '[__0, __1] =>
             [(Apply_results.contents_result.Manager_operation_result __0) **
               (Apply_results.contents_result_list
-                (Alpha_context.Kind.manager __1))]) _ [op, rest] in
+                (Alpha_context.Kind.manager __1))]) [_, _] [op, rest] in
       Apply_results.Cons_result
         (Apply_results.Manager_operation_result
           {|
@@ -1547,7 +1547,7 @@ Definition apply_contents_list {A : Set}
       existT
         (fun '[__1, __2] =>
           (Alpha_context.contents_list (Alpha_context.Kind.manager (__1 * __2))))
-        _ op in
+        [_, _] op in
     Error_monad.op_gtgteqquestion
       (precheck_manager_contents_list ctxt chain_id operation op)
       (fun ctxt =>

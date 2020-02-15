@@ -56,8 +56,8 @@ Definition mul (x : Z.t) (y : Z.t) : Z.t := Z.mul x y.
 Definition ediv (x : Z.t) (y : Z.t) : option (Z.t * Z.t) :=
   (* ❌ Try-with are not handled *)
   try
-    (let '(q, r) := Z.ediv_rem x y in
-    Some (q, r)).
+    (let '(q, __r_value) := Z.ediv_rem x y in
+    Some (q, __r_value)).
 
 Definition add_n : Z.t -> Z.t -> Z.t := add.
 

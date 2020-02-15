@@ -740,15 +740,15 @@ Module Baking_rights.
         (List.fold_left
           (fun function_parameter =>
             let '(acc, previous) := function_parameter in
-            fun r =>
+            fun __r_value =>
               if
                 (|Signature.Public_key_hash|).(S.SPublic_key_hash.__Set).(S.INDEXES_Set.mem)
-                  r.(t.delegate) previous then
+                  __r_value.(t.delegate) previous then
                 (acc, previous)
               else
-                ((cons r acc),
+                ((cons __r_value acc),
                   ((|Signature.Public_key_hash|).(S.SPublic_key_hash.__Set).(S.INDEXES_Set.add)
-                    r.(t.delegate) previous)))
+                    __r_value.(t.delegate) previous)))
           (nil,
             (|Signature.Public_key_hash|).(S.SPublic_key_hash.__Set).(S.INDEXES_Set.empty))
           rights)).
@@ -786,10 +786,10 @@ Module Baking_rights.
                     match q.(S.baking_rights_query.delegates) with
                     | [] => Error_monad.__return rights
                     | (cons _ _) as delegates =>
-                      let is_requested (p : t) : bool :=
+                      let is_requested (__p_value : t) : bool :=
                         List.__exists
                           ((|Signature.Public_key_hash|).(S.SPublic_key_hash.equal)
-                            p.(t.delegate)) delegates in
+                            __p_value.(t.delegate)) delegates in
                       Error_monad.__return (List.filter is_requested rights)
                     end))).
   
@@ -987,10 +987,10 @@ Module Endorsing_rights.
                     match q.(S.endorsing_rights_query.delegates) with
                     | [] => Error_monad.__return rights
                     | (cons _ _) as delegates =>
-                      let is_requested (p : t) : bool :=
+                      let is_requested (__p_value : t) : bool :=
                         List.__exists
                           ((|Signature.Public_key_hash|).(S.SPublic_key_hash.equal)
-                            p.(t.delegate)) delegates in
+                            __p_value.(t.delegate)) delegates in
                       Error_monad.__return (List.filter is_requested rights)
                     end))).
   

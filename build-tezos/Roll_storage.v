@@ -191,10 +191,10 @@ Definition freeze_rolls_for_cycle
 
 Module Random.
   Definition int32_to_bytes (i : int32) : MBytes.t :=
-    let b := MBytes.create 4 in
+    let __b_value := MBytes.create 4 in
     (* ❌ Sequences of instructions are ignored (operator ";") *)
     (* ❌ instruction_sequence ";" *)
-    b.
+    __b_value.
   
   Definition level_random
     (__seed_value : Seed_repr.seed) (use : string) (level : Level_repr.t)

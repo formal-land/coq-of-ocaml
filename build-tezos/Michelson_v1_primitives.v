@@ -166,10 +166,13 @@ Definition valid_case (name : string) : bool :=
     | _ => false
     end in
   let fix for_all
-    (a : (|Compare.Int|).(Compare.S.t)) (b : (|Compare.Int|).(Compare.S.t))
-    (f : (|Compare.Int|).(Compare.S.t) -> bool) {struct a} : bool :=
-    Pervasives.op_pipepipe ((|Compare.Int|).(Compare.S.op_gt) a b)
-      (Pervasives.op_andand (f a) (for_all (Pervasives.op_plus a 1) b f)) in
+    (__a_value : (|Compare.Int|).(Compare.S.t))
+    (__b_value : (|Compare.Int|).(Compare.S.t))
+    (f : (|Compare.Int|).(Compare.S.t) -> bool) {struct __a_value} : bool :=
+    Pervasives.op_pipepipe
+      ((|Compare.Int|).(Compare.S.op_gt) __a_value __b_value)
+      (Pervasives.op_andand (f __a_value)
+        (for_all (Pervasives.op_plus __a_value 1) __b_value f)) in
   let len := String.length name in
   Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_ltgt) len 0)
     (Pervasives.op_andand

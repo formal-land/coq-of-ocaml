@@ -106,7 +106,7 @@ Definition register (function_parameter : unit) : unit :=
           Error_monad.op_gtgteq (Alpha_context.Vote.get_current_proposal ctxt)
             (fun function_parameter =>
               match function_parameter with
-              | Pervasives.Ok p => Error_monad.return_some p
+              | Pervasives.Ok __p_value => Error_monad.return_some __p_value
               | Pervasives.Error __error_value =>
                 Lwt.__return (Pervasives.Error __error_value)
               end)).

@@ -255,7 +255,7 @@ Definition minimal_deserialize_cost {A : Set} (lexpr : Data_encoding.lazy_t A)
   Data_encoding.apply_lazy
     (fun function_parameter =>
       let '_ := function_parameter in
-      Gas_limit_repr.free) (fun b => serialized_cost b)
+      Gas_limit_repr.free) (fun __b_value => serialized_cost __b_value)
     (fun c_free =>
       fun function_parameter =>
         let '_ := function_parameter in
@@ -278,7 +278,7 @@ Definition is_unit_parameter
       match Micheline.root v with
       | Micheline.Prim _ Michelson_v1_primitives.D_Unit [] [] => true
       | _ => false
-      end) (fun b => MBytes.op_eq b unit_bytes)
+      end) (fun __b_value => MBytes.op_eq __b_value unit_bytes)
     (fun res =>
       fun function_parameter =>
         let '_ := function_parameter in

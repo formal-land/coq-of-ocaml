@@ -157,7 +157,7 @@ Definition Make :=
         1000000 in
       let fix __left (ppf : Format.formatter) (amount : int64) {struct ppf}
         : unit :=
-        let '(d, r) :=
+        let '(d, __r_value) :=
           ((Int64.div amount
             (* ❌ Constant of type int64 is converted to int *)
             1000),
@@ -175,14 +175,15 @@ Definition Make :=
                   (CamlinternalFormatBasics.Lit_padding
                     CamlinternalFormatBasics.Zeros 3)
                   CamlinternalFormatBasics.No_precision
-                  CamlinternalFormatBasics.End_of_format)) "%a%03Ld") __left d r
+                  CamlinternalFormatBasics.End_of_format)) "%a%03Ld") __left d
+            __r_value
         else
           Format.fprintf ppf
             (CamlinternalFormatBasics.Format
               (CamlinternalFormatBasics.Int64 CamlinternalFormatBasics.Int_d
                 CamlinternalFormatBasics.No_padding
                 CamlinternalFormatBasics.No_precision
-                CamlinternalFormatBasics.End_of_format) "%Ld") r in
+                CamlinternalFormatBasics.End_of_format) "%Ld") __r_value in
       let __right (ppf : Format.formatter) (amount : Z) : unit :=
         let triplet (ppf : Format.formatter) (v : Z) : unit :=
           if (|Compare.Int|).(Compare.S.op_gt) (Pervasives.__mod v 10) 0 then

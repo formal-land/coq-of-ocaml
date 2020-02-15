@@ -1285,11 +1285,11 @@ Definition has_default_entrypoint (expr : Script_repr.lazy_expr) : bool :=
           {struct function_parameter} : bool :=
           match function_parameter with
           |
-            Micheline.Prim _ Michelson_v1_primitives.T_or (cons l (cons r []))
-              annots =>
+            Micheline.Prim _ Michelson_v1_primitives.T_or
+              (cons l (cons __r_value [])) annots =>
             Pervasives.op_pipepipe
               (List.__exists (String.equal "%default") annots)
-              (Pervasives.op_pipepipe (has_default l) (has_default r))
+              (Pervasives.op_pipepipe (has_default l) (has_default __r_value))
           | Micheline.Prim _ _ _ annots =>
             List.__exists (String.equal "%default") annots
           | _ => false

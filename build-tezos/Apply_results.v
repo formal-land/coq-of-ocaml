@@ -1166,20 +1166,20 @@ Module Encoding.
                   'Manager_operation_result {|
                     contents_result.Manager_operation_result.balance_updates := bus;
                       contents_result.Manager_operation_result.operation_result
-                        := r;
+                        := __r_value;
                       contents_result.Manager_operation_result.internal_operation_results
                         := rs
                       |} := function_parameter in
-                (bus, r, rs);
+                (bus, __r_value, rs);
             case.Case.inj :=
               fun function_parameter =>
-                let '(bus, r, rs) := function_parameter in
+                let '(bus, __r_value, rs) := function_parameter in
                 Manager_operation_result
                   {|
                     contents_result.Manager_operation_result.balance_updates :=
                       bus;
                     contents_result.Manager_operation_result.operation_result :=
-                      r;
+                      __r_value;
                     contents_result.Manager_operation_result.internal_operation_results :=
                       rs |} |}.
   
@@ -1359,7 +1359,7 @@ Definition contents_and_result_encoding
             (packed_contents_and_result ->
             option (Alpha_context.contents A * contents_result A)) **
             (contents_result A -> __Case_'a) **
-            (__Case_'a -> contents_result A)]) _
+            (__Case_'a -> contents_result A)]) [_, _]
         [tag, name, encoding, proj, inj, meta_encoding, mselect, meta_proj,
           meta_inj] in
     let proj (c : packed_contents_and_result)
@@ -1429,7 +1429,7 @@ Definition contents_result_list_encoding
         existT
           (fun '[__0, __1] =>
             [(contents_result (Alpha_context.Kind.manager __0)) **
-              (contents_result_list (Alpha_context.Kind.manager __1))]) _
+              (contents_result_list (Alpha_context.Kind.manager __1))]) [_, _]
           [o, os] in
       cons (Contents_result o) (to_list (Contents_result_list os))
     end in
@@ -1507,8 +1507,8 @@ Definition contents_and_result_list_encoding
           (fun '[__0, __1] =>
             [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
               (contents_result (Alpha_context.Kind.manager __0)) **
-              (contents_and_result_list (Alpha_context.Kind.manager __1))]) _
-          [op, res, rest] in
+              (contents_and_result_list (Alpha_context.Kind.manager __1))]) [_,
+          _] [op, res, rest] in
       cons (Contents_and_result op res)
         (to_list (Contents_and_result_list rest))
     end in
@@ -1810,8 +1810,8 @@ Fixpoint kind_equal_list {kind kind2 : Set}
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (Alpha_context.contents_list (Alpha_context.Kind.manager __1)) **
             (contents_result (Alpha_context.Kind.manager __2)) **
-            (contents_result_list (Alpha_context.Kind.manager __3))]) _
-        [op, ops, res, ress] in
+            (contents_result_list (Alpha_context.Kind.manager __3))]) [_, _, _,
+        _] [op, ops, res, ress] in
     match kind_equal op res with
     | None => None
     | Some Eq =>
@@ -1836,7 +1836,7 @@ Fixpoint pack_contents_list {kind : Set}
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (Alpha_context.contents_list (Alpha_context.Kind.manager __1)) **
             (contents_result (Alpha_context.Kind.manager __0)) **
-            (contents_result_list (Alpha_context.Kind.manager __1))]) _
+            (contents_result_list (Alpha_context.Kind.manager __1))]) [_, _]
         [op, ops, res, ress] in
     Cons_and_result op res (pack_contents_list ops ress)
   |
@@ -1893,7 +1893,7 @@ Fixpoint unpack_contents_list {kind : Set}
         (fun '[__0, __1] =>
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (contents_result (Alpha_context.Kind.manager __0)) **
-            (contents_and_result_list (Alpha_context.Kind.manager __1))]) _
+            (contents_and_result_list (Alpha_context.Kind.manager __1))]) [_, _]
         [op, res, rest] in
     let '(ops, ress) := unpack_contents_list rest in
     ((Alpha_context.Cons op ops), (Cons_result res ress))
@@ -1913,8 +1913,8 @@ Fixpoint to_list (function_parameter : packed_contents_result_list)
       existT
         (fun '[__0, __1] =>
           [(contents_result (Alpha_context.Kind.manager __0)) **
-            (contents_result_list (Alpha_context.Kind.manager __1))]) _ [o, os]
-      in
+            (contents_result_list (Alpha_context.Kind.manager __1))]) [_, _]
+        [o, os] in
     cons (Contents_result o) (to_list (Contents_result_list os))
   end.
 
@@ -1984,7 +1984,7 @@ Definition operation_data_and_metadata_encoding
                       __Operation_data_'kind1) **
                       (operation_metadata
                         __Operation_metadata_'kind)])
-                  _ [op, res] in
+                  [_, _] [op, res] in
               match
                 kind_equal_list
                   op.(Alpha_context.protocol_data.contents)

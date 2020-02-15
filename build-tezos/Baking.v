@@ -46,26 +46,27 @@ Definition minimal_time
   let fix cumsum_time_between_blocks
     (acc : Alpha_context.Timestamp.time)
     (durations : list Alpha_context.Period.period)
-    (p : (|Compare.Int32|).(Compare.S.t)) {struct acc}
+    (__p_value : (|Compare.Int32|).(Compare.S.t)) {struct acc}
     : Error_monad.tzresult Alpha_context.Timestamp.time :=
     if
-      (|Compare.Int32|).(Compare.S.op_lteq) p
+      (|Compare.Int32|).(Compare.S.op_lteq) __p_value
         (* ❌ Constant of type int32 is converted to int *)
         0 then
       Error_monad.ok acc
     else
       match durations with
       | [] =>
-        cumsum_time_between_blocks acc [ Alpha_context.Period.one_minute ] p
+        cumsum_time_between_blocks acc [ Alpha_context.Period.one_minute ]
+          __p_value
       | cons last [] =>
-        Error_monad.op_gtgtquestion (Alpha_context.Period.mult p last)
+        Error_monad.op_gtgtquestion (Alpha_context.Period.mult __p_value last)
           (fun period => Alpha_context.Timestamp.op_plusquestion acc period)
       | cons first durations =>
         Error_monad.op_gtgtquestion
           (Alpha_context.Timestamp.op_plusquestion acc first)
           (fun acc =>
-            let p := Int32.pred p in
-            cumsum_time_between_blocks acc durations p)
+            let __p_value := Int32.pred __p_value in
+            cumsum_time_between_blocks acc durations __p_value)
       end in
   Lwt.__return
     (cumsum_time_between_blocks pred_timestamp

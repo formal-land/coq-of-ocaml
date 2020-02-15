@@ -19,16 +19,16 @@ Require Tezos.Constants_repr.
 (* top_level_evaluation *)
 
 Definition int64_to_bytes (i : int64) : MBytes.t :=
-  let b := MBytes.create 8 in
+  let __b_value := MBytes.create 8 in
   (* ❌ Sequences of instructions are ignored (operator ";") *)
   (* ❌ instruction_sequence ";" *)
-  b.
+  __b_value.
 
-Definition int64_of_bytes (b : MBytes.t) : Error_monad.tzresult int64 :=
-  if (|Compare.Int|).(Compare.S.op_ltgt) (MBytes.length b) 8 then
+Definition int64_of_bytes (__b_value : MBytes.t) : Error_monad.tzresult int64 :=
+  if (|Compare.Int|).(Compare.S.op_ltgt) (MBytes.length __b_value) 8 then
     Error_monad.__error_value extensible_type_value
   else
-    Error_monad.ok (MBytes.get_int64 b 0).
+    Error_monad.ok (MBytes.get_int64 __b_value 0).
 
 Definition from_int64 (fitness : int64) : list MBytes.t :=
   [ MBytes.of_string Constants_repr.version_number; int64_to_bytes fitness ].

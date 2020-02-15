@@ -83,14 +83,14 @@ Definition add (c : int32) (i : (|Compare.Int|).(Compare.S.t)) : int32 :=
 Definition sub (c : int32) (i : (|Compare.Int|).(Compare.S.t)) : option int32 :=
   (* ❌ Sequences of instructions are ignored (operator ";") *)
   (* ❌ instruction_sequence ";" *)
-  let r := Int32.sub c (Int32.of_int i) in
+  let __r_value := Int32.sub c (Int32.of_int i) in
   if
-    (|Compare.Int32|).(Compare.S.op_lt) r
+    (|Compare.Int32|).(Compare.S.op_lt) __r_value
       (* ❌ Constant of type int32 is converted to int *)
       0 then
     None
   else
-    Some r.
+    Some __r_value.
 
 Definition to_int32 {A : Set} (i : A) : A := i.
 

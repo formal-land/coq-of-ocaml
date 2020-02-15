@@ -87,7 +87,7 @@ Parameter step : forall {aft bef : Set},
   step_constants -> Script_typed_ir.descr bef aft -> stack bef ->
   Lwt.t (Error_monad.tzresult (stack aft * Alpha_context.context)).
 
-Parameter execute :
+Parameter execute_wrapper :
   Alpha_context.t -> Script_ir_translator.unparsing_mode -> step_constants ->
   Alpha_context.Script.t -> string -> Alpha_context.Script.expr ->
   Lwt.t (Error_monad.tzresult execution_result).

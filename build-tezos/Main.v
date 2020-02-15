@@ -574,7 +574,8 @@ Definition compare_operations
       existT
         (fun '[__0, __1] =>
           [(Alpha_context.contents.Manager_operation __0) **
-            (Alpha_context.contents.Manager_operation __1)]) _ [op1, op2] in
+            (Alpha_context.contents.Manager_operation __1)]) [_, _] [op1, op2]
+      in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   |
@@ -584,7 +585,8 @@ Definition compare_operations
       existT
         (fun '[__2, __4] =>
           [(Alpha_context.contents.Manager_operation __2) **
-            (Alpha_context.contents.Manager_operation __4)]) _ [op1, op2] in
+            (Alpha_context.contents.Manager_operation __4)]) [_, _] [op1, op2]
+      in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   |
@@ -594,7 +596,8 @@ Definition compare_operations
       existT
         (fun '[__5, __6] =>
           [(Alpha_context.contents.Manager_operation __5) **
-            (Alpha_context.contents.Manager_operation __6)]) _ [op1, op2] in
+            (Alpha_context.contents.Manager_operation __6)]) [_, _] [op1, op2]
+      in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   |
@@ -604,7 +607,8 @@ Definition compare_operations
       existT
         (fun '[__10, __8] =>
           [(Alpha_context.contents.Manager_operation __8) **
-            (Alpha_context.contents.Manager_operation __10)]) _ [op1, op2] in
+            (Alpha_context.contents.Manager_operation __10)]) [_, _] [op1, op2]
+      in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   end.
@@ -628,7 +632,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
           existT
             (fun '[__Ex_script_'a, __Ex_script_'b] =>
               [(Script_typed_ir.script __Ex_script_'a __Ex_script_'b) **
-                Alpha_context.context]) _ [parsed_script, ctxt] in
+                Alpha_context.context]) [_, _] [parsed_script, ctxt] in
         Error_monad.op_gtgteqquestion
           (Script_ir_translator.extract_big_map_diff ctxt
             Script_ir_translator.Optimized false

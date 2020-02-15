@@ -384,8 +384,7 @@ Fixpoint to_list (function_parameter : packed_contents_list)
       _ content in
   match content with
   | Single o =>
-    let 'existT _ tt o :=
-      obj_magic_exists (fun _ => (contents __Contents_list_'kind)) o in
+    let o := obj_magic (contents __Contents_list_'kind) o in
     obj_magic (list packed_contents) [ Contents o ]
   | Cons o os =>
     let 'existT _ [__0, __1] [o, os] :=
@@ -1330,7 +1329,7 @@ Definition check_signature_sync {A : Set}
     let 'existT _ [__2, __3] [contents, signature] :=
       existT
         (fun '[__2, __3] =>
-          [(contents_list (Kind.manager (__2 * __3))) ** Signature.t]) _
+          [(contents_list (Kind.manager (__2 * __3))) ** Signature.t]) [_, _]
         [contents, signature] in
     check Signature.Generic_operation (Contents_list contents) signature
   end.
@@ -1403,7 +1402,7 @@ Definition equal_contents_kind {a b : Set} (op1 : contents a) (op2 : contents b)
       existT
         (fun '[__0, __1] =>
           [(contents.Manager_operation __0) ** (contents.Manager_operation __1)])
-        _ [op1, op2] in
+        [_, _] [op1, op2] in
     match
       equal_manager_operation_kind op1.(contents.Manager_operation.operation)
         op2.(contents.Manager_operation.operation) with
@@ -1426,7 +1425,8 @@ Fixpoint equal_contents_kind_list {a b : Set}
         (fun '[__4, __5, __6, __7] =>
           [(contents (Kind.manager __4)) ** (contents_list (Kind.manager __5))
             ** (contents (Kind.manager __6)) **
-            (contents_list (Kind.manager __7))]) _ [op1, ops1, op2, ops2] in
+            (contents_list (Kind.manager __7))]) [_, _, _, _]
+        [op1, ops1, op2, ops2] in
     match equal_contents_kind op1 op2 with
     | None => None
     | Some Eq =>

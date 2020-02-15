@@ -58,7 +58,7 @@ Definition previous (ctxt : Raw_context.context) : Level_repr.level :=
   | None =>
     (* ❌ Assert instruction is not handled. *)
     assert false
-  | Some p => p
+  | Some __p_value => __p_value
   end.
 
 Definition first_level_in_cycle

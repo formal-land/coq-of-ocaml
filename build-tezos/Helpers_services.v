@@ -959,11 +959,11 @@ Module Forge.
                 (* `POST *) unit + (* `PUT *) unit) RPC_context.t
               (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
             i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (K * a * b * c * q * i * o)) * L)))) * L * D) (b : D)
+              (K * a * b * c * q * i * o)) * L)))) * L * D) (__b_value : D)
     (branch : (|Block_hash|).(S.HASH.t)) (level : Alpha_context.Raw_level.t)
     (function_parameter : unit) : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
-    operation ctxt b branch
+    operation ctxt __b_value branch
       (Alpha_context.Endorsement
         {| Alpha_context.contents.Endorsement.level := level |}).
   
@@ -989,14 +989,14 @@ Module Forge.
                 (* `POST *) unit + (* `PUT *) unit) RPC_context.t
               (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
             i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (K * a * b * c * q * i * o)) * L)))) * L * D) (b : D)
+              (K * a * b * c * q * i * o)) * L)))) * L * D) (__b_value : D)
     (branch : (|Block_hash|).(S.HASH.t))
     (source : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     (period : Alpha_context.Voting_period.t)
     (proposals : list (|Protocol_hash|).(S.HASH.t)) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
-    operation ctxt b branch
+    operation ctxt __b_value branch
       (Alpha_context.Proposals
         {| Alpha_context.contents.Proposals.source := source;
           Alpha_context.contents.Proposals.period := period;
@@ -1024,7 +1024,7 @@ Module Forge.
                 (* `POST *) unit + (* `PUT *) unit) RPC_context.t
               (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
             i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (K * a * b * c * q * i * o)) * L)))) * L * D) (b : D)
+              (K * a * b * c * q * i * o)) * L)))) * L * D) (__b_value : D)
     (branch : (|Block_hash|).(S.HASH.t))
     (source : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     (period : Alpha_context.Voting_period.t)
@@ -1032,7 +1032,7 @@ Module Forge.
     (ballot : Alpha_context.Vote.ballot) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
-    operation ctxt b branch
+    operation ctxt __b_value branch
       (Alpha_context.Ballot
         {| Alpha_context.contents.Ballot.source := source;
           Alpha_context.contents.Ballot.period := period;

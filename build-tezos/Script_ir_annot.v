@@ -104,21 +104,24 @@ Definition unparse_type_annot
   (function_parameter : option Script_typed_ir.type_annot) : list string :=
   match function_parameter with
   | None => nil
-  | Some (Script_typed_ir.Type_annot a) => [ Pervasives.op_caret ":" a ]
+  | Some (Script_typed_ir.Type_annot __a_value) =>
+    [ Pervasives.op_caret ":" __a_value ]
   end.
 
 Definition unparse_var_annot
   (function_parameter : option Script_typed_ir.var_annot) : list string :=
   match function_parameter with
   | None => nil
-  | Some (Script_typed_ir.Var_annot a) => [ Pervasives.op_caret "@" a ]
+  | Some (Script_typed_ir.Var_annot __a_value) =>
+    [ Pervasives.op_caret "@" __a_value ]
   end.
 
 Definition unparse_field_annot
   (function_parameter : option Script_typed_ir.field_annot) : list string :=
   match function_parameter with
   | None => nil
-  | Some (Script_typed_ir.Field_annot a) => [ Pervasives.op_caret "%" a ]
+  | Some (Script_typed_ir.Field_annot __a_value) =>
+    [ Pervasives.op_caret "%" __a_value ]
   end.
 
 Definition field_to_var_annot
@@ -314,19 +317,21 @@ Definition parse_annots
                   else
                     match String.get s 0 with
                     | ":" % char =>
-                      sub_or_wildcard nil (fun a => Type_annot_opt a) s acc
+                      sub_or_wildcard nil
+                        (fun __a_value => Type_annot_opt __a_value) s acc
                     | "@" % char =>
                       sub_or_wildcard
                         (if allow_special_var then
                           [ "%" % char ]
                         else
-                          nil) (fun a => Var_annot_opt a) s acc
+                          nil) (fun __a_value => Var_annot_opt __a_value) s acc
                     | "%" % char =>
                       sub_or_wildcard
                         (if allow_special_field then
                           [ "@" % char ]
                         else
-                          nil) (fun a => Field_annot_opt a) s acc
+                          nil) (fun __a_value => Field_annot_opt __a_value) s
+                        acc
                     | _ => Error_monad.__error_value extensible_type_value
                     end)) (Error_monad.ok nil) l) List.rev.
 
@@ -334,21 +339,21 @@ Definition opt_var_of_var_opt (function_parameter : option string)
   : option Script_typed_ir.var_annot :=
   match function_parameter with
   | None => None
-  | Some a => Some (Script_typed_ir.Var_annot a)
+  | Some __a_value => Some (Script_typed_ir.Var_annot __a_value)
   end.
 
 Definition opt_field_of_field_opt (function_parameter : option string)
   : option Script_typed_ir.field_annot :=
   match function_parameter with
   | None => None
-  | Some a => Some (Script_typed_ir.Field_annot a)
+  | Some __a_value => Some (Script_typed_ir.Field_annot __a_value)
   end.
 
 Definition opt_type_of_type_opt (function_parameter : option string)
   : option Script_typed_ir.type_annot :=
   match function_parameter with
   | None => None
-  | Some a => Some (Script_typed_ir.Type_annot a)
+  | Some __a_value => Some (Script_typed_ir.Type_annot __a_value)
   end.
 
 Definition classify_annot
@@ -363,20 +368,23 @@ Definition classify_annot
       List.fold_left
         (fun function_parameter =>
           let '(in_v, rv, in_t, rt, in_f, rf) := function_parameter in
-          fun a =>
-            match (a, in_v, rv, in_t, rt, in_f, rf) with
+          fun __a_value =>
+            match (__a_value, in_v, rv, in_t, rt, in_f, rf) with
             |
-              ((Var_annot_opt a, true, _, _, _, _, _) |
-              (Var_annot_opt a, false, [], _, _, _, _)) =>
-              (true, (cons (opt_var_of_var_opt a) rv), false, rt, false, rf)
+              ((Var_annot_opt __a_value, true, _, _, _, _, _) |
+              (Var_annot_opt __a_value, false, [], _, _, _, _)) =>
+              (true, (cons (opt_var_of_var_opt __a_value) rv), false, rt, false,
+                rf)
             |
-              ((Type_annot_opt a, _, _, true, _, _, _) |
-              (Type_annot_opt a, _, _, false, [], _, _)) =>
-              (false, rv, true, (cons (opt_type_of_type_opt a) rt), false, rf)
+              ((Type_annot_opt __a_value, _, _, true, _, _, _) |
+              (Type_annot_opt __a_value, _, _, false, [], _, _)) =>
+              (false, rv, true, (cons (opt_type_of_type_opt __a_value) rt),
+                false, rf)
             |
-              ((Field_annot_opt a, _, _, _, _, true, _) |
-              (Field_annot_opt a, _, _, _, _, false, [])) =>
-              (false, rv, false, rt, true, (cons (opt_field_of_field_opt a) rf))
+              ((Field_annot_opt __a_value, _, _, _, _, true, _) |
+              (Field_annot_opt __a_value, _, _, _, _, false, [])) =>
+              (false, rv, false, rt, true,
+                (cons (opt_field_of_field_opt __a_value) rf))
             | _ => Pervasives.raise extensible_type_value
             end) (false, nil, false, nil, false, nil) l in
     Error_monad.ok ((List.rev rv), (List.rev rt), (List.rev rf))).
@@ -386,7 +394,7 @@ Definition get_one_annot {A : Set}
   : Error_monad.tzresult (option A) :=
   match function_parameter with
   | [] => Error_monad.ok None
-  | cons a [] => Error_monad.ok a
+  | cons __a_value [] => Error_monad.ok __a_value
   | _ => Error_monad.__error_value extensible_type_value
   end.
 
@@ -395,8 +403,8 @@ Definition get_two_annot {A : Set}
   : Error_monad.tzresult (option A * option A) :=
   match function_parameter with
   | [] => Error_monad.ok (None, None)
-  | cons a [] => Error_monad.ok (a, None)
-  | cons a (cons b []) => Error_monad.ok (a, b)
+  | cons __a_value [] => Error_monad.ok (__a_value, None)
+  | cons __a_value (cons __b_value []) => Error_monad.ok (__a_value, __b_value)
   | _ => Error_monad.__error_value extensible_type_value
   end.
 
@@ -530,10 +538,10 @@ Definition parse_var_annot
               Error_monad.op_gtpipequestion (get_one_annot loc vars)
                 (fun function_parameter =>
                   match function_parameter with
-                  | (Some _) as a => a
+                  | (Some _) as __a_value => __a_value
                   | None =>
                     match default with
-                    | Some a => a
+                    | Some __a_value => __a_value
                     | None => None
                     end
                   end)))).
@@ -697,10 +705,10 @@ Definition parse_entrypoint_annot
               Error_monad.op_gtpipequestion (get_one_annot loc vars)
                 (fun function_parameter =>
                   match function_parameter with
-                  | (Some _) as a => (a, f)
+                  | (Some _) as __a_value => (__a_value, f)
                   | None =>
                     match default with
-                    | Some a => (a, f)
+                    | Some __a_value => (__a_value, f)
                     | None => (None, f)
                     end
                   end)))).

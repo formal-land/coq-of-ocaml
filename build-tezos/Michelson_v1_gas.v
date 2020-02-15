@@ -43,42 +43,37 @@ Module Cost_of.
     (wit : Script_typed_ir.comparable_struct a b) (v : a) {struct wit} : Z :=
     match (wit, v) with
     | (Script_typed_ir.Int_key _, _ as v) =>
-      let 'existT _ tt v :=
-        obj_magic_exists
-          (fun _ => (Script_int_repr.num Alpha_context.Script_int.z)) v in
+      let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.z) v in
       obj_magic Z (int_bytes v)
     | (Script_typed_ir.Nat_key _, _ as v) =>
-      let 'existT _ tt v :=
-        obj_magic_exists
-          (fun _ => (Script_int_repr.num Alpha_context.Script_int.n)) v in
+      let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.n) v in
       obj_magic Z (int_bytes v)
     | (Script_typed_ir.String_key _, _ as v) =>
-      let 'existT _ tt v := obj_magic_exists (fun _ => string) v in
+      let v := obj_magic string v in
       obj_magic Z (String.length v)
     | (Script_typed_ir.Bytes_key _, _ as v) =>
-      let 'existT _ tt v := obj_magic_exists (fun _ => MBytes.t) v in
+      let v := obj_magic MBytes.t v in
       obj_magic Z (MBytes.length v)
     | (Script_typed_ir.Bool_key _, _) => obj_magic Z 8
     | (Script_typed_ir.Key_hash_key _, _) =>
       obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
     | (Script_typed_ir.Timestamp_key _, _ as v) =>
-      let 'existT _ tt v :=
-        obj_magic_exists (fun _ => Alpha_context.Script_timestamp.t) v in
+      let v := obj_magic Alpha_context.Script_timestamp.t v in
       obj_magic Z (timestamp_bytes v)
     | (Script_typed_ir.Address_key _, _) =>
       obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
     | (Script_typed_ir.Mutez_key _, _) => obj_magic Z 8
-    | (Script_typed_ir.Pair_key (l, _) (r, _) _, _ as v) =>
-      let 'existT _ [__0, __1, __Pair_key] [l, r, v] :=
+    | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =>
+      let 'existT _ [__0, __1, __Pair_key] [l, __r_value, v] :=
         obj_magic_exists
           (fun '[__0, __1, __Pair_key] =>
             [(Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf) **
               (Script_typed_ir.comparable_struct __1 __Pair_key) ** (__0 * __1)])
-          [l, r, v] in
+          [l, __r_value, v] in
       obj_magic Z
         (let '(lval, rval) := v in
         Pervasives.op_plus (size_of_comparable l lval)
-          (size_of_comparable r rval))
+          (size_of_comparable __r_value rval))
     end.
   
   Definition __string_value (length : Z) : Alpha_context.Gas.cost :=
@@ -527,16 +522,16 @@ Module Cost_of.
     Definition hash_key : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost 30.
     
-    Definition hash_blake2b (b : MBytes.t) : Alpha_context.Gas.cost :=
+    Definition hash_blake2b (__b_value : MBytes.t) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
-        (Pervasives.op_plus 102 (Pervasives.op_div (MBytes.length b) 5)).
+        (Pervasives.op_plus 102 (Pervasives.op_div (MBytes.length __b_value) 5)).
     
-    Definition hash_sha256 (b : MBytes.t) : Alpha_context.Gas.cost :=
+    Definition hash_sha256 (__b_value : MBytes.t) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
-        (Pervasives.op_plus 409 (MBytes.length b)).
+        (Pervasives.op_plus 409 (MBytes.length __b_value)).
     
-    Definition hash_sha512 (b : MBytes.t) : Alpha_context.Gas.cost :=
-      let __bytes_value := MBytes.length b in
+    Definition hash_sha512 (__b_value : MBytes.t) : Alpha_context.Gas.cost :=
+      let __bytes_value := MBytes.length __b_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 409
           (Pervasives.op_plus (Pervasives.lsr __bytes_value 1)
@@ -573,49 +568,40 @@ Module Cost_of.
       : Alpha_context.Gas.cost :=
       match (ty, x, y) with
       | (Script_typed_ir.Bool_key _, _ as x, _ as y) =>
-        let 'existT _ tt [x, y] :=
-          obj_magic_exists (fun _ => [bool ** bool]) [x, y] in
+        let '[x, y] := obj_magic [bool ** bool] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_bool x y)
       | (Script_typed_ir.String_key _, _ as x, _ as y) =>
-        let 'existT _ tt [x, y] :=
-          obj_magic_exists (fun _ => [string ** string]) [x, y] in
+        let '[x, y] := obj_magic [string ** string] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_string x y)
       | (Script_typed_ir.Bytes_key _, _ as x, _ as y) =>
-        let 'existT _ tt [x, y] :=
-          obj_magic_exists (fun _ => [MBytes.t ** MBytes.t]) [x, y] in
+        let '[x, y] := obj_magic [MBytes.t ** MBytes.t] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_bytes x y)
       | (Script_typed_ir.Mutez_key _, x, y) =>
-        let 'existT _ tt [x, y] := obj_magic_exists (fun _ => [a ** a]) [x, y]
-          in
+        let '[x, y] := obj_magic [a ** a] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_tez x y)
       | (Script_typed_ir.Int_key _, _ as x, _ as y) =>
-        let 'existT _ tt [x, y] :=
-          obj_magic_exists
-            (fun _ =>
-              [(Script_int_repr.num Alpha_context.Script_int.z) **
-                (Script_int_repr.num Alpha_context.Script_int.z)]) [x, y] in
+        let '[x, y] :=
+          obj_magic
+            [(Script_int_repr.num Alpha_context.Script_int.z) **
+              (Script_int_repr.num Alpha_context.Script_int.z)] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_zint x y)
       | (Script_typed_ir.Nat_key _, _ as x, _ as y) =>
-        let 'existT _ tt [x, y] :=
-          obj_magic_exists
-            (fun _ =>
-              [(Script_int_repr.num Alpha_context.Script_int.n) **
-                (Script_int_repr.num Alpha_context.Script_int.n)]) [x, y] in
+        let '[x, y] :=
+          obj_magic
+            [(Script_int_repr.num Alpha_context.Script_int.n) **
+              (Script_int_repr.num Alpha_context.Script_int.n)] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_zint x y)
       | (Script_typed_ir.Key_hash_key _, x, y) =>
-        let 'existT _ tt [x, y] := obj_magic_exists (fun _ => [a ** a]) [x, y]
-          in
+        let '[x, y] := obj_magic [a ** a] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_key_hash x y)
       | (Script_typed_ir.Timestamp_key _, _ as x, _ as y) =>
-        let 'existT _ tt [x, y] :=
-          obj_magic_exists
-            (fun _ =>
-              [Alpha_context.Script_timestamp.t **
-                Alpha_context.Script_timestamp.t]) [x, y] in
+        let '[x, y] :=
+          obj_magic
+            [Alpha_context.Script_timestamp.t **
+              Alpha_context.Script_timestamp.t] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_timestamp x y)
       | (Script_typed_ir.Address_key _, x, y) =>
-        let 'existT _ tt [x, y] := obj_magic_exists (fun _ => [a ** a]) [x, y]
-          in
+        let '[x, y] := obj_magic [a ** a] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_address x y)
       | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
         let 'existT _ [__0, __1, __Pair_key] [tl, tr, x, y] :=
@@ -718,7 +704,8 @@ Module Cost_of.
     Definition two_arg_type : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost 3.
     
-    Definition operation (b : Z) : Alpha_context.Gas.cost := __bytes_value b.
+    Definition operation (__b_value : Z) : Alpha_context.Gas.cost :=
+      __bytes_value __b_value.
     
     Definition type_ (nb_args : Z) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost (Pervasives.op_plus nb_args 1).
