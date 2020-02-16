@@ -59,8 +59,8 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 35994 lines</li>
-      <li>Coq size: 53072 lines (+47% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 36144 lines</li>
+      <li>Coq size: 53072 lines (+46% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2508</li>
     </ul>
     
@@ -101,6 +101,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           25322,
           27076,
           30388,
+          30388,
         ],
         generated: [
           47563,
@@ -135,6 +136,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           52522,
           52514,
           52355,
+          53072,
           53072,
         ],
         labels: [
@@ -171,6 +173,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-13",
           "02-14",
           "02-15",
+          "02-16",
         ]
       }
 ;
@@ -1476,7 +1479,7 @@ Definition description : Storage_description.t Raw_context.context :=
   <div style="margin: 20px;">
     <h3>Alpha_context_mli</h3>
     <ul>
-      <li>OCaml size: 1390 lines</li>
+      <li>OCaml size: 1392 lines</li>
       <li>Coq size: 2553 lines (+83% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
@@ -1907,9 +1910,11 @@ module Script : sig
 
   val minimal_deserialize_cost : lazy_expr -&gt; Gas.cost
 
-  val force_decode_in_context : context -&gt; lazy_expr -&gt; (expr * context) tzresult Lwt.t
+  val force_decode_in_context :
+    context -&gt; lazy_expr -&gt; (expr * context) tzresult Lwt.t
 
-  val force_bytes_in_context : context -&gt; lazy_expr -&gt; (MBytes.t * context) tzresult Lwt.t
+  val force_bytes_in_context :
+    context -&gt; lazy_expr -&gt; (MBytes.t * context) tzresult Lwt.t
 
   val unit_parameter : lazy_expr
 
@@ -2148,10 +2153,10 @@ module Nonce : sig
 end
 
 module Seed : sig
-  type seed
+  type <abbr class="mark-warning" title="Extensible types are not handled.">seed
 
-  <abbr class="mark-warning" title="Extensible types are not handled.">type error +=
-    | Unknown of {oldest : Cycle.t; cycle : Cycle.t; latest : Cycle.t}</abbr>
+  type error +=
+    | Unknown of {oldest : Cycle.t; cycle : Cycle.t; latest : </abbr>Cycle.t}
 
   val for_cycle : context -&gt; Cycle.t -&gt; seed tzresult Lwt.t
 
@@ -2268,9 +2273,9 @@ module Contract : sig
     balance:Tez.t -&gt;
     script:Script.t * big_map_diff option -&gt;
     delegate:public_key_hash option -&gt;
-    context tzresult Lwt.t
+    context tzresult L<abbr class="mark-warning" title="Extensible types are not handled.">wt.t
 
-  <abbr class="mark-warning" title="Extensible types are not handled.">type error += Balance_too_low of contract * Tez.t * Tez.t</abbr>
+  type error += Balance_too_low of contract * Tez.t</abbr> * Tez.t
 
   val spend : context -&gt; contract -&gt; Tez.t -&gt; context tzresult Lwt.t
 
@@ -2632,13 +2637,13 @@ module Fees : sig
   val start_counting_storage_fees : context -&gt; context
 
   val burn_storage_fees :
-    context -&gt; storage_limit:Z.t -&gt; payer:Contract.t -&gt; context tzresult Lwt.t
+    context -&gt; storage_limit:Z.t -&gt; payer:Contract.t -&gt; context tzresult L<abbr class="mark-warning" title="Extensible types are not handled.">wt.t
 
-  <abbr class="mark-warning" title="Extensible types are not handled.">type error += Cannot_pay_storage_fee</abbr> (* `Temporary *)
+  type error += Cannot_pay_sto</abbr>rage_fee (* `Temporar<abbr class="mark-warning" title="Extensible types are not handled.">y *)
 
-  <abbr class="mark-warning" title="Extensible types are not handled.">type error += Operation_quota_exceeded</abbr> (* `Temporary *)
+  type error += Operation_quota_</abbr>exceeded (* `Temporar<abbr class="mark-warning" title="Extensible types are not handled.">y *)
 
-  <abbr class="mark-warning" title="Extensible types are not handled.">type error += Storage_limit_too_high</abbr> (* `Permanent *)
+  type error += Storage_limit_</abbr>too_high (* `Permanent *)
 
   val check_storage_limit : context -&gt; storage_limit:Z.t -&gt; unit tzresult
 end
@@ -2682,11 +2687,11 @@ module Operation : sig
 
   val hash_packed : packed_operation -&gt; Operation_hash.t
 
-  val acceptable_passes : packed_operation -&gt; int list
+  val acceptable_passes : packed_operation -&gt; int <abbr class="mark-warning" title="Extensible types are not handled.">list
 
-  <abbr class="mark-warning" title="Extensible types are not handled.">type error += Missing_signature</abbr> (* `Permanent *)
+  type error += Missing_s</abbr>ignature (* `Permanen<abbr class="mark-warning" title="Extensible types are not handled.">t *)
 
-  <abbr class="mark-warning" title="Extensible types are not handled.">type error += Invalid_signature</abbr> (* `Permanent *)
+  type error += Invalid_s</abbr>ignature (* `Permanent *)
 
   val check_signature :
     public_key -&gt; Chain_id.t -&gt; _ operation -&gt; unit tzresult Lwt.t
@@ -13760,8 +13765,8 @@ Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
   <div style="margin: 20px;">
     <h3>Apply_results_mli</h3>
     <ul>
-      <li>OCaml size: 190 lines</li>
-      <li>Coq size: 327 lines (+72% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 191 lines</li>
+      <li>Coq size: 327 lines (+71% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -13853,12 +13858,13 @@ and packed_contents_result =
 
 (** The result of an operation in the queue. [Skipped] ones should
     always be at the tail, and after a single [Failed]. *)
-and[@coq_force_gadt] 'kind manager_operation_result =
+and 'kind manager_operation_result =
   | Applied of 'kind successful_manager_operation_result
   | Backtracked of
       'kind successful_manager_operation_result * error list option
   | Failed : 'kind Kind.manager * error list -&gt; 'kind manager_operation_result
   | Skipped : 'kind Kind.manager -&gt; 'kind manager_operation_result
+[@@coq_force_gadt]
 
 (** Result of applying a {!manager_operation_content}, either internal
     or external. *)
@@ -23205,8 +23211,8 @@ Alternative: use a monad to sequence side-effects.">assert (Compare.Z.(total_siz
   | None -&gt;
       return c
 
-let originate_raw c ?prepaid_bootstrap_storage contract ~balance ~script ~delegate
-    =
+let originate_raw c ?prepaid_bootstrap_storage contract ~balance ~script
+    ~delegate =
   create_base
     c
     ?prepaid_bootstrap_storage
@@ -59032,8 +59038,8 @@ Parameter logxor : num n -&gt; num n -&gt; num n.
   <div style="margin: 20px;">
     <h3>Script_interpreter</h3>
     <ul>
-      <li>OCaml size: 1554 lines</li>
-      <li>Coq size: 3309 lines (+112% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1701 lines</li>
+      <li>Coq size: 3309 lines (+94% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -59195,9 +59201,9 @@ let unparse_stack ctxt (stack, stack_ty) =
   let rec unparse_stack :
       type a.
       a stack * a stack_ty -&gt; (Script.expr * string option) list tzresult Lwt.t
-      = function[@coq_match_gadt][@coq_match_with_default]
-    | (Empty, Empty_t) -&gt;
-        return_nil[@coq_implicit &quot;(a := unit)&quot;]
+      = function[@coq_match_gadt] [@coq_match_with_default]
+    | (Empty, Empty_t) -&gt; (
+        return_nil [@coq_implicit &quot;(a := unit)&quot;] )
     | (Item (v, rest), Item_t (ty, rest_ty, annot)) -&gt;
         unparse_data ctxt Readable ty v
         &gt;&gt;=? fun (data, _ctxt) -&gt;
@@ -59210,7 +59216,7 @@ let unparse_stack ctxt (stack, stack_ty) =
           | [a] -&gt;
               Some a
           | _ -&gt;
-              <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr>
+        <abbr class="mark-warning" title="Assert instruction is not handled.">      assert</abbr> false
         in
         let data = Micheline.strip_locations data in
         return ((data, annot) :: rest)
@@ -59226,7 +59232,7 @@ let rec interp_stack_prefix_preserving_operation :
     bef stack -&gt;
     (aft stack * result) tzresult Lwt.t =
  fun f n stk -&gt;
-  match[@coq_match_gadt][@coq_match_with_default] (n, stk) with
+  match[@coq_match_gadt] [@coq_match_with_default] (n, stk) with
   | ( Prefix
         (Prefix
           (Prefix
@@ -59351,13 +59357,13 @@ let rec step :
     | None -&gt;
         return (ret, ctxt)
     | Some log -&gt;
-        trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+       <abbr class="mark-warning" title="Values of extensible types are ignored.
 
-They are sent to a unit type.">Cannot_serialize_log</abbr> (unparse_stack ctxt (ret, descr.aft))
+They are sent to a unit type."> trace Cannot_serial</abbr>ize_log (unparse_stack ctxt (ret, descr.aft))
         &gt;&gt;=? fun stack -&gt;
-        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
+ <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level ctxt, stack) :: !log</abbr> ;
+Alternative: use a monad to sequence side-effects.">       log := (descr.loc, Gas.level ctxt, stack) </abbr>:: !log ;
         return (ret, ctxt)
   in
   let get_log (log : execution_trace ref option) =
@@ -59401,7 +59407,7 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
   let logged_return : a stack * context -&gt; (a stack * context) tzresult Lwt.t =
     logged_return descr
   in
-  match[@coq_match_gadt][@coq_match_with_default] (instr, stack, descr) with
+  match[@coq_match_gadt] [@coq_match_with_default] (instr, stack, descr) with
   (* stack ops *)
   | (Drop, Item (_, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.stack_op)
@@ -59421,16 +59427,16 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
       &gt;&gt;=? fun ctxt -&gt; logged_return (Item (Some v, rest), ctxt)
   | (Cons_none _, rest, _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.variant_no_data)
-      &gt;&gt;=? fun ctxt -&gt; logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
-  | (If_none (bt, bf), Item (v, rest), _) -&gt;
-      begin match v with
-      | None -&gt;
+      &gt;&gt;=? fun ctxt -&gt;
+      logged_return (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
+  | (If_none (bt, bf), Item (v, rest), _) -&gt; (
+    match v with
+    | None -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.branch)
         &gt;&gt;=? fun ctxt -&gt; step ?log ctxt step_constants bt rest
-      | Some v -&gt;
+    | Some v -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.branch)
-        &gt;&gt;=? fun ctxt -&gt; step ?log ctxt step_constants bf (Item (v, rest))
-      end
+        &gt;&gt;=? fun ctxt -&gt; step ?log ctxt step_constants bf (Item (v, rest)) )
   (* pairs *)
   | (Cons_pair, Item (a, Item (b, rest)), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.pair)
@@ -59444,7 +59450,8 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
                   { instr = Seq ({instr = Dip {instr = Cdr}}, {instr = Nop; _});
                     _ } );
             _ } ),
-      Item ((pair : (_, _) pair), rest) , _) -&gt;
+      Item ((pair : (_, _) pair), rest),
+      _ ) -&gt;
       let (a, b) = pair in
       Lwt.return (Gas.consume ctxt Interp_costs.pair_access)
       &gt;&gt;=? fun ctxt -&gt; logged_return (Item (a, Item (b, rest)), ctxt)
@@ -59459,36 +59466,37 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
   (* unions *)
   | (Left, Item (v, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.wrap)
-      &gt;&gt;=? fun ctxt -&gt; logged_return (Item (L v [@coq_implicit &quot;(b := unit)&quot;], rest), ctxt)
+      &gt;&gt;=? fun ctxt -&gt;
+      logged_return (Item ((L v [@coq_implicit &quot;(b := unit)&quot;]), rest), ctxt)
   | (Right, Item (v, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.wrap)
-      &gt;&gt;=? fun ctxt -&gt; logged_return (Item (R v [@coq_implicit &quot;(a := unit)&quot;], rest), ctxt)
-  | (If_left (bt, bf), Item (v, rest), _) -&gt;
-      begin match v with
-      | L v -&gt;
+      &gt;&gt;=? fun ctxt -&gt;
+      logged_return (Item ((R v [@coq_implicit &quot;(a := unit)&quot;]), rest), ctxt)
+  | (If_left (bt, bf), Item (v, rest), _) -&gt; (
+    match v with
+    | L v -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.branch)
         &gt;&gt;=? fun ctxt -&gt; step ?log ctxt step_constants bt (Item (v, rest))
-      | R v -&gt;
+    | R v -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.branch)
-        &gt;&gt;=? fun ctxt -&gt; step ?log ctxt step_constants bf (Item (v, rest))
-      end
+        &gt;&gt;=? fun ctxt -&gt; step ?log ctxt step_constants bf (Item (v, rest)) )
   (* lists *)
   | (Cons_list, Item (hd, Item (tl, rest)), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.cons)
       &gt;&gt;=? fun ctxt -&gt; logged_return (Item (hd :: tl, rest), ctxt)
   | (Nil, rest, _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.variant_no_data)
-      &gt;&gt;=? fun ctxt -&gt; logged_return (Item ([][@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
-  | (If_cons (bt, bf), Item (l, rest), _) -&gt;
-      begin match l with
-      | [] -&gt;
+      &gt;&gt;=? fun ctxt -&gt;
+      logged_return (Item (([] [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
+  | (If_cons (bt, bf), Item (l, rest), _) -&gt; (
+    match l with
+    | [] -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.branch)
         &gt;&gt;=? fun ctxt -&gt; step ?log ctxt step_constants bf rest
-      | hd :: tl -&gt;
+    | hd :: tl -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.branch)
         &gt;&gt;=? fun ctxt -&gt;
-        step ?log ctxt step_constants bt (Item (hd, Item (tl, rest)))
-      end
+        step ?log ctxt step_constants bt (Item (hd, Item (tl, rest))) )
   | (List_map body, Item (l, rest), _) -&gt;
       let rec loop rest ctxt l acc =
         Lwt.return (Gas.consume ctxt Interp_costs.loop_map)
@@ -59498,7 +59506,9 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
             return (Item (List.rev acc, rest), ctxt)
         | hd :: tl -&gt;
             step ?log ctxt step_constants body (Item (hd, rest))
-            &gt;&gt;=? fun[@coq_match_gadt][@coq_match_with_default] (Item (hd, rest), ctxt) -&gt;
+            &gt;&gt;=? fun [@coq_match_gadt] [@coq_match_with_default] ( Item
+                                                                     (hd, rest),
+                                                                   ctxt ) -&gt;
             loop rest ctxt tl (hd :: acc)
       in
       loop rest ctxt l [] &gt;&gt;=? fun (res, ctxt) -&gt; logged_return (res, ctxt)
@@ -59545,13 +59555,12 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
             &gt;&gt;=? fun (stack, ctxt) -&gt; loop ctxt tl stack
       in
       loop ctxt l init &gt;&gt;=? fun (res, ctxt) -&gt; logged_return (res, ctxt)
-  | (Set_mem, Item (v, Item (set, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | (Set_mem, Item (v, Item (set, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
       consume_gas_binop descr (set_mem, v, set) Interp_costs.set_mem rest ctxt
-  | (
-    Set_update,
-    Item (v, Item (presence, Item (set, rest))),
-    (descr : (_ * (_ * (_ * _)), _ * _) descr)
-  ) -&gt;
+  | ( Set_update,
+      Item (v, Item (presence, Item (set, rest))),
+      (descr : (_ * (_ * (_ * _)), _ * _) descr) ) -&gt;
       consume_gas_terop
         descr
         (set_update, v, presence, set)
@@ -59567,7 +59576,9 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
   (* maps *)
   | (Empty_map (t, _), rest, _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.empty_map)
-      &gt;&gt;=? fun ctxt -&gt; logged_return (Item ((empty_map[@coq_implicit &quot;(b := unit)&quot;]) t, rest), ctxt)
+      &gt;&gt;=? fun ctxt -&gt;
+      logged_return
+        (Item ((empty_map [@coq_implicit &quot;(b := unit)&quot;]) t, rest), ctxt)
   | (Map_map body, Item (map, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt (Interp_costs.map_to_list map))
       &gt;&gt;=? fun ctxt -&gt;
@@ -59580,7 +59591,9 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
             return (acc, ctxt)
         | ((k, _) as hd) :: tl -&gt;
             step ?log ctxt step_constants body (Item (hd, rest))
-            &gt;&gt;=? fun[@coq_match_gadt][@coq_match_with_default] (Item (hd, rest), ctxt) -&gt;
+            &gt;&gt;=? fun [@coq_match_gadt] [@coq_match_with_default] ( Item
+                                                                     (hd, rest),
+                                                                   ctxt ) -&gt;
             loop rest ctxt tl (map_update k (Some hd) acc)
       in
       loop rest ctxt l (empty_map (map_key_ty map))
@@ -59604,7 +59617,9 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
       consume_gas_binop descr (map_mem, v, map) Interp_costs.map_mem rest ctxt
   | (Map_get, Item (v, Item (map, rest)), (descr : (_ * _, _ * _) descr)) -&gt;
       consume_gas_binop descr (map_get, v, map) Interp_costs.map_get rest ctxt
-  | (Map_update, Item (k, Item (v, Item (map, rest))), (descr : (_ * (_ * (_ * _)), _ * _) descr)) -&gt;
+  | ( Map_update,
+      Item (k, Item (v, Item (map, rest))),
+      (descr : (_ * (_ * (_ * _)), _ * _) descr) ) -&gt;
       consume_gas_terop
         descr
         (map_update, k, v, map)
@@ -59633,35 +59648,45 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
       &gt;&gt;=? fun ctxt -&gt;
       Script_ir_translator.big_map_get ctxt key map
       &gt;&gt;=? fun (res, ctxt) -&gt; logged_return (Item (res, rest), ctxt)
-  | (Big_map_update, Item (key, Item (maybe_value, Item (map, rest))), (descr : (_ * (_ * (_ * _)), _ * _) descr)) -&gt;
+  | ( Big_map_update,
+      Item (key, Item (maybe_value, Item (map, rest))),
+      (descr : (_ * (_ * (_ * _)), _ * _) descr) ) -&gt;
       consume_gas_terop
         descr
         (Script_ir_translator.big_map_update, key, maybe_value, map)
         (fun k v m -&gt; Interp_costs.map_update k (Some v) m.diff)
         rest
   (* timestamp operations *)
-  | (Add_seconds_to_timestamp, Item (n, Item (t, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( Add_seconds_to_timestamp,
+      Item (n, Item (t, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_timestamp.add_delta, t, n)
         Interp_costs.add_timestamp
         rest
         ctxt
-  | (Add_timestamp_to_seconds, Item (t, Item (n, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( Add_timestamp_to_seconds,
+      Item (t, Item (n, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_timestamp.add_delta, t, n)
         Interp_costs.add_timestamp
         rest
         ctxt
-  | (Sub_timestamp_seconds, Item (t, Item (s, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( Sub_timestamp_seconds,
+      Item (t, Item (s, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_timestamp.sub_delta, t, s)
         Interp_costs.sub_timestamp
         rest
         ctxt
-  | (Diff_timestamps, Item (t1, Item (t2, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( Diff_timestamps,
+      Item (t1, Item (t2, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_timestamp.diff, t1, t2)
@@ -59692,7 +59717,8 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
             ctxt )
       else
         Lwt.return (Gas.consume ctxt (Interp_costs.slice_string 0))
-        &gt;&gt;=? fun ctxt -&gt; logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
+        &gt;&gt;=? fun ctxt -&gt;
+        logged_return (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
   | (String_size, Item (s, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.push)
       &gt;&gt;=? fun ctxt -&gt;
@@ -59722,7 +59748,8 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
             ctxt )
       else
         Lwt.return (Gas.consume ctxt (Interp_costs.slice_string 0))
-        &gt;&gt;=? fun ctxt -&gt; logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
+        &gt;&gt;=? fun ctxt -&gt;
+        logged_return (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
   | (Bytes_size, Item (s, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.push)
       &gt;&gt;=? fun ctxt -&gt;
@@ -59736,8 +59763,10 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
       &gt;&gt;=? fun res -&gt; logged_return (Item (res, rest), ctxt)
   | (Sub_tez, Item (x, Item (y, rest)), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.int64_op)
-      &gt;&gt;=? fun ctxt -&gt;
-      Lwt.return Tez.(x -? y)
+  <abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">    &gt;&gt;=? fun ctxt -&gt;
+      Lw</abbr>t.return Tez.(x -? y)
       &gt;&gt;=? fun res -&gt; logged_return (Item (res, rest), ctxt)
   | (Mul_teznat, Item (x, Item (y, rest)), _) -&gt; (
       Lwt.return (Gas.consume ctxt Interp_costs.int64_op)
@@ -59746,11 +59775,11 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
       &gt;&gt;=? fun ctxt -&gt;
       match Script_int.to_int64 y with
       | None -&gt;
-          fail <abbr class="mark-warning" title="Values of extensible types are ignored.
+          fail (Overflow (loc, get_log log))
+      |<abbr class="mark-warning" title="Values of extensible types are ignored.
 
-They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
-      | Some y -&gt;
-          Lwt.return Tez.(x *? y)
+They are sent to a unit type."> Some y -&gt;
+          Lwt.retu</abbr>rn Tez.(x *? y)
           &gt;&gt;=? fun res -&gt; logged_return (Item (res, rest), ctxt) )
   | (Mul_nattez, Item (y, Item (x, rest)), _) -&gt; (
       Lwt.return (Gas.consume ctxt Interp_costs.int64_op)
@@ -59759,9 +59788,7 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
       &gt;&gt;=? fun ctxt -&gt;
       match Script_int.to_int64 y with
       | None -&gt;
-          fail <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
+          fail (Overflow (loc, get_log log))
       | Some y -&gt;
           Lwt.return Tez.(x *? y)
           &gt;&gt;=? fun res -&gt; logged_return (Item (res, rest), ctxt) )
@@ -59781,44 +59808,110 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
       consume_gas_unop descr (not, x) Interp_costs.bool_unop rest ctxt
   (* integer operations *)
   | (Is_nat, Item (x, rest), (descr : (_ * _, _ * _) descr)) -&gt;
-      consume_gas_unop descr (Script_int.is_nat, x) (Interp_costs.abs[@coq_implicit &quot;(A := unit)&quot;]) rest ctxt
+      consume_gas_unop
+        descr
+        (Script_int.is_nat, x)
+        (Interp_costs.abs [@coq_implicit &quot;(A := unit)&quot;])
+        rest
+        ctxt
   | (Abs_int, Item (x, rest), (descr : (_ * _, _ * _) descr)) -&gt;
-      consume_gas_unop descr (Script_int.abs, x) (Interp_costs.abs[@coq_implicit &quot;(A := unit)&quot;]) rest ctxt
+      consume_gas_unop
+        descr
+        (Script_int.abs, x)
+        (Interp_costs.abs [@coq_implicit &quot;(A := unit)&quot;])
+        rest
+        ctxt
   | (Int_nat, Item (x, rest), (descr : (_ * _, _ * _) descr)) -&gt;
       consume_gas_unop descr (Script_int.int, x) Interp_costs.int rest ctxt
   | (Neg_int, Item (x, rest), (descr : (_ * _, _ * _) descr)) -&gt;
-      consume_gas_unop descr (Script_int.neg, x) (Interp_costs.neg[@coq_implicit &quot;(A := unit)&quot;]) rest ctxt
+      consume_gas_unop
+        descr
+        (Script_int.neg, x)
+        (Interp_costs.neg [@coq_implicit &quot;(A := unit)&quot;])
+        rest
+        ctxt
   | (Neg_nat, Item (x, rest), (descr : (_ * _, _ * _) descr)) -&gt;
-      consume_gas_unop descr (Script_int.neg, x) (Interp_costs.neg[@coq_implicit &quot;(A := unit)&quot;]) rest ctxt
-  | (Add_intint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop descr (Script_int.add, x, y) (Interp_costs.add[@coq_implicit &quot;(A := unit) (B := unit)&quot;]) rest ctxt
-  | (Add_intnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop descr (Script_int.add, x, y) (Interp_costs.add[@coq_implicit &quot;(A := unit) (B := unit)&quot;]) rest ctxt
-  | (Add_natint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop descr (Script_int.add, x, y) (Interp_costs.add[@coq_implicit &quot;(A := unit) (B := unit)&quot;]) rest ctxt
-  | (Add_natnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+      consume_gas_unop
+        descr
+        (Script_int.neg, x)
+        (Interp_costs.neg [@coq_implicit &quot;(A := unit)&quot;])
+        rest
+        ctxt
+  | (Add_intint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
+      consume_gas_binop
+        descr
+        (Script_int.add, x, y)
+        (Interp_costs.add [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        rest
+        ctxt
+  | (Add_intnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
+      consume_gas_binop
+        descr
+        (Script_int.add, x, y)
+        (Interp_costs.add [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        rest
+        ctxt
+  | (Add_natint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
+      consume_gas_binop
+        descr
+        (Script_int.add, x, y)
+        (Interp_costs.add [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        rest
+        ctxt
+  | (Add_natnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
       consume_gas_binop
         descr
         (Script_int.add_n, x, y)
-        (Interp_costs.add[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.add [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Sub_int, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop descr (Script_int.sub, x, y) (Interp_costs.sub[@coq_implicit &quot;(A := unit) (B := unit)&quot;]) rest ctxt
-  | (Mul_intint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop descr (Script_int.mul, x, y) (Interp_costs.mul[@coq_implicit &quot;(A := unit) (B := unit)&quot;]) rest ctxt
-  | (Mul_intnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop descr (Script_int.mul, x, y) (Interp_costs.mul[@coq_implicit &quot;(A := unit) (B := unit)&quot;]) rest ctxt
-  | (Mul_natint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop descr (Script_int.mul, x, y) (Interp_costs.mul[@coq_implicit &quot;(A := unit) (B := unit)&quot;]) rest ctxt
-  | (Mul_natnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | (Sub_int, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
       consume_gas_binop
         descr
-        (Script_int.mul_n, x, y)
-        (Interp_costs.mul[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Script_int.sub, x, y)
+        (Interp_costs.sub [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Ediv_teznat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | (Mul_intint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
+      consume_gas_binop
+        descr
+        (Script_int.mul, x, y)
+        (Interp_costs.mul [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        rest
+        ctxt
+  | (Mul_intnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
+      consume_gas_binop
+        descr
+        (Script_int.mul, x, y)
+        (Interp_costs.mul [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        rest
+        ctxt
+  | (Mul_natint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
+      consume_gas_binop
+        descr
+        (Script_int.mul, x, y)
+        (Interp_costs.mul [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        rest
+        ctxt
+  | (Mul_natnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
+<abbr class="mark-warning" title="Assert instruction is not handled.">      consum</abbr>e_gas_binop
+        descr
+        (Script_int.mul_n, x, y)
+        (Interp_cos<abbr class="mark-warning" title="Assert instruction is not handled.">ts.mul [@coq</abbr>_implicit &quot;(A := unit) (B := unit)&quot;])
+        rest
+        ctxt
+  | ( Ediv_teznat,
+      Item (x, Item (y, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.int64_to_z)
       &gt;&gt;=? fun ctxt -&gt;
       let x = Script_int.of_int64 (Tez.to_mutez x) in
@@ -59836,16 +59929,17 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
                     Some (q, r)
                 (* Cannot overflow *)
                 | _ -&gt;
-                    <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr> )
+      <abbr class="mark-warning" title="Assert instruction is not handled.">            </abbr>  assert false )
               (* Cannot overflow *)
               | _ -&gt;
-                  <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr> )),
+                  assert false )),
           x,
           y )
-        (Interp_costs.div[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+   <abbr class="mark-warning" title="Assert instruction is not handled.">     (Interp</abbr>_costs.div [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Ediv_tez, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | (Ediv_tez, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.int64_to_z)
       &gt;&gt;=? fun ctxt -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.int64_to_z)
@@ -59861,44 +59955,56 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
             | Some (q, r) -&gt; (
               match Script_int.to_int64 r with
               | None -&gt;
-                  <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr> (* Cannot overflow *)
+                  assert false (* Cannot overflow *)
               | Some r -&gt; (
                 match Tez.of_mutez r with
                 | None -&gt;
-                    <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr> (* Cannot overflow *)
+                    assert false (* Cannot overflow *)
                 | Some r -&gt;
                     Some (q, r) ) )),
           x,
           y )
-        (Interp_costs.div[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.div [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Ediv_intint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( Ediv_intint,
+      Item (x, Item (y, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_int.ediv, x, y)
-        (Interp_costs.div[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.div [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Ediv_intnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( Ediv_intnat,
+      Item (x, Item (y<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">, rest)),
+      (descr : (_ *</abbr> (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_int.ediv, x, y)
-        (Interp_costs.div[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.div [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Ediv_natint, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
-      consume_gas_binop
+  | ( Ediv_natint,
+      Item (x, Item (y, rest)),
+      (descr : (_ * (_ * _), _ * _) de<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">scr) ) -&gt;
+      consume_gas_b</abbr>inop
         descr
         (Script_int.ediv, x, y)
-        (Interp_costs.div[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.div [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Ediv_natnat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( Ediv_natnat,
+      Item (x, Item (y, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_int.ediv_n, x, y)
-        (Interp_costs.div[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.div [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
   | (Lsl_nat, Item (x, Item (y, rest)), _) -&gt; (
@@ -59906,9 +60012,7 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
       &gt;&gt;=? fun ctxt -&gt;
       match Script_int.shift_left_n x y with
       | None -&gt;
-          fail <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
+          fail (Overflow (loc, get_log log))
       | Some x -&gt;
           logged_return (Item (x, rest), ctxt) )
   | (Lsr_nat, Item (x, Item (y, rest)), _) -&gt; (
@@ -59916,51 +60020,53 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
       &gt;&gt;=? fun ctxt -&gt;
       match Script_int.shift_right_n x y with
       | None -&gt;
-          fail <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
+          fail (Overflow (loc, get_log log))
       | Some r -&gt;
           logged_return (Item (r, rest), ctxt) )
   | (Or_nat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
       consume_gas_binop
         descr
         (Script_int.logor, x, y)
-        (Interp_costs.logor[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.logor [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (And_nat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | (And_nat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
       consume_gas_binop
         descr
         (Script_int.logand, x, y)
-        (Interp_costs.logand[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.logand [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (And_int_nat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | ( And_int_nat,
+      Item (x, Item (y, rest)),
+      (descr : (_ * (_ * _), _ * _) descr) ) -&gt;
       consume_gas_binop
         descr
         (Script_int.logand, x, y)
-        (Interp_costs.logand[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.logand [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
-  | (Xor_nat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr)) -&gt;
+  | (Xor_nat, Item (x, Item (y, rest)), (descr : (_ * (_ * _), _ * _) descr))
+    -&gt;
       consume_gas_binop
         descr
         (Script_int.logxor, x, y)
-        (Interp_costs.logxor[@coq_implicit &quot;(A := unit) (B := unit)&quot;])
+        (Interp_costs.logxor [@coq_implicit &quot;(A := unit) (B := unit)&quot;])
         rest
         ctxt
   | (Not_int, Item (x, rest), (descr : (_ * _, _ * _) descr)) -&gt;
       consume_gas_unop
         descr
         (Script_int.lognot, x)
-        (Interp_costs.lognot[@coq_implicit &quot;(A := unit)&quot;])
+        (Interp_costs.lognot [@coq_implicit &quot;(A := unit)&quot;])
         rest
         ctxt
   | (Not_nat, Item (x, rest), (descr : (_ * _, _ * _) descr)) -&gt;
       consume_gas_unop
         descr
         (Script_int.lognot, x)
-        (Interp_costs.lognot[@coq_implicit &quot;(A := unit)&quot;])
+        (Interp_costs.lognot [@coq_implicit &quot;(A := unit)&quot;])
         rest
         ctxt
   (* control *)
@@ -59980,19 +60086,17 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
         &gt;&gt;=? fun ctxt -&gt;
         step ?log ctxt step_constants body rest
         &gt;&gt;=? fun (trans, ctxt) -&gt; step ?log ctxt step_constants descr trans
-      else
-        logged_return (rest, ctxt)
-  | (Loop_left body, Item (v, rest), _) -&gt;
-      begin match v with
-      | L v -&gt;
+      else logged_return (rest, ctxt)
+  | (Loop_left body, Item (v, rest), _) -&gt; (
+    match v with
+    | L v -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.loop_cycle)
         &gt;&gt;=? fun ctxt -&gt;
         step ?log ctxt step_constants body (Item (v, rest))
         &gt;&gt;=? fun (trans, ctxt) -&gt; step ?log ctxt step_constants descr trans
-      | R v -&gt;
+    | R v -&gt;
         Lwt.return (Gas.consume ctxt Interp_costs.loop_cycle)
-        &gt;&gt;=? fun ctxt -&gt; logged_return (Item (v, rest), ctxt)
-      end
+        &gt;&gt;=? fun ctxt -&gt; logged_return (Item (v, rest), ctxt) )
   | (Dip b, Item (ign, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.stack_op)
       &gt;&gt;=? fun ctxt -&gt;
@@ -60009,19 +60113,25 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
       let {lam = (descr, expr)} = lam in
       let full_arg_ty =
         match[@coq_match_with_default] descr.bef with
-        | Item_t (full_arg_ty, _, _) -&gt; full_arg_ty in
+        | Item_t (full_arg_ty, _, _) -&gt;
+            full_arg_ty
+      in
       unparse_data ctxt Optimized capture_ty capture
       &gt;&gt;=? fun (const_expr, ctxt) -&gt;
       unparse_ty ctxt capture_ty
       &gt;&gt;=? fun (ty_expr, ctxt) -&gt;
       match full_arg_ty with
       | Pair_t ((capture_ty, _, _), (arg_ty, _, _), _, _) -&gt;
-          let arg_stack_ty = Item_t (arg_ty, Empty_t, None) [@coq_implicit &quot;(ty := unit)&quot;] in
+          let arg_stack_ty =
+            (Item_t (arg_ty, Empty_t, None) [@coq_implicit &quot;(ty := unit)&quot;])
+          in
           let const_descr =
             ( {
                 loc = descr.loc;
                 bef = arg_stack_ty;
-                aft = Item_t (capture_ty, arg_stack_ty, None) [@coq_implicit &quot;(ty := unit)&quot;];
+                aft =
+                  (Item_t (capture_ty, arg_stack_ty, None) [@coq_implicit
+                                                             &quot;(ty := unit)&quot;]);
                 instr = Const capture;
               }
               : (_, _) descr )
@@ -60029,18 +60139,31 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
           let pair_descr =
             ( {
                 loc = descr.loc;
-                bef = Item_t (capture_ty, arg_stack_ty, None) [@coq_implicit &quot;(ty := unit)&quot;];
-                aft = Item_t (full_arg_ty, Empty_t, None) [@coq_implicit &quot;(ty := unit)&quot;];
+                bef =
+                  (Item_t (capture_ty, arg_stack_ty, None) [@coq_implicit
+                                                             &quot;(ty := unit)&quot;]);
+                aft =
+                  (Item_t (full<abbr class="mark-warning" title="Assert instruction is not handled.">_arg_ty, Emp</abbr>ty_t, None) [@coq_implicit
+                                                         &quot;(ty := unit)&quot;]);
                 instr = Cons_pair;
               }
               : (_, _) descr )
           in
-          let seq_descr =
+<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">          let seq_descr </abbr>=
             ( {
                 loc = descr.loc;
                 bef = arg_stack_ty;
-                aft = Item_t (full_arg_ty, Empty_t, None) [@coq_implicit &quot;(ty := unit)&quot;];
-                instr = Seq (const_descr, pair_descr) [@coq_implicit &quot;(aft := unit) (bef := unit) (trans := unit)&quot;];
+                aft =
+                  (Item_t (full_arg_ty, Emp<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">ty_t, None) [@coq_implicit
+   </abbr>                                                      &quot;(ty := unit)&quot;]);
+                instr =
+                  (Seq (const_descr, pair_descr) [@coq_implicit
+                                                   &quot;(aft := unit) (bef := \
+                                                    unit) (trans := unit)&quot;]);
               }
               : (_, _) descr )
           in
@@ -60049,7 +60172,10 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
                 loc = descr.loc;
                 bef = arg_stack_ty;
                 aft = descr.aft;
-                instr = Seq (seq_descr, descr) [@coq_implicit &quot;(aft := unit) (bef := unit) (trans := unit)&quot;];
+                instr =
+                  (Seq (seq_descr, descr) [@coq_implicit
+                                            &quot;(aft := unit) (bef := unit) \
+                                             (trans := unit)&quot;]);
               }
               : (_, _) descr )
           in
@@ -60063,24 +60189,23 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
           let lam' = {lam = (full_descr, full_expr)} in
           logged_return (Item (lam', rest), ctxt)
       | _ -&gt;
-          <abbr class="mark-warning" title="Assert instruction is not handled.">assert false</abbr> )
+          assert false )
   | (Lambda lam, rest, _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.push)
       &gt;&gt;=? fun ctxt -&gt; logged_return (Item (lam, rest), ctxt)
   | (Failwith tv, Item (v, _), _) -&gt;
-      trace <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">Cannot_serialize_failure</abbr> (unparse_data ctxt Optimized tv v)
+      trace Cannot_serialize_failure (unparse_data ctxt Optimized tv v)
       &gt;&gt;=? fun (v, _ctxt) -&gt;
       let v = Micheline.strip_locations v in
-      (fail[@coq_implicit &quot;(a := unit)&quot;]) <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
+      (fail [@coq_implicit &quot;(a := unit)&quot;]) (Reject (loc, v, get_log log))
   | (Nop, stack, _) -&gt;
       logged_return (stack, ctxt)
   (* comparison *)
   | (Compare ty, Item (a, Item (b, rest)), _) -&gt;
-      Lwt.return (Gas.consume ctxt ((Interp_costs.compare[@coq_implicit &quot;(s := unit)&quot;]) ty a b))
+      Lwt.return
+        (Gas.consume
+           ctxt
+           ((Interp_costs.compare [@coq_implicit &quot;(s := unit)&quot;]) ty a b))
       &gt;&gt;=? fun ctxt -&gt;
       logged_return
         ( Item
@@ -60134,7 +60259,9 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
         match Data_encoding.Binary.of_bytes Script.expr_encoding bytes with
         | None -&gt;
             Lwt.return (Gas.consume ctxt (Interp_costs.unpack_failed bytes))
-            &gt;&gt;=? fun ctxt -&gt; logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
+            &gt;&gt;=? fun ctxt -&gt;
+            logged_return
+              (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
         | Some expr -&gt; (
             Lwt.return (Gas.consume ctxt (Script.deserialized_cost expr))
             &gt;&gt;=? fun ctxt -&gt;
@@ -60145,8 +60272,11 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
             | Error _ignored -&gt;
                 Lwt.return
                   (Gas.consume ctxt (Interp_costs.unpack_failed bytes))
-                &gt;&gt;=? fun ctxt -&gt; logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt) )
-      else logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
+                &gt;&gt;=? fun ctxt -&gt;
+                logged_return
+                  (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt) )
+      else
+        logged_return (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
   (* protocol *)
   | (Address, Item (pair, rest), _) -&gt;
       let (_, address) = pair in
@@ -60168,11 +60298,9 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
           &gt;&gt;=? fun (ctxt, maybe_contract) -&gt;
           logged_return (Item (maybe_contract, rest), ctxt)
       | _ -&gt;
-          logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt) )
-  | ( Transfer_tokens,
-      Item (p, Item (amount, Item (triple, rest))),
-      _ )
-    -&gt;
+          logged_return
+            (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt) )
+  | (Transfer_tokens, Item (p, Item (amount, Item (triple, rest))), _) -&gt;
       let (tp, (destination, entrypoint)) = triple in
       Lwt.return (Gas.consume ctxt Interp_costs.transfer)
       &gt;&gt;=? fun ctxt -&gt;
@@ -60203,16 +60331,17 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun (ctxt, nonce) -&gt;
       logged_return
         ( Item
-            ( ( Internal_operation
-                  {source = step_constants.self; operation; nonce}
-                  [@coq_implicit &quot;(kind := unit)&quot;],
+            ( ( (Internal_operation
+                   {source = step_constants.self; operation; nonce} [@coq_implicit
+                                                                      &quot;(kind \
+                                                                       := \
+                                                                       unit)&quot;]),
                 big_map_diff ),
               rest ),
           ctxt )
   | ( Create_account,
       Item (manager, Item (delegate, Item (_delegatable, Item (credit, rest)))),
-      _
-    ) -&gt;
+      _ ) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.create_account)
       &gt;&gt;=? fun ctxt -&gt;
       Contract.fresh_contract_from_current_nonce ctxt
@@ -60235,10 +60364,12 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun (ctxt, nonce) -&gt;
       logged_return
         ( Item
-            ( ( Internal_operation
-                  {source = step_constants.self; operation; nonce}
-                  [@coq_implicit &quot;(kind := unit)&quot;],
-                None[@coq_implicit &quot;(A := unit)&quot;] ),
+            ( ( (Internal_operation
+                   {source = step_constants.self; operation; nonce} [@coq_implicit
+                                                                      &quot;(kind \
+                                                                       := \
+                                                                       unit)&quot;]),
+                (None [@coq_implicit &quot;(A := unit)&quot;]) ),
               Item ((contract, &quot;default&quot;), rest) ),
           ctxt )
   | (Implicit_account, Item (key, rest), _) -&gt;
@@ -60254,8 +60385,7 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
               Item
                 ( spendable,
                   Item (delegatable, Item (credit, Item (init, rest))) ) ) ),
-                  _)
-    -&gt;
+      _ ) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.create_contract)
       &gt;&gt;=? fun ctxt -&gt;
       unparse_ty ctxt param_type
@@ -60322,15 +60452,18 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun (ctxt, nonce) -&gt;
       logged_return
         ( Item
-            ( ( Internal_operation
-                  {source = step_constants.self; operation; nonce}
-                  [@coq_implicit &quot;(kind := unit)&quot;],
+            ( ( (Internal_operation
+                   {source = step_constants.self; operation; nonce} [@coq_implicit
+                                                                      &quot;(kind \
+                                                                       := \
+                                                                       unit)&quot;]),
                 big_map_diff ),
               Item ((contract, &quot;default&quot;), rest) ),
           ctxt )
   | ( Create_contract_2 (storage_type, param_type, {lam = (_, code)}, root_name),
       (* Removed the instruction's arguments manager, spendable and delegatable *)
-    Item (delegate, Item (credit, Item (init, rest))), _ ) -&gt;
+    Item (delegate, Item (credit, Item (init, rest))),
+      _ ) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.create_contract)
       &gt;&gt;=? fun ctxt -&gt;
       unparse_ty ctxt param_type
@@ -60385,9 +60518,11 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun (ctxt, nonce) -&gt;
       logged_return
         ( Item
-            ( ( Internal_operation
-                  {source = step_constants.self; operation; nonce}
-                  [@coq_implicit &quot;(kind := unit)&quot;],
+            ( ( (Internal_operation
+                   {source = step_constants.self; operation; nonce} [@coq_implicit
+                                                                      &quot;(kind \
+                                                                       := \
+                                                                       unit)&quot;]),
                 big_map_diff ),
               Item ((contract, &quot;default&quot;), rest) ),
           ctxt )
@@ -60399,10 +60534,12 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       &gt;&gt;=? fun (ctxt, nonce) -&gt;
       logged_return
         ( Item
-            ( ( Internal_operation
-                  {source = step_constants.self; operation; nonce}
-                  [@coq_implicit &quot;(kind := unit)&quot;],
-                None[@coq_implicit &quot;(A := unit)&quot;] ),
+            ( ( (Internal_operation
+                   {source = step_constants.self; operation; nonce} [@coq_implicit
+                                                                      &quot;(kind \
+                                                                       := \
+                                                                       unit)&quot;]),
+                (None [@coq_implicit &quot;(A := unit)&quot;]) ),
               rest ),
           ctxt )
   | (Balance, rest, _) -&gt;
@@ -60446,12 +60583,16 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
         match Gas.level ctxt with
         | Limited {remaining} -&gt;
             remaining
-        | Unaccounted -&gt;
+<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">        | Unaccounte</abbr>d -&gt;
             Z.of_string &quot;99999999&quot;
       in
-      logged_return (Item (Script_int.(abs (of_zint steps)), rest), ctxt)
+      logged_return (Item (Script_int.(abs (of_zint <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
+
+Alternative: use a monad to sequence side-effects.">steps)), rest), ctxt)
   | (Source, rest, _) -&gt;
-      Lwt.return (Gas.consume ctxt Interp_costs.source)
+ </abbr>     Lwt.return (Gas.consume ctxt Interp_costs.source)
       &gt;&gt;=? fun ctxt -&gt;
       logged_return (Item ((step_constants.payer, &quot;default&quot;), rest), ctxt)
   | (Sender, rest, _) -&gt;
@@ -60464,12 +60605,17 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       logged_return (Item ((t, (step_constants.self, entrypoint)), rest), ctxt)
   | (Amount, rest, _) -&gt;
       Lwt.return (Gas.consume ctxt Interp_costs.amount)
-      &gt;&gt;=? fun ctxt -&gt; logged_return (Item (step_constants.amount, rest), ctxt)
-  | (Dig (n, n'), stack, _) -&gt;
+      &gt;&gt;=? fun ctxt -&gt; logged_return (Item (step_constants.amount,<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type."> rest), ctxt)
+  | (Dig (n, n'), stack, _) -&gt;</abbr>
       Lwt.return (Gas.consume ctxt (Interp_costs.stack_n_op n))
       &gt;&gt;=? fun ctxt -&gt;
-      interp_stack_prefix_preserving_operation
-        (fun[@coq_match_gadt][@coq_match_with_default] (Item (v, rest)) -&gt; return (rest, v))
+      interp_s<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">tack_prefix_preserving_operation
+        (fu</abbr>n [@coq_match_gadt] [@coq_match_with_default] (Item (v, rest)) -&gt;
+          return (rest, v))
         n'
         stack
       &gt;&gt;=? fun (aft, x) -&gt; logged_return (Item (x, aft), ctxt)
@@ -60477,17 +60623,21 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
       Lwt.return (Gas.consume ctxt (Interp_costs.stack_n_op n))
       &gt;&gt;=? fun ctxt -&gt;
       interp_stack_prefix_preserving_operation
-        (fun stk -&gt; return (Item (v, stk), ()))
+        (fun stk -&gt; re<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">turn (Item (v, stk), ()))
         n'
         rest
-      &gt;&gt;=? fun (aft, ()) -&gt; logged_return (aft, ctxt)
+      &gt;&gt;=</abbr>? fun (aft, ()) -&gt; logged_return (aft, ctxt)
   | (Dipn (n, n', b), stack, _) -&gt;
       Lwt.return (Gas.consume ctxt (Interp_costs.stack_n_op n))
       &gt;&gt;=? fun ctxt -&gt;
       interp_stack_prefix_preserving_operation
         (fun stk -&gt;
           step ?log ctxt step_constants b stk
-          &gt;&gt;=? fun (res, ctxt') -&gt; return (res, ctxt'))
+          &gt;&gt;=<abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">? fun (res, ctxt') -&gt; re</abbr>turn (res, ctxt'))
         n'
         stack
       &gt;&gt;=? fun (aft, ctxt') -&gt; logged_return (aft, ctxt')
@@ -60518,17 +60668,22 @@ and interp :
   | None -&gt;
       return_unit
   | Some log -&gt;
-      trace <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">Cannot_serialize_log</abbr> ((unparse_stack[@coq_implicit &quot;(A := unit)&quot;]) ctxt (stack, code.bef))
+      trace
+        Cannot_serialize_log
+        ((unparse_stack [@coq_implicit &quot;(A := unit)&quot;]) ctxt (stack, code.bef))
       &gt;&gt;=? fun stack -&gt;
-      <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
-
-Alternative: use a monad to sequence side-effects.">log := (code.loc, Gas.level ctxt, stack) :: !log</abbr> ;
+      log := (code.loc, Gas.level ctxt, stack) :: !log ;
       return_unit )
   &gt;&gt;=? fun () -&gt;
-  (step[@coq_implicit &quot;(a := unit) (b := unit)&quot;]) ?log ctxt step_constants code stack
-  &gt;&gt;=? fun[@coq_match_gadt][@coq_match_with_default] (Item (ret, Empty), ctxt) -&gt; return (ret, ctxt)
+  (step [@coq_implicit &quot;(a := unit) (b := unit)&quot;])
+    ?log
+    ctxt
+    step_constants
+    code
+    stack
+  &gt;&gt;=? fun [@coq_match_gadt] [@coq_match_with_default] (Item (ret, Empty), ctxt)
+           -&gt;
+  return (ret, ctxt)
 
 (* ---- contract handling ---------------------------------------------------*)
 and execute ?log ctxt mode step_constants ~entrypoint unparsed_script arg :
@@ -60539,17 +60694,19 @@ and execute ?log ctxt mode step_constants ~entrypoint unparsed_script arg :
     tzresult
     Lwt.t =
   parse_script ctxt unparsed_script ~legacy:true
-  &gt;&gt;=? fun[@coq_match_gadt] (Ex_script {code; arg_type; storage; storage_type; root_name}, ctxt) -&gt;
+  &gt;&gt;=? fun [@coq_match_gadt] ( Ex_script
+                                 { code;
+                                   arg_type;
+                                   storage;
+                                   storage_type;
+                                   root_name },
+                               ctxt ) -&gt;
   trace
-    <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">(Bad_contract_parameter step_constants.self)</abbr>
+    (Bad_contract_parameter step_constants.self)
     (Lwt.return (find_entrypoint arg_type ~root_name entrypoint))
   &gt;&gt;=? fun (box, _) -&gt;
   trace
-    <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">(Bad_contract_parameter step_constants.self)</abbr>
+    (Bad_contract_parameter step_constants.self)
     (parse_data ctxt ~legacy:false arg_type (box arg))
   &gt;&gt;=? fun (arg, ctxt) -&gt;
   Script.force_decode_in_context ctxt unparsed_script.code
@@ -60559,9 +60716,7 @@ They are sent to a unit type.">(Bad_contract_parameter step_constants.self)</abb
   Script_ir_translator.collect_big_maps ctxt storage_type storage
   &gt;&gt;=? fun (to_update, ctxt) -&gt;
   trace
-    <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">(Runtime_contract_error (step_constants.self, script_code))</abbr>
+    (Runtime_contract_error (step_constants.self, script_code))
     (interp ?log ctxt step_constants code (arg, storage))
   &gt;&gt;=? fun ((ops, storage), ctxt) -&gt;
   Script_ir_translator.extract_big_map_diff
@@ -60573,9 +60728,7 @@ They are sent to a unit type.">(Runtime_contract_error (step_constants.self, scr
     storage_type
     storage
   &gt;&gt;=? fun (storage, big_map_diff, ctxt) -&gt;
-  trace <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">Cannot_serialize_storage</abbr> (unparse_data ctxt mode storage_type storage)
+  trace Cannot_serialize_storage (unparse_data ctxt mode storage_type storage)
   &gt;&gt;=? fun (storage, ctxt) -&gt;
   let (ops, op_diffs) = List.split ops in
   let big_map_diff =
