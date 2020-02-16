@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Module SizedString.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       name : string;
       size : Z }.
     Definition with_name name (r : record) :=
@@ -42,7 +42,7 @@ Definition b' : bool := f r'.
 
 Module Point.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       x : Z;
       y : Z;
       z : Z }.
@@ -65,7 +65,7 @@ Module Point.
 End Point.
 
 Module poly.
-  Record record {first second : Set} := Build {
+  Record record {first second : Set} : Set := Build {
     first : first;
     second : second }.
   Arguments record : clear implicits.
@@ -83,7 +83,7 @@ Definition p : poly Z bool := {| poly.first := 12; poly.second := false |}.
 Module ConstructorWithRecord.
   Module t.
     Module Foo.
-      Record record {name size : Set} := {
+      Record record {name size : Set} : Set := {
         name : name;
         size : size }.
       Arguments record : clear implicits.
@@ -93,7 +93,7 @@ Module ConstructorWithRecord.
   
   Module exi.
     Module Ex.
-      Record record {x : Set} := {
+      Record record {x : Set} : Set := {
         x : x }.
       Arguments record : clear implicits.
     End Ex.
@@ -101,7 +101,7 @@ Module ConstructorWithRecord.
   End exi.
   
   Module loc.
-    Record record {x y : Set} := Build {
+    Record record {x y : Set} : Set := Build {
       x : x;
       y : y }.
     Arguments record : clear implicits.
@@ -155,7 +155,7 @@ End ConstructorWithRecord.
 Module ConstructorWithPolymorphicRecord.
   Module t.
     Module Foo.
-      Record record {location payload size : Set} := {
+      Record record {location payload size : Set} : Set := {
         location : location;
         payload : payload;
         size : size }.

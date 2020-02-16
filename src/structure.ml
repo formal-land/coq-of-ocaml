@@ -62,6 +62,7 @@ type t =
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
   | Module of Name.t * t list
+  | ModuleExp of Name.t * Exp.t
   | ModuleInclude of PathName.t
   | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
@@ -74,22 +75,6 @@ let error_message
   (message : string)
   : t list Monad.t =
   raise [ErrorMessage (message, structure)] category message
-
-let simple_value (name : Name.t) (e : Exp.t) : t =
-  Value {
-    is_rec = Recursivity.New false;
-    cases = [
-      (
-        {
-          name;
-          typ_vars = [];
-          args = [];
-          typ = None
-        },
-        Some e
-      )
-    ]
-  }
 
 let top_level_evaluation_error : t list Monad.t =
   error_message
@@ -119,7 +104,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
       top_level_evaluation_error
     | Tstr_eval _ -> top_level_evaluation_error
     | Tstr_value (is_rec, cases) ->
-      Exp.import_let_fun Name.Map.empty true is_rec cases >>= fun def ->
+      set_scoping_env false (
+        Exp.import_let_fun Name.Map.empty true is_rec cases
+      ) >>= fun def ->
       return [Value def]
     | Tstr_type (_, typs) ->
       TypeDefinition.of_ocaml typs >>= fun def ->
@@ -160,8 +147,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
           md_type_path
           mod_type
           structure.str_items
-          structure.str_final_env >>= fun module_exp ->
-        return [simple_value name module_exp]
+          structure.str_final_env
+          false >>= fun module_exp ->
+        return [ModuleExp (name, module_exp)]
       | Not_found _ ->
         of_structure structure >>= fun structures ->
         return [Module (name, structures)]
@@ -181,7 +169,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       begin match is_first_class with
       | Found _ ->
         return [
-          simple_value name (Exp.Variable (MixedPath.PathName reference, []))
+          ModuleExp (name, Exp.Variable (MixedPath.PathName reference, []))
         ]
       | Not_found _ -> return [ModuleSynonym (name, reference)]
       end
@@ -194,8 +182,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
       Exp.of_module_expr
         Name.Map.empty
         mb_expr
-        None >>= fun module_exp ->
-      return [simple_value name module_exp]
+        None
+        false >>= fun module_exp ->
+      return [ModuleExp (name, module_exp)]
     | Tstr_module _ ->
       error_message
         (Error "unhandled_module")
@@ -282,16 +271,17 @@ let rec of_structure (structure : structure) : t list Monad.t =
                 let field =
                   PathName.of_path_and_name_with_convert mod_type_path name in
                 Some (
-                  simple_value
-                    name
-                    (Exp.Variable (
+                  ModuleExp (
+                    name,
+                    Exp.Variable (
                       MixedPath.Access (
                         reference,
                         [field],
                         false
                       ),
                       []
-                    ))
+                    )
+                  )
                 )
               | _ -> None
             )
@@ -338,6 +328,11 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+      )
+    | ModuleExp (name, e) ->
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+        Exp.to_coq false e ^-^ !^ "."
       )
     | ModuleInclude reference ->
       nest (!^ "Include" ^^ PathName.to_coq reference ^-^ !^ ".")

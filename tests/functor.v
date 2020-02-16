@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Module COMPARABLE.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     compare : t -> t -> Z;
   }.
@@ -18,7 +18,7 @@ Module COMPARABLE.
 End COMPARABLE.
 
 Module S.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     op_eq : t -> t -> bool;
     op_ltgt : t -> t -> bool;

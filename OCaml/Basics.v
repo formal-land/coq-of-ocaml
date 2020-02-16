@@ -5,6 +5,18 @@ Local Open Scope Z_scope.
 Import ListNotations.
 Set Implicit Arguments.
 
+Inductive sigS (A : Type) (P : A -> Set) : Set :=
+| existS : forall (x : A), P x -> sigS P.
+
+Reserved Notation "{ x @ P }" (at level 0, x at level 99).
+Reserved Notation "{ x : A @ P }" (at level 0, x at level 99).
+Reserved Notation "{ ' pat : A @ P }"
+  (at level 0, pat strict pattern, format "{ ' pat : A @ P }").
+
+Notation "{ x @ P }" := (sigS (fun x => P)) : type_scope.
+Notation "{ x : A @ P }" := (sigS (A := A) (fun x => P)) : type_scope.
+Notation "{ ' pat : A @ P }" := (sigS (A := A) (fun pat => P)) : type_scope.
+
 Notation "(| record |)" := (projT2 record).
 
 Module Primitive.

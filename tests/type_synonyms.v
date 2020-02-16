@@ -9,6 +9,6 @@ Import ListNotations.
 Unset Positivity Checking.
 Unset Guard Checking.
 
-Definition t1 := string.
+Definition t1 : Set := string.
 
-Definition t2 (a b : Set) := a * b.
+Definition t2 (a b : Set) : Set := a * b.

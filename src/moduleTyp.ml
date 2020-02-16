@@ -101,7 +101,7 @@ let rec to_typ (module_typ : t) : Type.t =
   | Functor (name, param, result) ->
     Type.ForallModule (name, to_typ param, to_typ result)
   | With (path_name, typ_values) ->
-    Type.Package (path_name, typ_values)
+    Type.Package (false, path_name, typ_values)
 
 let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
   match module_typ with

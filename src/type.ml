@@ -9,7 +9,7 @@ type t =
   | Sum of (string * t) list
   | Tuple of t list
   | Apply of MixedPath.t * t list
-  | Package of PathName.t * t option Tree.t
+  | Package of bool * PathName.t * t option Tree.t
   | ForallModule of Name.t * t * t
   | FunTyps of Name.t list * t
   | Error of string
@@ -143,7 +143,7 @@ let rec of_typ_expr
         )
         (signature_typ_params |> Tree.map (fun _ -> None))
         typ_substitutions in
-      return (Package (path_name, typ_params), typ_vars, new_typ_vars)
+      return (Package (true, path_name, typ_params), typ_vars, new_typ_vars)
 
 and of_typs_exprs
   (with_free_vars: bool)
@@ -228,7 +228,7 @@ let rec typ_args (typ : t) : Name.Set.t =
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
-  | Package (_, typ_params) ->
+  | Package (_, _, typ_params) ->
     Tree.flatten typ_params |>
     Util.List.filter_map (fun (_, typ) ->
       match typ with
@@ -356,7 +356,7 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
     Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
     nest @@ separate space
       (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
-  | Package (path_name, typ_params) ->
+  | Package (is_in_exp, path_name, typ_params) ->
     let existential_typs =
       Tree.flatten typ_params |>
       List.filter (fun (_, typ) -> typ = None) |>
@@ -368,7 +368,8 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
       begin match existential_typs with
       | [] -> !^ "unit"
       | _ :: _ -> !^ "_"
-      end ^^ !^ "&" ^^
+      end ^^
+      (if is_in_exp then !^ "@" else !^ "&") ^^
       nest (
         separate space (
           nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::

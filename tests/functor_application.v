@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Module Source.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     x : t;
   }.
@@ -18,7 +18,7 @@ Module Source.
 End Source.
 
 Module Target.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     y : t;
   }.

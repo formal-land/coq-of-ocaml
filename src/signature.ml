@@ -233,6 +233,7 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
           to_coq_type_kind arity
         )
       )) ^^
+      nest (!^ ":" ^^ Pp.set) ^^
       !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate newline (List.map to_coq_item signature.items)) ^^ newline ^^
       !^ "}" ^-^ !^ "."

@@ -1,4 +1,5 @@
 -R . OCaml
+-arg -impredicative-set
 
 Basics.v
 Libraries.v

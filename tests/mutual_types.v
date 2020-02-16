@@ -9,7 +9,7 @@ Import ListNotations.
 Unset Positivity Checking.
 Unset Guard Checking.
 
-Definition foo := string.
+Definition foo : Set := string.
 
 Reserved Notation "'simple".
 Reserved Notation "'double".
@@ -36,7 +36,7 @@ Arguments Node {_}.
 Arguments Unrelated {_}.
 
 Module re_bis.
-  Record record {bis : Set} := Build {
+  Record record {bis : Set} : Set := Build {
     bis : bis }.
   Arguments record : clear implicits.
   Definition with_bis {t_bis} bis (r : record t_bis) :=
@@ -45,7 +45,7 @@ End re_bis.
 Definition re_bis_skeleton := re_bis.record.
 
 Module re.
-  Record record {payload message : Set} := Build {
+  Record record {payload message : Set} : Set := Build {
     payload : payload;
     message : message }.
   Arguments record : clear implicits.

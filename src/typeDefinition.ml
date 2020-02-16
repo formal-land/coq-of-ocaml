@@ -21,6 +21,7 @@ let to_coq_record
           !^ ":" ^^ Pp.set
         ))
       end ^^
+      nest (!^ ":" ^^ Pp.set) ^^
       !^ ":=" ^^
       begin if generate_withs then
         !^ "Build"
@@ -267,8 +268,8 @@ module Constructors = struct
       | PathName { path = []; base } when base = typ_name -> gadt_typ typ_name
       | _ -> Apply (path, List.map (subst_gadt_typ_constructor typ_name) typs)
       end
-    | Package (path, tree) ->
-      Package (path, tree |> Tree.map (fun typ ->
+    | Package (is_in_exp, path, tree) ->
+      Package (is_in_exp, path, tree |> Tree.map (fun typ ->
         match typ with
         | None -> typ
         | Some typ -> Some (subst_gadt_typ_constructor typ_name typ)
@@ -825,6 +826,7 @@ let to_coq (def : t) : SmartPrint.t =
       | [] -> empty
       | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
       end ^^
+      nest (!^ ":" ^^ Pp.set) ^^
       !^ ":=" ^^ Type.to_coq None None value ^-^ !^ "."
     )
   | Abstract (name, typ_args) ->

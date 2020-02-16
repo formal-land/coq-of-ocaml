@@ -38,13 +38,15 @@ type t =
   | LetFun of t option Definition.t * t
   | LetTyp of Name.t * Name.t list * Type.t * t
     (** The definition of a type. It is used to represent module values. *)
+  | LetModule of Name.t * t * t
+    (** Open a first-class module. *)
   | Match of t * (Pattern.t * match_existential_cast option * t) list * t option * bool
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of int Tree.t * (PathName.t * int * t) list
+  | Module of int Tree.t * bool * (PathName.t * int * t) list
     (** The value of a first-class module. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module
@@ -320,9 +322,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     error_message (Error "override") NotSupported "Overriding is not handled"
   | Texp_letmodule (x, _, module_expr, e) ->
     let x = Name.of_ident true x in
-    of_module_expr typ_vars module_expr None >>= fun value ->
+    of_module_expr typ_vars module_expr None true >>= fun value ->
     of_expression typ_vars e >>= fun e ->
-    return (LetVar (x, [], value, e))
+    return (LetModule (x, value, e))
   | Texp_letexception _ ->
     error_message
       (Error "let_exception")
@@ -345,7 +347,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       (Error "object")
       NotSupported
       "Creation of objects is not handled"
-  | Texp_pack module_expr -> of_module_expr typ_vars module_expr None
+  | Texp_pack module_expr -> of_module_expr typ_vars module_expr None true
   | Texp_unreachable ->
     error_message
       (Error "unreachable")
@@ -583,6 +585,7 @@ and of_module_expr
   (typ_vars : Name.t Name.Map.t)
   (module_expr : Typedtree.module_expr)
   (module_type : Types.module_type option)
+  (is_in_exp : bool)
   : t Monad.t =
   let { mod_desc; mod_env; mod_loc; mod_type = local_module_type; _ } = module_expr in
   set_env mod_env (
@@ -611,12 +614,15 @@ and of_module_expr
           | Some local_module_type_path ->
             PathName.compare_paths local_module_type_path module_type_path = 0 in
         if are_module_paths_similar then
-          return (
-            ModuleCast (
-              module_typ_params_arity,
-              mixed_path
+          if is_in_exp then
+            return (Variable (mixed_path, []))
+          else
+            return (
+              ModuleCast (
+                module_typ_params_arity,
+                mixed_path
+              )
             )
-          )
         else
           ModuleTypValues.get typ_vars module_type >>= fun values ->
           let fields =
@@ -649,7 +655,7 @@ and of_module_expr
                   PathName.of_path_and_name_with_convert module_type_path modul,
                   0,
                   Variable (
-                    MixedPath.Access (PathName.of_name [] modul, [], false),
+                    MixedPath.Access (PathName.of_name [] modul, [], is_in_exp),
                     []
                   )
                 )
@@ -663,7 +669,7 @@ and of_module_expr
                   )
                 )
             ) in
-          return (Module (module_typ_params_arity, fields))
+          return (Module (module_typ_params_arity, is_in_exp, fields))
       | Not_found _ -> default_result
       end
     end
@@ -676,7 +682,13 @@ and of_module_expr
       module_type >>= fun is_first_class ->
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
-      of_structure typ_vars signature_path module_type structure.str_items structure.str_final_env
+      of_structure
+        typ_vars
+        signature_path
+        module_type
+        structure.str_items
+        structure.str_final_env
+        is_in_exp
     | IsFirstClassModule.Not_found reason ->
       error_message
         (Error "first_class_module_value_of_unknown_signature")
@@ -696,7 +708,7 @@ and of_module_expr
     | Some module_type_arg ->
       let x = Name.of_ident false ident in
       ModuleTyp.of_ocaml module_type_arg >>= fun module_type_arg ->
-      of_module_expr typ_vars e None >>= fun e ->
+      of_module_expr typ_vars e None is_in_exp >>= fun e ->
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
     end
   | Tmod_apply (e1, e2, _) ->
@@ -708,8 +720,8 @@ and of_module_expr
       match e1.mod_type with
       | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
       | _ -> None in
-    of_module_expr typ_vars e1 None >>= fun e1 ->
-    of_module_expr typ_vars e2 expected_module_typ_for_e2 >>= fun e2 ->
+    of_module_expr typ_vars e1 None is_in_exp >>= fun e1 ->
+    of_module_expr typ_vars e2 expected_module_typ_for_e2 is_in_exp >>= fun e2 ->
     let application = Apply (e1, [e2]) in
     begin match (module_type, module_typ_for_application) with
     | (None, _) | (_, None) -> return application
@@ -743,13 +755,16 @@ and of_module_expr
       match module_type with
       | Some _ -> module_type
       | None -> Some mod_type in
-    of_module_expr typ_vars module_expr module_type >>= fun e ->
-    begin match annotation with
-    | Tmodtype_implicit -> return e
-    | Tmodtype_explicit module_type ->
-      ModuleTyp.of_ocaml module_type >>= fun module_type ->
-      return (TypeAnnotation (e, ModuleTyp.to_typ module_type))
-    end
+    of_module_expr typ_vars module_expr module_type is_in_exp >>= fun e ->
+    if is_in_exp then
+      return e
+    else
+      begin match annotation with
+      | Tmodtype_implicit -> return e
+      | Tmodtype_explicit module_type ->
+        ModuleTyp.of_ocaml module_type >>= fun module_type ->
+        return (TypeAnnotation (e, ModuleTyp.to_typ module_type))
+      end
   | Tmod_unpack (e, _) -> of_expression typ_vars e
   ))
 
@@ -759,6 +774,7 @@ and of_structure
   (module_type : Types.module_type)
   (items : Typedtree.structure_item list)
   (final_env : Env.t)
+  (is_in_exp : bool)
   : t Monad.t =
   match items with
   | [] ->
@@ -779,7 +795,7 @@ and of_structure
             PathName.of_path_and_name_with_convert signature_path modul,
             0,
             Variable (
-              MixedPath.Access (PathName.of_name [] modul, [], false),
+              MixedPath.Access (PathName.of_name [] modul, [], is_in_exp),
               []
             )
           )
@@ -793,11 +809,12 @@ and of_structure
             )
           )
       ) in
-    return (Module (module_typ_params_arity, fields)))
+    return (Module (module_typ_params_arity, is_in_exp, fields)))
   | item :: items ->
       set_env item.str_env (
       set_loc (Loc.of_location item.str_loc) (
-      of_structure typ_vars signature_path module_type items final_env >>= fun e_next ->
+      of_structure
+        typ_vars signature_path module_type items final_env is_in_exp >>= fun e_next ->
       match item.str_desc with
       | Tstr_eval _ ->
         raise
@@ -852,7 +869,8 @@ and of_structure
           "Exception not handled"
       | Tstr_module { mb_id; mb_expr; _ } ->
         let name = Name.of_ident false mb_id in
-        of_module_expr typ_vars mb_expr (Some mb_expr.mod_type) >>= fun value ->
+        of_module_expr
+          typ_vars mb_expr (Some mb_expr.mod_type) is_in_exp >>= fun value ->
         return (LetVar (name, [], value, e_next))
       | Tstr_recmodule _ ->
         raise
@@ -1078,6 +1096,13 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       end ^^ !^ ":=" ^^ Type.to_coq None None typ ^^ !^ "in" ^^
       newline ^^ to_coq false e
     )
+  | LetModule (x, e1, e2) ->
+    Pp.parens paren @@ nest (
+      !^ "let" ^^
+      !^ "'existS" ^^ !^ "_" ^^ !^ "_" ^^ Name.to_coq x ^^ !^ ":=" ^^
+      to_coq false e1 ^^ !^ "in" ^^ newline ^^
+      to_coq false e2
+    )
   | Match (e, cases, default_value, is_with_default_case) ->
     begin match (cases, default_value, is_with_default_case) with
     | ([(pattern, existential_cast, e2)], None, false)
@@ -1124,8 +1149,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Module (module_typ_params_arity, fields) ->
-    to_coq_exist_t paren module_typ_params_arity (
+  | Module (module_typ_params_arity, is_in_exp, fields) ->
+    to_coq_exist_t paren module_typ_params_arity is_in_exp (
       group (
         !^ "{|" ^^ newline ^^
         indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, nb_free_vars, e) ->
@@ -1158,7 +1183,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "|}"
     )
   | ModuleCast (module_typ_params_arity, module_path) ->
-    to_coq_exist_t paren module_typ_params_arity (MixedPath.to_coq module_path)
+    to_coq_exist_t paren module_typ_params_arity false (MixedPath.to_coq module_path)
   | Functor (x, typ, e) ->
     Pp.parens paren @@ nest (
       !^ "fun" ^^
@@ -1253,12 +1278,15 @@ and to_coq_arity (arity : int) : SmartPrint.t =
   | arity -> !^ "Set" ^^ !^ "->" ^^ (to_coq_arity (arity - 1))
 
 and to_coq_exist_t
-  (paren : bool) (module_typ_params_arity : int Tree.t) (e : SmartPrint.t)
+  (paren : bool)
+  (module_typ_params_arity : int Tree.t)
+  (is_in_exp : bool)
+  (e : SmartPrint.t)
   : SmartPrint.t =
   let arities = Tree.flatten module_typ_params_arity |> List.map snd in
   let nb_of_existential_variables = List.length arities in
   Pp.parens paren @@ nest (
-    !^ "existT" ^^
+    (if is_in_exp then !^ "existS" else !^ "existT") ^^
     parens (nest (
       !^ "A :=" ^^
       match arities with
