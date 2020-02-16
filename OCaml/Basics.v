@@ -17,6 +17,11 @@ Notation "{ x @ P }" := (sigS (fun x => P)) : type_scope.
 Notation "{ x : A @ P }" := (sigS (A := A) (fun x => P)) : type_scope.
 Notation "{ ' pat : A @ P }" := (sigS (A := A) (fun pat => P)) : type_scope.
 
+(** Conversion from a module to a first-class module. *)
+Definition pack {A : Type} {P : A -> Set} (M : {x : A & P x}) : {x : A @ P x} :=
+  let 'existT _ _ M := M in
+  existS _ _ M.
+
 Notation "(| record |)" := (projT2 record).
 
 Module Primitive.

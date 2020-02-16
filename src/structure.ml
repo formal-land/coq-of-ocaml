@@ -147,8 +147,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
           md_type_path
           mod_type
           structure.str_items
-          structure.str_final_env
-          false >>= fun module_exp ->
+          structure.str_final_env >>= fun module_exp ->
         return [ModuleExp (name, module_exp)]
       | Not_found _ ->
         of_structure structure >>= fun structures ->
@@ -182,8 +181,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       Exp.of_module_expr
         Name.Map.empty
         mb_expr
-        None
-        false >>= fun module_exp ->
+        None >>= fun module_exp ->
       return [ModuleExp (name, module_exp)]
     | Tstr_module _ ->
       error_message

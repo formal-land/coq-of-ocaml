@@ -115,21 +115,22 @@ Module Triple.
 End Triple.
 
 Definition tripe : {'[a, b, c, bar] : _ @ Triple.signature a b c bar} :=
-  let a := Z in
-  let b := bool in
-  let c := string in
-  let va := 0 in
-  let vb := false in
-  let vc := "" in
-  let bar := Z in
-  let foo := 12 in
-  existS (A := [Set ** Set ** Set ** Set]) _ [_, _, _, _]
-    {|
-      Triple.va := va;
-      Triple.vb := vb;
-      Triple.vc := vc;
-      Triple.foo := foo
-    |}.
+  (pack
+    (let a := Z in
+    let b := bool in
+    let c := string in
+    let va := 0 in
+    let vb := false in
+    let vc := "" in
+    let bar := Z in
+    let foo := 12 in
+    existT (A := [Set ** Set ** Set ** Set]) _ [_, _, _, _]
+      {|
+        Triple.va := va;
+        Triple.vb := vb;
+        Triple.vc := vc;
+        Triple.foo := foo
+      |})).
 
 Module UsingTriple.
   Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Set} : Set := {
@@ -144,33 +145,34 @@ End UsingTriple.
 
 Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
   let 'existS _ _ Box := Box in
-  let elt := a in
-  let elt_ty := Box.(Boxed_set.elt_ty) in
-  let OPS := Box.(Boxed_set.OPS) in
-  let boxed :=
-    if b then
-      Box.(Boxed_set.OPS).(S.SET.add) v Box.(Boxed_set.boxed)
-    else
-      Box.(Boxed_set.OPS).(S.SET.remove) v Box.(Boxed_set.boxed) in
-  let size :=
-    let mem := Box.(Boxed_set.OPS).(S.SET.mem) v Box.(Boxed_set.boxed) in
-    if mem then
+  (pack
+    (let elt := a in
+    let elt_ty := Box.(Boxed_set.elt_ty) in
+    let OPS := existT (A := unit) (fun _ => _) tt Box.(Boxed_set.OPS) in
+    let boxed :=
       if b then
-        Box.(Boxed_set.size)
+        Box.(Boxed_set.OPS).(S.SET.add) v Box.(Boxed_set.boxed)
       else
-        Z.sub Box.(Boxed_set.size) 1
-    else
-      if b then
-        Z.add Box.(Boxed_set.size) 1
+        Box.(Boxed_set.OPS).(S.SET.remove) v Box.(Boxed_set.boxed) in
+    let size :=
+      let mem := Box.(Boxed_set.OPS).(S.SET.mem) v Box.(Boxed_set.boxed) in
+      if mem then
+        if b then
+          Box.(Boxed_set.size)
+        else
+          Z.sub Box.(Boxed_set.size) 1
       else
-        Box.(Boxed_set.size) in
-  existS (A := Set) _ _
-    {|
-      Boxed_set.elt_ty := elt_ty;
-      Boxed_set.OPS := OPS;
-      Boxed_set.boxed := boxed;
-      Boxed_set.size := size
-    |}.
+        if b then
+          Z.add Box.(Boxed_set.size) 1
+        else
+          Box.(Boxed_set.size) in
+    existT (A := Set) _ _
+      {|
+        Boxed_set.elt_ty := elt_ty;
+        Boxed_set.OPS := (|OPS|);
+        Boxed_set.boxed := boxed;
+        Boxed_set.size := size
+      |})).
 
 Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=
   let 'existS _ _ Box := Box in
