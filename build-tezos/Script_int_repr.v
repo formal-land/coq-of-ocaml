@@ -17,7 +17,7 @@ Inductive n : Set :=
 Inductive z : Set :=
 | Integer_tag : z.
 
-Definition num (t : Set) := Z.t.
+Definition num (t : Set) : Set := Z.t.
 
 Definition compare (x : Z.t) (y : Z.t) : Z := Z.compare x y.
 

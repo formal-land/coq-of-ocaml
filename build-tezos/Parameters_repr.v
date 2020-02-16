@@ -16,7 +16,7 @@ Require Tezos.Script_repr.
 Require Tezos.Tez_repr.
 
 Module bootstrap_account.
-  Record record := Build {
+  Record record : Set := Build {
     public_key_hash : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
     public_key : option (|Signature.Public_key|).(S.SPublic_key.t);
     amount : Tez_repr.t }.
@@ -30,7 +30,7 @@ End bootstrap_account.
 Definition bootstrap_account := bootstrap_account.record.
 
 Module bootstrap_contract.
-  Record record := Build {
+  Record record : Set := Build {
     delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
     amount : Tez_repr.t;
     script : Script_repr.t }.
@@ -44,7 +44,7 @@ End bootstrap_contract.
 Definition bootstrap_contract := bootstrap_contract.record.
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     bootstrap_accounts : list bootstrap_account;
     bootstrap_contracts : list bootstrap_contract;
     commitments : list Commitment_repr.t;

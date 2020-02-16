@@ -17,7 +17,7 @@ Inductive t : Set :=
 | Implicit : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -> t
 | Originated : Contract_hash.t -> t.
 
-Definition contract := t.
+Definition contract : Set := t.
 
 Parameter Included_S : {_ : unit & Compare.S.signature contract}.
 

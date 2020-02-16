@@ -28,7 +28,7 @@ Definition max_proposals_per_delegate : Z := 20.
 Definition max_operation_data_length : Z := Pervasives.op_star 16 1024.
 
 Module fixed.
-  Record record := Build {
+  Record record : Set := Build {
     proof_of_work_nonce_size : Z;
     nonce_length : Z;
     max_revelations_per_block : Z;
@@ -97,7 +97,7 @@ Definition __fixed_value : fixed :=
     fixed.max_proposals_per_delegate := max_proposals_per_delegate |}.
 
 Module parametric.
-  Record record := Build {
+  Record record : Set := Build {
     preserved_cycles : Z;
     blocks_per_cycle : int32;
     blocks_per_commitment : int32;
@@ -583,7 +583,7 @@ Definition parametric_encoding : Data_encoding.encoding parametric :=
             Period_repr.encoding)))).
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     fixed : fixed;
     parametric : parametric }.
   Definition with_fixed fixed (r : record) :=

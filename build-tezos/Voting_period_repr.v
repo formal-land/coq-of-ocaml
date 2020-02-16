@@ -11,9 +11,9 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-Definition t := int32.
+Definition t : Set := int32.
 
-Definition voting_period := t.
+Definition voting_period : Set := t.
 
 Definition op_eq := (|Compare.Int32|).(Compare.S.op_eq).
 

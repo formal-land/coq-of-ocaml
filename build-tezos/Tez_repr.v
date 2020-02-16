@@ -82,9 +82,9 @@ Definition of_string := (|QtyModule|).(Qty_repr.S.of_string).
 
 Definition to_string := (|QtyModule|).(Qty_repr.S.to_string).
 
-Definition t := qty.
+Definition t : Set := qty.
 
-Definition tez := qty.
+Definition tez : Set := qty.
 
 Definition encoding : Data_encoding.encoding qty :=
   Pervasives.op_atat

@@ -18,14 +18,14 @@ Require Tezos.Tez_repr.
 
 (* extensible_type_definition `error` *)
 
-Definition t := Seed_repr.nonce.
+Definition t : Set := Seed_repr.nonce.
 
-Definition nonce := t.
+Definition nonce : Set := t.
 
 Parameter encoding : Data_encoding.t nonce.
 
 Module unrevealed.
-  Record record := Build {
+  Record record : Set := Build {
     nonce_hash : Nonce_hash.t;
     delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
     rewards : Tez_repr.t;

@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-Definition lazyt (a : Set) := unit -> a.
+Definition lazyt (a : Set) : Set := unit -> a.
 
 Inductive lazy_list_t (a : Set) : Set :=
 | LCons :
@@ -19,7 +19,8 @@ Inductive lazy_list_t (a : Set) : Set :=
 
 Arguments LCons {_}.
 
-Definition lazy_list (a : Set) := Lwt.t (Error_monad.tzresult (lazy_list_t a)).
+Definition lazy_list (a : Set) : Set :=
+  Lwt.t (Error_monad.tzresult (lazy_list_t a)).
 
 Fixpoint op_minusminusgt
   (i : (|Compare.Int|).(Compare.S.t)) (j : (|Compare.Int|).(Compare.S.t))

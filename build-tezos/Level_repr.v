@@ -15,7 +15,7 @@ Require Tezos.Raw_level_repr.
 Require Tezos.Voting_period_repr.
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     level : Raw_level_repr.t;
     level_position : int32;
     cycle : Cycle_repr.t;
@@ -80,7 +80,7 @@ Definition max := (|CompareModule|).(Compare.S.max).
 
 Definition min := (|CompareModule|).(Compare.S.min).
 
-Definition level := t.
+Definition level : Set := t.
 
 Definition pp (ppf : Format.formatter) (function_parameter : t) : unit :=
   let '{| t.level := level |} := function_parameter in

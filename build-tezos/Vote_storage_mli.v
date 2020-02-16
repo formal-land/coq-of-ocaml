@@ -32,7 +32,7 @@ Parameter get_proposals :
 Parameter clear_proposals : Raw_context.t -> Lwt.t Raw_context.t.
 
 Module ballots.
-  Record record := Build {
+  Record record : Set := Build {
     yay : int32;
     nay : int32;
     pass : int32 }.

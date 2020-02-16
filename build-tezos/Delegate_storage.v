@@ -140,7 +140,7 @@ Definition balance_update_encoding : Data_encoding.encoding balance_update :=
                 | None => Pervasives.failwith "Qty.of_mutez"
                 end)) None Data_encoding.__int64_value))).
 
-Definition balance_updates := list (balance * balance_update).
+Definition balance_updates : Set := list (balance * balance_update).
 
 Definition balance_updates_encoding
   : Data_encoding.encoding (list (balance * balance_update)) :=
@@ -160,7 +160,7 @@ Definition cleanup_balance_updates {A : Set}
       end) balance_updates.
 
 Module frozen_balance.
-  Record record := Build {
+  Record record : Set := Build {
     deposit : Tez_repr.t;
     fees : Tez_repr.t;
     rewards : Tez_repr.t }.

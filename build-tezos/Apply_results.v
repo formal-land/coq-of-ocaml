@@ -21,7 +21,7 @@ Definition error_encoding : Data_encoding.encoding Error_monad.__error := axiom.
 
 Module successful_manager_operation_result.
   Module Reveal_result.
-    Record record {consumed_gas : Set} := {
+    Record record {consumed_gas : Set} : Set := {
       consumed_gas : consumed_gas }.
     Arguments record : clear implicits.
   End Reveal_result.
@@ -30,7 +30,7 @@ Module successful_manager_operation_result.
   Module Transaction_result.
     Record record {storage big_map_diff balance_updates originated_contracts
       consumed_gas storage_size paid_storage_size_diff
-      allocated_destination_contract : Set} := {
+      allocated_destination_contract : Set} : Set := {
       storage : storage;
       big_map_diff : big_map_diff;
       balance_updates : balance_updates;
@@ -45,7 +45,7 @@ Module successful_manager_operation_result.
   
   Module Origination_result.
     Record record {big_map_diff balance_updates originated_contracts
-      consumed_gas storage_size paid_storage_size_diff : Set} := {
+      consumed_gas storage_size paid_storage_size_diff : Set} : Set := {
       big_map_diff : big_map_diff;
       balance_updates : balance_updates;
       originated_contracts : originated_contracts;
@@ -57,7 +57,7 @@ Module successful_manager_operation_result.
   Definition Origination_result_skeleton := Origination_result.record.
   
   Module Delegation_result.
-    Record record {consumed_gas : Set} := {
+    Record record {consumed_gas : Set} : Set := {
       consumed_gas : consumed_gas }.
     Arguments record : clear implicits.
   End Delegation_result.
@@ -148,7 +148,8 @@ Inductive packed_internal_operation_result : Set :=
 Module Manager_result.
   Module case.
     Module MCase.
-      Record record {op_case encoding kind iselect select proj inj t : Set} := {
+      Record record {op_case encoding kind iselect select proj inj t : Set} :
+        Set := {
         op_case : op_case;
         encoding : encoding;
         kind : kind;
@@ -317,8 +318,8 @@ Module Manager_result.
               Alpha_context.internal_operation.operation := Alpha_context.Reveal _
                 |} as op) res =>
           let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT
-              (fun __Internal_operation_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Internal_operation_result_'kind =>
                 [(Alpha_context.internal_operation Alpha_context.Kind.reveal) **
                   (manager_operation_result __Internal_operation_result_'kind)])
               _ [op, res] in
@@ -368,8 +369,8 @@ Module Manager_result.
               Alpha_context.internal_operation.operation := Alpha_context.Transaction _
                 |} as op) res =>
           let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT
-              (fun __Internal_operation_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Internal_operation_result_'kind =>
                 [(Alpha_context.internal_operation
                   Alpha_context.Kind.transaction) **
                   (manager_operation_result __Internal_operation_result_'kind)])
@@ -449,8 +450,8 @@ Module Manager_result.
               Alpha_context.internal_operation.operation := Alpha_context.Origination _
                 |} as op) res =>
           let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT
-              (fun __Internal_operation_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Internal_operation_result_'kind =>
                 [(Alpha_context.internal_operation
                   Alpha_context.Kind.origination) **
                   (manager_operation_result __Internal_operation_result_'kind)])
@@ -513,8 +514,8 @@ Module Manager_result.
               Alpha_context.internal_operation.operation := Alpha_context.Delegation _
                 |} as op) res =>
           let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT
-              (fun __Internal_operation_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Internal_operation_result_'kind =>
                 [(Alpha_context.internal_operation Alpha_context.Kind.delegation)
                   **
                   (manager_operation_result __Internal_operation_result_'kind)])
@@ -547,14 +548,14 @@ Definition internal_operation_result_encoding
     : Data_encoding.case packed_internal_operation_result :=
     let 'Manager_result.MCase res_case := function_parameter in
     let 'existT _ __MCase_'a res_case :=
-      existT
-        (fun __MCase_'a : Set => (Manager_result.case.MCase kind __MCase_'a)) _
+      existT (A := Set)
+        (fun __MCase_'a => (Manager_result.case.MCase kind __MCase_'a)) _
         res_case in
     let 'Alpha_context.Operation.Encoding.Manager_operations.MCase op_case :=
       res_case.(Manager_result.case.MCase.op_case) in
     let 'existT _ __MCase_'a1 op_case :=
-      existT
-        (fun __MCase_'a1 : Set =>
+      existT (A := Set)
+        (fun __MCase_'a1 =>
           (Alpha_context.Operation.Encoding.Manager_operations.case.MCase kind
             __MCase_'a1)) _ op_case in
     Data_encoding.__case_value
@@ -606,7 +607,7 @@ Definition internal_operation_result_encoding
 
 Module contents_result.
   Module Endorsement_result.
-    Record record {balance_updates delegate slots : Set} := {
+    Record record {balance_updates delegate slots : Set} : Set := {
       balance_updates : balance_updates;
       delegate : delegate;
       slots : slots }.
@@ -616,7 +617,7 @@ Module contents_result.
   
   Module Manager_operation_result.
     Record record {balance_updates operation_result internal_operation_results :
-      Set} := {
+      Set} : Set := {
       balance_updates : balance_updates;
       operation_result : operation_result;
       internal_operation_results : internal_operation_results }.
@@ -710,7 +711,7 @@ Definition equal_manager_kind {a b : Set}
 Module Encoding.
   Module case.
     Module Case.
-      Record record {op_case encoding select mselect proj inj : Set} := {
+      Record record {op_case encoding select mselect proj inj : Set} : Set := {
         op_case : op_case;
         encoding : encoding;
         select : select;
@@ -784,8 +785,8 @@ Module Encoding.
             match function_parameter with
             | Contents_and_result ((Alpha_context.Endorsement _) as op) res =>
               let 'existT _ __Contents_and_result_'kind [op, res] :=
-                existT
-                  (fun __Contents_and_result_'kind : Set =>
+                existT (A := Set)
+                  (fun __Contents_and_result_'kind =>
                     [(Alpha_context.contents Alpha_context.Kind.endorsement) **
                       (contents_result __Contents_and_result_'kind)]) _
                   [op, res] in
@@ -835,8 +836,8 @@ Module Encoding.
               Contents_and_result
                 ((Alpha_context.Seed_nonce_revelation _) as op) res =>
               let 'existT _ __Contents_and_result_'kind [op, res] :=
-                existT
-                  (fun __Contents_and_result_'kind : Set =>
+                existT (A := Set)
+                  (fun __Contents_and_result_'kind =>
                     [(Alpha_context.contents
                       Alpha_context.Kind.seed_nonce_revelation) **
                       (contents_result __Contents_and_result_'kind)]) _
@@ -873,8 +874,8 @@ Module Encoding.
               Contents_and_result
                 ((Alpha_context.Double_endorsement_evidence _) as op) res =>
               let 'existT _ __Contents_and_result_'kind [op, res] :=
-                existT
-                  (fun __Contents_and_result_'kind : Set =>
+                existT (A := Set)
+                  (fun __Contents_and_result_'kind =>
                     [(Alpha_context.contents
                       Alpha_context.Kind.double_endorsement_evidence) **
                       (contents_result __Contents_and_result_'kind)]) _
@@ -912,8 +913,8 @@ Module Encoding.
               Contents_and_result
                 ((Alpha_context.Double_baking_evidence _) as op) res =>
               let 'existT _ __Contents_and_result_'kind [op, res] :=
-                existT
-                  (fun __Contents_and_result_'kind : Set =>
+                existT (A := Set)
+                  (fun __Contents_and_result_'kind =>
                     [(Alpha_context.contents
                       Alpha_context.Kind.double_baking_evidence) **
                       (contents_result __Contents_and_result_'kind)]) _
@@ -948,8 +949,8 @@ Module Encoding.
             | Contents_and_result ((Alpha_context.Activate_account _) as op) res
               =>
               let 'existT _ __Contents_and_result_'kind [op, res] :=
-                existT
-                  (fun __Contents_and_result_'kind : Set =>
+                existT (A := Set)
+                  (fun __Contents_and_result_'kind =>
                     [(Alpha_context.contents Alpha_context.Kind.activate_account)
                       ** (contents_result __Contents_and_result_'kind)]) _
                   [op, res] in
@@ -976,8 +977,8 @@ Module Encoding.
             match function_parameter with
             | Contents_and_result ((Alpha_context.Proposals _) as op) res =>
               let 'existT _ __Contents_and_result_'kind [op, res] :=
-                existT
-                  (fun __Contents_and_result_'kind : Set =>
+                existT (A := Set)
+                  (fun __Contents_and_result_'kind =>
                     [(Alpha_context.contents Alpha_context.Kind.proposals) **
                       (contents_result __Contents_and_result_'kind)]) _
                   [op, res] in
@@ -1008,8 +1009,8 @@ Module Encoding.
             match function_parameter with
             | Contents_and_result ((Alpha_context.Ballot _) as op) res =>
               let 'existT _ __Contents_and_result_'kind [op, res] :=
-                existT
-                  (fun __Contents_and_result_'kind : Set =>
+                existT (A := Set)
+                  (fun __Contents_and_result_'kind =>
                     [(Alpha_context.contents Alpha_context.Kind.ballot) **
                       (contents_result __Contents_and_result_'kind)]) _
                   [op, res] in
@@ -1036,16 +1037,16 @@ Module Encoding.
     case (Alpha_context.Kind.manager A) :=
     let 'Alpha_context.Operation.Encoding.Case op_case := function_parameter in
     let 'existT _ __Case_'a op_case :=
-      existT
-        (fun __Case_'a : Set =>
+      existT (A := Set)
+        (fun __Case_'a =>
           (Alpha_context.Operation.Encoding.case.Case
             (Alpha_context.Kind.manager kind) __Case_'a)) _ op_case in
     fun function_parameter =>
       let 'Manager_result.MCase res_case := function_parameter in
       let 'existT _ __MCase_'a res_case :=
-        existT
-          (fun __MCase_'a : Set => (Manager_result.case.MCase kind __MCase_'a))
-          _ res_case in
+        existT (A := Set)
+          (fun __MCase_'a => (Manager_result.case.MCase kind __MCase_'a)) _
+          res_case in
       fun mselect =>
         Case
           {| case.Case.op_case := Alpha_context.Operation.Encoding.Case op_case;
@@ -1068,8 +1069,8 @@ Module Encoding.
                         contents_result.Manager_operation_result.operation_result := Applied res
                           |} as op)) =>
                   let 'existT _ __0 [res, op] :=
-                    existT
-                      (fun __0 : Set =>
+                    existT (A := Set)
+                      (fun __0 =>
                         [(successful_manager_operation_result __0) **
                           (contents_result.Manager_operation_result __0)]) _
                       [res, op] in
@@ -1091,8 +1092,8 @@ Module Encoding.
                           Backtracked res errs
                           |} as op)) =>
                   let 'existT _ __1 [res, errs, op] :=
-                    existT
-                      (fun __1 : Set =>
+                    existT (A := Set)
+                      (fun __1 =>
                         [(successful_manager_operation_result __1) **
                           (option (list Error_monad.__error)) **
                           (contents_result.Manager_operation_result __1)]) _
@@ -1114,8 +1115,8 @@ Module Encoding.
                         contents_result.Manager_operation_result.operation_result := Skipped kind
                           |} as op)) =>
                   let 'existT _ __2 [kind, op] :=
-                    existT
-                      (fun __2 : Set =>
+                    existT (A := Set)
+                      (fun __2 =>
                         [(Alpha_context.Kind.manager __2) **
                           (contents_result.Manager_operation_result __2)]) _
                       [kind, op] in
@@ -1136,8 +1137,8 @@ Module Encoding.
                         contents_result.Manager_operation_result.operation_result := Failed kind errs
                           |} as op)) =>
                   let 'existT _ __3 [kind, errs, op] :=
-                    existT
-                      (fun __3 : Set =>
+                    existT (A := Set)
+                      (fun __3 =>
                         [(Alpha_context.Kind.manager __3) **
                           (list Error_monad.__error) **
                           (contents_result.Manager_operation_result __3)]) _
@@ -1195,8 +1196,8 @@ Module Encoding.
               Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
                 |}) as op) res =>
           let 'existT _ __Contents_and_result_'kind [op, res] :=
-            existT
-              (fun __Contents_and_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Contents_and_result_'kind =>
                 [(Alpha_context.contents
                   (Alpha_context.Kind.manager Alpha_context.Kind.reveal)) **
                   (contents_result __Contents_and_result_'kind)]) _ [op, res] in
@@ -1217,8 +1218,8 @@ Module Encoding.
                 Alpha_context.Transaction _
                 |}) as op) res =>
           let 'existT _ __Contents_and_result_'kind [op, res] :=
-            existT
-              (fun __Contents_and_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Contents_and_result_'kind =>
                 [(Alpha_context.contents
                   (Alpha_context.Kind.manager Alpha_context.Kind.transaction))
                   ** (contents_result __Contents_and_result_'kind)]) _ [op, res]
@@ -1240,8 +1241,8 @@ Module Encoding.
                 Alpha_context.Origination _
                 |}) as op) res =>
           let 'existT _ __Contents_and_result_'kind [op, res] :=
-            existT
-              (fun __Contents_and_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Contents_and_result_'kind =>
                 [(Alpha_context.contents
                   (Alpha_context.Kind.manager Alpha_context.Kind.origination))
                   ** (contents_result __Contents_and_result_'kind)]) _ [op, res]
@@ -1263,8 +1264,8 @@ Module Encoding.
                 Alpha_context.Delegation _
                 |}) as op) res =>
           let 'existT _ __Contents_and_result_'kind [op, res] :=
-            existT
-              (fun __Contents_and_result_'kind : Set =>
+            existT (A := Set)
+              (fun __Contents_and_result_'kind =>
                 [(Alpha_context.contents
                   (Alpha_context.Kind.manager Alpha_context.Kind.delegation)) **
                   (contents_result __Contents_and_result_'kind)]) _ [op, res] in
@@ -1292,8 +1293,8 @@ Definition contents_result_encoding
           Encoding.case.Case.inj := inj
           |} := function_parameter in
     let 'existT _ __Case_'a [tag, name, encoding, select, proj, inj] :=
-      existT
-        (fun __Case_'a : Set =>
+      existT (A := Set)
+        (fun __Case_'a =>
           [Z ** string ** (Data_encoding.t __Case_'a) **
             (packed_contents_result -> option (contents_result A)) **
             (contents_result A -> __Case_'a) **
@@ -1350,7 +1351,7 @@ Definition contents_and_result_encoding
     let 'existT _ [__Case_'a, __Case_'a1]
       [tag, name, encoding, proj, inj, meta_encoding, mselect, meta_proj,
         meta_inj] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__Case_'a, __Case_'a1] =>
           [Z ** string ** (Data_encoding.t __Case_'a1) **
             (Alpha_context.Operation.contents A -> __Case_'a1) **
@@ -1420,13 +1421,13 @@ Definition contents_result_list_encoding
     match function_parameter with
     | Contents_result_list (Single_result o) =>
       let 'existT _ __Contents_result_list_'kind o :=
-        existT
-          (fun __Contents_result_list_'kind : Set =>
+        existT (A := Set)
+          (fun __Contents_result_list_'kind =>
             (contents_result __Contents_result_list_'kind)) _ o in
       [ Contents_result o ]
     | Contents_result_list (Cons_result o os) =>
       let 'existT _ [__0, __1] [o, os] :=
-        existT
+        existT (A := [Set ** Set])
           (fun '[__0, __1] =>
             [(contents_result (Alpha_context.Kind.manager __0)) **
               (contents_result_list (Alpha_context.Kind.manager __1))]) [_, _]
@@ -1439,20 +1440,20 @@ Definition contents_result_list_encoding
     | [] => Pervasives.failwith "cannot decode empty operation result"
     | cons (Contents_result o) [] =>
       let 'existT _ __Contents_result_'kind o :=
-        existT
-          (fun __Contents_result_'kind : Set =>
+        existT (A := Set)
+          (fun __Contents_result_'kind =>
             (contents_result __Contents_result_'kind)) _ o in
       Contents_result_list (Single_result o)
     | cons (Contents_result o) os =>
       let 'existT _ __Contents_result_'kind1 [o, os] :=
-        existT
-          (fun __Contents_result_'kind1 : Set =>
+        existT (A := Set)
+          (fun __Contents_result_'kind1 =>
             [(contents_result __Contents_result_'kind1) **
               (list packed_contents_result)]) _ [o, os] in
       let 'Contents_result_list os := of_list os in
       let 'existT _ __Contents_result_list_'kind2 os :=
-        existT
-          (fun __Contents_result_list_'kind2 : Set =>
+        existT (A := Set)
+          (fun __Contents_result_list_'kind2 =>
             (contents_result_list __Contents_result_list_'kind2)) _ os in
       match (o, os) with
       | (Manager_operation_result _, Single_result (Manager_operation_result _))
@@ -1495,15 +1496,15 @@ Definition contents_and_result_list_encoding
     match function_parameter with
     | Contents_and_result_list (Single_and_result op res) =>
       let 'existT _ __Contents_and_result_list_'kind [op, res] :=
-        existT
-          (fun __Contents_and_result_list_'kind : Set =>
+        existT (A := Set)
+          (fun __Contents_and_result_list_'kind =>
             [(Alpha_context.contents __Contents_and_result_list_'kind) **
               (contents_result __Contents_and_result_list_'kind)]) _ [op, res]
         in
       [ Contents_and_result op res ]
     | Contents_and_result_list (Cons_and_result op res rest) =>
       let 'existT _ [__0, __1] [op, res, rest] :=
-        existT
+        existT (A := [Set ** Set])
           (fun '[__0, __1] =>
             [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
               (contents_result (Alpha_context.Kind.manager __0)) **
@@ -1518,22 +1519,22 @@ Definition contents_and_result_list_encoding
     | [] => Pervasives.failwith "cannot decode empty combined operation result"
     | cons (Contents_and_result op res) [] =>
       let 'existT _ __Contents_and_result_'kind [op, res] :=
-        existT
-          (fun __Contents_and_result_'kind : Set =>
+        existT (A := Set)
+          (fun __Contents_and_result_'kind =>
             [(Alpha_context.Operation.contents __Contents_and_result_'kind) **
               (contents_result __Contents_and_result_'kind)]) _ [op, res] in
       Contents_and_result_list (Single_and_result op res)
     | cons (Contents_and_result op res) rest =>
       let 'existT _ __Contents_and_result_'kind1 [op, res, rest] :=
-        existT
-          (fun __Contents_and_result_'kind1 : Set =>
+        existT (A := Set)
+          (fun __Contents_and_result_'kind1 =>
             [(Alpha_context.Operation.contents __Contents_and_result_'kind1) **
               (contents_result __Contents_and_result_'kind1) **
               (list packed_contents_and_result)]) _ [op, res, rest] in
       let 'Contents_and_result_list rest := of_list rest in
       let 'existT _ __Contents_and_result_list_'kind2 rest :=
-        existT
-          (fun __Contents_and_result_list_'kind2 : Set =>
+        existT (A := Set)
+          (fun __Contents_and_result_list_'kind2 =>
             (contents_and_result_list __Contents_and_result_list_'kind2)) _ rest
         in
       match (op, rest) with
@@ -1551,7 +1552,7 @@ Definition contents_and_result_list_encoding
     (Data_encoding.__Variable.__list_value None contents_and_result_encoding).
 
 Module operation_metadata.
-  Record record {kind : Set} := Build {
+  Record record {kind : Set} : Set := Build {
     contents : contents_result_list kind }.
   Arguments record : clear implicits.
   Definition with_contents {t_kind} contents (r : record t_kind) :=
@@ -1580,8 +1581,8 @@ Definition operation_metadata_encoding
                 operation_metadata.contents := contents
                   |} =>
               let 'existT _ __Operation_metadata_'kind contents :=
-                existT
-                  (fun __Operation_metadata_'kind : Set =>
+                existT (A := Set)
+                  (fun __Operation_metadata_'kind =>
                     (contents_result_list
                       __Operation_metadata_'kind)) _
                   contents in
@@ -1591,8 +1592,8 @@ Definition operation_metadata_encoding
           (fun function_parameter =>
             let 'Contents_result_list contents := function_parameter in
             let 'existT _ __Contents_result_list_'kind contents :=
-              existT
-                (fun __Contents_result_list_'kind : Set =>
+              existT (A := Set)
+                (fun __Contents_result_list_'kind =>
                   (contents_result_list
                     __Contents_result_list_'kind)) _
                 contents in
@@ -1805,7 +1806,7 @@ Fixpoint kind_equal_list {kind kind2 : Set}
     end
   | (Alpha_context.Cons op ops, Cons_result res ress) =>
     let 'existT _ [__0, __1, __2, __3] [op, ops, res, ress] :=
-      existT
+      existT (A := [Set ** Set ** Set ** Set])
         (fun '[__0, __1, __2, __3] =>
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (Alpha_context.contents_list (Alpha_context.Kind.manager __1)) **
@@ -1831,7 +1832,7 @@ Fixpoint pack_contents_list {kind : Set}
   | (Alpha_context.Single op, Single_result res) => Single_and_result op res
   | (Alpha_context.Cons op ops, Cons_result res ress) =>
     let 'existT _ [__0, __1] [op, ops, res, ress] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (Alpha_context.contents_list (Alpha_context.Kind.manager __1)) **
@@ -1889,7 +1890,7 @@ Fixpoint unpack_contents_list {kind : Set}
   | Single_and_result op res => ((Alpha_context.Single op), (Single_result res))
   | Cons_and_result op res rest =>
     let 'existT _ [__0, __1] [op, res, rest] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (contents_result (Alpha_context.Kind.manager __0)) **
@@ -1904,13 +1905,13 @@ Fixpoint to_list (function_parameter : packed_contents_result_list)
   match function_parameter with
   | Contents_result_list (Single_result o) =>
     let 'existT _ __Contents_result_list_'kind o :=
-      existT
-        (fun __Contents_result_list_'kind : Set =>
+      existT (A := Set)
+        (fun __Contents_result_list_'kind =>
           (contents_result __Contents_result_list_'kind)) _ o in
     [ Contents_result o ]
   | Contents_result_list (Cons_result o os) =>
     let 'existT _ [__0, __1] [o, os] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(contents_result (Alpha_context.Kind.manager __0)) **
             (contents_result_list (Alpha_context.Kind.manager __1))]) [_, _]
@@ -1926,20 +1927,20 @@ Fixpoint of_list (function_parameter : list packed_contents_result)
     assert false
   | cons (Contents_result o) [] =>
     let 'existT _ __Contents_result_'kind o :=
-      existT
-        (fun __Contents_result_'kind : Set =>
+      existT (A := Set)
+        (fun __Contents_result_'kind =>
           (contents_result __Contents_result_'kind)) _ o in
     Contents_result_list (Single_result o)
   | cons (Contents_result o) os =>
     let 'existT _ __Contents_result_'kind1 [o, os] :=
-      existT
-        (fun __Contents_result_'kind1 : Set =>
+      existT (A := Set)
+        (fun __Contents_result_'kind1 =>
           [(contents_result __Contents_result_'kind1) **
             (list packed_contents_result)]) _ [o, os] in
     let 'Contents_result_list os := of_list os in
     let 'existT _ __Contents_result_list_'kind os :=
-      existT
-        (fun __Contents_result_list_'kind : Set =>
+      existT (A := Set)
+        (fun __Contents_result_list_'kind =>
           (contents_result_list __Contents_result_list_'kind)) _ os in
     match (o, os) with
     | (Manager_operation_result _, Single_result (Manager_operation_result _))
@@ -1976,7 +1977,7 @@ Definition operation_data_and_metadata_encoding
               let 'existT _
                 [__Operation_data_'kind1,
                   __Operation_metadata_'kind] [op, res] :=
-                existT
+                existT (A := [Set ** Set])
                   (fun
                     '[__Operation_data_'kind1,
                       __Operation_metadata_'kind] =>
@@ -2006,8 +2007,8 @@ Definition operation_data_and_metadata_encoding
               function_parameter in
             let 'existT _ __Contents_and_result_list_'kind
               [contents, signature] :=
-              existT
-                (fun __Contents_and_result_list_'kind : Set =>
+              existT (A := Set)
+                (fun __Contents_and_result_list_'kind =>
                   [(contents_and_result_list
                     __Contents_and_result_list_'kind) **
                     (option Signature.t)]) _
@@ -2035,8 +2036,8 @@ Definition operation_data_and_metadata_encoding
             | (Alpha_context.Operation_data op, No_operation_metadata)
               =>
               let 'existT _ __Operation_data_'kind2 op :=
-                existT
-                  (fun __Operation_data_'kind2 : Set =>
+                existT (A := Set)
+                  (fun __Operation_data_'kind2 =>
                     (Alpha_context.protocol_data
                       __Operation_data_'kind2)) _ op
                 in
@@ -2051,8 +2052,8 @@ Definition operation_data_and_metadata_encoding
             let '(Alpha_context.Contents_list contents, signature) :=
               function_parameter in
             let 'existT _ __Contents_list_'kind [contents, signature] :=
-              existT
-                (fun __Contents_list_'kind : Set =>
+              existT (A := Set)
+                (fun __Contents_list_'kind =>
                   [(Alpha_context.contents_list
                     __Contents_list_'kind) **
                     (option Signature.t)]) _
@@ -2064,7 +2065,7 @@ Definition operation_data_and_metadata_encoding
       ]).
 
 Module block_metadata.
-  Record record := Build {
+  Record record : Set := Build {
     baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
     level : Alpha_context.Level.t;
     voting_period_kind : Alpha_context.Voting_period.kind;

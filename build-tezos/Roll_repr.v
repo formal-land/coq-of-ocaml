@@ -35,7 +35,7 @@ Definition max := (|Compare.Int32|).(Compare.S.max).
 
 Definition min := (|Compare.Int32|).(Compare.S.min).
 
-Definition roll := t.
+Definition roll : Set := t.
 
 Definition encoding : Data_encoding.encoding int32 :=
   Data_encoding.__int32_value.

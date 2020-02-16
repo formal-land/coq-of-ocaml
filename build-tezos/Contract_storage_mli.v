@@ -74,7 +74,7 @@ Parameter get_storage :
 
 Module big_map_diff_item.
   Module Update.
-    Record record {big_map diff_key diff_key_hash diff_value : Set} := {
+    Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
       big_map : big_map;
       diff_key : diff_key;
       diff_key_hash : diff_key_hash;
@@ -84,7 +84,7 @@ Module big_map_diff_item.
   Definition Update_skeleton := Update.record.
   
   Module Alloc.
-    Record record {big_map key_type value_type : Set} := {
+    Record record {big_map key_type value_type : Set} : Set := {
       big_map : big_map;
       key_type : key_type;
       value_type : value_type }.
@@ -116,7 +116,7 @@ Module ConstructorRecordNotations_big_map_diff_item.
 End ConstructorRecordNotations_big_map_diff_item.
 Import ConstructorRecordNotations_big_map_diff_item.
 
-Definition big_map_diff := list big_map_diff_item.
+Definition big_map_diff : Set := list big_map_diff_item.
 
 Parameter big_map_diff_encoding : Data_encoding.t big_map_diff.
 

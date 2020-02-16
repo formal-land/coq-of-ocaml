@@ -18,7 +18,7 @@ Require Tezos.Script_int_repr.
 Require Tezos.Storage_description.
 
 Module BASIC_DATA.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     op_eq : t -> t -> bool;
     op_ltgt : t -> t -> bool;
@@ -38,14 +38,14 @@ End BASIC_DATA.
 
 Parameter t : Set.
 
-Definition context := t.
+Definition context : Set := t.
 
-Definition public_key := (|Signature.Public_key|).(S.SPublic_key.t).
+Definition public_key : Set := (|Signature.Public_key|).(S.SPublic_key.t).
 
-Definition public_key_hash :=
+Definition public_key_hash : Set :=
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.t).
 
-Definition signature := Signature.t.
+Definition signature : Set := Signature.t.
 
 Module Tez.
   Parameter Included_BASIC_DATA : {t : _ & BASIC_DATA.signature t}.
@@ -86,7 +86,7 @@ Module Tez.
   Definition pp : Format.formatter -> t -> unit :=
     (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
-  Definition tez := t.
+  Definition tez : Set := t.
   
   Parameter zero : tez.
   
@@ -154,7 +154,7 @@ Module Period.
   Definition pp : Format.formatter -> t -> unit :=
     (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
-  Definition period := t.
+  Definition period : Set := t.
   
   Parameter rpc_arg : RPC_arg.arg period.
   
@@ -212,7 +212,7 @@ Module Timestamp.
   Definition pp : Format.formatter -> t -> unit :=
     (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
-  Definition time := t.
+  Definition time : Set := t.
   
   Parameter op_plusquestion : time -> Period.t -> Error_monad.tzresult time.
   
@@ -268,7 +268,7 @@ Module Raw_level.
   Definition pp : Format.formatter -> t -> unit :=
     (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
-  Definition raw_level := t.
+  Definition raw_level : Set := t.
   
   Parameter rpc_arg : RPC_arg.arg raw_level.
   
@@ -324,7 +324,7 @@ Module Cycle.
   Definition pp : Format.formatter -> t -> unit :=
     (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
-  Definition cycle := t.
+  Definition cycle : Set := t.
   
   Parameter rpc_arg : RPC_arg.arg cycle.
   
@@ -346,7 +346,7 @@ End Cycle.
 Module Gas.
   Module t.
     Module Limited.
-      Record record {remaining : Set} := {
+      Record record {remaining : Set} : Set := {
         remaining : remaining }.
       Arguments record : clear implicits.
     End Limited.
@@ -574,20 +574,20 @@ Module Script.
   | T_address : prim
   | T_chain_id : prim.
   
-  Definition location := Micheline.canonical_location.
+  Definition location : Set := Micheline.canonical_location.
   
-  Definition annot := Micheline.annot.
+  Definition annot : Set := Micheline.annot.
   
-  Definition expr := Micheline.canonical prim.
+  Definition expr : Set := Micheline.canonical prim.
   
-  Definition lazy_expr := Data_encoding.lazy_t expr.
+  Definition lazy_expr : Set := Data_encoding.lazy_t expr.
   
   Parameter __lazy_expr_value : expr -> lazy_expr.
   
-  Definition node := Micheline.node location prim.
+  Definition node : Set := Micheline.node location prim.
   
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       code : lazy_expr;
       storage : lazy_expr }.
     Definition with_code code (r : record) :=
@@ -665,7 +665,7 @@ End Script.
 
 Module Constants.
   Module fixed.
-    Record record := Build {
+    Record record : Set := Build {
       proof_of_work_nonce_size : Z;
       nonce_length : Z;
       max_revelations_per_block : Z;
@@ -713,7 +713,7 @@ Module Constants.
   Parameter max_proposals_per_delegate : Z.
   
   Module parametric.
-    Record record := Build {
+    Record record : Set := Build {
       preserved_cycles : Z;
       blocks_per_cycle : int32;
       blocks_per_commitment : int32;
@@ -1149,7 +1149,7 @@ Module Constants.
   Parameter min_proposal_quorum : context -> int32.
   
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       fixed : fixed;
       parametric : parametric }.
     Definition with_fixed fixed (r : record) :=
@@ -1201,7 +1201,7 @@ Module Voting_period.
   Definition pp : Format.formatter -> t -> unit :=
     (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
-  Definition voting_period := t.
+  Definition voting_period : Set := t.
   
   Parameter rpc_arg : RPC_arg.arg voting_period.
   
@@ -1222,7 +1222,7 @@ End Voting_period.
 
 Module Level.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       level : Raw_level.t;
       level_position : int32;
       cycle : Cycle.t;
@@ -1293,7 +1293,7 @@ Module Level.
   
   Parameter pp_full : Format.formatter -> t -> unit.
   
-  Definition level := t.
+  Definition level : Set := t.
   
   Parameter root : context -> level.
   
@@ -1348,7 +1348,7 @@ Module Fitness.
   
   Parameter of_bytes : MBytes.t -> option t.
   
-  Definition fitness := t.
+  Definition fitness : Set := t.
   
   Parameter increase : option Z -> context -> context.
   
@@ -1360,12 +1360,12 @@ End Fitness.
 Module Nonce.
   Parameter t : Set.
   
-  Definition nonce := t.
+  Definition nonce : Set := t.
   
   Parameter encoding : Data_encoding.t nonce.
   
   Module unrevealed.
-    Record record := Build {
+    Record record : Set := Build {
       nonce_hash : Nonce_hash.t;
       delegate : public_key_hash;
       rewards : Tez.t;
@@ -1415,7 +1415,7 @@ Module Seed.
 End Seed.
 
 Module Big_map.
-  Definition id := Z.t.
+  Definition id : Set := Z.t.
   
   Parameter fresh : context -> Lwt.t (Error_monad.tzresult (context * id)).
   
@@ -1477,7 +1477,7 @@ Module Contract.
   Definition pp : Format.formatter -> t -> unit :=
     (|Included_BASIC_DATA|).(BASIC_DATA.pp).
   
-  Definition contract := t.
+  Definition contract : Set := t.
   
   Parameter rpc_arg : RPC_arg.arg contract.
   
@@ -1543,7 +1543,7 @@ Module Contract.
   
   Module big_map_diff_item.
     Module Update.
-      Record record {big_map diff_key diff_key_hash diff_value : Set} := {
+      Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
         big_map : big_map;
         diff_key : diff_key;
         diff_key_hash : diff_key_hash;
@@ -1553,7 +1553,7 @@ Module Contract.
     Definition Update_skeleton := Update.record.
     
     Module Alloc.
-      Record record {big_map key_type value_type : Set} := {
+      Record record {big_map key_type value_type : Set} : Set := {
         big_map : big_map;
         key_type : key_type;
         value_type : value_type }.
@@ -1585,7 +1585,7 @@ Module Contract.
   End ConstructorRecordNotations_big_map_diff_item.
   Import ConstructorRecordNotations_big_map_diff_item.
   
-  Definition big_map_diff := list big_map_diff_item.
+  Definition big_map_diff : Set := list big_map_diff_item.
   
   Parameter big_map_diff_encoding : Data_encoding.t big_map_diff.
   
@@ -1636,7 +1636,7 @@ Module Delegate.
   | Debited : Tez.t -> balance_update
   | Credited : Tez.t -> balance_update.
   
-  Definition balance_updates := list (balance * balance_update).
+  Definition balance_updates : Set := list (balance * balance_update).
   
   Parameter balance_updates_encoding : Data_encoding.t balance_updates.
   
@@ -1672,7 +1672,7 @@ Module Delegate.
           list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))).
   
   Module frozen_balance.
-    Record record := Build {
+    Record record : Set := Build {
       deposit : Tez.t;
       fees : Tez.t;
       rewards : Tez.t }.
@@ -1729,7 +1729,7 @@ Module Delegate.
 End Delegate.
 
 Module Vote.
-  Definition proposal := (|Protocol_hash|).(S.HASH.t).
+  Definition proposal : Set := (|Protocol_hash|).(S.HASH.t).
   
   Parameter record_proposal :
     context -> (|Protocol_hash|).(S.HASH.t) -> public_key_hash ->
@@ -1768,7 +1768,7 @@ Module Vote.
   Parameter ballot_encoding : Data_encoding.t ballot.
   
   Module ballots.
-    Record record := Build {
+    Record record : Set := Build {
       yay : int32;
       nay : int32;
       pass : int32 }.
@@ -1822,7 +1822,7 @@ End Vote.
 
 Module Block_header.
   Module contents.
-    Record record := Build {
+    Record record : Set := Build {
       priority : Z;
       seed_nonce_hash : option Nonce_hash.t;
       proof_of_work_nonce : MBytes.t }.
@@ -1836,7 +1836,7 @@ Module Block_header.
   Definition contents := contents.record.
   
   Module protocol_data.
-    Record record := Build {
+    Record record : Set := Build {
       contents : contents;
       signature : Signature.t }.
     Definition with_contents contents (r : record) :=
@@ -1847,7 +1847,7 @@ Module Block_header.
   Definition protocol_data := protocol_data.record.
   
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       shell : Block_header.shell_header;
       protocol_data : protocol_data }.
     Definition with_shell shell (r : record) :=
@@ -1857,11 +1857,11 @@ Module Block_header.
   End t.
   Definition t := t.record.
   
-  Definition block_header := t.
+  Definition block_header : Set := t.
   
-  Definition raw := Block_header.t.
+  Definition raw : Set := Block_header.t.
   
-  Definition shell_header := Block_header.shell_header.
+  Definition shell_header : Set := Block_header.shell_header.
   
   Parameter __raw_value : block_header -> raw.
   
@@ -1933,14 +1933,14 @@ End Kind.
 
 Module contents.
   Module Endorsement.
-    Record record {level : Set} := {
+    Record record {level : Set} : Set := {
       level : level }.
     Arguments record : clear implicits.
   End Endorsement.
   Definition Endorsement_skeleton := Endorsement.record.
   
   Module Seed_nonce_revelation.
-    Record record {level nonce : Set} := {
+    Record record {level nonce : Set} : Set := {
       level : level;
       nonce : nonce }.
     Arguments record : clear implicits.
@@ -1948,7 +1948,7 @@ Module contents.
   Definition Seed_nonce_revelation_skeleton := Seed_nonce_revelation.record.
   
   Module Double_endorsement_evidence.
-    Record record {op1 op2 : Set} := {
+    Record record {op1 op2 : Set} : Set := {
       op1 : op1;
       op2 : op2 }.
     Arguments record : clear implicits.
@@ -1957,7 +1957,7 @@ Module contents.
     Double_endorsement_evidence.record.
   
   Module Double_baking_evidence.
-    Record record {bh1 bh2 : Set} := {
+    Record record {bh1 bh2 : Set} : Set := {
       bh1 : bh1;
       bh2 : bh2 }.
     Arguments record : clear implicits.
@@ -1965,7 +1965,7 @@ Module contents.
   Definition Double_baking_evidence_skeleton := Double_baking_evidence.record.
   
   Module Activate_account.
-    Record record {id activation_code : Set} := {
+    Record record {id activation_code : Set} : Set := {
       id : id;
       activation_code : activation_code }.
     Arguments record : clear implicits.
@@ -1973,7 +1973,7 @@ Module contents.
   Definition Activate_account_skeleton := Activate_account.record.
   
   Module Proposals.
-    Record record {source period proposals : Set} := {
+    Record record {source period proposals : Set} : Set := {
       source : source;
       period : period;
       proposals : proposals }.
@@ -1982,7 +1982,7 @@ Module contents.
   Definition Proposals_skeleton := Proposals.record.
   
   Module Ballot.
-    Record record {source period proposal ballot : Set} := {
+    Record record {source period proposal ballot : Set} : Set := {
       source : source;
       period : period;
       proposal : proposal;
@@ -1992,7 +1992,8 @@ Module contents.
   Definition Ballot_skeleton := Ballot.record.
   
   Module Manager_operation.
-    Record record {source fee counter operation gas_limit storage_limit : Set} := {
+    Record record {source fee counter operation gas_limit storage_limit : Set} :
+      Set := {
       source : source;
       fee : fee;
       counter : counter;
@@ -2006,7 +2007,7 @@ End contents.
 
 Module manager_operation.
   Module Transaction.
-    Record record {amount parameters entrypoint destination : Set} := {
+    Record record {amount parameters entrypoint destination : Set} : Set := {
       amount : amount;
       parameters : parameters;
       entrypoint : entrypoint;
@@ -2016,7 +2017,7 @@ Module manager_operation.
   Definition Transaction_skeleton := Transaction.record.
   
   Module Origination.
-    Record record {delegate script credit preorigination : Set} := {
+    Record record {delegate script credit preorigination : Set} : Set := {
       delegate : delegate;
       script : script;
       credit : credit;
@@ -2027,7 +2028,7 @@ Module manager_operation.
 End manager_operation.
 
 Module operation.
-  Record record {shell protocol_data : Set} := Build {
+  Record record {shell protocol_data : Set} : Set := Build {
     shell : shell;
     protocol_data : protocol_data }.
   Arguments record : clear implicits.
@@ -2041,7 +2042,7 @@ End operation.
 Definition operation_skeleton := operation.record.
 
 Module protocol_data.
-  Record record {contents signature : Set} := Build {
+  Record record {contents signature : Set} : Set := Build {
     contents : contents;
     signature : signature }.
   Arguments record : clear implicits.
@@ -2165,7 +2166,7 @@ Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.
 
 Module internal_operation.
-  Record record {kind : Set} := Build {
+  Record record {kind : Set} : Set := Build {
     source : Contract.contract;
     operation : manager_operation kind;
     nonce : Z }.
@@ -2195,7 +2196,7 @@ Inductive packed_protocol_data : Set :=
   protocol_data kind -> packed_protocol_data.
 
 Module packed_operation.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Operation.shell_header;
     protocol_data : packed_protocol_data }.
   Definition with_shell shell (r : record) :=
@@ -2235,15 +2236,15 @@ Module Fees.
 End Fees.
 
 Module Operation.
-  Definition contents (kind : Set) := contents kind.
+  Definition contents (kind : Set) : Set := contents kind.
   
-  Definition packed_contents := packed_contents.
+  Definition packed_contents : Set := packed_contents.
   
   Parameter contents_encoding : Data_encoding.t packed_contents.
   
-  Definition protocol_data (kind : Set) := protocol_data kind.
+  Definition protocol_data (kind : Set) : Set := protocol_data kind.
   
-  Definition packed_protocol_data := packed_protocol_data.
+  Definition packed_protocol_data : Set := packed_protocol_data.
   
   Parameter protocol_data_encoding : Data_encoding.t packed_protocol_data.
   
@@ -2251,7 +2252,7 @@ Module Operation.
     Data_encoding.t (Operation.shell_header * packed_contents_list).
   
   Module raw.
-    Record record := Build {
+    Record record : Set := Build {
       shell : Operation.shell_header;
       proto : MBytes.t }.
     Definition with_shell shell (r : record) :=
@@ -2266,7 +2267,7 @@ Module Operation.
   Parameter contents_list_encoding : Data_encoding.t packed_contents_list.
   
   Module t.
-    Record record {kind : Set} := Build {
+    Record record {kind : Set} : Set := Build {
       shell : Operation.shell_header;
       protocol_data : protocol_data kind }.
     Arguments record : clear implicits.
@@ -2277,7 +2278,7 @@ Module Operation.
   End t.
   Definition t := t.record.
   
-  Definition packed := packed_operation.
+  Definition packed : Set := packed_operation.
   
   Parameter encoding : Data_encoding.t packed.
   
@@ -2324,7 +2325,7 @@ Module Operation.
   Module Encoding.
     Module case.
       Module Case.
-        Record record {tag name encoding select proj inj : Set} := {
+        Record record {tag name encoding select proj inj : Set} : Set := {
           tag : tag;
           name : name;
           encoding : encoding;
@@ -2381,7 +2382,7 @@ Module Operation.
     Module Manager_operations.
       Module case.
         Module MCase.
-          Record record {tag name encoding select proj inj : Set} := {
+          Record record {tag name encoding select proj inj : Set} : Set := {
             tag : tag;
             name : name;
             encoding : encoding;
@@ -2430,9 +2431,9 @@ Module Operation.
 End Operation.
 
 Module Roll.
-  Definition t := int32.
+  Definition t : Set := int32.
   
-  Definition roll := t.
+  Definition roll : Set := t.
   
   Parameter encoding : Data_encoding.t roll.
   
@@ -2461,7 +2462,7 @@ End Roll.
 
 Module Commitment.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       blinded_public_key_hash : Blinded_public_key_hash.t;
       amount : Tez.tez }.
     Definition with_blinded_public_key_hash blinded_public_key_hash

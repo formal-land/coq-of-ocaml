@@ -17,7 +17,7 @@ Definition depend_on_me (function_parameter : unit) : unit :=
   tt.
 
 Module Single_data_storage.
-  Record signature {t value : Set} := {
+  Record signature {t value : Set} : Set := {
     tag_Single_data_storage : unit;
     t := t;
     context := t;
@@ -36,7 +36,7 @@ Module Single_data_storage.
 End Single_data_storage.
 
 Module Single_carbonated_data_storage.
-  Record signature {t value : Set} := {
+  Record signature {t value : Set} : Set := {
     tag_Single_carbonated_data_storage : unit;
     t := t;
     context := t;
@@ -60,7 +60,7 @@ Module Single_carbonated_data_storage.
 End Single_carbonated_data_storage.
 
 Module Non_iterable_indexed_data_storage.
-  Record signature {t key value : Set} := {
+  Record signature {t key value : Set} : Set := {
     tag_Non_iterable_indexed_data_storage : unit;
     t := t;
     context := t;
@@ -81,7 +81,7 @@ Module Non_iterable_indexed_data_storage.
 End Non_iterable_indexed_data_storage.
 
 Module Non_iterable_indexed_carbonated_data_storage.
-  Record signature {t key value : Set} := {
+  Record signature {t key value : Set} : Set := {
     tag_Non_iterable_indexed_carbonated_data_storage : unit;
     t := t;
     context := t;
@@ -113,7 +113,7 @@ Module Non_iterable_indexed_carbonated_data_storage.
 End Non_iterable_indexed_carbonated_data_storage.
 
 Module Indexed_data_storage.
-  Record signature {t key value : Set} := {
+  Record signature {t key value : Set} : Set := {
     tag_Non_iterable_indexed_data_storage : unit;
     t := t;
     context := t;
@@ -141,7 +141,7 @@ Module Indexed_data_storage.
 End Indexed_data_storage.
 
 Module Indexed_data_snapshotable_storage.
-  Record signature {snapshot key t value : Set} := {
+  Record signature {snapshot key t value : Set} : Set := {
     snapshot := snapshot;
     key := key;
     tag_Non_iterable_indexed_data_storage : unit;
@@ -175,7 +175,7 @@ Module Indexed_data_snapshotable_storage.
 End Indexed_data_snapshotable_storage.
 
 Module Data_set_storage.
-  Record signature {t elt : Set} := {
+  Record signature {t elt : Set} : Set := {
     t := t;
     context := t;
     elt := elt;
@@ -191,13 +191,13 @@ Module Data_set_storage.
 End Data_set_storage.
 
 Module NAME.
-  Record signature := {
+  Record signature : Set := {
     name : Raw_context.key;
   }.
 End NAME.
 
 Module VALUE.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     encoding : Data_encoding.t t;
   }.
@@ -205,13 +205,13 @@ Module VALUE.
 End VALUE.
 
 Module REGISTER.
-  Record signature := {
+  Record signature : Set := {
     ghost : bool;
   }.
 End REGISTER.
 
 Module Indexed_raw_context.
-  Record signature {t key : Set} {ipath : Set -> Set} := {
+  Record signature {t key : Set} {ipath : Set -> Set} : Set := {
     t := t;
     context := t;
     key := key;

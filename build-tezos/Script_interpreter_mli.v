@@ -16,7 +16,7 @@ Require Tezos.Script_typed_ir.
 
 Import Alpha_context.
 
-Definition execution_trace :=
+Definition execution_trace : Set :=
   list
     (Alpha_context.Script.location * Alpha_context.Gas.t *
       list (Alpha_context.Script.expr * option string)).
@@ -36,7 +36,7 @@ Definition execution_trace :=
 (* extensible_type_definition `error` *)
 
 Module execution_result.
-  Record record := Build {
+  Record record : Set := Build {
     ctxt : Alpha_context.context;
     storage : Alpha_context.Script.expr;
     big_map_diff : option Alpha_context.Contract.big_map_diff;
@@ -53,7 +53,7 @@ End execution_result.
 Definition execution_result := execution_result.record.
 
 Module step_constants.
-  Record record := Build {
+  Record record : Set := Build {
     source : Alpha_context.Contract.t;
     payer : Alpha_context.Contract.t;
     self : Alpha_context.Contract.t;

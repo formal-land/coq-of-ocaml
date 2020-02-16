@@ -371,7 +371,7 @@ Definition apply_manager_operation_content {kind : Set}
                                     ctxt) := function_parameter in
                                 let 'existT _ [__Ex_script_'a, __Ex_script_'b]
                                   [parsed_script, ctxt] :=
-                                  existT
+                                  existT (A := [Set ** Set])
                                     (fun '[__Ex_script_'a, __Ex_script_'b] =>
                                       [(Script_typed_ir.script __Ex_script_'a
                                         __Ex_script_'b) **
@@ -540,8 +540,8 @@ Definition apply_internal_manager_operations
               |} as op)) rest =>
       let 'existT _ __Internal_operation_'kind
         [source, operation, __nonce_value, op, rest] :=
-        existT
-          (fun __Internal_operation_'kind : Set =>
+        existT (A := Set)
+          (fun __Internal_operation_'kind =>
             [Alpha_context.Contract.contract **
               (Alpha_context.manager_operation __Internal_operation_'kind) ** Z
               ** (Alpha_context.internal_operation __Internal_operation_'kind)
@@ -569,8 +569,8 @@ Definition apply_internal_manager_operations
                   let 'Alpha_context.Internal_operation op := function_parameter
                     in
                   let 'existT _ __Internal_operation_'kind1 op :=
-                    existT
-                      (fun __Internal_operation_'kind1 : Set =>
+                    existT (A := Set)
+                      (fun __Internal_operation_'kind1 =>
                         (Alpha_context.internal_operation
                           __Internal_operation_'kind1)) _ op in
                   Apply_results.Internal_operation_result op
@@ -818,7 +818,7 @@ Fixpoint mark_skipped {kind : Set}
           Alpha_context.contents.Manager_operation.operation := operation
           |}) rest =>
     let 'existT _ [__0, __1] [source, fee, operation, rest] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
             Alpha_context.Tez.tez ** (Alpha_context.manager_operation __0) **
@@ -853,7 +853,7 @@ Fixpoint precheck_manager_contents_list {A kind : Set}
     precheck_manager_contents ctxt chain_id raw_operation op
   | Alpha_context.Cons ((Alpha_context.Manager_operation _) as op) rest =>
     let 'existT _ [__0, __1] [op, rest] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
@@ -909,7 +909,7 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
           Alpha_context.contents.Manager_operation.fee := fee
           |}) as op) rest =>
     let 'existT _ [__0, __1] [source, fee, op, rest] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
             Alpha_context.Tez.tez **
@@ -992,7 +992,7 @@ Definition mark_backtracked {A : Set}
     | Apply_results.Cons_result (Apply_results.Manager_operation_result op) rest
       =>
       let 'existT _ [__0, __1] [op, rest] :=
-        existT
+        existT (A := [Set ** Set])
           (fun '[__0, __1] =>
             [(Apply_results.contents_result.Manager_operation_result __0) **
               (Apply_results.contents_result_list
@@ -1017,8 +1017,8 @@ Definition mark_backtracked {A : Set}
     let 'Apply_results.Internal_operation_result kind __result_value :=
       function_parameter in
     let 'existT _ __Internal_operation_result_'kind [kind, __result_value] :=
-      existT
-        (fun __Internal_operation_result_'kind : Set =>
+      existT (A := Set)
+        (fun __Internal_operation_result_'kind =>
           [(Alpha_context.internal_operation __Internal_operation_result_'kind)
             **
             (Apply_results.manager_operation_result
@@ -1530,8 +1530,8 @@ Definition apply_contents_list {A : Set}
                         (Apply_results.Single_result Apply_results.Ballot_result))))))
   | (Alpha_context.Single (Alpha_context.Manager_operation _)) as op =>
     let 'existT _ __0 op :=
-      existT
-        (fun __0 : Set =>
+      existT (A := Set)
+        (fun __0 =>
           (Alpha_context.contents_list (Alpha_context.Kind.manager __0))) _ op
       in
     Error_monad.op_gtgteqquestion
@@ -1544,7 +1544,7 @@ Definition apply_contents_list {A : Set}
             Error_monad.__return (ctxt, __result_value)))
   | (Alpha_context.Cons (Alpha_context.Manager_operation _) _) as op =>
     let 'existT _ [__1, __2] op :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__1, __2] =>
           (Alpha_context.contents_list (Alpha_context.Kind.manager (__1 * __2))))
         [_, _] op in

@@ -65,7 +65,7 @@ Module Cost_of.
     | (Script_typed_ir.Mutez_key _, _) => obj_magic Z 8
     | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =>
       let 'existT _ [__0, __1, __Pair_key] [l, __r_value, v] :=
-        obj_magic_exists
+        obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__0, __1, __Pair_key] =>
             [(Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf) **
               (Script_typed_ir.comparable_struct __1 __Pair_key) ** (__0 * __1)])
@@ -91,12 +91,14 @@ Module Cost_of.
     
     Definition set_to_list {item : Set} (Box : Script_typed_ir.set item)
       : Alpha_context.Gas.cost :=
+      let 'existS _ _ Box := Box in
       Pervasives.op_atat Alpha_context.Gas.alloc_cost
-        (Pervasives.op_star (|Box|).(Script_typed_ir.Boxed_set.size) 2).
+        (Pervasives.op_star Box.(Script_typed_ir.Boxed_set.size) 2).
     
     Definition map_to_list {key value : Set}
       (Box : Script_typed_ir.map key value) : Alpha_context.Gas.cost :=
-      let size := Pervasives.snd (|Box|).(Script_typed_ir.Boxed_map.boxed) in
+      let 'existS _ _ Box := Box in
+      let size := Pervasives.snd Box.(Script_typed_ir.Boxed_map.boxed) in
       Alpha_context.Gas.op_starat 3 (Alpha_context.Gas.alloc_cost size).
     
     Definition z_to_int64 : Alpha_context.Gas.cost :=
@@ -112,7 +114,8 @@ Module Cost_of.
     
     Definition set_access {elt : Set}
       (_key : elt) (Box : Script_typed_ir.set elt) : Z :=
-      Pervasives.op_atat log2 (|Box|).(Script_typed_ir.Boxed_set.size).
+      let 'existS _ _ Box := Box in
+      Pervasives.op_atat log2 Box.(Script_typed_ir.Boxed_set.size).
     
     Definition set_update {A B : Set}
       (__key_value : A) (_presence : B) (set : Script_typed_ir.set A)
@@ -168,32 +171,35 @@ Module Cost_of.
     
     Definition set_to_list {elt : Set} (Box : Script_typed_ir.set elt)
       : Alpha_context.Gas.cost :=
+      let 'existS _ _ Box := Box in
       Alpha_context.Gas.atomic_step_cost
-        (Pervasives.op_star (|Box|).(Script_typed_ir.Boxed_set.size) 20).
+        (Pervasives.op_star Box.(Script_typed_ir.Boxed_set.size) 20).
     
     Definition set_mem {elt : Set}
       (__elt_value : elt) (Box : Script_typed_ir.set elt)
       : Alpha_context.Gas.cost :=
+      let 'existS _ _ Box := Box in
       let elt_bytes :=
-        (size_of_comparable (b := unit))
-          (|Box|).(Script_typed_ir.Boxed_set.elt_ty) __elt_value in
+        (size_of_comparable (b := unit)) Box.(Script_typed_ir.Boxed_set.elt_ty)
+          __elt_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div elt_bytes 82))
-          (log2 (|Box|).(Script_typed_ir.Boxed_set.size))).
+          (log2 Box.(Script_typed_ir.Boxed_set.size))).
     
     Definition set_update {elt : Set}
       (__elt_value : elt) (function_parameter : bool)
       : Script_typed_ir.set elt -> Alpha_context.Gas.cost :=
       let '_ := function_parameter in
       fun Box =>
+        let 'existS _ _ Box := Box in
         let elt_bytes :=
           (size_of_comparable (b := unit))
-            (|Box|).(Script_typed_ir.Boxed_set.elt_ty) __elt_value in
+            Box.(Script_typed_ir.Boxed_set.elt_ty) __elt_value in
         Alpha_context.Gas.atomic_step_cost
           (Pervasives.op_star
             (Pervasives.op_plus 1 (Pervasives.op_div elt_bytes 82))
-            (log2 (|Box|).(Script_typed_ir.Boxed_set.size))).
+            (log2 Box.(Script_typed_ir.Boxed_set.size))).
     
     Definition set_size : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost 10.
@@ -203,17 +209,18 @@ Module Cost_of.
     
     Definition map_to_list {key value : Set}
       (Box : Script_typed_ir.map key value) : Alpha_context.Gas.cost :=
-      let size := Pervasives.snd (|Box|).(Script_typed_ir.Boxed_map.boxed) in
+      let 'existS _ _ Box := Box in
+      let size := Pervasives.snd Box.(Script_typed_ir.Boxed_map.boxed) in
       Alpha_context.Gas.atomic_step_cost (Pervasives.op_star size 20).
     
     Definition map_access {key value : Set}
       (__key_value : key) (Box : Script_typed_ir.map key value)
       : Alpha_context.Gas.cost :=
-      let map_card := Pervasives.snd (|Box|).(Script_typed_ir.Boxed_map.boxed)
-        in
+      let 'existS _ _ Box := Box in
+      let map_card := Pervasives.snd Box.(Script_typed_ir.Boxed_map.boxed) in
       let key_bytes :=
-        (size_of_comparable (b := unit))
-          (|Box|).(Script_typed_ir.Boxed_map.key_ty) __key_value in
+        (size_of_comparable (b := unit)) Box.(Script_typed_ir.Boxed_map.key_ty)
+          __key_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div key_bytes 70))
@@ -228,11 +235,11 @@ Module Cost_of.
     Definition map_update {key value : Set}
       (__key_value : key) (_value : option value)
       (Box : Script_typed_ir.map key value) : Alpha_context.Gas.cost :=
-      let map_card := Pervasives.snd (|Box|).(Script_typed_ir.Boxed_map.boxed)
-        in
+      let 'existS _ _ Box := Box in
+      let map_card := Pervasives.snd Box.(Script_typed_ir.Boxed_map.boxed) in
       let key_bytes :=
-        (size_of_comparable (b := unit))
-          (|Box|).(Script_typed_ir.Boxed_map.key_ty) __key_value in
+        (size_of_comparable (b := unit)) Box.(Script_typed_ir.Boxed_map.key_ty)
+          __key_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div key_bytes 38))
@@ -605,7 +612,7 @@ Module Cost_of.
         obj_magic Alpha_context.Gas.cost (compare_address x y)
       | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
         let 'existT _ [__0, __1, __Pair_key] [tl, tr, x, y] :=
-          obj_magic_exists
+          obj_magic_exists (Es := [Set ** Set ** Set])
             (fun '[__0, __1, __Pair_key] =>
               [(Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf) **
                 (Script_typed_ir.comparable_struct __1 __Pair_key) **

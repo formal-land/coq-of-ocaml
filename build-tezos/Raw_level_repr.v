@@ -12,9 +12,9 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Storage_description.
 
-Definition t := int32.
+Definition t : Set := int32.
 
-Definition raw_level := t.
+Definition raw_level : Set := t.
 
 Definition op_eq := (|Compare.Int32|).(Compare.S.op_eq).
 

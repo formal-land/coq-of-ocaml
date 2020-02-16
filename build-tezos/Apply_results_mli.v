@@ -17,7 +17,7 @@ Import Alpha_context.
 
 Module contents_result.
   Module Endorsement_result.
-    Record record {balance_updates delegate slots : Set} := {
+    Record record {balance_updates delegate slots : Set} : Set := {
       balance_updates : balance_updates;
       delegate : delegate;
       slots : slots }.
@@ -27,7 +27,7 @@ Module contents_result.
   
   Module Manager_operation_result.
     Record record {balance_updates operation_result internal_operation_results :
-      Set} := {
+      Set} : Set := {
       balance_updates : balance_updates;
       operation_result : operation_result;
       internal_operation_results : internal_operation_results }.
@@ -39,7 +39,7 @@ End contents_result.
 
 Module successful_manager_operation_result.
   Module Reveal_result.
-    Record record {consumed_gas : Set} := {
+    Record record {consumed_gas : Set} : Set := {
       consumed_gas : consumed_gas }.
     Arguments record : clear implicits.
   End Reveal_result.
@@ -48,7 +48,7 @@ Module successful_manager_operation_result.
   Module Transaction_result.
     Record record {storage big_map_diff balance_updates originated_contracts
       consumed_gas storage_size paid_storage_size_diff
-      allocated_destination_contract : Set} := {
+      allocated_destination_contract : Set} : Set := {
       storage : storage;
       big_map_diff : big_map_diff;
       balance_updates : balance_updates;
@@ -63,7 +63,7 @@ Module successful_manager_operation_result.
   
   Module Origination_result.
     Record record {big_map_diff balance_updates originated_contracts
-      consumed_gas storage_size paid_storage_size_diff : Set} := {
+      consumed_gas storage_size paid_storage_size_diff : Set} : Set := {
       big_map_diff : big_map_diff;
       balance_updates : balance_updates;
       originated_contracts : originated_contracts;
@@ -75,7 +75,7 @@ Module successful_manager_operation_result.
   Definition Origination_result_skeleton := Origination_result.record.
   
   Module Delegation_result.
-    Record record {consumed_gas : Set} := {
+    Record record {consumed_gas : Set} : Set := {
       consumed_gas : consumed_gas }.
     Arguments record : clear implicits.
   End Delegation_result.
@@ -83,7 +83,7 @@ Module successful_manager_operation_result.
 End successful_manager_operation_result.
 
 Module operation_metadata.
-  Record record {contents : Set} := Build {
+  Record record {contents : Set} : Set := Build {
     contents : contents }.
   Arguments record : clear implicits.
   Definition with_contents {t_contents} contents (r : record t_contents) :=
@@ -292,7 +292,7 @@ Parameter kind_equal_list : forall {kind kind2 : Set},
   option (eq kind kind2).
 
 Module block_metadata.
-  Record record := Build {
+  Record record : Set := Build {
     baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
     level : Alpha_context.Level.t;
     voting_period_kind : Alpha_context.Voting_period.kind;

@@ -14,7 +14,7 @@ Require Tezos.Qty_repr.
 
 Parameter t : Set.
 
-Definition tez := t.
+Definition tez : Set := t.
 
 Parameter Included_S : {_ : unit & Qty_repr.S.signature t}.
 

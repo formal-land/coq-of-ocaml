@@ -17,10 +17,10 @@ Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
 
-Definition block_header_data := Alpha_context.Block_header.protocol_data.
+Definition block_header_data : Set := Alpha_context.Block_header.protocol_data.
 
 Module block_header.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Block_header.shell_header;
     protocol_data : block_header_data }.
   Definition with_shell shell (r : record) :=
@@ -34,7 +34,7 @@ Definition block_header_data_encoding
   : Data_encoding.encoding Alpha_context.Block_header.protocol_data :=
   Alpha_context.Block_header.protocol_data_encoding.
 
-Definition block_header_metadata := Apply_results.block_metadata.
+Definition block_header_metadata : Set := Apply_results.block_metadata.
 
 Definition block_header_metadata_encoding
   : Data_encoding.encoding Apply_results.block_metadata :=
@@ -64,7 +64,7 @@ Definition operation_data_and_receipt_encoding
   Apply_results.operation_data_and_metadata_encoding.
 
 Module operation.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Operation.shell_header;
     protocol_data : operation_data }.
   Definition with_shell shell (r : record) :=
@@ -104,7 +104,7 @@ Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
 
 Module validation_mode.
   Module Application.
-    Record record {block_header baker block_delay : Set} := {
+    Record record {block_header baker block_delay : Set} : Set := {
       block_header : block_header;
       baker : baker;
       block_delay : block_delay }.
@@ -113,7 +113,7 @@ Module validation_mode.
   Definition Application_skeleton := Application.record.
   
   Module Partial_application.
-    Record record {block_header baker block_delay : Set} := {
+    Record record {block_header baker block_delay : Set} : Set := {
       block_header : block_header;
       baker : baker;
       block_delay : block_delay }.
@@ -122,14 +122,14 @@ Module validation_mode.
   Definition Partial_application_skeleton := Partial_application.record.
   
   Module Partial_construction.
-    Record record {predecessor : Set} := {
+    Record record {predecessor : Set} : Set := {
       predecessor : predecessor }.
     Arguments record : clear implicits.
   End Partial_construction.
   Definition Partial_construction_skeleton := Partial_construction.record.
   
   Module Full_construction.
-    Record record {predecessor protocol_data baker block_delay : Set} := {
+    Record record {predecessor protocol_data baker block_delay : Set} : Set := {
       predecessor : predecessor;
       protocol_data : protocol_data;
       baker : baker;
@@ -175,7 +175,7 @@ End ConstructorRecordNotations_validation_mode.
 Import ConstructorRecordNotations_validation_mode.
 
 Module validation_state.
-  Record record := Build {
+  Record record : Set := Build {
     mode : validation_mode;
     chain_id : (|Chain_id|).(S.HASH.t);
     ctxt : Alpha_context.t;
@@ -341,8 +341,8 @@ Definition apply_operation (function_parameter : validation_state)
           operation.protocol_data := Operation_data protocol_data
           |} := operation in
       let 'existT _ __Operation_data_'kind [shell, protocol_data] :=
-        existT
-          (fun __Operation_data_'kind : Set =>
+        existT (A := Set)
+          (fun __Operation_data_'kind =>
             [Operation.shell_header **
               (Alpha_context.Operation.protocol_data __Operation_data_'kind)]) _
           [shell, protocol_data] in
@@ -519,14 +519,14 @@ Definition compare_operations
   let 'Alpha_context.Operation_data op1 :=
     op1.(Alpha_context.packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind op1 :=
-    existT
-      (fun __Operation_data_'kind : Set =>
+    existT (A := Set)
+      (fun __Operation_data_'kind =>
         (Alpha_context.protocol_data __Operation_data_'kind)) _ op1 in
   let 'Alpha_context.Operation_data op2 :=
     op2.(Alpha_context.packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind1 op2 :=
-    existT
-      (fun __Operation_data_'kind1 : Set =>
+    existT (A := Set)
+      (fun __Operation_data_'kind1 =>
         (Alpha_context.protocol_data __Operation_data_'kind1)) _ op2 in
   match
     (op1.(Alpha_context.protocol_data.contents),
@@ -571,7 +571,7 @@ Definition compare_operations
     (Alpha_context.Single (Alpha_context.Manager_operation op1),
       Alpha_context.Single (Alpha_context.Manager_operation op2)) =>
     let 'existT _ [__0, __1] [op1, op2] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(Alpha_context.contents.Manager_operation __0) **
             (Alpha_context.contents.Manager_operation __1)]) [_, _] [op1, op2]
@@ -582,7 +582,7 @@ Definition compare_operations
     (Alpha_context.Cons (Alpha_context.Manager_operation op1) _,
       Alpha_context.Single (Alpha_context.Manager_operation op2)) =>
     let 'existT _ [__2, __4] [op1, op2] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__2, __4] =>
           [(Alpha_context.contents.Manager_operation __2) **
             (Alpha_context.contents.Manager_operation __4)]) [_, _] [op1, op2]
@@ -593,7 +593,7 @@ Definition compare_operations
     (Alpha_context.Single (Alpha_context.Manager_operation op1),
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =>
     let 'existT _ [__5, __6] [op1, op2] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__5, __6] =>
           [(Alpha_context.contents.Manager_operation __5) **
             (Alpha_context.contents.Manager_operation __6)]) [_, _] [op1, op2]
@@ -604,7 +604,7 @@ Definition compare_operations
     (Alpha_context.Cons (Alpha_context.Manager_operation op1) _,
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =>
     let 'existT _ [__10, __8] [op1, op2] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__10, __8] =>
           [(Alpha_context.contents.Manager_operation __8) **
             (Alpha_context.contents.Manager_operation __10)]) [_, _] [op1, op2]
@@ -629,7 +629,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
         let '(Script_ir_translator.Ex_script parsed_script, ctxt) :=
           function_parameter in
         let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
-          existT
+          existT (A := [Set ** Set])
             (fun '[__Ex_script_'a, __Ex_script_'b] =>
               [(Script_typed_ir.script __Ex_script_'a __Ex_script_'b) **
                 Alpha_context.context]) [_, _] [parsed_script, ctxt] in

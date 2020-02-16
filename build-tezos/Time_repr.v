@@ -14,7 +14,7 @@ Require Tezos.Period_repr.
 
 Include Time.
 
-Definition time := t.
+Definition time : Set := t.
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)

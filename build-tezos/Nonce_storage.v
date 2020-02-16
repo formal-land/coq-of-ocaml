@@ -20,9 +20,9 @@ Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 
-Definition t := Seed_repr.nonce.
+Definition t : Set := Seed_repr.nonce.
 
-Definition nonce := t.
+Definition nonce : Set := t.
 
 Definition encoding : Data_encoding.t Seed_repr.nonce :=
   Seed_repr.nonce_encoding.
@@ -81,7 +81,7 @@ Definition reveal
             (fun ctxt => Error_monad.__return ctxt))).
 
 Module unrevealed.
-  Record record := Build {
+  Record record : Set := Build {
     nonce_hash : Nonce_hash.t;
     delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
     rewards : Tez_repr.t;

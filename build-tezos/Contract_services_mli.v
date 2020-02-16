@@ -40,7 +40,7 @@ Parameter __list_value : forall {E F H J K a b c i o q : Set},
   Lwt.t (Error_monad.shell_tzresult (list Alpha_context.Contract.t)).
 
 Module info.
-  Record record := Build {
+  Record record : Set := Build {
     balance : Alpha_context.Tez.t;
     delegate : option Alpha_context.public_key_hash;
     counter : option Alpha_context.counter;

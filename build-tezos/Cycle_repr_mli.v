@@ -14,7 +14,7 @@ Require Tezos.Storage_description.
 
 Parameter t : Set.
 
-Definition cycle := t.
+Definition cycle : Set := t.
 
 Parameter Included_S : {_ : unit & Compare.S.signature t}.
 

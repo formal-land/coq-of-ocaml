@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 
 Parameter t : Set.
 
-Definition voting_period := t.
+Definition voting_period : Set := t.
 
 Parameter encoding : Data_encoding.t voting_period.
 

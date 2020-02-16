@@ -41,7 +41,7 @@ Parameter __list_value : forall {E F H J K a b c i o q : Set},
       (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))).
 
 Module info.
-  Record record := Build {
+  Record record : Set := Build {
     balance : Alpha_context.Tez.t;
     frozen_balance : Alpha_context.Tez.t;
     frozen_balance_by_cycle :
@@ -302,7 +302,7 @@ Parameter grace_period : forall {E F H J K a b c i o q : Set},
 
 Module Baking_rights.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
       priority : Z;
@@ -347,7 +347,7 @@ End Baking_rights.
 
 Module Endorsing_rights.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
       slots : list Z;

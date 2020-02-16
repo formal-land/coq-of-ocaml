@@ -13,9 +13,9 @@ Require Import Tezos.Environment.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_description.
 
-Definition t := int32.
+Definition t : Set := int32.
 
-Definition roll := t.
+Definition roll : Set := t.
 
 Parameter encoding : Data_encoding.t roll.
 

@@ -25,9 +25,9 @@ Inductive type_annot : Set :=
 Inductive field_annot : Set :=
 | Field_annot : string -> field_annot.
 
-Definition address := Alpha_context.Contract.t * string.
+Definition address : Set := Alpha_context.Contract.t * string.
 
-Definition pair (a b : Set) := a * b.
+Definition pair (a b : Set) : Set := a * b.
 
 Inductive union (a b : Set) : Set :=
 | L : a -> union a b
@@ -63,10 +63,10 @@ where "'comparable_struct" := (fun (_ _ : Set) => comparable_struct_gadt).
 
 Definition comparable_struct := 'comparable_struct.
 
-Definition comparable_ty (a : Set) := comparable_struct a comb.
+Definition comparable_ty (a : Set) : Set := comparable_struct a comb.
 
 Module Boxed_set.
-  Record signature {elt OPS_t : Set} := {
+  Record signature {elt OPS_t : Set} : Set := {
     elt := elt;
     elt_ty : comparable_ty elt;
     OPS : S.SET.signature elt OPS_t;
@@ -76,10 +76,10 @@ Module Boxed_set.
   Arguments signature : clear implicits.
 End Boxed_set.
 
-Definition set (elt : Set) := {OPS_t : _ & Boxed_set.signature elt OPS_t}.
+Definition set (elt : Set) : Set := {OPS_t : _ @ Boxed_set.signature elt OPS_t}.
 
 Module Boxed_map.
-  Record signature {key value : Set} {OPS_t : Set -> Set} := {
+  Record signature {key value : Set} {OPS_t : Set -> Set} : Set := {
     key := key;
     value := value;
     key_ty : comparable_ty key;
@@ -89,15 +89,15 @@ Module Boxed_map.
   Arguments signature : clear implicits.
 End Boxed_map.
 
-Definition map (key value : Set) :=
-  {OPS_t : _ & Boxed_map.signature key value OPS_t}.
+Definition map (key value : Set) : Set :=
+  {OPS_t : _ @ Boxed_map.signature key value OPS_t}.
 
-Definition operation :=
+Definition operation : Set :=
   Alpha_context.packed_internal_operation *
     option Alpha_context.Contract.big_map_diff.
 
 Module script.
-  Record record {code arg_type storage storage_type root_name : Set} := Build {
+  Record record {code arg_type storage storage_type root_name : Set} : Set := Build {
     code : code;
     arg_type : arg_type;
     storage : storage;
@@ -132,7 +132,7 @@ End script.
 Definition script_skeleton := script.record.
 
 Module lambda.
-  Record record {lam : Set} := Build {
+  Record record {lam : Set} : Set := Build {
     lam : lam }.
   Arguments record : clear implicits.
   Definition with_lam {t_lam} lam (r : record t_lam) :=
@@ -141,7 +141,7 @@ End lambda.
 Definition lambda_skeleton := lambda.record.
 
 Module descr.
-  Record record {loc bef aft instr : Set} := Build {
+  Record record {loc bef aft instr : Set} : Set := Build {
     loc : loc;
     bef : bef;
     aft : aft;
@@ -163,7 +163,7 @@ End descr.
 Definition descr_skeleton := descr.record.
 
 Module big_map.
-  Record record {id diff key_type value_type : Set} := Build {
+  Record record {id diff key_type value_type : Set} : Set := Build {
     id : id;
     diff : diff;
     key_type : key_type;

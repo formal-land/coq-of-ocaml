@@ -316,9 +316,9 @@ Module Scripts.
                         let '(Script_ir_translator.Ex_ty arg_type, _) :=
                           function_parameter in
                         let 'existT _ __Ex_ty_'a3 arg_type :=
-                          existT
-                            (fun __Ex_ty_'a3 : Set =>
-                              (Script_typed_ir.ty __Ex_ty_'a3)) _ arg_type in
+                          existT (A := Set)
+                            (fun __Ex_ty_'a3 => (Script_typed_ir.ty __Ex_ty_'a3))
+                            _ arg_type in
                         Script_ir_translator.list_entrypoints arg_type ctxt
                           root_name))))
               (fun function_parameter =>
@@ -686,8 +686,8 @@ Module Forge.
                 (fun function_parameter =>
                   let 'Alpha_context.Manager operation := function_parameter in
                   let 'existT _ __Manager_'kind operation :=
-                    existT
-                      (fun __Manager_'kind : Set =>
+                    existT (A := Set)
+                      (fun __Manager_'kind =>
                         (Alpha_context.manager_operation __Manager_'kind)) _
                       operation in
                   Alpha_context.Contents
@@ -1292,7 +1292,7 @@ Module S.
   Import Data_encoding.
   
   Module level_query.
-    Record record := Build {
+    Record record : Set := Build {
       offset : int32 }.
     Definition with_offset offset (r : record) :=
       Build offset.

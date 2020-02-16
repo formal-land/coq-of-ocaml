@@ -16,7 +16,7 @@ Require Tezos.Storage_description.
 Import Alpha_context.
 
 Module rpc_context.
-  Record record := Build {
+  Record record : Set := Build {
     block_hash : (|Block_hash|).(S.HASH.t);
     block_header : Alpha_context.Block_header.shell_header;
     context : Alpha_context.t }.

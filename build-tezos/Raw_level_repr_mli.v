@@ -14,7 +14,7 @@ Require Tezos.Storage_description.
 
 Parameter t : Set.
 
-Definition raw_level := t.
+Definition raw_level : Set := t.
 
 Parameter encoding : Data_encoding.t raw_level.
 

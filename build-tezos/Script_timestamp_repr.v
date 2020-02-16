@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 Require Tezos.Script_int_repr.
 Require Tezos.Time_repr.
 
-Definition t := Z.t.
+Definition t : Set := Z.t.
 
 Definition compare : Z.t -> Z.t -> Z := Z.compare.
 

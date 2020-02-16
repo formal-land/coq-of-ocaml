@@ -14,7 +14,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Tez_repr.
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     blinded_public_key_hash : Blinded_public_key_hash.t;
     amount : Tez_repr.t }.
   Definition with_blinded_public_key_hash blinded_public_key_hash

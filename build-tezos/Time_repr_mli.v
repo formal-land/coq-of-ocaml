@@ -54,7 +54,7 @@ Parameter rfc_encoding : Data_encoding.t t.
 
 Parameter pp_hum : Format.formatter -> t -> unit.
 
-Definition time := t.
+Definition time : Set := t.
 
 Parameter pp : Format.formatter -> t -> unit.
 

@@ -50,12 +50,12 @@ Require Tezos.Vote_repr.
 Require Tezos.Vote_storage.
 Require Tezos.Voting_period_repr.
 
-Definition t := Raw_context.t.
+Definition t : Set := Raw_context.t.
 
-Definition context := t.
+Definition context : Set := t.
 
 Module BASIC_DATA.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     op_eq : t -> t -> bool;
     op_ltgt : t -> t -> bool;
@@ -88,7 +88,7 @@ Include Operation_repr.
 
 Module Operation.
   Module t.
-    Record record {kind : Set} := Build {
+    Record record {kind : Set} : Set := Build {
       shell : Operation.shell_header;
       protocol_data : protocol_data kind }.
     Arguments record : clear implicits.
@@ -99,7 +99,7 @@ Module Operation.
   End t.
   Definition t := t.record.
   
-  Definition packed := packed_operation.
+  Definition packed : Set := packed_operation.
   
   Definition unsigned_encoding
     : Data_encoding.t (Operation.shell_header * packed_contents_list) :=
@@ -172,12 +172,12 @@ End Script.
 
 Module Fees := Fees_storage.
 
-Definition public_key := (|Signature.Public_key|).(S.SPublic_key.t).
+Definition public_key : Set := (|Signature.Public_key|).(S.SPublic_key.t).
 
-Definition public_key_hash :=
+Definition public_key_hash : Set :=
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.t).
 
-Definition signature := Signature.t.
+Definition signature : Set := Signature.t.
 
 Module Constants.
   Include Constants_repr.
@@ -245,7 +245,7 @@ Module Contract.
 End Contract.
 
 Module Big_map.
-  Definition id := Z.t.
+  Definition id : Set := Z.t.
   
   Definition fresh
     : Raw_context.t -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z.t)) :=
@@ -359,7 +359,7 @@ Module Fitness.
   
   Definition of_bytes := (|Fitness|).(S.T.of_bytes).
   
-  Definition fitness := t.
+  Definition fitness : Set := t.
   
   Include Fitness_storage.
 End Fitness.

@@ -107,7 +107,7 @@ Module Pervasives.
   Parameter op_at : forall {a : Set}, list a -> list a -> list a.
   
   Module ref.
-    Record record {a : Set} := Build {
+    Record record {a : Set} : Set := Build {
       contents : a }.
     Arguments record : clear implicits.
     Definition with_contents {t_a} contents (r : record t_a) :=
@@ -132,12 +132,12 @@ Module Pervasives.
   Arguments Ok {_ _}.
   Arguments Error {_ _}.
   
-  Definition format6 (a b c d e f : Set) :=
+  Definition format6 (a b c d e f : Set) : Set :=
     CamlinternalFormatBasics.format6 a b c d e f.
   
-  Definition format4 (a b c d : Set) := format6 a b c c c d.
+  Definition format4 (a b c d : Set) : Set := format6 a b c c c d.
   
-  Definition format (a b c : Set) := format4 a b c c.
+  Definition format (a b c : Set) : Set := format4 a b c c.
   
   Parameter string_of_format : forall {a b c d e f : Set},
     format6 a b c d e f -> string.
@@ -308,7 +308,7 @@ Module String.
   
   Parameter uncapitalize_ascii : string -> string.
   
-  Definition t := string.
+  Definition t : Set := string.
   
   Parameter compare : t -> t -> Z.
   
@@ -402,7 +402,7 @@ Module Int32.
   
   Parameter float_of_bits : int32 -> Z.
   
-  Definition t := int32.
+  Definition t : Set := int32.
   
   Parameter compare : t -> t -> Z.
   
@@ -478,7 +478,7 @@ Module Int64.
   
   Parameter float_of_bits : int64 -> Z.
   
-  Definition t := int64.
+  Definition t : Set := int64.
   
   Parameter compare : t -> t -> Z.
   
@@ -554,7 +554,7 @@ Module Format.
   
   Parameter pp_get_ellipsis_text : formatter -> unit -> string.
   
-  Definition tag := string.
+  Definition tag : Set := string.
   
   Parameter pp_open_tag : formatter -> string -> unit.
   
@@ -843,7 +843,7 @@ End Raw_hashes.
 
 Module Compare.
   Module COMPARABLE.
-    Record signature {t : Set} := {
+    Record signature {t : Set} : Set := {
       t := t;
       compare : t -> t -> Z;
     }.
@@ -851,7 +851,7 @@ Module Compare.
   End COMPARABLE.
   
   Module S.
-    Record signature {t : Set} := {
+    Record signature {t : Set} : Set := {
       t := t;
       op_eq : t -> t -> bool;
       op_ltgt : t -> t -> bool;
@@ -913,7 +913,7 @@ Module Data_encoding.
   
   Parameter t : forall (a : Set), Set.
   
-  Definition encoding (a : Set) := t a.
+  Definition encoding (a : Set) : Set := t a.
   
   Parameter classify : forall {a : Set},
     encoding a -> (* `Variable *) unit + (* `Fixed *) Z + (* `Dynamic *) unit.
@@ -1213,7 +1213,7 @@ Module Error_monad.
   | Temporary : error_category
   | Branch : error_category.
   
-  Definition __error := extensible_type.
+  Definition __error : Set := extensible_type.
   
   Parameter pp : Format.formatter -> __error -> unit.
   
@@ -1224,7 +1224,7 @@ Module Error_monad.
   Parameter error_of_json : Data_encoding.json -> __error.
   
   Module error_info.
-    Record record := Build {
+    Record record : Set := Build {
       category : error_category;
       id : string;
       title : string;
@@ -1254,7 +1254,7 @@ Module Error_monad.
   
   Parameter classify_errors : list __error -> error_category.
   
-  Definition tzresult (a : Set) := Pervasives.result a (list __error).
+  Definition tzresult (a : Set) : Set := Pervasives.result a (list __error).
   
   Parameter result_encoding : forall {a : Set},
     Data_encoding.t a -> Data_encoding.encoding (tzresult a).
@@ -1343,7 +1343,8 @@ Module Error_monad.
   
   Parameter shell_error : Set.
   
-  Definition shell_tzresult (a : Set) := Pervasives.result a (list shell_error).
+  Definition shell_tzresult (a : Set) : Set :=
+    Pervasives.result a (list shell_error).
 End Error_monad.
 
 Import Error_monad.
@@ -1450,14 +1451,14 @@ End Option.
 Module RPC_arg.
   Parameter t : forall (a : Set), Set.
   
-  Definition arg (a : Set) := t a.
+  Definition arg (a : Set) : Set := t a.
   
   Parameter make : forall {a : Set},
     option string -> string -> (string -> Pervasives.result a string) ->
     (a -> string) -> unit -> arg a.
   
   Module descr.
-    Record record := Build {
+    Record record : Set := Build {
       name : string;
       descr : option string }.
     Definition with_name name (r : record) :=
@@ -1496,9 +1497,9 @@ End RPC_arg.
 Module RPC_path.
   Parameter t : forall (prefix params : Set), Set.
   
-  Definition path (prefix params : Set) := t prefix params.
+  Definition path (prefix params : Set) : Set := t prefix params.
   
-  Definition context (prefix : Set) := path prefix prefix.
+  Definition context (prefix : Set) : Set := path prefix prefix.
   
   Parameter root : context unit.
   
@@ -1526,7 +1527,7 @@ End RPC_path.
 Module RPC_query.
   Parameter t : forall (a : Set), Set.
   
-  Definition query (a : Set) := t a.
+  Definition query (a : Set) : Set := t a.
   
   Parameter empty : query unit.
   
@@ -1554,7 +1555,7 @@ Module RPC_query.
   
   Parameter seal : forall {a b : Set}, open_query a b a -> t a.
   
-  Definition untyped := list (string * string).
+  Definition untyped : Set := list (string * string).
   
   (* exception Invalid *)
   
@@ -1573,7 +1574,7 @@ Module RPC_service.
     (expected_type_variable prefix params query input output : Set), Set.
   
   Definition service (expected_type_variable prefix params query input output :
-    Set) :=
+    Set) : Set :=
     t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) prefix params query input output.
@@ -1606,7 +1607,7 @@ End RPC_service.
 
 Module RPC_answer.
   Module stream.
-    Record record {next shutdown : Set} := Build {
+    Record record {next shutdown : Set} : Set := Build {
       next : next;
       shutdown : shutdown }.
     Arguments record : clear implicits.
@@ -1659,7 +1660,7 @@ End RPC_answer.
 Module RPC_directory.
   Parameter t : forall (prefix : Set), Set.
   
-  Definition directory (prefix : Set) := t prefix.
+  Definition directory (prefix : Set) : Set := t prefix.
   
   Parameter empty : forall {prefix : Set}, directory prefix.
   
@@ -1966,7 +1967,7 @@ Module Base58.
   
   Parameter simple_encode : forall {a : Set}, encoding a -> a -> string.
   
-  Definition data := extensible_type.
+  Definition data : Set := extensible_type.
   
   Parameter register_encoding : forall {a : Set},
     string -> Z -> (a -> string) -> (string -> option a) -> (a -> data) ->
@@ -1980,7 +1981,7 @@ End Base58.
 
 Module S.
   Module T.
-    Record signature {t : Set} := {
+    Record signature {t : Set} : Set := {
       t := t;
       op_eq : t -> t -> bool;
       op_ltgt : t -> t -> bool;
@@ -2001,7 +2002,7 @@ Module S.
   End T.
   
   Module HASHABLE.
-    Record signature {t hash : Set} := {
+    Record signature {t hash : Set} : Set := {
       t := t;
       op_eq : t -> t -> bool;
       op_ltgt : t -> t -> bool;
@@ -2025,7 +2026,7 @@ Module S.
   End HASHABLE.
   
   Module MINIMAL_HASH.
-    Record signature {t : Set} := {
+    Record signature {t : Set} : Set := {
       t := t;
       name : string;
       title : string;
@@ -2049,7 +2050,7 @@ Module S.
   End MINIMAL_HASH.
   
   Module RAW_DATA.
-    Record signature {t : Set} := {
+    Record signature {t : Set} : Set := {
       t := t;
       size : Z;
       to_bytes : t -> MBytes.t;
@@ -2060,7 +2061,7 @@ Module S.
   End RAW_DATA.
   
   Module B58_DATA.
-    Record signature {t : Set} := {
+    Record signature {t : Set} : Set := {
       t := t;
       to_b58check : t -> string;
       to_short_b58check : t -> string;
@@ -2073,7 +2074,7 @@ Module S.
   End B58_DATA.
   
   Module ENCODER.
-    Record signature {t : Set} := {
+    Record signature {t : Set} : Set := {
       t := t;
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
@@ -2082,7 +2083,7 @@ Module S.
   End ENCODER.
   
   Module SET.
-    Record signature {elt t : Set} := {
+    Record signature {elt t : Set} : Set := {
       elt := elt;
       t := t;
       empty : t;
@@ -2119,7 +2120,7 @@ Module S.
   End SET.
   
   Module MAP.
-    Record signature {key : Set} {t : Set -> Set} := {
+    Record signature {key : Set} {t : Set -> Set} : Set := {
       key := key;
       t := t;
       empty : forall {a : Set}, t a;
@@ -2159,7 +2160,7 @@ Module S.
   End MAP.
   
   Module INDEXES_Set.
-    Record signature {elt t : Set} := {
+    Record signature {elt t : Set} : Set := {
       elt := elt;
       t := t;
       empty : t;
@@ -2207,7 +2208,7 @@ Module S.
   End INDEXES_Set.
   
   Module INDEXES_Map.
-    Record signature {key : Set} {t : Set -> Set} := {
+    Record signature {key : Set} {t : Set -> Set} : Set := {
       key := key;
       t := t;
       empty : forall {a : Set}, t a;
@@ -2258,7 +2259,7 @@ Module S.
   End INDEXES_Map.
   
   Module INDEXES.
-    Record signature {t __Set_t : Set} {Map_t : Set -> Set} := {
+    Record signature {t __Set_t : Set} {Map_t : Set -> Set} : Set := {
       t := t;
       to_path : t -> list string -> list string;
       of_path : list string -> option t;
@@ -2272,7 +2273,7 @@ Module S.
   End INDEXES.
   
   Module HASH.
-    Record signature {t __Set_t : Set} {Map_t : Set -> Set} := {
+    Record signature {t __Set_t : Set} {Map_t : Set -> Set} : Set := {
       t := t;
       name : string;
       title : string;
@@ -2315,8 +2316,8 @@ Module S.
   End HASH.
   
   Module MERKLE_TREE.
-    Record signature {elt t __Set_t : Set} {Map_t : Set -> Set} {path : Set} :=
-      {
+    Record signature {elt t __Set_t : Set} {Map_t : Set -> Set} {path : Set}
+      : Set := {
       elt := elt;
       t := t;
       name : string;
@@ -2366,7 +2367,7 @@ Module S.
   End MERKLE_TREE.
   
   Module SPublic_key_hash.
-    Record signature {t __Set_t : Set} {Map_t : Set -> Set} := {
+    Record signature {t __Set_t : Set} {Map_t : Set -> Set} : Set := {
       t := t;
       pp : Format.formatter -> t -> unit;
       pp_short : Format.formatter -> t -> unit;
@@ -2405,7 +2406,7 @@ Module S.
   End SPublic_key_hash.
   
   Module SPublic_key.
-    Record signature {t public_key_hash_t : Set} := {
+    Record signature {t public_key_hash_t : Set} : Set := {
       t := t;
       pp : Format.formatter -> t -> unit;
       op_eq : t -> t -> bool;
@@ -2434,7 +2435,8 @@ Module S.
   
   Module SIGNATURE.
     Record signature {Public_key_hash_t Public_key_hash___Set_t : Set}
-      {Public_key_hash_Map_t : Set -> Set} {Public_key_t t watermark : Set} := {
+      {Public_key_hash_Map_t : Set -> Set} {Public_key_t t watermark : Set}
+      : Set := {
       Public_key_hash :
         SPublic_key_hash.signature Public_key_hash_t Public_key_hash___Set_t
           Public_key_hash_Map_t;
@@ -2487,7 +2489,7 @@ End Map.
 
 Module Blake2B.
   Module Name.
-    Record signature := {
+    Record signature : Set := {
       name : string;
       title : string;
       size : option Z;
@@ -2495,7 +2497,7 @@ Module Blake2B.
   End Name.
   
   Module PrefixedName.
-    Record signature := {
+    Record signature : Set := {
       name : string;
       title : string;
       size : option Z;
@@ -2508,7 +2510,7 @@ Module Blake2B.
       {t : _ & S.MINIMAL_HASH.signature t}.
   
   Module SRegister.
-    Record signature := {
+    Record signature : Set := {
       register_encoding : forall {a : Set},
         string -> Z -> (a -> string) -> (string -> option a) ->
         (a -> Base58.data) -> Base58.encoding a;
@@ -2674,7 +2676,7 @@ Parameter Context_hash :
   {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}.
 
 Module Micheline.
-  Definition annot := list string.
+  Definition annot : Set := list string.
   
   Inductive node (l p : Set) : Set :=
   | Int : l -> Z.t -> node l p
@@ -2691,7 +2693,7 @@ Module Micheline.
   
   Parameter canonical : forall (p : Set), Set.
   
-  Definition canonical_location := Z.
+  Definition canonical_location : Set := Z.
   
   Parameter root : forall {p : Set}, canonical p -> node canonical_location p.
   
@@ -2719,7 +2721,7 @@ End Micheline.
 
 Module Block_header.
   Module shell_header.
-    Record record := Build {
+    Record record : Set := Build {
       level : Int32.t;
       proto_level : Z;
       predecessor : (|Block_hash|).(S.HASH.t);
@@ -2758,7 +2760,7 @@ Module Block_header.
   Parameter shell_header_encoding : Data_encoding.t shell_header.
   
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       shell : shell_header;
       protocol_data : MBytes.t }.
     Definition with_shell shell (r : record) :=
@@ -2818,7 +2820,7 @@ Parameter Fitness : {_ : unit & S.T.signature (list MBytes.t)}.
 
 Module Operation.
   Module shell_header.
-    Record record := Build {
+    Record record : Set := Build {
       branch : (|Block_hash|).(S.HASH.t) }.
     Definition with_branch branch (r : record) :=
       Build branch.
@@ -2828,7 +2830,7 @@ Module Operation.
   Parameter shell_header_encoding : Data_encoding.t shell_header.
   
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       shell : shell_header;
       proto : MBytes.t }.
     Definition with_shell shell (r : record) :=
@@ -2886,7 +2888,7 @@ End Operation.
 
 Module Protocol.
   Module t.
-    Record record {expected_env components : Set} := Build {
+    Record record {expected_env components : Set} : Set := Build {
       expected_env : expected_env;
       components : components }.
     Arguments record : clear implicits.
@@ -2900,7 +2902,7 @@ Module Protocol.
   Definition t_skeleton := t.record.
   
   Module component.
-    Record record {name interface implementation : Set} := Build {
+    Record record {name interface implementation : Set} : Set := Build {
       name : name;
       interface : interface;
       implementation : implementation }.
@@ -2985,9 +2987,9 @@ End Protocol.
 Module Context.
   Parameter t : Set.
   
-  Definition key := list string.
+  Definition key : Set := list string.
   
-  Definition value := MBytes.t.
+  Definition value : Set := MBytes.t.
   
   Parameter mem : t -> key -> Lwt.t bool.
   
@@ -3023,7 +3025,7 @@ End Context.
 
 Module Updater.
   Module validation_result.
-    Record record := Build {
+    Record record : Set := Build {
       context : Context.t;
       fitness : (|Fitness|).(S.T.t);
       message : option string;
@@ -3049,7 +3051,7 @@ Module Updater.
   Definition validation_result := validation_result.record.
   
   Module quota.
-    Record record := Build {
+    Record record : Set := Build {
       max_size : Z;
       max_op : option Z }.
     Definition with_max_size max_size (r : record) :=
@@ -3060,7 +3062,7 @@ Module Updater.
   Definition quota := quota.record.
   
   Module rpc_context.
-    Record record := Build {
+    Record record : Set := Build {
       block_hash : (|Block_hash|).(S.HASH.t);
       block_header : Block_header.shell_header;
       context : Context.t }.
@@ -3075,7 +3077,8 @@ Module Updater.
   
   Module PROTOCOL.
     Record signature {block_header_data block_header block_header_metadata
-      operation_data operation_receipt operation validation_state : Set} := {
+      operation_data operation_receipt operation validation_state : Set} : Set
+      := {
       max_block_length : Z;
       max_operation_data_length : Z;
       validation_passes : list quota;
@@ -3129,7 +3132,7 @@ Module Updater.
 End Updater.
 
 Module RPC_context.
-  Definition t := Updater.rpc_context.
+  Definition t : Set := Updater.rpc_context.
   
   (* class_type *)
   

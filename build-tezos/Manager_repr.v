@@ -15,7 +15,7 @@ Inductive manager_key : Set :=
 | Hash : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -> manager_key
 | Public_key : (|Signature.Public_key|).(S.SPublic_key.t) -> manager_key.
 
-Definition t := manager_key.
+Definition t : Set := manager_key.
 
 Import Data_encoding.
 

@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 
 Module t.
   Module Limited.
-    Record record {remaining : Set} := {
+    Record record {remaining : Set} : Set := {
       remaining : remaining }.
     Arguments record : clear implicits.
   End Limited.
@@ -35,10 +35,10 @@ Module ConstructorRecordNotations_t.
 End ConstructorRecordNotations_t.
 Import ConstructorRecordNotations_t.
 
-Definition internal_gas := Z.t.
+Definition internal_gas : Set := Z.t.
 
 Module cost.
-  Record record := Build {
+  Record record : Set := Build {
     allocations : Z.t;
     steps : Z.t;
     reads : Z.t;

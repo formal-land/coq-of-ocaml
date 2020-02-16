@@ -15,7 +15,7 @@ Require Tezos.Fitness_repr.
 Require Tezos.Nonce_hash.
 
 Module contents.
-  Record record := Build {
+  Record record : Set := Build {
     priority : Z;
     seed_nonce_hash : option Nonce_hash.t;
     proof_of_work_nonce : MBytes.t }.
@@ -29,7 +29,7 @@ End contents.
 Definition contents := contents.record.
 
 Module protocol_data.
-  Record record := Build {
+  Record record : Set := Build {
     contents : contents;
     signature : Signature.t }.
   Definition with_contents contents (r : record) :=
@@ -40,7 +40,7 @@ End protocol_data.
 Definition protocol_data := protocol_data.record.
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Block_header.shell_header;
     protocol_data : protocol_data }.
   Definition with_shell shell (r : record) :=
@@ -50,11 +50,11 @@ Module t.
 End t.
 Definition t := t.record.
 
-Definition block_header := t.
+Definition block_header : Set := t.
 
-Definition raw := Block_header.t.
+Definition raw : Set := Block_header.t.
 
-Definition shell_header := Block_header.shell_header.
+Definition shell_header : Set := Block_header.shell_header.
 
 Definition raw_encoding : Data_encoding.t Block_header.t :=
   Block_header.encoding.

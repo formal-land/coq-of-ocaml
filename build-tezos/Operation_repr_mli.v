@@ -68,7 +68,7 @@ Module Kind.
 End Kind.
 
 Module raw.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Operation.shell_header;
     proto : MBytes.t }.
   Definition with_shell shell (r : record) :=
@@ -82,14 +82,14 @@ Parameter raw_encoding : Data_encoding.t raw.
 
 Module contents.
   Module Endorsement.
-    Record record {level : Set} := {
+    Record record {level : Set} : Set := {
       level : level }.
     Arguments record : clear implicits.
   End Endorsement.
   Definition Endorsement_skeleton := Endorsement.record.
   
   Module Seed_nonce_revelation.
-    Record record {level nonce : Set} := {
+    Record record {level nonce : Set} : Set := {
       level : level;
       nonce : nonce }.
     Arguments record : clear implicits.
@@ -97,7 +97,7 @@ Module contents.
   Definition Seed_nonce_revelation_skeleton := Seed_nonce_revelation.record.
   
   Module Double_endorsement_evidence.
-    Record record {op1 op2 : Set} := {
+    Record record {op1 op2 : Set} : Set := {
       op1 : op1;
       op2 : op2 }.
     Arguments record : clear implicits.
@@ -106,7 +106,7 @@ Module contents.
     Double_endorsement_evidence.record.
   
   Module Double_baking_evidence.
-    Record record {bh1 bh2 : Set} := {
+    Record record {bh1 bh2 : Set} : Set := {
       bh1 : bh1;
       bh2 : bh2 }.
     Arguments record : clear implicits.
@@ -114,7 +114,7 @@ Module contents.
   Definition Double_baking_evidence_skeleton := Double_baking_evidence.record.
   
   Module Activate_account.
-    Record record {id activation_code : Set} := {
+    Record record {id activation_code : Set} : Set := {
       id : id;
       activation_code : activation_code }.
     Arguments record : clear implicits.
@@ -122,7 +122,7 @@ Module contents.
   Definition Activate_account_skeleton := Activate_account.record.
   
   Module Proposals.
-    Record record {source period proposals : Set} := {
+    Record record {source period proposals : Set} : Set := {
       source : source;
       period : period;
       proposals : proposals }.
@@ -131,7 +131,7 @@ Module contents.
   Definition Proposals_skeleton := Proposals.record.
   
   Module Ballot.
-    Record record {source period proposal ballot : Set} := {
+    Record record {source period proposal ballot : Set} : Set := {
       source : source;
       period : period;
       proposal : proposal;
@@ -141,7 +141,8 @@ Module contents.
   Definition Ballot_skeleton := Ballot.record.
   
   Module Manager_operation.
-    Record record {source fee counter operation gas_limit storage_limit : Set} := {
+    Record record {source fee counter operation gas_limit storage_limit : Set} :
+      Set := {
       source : source;
       fee : fee;
       counter : counter;
@@ -155,7 +156,7 @@ End contents.
 
 Module manager_operation.
   Module Transaction.
-    Record record {amount parameters entrypoint destination : Set} := {
+    Record record {amount parameters entrypoint destination : Set} : Set := {
       amount : amount;
       parameters : parameters;
       entrypoint : entrypoint;
@@ -165,7 +166,7 @@ Module manager_operation.
   Definition Transaction_skeleton := Transaction.record.
   
   Module Origination.
-    Record record {delegate script credit preorigination : Set} := {
+    Record record {delegate script credit preorigination : Set} : Set := {
       delegate : delegate;
       script : script;
       credit : credit;
@@ -176,7 +177,7 @@ Module manager_operation.
 End manager_operation.
 
 Module operation.
-  Record record {shell protocol_data : Set} := Build {
+  Record record {shell protocol_data : Set} : Set := Build {
     shell : shell;
     protocol_data : protocol_data }.
   Arguments record : clear implicits.
@@ -190,7 +191,7 @@ End operation.
 Definition operation_skeleton := operation.record.
 
 Module protocol_data.
-  Record record {contents signature : Set} := Build {
+  Record record {contents signature : Set} : Set := Build {
     contents : contents;
     signature : signature }.
   Arguments record : clear implicits.
@@ -315,7 +316,7 @@ Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.
 
 Module internal_operation.
-  Record record {kind : Set} := Build {
+  Record record {kind : Set} : Set := Build {
     source : Contract_repr.contract;
     operation : manager_operation kind;
     nonce : Z }.
@@ -349,7 +350,7 @@ Inductive packed_protocol_data : Set :=
   protocol_data kind -> packed_protocol_data.
 
 Module packed_operation.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Operation.shell_header;
     protocol_data : packed_protocol_data }.
   Definition with_shell shell (r : record) :=
@@ -420,7 +421,7 @@ Parameter equal : forall {a b : Set},
 Module Encoding.
   Module case.
     Module Case.
-      Record record {tag name encoding select proj inj : Set} := {
+      Record record {tag name encoding select proj inj : Set} : Set := {
         tag : tag;
         name : name;
         encoding : encoding;
@@ -477,7 +478,7 @@ Module Encoding.
   Module Manager_operations.
     Module case.
       Module MCase.
-        Record record {tag name encoding select proj inj : Set} := {
+        Record record {tag name encoding select proj inj : Set} : Set := {
           tag : tag;
           name : name;
           encoding : encoding;

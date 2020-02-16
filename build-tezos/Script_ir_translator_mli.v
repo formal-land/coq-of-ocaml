@@ -45,7 +45,7 @@ Inductive ex_script : Set :=
 Module tc_context.
   Module Toplevel.
     Record record {storage_type param_type root_name
-      legacy_create_contract_literal : Set} := {
+      legacy_create_contract_literal : Set} : Set := {
       storage_type : storage_type;
       param_type : param_type;
       root_name : root_name;
@@ -76,7 +76,7 @@ Import ConstructorRecordNotations_tc_context.
 
 Module judgement.
   Module Failed.
-    Record record {descr : Set} := {
+    Record record {descr : Set} : Set := {
       descr : descr }.
     Arguments record : clear implicits.
   End Failed.
@@ -108,7 +108,7 @@ Inductive unparsing_mode : Set :=
 | Optimized : unparsing_mode
 | Readable : unparsing_mode.
 
-Definition type_logger :=
+Definition type_logger : Set :=
   Z -> list (Alpha_context.Script.expr * Alpha_context.Script.annot) ->
   list (Alpha_context.Script.expr * Alpha_context.Script.annot) -> unit.
 

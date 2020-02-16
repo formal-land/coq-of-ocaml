@@ -30,7 +30,7 @@ Parameter register_named_subcontext : forall {key : Set},
 
 Module args.
   Module One.
-    Record record {rpc_arg encoding compare : Set} := {
+    Record record {rpc_arg encoding compare : Set} : Set := {
       rpc_arg : rpc_arg;
       encoding : encoding;
       compare : compare }.
@@ -70,7 +70,7 @@ Parameter unpack : forall {a key sub_key : Set},
   args key a sub_key -> sub_key -> key * a.
 
 Module INDEX.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     path_length : Z;
     to_path : t -> list string -> list string;

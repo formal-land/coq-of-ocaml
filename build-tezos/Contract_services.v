@@ -26,7 +26,7 @@ Definition big_map_root : RPC_path.context RPC_context.t :=
   RPC_path.op_div (RPC_path.op_div RPC_path.open_root "context") "big_maps".
 
 Module info.
-  Record record := Build {
+  Record record : Set := Build {
     balance : Alpha_context.Tez.t;
     delegate : option Alpha_context.public_key_hash;
     counter : option Alpha_context.counter;

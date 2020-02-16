@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 
 Module t.
   Module Limited.
-    Record record {remaining : Set} := {
+    Record record {remaining : Set} : Set := {
       remaining : remaining }.
     Arguments record : clear implicits.
   End Limited.

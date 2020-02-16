@@ -68,7 +68,7 @@ Module Kind.
 End Kind.
 
 Module raw.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Operation.shell_header;
     proto : MBytes.t }.
   Definition with_shell shell (r : record) :=
@@ -82,14 +82,14 @@ Definition raw_encoding : Data_encoding.t Operation.t := Operation.encoding.
 
 Module contents.
   Module Endorsement.
-    Record record {level : Set} := {
+    Record record {level : Set} : Set := {
       level : level }.
     Arguments record : clear implicits.
   End Endorsement.
   Definition Endorsement_skeleton := Endorsement.record.
   
   Module Seed_nonce_revelation.
-    Record record {level nonce : Set} := {
+    Record record {level nonce : Set} : Set := {
       level : level;
       nonce : nonce }.
     Arguments record : clear implicits.
@@ -97,7 +97,7 @@ Module contents.
   Definition Seed_nonce_revelation_skeleton := Seed_nonce_revelation.record.
   
   Module Double_endorsement_evidence.
-    Record record {op1 op2 : Set} := {
+    Record record {op1 op2 : Set} : Set := {
       op1 : op1;
       op2 : op2 }.
     Arguments record : clear implicits.
@@ -106,7 +106,7 @@ Module contents.
     Double_endorsement_evidence.record.
   
   Module Double_baking_evidence.
-    Record record {bh1 bh2 : Set} := {
+    Record record {bh1 bh2 : Set} : Set := {
       bh1 : bh1;
       bh2 : bh2 }.
     Arguments record : clear implicits.
@@ -114,7 +114,7 @@ Module contents.
   Definition Double_baking_evidence_skeleton := Double_baking_evidence.record.
   
   Module Activate_account.
-    Record record {id activation_code : Set} := {
+    Record record {id activation_code : Set} : Set := {
       id : id;
       activation_code : activation_code }.
     Arguments record : clear implicits.
@@ -122,7 +122,7 @@ Module contents.
   Definition Activate_account_skeleton := Activate_account.record.
   
   Module Proposals.
-    Record record {source period proposals : Set} := {
+    Record record {source period proposals : Set} : Set := {
       source : source;
       period : period;
       proposals : proposals }.
@@ -131,7 +131,7 @@ Module contents.
   Definition Proposals_skeleton := Proposals.record.
   
   Module Ballot.
-    Record record {source period proposal ballot : Set} := {
+    Record record {source period proposal ballot : Set} : Set := {
       source : source;
       period : period;
       proposal : proposal;
@@ -141,7 +141,8 @@ Module contents.
   Definition Ballot_skeleton := Ballot.record.
   
   Module Manager_operation.
-    Record record {source fee counter operation gas_limit storage_limit : Set} := {
+    Record record {source fee counter operation gas_limit storage_limit : Set} :
+      Set := {
       source : source;
       fee : fee;
       counter : counter;
@@ -155,7 +156,7 @@ End contents.
 
 Module manager_operation.
   Module Transaction.
-    Record record {amount parameters entrypoint destination : Set} := {
+    Record record {amount parameters entrypoint destination : Set} : Set := {
       amount : amount;
       parameters : parameters;
       entrypoint : entrypoint;
@@ -165,7 +166,7 @@ Module manager_operation.
   Definition Transaction_skeleton := Transaction.record.
   
   Module Origination.
-    Record record {delegate script credit preorigination : Set} := {
+    Record record {delegate script credit preorigination : Set} : Set := {
       delegate : delegate;
       script : script;
       credit : credit;
@@ -176,7 +177,7 @@ Module manager_operation.
 End manager_operation.
 
 Module operation.
-  Record record {shell protocol_data : Set} := Build {
+  Record record {shell protocol_data : Set} : Set := Build {
     shell : shell;
     protocol_data : protocol_data }.
   Arguments record : clear implicits.
@@ -190,7 +191,7 @@ End operation.
 Definition operation_skeleton := operation.record.
 
 Module protocol_data.
-  Record record {contents signature : Set} := Build {
+  Record record {contents signature : Set} : Set := Build {
     contents : contents;
     signature : signature }.
   Arguments record : clear implicits.
@@ -323,7 +324,7 @@ Definition manager_kind {kind : Set}
   end.
 
 Module internal_operation.
-  Record record {kind : Set} := Build {
+  Record record {kind : Set} : Set := Build {
     source : Contract_repr.contract;
     operation : manager_operation kind;
     nonce : Z }.
@@ -353,7 +354,7 @@ Inductive packed_protocol_data : Set :=
   protocol_data kind -> packed_protocol_data.
 
 Module packed_operation.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Operation.shell_header;
     protocol_data : packed_protocol_data }.
   Definition with_shell shell (r : record) :=
@@ -379,16 +380,16 @@ Fixpoint to_list (function_parameter : packed_contents_list)
   {struct function_parameter} : list packed_contents :=
   let 'Contents_list content := function_parameter in
   let 'existT _ __Contents_list_'kind content :=
-    existT
-      (fun __Contents_list_'kind : Set => (contents_list __Contents_list_'kind))
-      _ content in
+    existT (A := Set)
+      (fun __Contents_list_'kind => (contents_list __Contents_list_'kind)) _
+      content in
   match content with
   | Single o =>
     let o := obj_magic (contents __Contents_list_'kind) o in
     obj_magic (list packed_contents) [ Contents o ]
   | Cons o os =>
     let 'existT _ [__0, __1] [o, os] :=
-      obj_magic_exists
+      obj_magic_exists (Es := [Set ** Set])
         (fun '[__0, __1] =>
           [(contents (Kind.manager __0)) ** (contents_list (Kind.manager __1))])
         [o, os] in
@@ -404,18 +405,19 @@ Fixpoint of_list (function_parameter : list packed_contents)
     assert false
   | cons (Contents o) [] =>
     let 'existT _ __Contents_'kind o :=
-      existT (fun __Contents_'kind : Set => (contents __Contents_'kind)) _ o in
+      existT (A := Set) (fun __Contents_'kind => (contents __Contents_'kind)) _
+        o in
     Contents_list (Single o)
   | cons (Contents o) os =>
     let 'existT _ __Contents_'kind1 [o, os] :=
-      existT
-        (fun __Contents_'kind1 : Set =>
+      existT (A := Set)
+        (fun __Contents_'kind1 =>
           [(contents __Contents_'kind1) ** (list packed_contents)]) _ [o, os] in
     let 'Contents_list os := of_list os in
     let 'existT _ __Contents_list_'kind os :=
-      existT
-        (fun __Contents_list_'kind : Set =>
-          (contents_list __Contents_list_'kind)) _ os in
+      existT (A := Set)
+        (fun __Contents_list_'kind => (contents_list __Contents_list_'kind)) _
+        os in
     match (o, os) with
     | (Manager_operation _, Single (Manager_operation _)) =>
       Contents_list (Cons o os)
@@ -450,7 +452,7 @@ Module Encoding.
   Module Manager_operations.
     Module case.
       Module MCase.
-        Record record {tag name encoding select proj inj : Set} := {
+        Record record {tag name encoding select proj inj : Set} : Set := {
           tag : tag;
           name : name;
           encoding : encoding;
@@ -645,8 +647,8 @@ Module Encoding.
               case.MCase.inj := inj
               |} := function_parameter in
         let 'existT _ __MCase_'a [tag, name, encoding, select, proj, inj] :=
-          existT
-            (fun __MCase_'a : Set =>
+          existT (A := Set)
+            (fun __MCase_'a =>
               [Z ** string ** (Data_encoding.t __MCase_'a) **
                 (packed_manager_operation -> option (manager_operation A)) **
                 (manager_operation A -> __MCase_'a) **
@@ -669,7 +671,7 @@ Module Encoding.
   
   Module case.
     Module Case.
-      Record record {tag name encoding select proj inj : Set} := {
+      Record record {tag name encoding select proj inj : Set} : Set := {
         tag : tag;
         name : name;
         encoding : encoding;
@@ -737,8 +739,8 @@ Module Encoding.
             case.Case.inj := inj
             |} := function_parameter in
       let 'existT _ __Case_'a [tag, name, encoding, proj, inj] :=
-        existT
-          (fun __Case_'a : Set =>
+        existT (A := Set)
+          (fun __Case_'a =>
             [Z ** string ** (Data_encoding.t __Case_'a) **
               (contents A -> __Case_'a) ** (__Case_'a -> contents A)]) _
           [tag, name, encoding, proj, inj] in
@@ -1021,9 +1023,9 @@ Module Encoding.
     : case (Kind.manager A) :=
     let 'Manager_operations.MCase mcase := function_parameter in
     let 'existT _ __MCase_'a mcase :=
-      existT
-        (fun __MCase_'a : Set => (Manager_operations.case.MCase __MCase_'a kind))
-        _ mcase in
+      existT (A := Set)
+        (fun __MCase_'a => (Manager_operations.case.MCase __MCase_'a kind)) _
+        mcase in
     Case
       {| case.Case.tag := tag;
         case.Case.name := mcase.(Manager_operations.case.MCase.name);
@@ -1039,8 +1041,8 @@ Module Encoding.
                   ({| contents.Manager_operation.operation := operation |} as op))
               =>
               let 'existT _ __0 [operation, op] :=
-                existT
-                  (fun __0 : Set =>
+                existT (A := Set)
+                  (fun __0 =>
                     [(manager_operation __0) **
                       (contents.Manager_operation __0)]) _ [operation, op] in
               match
@@ -1092,8 +1094,8 @@ Module Encoding.
             case.Case.inj := inj
             |} := function_parameter in
       let 'existT _ __Case_'a [tag, name, encoding, select, proj, inj] :=
-        existT
-          (fun __Case_'a : Set =>
+        existT (A := Set)
+          (fun __Case_'a =>
             [Z ** string ** (Data_encoding.t __Case_'a) **
               (packed_contents -> option (contents A)) **
               (contents A -> __Case_'a) ** (__Case_'a -> contents A)]) _
@@ -1154,16 +1156,16 @@ Module Encoding.
                 protocol_data.signature := signature
                 |} := function_parameter in
           let 'existT _ __Operation_data_'kind [contents, signature] :=
-            existT
-              (fun __Operation_data_'kind : Set =>
+            existT (A := Set)
+              (fun __Operation_data_'kind =>
                 [(contents_list __Operation_data_'kind) ** (option Signature.t)])
               _ [contents, signature] in
           ((Contents_list contents), signature))
         (fun function_parameter =>
           let '(Contents_list contents, signature) := function_parameter in
           let 'existT _ __Contents_list_'kind [contents, signature] :=
-            existT
-              (fun __Contents_list_'kind : Set =>
+            existT (A := Set)
+              (fun __Contents_list_'kind =>
                 [(contents_list __Contents_list_'kind) ** (option Signature.t)])
               _ [contents, signature] in
           Operation_data
@@ -1212,8 +1214,8 @@ Module Encoding.
                 |} := function_parameter in
           let 'existT _ __Internal_operation_'kind
             [source, operation, __nonce_value] :=
-            existT
-              (fun __Internal_operation_'kind : Set =>
+            existT (A := Set)
+              (fun __Internal_operation_'kind =>
                 [Contract_repr.contract **
                   (manager_operation __Internal_operation_'kind) ** Z]) _
               [source, operation, __nonce_value] in
@@ -1222,8 +1224,8 @@ Module Encoding.
           let '((source, __nonce_value), Manager operation) :=
             function_parameter in
           let 'existT _ __Manager_'kind [source, __nonce_value, operation] :=
-            existT
-              (fun __Manager_'kind : Set =>
+            existT (A := Set)
+              (fun __Manager_'kind =>
                 [Contract_repr.contract ** Z **
                   (manager_operation __Manager_'kind)]) _
               [source, __nonce_value, operation] in
@@ -1273,9 +1275,9 @@ Definition __raw_value {A : Set} (function_parameter : operation A)
 Definition acceptable_passes (op : packed_operation) : list Z :=
   let 'Operation_data protocol_data := op.(packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind protocol_data :=
-    existT
-      (fun __Operation_data_'kind : Set =>
-        (protocol_data __Operation_data_'kind)) _ protocol_data in
+    existT (A := Set)
+      (fun __Operation_data_'kind => (protocol_data __Operation_data_'kind)) _
+      protocol_data in
   match protocol_data.(protocol_data.contents) with
   | Single (Endorsement _) => [ 0 ]
   | Single (Proposals _) => [ 1 ]
@@ -1327,7 +1329,7 @@ Definition check_signature_sync {A : Set}
     check Signature.Generic_operation (Contents_list contents) signature
   | ((Cons _ _) as contents, Some signature) =>
     let 'existT _ [__2, __3] [contents, signature] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__2, __3] =>
           [(contents_list (Kind.manager (__2 * __3))) ** Signature.t]) [_, _]
         [contents, signature] in
@@ -1399,7 +1401,7 @@ Definition equal_contents_kind {a b : Set} (op1 : contents a) (op2 : contents b)
   | (Ballot _, _) => None
   | (Manager_operation op1, Manager_operation op2) =>
     let 'existT _ [__0, __1] [op1, op2] :=
-      existT
+      existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(contents.Manager_operation __0) ** (contents.Manager_operation __1)])
         [_, _] [op1, op2] in
@@ -1421,7 +1423,7 @@ Fixpoint equal_contents_kind_list {a b : Set}
   | (Cons _ _, Single _) => None
   | (Cons op1 ops1, Cons op2 ops2) =>
     let 'existT _ [__4, __5, __6, __7] [op1, ops1, op2, ops2] :=
-      existT
+      existT (A := [Set ** Set ** Set ** Set])
         (fun '[__4, __5, __6, __7] =>
           [(contents (Kind.manager __4)) ** (contents_list (Kind.manager __5))
             ** (contents (Kind.manager __6)) **

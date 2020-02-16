@@ -12,9 +12,9 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Require Tezos.Storage_description.
 
-Definition t := int32.
+Definition t : Set := int32.
 
-Definition cycle := t.
+Definition cycle : Set := t.
 
 Definition encoding : Data_encoding.encoding int32 :=
   Data_encoding.__int32_value.

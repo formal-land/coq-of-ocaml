@@ -44,9 +44,9 @@ Parameter __storage_error_value : forall {a : Set},
 
 Parameter t : Set.
 
-Definition context := t.
+Definition context : Set := t.
 
-Definition root_context := t.
+Definition root_context : Set := t.
 
 Parameter prepare :
   Int32.t -> Time.t -> Time.t -> (|Fitness|).(S.T.t) -> Context.t ->
@@ -138,12 +138,12 @@ Parameter increment_origination_nonce :
 
 Parameter unset_origination_nonce : t -> t.
 
-Definition key := list string.
+Definition key : Set := list string.
 
-Definition value := MBytes.t.
+Definition value : Set := MBytes.t.
 
 Module T.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     context := t;
     mem : context -> key -> Lwt.t bool;

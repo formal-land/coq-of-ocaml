@@ -36,7 +36,7 @@ Parameter Make_single_data_storage :
               (|V|).(Storage_sigs.VALUE.t)}))).
 
 Module INDEX.
-  Record signature {t : Set} {ipath : Set -> Set} := {
+  Record signature {t : Set} {ipath : Set -> Set} : Set := {
     t := t;
     path_length : Z;
     to_path : t -> list string -> list string;
@@ -92,7 +92,7 @@ Parameter Make_indexed_subcontext :
           (fun (a : Set) => (|I|).(INDEX.ipath) a)}).
 
 Module WRAPPER.
-  Record signature {t key : Set} := {
+  Record signature {t key : Set} : Set := {
     t := t;
     key := key;
     wrap : t -> key;

@@ -13,17 +13,17 @@ Require Import Tezos.Environment.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Michelson_v1_primitives.
 
-Definition location := Micheline.canonical_location.
+Definition location : Set := Micheline.canonical_location.
 
-Definition annot := Micheline.annot.
+Definition annot : Set := Micheline.annot.
 
-Definition expr := Micheline.canonical Michelson_v1_primitives.prim.
+Definition expr : Set := Micheline.canonical Michelson_v1_primitives.prim.
 
 (* extensible_type_definition `error` *)
 
-Definition lazy_expr := Data_encoding.lazy_t expr.
+Definition lazy_expr : Set := Data_encoding.lazy_t expr.
 
-Definition node := Micheline.node location Michelson_v1_primitives.prim.
+Definition node : Set := Micheline.node location Michelson_v1_primitives.prim.
 
 Parameter location_encoding : Data_encoding.t location.
 
@@ -34,7 +34,7 @@ Parameter lazy_expr_encoding : Data_encoding.t lazy_expr.
 Parameter __lazy_expr_value : expr -> lazy_expr.
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     code : lazy_expr;
     storage : lazy_expr }.
   Definition with_code code (r : record) :=

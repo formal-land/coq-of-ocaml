@@ -11,9 +11,9 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-Definition t := Int64.t.
+Definition t : Set := Int64.t.
 
-Definition period := t.
+Definition period : Set := t.
 
 Definition op_eq := (|Compare.Int64|).(Compare.S.op_eq).
 

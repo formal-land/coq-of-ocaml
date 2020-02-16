@@ -11,7 +11,7 @@ Unset Guard Checking.
 
 Require Import Tezos.Environment.
 
-Definition proposal := (|Protocol_hash|).(S.HASH.t).
+Definition proposal : Set := (|Protocol_hash|).(S.HASH.t).
 
 Inductive ballot : Set :=
 | Yay : ballot

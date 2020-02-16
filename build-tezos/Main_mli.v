@@ -15,7 +15,7 @@ Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 
 Module validation_mode.
   Module Application.
-    Record record {block_header baker block_delay : Set} := {
+    Record record {block_header baker block_delay : Set} : Set := {
       block_header : block_header;
       baker : baker;
       block_delay : block_delay }.
@@ -24,7 +24,7 @@ Module validation_mode.
   Definition Application_skeleton := Application.record.
   
   Module Partial_application.
-    Record record {block_header baker block_delay : Set} := {
+    Record record {block_header baker block_delay : Set} : Set := {
       block_header : block_header;
       baker : baker;
       block_delay : block_delay }.
@@ -33,14 +33,14 @@ Module validation_mode.
   Definition Partial_application_skeleton := Partial_application.record.
   
   Module Partial_construction.
-    Record record {predecessor : Set} := {
+    Record record {predecessor : Set} : Set := {
       predecessor : predecessor }.
     Arguments record : clear implicits.
   End Partial_construction.
   Definition Partial_construction_skeleton := Partial_construction.record.
   
   Module Full_construction.
-    Record record {predecessor protocol_data baker block_delay : Set} := {
+    Record record {predecessor protocol_data baker block_delay : Set} : Set := {
       predecessor : predecessor;
       protocol_data : protocol_data;
       baker : baker;
@@ -86,7 +86,7 @@ End ConstructorRecordNotations_validation_mode.
 Import ConstructorRecordNotations_validation_mode.
 
 Module validation_state.
-  Record record := Build {
+  Record record : Set := Build {
     mode : validation_mode;
     chain_id : (|Chain_id|).(S.HASH.t);
     ctxt : Alpha_context.t;
@@ -102,10 +102,10 @@ Module validation_state.
 End validation_state.
 Definition validation_state := validation_state.record.
 
-Definition operation_data := Alpha_context.packed_protocol_data.
+Definition operation_data : Set := Alpha_context.packed_protocol_data.
 
 Module operation.
-  Record record := Build {
+  Record record : Set := Build {
     shell : Operation.shell_header;
     protocol_data : operation_data }.
   Definition with_shell shell (r : record) :=

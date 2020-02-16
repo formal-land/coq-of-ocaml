@@ -614,7 +614,8 @@ Module Big_map.
     Definition tag_Single_data_storage :=
       (|Single_data_storage|).(Storage_sigs.Single_data_storage.tag_Single_data_storage).
     
-    Definition t := (|Single_data_storage|).(Storage_sigs.Single_data_storage.t).
+    Definition t :=
+      (|Single_data_storage|).(Storage_sigs.Single_data_storage.t).
     
     Definition context :=
       (|Single_data_storage|).(Storage_sigs.Single_data_storage.context).
@@ -773,7 +774,7 @@ Module Big_map.
         (|Indexed_context|).(Storage_sigs.Indexed_raw_context.context)) :=
     (|Indexed_context|).(Storage_sigs.Indexed_raw_context.copy) ctxt from to_.
   
-  Definition key := (|Raw_context|).(Raw_context.T.t) * Z.t.
+  Definition key : Set := (|Raw_context|).(Raw_context.T.t) * Z.t.
   
   Definition Total_bytes :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
@@ -847,13 +848,13 @@ Module Big_map.
     
     Definition tag_Non_iterable_indexed_carbonated_data_storage : unit := tt.
     
-    Definition context :=
+    Definition context : Set :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context).
     
-    Definition key :=
+    Definition key : Set :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key).
     
-    Definition value :=
+    Definition value : Set :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value).
     
     Definition mem
@@ -1193,7 +1194,7 @@ Module Cycle.
         |})) (existT (A := Set) _ _ (|Int|)).
   
   Module unrevealed_nonce.
-    Record record := Build {
+    Record record : Set := Build {
       nonce_hash : Nonce_hash.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
       rewards : Tez_repr.t;
@@ -1401,7 +1402,7 @@ Module Roll.
         |}).
   
   Module Snapshoted_owner_index.
-    Definition t := Cycle_repr.t * Z.
+    Definition t : Set := Cycle_repr.t * Z.
     
     Definition path_length : Z :=
       Pervasives.op_plus
@@ -1431,7 +1432,7 @@ Module Roll.
         end
       end.
     
-    Definition ipath (a : Set) := (a * Cycle_repr.t) * Z.
+    Definition ipath (a : Set) : Set := (a * Cycle_repr.t) * Z.
     
     Definition left_args {A : Set}
       : Storage_description.args A Cycle_repr.cycle (A * Cycle_repr.cycle) :=
@@ -1735,7 +1736,7 @@ End Vote.
 
 Module Seed.
   Module unrevealed_nonce.
-    Record record := Build {
+    Record record : Set := Build {
       nonce_hash : Nonce_hash.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
       rewards : Tez_repr.t;

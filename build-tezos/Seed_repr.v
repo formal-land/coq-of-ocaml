@@ -23,7 +23,7 @@ Inductive t : Set :=
 Inductive sequence : Set :=
 | S : State_hash.t -> sequence.
 
-Definition nonce := MBytes.t.
+Definition nonce : Set := MBytes.t.
 
 Definition nonce_encoding : Data_encoding.encoding MBytes.t :=
   Data_encoding.Fixed.__bytes_value Constants_repr.nonce_length.

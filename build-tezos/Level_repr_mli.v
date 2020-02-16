@@ -15,7 +15,7 @@ Require Tezos.Raw_level_repr.
 Require Tezos.Voting_period_repr.
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     level : Raw_level_repr.t;
     level_position : int32;
     cycle : Cycle_repr.t;
@@ -47,7 +47,7 @@ Module t.
 End t.
 Definition t := t.record.
 
-Definition level := t.
+Definition level : Set := t.
 
 Parameter Included_S : {_ : unit & Compare.S.signature level}.
 

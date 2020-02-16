@@ -32,14 +32,14 @@ Inductive balance_update : Set :=
 | Debited : Tez_repr.t -> balance_update
 | Credited : Tez_repr.t -> balance_update.
 
-Definition balance_updates := list (balance * balance_update).
+Definition balance_updates : Set := list (balance * balance_update).
 
 Parameter balance_updates_encoding : Data_encoding.t balance_updates.
 
 Parameter cleanup_balance_updates : balance_updates -> balance_updates.
 
 Module frozen_balance.
-  Record record := Build {
+  Record record : Set := Build {
     deposit : Tez_repr.t;
     fees : Tez_repr.t;
     rewards : Tez_repr.t }.

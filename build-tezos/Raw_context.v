@@ -28,7 +28,7 @@ Definition Int_set :=
       |}).
 
 Module t.
-  Record record := Build {
+  Record record : Set := Build {
     context : Context.t;
     constants : Constants_repr.parametric;
     first_level : Raw_level_repr.t;
@@ -204,9 +204,9 @@ Module t.
 End t.
 Definition t := t.record.
 
-Definition context := t.
+Definition context : Set := t.
 
-Definition root_context := t.
+Definition root_context : Set := t.
 
 Definition current_level (ctxt : t) : Level_repr.t := ctxt.(t.level).
 
@@ -837,12 +837,12 @@ Definition fork_test_chain (function_parameter : t)
       Error_monad.op_gtgteq (Updater.fork_test_chain c protocol expiration)
         (fun c => Lwt.__return (t.with_context c s)).
 
-Definition key := list string.
+Definition key : Set := list string.
 
-Definition value := MBytes.t.
+Definition value : Set := MBytes.t.
 
 Module T.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     context := t;
     mem : context -> key -> Lwt.t bool;

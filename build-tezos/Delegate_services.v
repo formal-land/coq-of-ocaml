@@ -19,7 +19,7 @@ Require Tezos.Services_registration.
 Import Alpha_context.
 
 Module info.
-  Record record := Build {
+  Record record : Set := Build {
     balance : Alpha_context.Tez.t;
     frozen_balance : Alpha_context.Tez.t;
     frozen_balance_by_cycle :
@@ -114,7 +114,7 @@ Module S.
   Import Data_encoding.
   
   Module list_query.
-    Record record := Build {
+    Record record : Set := Build {
       active : bool;
       inactive : bool }.
     Definition with_active active (r : record) :=
@@ -591,7 +591,7 @@ Definition requested_levels
 
 Module Baking_rights.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
       priority : Z;
@@ -638,7 +638,7 @@ Module Baking_rights.
         "baking_rights".
     
     Module baking_rights_query.
-      Record record := Build {
+      Record record : Set := Build {
         levels : list Alpha_context.Raw_level.t;
         cycles : list Alpha_context.Cycle.t;
         delegates : list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
@@ -855,7 +855,7 @@ End Baking_rights.
 
 Module Endorsing_rights.
   Module t.
-    Record record := Build {
+    Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
       slots : list Z;
@@ -903,7 +903,7 @@ Module Endorsing_rights.
         "endorsing_rights".
     
     Module endorsing_rights_query.
-      Record record := Build {
+      Record record : Set := Build {
         levels : list Alpha_context.Raw_level.t;
         cycles : list Alpha_context.Cycle.t;
         delegates : list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) }.
@@ -1055,8 +1055,8 @@ Module Endorsing_power.
     let 'Alpha_context.Operation_data data :=
       operation.(Alpha_context.packed_operation.protocol_data) in
     let 'existT _ __Operation_data_'kind data :=
-      existT
-        (fun __Operation_data_'kind : Set =>
+      existT (A := Set)
+        (fun __Operation_data_'kind =>
           (Alpha_context.protocol_data __Operation_data_'kind)) _ data in
     match data.(Alpha_context.protocol_data.contents) with
     | Alpha_context.Single (Alpha_context.Endorsement _) =>
@@ -1135,7 +1135,7 @@ Module Required_endorsements.
   
   Module S.
     Module t.
-      Record record := Build {
+      Record record : Set := Build {
         block_delay : Alpha_context.Period.t }.
       Definition with_block_delay block_delay (r : record) :=
         Build block_delay.
@@ -1208,7 +1208,7 @@ Module Minimal_valid_time.
   
   Module S.
     Module t.
-      Record record := Build {
+      Record record : Set := Build {
         priority : Z;
         endorsing_power : Z }.
       Definition with_priority priority (r : record) :=

@@ -29,10 +29,10 @@ Inductive kind : Set :=
 | Prim_kind : kind
 | Seq_kind : kind.
 
-Definition unparsed_stack_ty :=
+Definition unparsed_stack_ty : Set :=
   list (Alpha_context.Script.expr * Alpha_context.Script.annot).
 
-Definition type_map := list (Z * (unparsed_stack_ty * unparsed_stack_ty)).
+Definition type_map : Set := list (Z * (unparsed_stack_ty * unparsed_stack_ty)).
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)

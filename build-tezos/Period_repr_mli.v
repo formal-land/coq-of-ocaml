@@ -13,7 +13,7 @@ Require Import Tezos.Environment.
 
 Parameter t : Set.
 
-Definition period := t.
+Definition period : Set := t.
 
 Parameter Included_S : {_ : unit & Compare.S.signature t}.
 

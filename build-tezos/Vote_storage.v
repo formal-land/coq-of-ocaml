@@ -94,7 +94,7 @@ Definition clear_proposals
       (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.clear) ctxt).
 
 Module ballots.
-  Record record := Build {
+  Record record : Set := Build {
     yay : int32;
     nay : int32;
     pass : int32 }.

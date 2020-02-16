@@ -24,7 +24,7 @@ Definition StringMap :=
 
 Module description.
   Module Value.
-    Record record {get encoding : Set} := {
+    Record record {get encoding : Set} : Set := {
       get : get;
       encoding : encoding }.
     Arguments record : clear implicits.
@@ -32,7 +32,7 @@ Module description.
   Definition Value_skeleton := Value.record.
   
   Module IndexedDir.
-    Record record {arg arg_encoding list subdir : Set} := {
+    Record record {arg arg_encoding list subdir : Set} : Set := {
       arg : arg;
       arg_encoding : arg_encoding;
       list : list;
@@ -102,7 +102,7 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
 
 Module args.
   Module One.
-    Record record {rpc_arg encoding compare : Set} := {
+    Record record {rpc_arg encoding compare : Set} : Set := {
       rpc_arg : rpc_arg;
       encoding : encoding;
       compare : compare }.
@@ -136,7 +136,7 @@ Fixpoint unpack {a b c : Set} (v : args a b c) (x : c) {struct v} : a * b :=
   | One _ => obj_magic (a * b) x
   | Pair l __r_value =>
     let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
-      obj_magic_exists
+      obj_magic_exists (Es := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_'inter_key] =>
           [(args a __0 __Pair_'inter_key) ** (args __Pair_'inter_key __1 c)])
         [l, __r_value] in
@@ -153,7 +153,7 @@ Fixpoint pack {a b c : Set} (v : args a b c) (x : a) (y : b) {struct v} : c :=
   | (One _, _) => obj_magic c (x, y)
   | (Pair l __r_value, _ as y) =>
     let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value, y] :=
-      obj_magic_exists
+      obj_magic_exists (Es := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_'inter_key] =>
           [(args a __0 __Pair_'inter_key) ** (args __Pair_'inter_key __1 c) **
             (__0 * __1)]) [l, __r_value, y] in
@@ -173,7 +173,7 @@ Fixpoint compare {a b c : Set} (function_parameter : args a b c)
     obj_magic (b -> b -> Z) compare'
   | Pair l __r_value =>
     let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
-      obj_magic_exists
+      obj_magic_exists (Es := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_'inter_key] =>
           [(args a __0 __Pair_'inter_key) ** (args __Pair_'inter_key __1 c)])
         [l, __r_value] in
@@ -216,7 +216,7 @@ Fixpoint register_indexed_subcontext {a b r : Set}
   | (Pair __left __right, _ as __list_value) =>
     let 'existT _ [__0, __1, __Pair_'inter_key] [__left, __right, __list_value]
       :=
-      obj_magic_exists
+      obj_magic_exists (Es := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_'inter_key] =>
           [(args r __0 __Pair_'inter_key) ** (args __Pair_'inter_key __1 b) **
             (r -> Lwt.t (Error_monad.tzresult (list (__0 * __1))))])
@@ -259,8 +259,8 @@ Fixpoint register_indexed_subcontext {a b r : Set}
             description.IndexedDir.subdir := subdir
             |} =>
         let 'existT _ __IndexedDir_'a [inner_arg, subdir] :=
-          existT
-            (fun __IndexedDir_'a : Set =>
+          existT (A := Set)
+            (fun __IndexedDir_'a =>
               [(RPC_arg.t __IndexedDir_'a) ** (t (r * __IndexedDir_'a))]) _
             [inner_arg, subdir] in
         match RPC_arg.__eq_value arg inner_arg with
@@ -297,7 +297,8 @@ Fixpoint pp {a : Set} (ppf : Format.formatter) (dir : t a) {struct ppf}
           CamlinternalFormatBasics.End_of_format) "EMPTY")
   | Value _e =>
     let 'existT _ __Value_'a _e :=
-      existT (fun __Value_'a : Set => (description.Value __Value_'a a)) _ _e in
+      existT (A := Set) (fun __Value_'a => (description.Value __Value_'a a)) _
+        _e in
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
         (CamlinternalFormatBasics.String_literal "Value"
@@ -322,8 +323,8 @@ Fixpoint pp {a : Set} (ppf : Format.formatter) (dir : t a) {struct ppf}
         description.IndexedDir.subdir := subdir
         |} =>
     let 'existT _ __IndexedDir_'a [arg, subdir] :=
-      existT
-        (fun __IndexedDir_'a : Set =>
+      existT (A := Set)
+        (fun __IndexedDir_'a =>
           [(RPC_arg.t __IndexedDir_'a) ** (t (a * __IndexedDir_'a))]) _
         [arg, subdir] in
     let name :=
@@ -358,7 +359,7 @@ with pp_item {a : Set}
     name (pp (a := unit)) dir.
 
 Module INDEX.
-  Record signature {t : Set} := {
+  Record signature {t : Set} : Set := {
     t := t;
     path_length : Z;
     to_path : t -> list string -> list string;
@@ -372,7 +373,7 @@ End INDEX.
 
 Module handler.
   Module Handler.
-    Record record {encoding get : Set} := {
+    Record record {encoding get : Set} : Set := {
       encoding : encoding;
       get : get }.
     Arguments record : clear implicits.
@@ -400,7 +401,7 @@ Arguments Handler {_ _}.
 
 Module opt_handler.
   Module Opt_handler.
-    Record record {encoding get : Set} := {
+    Record record {encoding get : Set} : Set := {
       encoding : encoding;
       get : get }.
     Arguments record : clear implicits.
@@ -442,14 +443,14 @@ Fixpoint combine_object {A : Set}
               Error_monad.return_unit |}
   | cons (name, Opt_handler __handler_value) fields =>
     let 'existT _ __Opt_handler_'a [name, __handler_value, fields] :=
-      existT
-        (fun __Opt_handler_'a : Set =>
+      existT (A := Set)
+        (fun __Opt_handler_'a =>
           [string ** (opt_handler.Opt_handler __Opt_handler_'a A) **
             (list (string * opt_handler A))]) _ [name, __handler_value, fields]
       in
     let 'Handler handlers := combine_object fields in
     let 'existT _ __Handler_'a handlers :=
-      existT (fun __Handler_'a : Set => (handler.Handler __Handler_'a A)) _
+      existT (A := Set) (fun __Handler_'a => (handler.Handler __Handler_'a A)) _
         handlers in
     Handler
       {|
@@ -472,7 +473,7 @@ Fixpoint combine_object {A : Set}
   end.
 
 Module query.
-  Record record := Build {
+  Record record : Set := Build {
     depth : Z }.
   Definition with_depth depth (r : record) :=
     Build depth.
@@ -497,8 +498,8 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           opt_handler.Opt_handler.get := get
           |} := function_parameter in
     let 'existT _ __Opt_handler_'a [encoding, get] :=
-      existT
-        (fun __Opt_handler_'a : Set =>
+      existT (A := Set)
+        (fun __Opt_handler_'a =>
           [(Data_encoding.t __Opt_handler_'a) **
             (ikey -> Z -> Lwt.t (Error_monad.tzresult (option __Opt_handler_'a)))])
         _ [encoding, get] in
@@ -534,8 +535,8 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           description.Value.encoding := encoding
           |} =>
       let 'existT _ __Value_'a [get, encoding] :=
-        existT
-          (fun __Value_'a : Set =>
+        existT (A := Set)
+          (fun __Value_'a =>
             [(ikey -> Lwt.t (Error_monad.tzresult (option __Value_'a))) **
               (Data_encoding.t __Value_'a)]) _ [get, encoding] in
       let __handler_value :=
@@ -560,7 +561,8 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
             (name, (build_handler dir (RPC_path.op_div path name)))) fields in
       let 'Handler __handler_value := combine_object fields in
       let 'existT _ __Handler_'a __handler_value :=
-        existT (fun __Handler_'a : Set => (handler.Handler __Handler_'a ikey)) _
+        existT (A := Set)
+          (fun __Handler_'a => (handler.Handler __Handler_'a ikey)) _
           __handler_value in
       let __handler_value :=
         Opt_handler
@@ -588,8 +590,8 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           description.IndexedDir.subdir := subdir
           |} =>
       let 'existT _ __IndexedDir_'a [arg, arg_encoding, __list_value, subdir] :=
-        existT
-          (fun __IndexedDir_'a : Set =>
+        existT (A := Set)
+          (fun __IndexedDir_'a =>
             [(RPC_arg.t __IndexedDir_'a) ** (Data_encoding.t __IndexedDir_'a) **
               (ikey -> Lwt.t (Error_monad.tzresult (list __IndexedDir_'a))) **
               (t (ikey * __IndexedDir_'a))]) _
@@ -597,8 +599,8 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
       let 'Opt_handler __handler_value :=
         build_handler subdir (RPC_path.op_divcolon path arg) in
       let 'existT _ __Opt_handler_'a1 __handler_value :=
-        existT
-          (fun __Opt_handler_'a1 : Set =>
+        existT (A := Set)
+          (fun __Opt_handler_'a1 =>
             (opt_handler.Opt_handler __Opt_handler_'a1 (ikey * __IndexedDir_'a)))
           _ __handler_value in
       let encoding :=

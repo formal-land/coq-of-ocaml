@@ -1,6 +1,5 @@
 -R . Tezos
 -arg -impredicative-set
--arg -type-in-type
 -arg -w
 -arg -notation-overridden
 

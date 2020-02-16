@@ -53,7 +53,7 @@ Definition max := (|CompareModule|).(Compare.S.max).
 
 Definition min := (|CompareModule|).(Compare.S.min).
 
-Definition contract := t.
+Definition contract : Set := t.
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)
@@ -105,7 +105,7 @@ Definition is_originated (function_parameter : t) : option Contract_hash.t :=
   end.
 
 Module origination_nonce.
-  Record record := Build {
+  Record record : Set := Build {
     operation_hash : (|Operation_hash|).(S.HASH.t);
     origination_index : int32 }.
   Definition with_operation_hash operation_hash (r : record) :=

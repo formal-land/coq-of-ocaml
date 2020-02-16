@@ -12,13 +12,13 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 
 Module QTY.
-  Record signature := {
+  Record signature : Set := {
     id : string;
   }.
 End QTY.
 
 Module S.
-  Record signature {qty : Set} := {
+  Record signature {qty : Set} : Set := {
     qty := qty;
     (* extensible_type error *)
     id : string;

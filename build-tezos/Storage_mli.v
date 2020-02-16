@@ -174,7 +174,7 @@ Module Big_map.
   Parameter copy :
     Raw_context.t -> Z.t -> Z.t -> Lwt.t (Error_monad.tzresult Raw_context.t).
   
-  Definition key := Raw_context.t * Z.t.
+  Definition key : Set := Raw_context.t * Z.t.
   
   Parameter rpc_arg : RPC_arg.t Z.t.
   
@@ -249,7 +249,7 @@ End Vote.
 
 Module Seed.
   Module unrevealed_nonce.
-    Record record := Build {
+    Record record : Set := Build {
       nonce_hash : Nonce_hash.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
       rewards : Tez_repr.t;
