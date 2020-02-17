@@ -58,10 +58,9 @@ Definition Index :=
   let t := roll in
   let path_length := 3 in
   let to_path (roll : int32) (l : list string) : list string :=
-    cons
-      (Pervasives.op_atat Int32.to_string (Int32.logand roll (Int32.of_int 255)))
+    cons (Int32.to_string (Int32.logand roll (Int32.of_int 255)))
       (cons
-        (Pervasives.op_atat Int32.to_string
+        (Int32.to_string
           (Int32.logand (Int32.shift_right_logical roll 8) (Int32.of_int 255)))
         (cons (Int32.to_string roll) l)) in
   let of_path (function_parameter : list string) : option int32 :=

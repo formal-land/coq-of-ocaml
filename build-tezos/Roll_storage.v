@@ -162,10 +162,9 @@ Definition freeze_rolls_for_cycle
               (* ❌ Constant of type int32 is converted to int *)
               0 in
           let selected_index :=
-            Pervasives.op_pipegt
-              (Pervasives.op_pipegt
-                (Seed_repr.take_int32 seq (Int32.of_int max_index))
-                Pervasives.fst) Int32.to_int in
+            Int32.to_int
+              (Pervasives.fst
+                (Seed_repr.take_int32 seq (Int32.of_int max_index))) in
           Error_monad.op_gtgteqquestion
             ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.set)
               ctxt cycle selected_index)

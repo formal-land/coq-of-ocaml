@@ -77,12 +77,10 @@ Module Scripts.
         (list
           (Alpha_context.Script.location * Alpha_context.Gas.t *
             list (Alpha_context.Script.expr * option string))) :=
-      Pervasives.op_atat
-        (let arg := Data_encoding.def "scripted.trace" in
-        fun eta => arg None None eta)
-        (Pervasives.op_atat
-          (let arg := Data_encoding.__list_value in
-          fun eta => arg None eta)
+      (let arg := Data_encoding.def "scripted.trace" in
+      fun eta => arg None None eta)
+        ((let arg := Data_encoding.__list_value in
+        fun eta => arg None eta)
           (Data_encoding.obj3
             (Data_encoding.req None None "location"
               Alpha_context.Script.location_encoding)
@@ -1300,13 +1298,13 @@ Module S.
   Definition level_query := level_query.record.
   
   Definition level_query : RPC_query.t level_query :=
-    Pervasives.op_pipegt
+    RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.__query_value
           (fun offset => {| level_query.offset := offset |}))
         (RPC_query.__field_value None "offset" RPC_arg.__int32_value
           (* ❌ Constant of type int32 is converted to int *)
-          0 (fun __t_value => __t_value.(level_query.offset)))) RPC_query.seal.
+          0 (fun __t_value => __t_value.(level_query.offset)))).
   
   Definition current_level
     : RPC_service.service (* `GET *) unit Updater.rpc_context

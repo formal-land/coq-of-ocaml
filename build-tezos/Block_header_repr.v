@@ -63,9 +63,8 @@ Definition shell_header_encoding : Data_encoding.t Block_header.shell_header :=
   Block_header.shell_header_encoding.
 
 Definition contents_encoding : Data_encoding.encoding contents :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "block_header.alpha.unsigned_contents" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "block_header.alpha.unsigned_contents" in
+  fun eta => arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =>
         let '{|
@@ -88,9 +87,8 @@ Definition contents_encoding : Data_encoding.encoding contents :=
         (Data_encoding.opt None None "seed_nonce_hash" Nonce_hash.encoding))).
 
 Definition protocol_data_encoding : Data_encoding.encoding protocol_data :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "block_header.alpha.signed_contents" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "block_header.alpha.signed_contents" in
+  fun eta => arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =>
         let '{|
@@ -119,9 +117,8 @@ Definition unsigned_encoding
   Data_encoding.merge_objs Block_header.shell_header_encoding contents_encoding.
 
 Definition encoding : Data_encoding.encoding t :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "block_header.alpha.full_header" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "block_header.alpha.full_header" in
+  fun eta => arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =>
         let '{| t.shell := shell; t.protocol_data := protocol_data |} :=

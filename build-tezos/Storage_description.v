@@ -481,11 +481,11 @@ End query.
 Definition query := query.record.
 
 Definition depth_query : RPC_query.t query :=
-  Pervasives.op_pipegt
+  RPC_query.seal
     (RPC_query.op_pipeplus
       (RPC_query.__query_value (fun depth => {| query.depth := depth |}))
       (RPC_query.__field_value None "depth" RPC_arg.__int_value 0
-        (fun __t_value => __t_value.(query.depth)))) RPC_query.seal.
+        (fun __t_value => __t_value.(query.depth)))).
 
 Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
   let rpc_dir := Pervasives.__ref_value RPC_directory.empty in

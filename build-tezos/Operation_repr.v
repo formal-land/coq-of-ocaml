@@ -503,9 +503,8 @@ Module Encoding.
     
     Definition entrypoint_encoding
       : Data_encoding.encoding (|Compare.String|).(Compare.S.t) :=
-      Pervasives.op_atat
-        (Data_encoding.def "entrypoint" (Some "entrypoint")
-          (Some "Named entrypoint to a Michelson smart contract"))
+      (Data_encoding.def "entrypoint" (Some "entrypoint")
+        (Some "Named entrypoint to a Michelson smart contract"))
         (let builtin_case (tag : Z) (name : (|Compare.String|).(Compare.S.t))
           : Data_encoding.case (|Compare.String|).(Compare.S.t) :=
           Data_encoding.__case_value name None (Data_encoding.Tag tag)
@@ -753,9 +752,8 @@ Module Encoding.
     let of_list (o : contents Kind.endorsement)
       : contents_list Kind.endorsement :=
       Single o in
-    Pervasives.op_atat
-      (let arg := Data_encoding.def "inlined.endorsement" in
-      fun eta => arg None None eta)
+    (let arg := Data_encoding.def "inlined.endorsement" in
+    fun eta => arg None None eta)
       (Data_encoding.conv
         (fun function_parameter =>
           let '{|
@@ -775,13 +773,10 @@ Module Encoding.
         (Data_encoding.merge_objs Operation.shell_header_encoding
           (Data_encoding.obj2
             (Data_encoding.req None None "operations"
-              (Pervasives.op_atat
-                (let arg := Data_encoding.conv to_list of_list in
-                fun eta => arg None eta)
-                (Pervasives.op_atat
-                  (let arg := Data_encoding.def "inlined.endorsement.contents"
-                    in
-                  fun eta => arg None None eta)
+              ((let arg := Data_encoding.conv to_list of_list in
+              fun eta => arg None eta)
+                ((let arg := Data_encoding.def "inlined.endorsement.contents" in
+                fun eta => arg None None eta)
                   (Data_encoding.union None [ make endorsement_case ]))))
             (Data_encoding.varopt None None "signature" Signature.encoding)))).
   
@@ -1106,9 +1101,8 @@ Module Encoding.
           | None => None
           | Some o => Some (proj o)
           end) (fun x => Contents (inj x)) in
-    Pervasives.op_atat
-      (let arg := Data_encoding.def "operation.alpha.contents" in
-      fun eta => arg None None eta)
+    (let arg := Data_encoding.def "operation.alpha.contents" in
+    fun eta => arg None None eta)
       (Data_encoding.union None
         [
           make endorsement_case;
@@ -1145,9 +1139,8 @@ Module Encoding.
   
   Definition protocol_data_encoding
     : Data_encoding.encoding packed_protocol_data :=
-    Pervasives.op_atat
-      (let arg := Data_encoding.def "operation.alpha.contents_and_signature" in
-      fun eta => arg None None eta)
+    (let arg := Data_encoding.def "operation.alpha.contents_and_signature" in
+    fun eta => arg None None eta)
       (Data_encoding.conv
         (fun function_parameter =>
           let
@@ -1192,18 +1185,16 @@ Module Encoding.
   
   Definition unsigned_operation_encoding
     : Data_encoding.encoding (Operation.shell_header * packed_contents_list) :=
-    Pervasives.op_atat
-      (let arg := Data_encoding.def "operation.alpha.unsigned_operation" in
-      fun eta => arg None None eta)
+    (let arg := Data_encoding.def "operation.alpha.unsigned_operation" in
+    fun eta => arg None None eta)
       (Data_encoding.merge_objs Operation.shell_header_encoding
         (Data_encoding.obj1
           (Data_encoding.req None None "contents" contents_list_encoding))).
   
   Definition internal_operation_encoding
     : Data_encoding.encoding packed_internal_operation :=
-    Pervasives.op_atat
-      (let arg := Data_encoding.def "operation.alpha.internal_operation" in
-      fun eta => arg None None eta)
+    (let arg := Data_encoding.def "operation.alpha.internal_operation" in
+    fun eta => arg None None eta)
       (Data_encoding.conv
         (fun function_parameter =>
           let

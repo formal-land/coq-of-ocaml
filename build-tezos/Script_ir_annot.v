@@ -262,7 +262,7 @@ Definition parse_annots
         (acc : list A) : Error_monad.tzresult (list A) :=
         let len := String.length s in
         if (|Compare.Int|).(Compare.S.op_eq) len 1 then
-          Pervasives.op_atat Error_monad.ok (cons (wrap None) acc)
+          Error_monad.ok (cons (wrap None) acc)
         else
           match
             ((String.get s 1),
@@ -288,20 +288,19 @@ Definition parse_annots
             "O" % char | "P" % char | "Q" % char | "R" % char | "S" % char |
             "T" % char | "U" % char | "V" % char | "W" % char | "X" % char |
             "Y" % char | "Z" % char | "_" % char), _, _) =>
-            Pervasives.op_atat Error_monad.ok
+            Error_monad.ok
               (cons (wrap (Some (String.sub s 1 (Pervasives.op_minus len 1))))
                 acc)
-          | ("@" % char, true, _) =>
-            Pervasives.op_atat Error_monad.ok (cons (wrap (Some "@")) acc)
+          | ("@" % char, true, _) => Error_monad.ok (cons (wrap (Some "@")) acc)
           | ("%" % char, _, true) =>
             if (|Compare.Int|).(Compare.S.op_eq) len 2 then
-              Pervasives.op_atat Error_monad.ok (cons (wrap (Some "%")) acc)
+              Error_monad.ok (cons (wrap (Some "%")) acc)
             else
               if
                 Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_eq) len 3)
                   ((|Compare.Char|).(Compare.S.op_eq) (String.get s 2)
                     "%" % char) then
-                Pervasives.op_atat Error_monad.ok (cons (wrap (Some "%%")) acc)
+                Error_monad.ok (cons (wrap (Some "%%")) acc)
               else
                 Error_monad.__error_value extensible_type_value
           | (_, _, _) => Error_monad.__error_value extensible_type_value

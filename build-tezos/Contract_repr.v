@@ -117,20 +117,19 @@ Definition origination_nonce := origination_nonce.record.
 
 Definition origination_nonce_encoding
   : Data_encoding.encoding origination_nonce :=
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.conv
-        (fun function_parameter =>
-          let '{|
-            origination_nonce.operation_hash := operation_hash;
-              origination_nonce.origination_index := origination_index
-              |} := function_parameter in
-          (operation_hash, origination_index))
-        (fun function_parameter =>
-          let '(operation_hash, origination_index) := function_parameter in
-          {| origination_nonce.operation_hash := operation_hash;
-            origination_nonce.origination_index := origination_index |}) in
-    fun eta => arg None eta)
+  (let arg :=
+    Data_encoding.conv
+      (fun function_parameter =>
+        let '{|
+          origination_nonce.operation_hash := operation_hash;
+            origination_nonce.origination_index := origination_index
+            |} := function_parameter in
+        (operation_hash, origination_index))
+      (fun function_parameter =>
+        let '(operation_hash, origination_index) := function_parameter in
+        {| origination_nonce.operation_hash := operation_hash;
+          origination_nonce.origination_index := origination_index |}) in
+  fun eta => arg None eta)
     (Data_encoding.obj2
       (Data_encoding.req None None "operation"
         (|Operation_hash|).(S.HASH.encoding))

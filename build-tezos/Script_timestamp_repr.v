@@ -45,7 +45,7 @@ Definition to_string (x : Z.t) : string :=
   end.
 
 Definition diff (x : Z.t) (y : Z.t) : Script_int_repr.num Script_int_repr.z :=
-  Pervasives.op_atat Script_int_repr.of_zint (Z.sub x y).
+  Script_int_repr.of_zint (Z.sub x y).
 
 Definition sub_delta {A : Set} (__t_value : Z.t) (delta : Script_int_repr.num A)
   : Z.t := Z.sub __t_value (Script_int_repr.to_zint delta).

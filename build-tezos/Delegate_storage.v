@@ -36,9 +36,8 @@ Inductive balance : Set :=
   balance.
 
 Definition balance_encoding : Data_encoding.encoding balance :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation_metadata.alpha.balance" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation_metadata.alpha.balance" in
+  fun eta => arg None None eta)
     (Data_encoding.union None
       [
         Data_encoding.__case_value "Contract" None (Data_encoding.Tag 0)
@@ -113,9 +112,8 @@ Inductive balance_update : Set :=
 | Credited : Tez_repr.t -> balance_update.
 
 Definition balance_update_encoding : Data_encoding.encoding balance_update :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation_metadata.alpha.balance_update" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation_metadata.alpha.balance_update" in
+  fun eta => arg None None eta)
     (Data_encoding.obj1
       (Data_encoding.req None None "change"
         (Data_encoding.conv
@@ -124,7 +122,7 @@ Definition balance_update_encoding : Data_encoding.encoding balance_update :=
             | Credited v => Tez_repr.to_mutez v
             | Debited v => Int64.neg (Tez_repr.to_mutez v)
             end)
-          (Pervasives.op_atat Data_encoding.Json.wrap_error
+          (Data_encoding.Json.wrap_error
             (fun v =>
               if
                 (|Compare.Int64|).(Compare.S.op_lt) v
@@ -144,9 +142,8 @@ Definition balance_updates : Set := list (balance * balance_update).
 
 Definition balance_updates_encoding
   : Data_encoding.encoding (list (balance * balance_update)) :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation_metadata.alpha.balance_updates" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation_metadata.alpha.balance_updates" in
+  fun eta => arg None None eta)
     (Data_encoding.__list_value None
       (Data_encoding.merge_objs balance_encoding balance_update_encoding)).
 
@@ -265,7 +262,7 @@ Definition registered
     (fun function_parameter =>
       match function_parameter with
       | Some current_delegate =>
-        Pervasives.op_atat Error_monad.__return
+        Error_monad.__return
           ((|Signature.Public_key_hash|).(S.SPublic_key_hash.equal) delegate
             current_delegate)
       | None => Error_monad.return_false

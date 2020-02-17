@@ -125,7 +125,7 @@ Module S.
   Definition list_query := list_query.record.
   
   Definition __list_query_value : RPC_query.t list_query :=
-    Pervasives.op_pipegt
+    RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.op_pipeplus
           (RPC_query.__query_value
@@ -136,7 +136,7 @@ Module S.
           (RPC_query.flag None "active"
             (fun __t_value => __t_value.(list_query.active))))
         (RPC_query.flag None "inactive"
-          (fun __t_value => __t_value.(list_query.inactive)))) RPC_query.seal.
+          (fun __t_value => __t_value.(list_query.inactive)))).
   
   Definition list_delegate
     : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -658,7 +658,7 @@ Module Baking_rights.
     Definition baking_rights_query := baking_rights_query.record.
     
     Definition baking_rights_query : RPC_query.t baking_rights_query :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
             (RPC_query.op_pipeplus
@@ -686,8 +686,7 @@ Module Baking_rights.
             (RPC_query.opt_field None "max_priority" RPC_arg.__int_value
               (fun __t_value => __t_value.(baking_rights_query.max_priority))))
           (RPC_query.flag None "all"
-            (fun __t_value => __t_value.(baking_rights_query.all))))
-        RPC_query.seal.
+            (fun __t_value => __t_value.(baking_rights_query.all)))).
     
     Definition baking_rights
       : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -735,8 +734,8 @@ Module Baking_rights.
         loop contract_list nil 0).
   
   Definition remove_duplicated_delegates (rights : list t) : list t :=
-    Pervasives.op_atat List.rev
-      (Pervasives.op_atat Pervasives.fst
+    List.rev
+      (Pervasives.fst
         (List.fold_left
           (fun function_parameter =>
             let '(acc, previous) := function_parameter in
@@ -917,7 +916,7 @@ Module Endorsing_rights.
     Definition endorsing_rights_query := endorsing_rights_query.record.
     
     Definition endorsing_rights_query : RPC_query.t endorsing_rights_query :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
             (RPC_query.op_pipeplus
@@ -935,8 +934,7 @@ Module Endorsing_rights.
               (fun __t_value => __t_value.(endorsing_rights_query.cycles))))
           (RPC_query.multi_field None "delegate"
             (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg)
-            (fun __t_value => __t_value.(endorsing_rights_query.delegates))))
-        RPC_query.seal.
+            (fun __t_value => __t_value.(endorsing_rights_query.delegates)))).
     
     Definition endorsing_rights
       : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -1143,13 +1141,13 @@ Module Required_endorsements.
     Definition t := t.record.
     
     Definition required_endorsements_query : RPC_query.t t :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.__query_value
             (fun block_delay => {| t.block_delay := block_delay |}))
           (RPC_query.__field_value None "block_delay"
             Alpha_context.Period.rpc_arg Alpha_context.Period.zero
-            (fun __t_value => __t_value.(t.block_delay)))) RPC_query.seal.
+            (fun __t_value => __t_value.(t.block_delay)))).
     
     Definition required_endorsements
       : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -1219,7 +1217,7 @@ Module Minimal_valid_time.
     Definition t := t.record.
     
     Definition minimal_valid_time_query : RPC_query.t t :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
             (RPC_query.__query_value
@@ -1230,7 +1228,7 @@ Module Minimal_valid_time.
             (RPC_query.__field_value None "priority" RPC_arg.__int_value 0
               (fun __t_value => __t_value.(t.priority))))
           (RPC_query.__field_value None "endorsing_power" RPC_arg.__int_value 0
-            (fun __t_value => __t_value.(t.endorsing_power)))) RPC_query.seal.
+            (fun __t_value => __t_value.(t.endorsing_power)))).
     
     Definition minimal_valid_time
       : RPC_service.service (* `GET *) unit Updater.rpc_context

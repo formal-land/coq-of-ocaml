@@ -166,9 +166,8 @@ Definition big_map_diff_item_encoding
 
 Definition big_map_diff_encoding
   : Data_encoding.encoding (list big_map_diff_item) :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "contract.big_map_diff" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "contract.big_map_diff" in
+  fun eta => arg None None eta)
     (Data_encoding.__list_value None big_map_diff_item_encoding).
 
 Definition big_map_key_cost : Z := 65.

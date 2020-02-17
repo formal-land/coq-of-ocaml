@@ -635,17 +635,15 @@ Definition precheck_manager_contents {A B : Set}
                         Alpha_context.manager_operation.Transaction.parameters := parameters
                           |} =>
                       Error_monad.op_gtgteqquestion
-                        (Pervasives.op_atat Lwt.__return
-                          (Pervasives.op_atat
-                            (Error_monad.record_trace extensible_type_value)
+                        (Lwt.__return
+                          ((Error_monad.record_trace extensible_type_value)
                             (Alpha_context.Gas.check_enough ctxt
                               (Alpha_context.Script.minimal_deserialize_cost
                                 parameters))))
                         (fun function_parameter =>
                           let '_ := function_parameter in
                           Error_monad.op_gtgtpipequestion
-                            (Pervasives.op_atat
-                              (Error_monad.trace extensible_type_value)
+                            ((Error_monad.trace extensible_type_value)
                               (Alpha_context.Script.force_decode_in_context ctxt
                                 parameters))
                             (fun function_parameter =>
@@ -656,9 +654,8 @@ Definition precheck_manager_contents {A B : Set}
                         Alpha_context.manager_operation.Origination.script := script
                           |} =>
                       Error_monad.op_gtgteqquestion
-                        (Pervasives.op_atat Lwt.__return
-                          (Pervasives.op_atat
-                            (Error_monad.record_trace extensible_type_value)
+                        (Lwt.__return
+                          ((Error_monad.record_trace extensible_type_value)
                             (Error_monad.op_gtgtquestion
                               (Alpha_context.Gas.consume ctxt
                                 (Alpha_context.Script.minimal_deserialize_cost
@@ -670,15 +667,13 @@ Definition precheck_manager_contents {A B : Set}
                         (fun function_parameter =>
                           let '_ := function_parameter in
                           Error_monad.op_gtgteqquestion
-                            (Pervasives.op_atat
-                              (Error_monad.trace extensible_type_value)
+                            ((Error_monad.trace extensible_type_value)
                               (Alpha_context.Script.force_decode_in_context ctxt
                                 script.(Alpha_context.Script.t.code)))
                             (fun function_parameter =>
                               let '(_code, ctxt) := function_parameter in
                               Error_monad.op_gtgtpipequestion
-                                (Pervasives.op_atat
-                                  (Error_monad.trace extensible_type_value)
+                                ((Error_monad.trace extensible_type_value)
                                   (Alpha_context.Script.force_decode_in_context
                                     ctxt script.(Alpha_context.Script.t.storage)))
                                 (fun function_parameter =>

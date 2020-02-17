@@ -69,9 +69,8 @@ Definition xor_higher_bits (i : int32) (__b_value : MBytes.t) : MBytes.t :=
 Definition __sequence_value (function_parameter : t) : int32 -> sequence :=
   let 'T state := function_parameter in
   fun n =>
-    Pervasives.op_pipegt
-      (Pervasives.op_pipegt (State_hash.to_bytes state) (xor_higher_bits n))
-      (fun __b_value => S (State_hash.hash_bytes None [ __b_value ])).
+    (fun __b_value => S (State_hash.hash_bytes None [ __b_value ]))
+      ((xor_higher_bits n) (State_hash.to_bytes state)).
 
 Definition take (function_parameter : sequence) : MBytes.t * sequence :=
   let 'S state := function_parameter in

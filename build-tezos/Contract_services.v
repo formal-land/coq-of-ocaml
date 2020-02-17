@@ -43,22 +43,21 @@ End info.
 Definition info := info.record.
 
 Definition info_encoding : Data_encoding.encoding info :=
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.conv
-        (fun function_parameter =>
-          let '{|
-            info.balance := balance;
-              info.delegate := delegate;
-              info.counter := counter;
-              info.script := script
-              |} := function_parameter in
-          (balance, delegate, script, counter))
-        (fun function_parameter =>
-          let '(balance, delegate, script, counter) := function_parameter in
-          {| info.balance := balance; info.delegate := delegate;
-            info.counter := counter; info.script := script |}) in
-    fun eta => arg None eta)
+  (let arg :=
+    Data_encoding.conv
+      (fun function_parameter =>
+        let '{|
+          info.balance := balance;
+            info.delegate := delegate;
+            info.counter := counter;
+            info.script := script
+            |} := function_parameter in
+        (balance, delegate, script, counter))
+      (fun function_parameter =>
+        let '(balance, delegate, script, counter) := function_parameter in
+        {| info.balance := balance; info.delegate := delegate;
+          info.counter := counter; info.script := script |}) in
+  fun eta => arg None eta)
     (Data_encoding.obj4
       (Data_encoding.req None None "balance" Alpha_context.Tez.encoding)
       (Data_encoding.opt None None "delegate"

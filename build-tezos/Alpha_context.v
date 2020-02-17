@@ -135,10 +135,9 @@ Module Script_timestamp.
         "Internal error: 'time_between_block' constants is an empty list."
     | cons first_delay _ =>
       let current_timestamp := Raw_context.predecessor_timestamp ctxt in
-      Pervasives.op_pipegt
-        (Pervasives.op_pipegt
-          (Time.add current_timestamp (Period_repr.to_seconds first_delay))
-          Timestamp.to_seconds) of_int64
+      of_int64
+        (Timestamp.to_seconds
+          (Time.add current_timestamp (Period_repr.to_seconds first_delay)))
     end.
 End Script_timestamp.
 
@@ -404,7 +403,7 @@ Definition finalize (message : option string) (c : Raw_context.context)
     Updater.validation_result.message := message;
     Updater.validation_result.max_operations_ttl := 60;
     Updater.validation_result.last_allowed_fork_level :=
-      Pervasives.op_atat Raw_level.to_int32 (Level.last_allowed_fork_level c) |}.
+      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}.
 
 Definition activate
   : Raw_context.context -> (|Protocol_hash|).(S.HASH.t) -> Lwt.t Raw_context.t :=

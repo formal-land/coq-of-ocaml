@@ -498,9 +498,8 @@ Definition strings_of_prims (expr : Micheline.canonical prim)
   Micheline.strip_locations (convert (Micheline.root expr)).
 
 Definition prim_encoding : Data_encoding.encoding prim :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "michelson.v1.primitives" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "michelson.v1.primitives" in
+  fun eta => arg None None eta)
     (Data_encoding.string_enum
       [
         ("parameter", K_parameter);

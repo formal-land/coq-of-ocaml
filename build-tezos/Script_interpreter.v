@@ -2205,7 +2205,7 @@ Fixpoint step {a b : Set}
               (fun ctxt =>
                 logged_return
                   ((Item
-                    (Pervasives.op_atat Alpha_context.Script_int.of_int
+                    (Alpha_context.Script_int.of_int
                       (Script_ir_translator.compare_comparable ty __a_value
                         __b_value)) rest), ctxt)))
         | (Script_typed_ir.Eq, Item cmpres rest, _) =>
@@ -2503,8 +2503,8 @@ Fixpoint step {a b : Set}
                         (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
                         manager in
                     let storage :=
-                      Pervasives.op_atat Script_repr.__lazy_expr_value
-                        (Pervasives.op_atat Micheline.strip_locations
+                      Script_repr.__lazy_expr_value
+                        (Micheline.strip_locations
                           (Micheline.Bytes 0 manager_bytes)) in
                     let script :=
                       {|
@@ -2593,8 +2593,7 @@ Fixpoint step {a b : Set}
                         let '(unparsed_storage_type, ctxt) := function_parameter
                           in
                         let code :=
-                          Pervasives.op_atat
-                            Alpha_context.Script.__lazy_expr_value
+                          Alpha_context.Script.__lazy_expr_value
                             (Micheline.strip_locations
                               (Micheline.Seq 0
                                 [
@@ -2633,8 +2632,7 @@ Fixpoint step {a b : Set}
                                     let '(storage, ctxt) := function_parameter
                                       in
                                     let storage :=
-                                      Pervasives.op_atat
-                                        Alpha_context.Script.__lazy_expr_value
+                                      Alpha_context.Script.__lazy_expr_value
                                         (Micheline.strip_locations storage) in
                                     Error_monad.op_gtgteqquestion
                                       (if spendable then

@@ -15,8 +15,8 @@ Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_repr.
 
 Definition manager_script_code : Script_repr.lazy_expr :=
-  Pervasives.op_atat Script_repr.__lazy_expr_value
-    (Pervasives.op_atat Micheline.strip_locations
+  Script_repr.__lazy_expr_value
+    (Micheline.strip_locations
       (Micheline.Seq 0
         [
           Micheline.Prim 0 Michelson_v1_primitives.K_parameter
@@ -753,9 +753,9 @@ Definition add_do
                         manager_pkh);
                     storage_expr
                   ] nil in
-              ((Pervasives.op_atat Script_repr.__lazy_expr_value
+              ((Script_repr.__lazy_expr_value
                 (Micheline.strip_locations migrated_code)),
-                (Pervasives.op_atat Script_repr.__lazy_expr_value
+                (Script_repr.__lazy_expr_value
                   (Micheline.strip_locations migrated_storage)))
             | _ => (script_code, script_storage)
             end
@@ -1256,9 +1256,9 @@ Definition add_set_delegate
                         manager_pkh);
                     storage_expr
                   ] nil in
-              ((Pervasives.op_atat Script_repr.__lazy_expr_value
+              ((Script_repr.__lazy_expr_value
                 (Micheline.strip_locations migrated_code)),
-                (Pervasives.op_atat Script_repr.__lazy_expr_value
+                (Script_repr.__lazy_expr_value
                   (Micheline.strip_locations migrated_storage)))
             | _ => (script_code, script_storage)
             end
@@ -1345,7 +1345,6 @@ Definition add_root_entrypoint (script_code : Script_repr.lazy_expr)
                     (List.map rewrite_self exprs) annots
                 | other => other
                 end) toplevel) in
-        Pervasives.op_atat Script_repr.__lazy_expr_value
-          (Micheline.strip_locations migrated_code)
+        Script_repr.__lazy_expr_value (Micheline.strip_locations migrated_code)
       | _ => script_code
       end).

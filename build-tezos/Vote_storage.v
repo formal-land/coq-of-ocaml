@@ -108,18 +108,17 @@ End ballots.
 Definition ballots := ballots.record.
 
 Definition ballots_encoding : Data_encoding.encoding ballots :=
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.conv
-        (fun function_parameter =>
-          let '{|
-            ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |} :=
-            function_parameter in
-          (yay, nay, pass))
-        (fun function_parameter =>
-          let '(yay, nay, pass) := function_parameter in
-          {| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}) in
-    fun eta => arg None eta)
+  (let arg :=
+    Data_encoding.conv
+      (fun function_parameter =>
+        let '{|
+          ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |} :=
+          function_parameter in
+        (yay, nay, pass))
+      (fun function_parameter =>
+        let '(yay, nay, pass) := function_parameter in
+        {| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}) in
+  fun eta => arg None eta)
     (Data_encoding.obj3
       (Data_encoding.req None None "yay" Data_encoding.__int32_value)
       (Data_encoding.req None None "nay" Data_encoding.__int32_value)

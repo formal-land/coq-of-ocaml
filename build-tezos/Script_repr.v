@@ -60,9 +60,8 @@ End t.
 Definition t := t.record.
 
 Definition encoding : Data_encoding.encoding t :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "scripted.contracts" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "scripted.contracts" in
+  fun eta => arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =>
         let '{| t.code := code; t.storage := storage |} := function_parameter in

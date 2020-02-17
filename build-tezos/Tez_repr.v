@@ -87,6 +87,5 @@ Definition t : Set := qty.
 Definition tez : Set := qty.
 
 Definition encoding : Data_encoding.encoding qty :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "mutez" in
-    fun eta => arg None None eta) qty_encoding.
+  (let arg := Data_encoding.def "mutez" in
+  fun eta => arg None None eta) qty_encoding.

@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 36144 lines</li>
-      <li>Coq size: 53116 lines (+46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 53010 lines (+46% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2508</li>
     </ul>
     
@@ -102,6 +102,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           27076,
           30388,
           30401,
+          30380,
         ],
         generated: [
           47563,
@@ -138,6 +139,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           52355,
           53072,
           53116,
+          53010,
         ],
         labels: [
           "01-14",
@@ -173,6 +175,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-13",
           "02-14",
           "02-15",
+          "02-16",
           "02-16",
         ]
       }
@@ -706,7 +709,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 475 lines (+70% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 474 lines (+69% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -1132,10 +1135,9 @@ Module Script_timestamp.
         &quot;Internal error: 'time_between_block' constants is an empty list.&quot;
     | cons first_delay _ =&gt;
       let current_timestamp := Raw_context.predecessor_timestamp ctxt in
-      Pervasives.op_pipegt
-        (Pervasives.op_pipegt
-          (Time.add current_timestamp (Period_repr.to_seconds first_delay))
-          Timestamp.to_seconds) of_int64
+      of_int64
+        (Timestamp.to_seconds
+          (Time.add current_timestamp (Period_repr.to_seconds first_delay)))
     end.
 End Script_timestamp.
 
@@ -1401,7 +1403,7 @@ Definition finalize (message : option string) (c : Raw_context.context)
     Updater.validation_result.message := message;
     Updater.validation_result.max_operations_ttl := 60;
     Updater.validation_result.last_allowed_fork_level :=
-      Pervasives.op_atat Raw_level.to_int32 (Level.last_allowed_fork_level c) |}.
+      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}.
 
 Definition activate
   : Raw_context.context -&gt; (|Protocol_hash|).(S.HASH.t) -&gt; Lwt.t Raw_context.t :=
@@ -6964,7 +6966,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1487 lines</li>
-      <li>Coq size: 1871 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1866 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -9176,17 +9178,15 @@ Definition precheck_manager_contents {A B : Set}
                         Alpha_context.manager_operation.Transaction.parameters := parameters
                           |} =&gt;
                       Error_monad.op_gtgteqquestion
-                        (Pervasives.op_atat Lwt.__return
-                          (Pervasives.op_atat
-                            (Error_monad.record_trace extensible_type_value)
+                        (Lwt.__return
+                          ((Error_monad.record_trace extensible_type_value)
                             (Alpha_context.Gas.check_enough ctxt
                               (Alpha_context.Script.minimal_deserialize_cost
                                 parameters))))
                         (fun function_parameter =&gt;
                           let '_ := function_parameter in
                           Error_monad.op_gtgtpipequestion
-                            (Pervasives.op_atat
-                              (Error_monad.trace extensible_type_value)
+                            ((Error_monad.trace extensible_type_value)
                               (Alpha_context.Script.force_decode_in_context ctxt
                                 parameters))
                             (fun function_parameter =&gt;
@@ -9197,9 +9197,8 @@ Definition precheck_manager_contents {A B : Set}
                         Alpha_context.manager_operation.Origination.script := script
                           |} =&gt;
                       Error_monad.op_gtgteqquestion
-                        (Pervasives.op_atat Lwt.__return
-                          (Pervasives.op_atat
-                            (Error_monad.record_trace extensible_type_value)
+                        (Lwt.__return
+                          ((Error_monad.record_trace extensible_type_value)
                             (Error_monad.op_gtgtquestion
                               (Alpha_context.Gas.consume ctxt
                                 (Alpha_context.Script.minimal_deserialize_cost
@@ -9211,15 +9210,13 @@ Definition precheck_manager_contents {A B : Set}
                         (fun function_parameter =&gt;
                           let '_ := function_parameter in
                           Error_monad.op_gtgteqquestion
-                            (Pervasives.op_atat
-                              (Error_monad.trace extensible_type_value)
+                            ((Error_monad.trace extensible_type_value)
                               (Alpha_context.Script.force_decode_in_context ctxt
                                 script.(Alpha_context.Script.t.code)))
                             (fun function_parameter =&gt;
                               let '(_code, ctxt) := function_parameter in
                               Error_monad.op_gtgtpipequestion
-                                (Pervasives.op_atat
-                                  (Error_monad.trace extensible_type_value)
+                                ((Error_monad.trace extensible_type_value)
                                   (Alpha_context.Script.force_decode_in_context
                                     ctxt script.(Alpha_context.Script.t.storage)))
                                 (fun function_parameter =&gt;
@@ -10420,7 +10417,7 @@ Definition finalize_application
     <h3>Apply_results</h3>
     <ul>
       <li>OCaml size: 1187 lines</li>
-      <li>Coq size: 2141 lines (+80% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2133 lines (+79% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -11826,18 +11823,17 @@ Module Manager_result.
         Alpha_context.Operation.Encoding.Manager_operations.case.MCase.name := name
           |} := op_case in
     let __t_value :=
-      Pervasives.op_atat
-        (let arg :=
-          Data_encoding.def
-            (Format.asprintf
-              (CamlinternalFormatBasics.Format
-                (CamlinternalFormatBasics.String_literal
-                  &quot;operation.alpha.operation_result.&quot;
-                  (CamlinternalFormatBasics.String
-                    CamlinternalFormatBasics.No_padding
-                    CamlinternalFormatBasics.End_of_format))
-                &quot;operation.alpha.operation_result.%s&quot;) name) in
-        fun eta =&gt; arg None None eta)
+      (let arg :=
+        Data_encoding.def
+          (Format.asprintf
+            (CamlinternalFormatBasics.Format
+              (CamlinternalFormatBasics.String_literal
+                &quot;operation.alpha.operation_result.&quot;
+                (CamlinternalFormatBasics.String
+                  CamlinternalFormatBasics.No_padding
+                  CamlinternalFormatBasics.End_of_format))
+              &quot;operation.alpha.operation_result.%s&quot;) name) in
+      fun eta =&gt; arg None None eta)
         (Data_encoding.union (Some Data_encoding.Uint8)
           [
             Data_encoding.__case_value &quot;Applied&quot; None (Data_encoding.Tag 0)
@@ -12213,9 +12209,8 @@ Definition internal_operation_result_encoding
                 op; Alpha_context.internal_operation.nonce := __nonce_value |}
           in
         Internal_operation_result op res) in
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation.alpha.internal_operation_result&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation.alpha.internal_operation_result&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
         make Manager_result.reveal_case;
@@ -12927,9 +12922,8 @@ Definition contents_result_encoding
     let inj (x : __Case_'a) : packed_contents_result :=
       Contents_result (inj x) in
     tagged_case (Data_encoding.Tag tag) name encoding proj inj in
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation.alpha.contents_result&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation.alpha.contents_result&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
         make endorsement_case;
@@ -12997,10 +12991,9 @@ Definition contents_and_result_encoding
         (Data_encoding.obj1
           (Data_encoding.req None None &quot;metadata&quot; meta_encoding)) in
     tagged_case (Data_encoding.Tag tag) name encoding proj inj in
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.def &quot;operation.alpha.operation_contents_and_result&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation.alpha.operation_contents_and_result&quot;
+    in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
         make endorsement_case;
@@ -13082,9 +13075,8 @@ Definition contents_result_list_encoding
       | _ =&gt; Pervasives.failwith &quot;cannot decode ill-formed operation result&quot;
       end
     end in
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation.alpha.contents_list_result&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation.alpha.contents_list_result&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.conv to_list of_list None
       (Data_encoding.__list_value None contents_result_encoding)).
 
@@ -13186,9 +13178,8 @@ Inductive packed_operation_metadata : Set :=
 
 Definition operation_metadata_encoding
   : Data_encoding.encoding packed_operation_metadata :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation.alpha.result&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation.alpha.result&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
         Data_encoding.__case_value &quot;Operation_metadata&quot; None
@@ -13575,9 +13566,8 @@ Fixpoint of_list (function_parameter : list packed_contents_result)
 Definition operation_data_and_metadata_encoding
   : Data_encoding.encoding
     (Alpha_context.packed_protocol_data * packed_operation_metadata) :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation.alpha.operation_with_metadata&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation.alpha.operation_with_metadata&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
         Data_encoding.__case_value &quot;Operation_with_metadata&quot; None
@@ -13717,9 +13707,8 @@ End block_metadata.
 Definition block_metadata := block_metadata.record.
 
 Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;block_header.alpha.metadata&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;block_header.alpha.metadata&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =&gt;
         let '{|
@@ -15844,7 +15833,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Block_header_repr</h3>
     <ul>
       <li>OCaml size: 131 lines</li>
-      <li>Coq size: 174 lines (+32% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 171 lines (+30% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16050,9 +16039,8 @@ Definition shell_header_encoding : Data_encoding.t Block_header.shell_header :=
   Block_header.shell_header_encoding.
 
 Definition contents_encoding : Data_encoding.encoding contents :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;block_header.alpha.unsigned_contents&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;block_header.alpha.unsigned_contents&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =&gt;
         let '{|
@@ -16075,9 +16063,8 @@ Definition contents_encoding : Data_encoding.encoding contents :=
         (Data_encoding.opt None None &quot;seed_nonce_hash&quot; Nonce_hash.encoding))).
 
 Definition protocol_data_encoding : Data_encoding.encoding protocol_data :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;block_header.alpha.signed_contents&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;block_header.alpha.signed_contents&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =&gt;
         let '{|
@@ -16106,9 +16093,8 @@ Definition unsigned_encoding
   Data_encoding.merge_objs Block_header.shell_header_encoding contents_encoding.
 
 Definition encoding : Data_encoding.encoding t :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;block_header.alpha.full_header&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;block_header.alpha.full_header&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =&gt;
         let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
@@ -18986,7 +18972,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Contract_repr</h3>
     <ul>
       <li>OCaml size: 232 lines</li>
-      <li>Coq size: 249 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 248 lines (+6% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19363,20 +19349,19 @@ Definition origination_nonce := origination_nonce.record.
 
 Definition origination_nonce_encoding
   : Data_encoding.encoding origination_nonce :=
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.conv
-        (fun function_parameter =&gt;
-          let '{|
-            origination_nonce.operation_hash := operation_hash;
-              origination_nonce.origination_index := origination_index
-              |} := function_parameter in
-          (operation_hash, origination_index))
-        (fun function_parameter =&gt;
-          let '(operation_hash, origination_index) := function_parameter in
-          {| origination_nonce.operation_hash := operation_hash;
-            origination_nonce.origination_index := origination_index |}) in
-    fun eta =&gt; arg None eta)
+  (let arg :=
+    Data_encoding.conv
+      (fun function_parameter =&gt;
+        let '{|
+          origination_nonce.operation_hash := operation_hash;
+            origination_nonce.origination_index := origination_index
+            |} := function_parameter in
+        (operation_hash, origination_index))
+      (fun function_parameter =&gt;
+        let '(operation_hash, origination_index) := function_parameter in
+        {| origination_nonce.operation_hash := operation_hash;
+          origination_nonce.origination_index := origination_index |}) in
+  fun eta =&gt; arg None eta)
     (Data_encoding.obj2
       (Data_encoding.req None None &quot;operation&quot;
         (|Operation_hash|).(S.HASH.encoding))
@@ -19693,7 +19678,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Contract_services</h3>
     <ul>
       <li>OCaml size: 425 lines</li>
-      <li>Coq size: 613 lines (+44% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 612 lines (+44% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -20923,22 +20908,21 @@ End info.
 Definition info := info.record.
 
 Definition info_encoding : Data_encoding.encoding info :=
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.conv
-        (fun function_parameter =&gt;
-          let '{|
-            info.balance := balance;
-              info.delegate := delegate;
-              info.counter := counter;
-              info.script := script
-              |} := function_parameter in
-          (balance, delegate, script, counter))
-        (fun function_parameter =&gt;
-          let '(balance, delegate, script, counter) := function_parameter in
-          {| info.balance := balance; info.delegate := delegate;
-            info.counter := counter; info.script := script |}) in
-    fun eta =&gt; arg None eta)
+  (let arg :=
+    Data_encoding.conv
+      (fun function_parameter =&gt;
+        let '{|
+          info.balance := balance;
+            info.delegate := delegate;
+            info.counter := counter;
+            info.script := script
+            |} := function_parameter in
+        (balance, delegate, script, counter))
+      (fun function_parameter =&gt;
+        let '(balance, delegate, script, counter) := function_parameter in
+        {| info.balance := balance; info.delegate := delegate;
+          info.counter := counter; info.script := script |}) in
+  fun eta =&gt; arg None eta)
     (Data_encoding.obj4
       (Data_encoding.req None None &quot;balance&quot; Alpha_context.Tez.encoding)
       (Data_encoding.opt None None &quot;delegate&quot;
@@ -22747,7 +22731,7 @@ Parameter register : unit -&gt; unit.
     <h3>Contract_storage</h3>
     <ul>
       <li>OCaml size: 733 lines</li>
-      <li>Coq size: 890 lines (+21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 889 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -23686,9 +23670,8 @@ Definition big_map_diff_item_encoding
 
 Definition big_map_diff_encoding
   : Data_encoding.encoding (list big_map_diff_item) :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;contract.big_map_diff&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;contract.big_map_diff&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.__list_value None big_map_diff_item_encoding).
 
 Definition big_map_key_cost : Z := 65.
@@ -25151,7 +25134,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature cycle}.
     <h3>Delegate_services</h3>
     <ul>
       <li>OCaml size: 697 lines</li>
-      <li>Coq size: 1358 lines (+94% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1356 lines (+94% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -26733,7 +26716,7 @@ Module S.
   Definition list_query := list_query.record.
   
   Definition __list_query_value : RPC_query.t list_query :=
-    Pervasives.op_pipegt
+    RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.op_pipeplus
           (RPC_query.__query_value
@@ -26744,7 +26727,7 @@ Module S.
           (RPC_query.flag None &quot;active&quot;
             (fun __t_value =&gt; __t_value.(list_query.active))))
         (RPC_query.flag None &quot;inactive&quot;
-          (fun __t_value =&gt; __t_value.(list_query.inactive)))) RPC_query.seal.
+          (fun __t_value =&gt; __t_value.(list_query.inactive)))).
   
   Definition list_delegate
     : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -27266,7 +27249,7 @@ Module Baking_rights.
     Definition baking_rights_query := baking_rights_query.record.
     
     Definition baking_rights_query : RPC_query.t baking_rights_query :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
             (RPC_query.op_pipeplus
@@ -27294,8 +27277,7 @@ Module Baking_rights.
             (RPC_query.opt_field None &quot;max_priority&quot; RPC_arg.__int_value
               (fun __t_value =&gt; __t_value.(baking_rights_query.max_priority))))
           (RPC_query.flag None &quot;all&quot;
-            (fun __t_value =&gt; __t_value.(baking_rights_query.all))))
-        RPC_query.seal.
+            (fun __t_value =&gt; __t_value.(baking_rights_query.all)))).
     
     Definition baking_rights
       : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -27343,8 +27325,8 @@ Module Baking_rights.
         loop contract_list nil 0).
   
   Definition remove_duplicated_delegates (rights : list t) : list t :=
-    Pervasives.op_atat List.rev
-      (Pervasives.op_atat Pervasives.fst
+    List.rev
+      (Pervasives.fst
         (List.fold_left
           (fun function_parameter =&gt;
             let '(acc, previous) := function_parameter in
@@ -27525,7 +27507,7 @@ Module Endorsing_rights.
     Definition endorsing_rights_query := endorsing_rights_query.record.
     
     Definition endorsing_rights_query : RPC_query.t endorsing_rights_query :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
             (RPC_query.op_pipeplus
@@ -27543,8 +27525,7 @@ Module Endorsing_rights.
               (fun __t_value =&gt; __t_value.(endorsing_rights_query.cycles))))
           (RPC_query.multi_field None &quot;delegate&quot;
             (|Signature.Public_key_hash|).(S.SPublic_key_hash.rpc_arg)
-            (fun __t_value =&gt; __t_value.(endorsing_rights_query.delegates))))
-        RPC_query.seal.
+            (fun __t_value =&gt; __t_value.(endorsing_rights_query.delegates)))).
     
     Definition endorsing_rights
       : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -27751,13 +27732,13 @@ Module Required_endorsements.
     Definition t := t.record.
     
     Definition required_endorsements_query : RPC_query.t t :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.__query_value
             (fun block_delay =&gt; {| t.block_delay := block_delay |}))
           (RPC_query.__field_value None &quot;block_delay&quot;
             Alpha_context.Period.rpc_arg Alpha_context.Period.zero
-            (fun __t_value =&gt; __t_value.(t.block_delay)))) RPC_query.seal.
+            (fun __t_value =&gt; __t_value.(t.block_delay)))).
     
     Definition required_endorsements
       : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -27827,7 +27808,7 @@ Module Minimal_valid_time.
     Definition t := t.record.
     
     Definition minimal_valid_time_query : RPC_query.t t :=
-      Pervasives.op_pipegt
+      RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
             (RPC_query.__query_value
@@ -27838,7 +27819,7 @@ Module Minimal_valid_time.
             (RPC_query.__field_value None &quot;priority&quot; RPC_arg.__int_value 0
               (fun __t_value =&gt; __t_value.(t.priority))))
           (RPC_query.__field_value None &quot;endorsing_power&quot; RPC_arg.__int_value 0
-            (fun __t_value =&gt; __t_value.(t.endorsing_power)))) RPC_query.seal.
+            (fun __t_value =&gt; __t_value.(t.endorsing_power)))).
     
     Definition minimal_valid_time
       : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -29415,7 +29396,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 1050 lines (+47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1047 lines (+46% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -30194,9 +30175,8 @@ Inductive balance : Set :=
   balance.
 
 Definition balance_encoding : Data_encoding.encoding balance :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation_metadata.alpha.balance&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation_metadata.alpha.balance&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
         Data_encoding.__case_value &quot;Contract&quot; None (Data_encoding.Tag 0)
@@ -30271,9 +30251,8 @@ Inductive balance_update : Set :=
 | Credited : Tez_repr.t -&gt; balance_update.
 
 Definition balance_update_encoding : Data_encoding.encoding balance_update :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation_metadata.alpha.balance_update&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation_metadata.alpha.balance_update&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.obj1
       (Data_encoding.req None None &quot;change&quot;
         (Data_encoding.conv
@@ -30282,7 +30261,7 @@ Definition balance_update_encoding : Data_encoding.encoding balance_update :=
             | Credited v =&gt; Tez_repr.to_mutez v
             | Debited v =&gt; Int64.neg (Tez_repr.to_mutez v)
             end)
-          (Pervasives.op_atat Data_encoding.Json.wrap_error
+          (Data_encoding.Json.wrap_error
             (fun v =&gt;
               if
                 (|Compare.Int64|).(Compare.S.op_lt) v
@@ -30302,9 +30281,8 @@ Definition balance_updates : Set := list (balance * balance_update).
 
 Definition balance_updates_encoding
   : Data_encoding.encoding (list (balance * balance_update)) :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;operation_metadata.alpha.balance_updates&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;operation_metadata.alpha.balance_updates&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.__list_value None
       (Data_encoding.merge_objs balance_encoding balance_update_encoding)).
 
@@ -30423,7 +30401,7 @@ Definition registered
     (fun function_parameter =&gt;
       match function_parameter with
       | Some current_delegate =&gt;
-        Pervasives.op_atat Error_monad.__return
+        Error_monad.__return
           ((|Signature.Public_key_hash|).(S.SPublic_key_hash.equal) delegate
             current_delegate)
       | None =&gt; Error_monad.return_false
@@ -32928,7 +32906,7 @@ Parameter op_plusat : cost -&gt; cost -&gt; cost.
     <h3>Helpers_services</h3>
     <ul>
       <li>OCaml size: 890 lines</li>
-      <li>Coq size: 1430 lines (+60% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1428 lines (+60% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -35137,12 +35115,10 @@ Module Scripts.
         (list
           (Alpha_context.Script.location * Alpha_context.Gas.t *
             list (Alpha_context.Script.expr * option string))) :=
-      Pervasives.op_atat
-        (let arg := Data_encoding.def &quot;scripted.trace&quot; in
-        fun eta =&gt; arg None None eta)
-        (Pervasives.op_atat
-          (let arg := Data_encoding.__list_value in
-          fun eta =&gt; arg None eta)
+      (let arg := Data_encoding.def &quot;scripted.trace&quot; in
+      fun eta =&gt; arg None None eta)
+        ((let arg := Data_encoding.__list_value in
+        fun eta =&gt; arg None eta)
           (Data_encoding.obj3
             (Data_encoding.req None None &quot;location&quot;
               Alpha_context.Script.location_encoding)
@@ -36360,13 +36336,13 @@ Module S.
   Definition level_query := level_query.record.
   
   Definition level_query : RPC_query.t level_query :=
-    Pervasives.op_pipegt
+    RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.__query_value
           (fun offset =&gt; {| level_query.offset := offset |}))
         (RPC_query.__field_value None &quot;offset&quot; RPC_arg.__int32_value
           (* ❌ Constant of type int32 is converted to int *)
-          0 (fun __t_value =&gt; __t_value.(level_query.offset)))) RPC_query.seal.
+          0 (fun __t_value =&gt; __t_value.(level_query.offset)))).
   
   Definition current_level
     : RPC_service.service (* `GET *) unit Updater.rpc_context
@@ -38755,7 +38731,7 @@ Definition prepare
     <h3>Legacy_script_support_repr</h3>
     <ul>
       <li>OCaml size: 828 lines</li>
-      <li>Coq size: 1351 lines (+63% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1350 lines (+63% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -39610,8 +39586,8 @@ Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_repr.
 
 Definition manager_script_code : Script_repr.lazy_expr :=
-  Pervasives.op_atat Script_repr.__lazy_expr_value
-    (Pervasives.op_atat Micheline.strip_locations
+  Script_repr.__lazy_expr_value
+    (Micheline.strip_locations
       (Micheline.Seq 0
         [
           Micheline.Prim 0 Michelson_v1_primitives.K_parameter
@@ -40348,9 +40324,9 @@ Definition add_do
                         manager_pkh);
                     storage_expr
                   ] nil in
-              ((Pervasives.op_atat Script_repr.__lazy_expr_value
+              ((Script_repr.__lazy_expr_value
                 (Micheline.strip_locations migrated_code)),
-                (Pervasives.op_atat Script_repr.__lazy_expr_value
+                (Script_repr.__lazy_expr_value
                   (Micheline.strip_locations migrated_storage)))
             | _ =&gt; (script_code, script_storage)
             end
@@ -40851,9 +40827,9 @@ Definition add_set_delegate
                         manager_pkh);
                     storage_expr
                   ] nil in
-              ((Pervasives.op_atat Script_repr.__lazy_expr_value
+              ((Script_repr.__lazy_expr_value
                 (Micheline.strip_locations migrated_code)),
-                (Pervasives.op_atat Script_repr.__lazy_expr_value
+                (Script_repr.__lazy_expr_value
                   (Micheline.strip_locations migrated_storage)))
             | _ =&gt; (script_code, script_storage)
             end
@@ -40940,8 +40916,7 @@ Definition add_root_entrypoint (script_code : Script_repr.lazy_expr)
                     (List.map rewrite_self exprs) annots
                 | other =&gt; other
                 end) toplevel) in
-        Pervasives.op_atat Script_repr.__lazy_expr_value
-          (Micheline.strip_locations migrated_code)
+        Script_repr.__lazy_expr_value (Micheline.strip_locations migrated_code)
       | _ =&gt; script_code
       end).
 </pre>
@@ -43616,7 +43591,7 @@ Parameter encoding : Data_encoding.encoding t.
     <h3>Michelson_v1_gas</h3>
     <ul>
       <li>OCaml size: 779 lines</li>
-      <li>Coq size: 945 lines (+21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 944 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -44499,7 +44474,7 @@ Module Cost_of.
     Definition set_to_list {item : Set} (Box : Script_typed_ir.set item)
       : Alpha_context.Gas.cost :=
       let 'existS _ _ Box := Box in
-      Pervasives.op_atat Alpha_context.Gas.alloc_cost
+      Alpha_context.Gas.alloc_cost
         (Pervasives.op_star Box.(Script_typed_ir.Boxed_set.size) 2).
     
     Definition map_to_list {key value : Set}
@@ -44522,7 +44497,7 @@ Module Cost_of.
     Definition set_access {elt : Set}
       (_key : elt) (Box : Script_typed_ir.set elt) : Z :=
       let 'existS _ _ Box := Box in
-      Pervasives.op_atat log2 Box.(Script_typed_ir.Boxed_set.size).
+      log2 Box.(Script_typed_ir.Boxed_set.size).
     
     Definition set_update {A B : Set}
       (__key_value : A) (_presence : B) (set : Script_typed_ir.set A)
@@ -45045,8 +45020,7 @@ Module Cost_of.
     Definition z : Z.t -&gt; Alpha_context.Gas.cost := Legacy.zint.
     
     Definition int_of_string (str : string) : Alpha_context.Gas.cost :=
-      Pervasives.op_atat Alpha_context.Gas.alloc_cost
-        (Pervasives.op_div (String.length str) 5).
+      Alpha_context.Gas.alloc_cost (Pervasives.op_div (String.length str) 5).
     
     Definition tez : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.step_cost 1)
@@ -45302,9 +45276,9 @@ Module Cost_of.
     
     Definition timestamp (x : Alpha_context.Script_timestamp.t)
       : Alpha_context.Gas.cost :=
-      Pervasives.op_pipegt
-        (Pervasives.op_pipegt (Alpha_context.Script_timestamp.to_zint x)
-          Alpha_context.Script_int.of_zint) (__int_value (A := unit)).
+      (__int_value (A := unit))
+        (Alpha_context.Script_int.of_zint
+          (Alpha_context.Script_timestamp.to_zint x)).
     
     Definition operation (__bytes_value : MBytes.t) : Alpha_context.Gas.cost :=
       Alpha_context.Script.bytes_node_cost __bytes_value.
@@ -46042,7 +46016,7 @@ End Cost_of.
     <h3>Michelson_v1_primitives</h3>
     <ul>
       <li>OCaml size: 872 lines</li>
-      <li>Coq size: 627 lines (-29% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 626 lines (-29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -47430,9 +47404,8 @@ Definition strings_of_prims (expr : Micheline.canonical prim)
   Micheline.strip_locations (convert (Micheline.root expr)).
 
 Definition prim_encoding : Data_encoding.encoding prim :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;michelson.v1.primitives&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;michelson.v1.primitives&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.string_enum
       [
         (&quot;parameter&quot;, K_parameter);
@@ -48855,7 +48828,7 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
     <h3>Operation_repr</h3>
     <ul>
       <li>OCaml size: 858 lines</li>
-      <li>Coq size: 1452 lines (+69% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1443 lines (+68% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -50234,9 +50207,8 @@ Module Encoding.
     
     Definition entrypoint_encoding
       : Data_encoding.encoding (|Compare.String|).(Compare.S.t) :=
-      Pervasives.op_atat
-        (Data_encoding.def &quot;entrypoint&quot; (Some &quot;entrypoint&quot;)
-          (Some &quot;Named entrypoint to a Michelson smart contract&quot;))
+      (Data_encoding.def &quot;entrypoint&quot; (Some &quot;entrypoint&quot;)
+        (Some &quot;Named entrypoint to a Michelson smart contract&quot;))
         (let builtin_case (tag : Z) (name : (|Compare.String|).(Compare.S.t))
           : Data_encoding.case (|Compare.String|).(Compare.S.t) :=
           Data_encoding.__case_value name None (Data_encoding.Tag tag)
@@ -50484,9 +50456,8 @@ Module Encoding.
     let of_list (o : contents Kind.endorsement)
       : contents_list Kind.endorsement :=
       Single o in
-    Pervasives.op_atat
-      (let arg := Data_encoding.def &quot;inlined.endorsement&quot; in
-      fun eta =&gt; arg None None eta)
+    (let arg := Data_encoding.def &quot;inlined.endorsement&quot; in
+    fun eta =&gt; arg None None eta)
       (Data_encoding.conv
         (fun function_parameter =&gt;
           let '{|
@@ -50506,13 +50477,10 @@ Module Encoding.
         (Data_encoding.merge_objs Operation.shell_header_encoding
           (Data_encoding.obj2
             (Data_encoding.req None None &quot;operations&quot;
-              (Pervasives.op_atat
-                (let arg := Data_encoding.conv to_list of_list in
-                fun eta =&gt; arg None eta)
-                (Pervasives.op_atat
-                  (let arg := Data_encoding.def &quot;inlined.endorsement.contents&quot;
-                    in
-                  fun eta =&gt; arg None None eta)
+              ((let arg := Data_encoding.conv to_list of_list in
+              fun eta =&gt; arg None eta)
+                ((let arg := Data_encoding.def &quot;inlined.endorsement.contents&quot; in
+                fun eta =&gt; arg None None eta)
                   (Data_encoding.union None [ make endorsement_case ]))))
             (Data_encoding.varopt None None &quot;signature&quot; Signature.encoding)))).
   
@@ -50837,9 +50805,8 @@ Module Encoding.
           | None =&gt; None
           | Some o =&gt; Some (proj o)
           end) (fun x =&gt; Contents (inj x)) in
-    Pervasives.op_atat
-      (let arg := Data_encoding.def &quot;operation.alpha.contents&quot; in
-      fun eta =&gt; arg None None eta)
+    (let arg := Data_encoding.def &quot;operation.alpha.contents&quot; in
+    fun eta =&gt; arg None None eta)
       (Data_encoding.union None
         [
           make endorsement_case;
@@ -50876,9 +50843,8 @@ Module Encoding.
   
   Definition protocol_data_encoding
     : Data_encoding.encoding packed_protocol_data :=
-    Pervasives.op_atat
-      (let arg := Data_encoding.def &quot;operation.alpha.contents_and_signature&quot; in
-      fun eta =&gt; arg None None eta)
+    (let arg := Data_encoding.def &quot;operation.alpha.contents_and_signature&quot; in
+    fun eta =&gt; arg None None eta)
       (Data_encoding.conv
         (fun function_parameter =&gt;
           let
@@ -50923,18 +50889,16 @@ Module Encoding.
   
   Definition unsigned_operation_encoding
     : Data_encoding.encoding (Operation.shell_header * packed_contents_list) :=
-    Pervasives.op_atat
-      (let arg := Data_encoding.def &quot;operation.alpha.unsigned_operation&quot; in
-      fun eta =&gt; arg None None eta)
+    (let arg := Data_encoding.def &quot;operation.alpha.unsigned_operation&quot; in
+    fun eta =&gt; arg None None eta)
       (Data_encoding.merge_objs Operation.shell_header_encoding
         (Data_encoding.obj1
           (Data_encoding.req None None &quot;contents&quot; contents_list_encoding))).
   
   Definition internal_operation_encoding
     : Data_encoding.encoding packed_internal_operation :=
-    Pervasives.op_atat
-      (let arg := Data_encoding.def &quot;operation.alpha.internal_operation&quot; in
-      fun eta =&gt; arg None None eta)
+    (let arg := Data_encoding.def &quot;operation.alpha.internal_operation&quot; in
+    fun eta =&gt; arg None None eta)
       (Data_encoding.conv
         (fun function_parameter =&gt;
           let
@@ -56323,7 +56287,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature raw_level}
     <h3>Roll_repr</h3>
     <ul>
       <li>OCaml size: 65 lines</li>
-      <li>Coq size: 82 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 81 lines (+24% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -56460,10 +56424,9 @@ Definition Index :=
   let t := roll in
   let path_length := 3 in
   let to_path (roll : int32) (l : list string) : list string :=
-    cons
-      (Pervasives.op_atat Int32.to_string (Int32.logand roll (Int32.of_int 255)))
+    cons (Int32.to_string (Int32.logand roll (Int32.of_int 255)))
       (cons
-        (Pervasives.op_atat Int32.to_string
+        (Int32.to_string
           (Int32.logand (Int32.shift_right_logical roll 8) (Int32.of_int 255)))
         (cons (Int32.to_string roll) l)) in
   let of_path (function_parameter : list string) : option int32 :=
@@ -56590,7 +56553,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature roll}.
     <h3>Roll_storage</h3>
     <ul>
       <li>OCaml size: 604 lines</li>
-      <li>Coq size: 935 lines (+54% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 934 lines (+54% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -57378,10 +57341,9 @@ Definition freeze_rolls_for_cycle
               (* ❌ Constant of type int32 is converted to int *)
               0 in
           let selected_index :=
-            Pervasives.op_pipegt
-              (Pervasives.op_pipegt
-                (Seed_repr.take_int32 seq (Int32.of_int max_index))
-                Pervasives.fst) Int32.to_int in
+            Int32.to_int
+              (Pervasives.fst
+                (Seed_repr.take_int32 seq (Int32.of_int max_index))) in
           Error_monad.op_gtgteqquestion
             ((|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.set)
               ctxt cycle selected_index)
@@ -59053,7 +59015,7 @@ Parameter logxor : num n -&gt; num n -&gt; num n.
     <h3>Script_interpreter</h3>
     <ul>
       <li>OCaml size: 1701 lines</li>
-      <li>Coq size: 3309 lines (+94% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3307 lines (+94% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -62999,7 +62961,7 @@ Fixpoint step {a b : Set}
               (fun ctxt =&gt;
                 logged_return
                   ((Item
-                    (Pervasives.op_atat Alpha_context.Script_int.of_int
+                    (Alpha_context.Script_int.of_int
                       (Script_ir_translator.compare_comparable ty __a_value
                         __b_value)) rest), ctxt)))
         | (Script_typed_ir.Eq, Item cmpres rest, _) =&gt;
@@ -63297,8 +63259,8 @@ Fixpoint step {a b : Set}
                         (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
                         manager in
                     let storage :=
-                      Pervasives.op_atat Script_repr.__lazy_expr_value
-                        (Pervasives.op_atat Micheline.strip_locations
+                      Script_repr.__lazy_expr_value
+                        (Micheline.strip_locations
                           (Micheline.Bytes 0 manager_bytes)) in
                     let script :=
                       {|
@@ -63387,8 +63349,7 @@ Fixpoint step {a b : Set}
                         let '(unparsed_storage_type, ctxt) := function_parameter
                           in
                         let code :=
-                          Pervasives.op_atat
-                            Alpha_context.Script.__lazy_expr_value
+                          Alpha_context.Script.__lazy_expr_value
                             (Micheline.strip_locations
                               (Micheline.Seq 0
                                 [
@@ -63427,8 +63388,7 @@ Fixpoint step {a b : Set}
                                     let '(storage, ctxt) := function_parameter
                                       in
                                     let storage :=
-                                      Pervasives.op_atat
-                                        Alpha_context.Script.__lazy_expr_value
+                                      Alpha_context.Script.__lazy_expr_value
                                         (Micheline.strip_locations storage) in
                                     Error_monad.op_gtgteqquestion
                                       (if spendable then
@@ -64318,7 +64278,7 @@ Parameter trace :
     <h3>Script_ir_annot</h3>
     <ul>
       <li>OCaml size: 521 lines</li>
-      <li>Coq size: 730 lines (+40% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 729 lines (+39% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -65149,7 +65109,7 @@ Definition parse_annots
         (acc : list A) : Error_monad.tzresult (list A) :=
         let len := String.length s in
         if (|Compare.Int|).(Compare.S.op_eq) len 1 then
-          Pervasives.op_atat Error_monad.ok (cons (wrap None) acc)
+          Error_monad.ok (cons (wrap None) acc)
         else
           match
             ((String.get s 1),
@@ -65175,20 +65135,19 @@ Definition parse_annots
             &quot;O&quot; % char | &quot;P&quot; % char | &quot;Q&quot; % char | &quot;R&quot; % char | &quot;S&quot; % char |
             &quot;T&quot; % char | &quot;U&quot; % char | &quot;V&quot; % char | &quot;W&quot; % char | &quot;X&quot; % char |
             &quot;Y&quot; % char | &quot;Z&quot; % char | &quot;_&quot; % char), _, _) =&gt;
-            Pervasives.op_atat Error_monad.ok
+            Error_monad.ok
               (cons (wrap (Some (String.sub s 1 (Pervasives.op_minus len 1))))
                 acc)
-          | (&quot;@&quot; % char, true, _) =&gt;
-            Pervasives.op_atat Error_monad.ok (cons (wrap (Some &quot;@&quot;)) acc)
+          | (&quot;@&quot; % char, true, _) =&gt; Error_monad.ok (cons (wrap (Some &quot;@&quot;)) acc)
           | (&quot;%&quot; % char, _, true) =&gt;
             if (|Compare.Int|).(Compare.S.op_eq) len 2 then
-              Pervasives.op_atat Error_monad.ok (cons (wrap (Some &quot;%&quot;)) acc)
+              Error_monad.ok (cons (wrap (Some &quot;%&quot;)) acc)
             else
               if
                 Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_eq) len 3)
                   ((|Compare.Char|).(Compare.S.op_eq) (String.get s 2)
                     &quot;%&quot; % char) then
-                Pervasives.op_atat Error_monad.ok (cons (wrap (Some &quot;%%&quot;)) acc)
+                Error_monad.ok (cons (wrap (Some &quot;%%&quot;)) acc)
               else
                 Error_monad.__error_value extensible_type_value
           | (_, _, _) =&gt; Error_monad.__error_value extensible_type_value
@@ -66015,7 +65974,7 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5996 lines</li>
-      <li>Coq size: 9975 lines (+66% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 9917 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -72871,7 +72830,7 @@ Fixpoint compare_comparable {a s : Set}
   | Script_typed_ir.Timestamp_key _ =&gt;
     wrap_compare Alpha_context.Script_timestamp.compare
   | Script_typed_ir.Address_key _ =&gt;
-    Pervasives.op_atat wrap_compare
+    wrap_compare
       (fun function_parameter =&gt;
         let '(x, ex) := function_parameter in
         fun function_parameter =&gt;
@@ -73481,8 +73440,8 @@ Definition serialize_ty_for_error {A : Set}
   : Error_monad.tzresult
     (Micheline.canonical Alpha_context.Script.prim * Alpha_context.context) :=
   Error_monad.op_gtpipequestion
-    (Pervasives.op_pipegt (unparse_ty_no_lwt ctxt ty)
-      (Error_monad.record_trace extensible_type_value))
+    ((Error_monad.record_trace extensible_type_value)
+      (unparse_ty_no_lwt ctxt ty))
     (fun function_parameter =&gt;
       let '(ty, ctxt) := function_parameter in
       ((Micheline.strip_locations (strip_var_annots ty)), ctxt)).
@@ -73669,14 +73628,14 @@ Fixpoint ty_eq {ta tb : Set}
               [(Script_typed_ir.comparable_ty __0) ** (Script_typed_ir.ty __1)
                 ** (Script_typed_ir.comparable_ty __2) **
                 (Script_typed_ir.ty __3)]) [_, _, _, _] [tal, tar, tbl, tbr] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (comparable_ty_eq ctxt tal tbl)
             (fun function_parameter =&gt;
               let 'Eq := function_parameter in
               Error_monad.op_gtgtquestion (ty_eq ctxt tar tbr)
                 (fun function_parameter =&gt;
                   let '(Eq, ctxt) := function_parameter in
-                  ok Eq ctxt 2))) (record_inconsistent ctxt ta tb)
+                  ok Eq ctxt 2)))
       |
         (Script_typed_ir.Big_map_t tal tar _,
           Script_typed_ir.Big_map_t tbl tbr _) =&gt;
@@ -73686,25 +73645,25 @@ Fixpoint ty_eq {ta tb : Set}
               [(Script_typed_ir.comparable_ty __4) ** (Script_typed_ir.ty __5)
                 ** (Script_typed_ir.comparable_ty __6) **
                 (Script_typed_ir.ty __7)]) [_, _, _, _] [tal, tar, tbl, tbr] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (comparable_ty_eq ctxt tal tbl)
             (fun function_parameter =&gt;
               let 'Eq := function_parameter in
               Error_monad.op_gtgtquestion (ty_eq ctxt tar tbr)
                 (fun function_parameter =&gt;
                   let '(Eq, ctxt) := function_parameter in
-                  ok Eq ctxt 2))) (record_inconsistent ctxt ta tb)
+                  ok Eq ctxt 2)))
       | (Script_typed_ir.Set_t ea _, Script_typed_ir.Set_t eb _) =&gt;
         let 'existT _ [__8, __9] [ea, eb] :=
           existT (A := [Set ** Set])
             (fun '[__8, __9] =&gt;
               [(Script_typed_ir.comparable_ty __8) **
                 (Script_typed_ir.comparable_ty __9)]) [_, _] [ea, eb] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (comparable_ty_eq ctxt ea eb)
             (fun function_parameter =&gt;
               let 'Eq := function_parameter in
-              ok Eq ctxt 1)) (record_inconsistent ctxt ta tb)
+              ok Eq ctxt 1))
       |
         (Script_typed_ir.Pair_t (tal, _, _) (tar, _, _) _ _,
           Script_typed_ir.Pair_t (tbl, _, _) (tbr, _, _) _ _) =&gt;
@@ -73714,14 +73673,14 @@ Fixpoint ty_eq {ta tb : Set}
               [(Script_typed_ir.ty __10) ** (Script_typed_ir.ty __11) **
                 (Script_typed_ir.ty __12) ** (Script_typed_ir.ty __13)]) [_, _,
             _, _] [tal, tar, tbl, tbr] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (ty_eq ctxt tal tbl)
             (fun function_parameter =&gt;
               let '(Eq, ctxt) := function_parameter in
               Error_monad.op_gtgtquestion (ty_eq ctxt tar tbr)
                 (fun function_parameter =&gt;
                   let '(Eq, ctxt) := function_parameter in
-                  ok Eq ctxt 2))) (record_inconsistent ctxt ta tb)
+                  ok Eq ctxt 2)))
       |
         (Script_typed_ir.Union_t (tal, _) (tar, _) _ _,
           Script_typed_ir.Union_t (tbl, _) (tbr, _) _ _) =&gt;
@@ -73731,14 +73690,14 @@ Fixpoint ty_eq {ta tb : Set}
               [(Script_typed_ir.ty __14) ** (Script_typed_ir.ty __15) **
                 (Script_typed_ir.ty __16) ** (Script_typed_ir.ty __17)]) [_, _,
             _, _] [tal, tar, tbl, tbr] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (ty_eq ctxt tal tbl)
             (fun function_parameter =&gt;
               let '(Eq, ctxt) := function_parameter in
               Error_monad.op_gtgtquestion (ty_eq ctxt tar tbr)
                 (fun function_parameter =&gt;
                   let '(Eq, ctxt) := function_parameter in
-                  ok Eq ctxt 2))) (record_inconsistent ctxt ta tb)
+                  ok Eq ctxt 2)))
       | (Script_typed_ir.Lambda_t tal tar _, Script_typed_ir.Lambda_t tbl tbr _)
         =&gt;
         let 'existT _ [__18, __19, __20, __21] [tal, tar, tbl, tbr] :=
@@ -73747,47 +73706,47 @@ Fixpoint ty_eq {ta tb : Set}
               [(Script_typed_ir.ty __18) ** (Script_typed_ir.ty __19) **
                 (Script_typed_ir.ty __20) ** (Script_typed_ir.ty __21)]) [_, _,
             _, _] [tal, tar, tbl, tbr] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (ty_eq ctxt tal tbl)
             (fun function_parameter =&gt;
               let '(Eq, ctxt) := function_parameter in
               Error_monad.op_gtgtquestion (ty_eq ctxt tar tbr)
                 (fun function_parameter =&gt;
                   let '(Eq, ctxt) := function_parameter in
-                  ok Eq ctxt 2))) (record_inconsistent ctxt ta tb)
+                  ok Eq ctxt 2)))
       | (Script_typed_ir.Contract_t tal _, Script_typed_ir.Contract_t tbl _) =&gt;
         let 'existT _ [__22, __23] [tal, tbl] :=
           existT (A := [Set ** Set])
             (fun '[__22, __23] =&gt;
               [(Script_typed_ir.ty __22) ** (Script_typed_ir.ty __23)]) [_, _]
             [tal, tbl] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (ty_eq ctxt tal tbl)
             (fun function_parameter =&gt;
               let '(Eq, ctxt) := function_parameter in
-              ok Eq ctxt 1)) (record_inconsistent ctxt ta tb)
+              ok Eq ctxt 1))
       | (Script_typed_ir.Option_t tva _ _, Script_typed_ir.Option_t tvb _ _) =&gt;
         let 'existT _ [__24, __25] [tva, tvb] :=
           existT (A := [Set ** Set])
             (fun '[__24, __25] =&gt;
               [(Script_typed_ir.ty __24) ** (Script_typed_ir.ty __25)]) [_, _]
             [tva, tvb] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (ty_eq ctxt tva tvb)
             (fun function_parameter =&gt;
               let '(Eq, ctxt) := function_parameter in
-              ok Eq ctxt 1)) (record_inconsistent ctxt ta tb)
+              ok Eq ctxt 1))
       | (Script_typed_ir.List_t tva _ _, Script_typed_ir.List_t tvb _ _) =&gt;
         let 'existT _ [__26, __27] [tva, tvb] :=
           existT (A := [Set ** Set])
             (fun '[__26, __27] =&gt;
               [(Script_typed_ir.ty __26) ** (Script_typed_ir.ty __27)]) [_, _]
             [tva, tvb] in
-        Pervasives.op_pipegt
+        (record_inconsistent ctxt ta tb)
           (Error_monad.op_gtgtquestion (ty_eq ctxt tva tvb)
             (fun function_parameter =&gt;
               let '(Eq, ctxt) := function_parameter in
-              ok Eq ctxt 1)) (record_inconsistent ctxt ta tb)
+              ok Eq ctxt 1))
       | (_, _) =&gt;
         Error_monad.op_gtgtquestion (serialize_ty_for_error ctxt ta)
           (fun function_parameter =&gt;
@@ -73813,8 +73772,7 @@ Fixpoint stack_ty_eq {ta tb : Set}
             (Script_typed_ir.ty __2) ** (Script_typed_ir.stack_ty __3)]) [_, _,
         _, _] [tva, ra, tvb, rb] in
     Error_monad.op_gtgtquestion
-      (Pervasives.op_pipegt (ty_eq ctxt tva tvb)
-        (Error_monad.record_trace extensible_type_value))
+      ((Error_monad.record_trace extensible_type_value) (ty_eq ctxt tva tvb))
       (fun function_parameter =&gt;
         let '(Eq, ctxt) := function_parameter in
         Error_monad.op_gtgtquestion
@@ -74399,7 +74357,7 @@ Fixpoint parse_comparable_ty
               Alpha_context.Script.T_signature | Alpha_context.Script.T_contract)
               _ _ =&gt; Error_monad.__error_value extensible_type_value
           | expr =&gt;
-            Pervasives.op_atat Error_monad.__error_value
+            Error_monad.__error_value
               (unexpected expr nil Script_tc_errors.Type_namespace
                 [
                   Alpha_context.Script.T_int;
@@ -74795,7 +74753,7 @@ with parse_ty
           Alpha_context.Script.T_map | Alpha_context.Script.T_lambda) as prim) l
           _, _) =&gt; Error_monad.__error_value extensible_type_value
       | (expr, _) =&gt;
-        Pervasives.op_atat Error_monad.__error_value
+        Error_monad.__error_value
           (unexpected expr nil Script_tc_errors.Type_namespace
             [
               Alpha_context.Script.T_pair;
@@ -74857,8 +74815,7 @@ with parse_big_map_ty
                     let big_map_ty :=
                       Script_typed_ir.Big_map_t key_ty value_ty map_name in
                     ((Ex_ty big_map_ty), ctxt))))
-      | args =&gt;
-        Pervasives.op_atat Error_monad.__error_value extensible_type_value
+      | args =&gt; Error_monad.__error_value extensible_type_value
       end)
 
 with parse_storage_ty
@@ -75313,7 +75270,7 @@ Fixpoint parse_data {a : Set}
             (Script_typed_ir.map C E * Alpha_context.context)) :=
         let length := List.length items in
         Error_monad.op_gtgtpipequestion
-          (Pervasives.op_pipegt
+          (traced
             (Error_monad.fold_left_s
               (fun function_parameter =&gt;
                 let '(last_value, map, ctxt) := function_parameter in
@@ -75360,17 +75317,15 @@ Fixpoint parse_data {a : Set}
                                         (map_update k (Some (item_wrapper v))
                                           map), ctxt))))
                       | Micheline.Prim loc Alpha_context.Script.D_Elt l _ =&gt;
-                        Pervasives.op_atat Error_monad.fail
-                          extensible_type_value
+                        Error_monad.fail extensible_type_value
                       | Micheline.Prim loc name _ _ =&gt;
-                        Pervasives.op_atat Error_monad.fail
-                          extensible_type_value
+                        Error_monad.fail extensible_type_value
                       |
                         (Micheline.Int _ _ | Micheline.String _ _ |
                         Micheline.Bytes _ _ | Micheline.Seq _ _) =&gt;
                         Error_monad.op_gtgteqquestion (__error_value tt)
                           Error_monad.fail
-                      end)) (None, (empty_map key_type), ctxt) items) traced)
+                      end)) (None, (empty_map key_type), ctxt) items))
           (fun function_parameter =&gt;
             let '(_, items, ctxt) := function_parameter in
             (items, ctxt)) in
@@ -75802,8 +75757,7 @@ Fixpoint parse_data {a : Set}
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.pair))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat traced
-                    (parse_data type_logger ctxt legacy ta va))
+                  (traced (parse_data type_logger ctxt legacy ta va))
                   (fun function_parameter =&gt;
                     let '(va, ctxt) := function_parameter in
                     Error_monad.op_gtgteqquestion
@@ -75814,7 +75768,7 @@ Fixpoint parse_data {a : Set}
       |
         (Script_typed_ir.Pair_t _ _ _ _,
           Micheline.Prim loc Alpha_context.Script.D_Pair l _) =&gt;
-        Pervasives.op_atat Error_monad.fail extensible_type_value
+        Error_monad.fail extensible_type_value
       | (Script_typed_ir.Pair_t _ _ _ _, expr) =&gt;
         traced
           (Error_monad.fail
@@ -75842,15 +75796,14 @@ Fixpoint parse_data {a : Set}
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.union))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat traced
-                    (parse_data type_logger ctxt legacy tl v))
+                  (traced (parse_data type_logger ctxt legacy tl v))
                   (fun function_parameter =&gt;
                     let '(v, ctxt) := function_parameter in
                     Error_monad.__return ((Script_typed_ir.L v), ctxt))))
       |
         (Script_typed_ir.Union_t _ _ _ _,
           Micheline.Prim loc Alpha_context.Script.D_Left l _) =&gt;
-        Pervasives.op_atat Error_monad.fail extensible_type_value
+        Error_monad.fail extensible_type_value
       |
         (Script_typed_ir.Union_t _ (tr, _) _ _,
           Micheline.Prim loc Alpha_context.Script.D_Right (cons v []) annot) =&gt;
@@ -75870,15 +75823,14 @@ Fixpoint parse_data {a : Set}
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.union))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat traced
-                    (parse_data type_logger ctxt legacy tr v))
+                  (traced (parse_data type_logger ctxt legacy tr v))
                   (fun function_parameter =&gt;
                     let '(v, ctxt) := function_parameter in
                     Error_monad.__return ((Script_typed_ir.R v), ctxt))))
       |
         (Script_typed_ir.Union_t _ _ _ _,
           Micheline.Prim loc Alpha_context.Script.D_Right l _) =&gt;
-        Pervasives.op_atat Error_monad.fail extensible_type_value
+        Error_monad.fail extensible_type_value
       | (Script_typed_ir.Union_t _ _ _ _, expr) =&gt;
         traced
           (Error_monad.fail
@@ -75899,7 +75851,7 @@ Fixpoint parse_data {a : Set}
         Error_monad.op_gtgteqquestion
           (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.lambda))
           (fun ctxt =&gt;
-            Pervasives.op_atat traced
+            traced
               (parse_returning type_logger Lambda ctxt legacy
                 (ta, (Some (Script_typed_ir.Var_annot &quot;@arg&quot;))) tr script_instr))
       | (Script_typed_ir.Lambda_t _ _ _, expr) =&gt;
@@ -75926,15 +75878,14 @@ Fixpoint parse_data {a : Set}
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.some))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat traced
-                    (parse_data type_logger ctxt legacy __t_value v))
+                  (traced (parse_data type_logger ctxt legacy __t_value v))
                   (fun function_parameter =&gt;
                     let '(v, ctxt) := function_parameter in
                     Error_monad.__return ((Some v), ctxt))))
       |
         (Script_typed_ir.Option_t _ _ _,
           Micheline.Prim loc Alpha_context.Script.D_Some l _) =&gt;
-        Pervasives.op_atat Error_monad.fail extensible_type_value
+        Error_monad.fail extensible_type_value
       |
         (Script_typed_ir.Option_t _ _ _,
           Micheline.Prim loc Alpha_context.Script.D_None [] annot) =&gt;
@@ -75952,7 +75903,7 @@ Fixpoint parse_data {a : Set}
       |
         (Script_typed_ir.Option_t _ _ _,
           Micheline.Prim loc Alpha_context.Script.D_None l _) =&gt;
-        Pervasives.op_atat Error_monad.fail extensible_type_value
+        Error_monad.fail extensible_type_value
       | (Script_typed_ir.Option_t _ _ _, expr) =&gt;
         traced
           (Error_monad.fail
@@ -75969,7 +75920,7 @@ Fixpoint parse_data {a : Set}
                   (Micheline.node Alpha_context.Script.location
                     Alpha_context.Script.prim))]) _
             [__t_value, _ty_name, _loc, items] in
-        Pervasives.op_atat traced
+        traced
           (Error_monad.fold_right_s
             (fun v =&gt;
               fun function_parameter =&gt;
@@ -76003,7 +75954,7 @@ Fixpoint parse_data {a : Set}
             [__t_value, _ty_name, loc, vs, expr] in
         let length := List.length vs in
         Error_monad.op_gtgtpipequestion
-          (Pervasives.op_atat traced
+          (traced
             (Error_monad.fold_left_s
               (fun function_parameter =&gt;
                 let '(last_value, set, ctxt) := function_parameter in
@@ -76258,8 +76209,8 @@ with parse_int32
         then
         Error_monad.ok n''
       else
-        Pervasives.op_atat Error_monad.__error_value (error' tt))
-  | _ =&gt; Pervasives.op_atat Error_monad.__error_value (error' tt)
+        Error_monad.__error_value (error' tt))
+  | _ =&gt; Error_monad.__error_value (error' tt)
   end
 
 with parse_instr {bef : Set}
@@ -76272,17 +76223,15 @@ with parse_instr {bef : Set}
     (check : Error_monad.tzresult B) (loc : Alpha_context.Script.location)
     (name : Alpha_context.Script.prim) (n : Z) (m : Z)
     : Lwt.t (Error_monad.tzresult B) :=
-    Pervasives.op_atat
-      (Error_monad.trace_eval
-        (fun function_parameter =&gt;
-          let '_ := function_parameter in
-          Error_monad.op_gtgtpipequestion
-            (serialize_stack_for_error ctxt stack_ty)
-            (fun function_parameter =&gt;
-              let '(stack_ty, _ctxt) := function_parameter in
-              extensible_type_value)))
-      (Pervasives.op_atat (Error_monad.trace extensible_type_value)
-        (Lwt.__return check)) in
+    (Error_monad.trace_eval
+      (fun function_parameter =&gt;
+        let '_ := function_parameter in
+        Error_monad.op_gtgtpipequestion
+          (serialize_stack_for_error ctxt stack_ty)
+          (fun function_parameter =&gt;
+            let '(stack_ty, _ctxt) := function_parameter in
+            extensible_type_value)))
+      ((Error_monad.trace extensible_type_value) (Lwt.__return check)) in
   let check_item_ty {B C : Set}
     (ctxt : Alpha_context.context) (exp : Script_typed_ir.ty B)
     (got : Script_typed_ir.ty C) (loc : Alpha_context.Script.location)
@@ -76290,16 +76239,15 @@ with parse_instr {bef : Set}
     : Lwt.t
       (Error_monad.tzresult
         (eq B C * Script_typed_ir.ty B * Alpha_context.context)) :=
-    Pervasives.op_atat
-      (Error_monad.trace_eval
-        (fun function_parameter =&gt;
-          let '_ := function_parameter in
-          Error_monad.op_gtgtpipequestion
-            (serialize_stack_for_error ctxt stack_ty)
-            (fun function_parameter =&gt;
-              let '(stack_ty, _ctxt) := function_parameter in
-              extensible_type_value)))
-      (Pervasives.op_atat (Error_monad.trace extensible_type_value)
+    (Error_monad.trace_eval
+      (fun function_parameter =&gt;
+        let '_ := function_parameter in
+        Error_monad.op_gtgtpipequestion
+          (serialize_stack_for_error ctxt stack_ty)
+          (fun function_parameter =&gt;
+            let '(stack_ty, _ctxt) := function_parameter in
+            extensible_type_value)))
+      ((Error_monad.trace extensible_type_value)
         (Lwt.__return
           (Error_monad.op_gtgtquestion (ty_eq ctxt exp got)
             (fun function_parameter =&gt;
@@ -76314,16 +76262,15 @@ with parse_instr {bef : Set}
     (loc : Alpha_context.Script.location) (name : Alpha_context.Script.prim)
     (n : Z) (m : Z)
     : Lwt.t (Error_monad.tzresult (eq B C * Script_typed_ir.comparable_ty B)) :=
-    Pervasives.op_atat
-      (Error_monad.trace_eval
-        (fun function_parameter =&gt;
-          let '_ := function_parameter in
-          Error_monad.op_gtgtpipequestion
-            (serialize_stack_for_error ctxt stack_ty)
-            (fun function_parameter =&gt;
-              let '(stack_ty, _ctxt) := function_parameter in
-              extensible_type_value)))
-      (Pervasives.op_atat (Error_monad.trace extensible_type_value)
+    (Error_monad.trace_eval
+      (fun function_parameter =&gt;
+        let '_ := function_parameter in
+        Error_monad.op_gtgtpipequestion
+          (serialize_stack_for_error ctxt stack_ty)
+          (fun function_parameter =&gt;
+            let '(stack_ty, _ctxt) := function_parameter in
+            extensible_type_value)))
+      ((Error_monad.trace extensible_type_value)
         (Lwt.__return
           (Error_monad.op_gtgtquestion (comparable_ty_eq ctxt exp got)
             (fun function_parameter =&gt;
@@ -76388,7 +76335,7 @@ with parse_instr {bef : Set}
       (fun function_parameter =&gt;
         let '_ := function_parameter in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return
+          (Lwt.__return
             (Alpha_context.Gas.consume ctxt (Typecheck_costs.instr instr)))
           (fun ctxt =&gt;
             __return ctxt
@@ -76398,8 +76345,7 @@ with parse_instr {bef : Set}
                   Script_typed_ir.descr.aft := aft;
                   Script_typed_ir.descr.instr := instr |}))) in
   Error_monad.op_gtgteqquestion
-    (Pervasives.op_atat Lwt.__return
-      (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
+    (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
     (fun ctxt =&gt;
       match
         ((script_instr, stack_ty),
@@ -76436,7 +76382,7 @@ with parse_instr {bef : Set}
               : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
               match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
               | (true, rest) =&gt;
-                Pervasives.op_atat outer_return
+                outer_return
                   (Dropn_proof_argument (Script_typed_ir.Rest, rest, rest))
               | (false, Script_typed_ir.Item_t v rest annot) =&gt;
                 let 'existT _ [__470, __471] [v, rest, annot] :=
@@ -76468,7 +76414,7 @@ with parse_instr {bef : Set}
                             (Script_typed_ir.stack_ty
                               __Dropn_proof_argument_'aft)]) [_, _]
                         [n', stack_after_drops, aft'] in
-                    Pervasives.op_atat outer_return
+                    outer_return
                       (Dropn_proof_argument
                         ((Script_typed_ir.Prefix n'), stack_after_drops,
                           (Script_typed_ir.Item_t v aft' annot))))
@@ -76542,7 +76488,7 @@ with parse_instr {bef : Set}
                     (Script_typed_ir.stack_ty __473) **
                     (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot]
               in
-            Pervasives.op_atat outer_return
+            outer_return
               (Dig_proof_argument (Script_typed_ir.Rest, (v, annot), rest))
           | (false, Script_typed_ir.Item_t v rest annot) =&gt;
             let 'existT _ [__474, __475] [v, rest, annot] :=
@@ -76572,7 +76518,7 @@ with parse_instr {bef : Set}
                         (option Script_typed_ir.var_annot) **
                         (Script_typed_ir.stack_ty __Dig_proof_argument_'aft)])
                     [_, _, _] [n', x, xv, aft'] in
-                Pervasives.op_atat outer_return
+                outer_return
                   (Dig_proof_argument
                     ((Script_typed_ir.Prefix n'), (x, xv),
                       (Script_typed_ir.Item_t v aft' annot))))
@@ -76639,7 +76585,7 @@ with parse_instr {bef : Set}
               : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
               match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
               | (true, rest) =&gt;
-                Pervasives.op_atat outer_return
+                outer_return
                   (Dug_proof_argument
                     (Script_typed_ir.Rest, tt,
                       (Script_typed_ir.Item_t x rest stack_annot)))
@@ -76670,7 +76616,7 @@ with parse_instr {bef : Set}
                             __Dug_proof_argument_'aft) **
                             (Script_typed_ir.stack_ty __Dug_proof_argument_'aft)])
                         [_, _] [n', aft'] in
-                    Pervasives.op_atat outer_return
+                    outer_return
                       (Dug_proof_argument
                         ((Script_typed_ir.Prefix n'), tt,
                           (Script_typed_ir.Item_t v aft' annot))))
@@ -76747,8 +76693,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (parse_packable_ty ctxt legacy __t_value))
+              (Lwt.__return (parse_packable_ty ctxt legacy __t_value))
               (fun function_parameter =&gt;
                 let '(Ex_ty __t_value, ctxt) := function_parameter in
                 let 'existT _ __Ex_ty_'a1 [__t_value, ctxt] :=
@@ -76791,7 +76736,7 @@ with parse_instr {bef : Set}
         ((Micheline.Prim loc Alpha_context.Script.I_NONE (cons __t_value [])
           annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy __t_value))
+          (Lwt.__return (parse_any_ty ctxt legacy __t_value))
           (fun function_parameter =&gt;
             let '(Ex_ty __t_value, ctxt) := function_parameter in
             let 'existT _ __Ex_ty_'a2 [__t_value, ctxt] :=
@@ -76914,7 +76859,7 @@ with parse_instr {bef : Set}
           (fun function_parameter =&gt;
             let '(annot, field_annot) := function_parameter in
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
+              (Lwt.__return
                 (Script_ir_annot.check_correct_field field_annot
                   expected_field_annot))
               (fun function_parameter =&gt;
@@ -76945,7 +76890,7 @@ with parse_instr {bef : Set}
           (fun function_parameter =&gt;
             let '(annot, field_annot) := function_parameter in
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
+              (Lwt.__return
                 (Script_ir_annot.check_correct_field field_annot
                   expected_field_annot))
               (fun function_parameter =&gt;
@@ -76965,7 +76910,7 @@ with parse_instr {bef : Set}
                 (option Script_typed_ir.var_annot)]) [_, _]
             [loc, tr, annot, tl, rest, stack_annot] in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy tr))
+          (Lwt.__return (parse_any_ty ctxt legacy tr))
           (fun function_parameter =&gt;
             let '(Ex_ty tr, ctxt) := function_parameter in
             let 'existT _ __Ex_ty_'a3 [tr, ctxt] :=
@@ -76997,7 +76942,7 @@ with parse_instr {bef : Set}
                 (option Script_typed_ir.var_annot)]) [_, _]
             [loc, tl, annot, tr, rest, stack_annot] in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy tl))
+          (Lwt.__return (parse_any_ty ctxt legacy tl))
           (fun function_parameter =&gt;
             let '(Ex_ty tl, ctxt) := function_parameter in
             let 'existT _ __Ex_ty_'a4 [tl, ctxt] :=
@@ -77090,7 +77035,7 @@ with parse_instr {bef : Set}
         ((Micheline.Prim loc Alpha_context.Script.I_NIL (cons __t_value [])
           annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy __t_value))
+          (Lwt.__return (parse_any_ty ctxt legacy __t_value))
           (fun function_parameter =&gt;
             let '(Ex_ty __t_value, ctxt) := function_parameter in
             let 'existT _ __Ex_ty_'a5 [__t_value, ctxt] :=
@@ -77268,12 +77213,11 @@ with parse_instr {bef : Set}
                             extensible_type_value) in
                       Error_monad.trace_eval invalid_map_body
                         (Error_monad.op_gtgteqquestion
-                          (Pervasives.op_atat Lwt.__return
-                            (stack_ty_eq ctxt 1 rest starting_rest))
+                          (Lwt.__return (stack_ty_eq ctxt 1 rest starting_rest))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (merge_stacks legacy loc ctxt rest starting_rest))
                               (fun function_parameter =&gt;
                                 let '(rest, ctxt) := function_parameter in
@@ -77346,12 +77290,11 @@ with parse_instr {bef : Set}
                                 extensible_type_value)) in
                       Error_monad.trace_eval invalid_iter_body
                         (Error_monad.op_gtgteqquestion
-                          (Pervasives.op_atat Lwt.__return
-                            (stack_ty_eq ctxt 1 aft rest))
+                          (Lwt.__return (stack_ty_eq ctxt 1 aft rest))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (merge_stacks legacy loc ctxt aft rest))
                               (fun function_parameter =&gt;
                                 let '(rest, ctxt) := function_parameter in
@@ -77365,7 +77308,7 @@ with parse_instr {bef : Set}
         ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_SET
           (cons __t_value []) annot, rest), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt __t_value))
+          (Lwt.__return (parse_comparable_ty ctxt __t_value))
           (fun function_parameter =&gt;
             let '(Ex_comparable_ty __t_value, ctxt) := function_parameter in
             let 'existT _ __Ex_comparable_ty_'a1 [__t_value, ctxt] :=
@@ -77434,12 +77377,11 @@ with parse_instr {bef : Set}
                                 extensible_type_value)) in
                       Error_monad.trace_eval invalid_iter_body
                         (Error_monad.op_gtgteqquestion
-                          (Pervasives.op_atat Lwt.__return
-                            (stack_ty_eq ctxt 1 aft rest))
+                          (Lwt.__return (stack_ty_eq ctxt 1 aft rest))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (merge_stacks legacy loc ctxt aft rest))
                               (fun function_parameter =&gt;
                                 let '(rest, ctxt) := function_parameter in
@@ -77526,7 +77468,7 @@ with parse_instr {bef : Set}
         ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP
           (cons tk (cons tv [])) annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
+          (Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =&gt;
             let '(Ex_comparable_ty tk, ctxt) := function_parameter in
             let 'existT _ __Ex_comparable_ty_'a2 [tk, ctxt] :=
@@ -77535,7 +77477,7 @@ with parse_instr {bef : Set}
                   [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a2) **
                     Alpha_context.context]) _ [tk, ctxt] in
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy tv))
+              (Lwt.__return (parse_any_ty ctxt legacy tv))
               (fun function_parameter =&gt;
                 let '(Ex_ty tv, ctxt) := function_parameter in
                 let 'existT _ __Ex_ty_'a6 [tv, ctxt] :=
@@ -77613,12 +77555,11 @@ with parse_instr {bef : Set}
                             extensible_type_value) in
                       Error_monad.trace_eval invalid_map_body
                         (Error_monad.op_gtgteqquestion
-                          (Pervasives.op_atat Lwt.__return
-                            (stack_ty_eq ctxt 1 rest starting_rest))
+                          (Lwt.__return (stack_ty_eq ctxt 1 rest starting_rest))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (merge_stacks legacy loc ctxt rest starting_rest))
                               (fun function_parameter =&gt;
                                 let '(rest, ctxt) := function_parameter in
@@ -77700,12 +77641,11 @@ with parse_instr {bef : Set}
                                 extensible_type_value)) in
                       Error_monad.trace_eval invalid_iter_body
                         (Error_monad.op_gtgteqquestion
-                          (Pervasives.op_atat Lwt.__return
-                            (stack_ty_eq ctxt 1 aft rest))
+                          (Lwt.__return (stack_ty_eq ctxt 1 aft rest))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (merge_stacks legacy loc ctxt aft rest))
                               (fun function_parameter =&gt;
                                 let '(rest, ctxt) := function_parameter in
@@ -77817,7 +77757,7 @@ with parse_instr {bef : Set}
         ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
           (cons tk (cons tv [])) annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_comparable_ty ctxt tk))
+          (Lwt.__return (parse_comparable_ty ctxt tk))
           (fun function_parameter =&gt;
             let '(Ex_comparable_ty tk, ctxt) := function_parameter in
             let 'existT _ __Ex_comparable_ty_'a3 [tk, ctxt] :=
@@ -77826,8 +77766,7 @@ with parse_instr {bef : Set}
                   [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a3) **
                     Alpha_context.context]) _ [tk, ctxt] in
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (parse_packable_ty ctxt legacy tv))
+              (Lwt.__return (parse_packable_ty ctxt legacy tv))
               (fun function_parameter =&gt;
                 let '(Ex_ty tv, ctxt) := function_parameter in
                 let 'existT _ __Ex_ty_'a7 [tv, ctxt] :=
@@ -78108,13 +78047,13 @@ with parse_instr {bef : Set}
                                 extensible_type_value)) in
                       Error_monad.trace_eval unmatched_branches
                         (Error_monad.op_gtgteqquestion
-                          (Pervasives.op_atat Lwt.__return
+                          (Lwt.__return
                             (stack_ty_eq ctxt 1
                               ibody.(Script_typed_ir.descr.aft) __stack_value))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (merge_stacks legacy loc ctxt
                                   ibody.(Script_typed_ir.descr.aft)
                                   __stack_value))
@@ -78184,13 +78123,13 @@ with parse_instr {bef : Set}
                                 extensible_type_value)) in
                       Error_monad.trace_eval unmatched_branches
                         (Error_monad.op_gtgteqquestion
-                          (Pervasives.op_atat Lwt.__return
+                          (Lwt.__return
                             (stack_ty_eq ctxt 1
                               ibody.(Script_typed_ir.descr.aft) __stack_value))
                           (fun function_parameter =&gt;
                             let '(Eq, ctxt) := function_parameter in
                             Error_monad.op_gtgteqquestion
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (merge_stacks legacy loc ctxt
                                   ibody.(Script_typed_ir.descr.aft)
                                   __stack_value))
@@ -78207,7 +78146,7 @@ with parse_instr {bef : Set}
         ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
           (cons arg (cons ret (cons code []))) annot, __stack_value), _) =&gt;
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy arg))
+          (Lwt.__return (parse_any_ty ctxt legacy arg))
           (fun function_parameter =&gt;
             let '(Ex_ty arg, ctxt) := function_parameter in
             let 'existT _ __Ex_ty_'a8 [arg, ctxt] :=
@@ -78216,7 +78155,7 @@ with parse_instr {bef : Set}
                   [(Script_typed_ir.ty __Ex_ty_'a8) ** Alpha_context.context]) _
                 [arg, ctxt] in
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy ret))
+              (Lwt.__return (parse_any_ty ctxt legacy ret))
               (fun function_parameter =&gt;
                 let '(Ex_ty ret, ctxt) := function_parameter in
                 let 'existT _ __Ex_ty_'a9 [ret, ctxt] :=
@@ -78280,7 +78219,7 @@ with parse_instr {bef : Set}
             [_, _, _, _, _]
             [loc, annot, capture, capture_ty, arg_ty, lam_annot, ret, rest] in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (check_packable false loc capture_ty))
+          (Lwt.__return (check_packable false loc capture_ty))
           (fun function_parameter =&gt;
             let '_ := function_parameter in
             Error_monad.op_gtgteqquestion
@@ -78351,7 +78290,7 @@ with parse_instr {bef : Set}
                       (fun __Typed_'aft16 =&gt;
                         (Script_typed_ir.descr tstk __Typed_'aft16)) _
                       __descr_value in
-                  Pervasives.op_atat outer_return
+                  outer_return
                     (Dipn_proof_argument
                       (Script_typed_ir.Rest, (ctxt, __descr_value),
                         __descr_value.(Script_typed_ir.descr.aft)))
@@ -78386,7 +78325,7 @@ with parse_instr {bef : Set}
                             __Dipn_proof_argument_'faft) **
                         (Script_typed_ir.stack_ty __Dipn_proof_argument_'aft)])
                     [_, _, _] [n', __descr_value, aft'] in
-                Pervasives.op_atat outer_return
+                outer_return
                   (Dipn_proof_argument
                     ((Script_typed_ir.Prefix n'), __descr_value,
                       (Script_typed_ir.Item_t v aft' annot))))
@@ -78525,8 +78464,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Diff_timestamps
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
@@ -78547,8 +78485,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Concat_string_pair
                   (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
@@ -78624,8 +78561,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Concat_bytes_pair
                   (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest
@@ -78700,8 +78636,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Add_tez
                   (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest
@@ -78722,8 +78657,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Sub_tez
                   (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest
@@ -78775,8 +78709,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Or
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
@@ -78797,8 +78730,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.And
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
@@ -78819,8 +78751,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Xor
                   (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
@@ -78923,8 +78854,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Add_intint
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
@@ -78976,8 +78906,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Add_natnat
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
@@ -78998,8 +78927,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Sub_int
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
@@ -79051,8 +78979,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun _tname =&gt;
                 typed ctxt loc Script_typed_ir.Sub_int
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest
@@ -79073,8 +79000,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Mul_intint
                   (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
@@ -79126,8 +79052,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Mul_natnat
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
@@ -79168,8 +79093,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Ediv_tez
                   (Script_typed_ir.Item_t
@@ -79194,8 +79118,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Ediv_intint
                   (Script_typed_ir.Item_t
@@ -79260,8 +79183,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Ediv_natnat
                   (Script_typed_ir.Item_t
@@ -79286,8 +79208,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Lsl_nat
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
@@ -79308,8 +79229,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Lsr_nat
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
@@ -79330,8 +79250,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Or_nat
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
@@ -79352,8 +79271,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.And_nat
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
@@ -79390,8 +79308,7 @@ with parse_instr {bef : Set}
         Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (Script_ir_annot.merge_type_annot legacy tn1 tn2))
+              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
               (fun tname =&gt;
                 typed ctxt loc Script_typed_ir.Xor_nat
                   (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
@@ -79539,7 +79456,7 @@ with parse_instr {bef : Set}
           (parse_var_annot loc (Some item_annot) annot)
           (fun annot =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return (parse_any_ty ctxt legacy cast_t))
+              (Lwt.__return (parse_any_ty ctxt legacy cast_t))
               (fun function_parameter =&gt;
                 let '(Ex_ty cast_t, ctxt) := function_parameter in
                 let 'existT _ __Ex_ty_'a10 [cast_t, ctxt] :=
@@ -79548,11 +79465,11 @@ with parse_instr {bef : Set}
                       [(Script_typed_ir.ty __Ex_ty_'a10) **
                         Alpha_context.context]) _ [cast_t, ctxt] in
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat Lwt.__return (ty_eq ctxt cast_t __t_value))
+                  (Lwt.__return (ty_eq ctxt cast_t __t_value))
                   (fun function_parameter =&gt;
                     let '(Eq, ctxt) := function_parameter in
                     Error_monad.op_gtgteqquestion
-                      (Pervasives.op_atat Lwt.__return
+                      (Lwt.__return
                         (merge_types legacy ctxt loc cast_t __t_value))
                       (fun function_parameter =&gt;
                         let '(_, ctxt) := function_parameter in
@@ -79609,7 +79526,7 @@ with parse_instr {bef : Set}
                 (option Script_typed_ir.var_annot)]) _
             [loc, ty, annot, rest, packed_annot] in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_packable_ty ctxt legacy ty))
+          (Lwt.__return (parse_packable_ty ctxt legacy ty))
           (fun function_parameter =&gt;
             let '(Ex_ty __t_value, ctxt) := function_parameter in
             let 'existT _ __Ex_ty_'a11 [__t_value, ctxt] :=
@@ -79662,7 +79579,7 @@ with parse_instr {bef : Set}
                 (option Script_typed_ir.var_annot)]) _
             [loc, ty, annot, rest, addr_annot] in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (parse_parameter_ty ctxt legacy ty))
+          (Lwt.__return (parse_parameter_ty ctxt legacy ty))
           (fun function_parameter =&gt;
             let '(Ex_ty __t_value, ctxt) := function_parameter in
             let 'existT _ __Ex_ty_'a12 [__t_value, ctxt] :=
@@ -79678,7 +79595,7 @@ with parse_instr {bef : Set}
               (fun function_parameter =&gt;
                 let '(annot, entrypoint) := function_parameter in
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat Lwt.__return
+                  (Lwt.__return
                     match entrypoint with
                     | None =&gt; Pervasives.Ok &quot;default&quot;
                     | Some (Script_typed_ir.Field_annot &quot;default&quot;) =&gt;
@@ -79796,18 +79713,15 @@ with parse_instr {bef : Set}
             (fun function_parameter =&gt;
               let '(op_annot, addr_annot) := function_parameter in
               let cannonical_code :=
-                Pervasives.op_atat Pervasives.fst
-                  (Micheline.extract_locations code) in
+                Pervasives.fst (Micheline.extract_locations code) in
               Error_monad.op_gtgteqquestion
-                (Pervasives.op_atat Lwt.__return
-                  (parse_toplevel legacy cannonical_code))
+                (Lwt.__return (parse_toplevel legacy cannonical_code))
                 (fun function_parameter =&gt;
                   let '(arg_type, storage_type, code_field, root_name) :=
                     function_parameter in
                   Error_monad.op_gtgteqquestion
                     (Error_monad.trace extensible_type_value
-                      (Pervasives.op_atat Lwt.__return
-                        (parse_parameter_ty ctxt legacy arg_type)))
+                      (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)))
                     (fun function_parameter =&gt;
                       let '(Ex_ty arg_type, ctxt) := function_parameter in
                       let 'existT _ __Ex_ty_'a13 [arg_type, ctxt] :=
@@ -79825,7 +79739,7 @@ with parse_instr {bef : Set}
                           let '_ := function_parameter in
                           Error_monad.op_gtgteqquestion
                             (Error_monad.trace extensible_type_value
-                              (Pervasives.op_atat Lwt.__return
+                              (Lwt.__return
                                 (parse_storage_ty ctxt legacy storage_type)))
                             (fun function_parameter =&gt;
                               let '(Ex_ty storage_type, ctxt) :=
@@ -79895,41 +79809,38 @@ with parse_instr {bef : Set}
                                         |} as lambda, ctxt) :=
                                     function_parameter in
                                   Error_monad.op_gtgteqquestion
-                                    (Pervasives.op_atat Lwt.__return
-                                      (ty_eq ctxt arg arg_type_full))
+                                    (Lwt.__return (ty_eq ctxt arg arg_type_full))
                                     (fun function_parameter =&gt;
                                       let '(Eq, ctxt) := function_parameter in
                                       Error_monad.op_gtgteqquestion
-                                        (Pervasives.op_atat Lwt.__return
+                                        (Lwt.__return
                                           (merge_types legacy ctxt loc arg
                                             arg_type_full))
                                         (fun function_parameter =&gt;
                                           let '(_, ctxt) := function_parameter
                                             in
                                           Error_monad.op_gtgteqquestion
-                                            (Pervasives.op_atat Lwt.__return
+                                            (Lwt.__return
                                               (ty_eq ctxt ret ret_type_full))
                                             (fun function_parameter =&gt;
                                               let '(Eq, ctxt) :=
                                                 function_parameter in
                                               Error_monad.op_gtgteqquestion
-                                                (Pervasives.op_atat Lwt.__return
+                                                (Lwt.__return
                                                   (merge_types legacy ctxt loc
                                                     ret ret_type_full))
                                                 (fun function_parameter =&gt;
                                                   let '(_, ctxt) :=
                                                     function_parameter in
                                                   Error_monad.op_gtgteqquestion
-                                                    (Pervasives.op_atat
-                                                      Lwt.__return
+                                                    (Lwt.__return
                                                       (ty_eq ctxt storage_type
                                                         ginit))
                                                     (fun function_parameter =&gt;
                                                       let '(Eq, ctxt) :=
                                                         function_parameter in
                                                       Error_monad.op_gtgteqquestion
-                                                        (Pervasives.op_atat
-                                                          Lwt.__return
+                                                        (Lwt.__return
                                                           (merge_types legacy
                                                             ctxt loc
                                                             storage_type ginit))
@@ -79972,18 +79883,15 @@ with parse_instr {bef : Set}
           (fun function_parameter =&gt;
             let '(op_annot, addr_annot) := function_parameter in
             let cannonical_code :=
-              Pervasives.op_atat Pervasives.fst
-                (Micheline.extract_locations code) in
+              Pervasives.fst (Micheline.extract_locations code) in
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
-                (parse_toplevel legacy cannonical_code))
+              (Lwt.__return (parse_toplevel legacy cannonical_code))
               (fun function_parameter =&gt;
                 let '(arg_type, storage_type, code_field, root_name) :=
                   function_parameter in
                 Error_monad.op_gtgteqquestion
                   (Error_monad.trace extensible_type_value
-                    (Pervasives.op_atat Lwt.__return
-                      (parse_parameter_ty ctxt legacy arg_type)))
+                    (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)))
                   (fun function_parameter =&gt;
                     let '(Ex_ty arg_type, ctxt) := function_parameter in
                     let 'existT _ __Ex_ty_'a15 [arg_type, ctxt] :=
@@ -80001,7 +79909,7 @@ with parse_instr {bef : Set}
                         let '_ := function_parameter in
                         Error_monad.op_gtgteqquestion
                           (Error_monad.trace extensible_type_value
-                            (Pervasives.op_atat Lwt.__return
+                            (Lwt.__return
                               (parse_storage_ty ctxt legacy storage_type)))
                           (fun function_parameter =&gt;
                             let '(Ex_ty storage_type, ctxt) :=
@@ -80066,40 +79974,37 @@ with parse_instr {bef : Set}
                                       |} as lambda, ctxt) := function_parameter
                                   in
                                 Error_monad.op_gtgteqquestion
-                                  (Pervasives.op_atat Lwt.__return
-                                    (ty_eq ctxt arg arg_type_full))
+                                  (Lwt.__return (ty_eq ctxt arg arg_type_full))
                                   (fun function_parameter =&gt;
                                     let '(Eq, ctxt) := function_parameter in
                                     Error_monad.op_gtgteqquestion
-                                      (Pervasives.op_atat Lwt.__return
+                                      (Lwt.__return
                                         (merge_types legacy ctxt loc arg
                                           arg_type_full))
                                       (fun function_parameter =&gt;
                                         let '(_, ctxt) := function_parameter in
                                         Error_monad.op_gtgteqquestion
-                                          (Pervasives.op_atat Lwt.__return
+                                          (Lwt.__return
                                             (ty_eq ctxt ret ret_type_full))
                                           (fun function_parameter =&gt;
                                             let '(Eq, ctxt) :=
                                               function_parameter in
                                             Error_monad.op_gtgteqquestion
-                                              (Pervasives.op_atat Lwt.__return
+                                              (Lwt.__return
                                                 (merge_types legacy ctxt loc ret
                                                   ret_type_full))
                                               (fun function_parameter =&gt;
                                                 let '(_, ctxt) :=
                                                   function_parameter in
                                                 Error_monad.op_gtgteqquestion
-                                                  (Pervasives.op_atat
-                                                    Lwt.__return
+                                                  (Lwt.__return
                                                     (ty_eq ctxt storage_type
                                                       ginit))
                                                   (fun function_parameter =&gt;
                                                     let '(Eq, ctxt) :=
                                                       function_parameter in
                                                     Error_monad.op_gtgteqquestion
-                                                      (Pervasives.op_atat
-                                                        Lwt.__return
+                                                      (Lwt.__return
                                                         (merge_types legacy ctxt
                                                           loc storage_type ginit))
                                                       (fun function_parameter =&gt;
@@ -80378,11 +80283,11 @@ with parse_instr {bef : Set}
                 (Script_typed_ir.ty __464) ** (Script_typed_ir.ty __466)]) [_,
             _] [loc, name, ta, tb] in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return (serialize_ty_for_error ctxt ta))
+          (Lwt.__return (serialize_ty_for_error ctxt ta))
           (fun function_parameter =&gt;
             let '(ta, ctxt) := function_parameter in
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return (serialize_ty_for_error ctxt tb))
+              (Lwt.__return (serialize_ty_for_error ctxt tb))
               (fun function_parameter =&gt;
                 let '(tb, _ctxt) := function_parameter in
                 Error_monad.fail extensible_type_value))
@@ -80401,8 +80306,7 @@ with parse_instr {bef : Set}
               [Alpha_context.Script.location ** Alpha_context.Script.prim **
                 (Script_typed_ir.ty __468)]) _ [loc, name, __t_value] in
         Error_monad.op_gtgteqquestion
-          (Pervasives.op_atat Lwt.__return
-            (serialize_ty_for_error ctxt __t_value))
+          (Lwt.__return (serialize_ty_for_error ctxt __t_value))
           (fun function_parameter =&gt;
             let '(__t_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
@@ -80478,7 +80382,7 @@ with parse_instr {bef : Set}
             let '(__stack_value, _ctxt) := function_parameter in
             Error_monad.fail extensible_type_value)
       | ((expr, _), _) =&gt;
-        Pervasives.op_atat Error_monad.fail
+        Error_monad.fail
           (unexpected expr [ Script_tc_errors.Seq_kind ]
             Script_tc_errors.Instr_namespace
             [
@@ -80563,7 +80467,7 @@ with parse_contract {arg : Set}
     (Error_monad.tzresult
       (Alpha_context.context * Script_typed_ir.typed_contract arg)) :=
   Error_monad.op_gtgteqquestion
-    (Pervasives.op_atat Lwt.__return
+    (Lwt.__return
       (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists))
     (fun ctxt =&gt;
       Error_monad.op_gtgteqquestion
@@ -80573,11 +80477,11 @@ with parse_contract {arg : Set}
           | false =&gt; Error_monad.fail extensible_type_value
           | true =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
+              (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat (Error_monad.trace extensible_type_value)
+                  ((Error_monad.trace extensible_type_value)
                     (Alpha_context.Contract.get_script_code ctxt contract))
                   (fun function_parameter =&gt;
                     let '(ctxt, code) := function_parameter in
@@ -80655,7 +80559,7 @@ with parse_contract_for_script {arg : Set}
     (Error_monad.tzresult
       (Alpha_context.context * option (Script_typed_ir.typed_contract arg))) :=
   Error_monad.op_gtgteqquestion
-    (Pervasives.op_atat Lwt.__return
+    (Lwt.__return
       (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists))
     (fun ctxt =&gt;
       Error_monad.op_gtgteqquestion
@@ -80665,11 +80569,11 @@ with parse_contract_for_script {arg : Set}
           | false =&gt; Error_monad.__return (ctxt, None)
           | true =&gt;
             Error_monad.op_gtgteqquestion
-              (Pervasives.op_atat Lwt.__return
+              (Lwt.__return
                 (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script))
               (fun ctxt =&gt;
                 Error_monad.op_gtgteqquestion
-                  (Pervasives.op_atat (Error_monad.trace extensible_type_value)
+                  ((Error_monad.trace extensible_type_value)
                     (Alpha_context.Contract.get_script_code ctxt contract))
                   (fun function_parameter =&gt;
                     let '(ctxt, code) := function_parameter in
@@ -80756,7 +80660,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
   : Error_monad.tzresult
     (Alpha_context.Script.node * Alpha_context.Script.node *
       Alpha_context.Script.node * option string) :=
-  Pervasives.op_atat (Error_monad.record_trace extensible_type_value)
+  (Error_monad.record_trace extensible_type_value)
     match Micheline.root toplevel with
     | Micheline.Int loc _ =&gt; Error_monad.__error_value extensible_type_value
     | Micheline.String loc _ =&gt; Error_monad.__error_value extensible_type_value
@@ -80931,7 +80835,7 @@ Definition parse_script
         (fun function_parameter =&gt;
           let '(storage, ctxt) := function_parameter in
           Error_monad.op_gtgteqquestion
-            (Pervasives.op_atat Lwt.__return (parse_toplevel legacy code))
+            (Lwt.__return (parse_toplevel legacy code))
             (fun function_parameter =&gt;
               let '(arg_type, storage_type, code_field, root_name) :=
                 function_parameter in
@@ -80991,7 +80895,7 @@ Definition parse_script
                               (fun function_parameter =&gt;
                                 let '_ := function_parameter in
                                 Error_monad.op_gtgtpipequestion
-                                  (Pervasives.op_atat Lwt.__return
+                                  (Lwt.__return
                                     (serialize_ty_for_error ctxt storage_type))
                                   (fun function_parameter =&gt;
                                     let '(storage_type, _ctxt) :=
@@ -81035,8 +80939,7 @@ Definition typecheck_code
   : Lwt.t
     (Error_monad.tzresult (Script_tc_errors.type_map * Alpha_context.context)) :=
   let legacy := false in
-  Error_monad.op_gtgteqquestion
-    (Pervasives.op_atat Lwt.__return (parse_toplevel legacy code))
+  Error_monad.op_gtgteqquestion (Lwt.__return (parse_toplevel legacy code))
     (fun function_parameter =&gt;
       let '(arg_type, storage_type, code_field, root_name) := function_parameter
         in
@@ -81121,8 +81024,7 @@ Definition typecheck_data
   let legacy := false in
   Error_monad.op_gtgteqquestion
     (Error_monad.trace extensible_type_value
-      (Pervasives.op_atat Lwt.__return
-        (parse_packable_ty ctxt legacy (Micheline.root exp_ty))))
+      (Lwt.__return (parse_packable_ty ctxt legacy (Micheline.root exp_ty))))
     (fun function_parameter =&gt;
       let '(Ex_ty exp_ty, ctxt) := function_parameter in
       let 'existT _ __Ex_ty_'a [exp_ty, ctxt] :=
@@ -81135,8 +81037,7 @@ Definition typecheck_data
           (fun function_parameter =&gt;
             let '_ := function_parameter in
             Error_monad.op_gtgtpipequestion
-              (Pervasives.op_atat Lwt.__return
-                (serialize_ty_for_error ctxt exp_ty))
+              (Lwt.__return (serialize_ty_for_error ctxt exp_ty))
               (fun function_parameter =&gt;
                 let '(exp_ty, _ctxt) := function_parameter in
                 extensible_type_value))
@@ -81171,7 +81072,7 @@ Definition list_entrypoints {A : Set}
     let '(unreachables, all) as acc := function_parameter in
     match annot with
     | (None | Some (Script_typed_ir.Field_annot &quot;&quot;)) =&gt;
-      Pervasives.op_atat Error_monad.ok
+      Error_monad.ok
         (if reachable then
           acc
         else
@@ -81808,14 +81709,14 @@ Definition pack_data {A : Set}
         Data_encoding.Binary.to_bytes_exn Alpha_context.Script.expr_encoding
           (Micheline.strip_locations unparsed) in
       Error_monad.op_gtgteqquestion
-        (Pervasives.op_atat Lwt.__return
+        (Lwt.__return
           (Alpha_context.Gas.consume ctxt
             (Alpha_context.Script.serialized_cost __bytes_value)))
         (fun ctxt =&gt;
           let __bytes_value :=
             MBytes.concat &quot;&quot; [ MBytes.of_string &quot;\005&quot;; __bytes_value ] in
           Error_monad.op_gtgteqquestion
-            (Pervasives.op_atat Lwt.__return
+            (Lwt.__return
               (Alpha_context.Gas.consume ctxt
                 (Alpha_context.Script.serialized_cost __bytes_value)))
             (fun ctxt =&gt; Error_monad.__return (__bytes_value, ctxt)))).
@@ -81827,7 +81728,7 @@ Definition hash_data {A : Set}
     (fun function_parameter =&gt;
       let '(__bytes_value, ctxt) := function_parameter in
       Error_monad.op_gtgteqquestion
-        (Pervasives.op_atat Lwt.__return
+        (Lwt.__return
           (Alpha_context.Gas.consume ctxt
             (Michelson_v1_gas.Cost_of.Legacy.__hash_value __bytes_value
               Script_expr_hash.size)))
@@ -82945,7 +82846,7 @@ Parameter extract_big_map_diff : forall {a : Set},
     <h3>Script_repr</h3>
     <ul>
       <li>OCaml size: 233 lines</li>
-      <li>Coq size: 296 lines (+27% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 295 lines (+26% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -83254,9 +83155,8 @@ End t.
 Definition t := t.record.
 
 Definition encoding : Data_encoding.encoding t :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;scripted.contracts&quot; in
-    fun eta =&gt; arg None None eta)
+  (let arg := Data_encoding.def &quot;scripted.contracts&quot; in
+  fun eta =&gt; arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =&gt;
         let '{| t.code := code; t.storage := storage |} := function_parameter in
@@ -84895,7 +84795,7 @@ Definition to_string (x : Z.t) : string :=
   end.
 
 Definition diff (x : Z.t) (y : Z.t) : Script_int_repr.num Script_int_repr.z :=
-  Pervasives.op_atat Script_int_repr.of_zint (Z.sub x y).
+  Script_int_repr.of_zint (Z.sub x y).
 
 Definition sub_delta {A : Set} (__t_value : Z.t) (delta : Script_int_repr.num A)
   : Z.t := Z.sub __t_value (Script_int_repr.to_zint delta).
@@ -85891,7 +85791,7 @@ Inductive ex_big_map : Set :=
     <h3>Seed_repr</h3>
     <ul>
       <li>OCaml size: 134 lines</li>
-      <li>Coq size: 147 lines (+9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 146 lines (+8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86110,9 +86010,8 @@ Definition xor_higher_bits (i : int32) (__b_value : MBytes.t) : MBytes.t :=
 Definition __sequence_value (function_parameter : t) : int32 -&gt; sequence :=
   let 'T state := function_parameter in
   fun n =&gt;
-    Pervasives.op_pipegt
-      (Pervasives.op_pipegt (State_hash.to_bytes state) (xor_higher_bits n))
-      (fun __b_value =&gt; S (State_hash.hash_bytes None [ __b_value ])).
+    (fun __b_value =&gt; S (State_hash.hash_bytes None [ __b_value ]))
+      ((xor_higher_bits n) (State_hash.to_bytes state)).
 
 Definition take (function_parameter : sequence) : MBytes.t * sequence :=
   let 'S state := function_parameter in
@@ -88565,7 +88464,7 @@ Module Contract.
         (ctxt : (|Raw_context|).(Raw_context.T.context))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
-        Pervasives.op_atat Lwt.__return
+        Lwt.__return
           (Error_monad.op_gtgtquestion
             ((|Raw_context|).(Raw_context.T.check_enough_gas) ctxt
               (Script_repr.minimal_deserialize_cost value))
@@ -88580,7 +88479,7 @@ Module Contract.
         (ctxt : (|Raw_context|).(Raw_context.T.context))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
-        Pervasives.op_atat Lwt.__return
+        Lwt.__return
           (Error_monad.op_gtgtquestion (Script_repr.force_bytes value)
             (fun function_parameter =&gt;
               let '(_value, value_cost) := function_parameter in
@@ -89101,7 +89000,7 @@ Module Big_map.
       (ctxt : (|Raw_context|).(Raw_context.T.context))
       (value : Script_repr.expr)
       : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
-      Pervasives.op_atat Lwt.__return
+      Lwt.__return
         ((|Raw_context|).(Raw_context.T.consume_gas) ctxt
           (Script_repr.deserialized_cost value)).
     
@@ -91753,11 +91652,11 @@ End query.
 Definition query := query.record.
 
 Definition depth_query : RPC_query.t query :=
-  Pervasives.op_pipegt
+  RPC_query.seal
     (RPC_query.op_pipeplus
       (RPC_query.__query_value (fun depth =&gt; {| query.depth := depth |}))
       (RPC_query.__field_value None &quot;depth&quot; RPC_arg.__int_value 0
-        (fun __t_value =&gt; __t_value.(query.depth)))) RPC_query.seal.
+        (fun __t_value =&gt; __t_value.(query.depth)))).
 
 Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
   let rpc_dir := Pervasives.__ref_value RPC_directory.empty in
@@ -96331,7 +96230,7 @@ End Indexed_raw_context.
     <h3>Tez_repr</h3>
     <ul>
       <li>OCaml size: 36 lines</li>
-      <li>Coq size: 92 lines (+155% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 91 lines (+152% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96466,9 +96365,8 @@ Definition t : Set := qty.
 Definition tez : Set := qty.
 
 Definition encoding : Data_encoding.encoding qty :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def &quot;mutez&quot; in
-    fun eta =&gt; arg None None eta) qty_encoding.
+  (let arg := Data_encoding.def &quot;mutez&quot; in
+  fun eta =&gt; arg None None eta) qty_encoding.
 </pre>
   </div>
 </div>
@@ -97074,7 +96972,7 @@ Parameter ballot_encoding : Data_encoding.t ballot.
     <h3>Vote_storage</h3>
     <ul>
       <li>OCaml size: 156 lines</li>
-      <li>Coq size: 345 lines (+121% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 344 lines (+120% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -97350,18 +97248,17 @@ End ballots.
 Definition ballots := ballots.record.
 
 Definition ballots_encoding : Data_encoding.encoding ballots :=
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.conv
-        (fun function_parameter =&gt;
-          let '{|
-            ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |} :=
-            function_parameter in
-          (yay, nay, pass))
-        (fun function_parameter =&gt;
-          let '(yay, nay, pass) := function_parameter in
-          {| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}) in
-    fun eta =&gt; arg None eta)
+  (let arg :=
+    Data_encoding.conv
+      (fun function_parameter =&gt;
+        let '{|
+          ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |} :=
+          function_parameter in
+        (yay, nay, pass))
+      (fun function_parameter =&gt;
+        let '(yay, nay, pass) := function_parameter in
+        {| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}) in
+  fun eta =&gt; arg None eta)
     (Data_encoding.obj3
       (Data_encoding.req None None &quot;yay&quot; Data_encoding.__int32_value)
       (Data_encoding.req None None &quot;nay&quot; Data_encoding.__int32_value)

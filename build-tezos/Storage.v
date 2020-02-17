@@ -379,7 +379,7 @@ Module Contract.
         (ctxt : (|Raw_context|).(Raw_context.T.context))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
-        Pervasives.op_atat Lwt.__return
+        Lwt.__return
           (Error_monad.op_gtgtquestion
             ((|Raw_context|).(Raw_context.T.check_enough_gas) ctxt
               (Script_repr.minimal_deserialize_cost value))
@@ -394,7 +394,7 @@ Module Contract.
         (ctxt : (|Raw_context|).(Raw_context.T.context))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
-        Pervasives.op_atat Lwt.__return
+        Lwt.__return
           (Error_monad.op_gtgtquestion (Script_repr.force_bytes value)
             (fun function_parameter =>
               let '(_value, value_cost) := function_parameter in
@@ -915,7 +915,7 @@ Module Big_map.
       (ctxt : (|Raw_context|).(Raw_context.T.context))
       (value : Script_repr.expr)
       : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
-      Pervasives.op_atat Lwt.__return
+      Lwt.__return
         ((|Raw_context|).(Raw_context.T.consume_gas) ctxt
           (Script_repr.deserialized_cost value)).
     

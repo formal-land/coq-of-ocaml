@@ -92,7 +92,7 @@ Module Cost_of.
     Definition set_to_list {item : Set} (Box : Script_typed_ir.set item)
       : Alpha_context.Gas.cost :=
       let 'existS _ _ Box := Box in
-      Pervasives.op_atat Alpha_context.Gas.alloc_cost
+      Alpha_context.Gas.alloc_cost
         (Pervasives.op_star Box.(Script_typed_ir.Boxed_set.size) 2).
     
     Definition map_to_list {key value : Set}
@@ -115,7 +115,7 @@ Module Cost_of.
     Definition set_access {elt : Set}
       (_key : elt) (Box : Script_typed_ir.set elt) : Z :=
       let 'existS _ _ Box := Box in
-      Pervasives.op_atat log2 Box.(Script_typed_ir.Boxed_set.size).
+      log2 Box.(Script_typed_ir.Boxed_set.size).
     
     Definition set_update {A B : Set}
       (__key_value : A) (_presence : B) (set : Script_typed_ir.set A)
@@ -638,8 +638,7 @@ Module Cost_of.
     Definition z : Z.t -> Alpha_context.Gas.cost := Legacy.zint.
     
     Definition int_of_string (str : string) : Alpha_context.Gas.cost :=
-      Pervasives.op_atat Alpha_context.Gas.alloc_cost
-        (Pervasives.op_div (String.length str) 5).
+      Alpha_context.Gas.alloc_cost (Pervasives.op_div (String.length str) 5).
     
     Definition tez : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.step_cost 1)
@@ -895,9 +894,9 @@ Module Cost_of.
     
     Definition timestamp (x : Alpha_context.Script_timestamp.t)
       : Alpha_context.Gas.cost :=
-      Pervasives.op_pipegt
-        (Pervasives.op_pipegt (Alpha_context.Script_timestamp.to_zint x)
-          Alpha_context.Script_int.of_zint) (__int_value (A := unit)).
+      (__int_value (A := unit))
+        (Alpha_context.Script_int.of_zint
+          (Alpha_context.Script_timestamp.to_zint x)).
     
     Definition operation (__bytes_value : MBytes.t) : Alpha_context.Gas.cost :=
       Alpha_context.Script.bytes_node_cost __bytes_value.

@@ -207,18 +207,17 @@ Module Manager_result.
         Alpha_context.Operation.Encoding.Manager_operations.case.MCase.name := name
           |} := op_case in
     let __t_value :=
-      Pervasives.op_atat
-        (let arg :=
-          Data_encoding.def
-            (Format.asprintf
-              (CamlinternalFormatBasics.Format
-                (CamlinternalFormatBasics.String_literal
-                  "operation.alpha.operation_result."
-                  (CamlinternalFormatBasics.String
-                    CamlinternalFormatBasics.No_padding
-                    CamlinternalFormatBasics.End_of_format))
-                "operation.alpha.operation_result.%s") name) in
-        fun eta => arg None None eta)
+      (let arg :=
+        Data_encoding.def
+          (Format.asprintf
+            (CamlinternalFormatBasics.Format
+              (CamlinternalFormatBasics.String_literal
+                "operation.alpha.operation_result."
+                (CamlinternalFormatBasics.String
+                  CamlinternalFormatBasics.No_padding
+                  CamlinternalFormatBasics.End_of_format))
+              "operation.alpha.operation_result.%s") name) in
+      fun eta => arg None None eta)
         (Data_encoding.union (Some Data_encoding.Uint8)
           [
             Data_encoding.__case_value "Applied" None (Data_encoding.Tag 0)
@@ -594,9 +593,8 @@ Definition internal_operation_result_encoding
                 op; Alpha_context.internal_operation.nonce := __nonce_value |}
           in
         Internal_operation_result op res) in
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation.alpha.internal_operation_result" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation.alpha.internal_operation_result" in
+  fun eta => arg None None eta)
     (Data_encoding.union None
       [
         make Manager_result.reveal_case;
@@ -1308,9 +1306,8 @@ Definition contents_result_encoding
     let inj (x : __Case_'a) : packed_contents_result :=
       Contents_result (inj x) in
     tagged_case (Data_encoding.Tag tag) name encoding proj inj in
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation.alpha.contents_result" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation.alpha.contents_result" in
+  fun eta => arg None None eta)
     (Data_encoding.union None
       [
         make endorsement_case;
@@ -1378,10 +1375,9 @@ Definition contents_and_result_encoding
         (Data_encoding.obj1
           (Data_encoding.req None None "metadata" meta_encoding)) in
     tagged_case (Data_encoding.Tag tag) name encoding proj inj in
-  Pervasives.op_atat
-    (let arg :=
-      Data_encoding.def "operation.alpha.operation_contents_and_result" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation.alpha.operation_contents_and_result"
+    in
+  fun eta => arg None None eta)
     (Data_encoding.union None
       [
         make endorsement_case;
@@ -1463,9 +1459,8 @@ Definition contents_result_list_encoding
       | _ => Pervasives.failwith "cannot decode ill-formed operation result"
       end
     end in
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation.alpha.contents_list_result" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation.alpha.contents_list_result" in
+  fun eta => arg None None eta)
     (Data_encoding.conv to_list of_list None
       (Data_encoding.__list_value None contents_result_encoding)).
 
@@ -1567,9 +1562,8 @@ Inductive packed_operation_metadata : Set :=
 
 Definition operation_metadata_encoding
   : Data_encoding.encoding packed_operation_metadata :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation.alpha.result" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation.alpha.result" in
+  fun eta => arg None None eta)
     (Data_encoding.union None
       [
         Data_encoding.__case_value "Operation_metadata" None
@@ -1956,9 +1950,8 @@ Fixpoint of_list (function_parameter : list packed_contents_result)
 Definition operation_data_and_metadata_encoding
   : Data_encoding.encoding
     (Alpha_context.packed_protocol_data * packed_operation_metadata) :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "operation.alpha.operation_with_metadata" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "operation.alpha.operation_with_metadata" in
+  fun eta => arg None None eta)
     (Data_encoding.union None
       [
         Data_encoding.__case_value "Operation_with_metadata" None
@@ -2098,9 +2091,8 @@ End block_metadata.
 Definition block_metadata := block_metadata.record.
 
 Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
-  Pervasives.op_atat
-    (let arg := Data_encoding.def "block_header.alpha.metadata" in
-    fun eta => arg None None eta)
+  (let arg := Data_encoding.def "block_header.alpha.metadata" in
+  fun eta => arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =>
         let '{|
