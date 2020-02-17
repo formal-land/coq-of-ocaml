@@ -98,9 +98,6 @@ let try_convert (path_name : t) : t option =
     | "op_and" -> make [] "andb"
     | "op_pipepipe" -> make [] "orb"
     | "or" -> make [] "orb"
-    (* Composition operators *)
-    | "op_pipegt" -> make ["OCaml"; "Stdlib"] "reverse_apply"
-    | "op_atat" -> make [] "apply"
     (* Integer arithmetic *)
     | "op_tildeminus" -> make ["Z"] "opp"
     | "op_tildeplus" -> make []  ""

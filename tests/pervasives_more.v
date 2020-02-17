@@ -39,9 +39,9 @@ Definition b_or : bool := orb true false.
 
 Definition b_or_old : bool := orb true false.
 
-Definition app1 : Z := OCaml.Stdlib.reverse_apply 12 (fun x => x).
+Definition app1 : Z := (fun x => x) 12.
 
-Definition app2 : Z := apply (fun x => x) 12.
+Definition app2 : Z := (fun x => x) 12.
 
 Definition n_neg1 : Z := Z.opp 12.
 

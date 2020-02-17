@@ -1046,9 +1046,32 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       end
     end
   | Apply (e_f, e_xs) ->
-    Pp.parens paren @@ nest @@ (separate space (
-      List.map (to_coq true) (e_f :: e_xs)
-    ))
+    begin match (e_f, e_xs) with
+    | (
+        Variable (
+          MixedPath.PathName {
+            PathName.path = [Name.Make lib_name];
+            base = Name.Make "op_atat"
+          },
+          []
+        ),
+        [f; x]
+      ) when lib_name = PathName.stdlib_name ->
+      to_coq paren (Apply (f, [x]))
+    | (
+        Variable (
+          MixedPath.PathName {
+            PathName.path = [Name.Make lib_name];
+            base = Name.Make "op_pipegt"
+          },
+          []
+        ),
+        [x; f]
+      ) when lib_name = PathName.stdlib_name ->
+      to_coq paren (Apply (f, [x]))
+    | _ ->
+      Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
+    end
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (x, typ_params, e1, e2) ->
