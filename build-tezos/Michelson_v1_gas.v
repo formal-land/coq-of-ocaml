@@ -68,8 +68,8 @@ Module Cost_of.
       let 'existT _ [__0, __1, __Pair_key] [l, __r_value, v] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__0, __1, __Pair_key] =>
-            [(Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf) **
-              (Script_typed_ir.comparable_struct __1 __Pair_key) ** (__0 * __1)])
+            [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
+              Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1])
           [l, __r_value, v] in
       obj_magic Z
         (let '(lval, rval) := v in
@@ -590,14 +590,14 @@ Module Cost_of.
       | (Script_typed_ir.Int_key _, _ as x, _ as y) =>
         let '[x, y] :=
           obj_magic
-            [(Script_int_repr.num Alpha_context.Script_int.z) **
-              (Script_int_repr.num Alpha_context.Script_int.z)] [x, y] in
+            [Script_int_repr.num Alpha_context.Script_int.z **
+              Script_int_repr.num Alpha_context.Script_int.z] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_zint x y)
       | (Script_typed_ir.Nat_key _, _ as x, _ as y) =>
         let '[x, y] :=
           obj_magic
-            [(Script_int_repr.num Alpha_context.Script_int.n) **
-              (Script_int_repr.num Alpha_context.Script_int.n)] [x, y] in
+            [Script_int_repr.num Alpha_context.Script_int.n **
+              Script_int_repr.num Alpha_context.Script_int.n] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_zint x y)
       | (Script_typed_ir.Key_hash_key _, x, y) =>
         let '[x, y] := obj_magic [a ** a] [x, y] in
@@ -615,9 +615,9 @@ Module Cost_of.
         let 'existT _ [__0, __1, __Pair_key] [tl, tr, x, y] :=
           obj_magic_exists (Es := [Set ** Set ** Set])
             (fun '[__0, __1, __Pair_key] =>
-              [(Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf) **
-                (Script_typed_ir.comparable_struct __1 __Pair_key) **
-                (__0 * __1) ** (__0 * __1)]) [tl, tr, x, y] in
+              [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
+                Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1 **
+                __0 * __1]) [tl, tr, x, y] in
         obj_magic Alpha_context.Gas.cost
           (let '(xl, xr) := x in
           let '(yl, yr) := y in

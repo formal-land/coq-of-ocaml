@@ -88,10 +88,9 @@ Definition unparse_stack {A : Set}
       let 'existT _ [__0, __1] [v, rest, ty, rest_ty, annot] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__0, __1] =>
-            [__0 ** (stack __1) ** (Script_typed_ir.ty __0) **
-              (Script_typed_ir.stack_ty __1) **
-              (option Script_typed_ir.var_annot)]) [v, rest, ty, rest_ty, annot]
-        in
+            [__0 ** stack __1 ** Script_typed_ir.ty __0 **
+              Script_typed_ir.stack_ty __1 ** option Script_typed_ir.var_annot])
+          [v, rest, ty, rest_ty, annot] in
       obj_magic
         (Lwt.t
           (Error_monad.tzresult
@@ -166,10 +165,10 @@ Fixpoint interp_stack_prefix_preserving_operation
         (fun
           '[__0, __12, __15, __18, __21, __24, __27, __3, __30, __33, __36,
             __39, __42, __45, __46, __47, __6, __9] =>
-          [(Script_typed_ir.stack_prefix_preservation_witness fbef faft __46
-            __47) ** __0 ** __3 ** __6 ** __9 ** __12 ** __15 ** __18 ** __21 **
-            __24 ** __27 ** __30 ** __33 ** __36 ** __39 ** __42 ** __45 **
-            (stack __46)])
+          [Script_typed_ir.stack_prefix_preservation_witness fbef faft __46 __47
+            ** __0 ** __3 ** __6 ** __9 ** __12 ** __15 ** __18 ** __21 ** __24
+            ** __27 ** __30 ** __33 ** __36 ** __39 ** __42 ** __45 **
+            stack __46])
         [n, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf,
           rest] in
     obj_magic (Lwt.t (Error_monad.tzresult (stack aft * result)))
@@ -199,8 +198,8 @@ Fixpoint interp_stack_prefix_preserving_operation
       :=
       obj_magic_exists (Es := [Set ** Set ** Set ** Set ** Set ** Set])
         (fun '[__48, __51, __54, __57, __58, __59] =>
-          [(Script_typed_ir.stack_prefix_preservation_witness fbef faft __58
-            __59) ** __48 ** __51 ** __54 ** __57 ** (stack __58)])
+          [Script_typed_ir.stack_prefix_preservation_witness fbef faft __58 __59
+            ** __48 ** __51 ** __54 ** __57 ** stack __58])
         [n, v0, v1, v2, v3, rest] in
     obj_magic (Lwt.t (Error_monad.tzresult (stack aft * result)))
       (let=? '(rest', __result_value) :=
@@ -211,8 +210,8 @@ Fixpoint interp_stack_prefix_preserving_operation
     let 'existT _ [__60, __61, __62] [n, v, rest] :=
       obj_magic_exists (Es := [Set ** Set ** Set])
         (fun '[__60, __61, __62] =>
-          [(Script_typed_ir.stack_prefix_preservation_witness fbef faft __61
-            __62) ** __60 ** (stack __61)]) [n, v, rest] in
+          [Script_typed_ir.stack_prefix_preservation_witness fbef faft __61 __62
+            ** __60 ** stack __61]) [n, v, rest] in
     obj_magic (Lwt.t (Error_monad.tzresult (stack aft * result)))
       (let=? '(rest', __result_value) :=
         interp_stack_prefix_preserving_operation f n rest in
@@ -320,7 +319,7 @@ Fixpoint step {a b : Set}
     match (instr, __stack_value, __descr_value) with
     | (Script_typed_ir.Drop, Item _ rest, _) =>
       let 'existT _ __1 rest :=
-        obj_magic_exists (Es := Set) (fun __1 => (stack __1)) rest in
+        obj_magic_exists (Es := Set) (fun __1 => stack __1) rest in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
@@ -328,7 +327,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Dup, Item v rest, _) =>
       let 'existT _ [__2, __3] [v, rest] :=
         obj_magic_exists (Es := [Set ** Set])
-          (fun '[__2, __3] => [__2 ** (stack __3)]) [v, rest] in
+          (fun '[__2, __3] => [__2 ** stack __3]) [v, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
@@ -336,16 +335,14 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Swap, Item vi (Item vo rest), _) =>
       let 'existT _ [__4, __5, __6] [vi, vo, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
-          (fun '[__4, __5, __6] => [__4 ** __5 ** (stack __6)]) [vi, vo, rest]
-        in
+          (fun '[__4, __5, __6] => [__4 ** __5 ** stack __6]) [vi, vo, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
         logged_return ((Item vo (Item vi rest)), ctxt))
     | (Script_typed_ir.Const v, rest, _) =>
       let 'existT _ __7 [v, rest] :=
-        obj_magic_exists (Es := Set) (fun __7 => [__7 ** (stack b)]) [v, rest]
-        in
+        obj_magic_exists (Es := Set) (fun __7 => [__7 ** stack b]) [v, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
@@ -353,7 +350,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Cons_some, Item v rest, _) =>
       let 'existT _ [__8, __9] [v, rest] :=
         obj_magic_exists (Es := [Set ** Set])
-          (fun '[__8, __9] => [__8 ** (stack __9)]) [v, rest] in
+          (fun '[__8, __9] => [__8 ** stack __9]) [v, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
@@ -369,9 +366,9 @@ Fixpoint step {a b : Set}
       let 'existT _ [__11, __12] [bt, bf, v, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__11, __12] =>
-            [(Script_typed_ir.descr __12 a) **
-              (Script_typed_ir.descr (__11 * __12) a) ** (option __11) **
-              (stack __12)]) [bt, bf, v, rest] in
+            [Script_typed_ir.descr __12 a **
+              Script_typed_ir.descr (__11 * __12) a ** option __11 **
+              stack __12]) [bt, bf, v, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         match v with
         | None =>
@@ -386,7 +383,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Cons_pair, Item __a_value (Item __b_value rest), _) =>
       let 'existT _ [__13, __14, __15] [__a_value, __b_value, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
-          (fun '[__13, __14, __15] => [__13 ** __14 ** (stack __15)])
+          (fun '[__13, __14, __15] => [__13 ** __14 ** stack __15])
           [__a_value, __b_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -415,7 +412,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__17, __18, __19] [pair, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__17, __18, __19] =>
-            [(Script_typed_ir.pair __18 __19) ** (stack __17)]) [pair, rest] in
+            [Script_typed_ir.pair __18 __19 ** stack __17]) [pair, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let '(__a_value, __b_value) := pair in
         let=? ctxt :=
@@ -426,7 +423,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__21, __22, __23] [pair, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__21, __22, __23] =>
-            [(Script_typed_ir.pair __21 __22) ** (stack __23)]) [pair, rest] in
+            [Script_typed_ir.pair __21 __22 ** stack __23]) [pair, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let '(__a_value, _) := pair in
         let=? ctxt :=
@@ -437,7 +434,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__24, __25, __26] [pair, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__24, __25, __26] =>
-            [(Script_typed_ir.pair __24 __25) ** (stack __26)]) [pair, rest] in
+            [Script_typed_ir.pair __24 __25 ** stack __26]) [pair, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let '(_, __b_value) := pair in
         let=? ctxt :=
@@ -447,7 +444,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Left, Item v rest, _) =>
       let 'existT _ [__27, __28] [v, rest] :=
         obj_magic_exists (Es := [Set ** Set])
-          (fun '[__27, __28] => [__27 ** (stack __28)]) [v, rest] in
+          (fun '[__27, __28] => [__27 ** stack __28]) [v, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
@@ -455,7 +452,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Right, Item v rest, _) =>
       let 'existT _ [__30, __31] [v, rest] :=
         obj_magic_exists (Es := [Set ** Set])
-          (fun '[__30, __31] => [__30 ** (stack __31)]) [v, rest] in
+          (fun '[__30, __31] => [__30 ** stack __31]) [v, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
@@ -464,10 +461,10 @@ Fixpoint step {a b : Set}
       let 'existT _ [__33, __34, __35] [bt, bf, v, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__33, __34, __35] =>
-            [(Script_typed_ir.descr (__33 * __35) a) **
-              (Script_typed_ir.descr (__34 * __35) a) **
-              (Script_typed_ir.union __33 __34) ** (stack __35)])
-          [bt, bf, v, rest] in
+            [Script_typed_ir.descr (__33 * __35) a **
+              Script_typed_ir.descr (__34 * __35) a **
+              Script_typed_ir.union __33 __34 ** stack __35]) [bt, bf, v, rest]
+        in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         match v with
         | Script_typed_ir.L v =>
@@ -482,7 +479,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Cons_list, Item hd (Item tl rest), _) =>
       let 'existT _ [__36, __37] [hd, tl, rest] :=
         obj_magic_exists (Es := [Set ** Set])
-          (fun '[__36, __37] => [__36 ** (list __36) ** (stack __37)])
+          (fun '[__36, __37] => [__36 ** list __36 ** stack __37])
           [hd, tl, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -500,8 +497,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__39, __40] [bt, bf, l, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__39, __40] =>
-            [(Script_typed_ir.descr (__39 * (list __39 * __40)) a) **
-              (Script_typed_ir.descr __40 a) ** (list __39) ** (stack __40)])
+            [Script_typed_ir.descr (__39 * (list __39 * __40)) a **
+              Script_typed_ir.descr __40 a ** list __39 ** stack __40])
           [bt, bf, l, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         match l with
@@ -518,8 +515,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__41, __42, __43] [body, l, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__41, __42, __43] =>
-            [(Script_typed_ir.descr (__41 * __42) (__43 * __42)) ** (list __41)
-              ** (stack __42)]) [body, l, rest] in
+            [Script_typed_ir.descr (__41 * __42) (__43 * __42) ** list __41 **
+              stack __42]) [body, l, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let fix loop
           (rest : stack __42) (ctxt : Alpha_context.context) (l : list __41)
@@ -538,7 +535,7 @@ Fixpoint step {a b : Set}
             match function_parameter with
             | (Item hd rest, ctxt) =>
               let '[hd, rest, ctxt] :=
-                obj_magic [__43 ** (stack __42) ** Alpha_context.context]
+                obj_magic [__43 ** stack __42 ** Alpha_context.context]
                   [hd, rest, ctxt] in
               obj_magic
                 (Lwt.t
@@ -553,8 +550,8 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.List_size, Item __list_value rest, _) =>
       let 'existT _ [__44, __45] [__list_value, rest] :=
         obj_magic_exists (Es := [Set ** Set])
-          (fun '[__44, __45] => [(list __44) ** (stack __45)])
-          [__list_value, rest] in
+          (fun '[__44, __45] => [list __44 ** stack __45]) [__list_value, rest]
+        in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? '(len, ctxt) :=
           Lwt.__return
@@ -575,8 +572,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__46, __47] [body, l, init] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__46, __47] =>
-            [(Script_typed_ir.descr (__46 * __47) __47) ** (list __46) **
-              (stack __47)]) [body, l, init] in
+            [Script_typed_ir.descr (__46 * __47) __47 ** list __46 **
+              stack __47]) [body, l, init] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let fix loop
           (ctxt : Alpha_context.context) (l : list __46)
@@ -597,7 +594,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Empty_set __t_value, rest, _) =>
       let 'existT _ __48 [__t_value, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __48 => [(Script_typed_ir.comparable_ty __48) ** (stack b)])
+          (fun __48 => [Script_typed_ir.comparable_ty __48 ** stack b])
           [__t_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -609,8 +606,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__49, __50] [body, set, init] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__49, __50] =>
-            [(Script_typed_ir.descr (__49 * __50) __50) **
-              (Script_typed_ir.set __49) ** (stack __50)]) [body, set, init] in
+            [Script_typed_ir.descr (__49 * __50) __50 **
+              Script_typed_ir.set __49 ** stack __50]) [body, set, init] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -639,9 +636,9 @@ Fixpoint step {a b : Set}
       let 'existT _ [__51, __52] [v, set, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__51, __52] =>
-            [__51 ** (Script_typed_ir.set __51) ** (stack __52) **
-              (Script_typed_ir.descr (__51 * (Script_typed_ir.set __51 * __52))
-                (bool * __52))]) [v, set, rest, __descr_value] in
+            [__51 ** Script_typed_ir.set __51 ** stack __52 **
+              Script_typed_ir.descr (__51 * (Script_typed_ir.set __51 * __52))
+                (bool * __52)]) [v, set, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Script_ir_translator.set_mem, v, set)
           Interp_costs.set_mem rest ctxt)
@@ -651,10 +648,10 @@ Fixpoint step {a b : Set}
       let 'existT _ [__53, __54] [v, presence, set, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__53, __54] =>
-            [__53 ** bool ** (Script_typed_ir.set __53) ** (stack __54) **
-              (Script_typed_ir.descr
+            [__53 ** bool ** Script_typed_ir.set __53 ** stack __54 **
+              Script_typed_ir.descr
                 (__53 * (bool * (Script_typed_ir.set __53 * __54)))
-                (Script_typed_ir.set __53 * __54))])
+                (Script_typed_ir.set __53 * __54)])
           [v, presence, set, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_terop __descr_value
@@ -664,9 +661,9 @@ Fixpoint step {a b : Set}
       let 'existT _ [__55, __56] [set, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__55, __56] =>
-            [(Script_typed_ir.set __55) ** (stack __56) **
-              (Script_typed_ir.descr (Script_typed_ir.set __55 * __56)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __56))])
+            [Script_typed_ir.set __55 ** stack __56 **
+              Script_typed_ir.descr (Script_typed_ir.set __55 * __56)
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __56)])
           [set, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Script_ir_translator.set_size, set)
@@ -676,7 +673,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Empty_map __t_value _, rest, _) =>
       let 'existT _ __57 [__t_value, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __57 => [(Script_typed_ir.comparable_ty __57) ** (stack b)])
+          (fun __57 => [Script_typed_ir.comparable_ty __57 ** stack b])
           [__t_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -689,9 +686,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__59, __60, __61, __62] [body, map, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set ** Set])
           (fun '[__59, __60, __61, __62] =>
-            [(Script_typed_ir.descr ((__59 * __60) * __61) (__62 * __61)) **
-              (Script_typed_ir.map __59 __60) ** (stack __61)])
-          [body, map, rest] in
+            [Script_typed_ir.descr ((__59 * __60) * __61) (__62 * __61) **
+              Script_typed_ir.map __59 __60 ** stack __61]) [body, map, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -718,7 +714,7 @@ Fixpoint step {a b : Set}
             match function_parameter with
             | (Item hd rest, ctxt) =>
               let '[hd, rest, ctxt] :=
-                obj_magic [__62 ** (stack __61) ** Alpha_context.context]
+                obj_magic [__62 ** stack __61 ** Alpha_context.context]
                   [hd, rest, ctxt] in
               obj_magic
                 (Lwt.t
@@ -738,9 +734,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__63, __64, __65] [body, map, init] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__63, __64, __65] =>
-            [(Script_typed_ir.descr ((__63 * __64) * __65) __65) **
-              (Script_typed_ir.map __63 __64) ** (stack __65)])
-          [body, map, init] in
+            [Script_typed_ir.descr ((__63 * __64) * __65) __65 **
+              Script_typed_ir.map __63 __64 ** stack __65]) [body, map, init] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -769,9 +764,9 @@ Fixpoint step {a b : Set}
       let 'existT _ [__66, __67, __68] [v, map, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__66, __67, __68] =>
-            [__66 ** (Script_typed_ir.map __66 __67) ** (stack __68) **
-              (Script_typed_ir.descr
-                (__66 * (Script_typed_ir.map __66 __67 * __68)) (bool * __68))])
+            [__66 ** Script_typed_ir.map __66 __67 ** stack __68 **
+              Script_typed_ir.descr
+                (__66 * (Script_typed_ir.map __66 __67 * __68)) (bool * __68)])
           [v, map, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Script_ir_translator.map_mem, v, map)
@@ -780,10 +775,10 @@ Fixpoint step {a b : Set}
       let 'existT _ [__69, __70, __71] [v, map, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__69, __70, __71] =>
-            [__69 ** (Script_typed_ir.map __69 __70) ** (stack __71) **
-              (Script_typed_ir.descr
+            [__69 ** Script_typed_ir.map __69 __70 ** stack __71 **
+              Script_typed_ir.descr
                 (__69 * (Script_typed_ir.map __69 __70 * __71))
-                (option __70 * __71))]) [v, map, rest, __descr_value] in
+                (option __70 * __71)]) [v, map, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Script_ir_translator.map_get, v, map)
           Interp_costs.map_get rest ctxt)
@@ -793,11 +788,11 @@ Fixpoint step {a b : Set}
       let 'existT _ [__72, __73, __74] [k, v, map, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__72, __73, __74] =>
-            [__72 ** (option __73) ** (Script_typed_ir.map __72 __73) **
-              (stack __74) **
-              (Script_typed_ir.descr
+            [__72 ** option __73 ** Script_typed_ir.map __72 __73 ** stack __74
+              **
+              Script_typed_ir.descr
                 (__72 * (option __73 * (Script_typed_ir.map __72 __73 * __74)))
-                (Script_typed_ir.map __72 __73 * __74))])
+                (Script_typed_ir.map __72 __73 * __74)])
           [k, v, map, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_terop __descr_value
@@ -807,9 +802,9 @@ Fixpoint step {a b : Set}
       let 'existT _ [__75, __76, __77] [map, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__75, __76, __77] =>
-            [(Script_typed_ir.map __75 __76) ** (stack __77) **
-              (Script_typed_ir.descr (Script_typed_ir.map __75 __76 * __77)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __77))])
+            [Script_typed_ir.map __75 __76 ** stack __77 **
+              Script_typed_ir.descr (Script_typed_ir.map __75 __76 * __77)
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __77)])
           [map, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Script_ir_translator.map_size, map)
@@ -820,8 +815,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__78, __79] [tk, tv, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__78, __79] =>
-            [(Script_typed_ir.comparable_ty __78) ** (Script_typed_ir.ty __79)
-              ** (stack b)]) [tk, tv, rest] in
+            [Script_typed_ir.comparable_ty __78 ** Script_typed_ir.ty __79 **
+              stack b]) [tk, tv, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map)
@@ -832,7 +827,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__80, __81, __82] [__key_value, map, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__80, __81, __82] =>
-            [__80 ** (Script_typed_ir.big_map __80 __81) ** (stack __82)])
+            [__80 ** Script_typed_ir.big_map __80 __81 ** stack __82])
           [__key_value, map, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -847,7 +842,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__83, __84, __85] [__key_value, map, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__83, __84, __85] =>
-            [__83 ** (Script_typed_ir.big_map __83 __84) ** (stack __85)])
+            [__83 ** Script_typed_ir.big_map __83 __84 ** stack __85])
           [__key_value, map, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -866,12 +861,12 @@ Fixpoint step {a b : Set}
         [__key_value, maybe_value, map, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__86, __87, __88] =>
-            [__86 ** (option __87) ** (Script_typed_ir.big_map __86 __87) **
-              (stack __88) **
-              (Script_typed_ir.descr
+            [__86 ** option __87 ** Script_typed_ir.big_map __86 __87 **
+              stack __88 **
+              Script_typed_ir.descr
                 (__86 *
                   (option __87 * (Script_typed_ir.big_map __86 __87 * __88)))
-                (Script_typed_ir.big_map __86 __87 * __88))])
+                (Script_typed_ir.big_map __86 __87 * __88)])
           [__key_value, maybe_value, map, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_terop __descr_value
@@ -887,12 +882,12 @@ Fixpoint step {a b : Set}
       let 'existT _ __89 [n, __t_value, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __89 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              Alpha_context.Script_timestamp.t ** (stack __89) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_timestamp.t ** stack __89 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_timestamp.t * __89))
-                (Alpha_context.Script_timestamp.t * __89))])
+                (Alpha_context.Script_timestamp.t * __89)])
           [n, __t_value, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value
@@ -905,12 +900,12 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __90 =>
             [Alpha_context.Script_timestamp.t **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __90) **
-              (Script_typed_ir.descr
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __90 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_timestamp.t *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
-                    __90)) (Alpha_context.Script_timestamp.t * __90))])
+                    __90)) (Alpha_context.Script_timestamp.t * __90)])
           [__t_value, n, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value
@@ -923,12 +918,12 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __91 =>
             [Alpha_context.Script_timestamp.t **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __91) **
-              (Script_typed_ir.descr
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __91 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_timestamp.t *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
-                    __91)) (Alpha_context.Script_timestamp.t * __91))])
+                    __91)) (Alpha_context.Script_timestamp.t * __91)])
           [__t_value, s, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value
@@ -941,11 +936,11 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __92 =>
             [Alpha_context.Script_timestamp.t **
-              Alpha_context.Script_timestamp.t ** (stack __92) **
-              (Script_typed_ir.descr
+              Alpha_context.Script_timestamp.t ** stack __92 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_timestamp.t *
                   (Alpha_context.Script_timestamp.t * __92))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __92))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __92)])
           [t1, t2, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value
@@ -954,7 +949,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Concat_string_pair, Item x (Item y rest), _) =>
       let 'existT _ __93 [x, y, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __93 => [string ** string ** (stack __93)]) [x, y, rest] in
+          (fun __93 => [string ** string ** stack __93]) [x, y, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -964,8 +959,8 @@ Fixpoint step {a b : Set}
         logged_return ((Item s rest), ctxt))
     | (Script_typed_ir.Concat_string, Item ss rest, _) =>
       let 'existT _ __94 [ss, rest] :=
-        obj_magic_exists (Es := Set)
-          (fun __94 => [(list string) ** (stack __94)]) [ss, rest] in
+        obj_magic_exists (Es := Set) (fun __94 => [list string ** stack __94])
+          [ss, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -977,9 +972,9 @@ Fixpoint step {a b : Set}
       let 'existT _ __95 [offset, length, s, rest] :=
         obj_magic_exists (Es := Set)
           (fun __95 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              string ** (stack __95)]) [offset, length, s, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n ** string
+              ** stack __95]) [offset, length, s, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let s_length := Z.of_int (String.length s) in
         let offset := Alpha_context.Script_int.to_zint offset in
@@ -1002,7 +997,7 @@ Fixpoint step {a b : Set}
           logged_return ((Item (None (A := unit)) rest), ctxt))
     | (Script_typed_ir.String_size, Item s rest, _) =>
       let 'existT _ __96 [s, rest] :=
-        obj_magic_exists (Es := Set) (fun __96 => [string ** (stack __96)])
+        obj_magic_exists (Es := Set) (fun __96 => [string ** stack __96])
           [s, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1014,7 +1009,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Concat_bytes_pair, Item x (Item y rest), _) =>
       let 'existT _ __97 [x, y, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __97 => [MBytes.t ** MBytes.t ** (stack __97)]) [x, y, rest] in
+          (fun __97 => [MBytes.t ** MBytes.t ** stack __97]) [x, y, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -1024,8 +1019,8 @@ Fixpoint step {a b : Set}
         logged_return ((Item s rest), ctxt))
     | (Script_typed_ir.Concat_bytes, Item ss rest, _) =>
       let 'existT _ __98 [ss, rest] :=
-        obj_magic_exists (Es := Set)
-          (fun __98 => [(list MBytes.t) ** (stack __98)]) [ss, rest] in
+        obj_magic_exists (Es := Set) (fun __98 => [list MBytes.t ** stack __98])
+          [ss, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -1037,9 +1032,9 @@ Fixpoint step {a b : Set}
       let 'existT _ __99 [offset, length, s, rest] :=
         obj_magic_exists (Es := Set)
           (fun __99 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              MBytes.t ** (stack __99)]) [offset, length, s, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              MBytes.t ** stack __99]) [offset, length, s, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let s_length := Z.of_int (MBytes.length s) in
         let offset := Alpha_context.Script_int.to_zint offset in
@@ -1062,7 +1057,7 @@ Fixpoint step {a b : Set}
           logged_return ((Item (None (A := unit)) rest), ctxt))
     | (Script_typed_ir.Bytes_size, Item s rest, _) =>
       let 'existT _ __100 [s, rest] :=
-        obj_magic_exists (Es := Set) (fun __100 => [MBytes.t ** (stack __100)])
+        obj_magic_exists (Es := Set) (fun __100 => [MBytes.t ** stack __100])
           [s, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1075,7 +1070,7 @@ Fixpoint step {a b : Set}
       let 'existT _ __101 [x, y, rest] :=
         obj_magic_exists (Es := Set)
           (fun __101 =>
-            [Alpha_context.Tez.t ** Alpha_context.Tez.t ** (stack __101)])
+            [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack __101])
           [x, y, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1086,7 +1081,7 @@ Fixpoint step {a b : Set}
       let 'existT _ __102 [x, y, rest] :=
         obj_magic_exists (Es := Set)
           (fun __102 =>
-            [Alpha_context.Tez.t ** Alpha_context.Tez.t ** (stack __102)])
+            [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack __102])
           [x, y, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1098,8 +1093,8 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __103 =>
             [Alpha_context.Tez.t **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __103)]) [x, y, rest] in
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __103]) [x, y, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
@@ -1116,8 +1111,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __104 [y, x, rest] :=
         obj_magic_exists (Es := Set)
           (fun __104 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              Alpha_context.Tez.t ** (stack __104)]) [y, x, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Tez.t ** stack __104]) [y, x, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
@@ -1134,8 +1129,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __105 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __105 =>
-            [bool ** bool ** (stack __105) **
-              (Script_typed_ir.descr (bool * (bool * __105)) (bool * __105))])
+            [bool ** bool ** stack __105 **
+              Script_typed_ir.descr (bool * (bool * __105)) (bool * __105)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Pervasives.op_pipepipe, x, y)
@@ -1144,8 +1139,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __106 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __106 =>
-            [bool ** bool ** (stack __106) **
-              (Script_typed_ir.descr (bool * (bool * __106)) (bool * __106))])
+            [bool ** bool ** stack __106 **
+              Script_typed_ir.descr (bool * (bool * __106)) (bool * __106)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Pervasives.op_andand, x, y)
@@ -1154,8 +1149,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __107 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __107 =>
-            [bool ** bool ** (stack __107) **
-              (Script_typed_ir.descr (bool * (bool * __107)) (bool * __107))])
+            [bool ** bool ** stack __107 **
+              Script_typed_ir.descr (bool * (bool * __107)) (bool * __107)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value
@@ -1165,8 +1160,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __108 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __108 =>
-            [bool ** (stack __108) **
-              (Script_typed_ir.descr (bool * __108) (bool * __108))])
+            [bool ** stack __108 **
+              Script_typed_ir.descr (bool * __108) (bool * __108)])
           [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Pervasives.not, x)
@@ -1175,13 +1170,13 @@ Fixpoint step {a b : Set}
       let 'existT _ __109 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __109 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __109) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __109 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z * __109)
                 (option
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n) *
-                  __109))]) [x, rest, __descr_value] in
+                  __109)]) [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Alpha_context.Script_int.is_nat, x)
           (Interp_costs.abs (A := unit)) rest ctxt)
@@ -1189,11 +1184,11 @@ Fixpoint step {a b : Set}
       let 'existT _ __110 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __110 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __110) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __110 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z * __110)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __110))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __110)])
           [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Alpha_context.Script_int.abs, x)
@@ -1202,11 +1197,11 @@ Fixpoint step {a b : Set}
       let 'existT _ __111 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __111 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __111) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __111 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n * __111)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __111))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __111)])
           [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value
@@ -1216,11 +1211,11 @@ Fixpoint step {a b : Set}
       let 'existT _ __112 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __112 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __112) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __112 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z * __112)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __112))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __112)])
           [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
@@ -1229,11 +1224,11 @@ Fixpoint step {a b : Set}
       let 'existT _ __113 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __113 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __113) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __113 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n * __113)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __113))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __113)])
           [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
@@ -1242,14 +1237,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __114 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __114 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __114) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __114 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                     __114))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __114))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __114)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
@@ -1258,14 +1253,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __115 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __115 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __115) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __115 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __115))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __115))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __115)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
@@ -1274,14 +1269,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __116 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __116 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __116) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __116 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                     __116))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __116))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __116)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
@@ -1290,14 +1285,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __117 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __117 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __117) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __117 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __117))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __117))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __117)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.add_n, x, y)
@@ -1306,12 +1301,12 @@ Fixpoint step {a b : Set}
       let 'existT _ [__118, __119, __120] [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__118, __119, __120] =>
-            [(Alpha_context.Script_int.num __118) **
-              (Alpha_context.Script_int.num __119) ** (stack __120) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num __118 **
+              Alpha_context.Script_int.num __119 ** stack __120 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num __118 *
                   (Alpha_context.Script_int.num __119 * __120))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __120))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __120)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.sub, x, y)
@@ -1320,14 +1315,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __121 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __121 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __121) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __121 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                     __121))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __121))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __121)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
@@ -1336,14 +1331,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __122 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __122 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __122) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __122 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __122))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __122))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __122)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
@@ -1352,14 +1347,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __123 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __123 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __123) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __123 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                     __123))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __123))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __123)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
@@ -1368,14 +1363,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __124 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __124 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __124) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __124 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __124))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __124))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __124)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.mul_n, x, y)
@@ -1385,15 +1380,15 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __125 =>
             [Alpha_context.Tez.t **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __125) **
-              (Script_typed_ir.descr
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __125 **
+              Script_typed_ir.descr
                 (Alpha_context.Tez.t *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __125))
                 (option
                   (Script_typed_ir.pair Alpha_context.Tez.t Alpha_context.Tez.t)
-                  * __125))]) [x, y, rest, __descr_value] in
+                  * __125)]) [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z)
@@ -1427,13 +1422,13 @@ Fixpoint step {a b : Set}
       let 'existT _ __126 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __126 =>
-            [Alpha_context.Tez.t ** Alpha_context.Tez.t ** (stack __126) **
-              (Script_typed_ir.descr
+            [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack __126 **
+              Script_typed_ir.descr
                 (Alpha_context.Tez.t * (Alpha_context.Tez.t * __126))
                 (option
                   (Script_typed_ir.pair
                     (Alpha_context.Script_int.num Alpha_context.Script_int.n)
-                    Alpha_context.Tez.t) * __126))]) [x, y, rest, __descr_value]
+                    Alpha_context.Tez.t) * __126)]) [x, y, rest, __descr_value]
         in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1473,10 +1468,10 @@ Fixpoint step {a b : Set}
       let 'existT _ __127 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __127 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __127) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __127 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                     __127))
@@ -1484,7 +1479,7 @@ Fixpoint step {a b : Set}
                   (Script_typed_ir.pair
                     (Alpha_context.Script_int.num Alpha_context.Script_int.z)
                     (Alpha_context.Script_int.num Alpha_context.Script_int.n)) *
-                  __127))]) [x, y, rest, __descr_value] in
+                  __127)]) [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
           (Interp_costs.div (A := unit) (B := unit)) rest ctxt)
@@ -1492,10 +1487,10 @@ Fixpoint step {a b : Set}
       let 'existT _ __128 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __128 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __128) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __128 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __128))
@@ -1503,7 +1498,7 @@ Fixpoint step {a b : Set}
                   (Script_typed_ir.pair
                     (Alpha_context.Script_int.num Alpha_context.Script_int.z)
                     (Alpha_context.Script_int.num Alpha_context.Script_int.n)) *
-                  __128))]) [x, y, rest, __descr_value] in
+                  __128)]) [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
           (Interp_costs.div (A := unit) (B := unit)) rest ctxt)
@@ -1511,10 +1506,10 @@ Fixpoint step {a b : Set}
       let 'existT _ __129 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __129 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __129) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __129 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                     __129))
@@ -1522,7 +1517,7 @@ Fixpoint step {a b : Set}
                   (Script_typed_ir.pair
                     (Alpha_context.Script_int.num Alpha_context.Script_int.z)
                     (Alpha_context.Script_int.num Alpha_context.Script_int.n)) *
-                  __129))]) [x, y, rest, __descr_value] in
+                  __129)]) [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
           (Interp_costs.div (A := unit) (B := unit)) rest ctxt)
@@ -1530,10 +1525,10 @@ Fixpoint step {a b : Set}
       let 'existT _ __130 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __130 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __130) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __130 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __130))
@@ -1541,7 +1536,7 @@ Fixpoint step {a b : Set}
                   (Script_typed_ir.pair
                     (Alpha_context.Script_int.num Alpha_context.Script_int.n)
                     (Alpha_context.Script_int.num Alpha_context.Script_int.n)) *
-                  __130))]) [x, y, rest, __descr_value] in
+                  __130)]) [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.ediv_n, x, y)
           (Interp_costs.div (A := unit) (B := unit)) rest ctxt)
@@ -1549,9 +1544,9 @@ Fixpoint step {a b : Set}
       let 'existT _ __131 [x, y, rest] :=
         obj_magic_exists (Es := Set)
           (fun __131 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __131)]) [x, y, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __131]) [x, y, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -1564,9 +1559,9 @@ Fixpoint step {a b : Set}
       let 'existT _ __132 [x, y, rest] :=
         obj_magic_exists (Es := Set)
           (fun __132 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __132)]) [x, y, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __132]) [x, y, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -1579,14 +1574,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __133 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __133 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __133) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __133 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __133))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __133))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __133)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.logor, x, y)
@@ -1595,14 +1590,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __134 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __134 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __134) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __134 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __134))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __134))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __134)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
@@ -1611,14 +1606,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __135 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __135 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __135) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __135 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __135))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __135))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __135)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
@@ -1627,14 +1622,14 @@ Fixpoint step {a b : Set}
       let 'existT _ __136 [x, y, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __136 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __136) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __136 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                   (Alpha_context.Script_int.num Alpha_context.Script_int.n *
                     __136))
-                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __136))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.n * __136)])
           [x, y, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_binop __descr_value (Alpha_context.Script_int.logxor, x, y)
@@ -1643,11 +1638,11 @@ Fixpoint step {a b : Set}
       let 'existT _ __137 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __137 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __137) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __137 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.z * __137)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __137))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __137)])
           [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
@@ -1656,11 +1651,11 @@ Fixpoint step {a b : Set}
       let 'existT _ __138 [x, rest, __descr_value] :=
         obj_magic_exists (Es := Set)
           (fun __138 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.n) **
-              (stack __138) **
-              (Script_typed_ir.descr
+            [Alpha_context.Script_int.num Alpha_context.Script_int.n **
+              stack __138 **
+              Script_typed_ir.descr
                 (Alpha_context.Script_int.num Alpha_context.Script_int.n * __138)
-                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __138))])
+                (Alpha_context.Script_int.num Alpha_context.Script_int.z * __138)])
           [x, rest, __descr_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
@@ -1669,8 +1664,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __Seq_'trans3 [hd, tl, __stack_value] :=
         obj_magic_exists (Es := Set)
           (fun __Seq_'trans3 =>
-            [(Script_typed_ir.descr b __Seq_'trans3) **
-              (Script_typed_ir.descr __Seq_'trans3 a) ** (stack b)])
+            [Script_typed_ir.descr b __Seq_'trans3 **
+              Script_typed_ir.descr __Seq_'trans3 a ** stack b])
           [hd, tl, __stack_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? '(trans, ctxt) := step log ctxt step_constants hd __stack_value
@@ -1680,8 +1675,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __139 [bt, bf, __b_value, rest] :=
         obj_magic_exists (Es := Set)
           (fun __139 =>
-            [(Script_typed_ir.descr __139 a) ** (Script_typed_ir.descr __139 a)
-              ** bool ** (stack __139)]) [bt, bf, __b_value, rest] in
+            [Script_typed_ir.descr __139 a ** Script_typed_ir.descr __139 a **
+              bool ** stack __139]) [bt, bf, __b_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (if __b_value then
           let=? ctxt :=
@@ -1695,8 +1690,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __140 [body, __b_value, rest] :=
         obj_magic_exists (Es := Set)
           (fun __140 =>
-            [(Script_typed_ir.descr __140 (bool * __140)) ** bool **
-              (stack __140)]) [body, __b_value, rest] in
+            [Script_typed_ir.descr __140 (bool * __140) ** bool ** stack __140])
+          [body, __b_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (if __b_value then
           let=? ctxt :=
@@ -1710,10 +1705,10 @@ Fixpoint step {a b : Set}
       let 'existT _ [__141, __142, __143] [body, v, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__141, __142, __143] =>
-            [(Script_typed_ir.descr (__141 * __143)
-              (Script_typed_ir.union __141 __142 * __143)) **
-              (Script_typed_ir.union __141 __142) ** (stack __143)])
-          [body, v, rest] in
+            [Script_typed_ir.descr (__141 * __143)
+              (Script_typed_ir.union __141 __142 * __143) **
+              Script_typed_ir.union __141 __142 ** stack __143]) [body, v, rest]
+        in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         match v with
         | Script_typed_ir.L v =>
@@ -1733,7 +1728,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__144, __145, __146] [__b_value, ign, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__144, __145, __146] =>
-            [(Script_typed_ir.descr __145 __146) ** __144 ** (stack __145)])
+            [Script_typed_ir.descr __145 __146 ** __144 ** stack __145])
           [__b_value, ign, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1744,7 +1739,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__147, __148, __149] [arg, lam, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__147, __148, __149] =>
-            [__147 ** (Script_typed_ir.lambda __147 __148) ** (stack __149)])
+            [__147 ** Script_typed_ir.lambda __147 __148 ** stack __149])
           [arg, lam, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1756,8 +1751,8 @@ Fixpoint step {a b : Set}
         [capture_ty, capture, lam, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set ** Set])
           (fun '[__150, __151, __152, __153] =>
-            [(Script_typed_ir.ty __150) ** __150 **
-              (Script_typed_ir.lambda (__150 * __151) __152) ** (stack __153)])
+            [Script_typed_ir.ty __150 ** __150 **
+              Script_typed_ir.lambda (__150 * __151) __152 ** stack __153])
           [capture_ty, capture, lam, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -1836,7 +1831,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__154, __155] [lam, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__154, __155] =>
-            [(Script_typed_ir.lambda __154 __155) ** (stack b)]) [lam, rest] in
+            [Script_typed_ir.lambda __154 __155 ** stack b]) [lam, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
@@ -1844,7 +1839,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Failwith tv, Item v _, _) =>
       let 'existT _ __156 [tv, v] :=
         obj_magic_exists (Es := Set)
-          (fun __156 => [(Script_typed_ir.ty __156) ** __156]) [tv, v] in
+          (fun __156 => [Script_typed_ir.ty __156 ** __156]) [tv, v] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? '(v, _ctxt) :=
           Error_monad.trace extensible_type_value
@@ -1860,8 +1855,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__158, __159] [ty, __a_value, __b_value, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__158, __159] =>
-            [(Script_typed_ir.comparable_ty __158) ** __158 ** __158 **
-              (stack __159)]) [ty, __a_value, __b_value, rest] in
+            [Script_typed_ir.comparable_ty __158 ** __158 ** __158 **
+              stack __159]) [ty, __a_value, __b_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -1876,8 +1871,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __160 [cmpres, rest] :=
         obj_magic_exists (Es := Set)
           (fun __160 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __160)]) [cmpres, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __160]) [cmpres, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let cmpres :=
           Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero
@@ -1891,8 +1886,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __161 [cmpres, rest] :=
         obj_magic_exists (Es := Set)
           (fun __161 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __161)]) [cmpres, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __161]) [cmpres, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let cmpres :=
           Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero
@@ -1906,8 +1901,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __162 [cmpres, rest] :=
         obj_magic_exists (Es := Set)
           (fun __162 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __162)]) [cmpres, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __162]) [cmpres, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let cmpres :=
           Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero
@@ -1921,8 +1916,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __163 [cmpres, rest] :=
         obj_magic_exists (Es := Set)
           (fun __163 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __163)]) [cmpres, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __163]) [cmpres, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let cmpres :=
           Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero
@@ -1936,8 +1931,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __164 [cmpres, rest] :=
         obj_magic_exists (Es := Set)
           (fun __164 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __164)]) [cmpres, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __164]) [cmpres, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let cmpres :=
           Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero
@@ -1951,8 +1946,8 @@ Fixpoint step {a b : Set}
       let 'existT _ __165 [cmpres, rest] :=
         obj_magic_exists (Es := Set)
           (fun __165 =>
-            [(Alpha_context.Script_int.num Alpha_context.Script_int.z) **
-              (stack __165)]) [cmpres, rest] in
+            [Alpha_context.Script_int.num Alpha_context.Script_int.z **
+              stack __165]) [cmpres, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let cmpres :=
           Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero
@@ -1966,7 +1961,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__166, __167] [__t_value, value, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__166, __167] =>
-            [(Script_typed_ir.ty __166) ** __166 ** (stack __167)])
+            [Script_typed_ir.ty __166 ** __166 ** stack __167])
           [__t_value, value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? '(__bytes_value, ctxt) :=
@@ -1976,7 +1971,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__168, __169] [__t_value, __bytes_value, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__168, __169] =>
-            [(Script_typed_ir.ty __169) ** MBytes.t ** (stack __168)])
+            [Script_typed_ir.ty __169 ** MBytes.t ** stack __168])
           [__t_value, __bytes_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? '_ :=
@@ -2025,8 +2020,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__170, __171] [pair, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__170, __171] =>
-            [(Script_typed_ir.typed_contract __170) ** (stack __171)])
-          [pair, rest] in
+            [Script_typed_ir.typed_contract __170 ** stack __171]) [pair, rest]
+        in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let '(_, address) := pair in
         let=? ctxt :=
@@ -2036,8 +2031,8 @@ Fixpoint step {a b : Set}
       let 'existT _ [__172, __173] [__t_value, entrypoint, contract, rest] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__172, __173] =>
-            [(Script_typed_ir.ty __173) ** string ** Script_typed_ir.address **
-              (stack __172)]) [__t_value, entrypoint, contract, rest] in
+            [Script_typed_ir.ty __173 ** string ** Script_typed_ir.address **
+              stack __172]) [__t_value, entrypoint, contract, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.contract) in
@@ -2058,7 +2053,7 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__174, __175] =>
             [__174 ** Alpha_context.Tez.t **
-              (Script_typed_ir.typed_contract __174) ** (stack __175)])
+              Script_typed_ir.typed_contract __174 ** stack __175])
           [__p_value, amount, triple, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let '(tp, (destination, entrypoint)) := triple in
@@ -2103,8 +2098,8 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __176 =>
             [Alpha_context.public_key_hash **
-              (option Alpha_context.public_key_hash) ** bool **
-              Alpha_context.Tez.t ** (stack __176)])
+              option Alpha_context.public_key_hash ** bool **
+              Alpha_context.Tez.t ** stack __176])
           [manager, delegate, _delegatable, credit, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2145,7 +2140,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Implicit_account, Item __key_value rest, _) =>
       let 'existT _ __177 [__key_value, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __177 => [Alpha_context.public_key_hash ** (stack __177)])
+          (fun __177 => [Alpha_context.public_key_hash ** stack __177])
           [__key_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2167,12 +2162,11 @@ Fixpoint step {a b : Set}
           spendable, delegatable, credit, init, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__178, __179, __Create_contract_'p] =>
-            [(Script_typed_ir.ty __178) **
-              (Script_typed_ir.ty __Create_contract_'p) **
-              Alpha_context.Script.node ** (option string) **
+            [Script_typed_ir.ty __178 ** Script_typed_ir.ty __Create_contract_'p
+              ** Alpha_context.Script.node ** option string **
               Alpha_context.public_key_hash **
-              (option Alpha_context.public_key_hash) ** bool ** bool **
-              Alpha_context.Tez.t ** __178 ** (stack __179)])
+              option Alpha_context.public_key_hash ** bool ** bool **
+              Alpha_context.Tez.t ** __178 ** stack __179])
           [storage_type, param_type, code, root_name, manager, delegate,
             spendable, delegatable, credit, init, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
@@ -2258,11 +2252,11 @@ Fixpoint step {a b : Set}
           rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__180, __181, __Create_contract_2_'p] =>
-            [(Script_typed_ir.ty __180) **
-              (Script_typed_ir.ty __Create_contract_2_'p) **
-              Alpha_context.Script.node ** (option string) **
-              (option Alpha_context.public_key_hash) ** Alpha_context.Tez.t **
-              __180 ** (stack __181)])
+            [Script_typed_ir.ty __180 **
+              Script_typed_ir.ty __Create_contract_2_'p **
+              Alpha_context.Script.node ** option string **
+              option Alpha_context.public_key_hash ** Alpha_context.Tez.t **
+              __180 ** stack __181])
           [storage_type, param_type, code, root_name, delegate, credit, init,
             rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
@@ -2326,8 +2320,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Set_delegate, Item delegate rest, _) =>
       let 'existT _ __182 [delegate, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __182 =>
-            [(option Alpha_context.public_key_hash) ** (stack __182)])
+          (fun __182 => [option Alpha_context.public_key_hash ** stack __182])
           [delegate, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2368,7 +2361,7 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __183 =>
             [Alpha_context.public_key ** Alpha_context.signature ** MBytes.t **
-              (stack __183)]) [__key_value, signature, message, rest] in
+              stack __183]) [__key_value, signature, message, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -2379,7 +2372,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Hash_key, Item __key_value rest, _) =>
       let 'existT _ __184 [__key_value, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __184 => [Alpha_context.public_key ** (stack __184)])
+          (fun __184 => [Alpha_context.public_key ** stack __184])
           [__key_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2390,7 +2383,7 @@ Fixpoint step {a b : Set}
             rest), ctxt))
     | (Script_typed_ir.Blake2b, Item __bytes_value rest, _) =>
       let 'existT _ __185 [__bytes_value, rest] :=
-        obj_magic_exists (Es := Set) (fun __185 => [MBytes.t ** (stack __185)])
+        obj_magic_exists (Es := Set) (fun __185 => [MBytes.t ** stack __185])
           [__bytes_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2401,7 +2394,7 @@ Fixpoint step {a b : Set}
         logged_return ((Item __hash_value rest), ctxt))
     | (Script_typed_ir.Sha256, Item __bytes_value rest, _) =>
       let 'existT _ __186 [__bytes_value, rest] :=
-        obj_magic_exists (Es := Set) (fun __186 => [MBytes.t ** (stack __186)])
+        obj_magic_exists (Es := Set) (fun __186 => [MBytes.t ** stack __186])
           [__bytes_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2412,7 +2405,7 @@ Fixpoint step {a b : Set}
         logged_return ((Item __hash_value rest), ctxt))
     | (Script_typed_ir.Sha512, Item __bytes_value rest, _) =>
       let 'existT _ __187 [__bytes_value, rest] :=
-        obj_magic_exists (Es := Set) (fun __187 => [MBytes.t ** (stack __187)])
+        obj_magic_exists (Es := Set) (fun __187 => [MBytes.t ** stack __187])
           [__bytes_value, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2456,7 +2449,7 @@ Fixpoint step {a b : Set}
     | (Script_typed_ir.Self __t_value entrypoint, rest, _) =>
       let 'existT _ __188 [__t_value, entrypoint, rest] :=
         obj_magic_exists (Es := Set)
-          (fun __188 => [(Script_typed_ir.ty __188) ** string ** (stack b)])
+          (fun __188 => [Script_typed_ir.ty __188 ** string ** stack b])
           [__t_value, entrypoint, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2475,8 +2468,8 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__189, __190, __Dig_'rest] =>
             [Z **
-              (Script_typed_ir.stack_prefix_preservation_witness
-                (__189 * __Dig_'rest) __Dig_'rest b __190) ** (stack b)])
+              Script_typed_ir.stack_prefix_preservation_witness
+                (__189 * __Dig_'rest) __Dig_'rest b __190 ** stack b])
           [n, n', __stack_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2488,7 +2481,7 @@ Fixpoint step {a b : Set}
               match function_parameter with
               | Item v rest =>
                 let '[v, rest] :=
-                  obj_magic [__189 ** (stack __Dig_'rest)] [v, rest] in
+                  obj_magic [__189 ** stack __Dig_'rest] [v, rest] in
                 obj_magic
                   (Lwt.t (Error_monad.tzresult (stack __Dig_'rest * __189)))
                   (Error_monad.__return (rest, v))
@@ -2500,8 +2493,8 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__191, __192, __Dug_'rest] =>
             [Z **
-              (Script_typed_ir.stack_prefix_preservation_witness __Dug_'rest
-                (__191 * __Dug_'rest) __192 a) ** __191 ** (stack __192)])
+              Script_typed_ir.stack_prefix_preservation_witness __Dug_'rest
+                (__191 * __Dug_'rest) __192 a ** __191 ** stack __192])
           [n, n', v, rest] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2517,9 +2510,9 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__Dipn_'faft, __Dipn_'fbef] =>
             [Z **
-              (Script_typed_ir.stack_prefix_preservation_witness __Dipn_'fbef
-                __Dipn_'faft b a) **
-              (Script_typed_ir.descr __Dipn_'fbef __Dipn_'faft) ** (stack b)])
+              Script_typed_ir.stack_prefix_preservation_witness __Dipn_'fbef
+                __Dipn_'faft b a **
+              Script_typed_ir.descr __Dipn_'fbef __Dipn_'faft ** stack b])
           [n, n', __b_value, __stack_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
@@ -2537,8 +2530,8 @@ Fixpoint step {a b : Set}
         obj_magic_exists (Es := Set)
           (fun __Dropn =>
             [Z **
-              (Script_typed_ir.stack_prefix_preservation_witness a a b __Dropn)
-              ** (stack b)]) [n, n', __stack_value] in
+              Script_typed_ir.stack_prefix_preservation_witness a a b __Dropn **
+              stack b]) [n, n', __stack_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
         (let=? ctxt :=
           Lwt.__return
@@ -2610,11 +2603,11 @@ Definition execute
     [code, arg_type, storage, storage_type, root_name, ctxt] :=
     obj_magic_exists (Es := [Set ** Set])
       (fun '[__Ex_script_'a, __Ex_script_'b] =>
-        [(Script_typed_ir.lambda
+        [Script_typed_ir.lambda
           (Script_typed_ir.pair __Ex_script_'a __Ex_script_'b)
-          (Script_typed_ir.pair (list Script_typed_ir.operation) __Ex_script_'b))
-          ** (Script_typed_ir.ty __Ex_script_'a) ** __Ex_script_'b **
-          (Script_typed_ir.ty __Ex_script_'b) ** (option string) **
+          (Script_typed_ir.pair (list Script_typed_ir.operation) __Ex_script_'b)
+          ** Script_typed_ir.ty __Ex_script_'a ** __Ex_script_'b **
+          Script_typed_ir.ty __Ex_script_'b ** option string **
           Alpha_context.context])
       [code, arg_type, storage, storage_type, root_name, ctxt] in
   obj_magic

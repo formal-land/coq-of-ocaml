@@ -382,7 +382,7 @@ Fixpoint to_list (function_parameter : packed_contents_list)
   let 'Contents_list content := function_parameter in
   let 'existT _ __Contents_list_'kind content :=
     existT (A := Set)
-      (fun __Contents_list_'kind => (contents_list __Contents_list_'kind)) _
+      (fun __Contents_list_'kind => contents_list __Contents_list_'kind) _
       content in
   match content with
   | Single o =>
@@ -392,7 +392,7 @@ Fixpoint to_list (function_parameter : packed_contents_list)
     let 'existT _ [__0, __1] [o, os] :=
       obj_magic_exists (Es := [Set ** Set])
         (fun '[__0, __1] =>
-          [(contents (Kind.manager __0)) ** (contents_list (Kind.manager __1))])
+          [contents (Kind.manager __0) ** contents_list (Kind.manager __1)])
         [o, os] in
     obj_magic (list packed_contents)
       (cons (Contents o) (to_list (Contents_list os)))
@@ -406,19 +406,19 @@ Fixpoint of_list (function_parameter : list packed_contents)
     assert false
   | cons (Contents o) [] =>
     let 'existT _ __Contents_'kind o :=
-      existT (A := Set) (fun __Contents_'kind => (contents __Contents_'kind)) _
-        o in
+      existT (A := Set) (fun __Contents_'kind => contents __Contents_'kind) _ o
+      in
     Contents_list (Single o)
   | cons (Contents o) os =>
     let 'existT _ __Contents_'kind1 [o, os] :=
       existT (A := Set)
         (fun __Contents_'kind1 =>
-          [(contents __Contents_'kind1) ** (list packed_contents)]) _ [o, os] in
+          [contents __Contents_'kind1 ** list packed_contents]) _ [o, os] in
     let 'Contents_list os := of_list os in
     let 'existT _ __Contents_list_'kind os :=
       existT (A := Set)
-        (fun __Contents_list_'kind => (contents_list __Contents_list_'kind)) _
-        os in
+        (fun __Contents_list_'kind => contents_list __Contents_list_'kind) _ os
+      in
     match (o, os) with
     | (Manager_operation _, Single (Manager_operation _)) =>
       Contents_list (Cons o os)
@@ -649,10 +649,10 @@ Module Encoding.
         let 'existT _ __MCase_'a [tag, name, encoding, select, proj, inj] :=
           existT (A := Set)
             (fun __MCase_'a =>
-              [Z ** string ** (Data_encoding.t __MCase_'a) **
-                (packed_manager_operation -> option (manager_operation A)) **
-                (manager_operation A -> __MCase_'a) **
-                (__MCase_'a -> manager_operation A)]) _
+              [Z ** string ** Data_encoding.t __MCase_'a **
+                packed_manager_operation -> option (manager_operation A) **
+                manager_operation A -> __MCase_'a **
+                __MCase_'a -> manager_operation A]) _
             [tag, name, encoding, select, proj, inj] in
         __case_value (Data_encoding.Tag tag) name encoding
           (fun o =>
@@ -741,9 +741,8 @@ Module Encoding.
       let 'existT _ __Case_'a [tag, name, encoding, proj, inj] :=
         existT (A := Set)
           (fun __Case_'a =>
-            [Z ** string ** (Data_encoding.t __Case_'a) **
-              (contents A -> __Case_'a) ** (__Case_'a -> contents A)]) _
-          [tag, name, encoding, proj, inj] in
+            [Z ** string ** Data_encoding.t __Case_'a ** contents A -> __Case_'a
+              ** __Case_'a -> contents A]) _ [tag, name, encoding, proj, inj] in
       __case_value (Data_encoding.Tag tag) name encoding
         (fun o => Some (proj o)) (fun x => inj x) in
     let to_list (function_parameter : contents_list Kind.endorsement)
@@ -1020,7 +1019,7 @@ Module Encoding.
     let 'Manager_operations.MCase mcase := function_parameter in
     let 'existT _ __MCase_'a mcase :=
       existT (A := Set)
-        (fun __MCase_'a => (Manager_operations.case.MCase __MCase_'a kind)) _
+        (fun __MCase_'a => Manager_operations.case.MCase __MCase_'a kind) _
         mcase in
     Case
       {| case.Case.tag := tag;
@@ -1039,8 +1038,8 @@ Module Encoding.
               let 'existT _ __0 [operation, op] :=
                 existT (A := Set)
                   (fun __0 =>
-                    [(manager_operation __0) **
-                      (contents.Manager_operation __0)]) _ [operation, op] in
+                    [manager_operation __0 ** contents.Manager_operation __0]) _
+                  [operation, op] in
               match
                 mcase.(Manager_operations.case.MCase.select) (Manager operation)
                 with
@@ -1092,9 +1091,9 @@ Module Encoding.
       let 'existT _ __Case_'a [tag, name, encoding, select, proj, inj] :=
         existT (A := Set)
           (fun __Case_'a =>
-            [Z ** string ** (Data_encoding.t __Case_'a) **
-              (packed_contents -> option (contents A)) **
-              (contents A -> __Case_'a) ** (__Case_'a -> contents A)]) _
+            [Z ** string ** Data_encoding.t __Case_'a **
+              packed_contents -> option (contents A) ** contents A -> __Case_'a
+              ** __Case_'a -> contents A]) _
           [tag, name, encoding, select, proj, inj] in
       __case_value (Data_encoding.Tag tag) name encoding
         (fun o =>
@@ -1152,16 +1151,16 @@ Module Encoding.
           let 'existT _ __Operation_data_'kind [contents, signature] :=
             existT (A := Set)
               (fun __Operation_data_'kind =>
-                [(contents_list __Operation_data_'kind) ** (option Signature.t)])
-              _ [contents, signature] in
+                [contents_list __Operation_data_'kind ** option Signature.t]) _
+              [contents, signature] in
           ((Contents_list contents), signature))
         (fun function_parameter =>
           let '(Contents_list contents, signature) := function_parameter in
           let 'existT _ __Contents_list_'kind [contents, signature] :=
             existT (A := Set)
               (fun __Contents_list_'kind =>
-                [(contents_list __Contents_list_'kind) ** (option Signature.t)])
-              _ [contents, signature] in
+                [contents_list __Contents_list_'kind ** option Signature.t]) _
+              [contents, signature] in
           Operation_data
             {| protocol_data.contents := contents;
               protocol_data.signature := signature |}) None
@@ -1209,7 +1208,7 @@ Module Encoding.
             existT (A := Set)
               (fun __Internal_operation_'kind =>
                 [Contract_repr.contract **
-                  (manager_operation __Internal_operation_'kind) ** Z]) _
+                  manager_operation __Internal_operation_'kind ** Z]) _
               [source, operation, __nonce_value] in
           ((source, __nonce_value), (Manager operation)))
         (fun function_parameter =>
@@ -1219,7 +1218,7 @@ Module Encoding.
             existT (A := Set)
               (fun __Manager_'kind =>
                 [Contract_repr.contract ** Z **
-                  (manager_operation __Manager_'kind)]) _
+                  manager_operation __Manager_'kind]) _
               [source, __nonce_value, operation] in
           Internal_operation
             {| internal_operation.source := source;
@@ -1268,7 +1267,7 @@ Definition acceptable_passes (op : packed_operation) : list Z :=
   let 'Operation_data protocol_data := op.(packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind protocol_data :=
     existT (A := Set)
-      (fun __Operation_data_'kind => (protocol_data __Operation_data_'kind)) _
+      (fun __Operation_data_'kind => protocol_data __Operation_data_'kind) _
       protocol_data in
   match protocol_data.(protocol_data.contents) with
   | Single (Endorsement _) => [ 0 ]
@@ -1323,7 +1322,7 @@ Definition check_signature_sync {A : Set}
     let 'existT _ [__2, __3] [contents, signature] :=
       existT (A := [Set ** Set])
         (fun '[__2, __3] =>
-          [(contents_list (Kind.manager (__2 * __3))) ** Signature.t]) [_, _]
+          [contents_list (Kind.manager (__2 * __3)) ** Signature.t]) [_, _]
         [contents, signature] in
     check Signature.Generic_operation (Contents_list contents) signature
   end.
@@ -1395,7 +1394,7 @@ Definition equal_contents_kind {a b : Set} (op1 : contents a) (op2 : contents b)
     let 'existT _ [__0, __1] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [(contents.Manager_operation __0) ** (contents.Manager_operation __1)])
+          [contents.Manager_operation __0 ** contents.Manager_operation __1])
         [_, _] [op1, op2] in
     match
       equal_manager_operation_kind op1.(contents.Manager_operation.operation)
@@ -1417,10 +1416,9 @@ Fixpoint equal_contents_kind_list {a b : Set}
     let 'existT _ [__4, __5, __6, __7] [op1, ops1, op2, ops2] :=
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__4, __5, __6, __7] =>
-          [(contents (Kind.manager __4)) ** (contents_list (Kind.manager __5))
-            ** (contents (Kind.manager __6)) **
-            (contents_list (Kind.manager __7))]) [_, _, _, _]
-        [op1, ops1, op2, ops2] in
+          [contents (Kind.manager __4) ** contents_list (Kind.manager __5) **
+            contents (Kind.manager __6) ** contents_list (Kind.manager __7)])
+        [_, _, _, _] [op1, ops1, op2, ops2] in
     match equal_contents_kind op1 op2 with
     | None => None
     | Some Eq =>

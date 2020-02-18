@@ -1045,7 +1045,7 @@ Module Endorsing_power.
     let 'existT _ __Operation_data_'kind data :=
       existT (A := Set)
         (fun __Operation_data_'kind =>
-          (Alpha_context.protocol_data __Operation_data_'kind)) _ data in
+          Alpha_context.protocol_data __Operation_data_'kind) _ data in
     match data.(Alpha_context.protocol_data.contents) with
     | Alpha_context.Single (Alpha_context.Endorsement _) =>
       let=? '(_, slots, _) :=

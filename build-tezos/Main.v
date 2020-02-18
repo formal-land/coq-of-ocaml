@@ -321,7 +321,7 @@ Definition apply_operation (function_parameter : validation_state)
         existT (A := Set)
           (fun __Operation_data_'kind =>
             [Operation.shell_header **
-              (Alpha_context.Operation.protocol_data __Operation_data_'kind)]) _
+              Alpha_context.Operation.protocol_data __Operation_data_'kind]) _
           [shell, protocol_data] in
       let operation :=
         {| Alpha_context.operation.shell := shell;
@@ -482,13 +482,13 @@ Definition compare_operations
   let 'existT _ __Operation_data_'kind op1 :=
     existT (A := Set)
       (fun __Operation_data_'kind =>
-        (Alpha_context.protocol_data __Operation_data_'kind)) _ op1 in
+        Alpha_context.protocol_data __Operation_data_'kind) _ op1 in
   let 'Alpha_context.Operation_data op2 :=
     op2.(Alpha_context.packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind1 op2 :=
     existT (A := Set)
       (fun __Operation_data_'kind1 =>
-        (Alpha_context.protocol_data __Operation_data_'kind1)) _ op2 in
+        Alpha_context.protocol_data __Operation_data_'kind1) _ op2 in
   match
     (op1.(Alpha_context.protocol_data.contents),
       op2.(Alpha_context.protocol_data.contents)) with
@@ -534,9 +534,8 @@ Definition compare_operations
     let 'existT _ [__0, __1] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [(Alpha_context.contents.Manager_operation __0) **
-            (Alpha_context.contents.Manager_operation __1)]) [_, _] [op1, op2]
-      in
+          [Alpha_context.contents.Manager_operation __0 **
+            Alpha_context.contents.Manager_operation __1]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   |
@@ -545,9 +544,8 @@ Definition compare_operations
     let 'existT _ [__2, __4] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__2, __4] =>
-          [(Alpha_context.contents.Manager_operation __2) **
-            (Alpha_context.contents.Manager_operation __4)]) [_, _] [op1, op2]
-      in
+          [Alpha_context.contents.Manager_operation __2 **
+            Alpha_context.contents.Manager_operation __4]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   |
@@ -556,9 +554,8 @@ Definition compare_operations
     let 'existT _ [__5, __6] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__5, __6] =>
-          [(Alpha_context.contents.Manager_operation __5) **
-            (Alpha_context.contents.Manager_operation __6)]) [_, _] [op1, op2]
-      in
+          [Alpha_context.contents.Manager_operation __5 **
+            Alpha_context.contents.Manager_operation __6]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   |
@@ -567,9 +564,8 @@ Definition compare_operations
     let 'existT _ [__10, __8] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__10, __8] =>
-          [(Alpha_context.contents.Manager_operation __8) **
-            (Alpha_context.contents.Manager_operation __10)]) [_, _] [op1, op2]
-      in
+          [Alpha_context.contents.Manager_operation __8 **
+            Alpha_context.contents.Manager_operation __10]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   end.
@@ -589,7 +585,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
       existT (A := [Set ** Set])
         (fun '[__Ex_script_'a, __Ex_script_'b] =>
-          [(Script_typed_ir.script __Ex_script_'a __Ex_script_'b) **
+          [Script_typed_ir.script __Ex_script_'a __Ex_script_'b **
             Alpha_context.context]) [_, _] [parsed_script, ctxt] in
     let=? '(storage, big_map_diff, ctxt) :=
       Script_ir_translator.extract_big_map_diff ctxt

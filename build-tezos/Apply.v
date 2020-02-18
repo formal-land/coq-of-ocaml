@@ -271,7 +271,7 @@ Definition apply_manager_operation_content {kind : Set}
     let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
       existT (A := [Set ** Set])
         (fun '[__Ex_script_'a, __Ex_script_'b] =>
-          [(Script_typed_ir.script __Ex_script_'a __Ex_script_'b) **
+          [Script_typed_ir.script __Ex_script_'a __Ex_script_'b **
             Alpha_context.context]) [_, _] [parsed_script, ctxt] in
     let=? '(to_duplicate, ctxt) :=
       Script_ir_translator.collect_big_maps ctxt
@@ -371,9 +371,9 @@ Definition apply_internal_manager_operations
         existT (A := Set)
           (fun __Internal_operation_'kind =>
             [Alpha_context.Contract.contract **
-              (Alpha_context.manager_operation __Internal_operation_'kind) ** Z
-              ** (Alpha_context.internal_operation __Internal_operation_'kind)
-              ** (list Alpha_context.packed_internal_operation)]) _
+              Alpha_context.manager_operation __Internal_operation_'kind ** Z **
+              Alpha_context.internal_operation __Internal_operation_'kind **
+              list Alpha_context.packed_internal_operation]) _
           [source, operation, __nonce_value, op, rest] in
       let= function_parameter :=
         if Alpha_context.internal_nonce_already_recorded ctxt __nonce_value then
@@ -396,8 +396,8 @@ Definition apply_internal_manager_operations
               let 'existT _ __Internal_operation_'kind1 op :=
                 existT (A := Set)
                   (fun __Internal_operation_'kind1 =>
-                    (Alpha_context.internal_operation
-                      __Internal_operation_'kind1)) _ op in
+                    Alpha_context.internal_operation __Internal_operation_'kind1)
+                  _ op in
               Apply_results.Internal_operation_result op
                 (Apply_results.Skipped
                   (Alpha_context.manager_kind
@@ -601,8 +601,8 @@ Fixpoint mark_skipped {kind : Set}
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
-            Alpha_context.Tez.tez ** (Alpha_context.manager_operation __0) **
-            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
+            Alpha_context.Tez.tez ** Alpha_context.manager_operation __0 **
+            Alpha_context.contents_list (Alpha_context.Kind.manager __1)]) [_,
         _] [source, fee, operation, rest] in
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Cons_result
@@ -635,8 +635,8 @@ Fixpoint precheck_manager_contents_list {A kind : Set}
     let 'existT _ [__0, __1] [op, rest] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
-            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
+          [Alpha_context.contents (Alpha_context.Kind.manager __0) **
+            Alpha_context.contents_list (Alpha_context.Kind.manager __1)]) [_,
         _] [op, rest] in
     let=? ctxt := precheck_manager_contents ctxt chain_id raw_operation op in
     precheck_manager_contents_list ctxt chain_id raw_operation rest
@@ -689,8 +689,8 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
         (fun '[__0, __1] =>
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
             Alpha_context.Tez.tez **
-            (Alpha_context.contents (Alpha_context.Kind.manager __0)) **
-            (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
+            Alpha_context.contents (Alpha_context.Kind.manager __0) **
+            Alpha_context.contents_list (Alpha_context.Kind.manager __1)]) [_,
         _] [source, fee, op, rest] in
     let source := Alpha_context.Contract.implicit_contract source in
     let= function_parameter := apply_manager_contents ctxt mode chain_id op in
@@ -767,9 +767,9 @@ Definition mark_backtracked {A : Set}
       let 'existT _ [__0, __1] [op, rest] :=
         existT (A := [Set ** Set])
           (fun '[__0, __1] =>
-            [(Apply_results.contents_result.Manager_operation_result __0) **
-              (Apply_results.contents_result_list
-                (Alpha_context.Kind.manager __1))]) [_, _] [op, rest] in
+            [Apply_results.contents_result.Manager_operation_result __0 **
+              Apply_results.contents_result_list
+                (Alpha_context.Kind.manager __1)]) [_, _] [op, rest] in
       Apply_results.Cons_result
         (Apply_results.Manager_operation_result
           {|
@@ -792,10 +792,9 @@ Definition mark_backtracked {A : Set}
     let 'existT _ __Internal_operation_result_'kind [kind, __result_value] :=
       existT (A := Set)
         (fun __Internal_operation_result_'kind =>
-          [(Alpha_context.internal_operation __Internal_operation_result_'kind)
-            **
-            (Apply_results.manager_operation_result
-              __Internal_operation_result_'kind)]) _ [kind, __result_value] in
+          [Alpha_context.internal_operation __Internal_operation_result_'kind **
+            Apply_results.manager_operation_result
+              __Internal_operation_result_'kind]) _ [kind, __result_value] in
     Apply_results.Internal_operation_result kind
       (mark_manager_operation_result __result_value)
   with mark_manager_operation_result {kind : Set}
@@ -1177,9 +1176,8 @@ Definition apply_contents_list {A : Set}
   | (Alpha_context.Single (Alpha_context.Manager_operation _)) as op =>
     let 'existT _ __0 op :=
       existT (A := Set)
-        (fun __0 =>
-          (Alpha_context.contents_list (Alpha_context.Kind.manager __0))) _ op
-      in
+        (fun __0 => Alpha_context.contents_list (Alpha_context.Kind.manager __0))
+        _ op in
     let=? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
     let= '(ctxt, __result_value) :=
       apply_manager_contents_list ctxt mode baker chain_id op in
@@ -1188,7 +1186,7 @@ Definition apply_contents_list {A : Set}
     let 'existT _ [__1, __2] op :=
       existT (A := [Set ** Set])
         (fun '[__1, __2] =>
-          (Alpha_context.contents_list (Alpha_context.Kind.manager (__1 * __2))))
+          Alpha_context.contents_list (Alpha_context.Kind.manager (__1 * __2)))
         [_, _] op in
     let=? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
     let= '(ctxt, __result_value) :=
