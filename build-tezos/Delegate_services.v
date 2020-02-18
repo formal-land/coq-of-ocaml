@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Baking_mli. Module Baking := Baking_mli.
 Require Tezos.Contract_repr.
@@ -584,7 +584,7 @@ Definition requested_levels
         if Alpha_context.Level.op_lteq level current_level then
           Error_monad.__return (level, None)
         else
-          let!? timestamp := Baking.earlier_predecessor_timestamp ctxt level in
+          let=? timestamp := Baking.earlier_predecessor_timestamp ctxt level in
           Error_monad.__return (level, (Some timestamp))) levels
   end.
 
@@ -702,7 +702,7 @@ Module Baking_rights.
     (function_parameter : Alpha_context.Level.t * option Time.t)
     : Lwt.t (Error_monad.tzresult (list t)) :=
     let '(level, pred_timestamp) := function_parameter in
-    let!? contract_list := Baking.baking_priorities ctxt level in
+    let=? contract_list := Baking.baking_priorities ctxt level in
     let fix loop
       (l : Misc.lazy_list_t (|Signature.Public_key|).(S.SPublic_key.t))
       (acc : list t) (priority : (|Compare.Int|).(Compare.S.t)) {struct l}
@@ -713,11 +713,11 @@ Module Baking_rights.
         let 'Misc.LCons pk next := l in
         let delegate := (|Signature.Public_key|).(S.SPublic_key.__hash_value) pk
           in
-        let!? timestamp :=
+        let=? timestamp :=
           match pred_timestamp with
           | None => Error_monad.return_none
           | Some pred_timestamp =>
-            let!? __t_value := Baking.minimal_time ctxt priority pred_timestamp
+            let=? __t_value := Baking.minimal_time ctxt priority pred_timestamp
               in
             Error_monad.return_some __t_value
           end in
@@ -726,7 +726,7 @@ Module Baking_rights.
             {| t.level := level.(Alpha_context.Level.t.level);
               t.delegate := delegate; t.priority := priority;
               t.timestamp := timestamp |} acc in
-        let!? l := next tt in
+        let=? l := next tt in
         loop l acc (Pervasives.op_plus priority 1) in
     loop contract_list nil 0.
   
@@ -756,7 +756,7 @@ Module Baking_rights.
         fun q =>
           fun function_parameter =>
             let '_ := function_parameter in
-            let!? levels :=
+            let=? levels :=
               requested_levels
                 ((Alpha_context.Level.succ ctxt
                   (Alpha_context.Level.current ctxt)),
@@ -768,7 +768,7 @@ Module Baking_rights.
               | None => 64
               | Some max => max
               end in
-            let!? rights :=
+            let=? rights :=
               Error_monad.map_s (baking_priorities ctxt max_priority) levels in
             let rights :=
               if q.(S.baking_rights_query.all) then
@@ -945,7 +945,7 @@ Module Endorsing_rights.
     (function_parameter : Alpha_context.Level.t * option Time.t)
     : Lwt.t (Error_monad.tzresult (list t)) :=
     let '(level, estimated_time) := function_parameter in
-    let!? rights := Baking.endorsement_rights ctxt level in
+    let=? rights := Baking.endorsement_rights ctxt level in
     Error_monad.__return
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
         (fun delegate =>
@@ -964,13 +964,13 @@ Module Endorsing_rights.
         fun q =>
           fun function_parameter =>
             let '_ := function_parameter in
-            let!? levels :=
+            let=? levels :=
               requested_levels
                 ((Alpha_context.Level.current ctxt),
                   (Some (Alpha_context.Timestamp.current ctxt))) ctxt
                 q.(S.endorsing_rights_query.cycles)
                 q.(S.endorsing_rights_query.levels) in
-            let!? rights := Error_monad.map_s (endorsement_slots ctxt) levels in
+            let=? rights := Error_monad.map_s (endorsement_slots ctxt) levels in
             let rights := List.concat rights in
             match q.(S.endorsing_rights_query.delegates) with
             | [] => Error_monad.__return rights
@@ -1048,7 +1048,7 @@ Module Endorsing_power.
           (Alpha_context.protocol_data __Operation_data_'kind)) _ data in
     match data.(Alpha_context.protocol_data.contents) with
     | Alpha_context.Single (Alpha_context.Endorsement _) =>
-      let!? '(_, slots, _) :=
+      let=? '(_, slots, _) :=
         Baking.check_endorsement_rights ctxt chain_id
           {|
             Alpha_context.operation.shell :=
@@ -1289,7 +1289,7 @@ Definition endorsement_rights
   : Lwt.t
     (Error_monad.tzresult
       (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))) :=
-  let!? l := Endorsing_rights.endorsement_slots ctxt (level, None) in
+  let=? l := Endorsing_rights.endorsement_slots ctxt (level, None) in
   Error_monad.__return
     (List.map
       (fun function_parameter =>
@@ -1312,7 +1312,7 @@ Definition baking_rights
     | Some m => m
     end in
   let level := Alpha_context.Level.current ctxt in
-  let!? l := Baking_rights.baking_priorities ctxt max (level, None) in
+  let=? l := Baking_rights.baking_priorities ctxt max (level, None) in
   Error_monad.__return
     (level.(Alpha_context.Level.t.level),
       (List.map

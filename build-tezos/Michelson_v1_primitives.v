@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 
 Import Micheline.
 
@@ -451,34 +451,28 @@ Definition prims_of_strings (expr : Micheline.canonical string)
     | Micheline.String l x => Error_monad.ok (Micheline.String l x)
     | Micheline.Bytes l x => Error_monad.ok (Micheline.Bytes l x)
     | Micheline.Prim loc prim args annot =>
-      Error_monad.op_gtgtquestion
-        (Error_monad.record_trace extensible_type_value (prim_of_string prim))
-        (fun prim =>
-          Error_monad.op_gtgtquestion
-            (List.fold_left
-              (fun acc =>
-                fun arg =>
-                  Error_monad.op_gtgtquestion acc
-                    (fun args =>
-                      Error_monad.op_gtgtquestion (convert arg)
-                        (fun arg => Error_monad.ok (cons arg args))))
-              (Error_monad.ok nil) args)
-            (fun args =>
-              Error_monad.ok (Micheline.Prim 0 prim (List.rev args) annot)))
-    | Micheline.Seq _ args =>
-      Error_monad.op_gtgtquestion
-        (List.fold_left
+      let? prim :=
+        Error_monad.record_trace extensible_type_value (prim_of_string prim) in
+      let? args :=
+        List.fold_left
           (fun acc =>
             fun arg =>
-              Error_monad.op_gtgtquestion acc
-                (fun args =>
-                  Error_monad.op_gtgtquestion (convert arg)
-                    (fun arg => Error_monad.ok (cons arg args))))
-          (Error_monad.ok nil) args)
-        (fun args => Error_monad.ok (Micheline.Seq 0 (List.rev args)))
+              let? args := acc in
+              let? arg := convert arg in
+              Error_monad.ok (cons arg args)) (Error_monad.ok nil) args in
+      Error_monad.ok (Micheline.Prim 0 prim (List.rev args) annot)
+    | Micheline.Seq _ args =>
+      let? args :=
+        List.fold_left
+          (fun acc =>
+            fun arg =>
+              let? args := acc in
+              let? arg := convert arg in
+              Error_monad.ok (cons arg args)) (Error_monad.ok nil) args in
+      Error_monad.ok (Micheline.Seq 0 (List.rev args))
     end in
-  Error_monad.op_gtgtquestion (convert (Micheline.root expr))
-    (fun expr => Error_monad.ok (Micheline.strip_locations expr)).
+  let? expr := convert (Micheline.root expr) in
+  Error_monad.ok (Micheline.strip_locations expr).
 
 Definition strings_of_prims (expr : Micheline.canonical prim)
   : Micheline.canonical string :=

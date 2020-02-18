@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Storage_description.
 
@@ -40,7 +40,7 @@ Definition rpc_init (function_parameter : Updater.rpc_context)
   let level := block_header.(Block_header.shell_header.level) in
   let timestamp := block_header.(Block_header.shell_header.timestamp) in
   let fitness := block_header.(Block_header.shell_header.fitness) in
-  let!? context :=
+  let=? context :=
     Alpha_context.prepare context level timestamp timestamp fitness in
   Error_monad.__return
     {| rpc_context.block_hash := block_hash;
@@ -63,7 +63,7 @@ Definition register0_fullctxt {A B C : Set}
       (fun ctxt =>
         fun q =>
           fun i =>
-            let!? ctxt := rpc_init ctxt in
+            let=? ctxt := rpc_init ctxt in
             f ctxt q i)).
 
 Definition opt_register0_fullctxt {A B C : Set}
@@ -79,7 +79,7 @@ Definition opt_register0_fullctxt {A B C : Set}
       (fun ctxt =>
         fun q =>
           fun i =>
-            let!? ctxt := rpc_init ctxt in
+            let=? ctxt := rpc_init ctxt in
             f ctxt q i)).
 
 Definition register0 {A B C : Set}
@@ -119,7 +119,7 @@ Definition register1_fullctxt {A B C D : Set}
         let '(ctxt, arg) := function_parameter in
         fun q =>
           fun i =>
-            let!? ctxt := rpc_init ctxt in
+            let=? ctxt := rpc_init ctxt in
             f ctxt arg q i)).
 
 Definition register1 {A B C D : Set}
@@ -161,7 +161,7 @@ Definition register2_fullctxt {A B C D E : Set}
         let '((ctxt, arg1), arg2) := function_parameter in
         fun q =>
           fun i =>
-            let!? ctxt := rpc_init ctxt in
+            let=? ctxt := rpc_init ctxt in
             f ctxt arg1 arg2 q i)).
 
 Definition register2 {A B C D E : Set}
@@ -183,15 +183,13 @@ Definition get_rpc_services (function_parameter : unit)
   let __p_value :=
     RPC_directory.map
       (fun c =>
-        Error_monad.op_gtgteq (rpc_init c)
-          (fun function_parameter =>
-            match function_parameter with
-            | Pervasives.Error _ =>
-              (* ❌ Assert instruction is not handled. *)
-              assert false
-            | Pervasives.Ok c => Lwt.__return c.(rpc_context.context)
-            end))
-      (Storage_description.build_directory Alpha_context.description) in
+        let= function_parameter := rpc_init c in
+        match function_parameter with
+        | Pervasives.Error _ =>
+          (* ❌ Assert instruction is not handled. *)
+          assert false
+        | Pervasives.Ok c => Lwt.__return c.(rpc_context.context)
+        end) (Storage_description.build_directory Alpha_context.description) in
   RPC_directory.register_dynamic_directory None
     (Pervasives.op_exclamation rpc_services)
     (RPC_path.op_div

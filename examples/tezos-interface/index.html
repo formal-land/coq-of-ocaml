@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3340 lines (-46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3356 lines (-46% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 191</li>
     </ul>
     
@@ -104,7 +104,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Environment_mli</h3>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3340 lines (-46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3356 lines (-46% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -10087,12 +10087,28 @@ Module RPC_context.
 End RPC_context.
 
 Module Notations.
-  Notation &quot;'let!?' x ':=' X 'in' Y&quot; :=
+  Notation &quot;'let=' x ':=' X 'in' Y&quot; :=
+    (Error_monad.op_gtgteq X (fun x =&gt; Y))
+    (at level 200, x ident, X at level 100, Y at level 200).
+
+  Notation &quot;'let=' ' x ':=' X 'in' Y&quot; :=
+    (Error_monad.op_gtgteq X (fun x =&gt; Y))
+    (at level 200, x pattern, X at level 100, Y at level 200).
+
+  Notation &quot;'let=?' x ':=' X 'in' Y&quot; :=
     (Error_monad.op_gtgteqquestion X (fun x =&gt; Y))
     (at level 200, x ident, X at level 100, Y at level 200).
 
-  Notation &quot;'let!?' ' x ':=' X 'in' Y&quot; :=
+  Notation &quot;'let=?' ' x ':=' X 'in' Y&quot; :=
     (Error_monad.op_gtgteqquestion X (fun x =&gt; Y))
+    (at level 200, x pattern, X at level 100, Y at level 200).
+
+  Notation &quot;'let?' x ':=' X 'in' Y&quot; :=
+    (Error_monad.op_gtgtquestion X (fun x =&gt; Y))
+    (at level 200, x ident, X at level 100, Y at level 200).
+
+  Notation &quot;'let?' ' x ':=' X 'in' Y&quot; :=
+    (Error_monad.op_gtgtquestion X (fun x =&gt; Y))
     (at level 200, x pattern, X at level 100, Y at level 200).
 End Notations.
 </pre>

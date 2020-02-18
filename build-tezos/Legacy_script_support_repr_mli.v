@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Script_repr.
 
 Parameter manager_script_code : Script_repr.lazy_expr.

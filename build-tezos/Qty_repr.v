@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 
 Module QTY.
   Record signature : Set := {
@@ -274,19 +274,18 @@ Definition Make :=
             0 then
           Error_monad.ok acc
         else
-          Error_monad.op_gtgtquestion (op_plusquestion pow pow)
-            (fun npow =>
-              if
-                (|Compare.Int64|).(Compare.S.op_eq)
-                  (Int64.logand cur
-                    (* ❌ Constant of type int64 is converted to int *)
-                    1)
-                  (* ❌ Constant of type int64 is converted to int *)
-                  1 then
-                Error_monad.op_gtgtquestion (op_plusquestion acc pow)
-                  (fun nacc => step (Int64.shift_right_logical cur 1) npow nacc)
-              else
-                step (Int64.shift_right_logical cur 1) npow acc) in
+          let? npow := op_plusquestion pow pow in
+          if
+            (|Compare.Int64|).(Compare.S.op_eq)
+              (Int64.logand cur
+                (* ❌ Constant of type int64 is converted to int *)
+                1)
+              (* ❌ Constant of type int64 is converted to int *)
+              1 then
+            let? nacc := op_plusquestion acc pow in
+            step (Int64.shift_right_logical cur 1) npow nacc
+          else
+            step (Int64.shift_right_logical cur 1) npow acc in
       if
         (|Compare.Int64|).(Compare.S.op_lt) m
           (* ❌ Constant of type int64 is converted to int *)

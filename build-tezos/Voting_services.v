@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Services_registration.
 
@@ -104,13 +104,13 @@ Definition register (function_parameter : unit) : unit :=
         let '_ := function_parameter in
         fun function_parameter =>
           let '_ := function_parameter in
-          Error_monad.op_gtgteq (Alpha_context.Vote.get_current_proposal ctxt)
-            (fun function_parameter =>
-              match function_parameter with
-              | Pervasives.Ok __p_value => Error_monad.return_some __p_value
-              | Pervasives.Error __error_value =>
-                Lwt.__return (Pervasives.Error __error_value)
-              end)).
+          let= function_parameter :=
+            Alpha_context.Vote.get_current_proposal ctxt in
+          match function_parameter with
+          | Pervasives.Ok __p_value => Error_monad.return_some __p_value
+          | Pervasives.Error __error_value =>
+            Lwt.__return (Pervasives.Error __error_value)
+          end).
 
 Definition ballots {D E G I K L a b c i o q : Set}
   (ctxt :

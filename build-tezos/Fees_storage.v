@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Constants_repr.
 Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
@@ -34,7 +34,7 @@ Definition origination_burn (c : Raw_context.context)
   : Lwt.t (Error_monad.tzresult (Raw_context.t * Tez_repr.t)) :=
   let origination_size := Constants_storage.origination_size c in
   let cost_per_byte := Constants_storage.cost_per_byte c in
-  let!? to_be_paid :=
+  let=? to_be_paid :=
     Lwt.__return
       (Tez_repr.op_starquestion cost_per_byte (Int64.of_int origination_size))
     in
@@ -44,13 +44,13 @@ Definition origination_burn (c : Raw_context.context)
 Definition record_paid_storage_space
   (c : Raw_context.t) (contract : Contract_repr.t)
   : Lwt.t (Error_monad.tzresult (Raw_context.t * Z.t * Z.t * Tez_repr.t)) :=
-  let!? size := Contract_storage.used_storage_space c contract in
-  let!? '(to_be_paid, c) :=
+  let=? size := Contract_storage.used_storage_space c contract in
+  let=? '(to_be_paid, c) :=
     Contract_storage.set_paid_storage_space_and_return_fees_to_pay c contract
       size in
   let c := Raw_context.update_storage_space_to_pay c to_be_paid in
   let cost_per_byte := Constants_storage.cost_per_byte c in
-  let!? to_burn :=
+  let=? to_burn :=
     Lwt.__return
       (Tez_repr.op_starquestion cost_per_byte (Z.to_int64 to_be_paid)) in
   Error_monad.__return (c, size, to_be_paid, to_burn).
@@ -70,15 +70,15 @@ Definition burn_storage_fees
     Error_monad.fail extensible_type_value
   else
     let cost_per_byte := Constants_storage.cost_per_byte c in
-    let!? to_burn :=
+    let=? to_burn :=
       Lwt.__return
         (Tez_repr.op_starquestion cost_per_byte (Z.to_int64 consumed)) in
     if Tez_repr.op_eq to_burn Tez_repr.zero then
       Error_monad.__return c
     else
-      let!? c :=
+      let=? c :=
         Error_monad.trace extensible_type_value
-          (let!? '_ := Contract_storage.must_exist c payer in
+          (let=? '_ := Contract_storage.must_exist c payer in
           Contract_storage.spend c payer to_burn) in
       Error_monad.__return c.
 

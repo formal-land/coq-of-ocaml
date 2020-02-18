@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Constants_storage.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
@@ -201,14 +201,14 @@ Definition link
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? balance :=
+  let=? balance :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) c
       contract in
-  let!? c := Roll_storage.Delegate.add_amount c delegate balance in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.add)
-      (c, (Contract_repr.implicit_contract delegate)) contract)
-    (fun c => Error_monad.__return c).
+  let=? c := Roll_storage.Delegate.add_amount c delegate balance in
+  let= c :=
+    (|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.add)
+      (c, (Contract_repr.implicit_contract delegate)) contract in
+  Error_monad.__return c.
 
 Definition unlink
   (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
@@ -217,27 +217,27 @@ Definition unlink
   : Lwt.t
     (Error_monad.tzresult
       (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context)) :=
-  let!? balance :=
+  let=? balance :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) c
       contract in
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
   | None => Error_monad.__return c
   | Some delegate =>
-    let!? c := Roll_storage.Delegate.remove_amount c delegate balance in
-    Error_monad.op_gtgteq
-      ((|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.del)
-        (c, (Contract_repr.implicit_contract delegate)) contract)
-      (fun c => Error_monad.__return c)
+    let=? c := Roll_storage.Delegate.remove_amount c delegate balance in
+    let= c :=
+      (|Storage.Contract.Delegated|).(Storage_sigs.Data_set_storage.del)
+        (c, (Contract_repr.implicit_contract delegate)) contract in
+    Error_monad.__return c
   end.
 
 Definition known
   (c : (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.context))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult bool) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get_option)
       c (Contract_repr.implicit_contract delegate) in
   match function_parameter with
@@ -249,7 +249,7 @@ Definition registered
   (c : (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.context))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult bool) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.get_option)
       c (Contract_repr.implicit_contract delegate) in
   match function_parameter with
@@ -267,11 +267,11 @@ Definition init
     (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.key))
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? known_delegate := known ctxt delegate in
-  let!? '_ := Error_monad.fail_unless known_delegate extensible_type_value in
-  let!? is_registered := registered ctxt delegate in
-  let!? '_ := Error_monad.fail_unless is_registered extensible_type_value in
-  let!? ctxt :=
+  let=? known_delegate := known ctxt delegate in
+  let=? '_ := Error_monad.fail_unless known_delegate extensible_type_value in
+  let=? is_registered := registered ctxt delegate in
+  let=? '_ := Error_monad.fail_unless is_registered extensible_type_value in
+  let=? ctxt :=
     (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.init) ctxt
       contract delegate in
   link ctxt contract delegate.
@@ -294,13 +294,14 @@ Definition set
     let delete (function_parameter : unit)
       : Lwt.t (Error_monad.tzresult Raw_context.t) :=
       let '_ := function_parameter in
-      let!? c := unlink c contract in
-      Error_monad.op_gtgteq
-        ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.remove)
-          c contract) (fun c => Error_monad.__return c) in
+      let=? c := unlink c contract in
+      let= c :=
+        (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.remove)
+          c contract in
+      Error_monad.__return c in
     match Contract_repr.is_implicit contract with
     | Some pkh =>
-      let!? is_registered := registered c pkh in
+      let=? is_registered := registered c pkh in
       if is_registered then
         Error_monad.fail extensible_type_value
       else
@@ -308,8 +309,8 @@ Definition set
     | None => delete tt
     end
   | Some delegate =>
-    let!? known_delegate := known c delegate in
-    let!? registered_delegate := registered c delegate in
+    let=? known_delegate := known c delegate in
+    let=? registered_delegate := registered c delegate in
     let self_delegation :=
       match Contract_repr.is_implicit contract with
       | Some pkh =>
@@ -322,8 +323,8 @@ Definition set
           (Pervasives.op_pipepipe registered_delegate self_delegation)) then
       Error_monad.fail extensible_type_value
     else
-      let!? '_ :=
-        let!? function_parameter :=
+      let=? '_ :=
+        let=? function_parameter :=
           (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.get_option)
             c contract in
         match
@@ -336,7 +337,7 @@ Definition set
             end) with
         | (Some current_delegate, true) =>
           if self_delegation then
-            let!? function_parameter :=
+            let=? function_parameter :=
               Roll_storage.Delegate.is_inactive c delegate in
             match function_parameter with
             | true => Error_monad.return_unit
@@ -346,10 +347,10 @@ Definition set
             Error_monad.fail extensible_type_value
         | ((None | Some _), _) => Error_monad.return_unit
         end in
-      let!? '_ :=
+      let=? '_ :=
         match Contract_repr.is_implicit contract with
         | Some pkh =>
-          let!? is_registered := registered c pkh in
+          let=? is_registered := registered c pkh in
           if Pervasives.op_andand (Pervasives.not self_delegation) is_registered
             then
             Error_monad.fail extensible_type_value
@@ -357,31 +358,28 @@ Definition set
             Error_monad.return_unit
         | None => Error_monad.return_unit
         end in
-      Error_monad.op_gtgteq
-        ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.mem) c
-          contract)
-        (fun __exists =>
-          let!? '_ :=
-            Error_monad.fail_when
-              (Pervasives.op_andand self_delegation (Pervasives.not __exists))
-              extensible_type_value in
-          let!? c := unlink c contract in
-          Error_monad.op_gtgteq
-            ((|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.init_set)
-              c contract delegate)
-            (fun c =>
-              let!? c := link c contract delegate in
-              let!? c :=
-                if self_delegation then
-                  Error_monad.op_gtgteq
-                    ((|Storage.Delegates|).(Storage_sigs.Data_set_storage.add) c
-                      delegate)
-                    (fun c =>
-                      let!? c := Roll_storage.Delegate.set_active c delegate in
-                      Error_monad.__return c)
-                else
-                  Error_monad.__return c in
-              Error_monad.__return c))
+      let= __exists :=
+        (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.mem) c
+          contract in
+      let=? '_ :=
+        Error_monad.fail_when
+          (Pervasives.op_andand self_delegation (Pervasives.not __exists))
+          extensible_type_value in
+      let=? c := unlink c contract in
+      let= c :=
+        (|Storage.Contract.Delegate|).(Storage_sigs.Indexed_data_storage.init_set)
+          c contract delegate in
+      let=? c := link c contract delegate in
+      let=? c :=
+        if self_delegation then
+          let= c :=
+            (|Storage.Delegates|).(Storage_sigs.Data_set_storage.add) c delegate
+            in
+          let=? c := Roll_storage.Delegate.set_active c delegate in
+          Error_monad.__return c
+        else
+          Error_monad.__return c in
+      Error_monad.__return c
   end.
 
 Definition remove
@@ -408,7 +406,7 @@ Definition get_frozen_deposit
   (cycle :
     (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.get_option)
       (ctxt, contract) cycle in
   match function_parameter with
@@ -423,32 +421,32 @@ Definition credit_frozen_deposit
     (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? old_amount := get_frozen_deposit ctxt contract cycle in
-  let!? new_amount := Lwt.__return (Tez_repr.op_plusquestion old_amount amount)
+  let=? old_amount := get_frozen_deposit ctxt contract cycle in
+  let=? new_amount := Lwt.__return (Tez_repr.op_plusquestion old_amount amount)
     in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.init_set)
-      (ctxt, contract) cycle new_amount)
-    (fun ctxt =>
-      Error_monad.op_gtgteq
-        ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
-          (ctxt, cycle) delegate) (fun ctxt => Error_monad.__return ctxt)).
+  let= ctxt :=
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.init_set)
+      (ctxt, contract) cycle new_amount in
+  let= ctxt :=
+    (|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
+      (ctxt, cycle) delegate in
+  Error_monad.__return ctxt.
 
 Definition freeze_deposit
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let '{| Level_repr.t.cycle := cycle |} := Level_storage.current ctxt in
-  let!? ctxt := Roll_storage.Delegate.set_active ctxt delegate in
+  let=? ctxt := Roll_storage.Delegate.set_active ctxt delegate in
   let contract := Contract_repr.implicit_contract delegate in
-  let!? balance :=
+  let=? balance :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) ctxt
       contract in
-  let!? new_balance :=
+  let=? new_balance :=
     Lwt.__return
       (Error_monad.record_trace extensible_type_value
         (Tez_repr.op_minusquestion balance amount)) in
-  let!? ctxt :=
+  let=? ctxt :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set) ctxt
       contract new_balance in
   credit_frozen_deposit ctxt delegate cycle amount.
@@ -458,7 +456,7 @@ Definition get_frozen_fees
   (cycle :
     (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.get_option)
       (ctxt, contract) cycle in
   match function_parameter with
@@ -473,23 +471,23 @@ Definition credit_frozen_fees
     (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? old_amount := get_frozen_fees ctxt contract cycle in
-  let!? new_amount := Lwt.__return (Tez_repr.op_plusquestion old_amount amount)
+  let=? old_amount := get_frozen_fees ctxt contract cycle in
+  let=? new_amount := Lwt.__return (Tez_repr.op_plusquestion old_amount amount)
     in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.init_set)
-      (ctxt, contract) cycle new_amount)
-    (fun ctxt =>
-      Error_monad.op_gtgteq
-        ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
-          (ctxt, cycle) delegate) (fun ctxt => Error_monad.__return ctxt)).
+  let= ctxt :=
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.init_set)
+      (ctxt, contract) cycle new_amount in
+  let= ctxt :=
+    (|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
+      (ctxt, cycle) delegate in
+  Error_monad.__return ctxt.
 
 Definition freeze_fees
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let '{| Level_repr.t.cycle := cycle |} := Level_storage.current ctxt in
-  let!? ctxt := Roll_storage.Delegate.add_amount ctxt delegate amount in
+  let=? ctxt := Roll_storage.Delegate.add_amount ctxt delegate amount in
   credit_frozen_fees ctxt delegate cycle amount.
 
 Definition burn_fees
@@ -499,27 +497,28 @@ Definition burn_fees
     (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? old_amount := get_frozen_fees ctxt contract cycle in
-  let!? '(new_amount, ctxt) :=
+  let=? old_amount := get_frozen_fees ctxt contract cycle in
+  let=? '(new_amount, ctxt) :=
     match Tez_repr.op_minusquestion old_amount amount with
     | Pervasives.Ok new_amount =>
-      let!? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate amount in
+      let=? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate amount in
       Error_monad.__return (new_amount, ctxt)
     | Pervasives.Error _ =>
-      let!? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate old_amount
+      let=? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate old_amount
         in
       Error_monad.__return (Tez_repr.zero, ctxt)
     end in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.init_set)
-      (ctxt, contract) cycle new_amount) (fun ctxt => Error_monad.__return ctxt).
+  let= ctxt :=
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.init_set)
+      (ctxt, contract) cycle new_amount in
+  Error_monad.__return ctxt.
 
 Definition get_frozen_rewards
   (ctxt : Raw_context.t) (contract : Contract_repr.t)
   (cycle :
     (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.get_option)
       (ctxt, contract) cycle in
   match function_parameter with
@@ -534,16 +533,16 @@ Definition credit_frozen_rewards
     (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? old_amount := get_frozen_rewards ctxt contract cycle in
-  let!? new_amount := Lwt.__return (Tez_repr.op_plusquestion old_amount amount)
+  let=? old_amount := get_frozen_rewards ctxt contract cycle in
+  let=? new_amount := Lwt.__return (Tez_repr.op_plusquestion old_amount amount)
     in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.init_set)
-      (ctxt, contract) cycle new_amount)
-    (fun ctxt =>
-      Error_monad.op_gtgteq
-        ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
-          (ctxt, cycle) delegate) (fun ctxt => Error_monad.__return ctxt)).
+  let= ctxt :=
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.init_set)
+      (ctxt, contract) cycle new_amount in
+  let= ctxt :=
+    (|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.add)
+      (ctxt, cycle) delegate in
+  Error_monad.__return ctxt.
 
 Definition freeze_rewards
   (ctxt : Raw_context.t)
@@ -559,15 +558,16 @@ Definition burn_rewards
     (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? old_amount := get_frozen_rewards ctxt contract cycle in
+  let=? old_amount := get_frozen_rewards ctxt contract cycle in
   let new_amount :=
     match Tez_repr.op_minusquestion old_amount amount with
     | Pervasives.Error _ => Tez_repr.zero
     | Pervasives.Ok new_amount => new_amount
     end in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.init_set)
-      (ctxt, contract) cycle new_amount) (fun ctxt => Error_monad.__return ctxt).
+  let= ctxt :=
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.init_set)
+      (ctxt, contract) cycle new_amount in
+  Error_monad.__return ctxt.
 
 Definition unfreeze
   (ctxt : Raw_context.t)
@@ -577,44 +577,41 @@ Definition unfreeze
   : Lwt.t
     (Error_monad.tzresult (Raw_context.t * list (balance * balance_update))) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? deposit := get_frozen_deposit ctxt contract cycle in
-  let!? fees := get_frozen_fees ctxt contract cycle in
-  let!? rewards := get_frozen_rewards ctxt contract cycle in
-  let!? balance :=
+  let=? deposit := get_frozen_deposit ctxt contract cycle in
+  let=? fees := get_frozen_fees ctxt contract cycle in
+  let=? rewards := get_frozen_rewards ctxt contract cycle in
+  let=? balance :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) ctxt
       contract in
-  let!? unfrozen_amount := Lwt.__return (Tez_repr.op_plusquestion deposit fees)
+  let=? unfrozen_amount := Lwt.__return (Tez_repr.op_plusquestion deposit fees)
     in
-  let!? unfrozen_amount :=
+  let=? unfrozen_amount :=
     Lwt.__return (Tez_repr.op_plusquestion unfrozen_amount rewards) in
-  let!? balance :=
+  let=? balance :=
     Lwt.__return (Tez_repr.op_plusquestion balance unfrozen_amount) in
-  let!? ctxt :=
+  let=? ctxt :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set) ctxt
       contract balance in
-  let!? ctxt := Roll_storage.Delegate.add_amount ctxt delegate rewards in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.remove)
-      (ctxt, contract) cycle)
-    (fun ctxt =>
-      Error_monad.op_gtgteq
-        ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.remove)
-          (ctxt, contract) cycle)
-        (fun ctxt =>
-          Error_monad.op_gtgteq
-            ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.remove)
-              (ctxt, contract) cycle)
-            (fun ctxt =>
-              Error_monad.__return
-                (ctxt,
-                  (cleanup_balance_updates
-                    [
-                      ((Deposits delegate cycle), (Debited deposit));
-                      ((Fees delegate cycle), (Debited fees));
-                      ((Rewards delegate cycle), (Debited rewards));
-                      ((Contract (Contract_repr.implicit_contract delegate)),
-                        (Credited unfrozen_amount))
-                    ]))))).
+  let=? ctxt := Roll_storage.Delegate.add_amount ctxt delegate rewards in
+  let= ctxt :=
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.remove)
+      (ctxt, contract) cycle in
+  let= ctxt :=
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.remove)
+      (ctxt, contract) cycle in
+  let= ctxt :=
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.remove)
+      (ctxt, contract) cycle in
+  Error_monad.__return
+    (ctxt,
+      (cleanup_balance_updates
+        [
+          ((Deposits delegate cycle), (Debited deposit));
+          ((Fees delegate cycle), (Debited fees));
+          ((Rewards delegate cycle), (Debited rewards));
+          ((Contract (Contract_repr.implicit_contract delegate)),
+            (Credited unfrozen_amount))
+        ])).
 
 Definition cycle_end
   (ctxt : Raw_context.context) (last_cycle : Cycle_repr.cycle)
@@ -625,18 +622,18 @@ Definition cycle_end
         list
           (|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.elt))) :=
   let preserved := Constants_storage.preserved_cycles ctxt in
-  let!? '(ctxt, balance_updates) :=
+  let=? '(ctxt, balance_updates) :=
     match Cycle_repr.pred last_cycle with
     | None => Error_monad.__return (ctxt, nil)
     | Some revealed_cycle =>
       List.fold_left
         (fun acc =>
           fun u =>
-            let!? '(ctxt, balance_updates) := acc in
-            let!? ctxt :=
+            let=? '(ctxt, balance_updates) := acc in
+            let=? ctxt :=
               burn_fees ctxt u.(Nonce_storage.unrevealed.delegate)
                 revealed_cycle u.(Nonce_storage.unrevealed.fees) in
-            let!? ctxt :=
+            let=? ctxt :=
               burn_rewards ctxt u.(Nonce_storage.unrevealed.delegate)
                 revealed_cycle u.(Nonce_storage.unrevealed.rewards) in
             let bus :=
@@ -652,36 +649,34 @@ Definition cycle_end
   match Cycle_repr.sub last_cycle preserved with
   | None => Error_monad.__return (ctxt, balance_updates, nil)
   | Some unfrozen_cycle =>
-    let!? '(ctxt, balance_updates) :=
+    let=? '(ctxt, balance_updates) :=
       (|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.fold)
         (ctxt, unfrozen_cycle) (Pervasives.Ok (ctxt, balance_updates))
         (fun delegate =>
           fun acc =>
-            let!? '(ctxt, bus) := Lwt.__return acc in
-            let!? '(ctxt, balance_updates) :=
+            let=? '(ctxt, bus) := Lwt.__return acc in
+            let=? '(ctxt, balance_updates) :=
               unfreeze ctxt delegate unfrozen_cycle in
             Error_monad.__return (ctxt, (Pervasives.op_at balance_updates bus)))
       in
-    Error_monad.op_gtgteq
-      ((|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.clear)
-        (ctxt, unfrozen_cycle))
-      (fun ctxt =>
-        let!? '(ctxt, deactivated) :=
-          (|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.fold)
-            ctxt (Pervasives.Ok (ctxt, nil))
-            (fun delegate =>
-              fun acc =>
-                let!? '(ctxt, deactivated) := Lwt.__return acc in
-                let!? cycle :=
-                  (|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.get)
-                    ctxt (Contract_repr.implicit_contract delegate) in
-                if Cycle_repr.op_lteq cycle last_cycle then
-                  let!? ctxt := Roll_storage.Delegate.set_inactive ctxt delegate
-                    in
-                  Error_monad.__return (ctxt, (cons delegate deactivated))
-                else
-                  Error_monad.__return (ctxt, deactivated)) in
-        Error_monad.__return (ctxt, balance_updates, deactivated))
+    let= ctxt :=
+      (|Storage.Delegates_with_frozen_balance|).(Storage_sigs.Data_set_storage.clear)
+        (ctxt, unfrozen_cycle) in
+    let=? '(ctxt, deactivated) :=
+      (|Storage.Active_delegates_with_rolls|).(Storage_sigs.Data_set_storage.fold)
+        ctxt (Pervasives.Ok (ctxt, nil))
+        (fun delegate =>
+          fun acc =>
+            let=? '(ctxt, deactivated) := Lwt.__return acc in
+            let=? cycle :=
+              (|Storage.Contract.Delegate_desactivation|).(Storage_sigs.Indexed_data_storage.get)
+                ctxt (Contract_repr.implicit_contract delegate) in
+            if Cycle_repr.op_lteq cycle last_cycle then
+              let=? ctxt := Roll_storage.Delegate.set_inactive ctxt delegate in
+              Error_monad.__return (ctxt, (cons delegate deactivated))
+            else
+              Error_monad.__return (ctxt, deactivated)) in
+    Error_monad.__return (ctxt, balance_updates, deactivated)
   end.
 
 Definition punish
@@ -691,28 +686,24 @@ Definition punish
     (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult (Raw_context.t * frozen_balance)) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? deposit := get_frozen_deposit ctxt contract cycle in
-  let!? fees := get_frozen_fees ctxt contract cycle in
-  let!? rewards := get_frozen_rewards ctxt contract cycle in
-  let!? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate deposit in
-  let!? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate fees in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.remove)
-      (ctxt, contract) cycle)
-    (fun ctxt =>
-      Error_monad.op_gtgteq
-        ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.remove)
-          (ctxt, contract) cycle)
-        (fun ctxt =>
-          Error_monad.op_gtgteq
-            ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.remove)
-              (ctxt, contract) cycle)
-            (fun ctxt =>
-              Error_monad.__return
-                (ctxt,
-                  {| frozen_balance.deposit := deposit;
-                    frozen_balance.fees := fees;
-                    frozen_balance.rewards := rewards |})))).
+  let=? deposit := get_frozen_deposit ctxt contract cycle in
+  let=? fees := get_frozen_fees ctxt contract cycle in
+  let=? rewards := get_frozen_rewards ctxt contract cycle in
+  let=? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate deposit in
+  let=? ctxt := Roll_storage.Delegate.remove_amount ctxt delegate fees in
+  let= ctxt :=
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.remove)
+      (ctxt, contract) cycle in
+  let= ctxt :=
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.remove)
+      (ctxt, contract) cycle in
+  let= ctxt :=
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.remove)
+      (ctxt, contract) cycle in
+  Error_monad.__return
+    (ctxt,
+      {| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
+        frozen_balance.rewards := rewards |}).
 
 Definition has_frozen_balance
   (ctxt : Raw_context.t)
@@ -721,15 +712,15 @@ Definition has_frozen_balance
     (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult bool) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? deposit := get_frozen_deposit ctxt contract cycle in
+  let=? deposit := get_frozen_deposit ctxt contract cycle in
   if Tez_repr.op_ltgt deposit Tez_repr.zero then
     Error_monad.return_true
   else
-    let!? fees := get_frozen_fees ctxt contract cycle in
+    let=? fees := get_frozen_fees ctxt contract cycle in
     if Tez_repr.op_ltgt fees Tez_repr.zero then
       Error_monad.return_true
     else
-      let!? rewards := get_frozen_rewards ctxt contract cycle in
+      let=? rewards := get_frozen_rewards ctxt contract cycle in
       Error_monad.__return (Tez_repr.op_ltgt rewards Tez_repr.zero).
 
 Definition frozen_balance_by_cycle_encoding
@@ -759,46 +750,45 @@ Definition frozen_balance_by_cycle
   let contract := Contract_repr.implicit_contract delegate in
   let map {A : Set} : (|Cycle_repr.Map|).(S.MAP.t) A :=
     (|Cycle_repr.Map|).(S.MAP.empty) in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
+  let= map :=
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
       (ctxt, contract) map
       (fun cycle =>
         fun amount =>
           fun map =>
             Lwt.__return
               ((|Cycle_repr.Map|).(S.MAP.add) cycle
-                (frozen_balance.with_deposit amount empty_frozen_balance) map)))
-    (fun map =>
-      Error_monad.op_gtgteq
-        ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
-          (ctxt, contract) map
-          (fun cycle =>
-            fun amount =>
-              fun map =>
-                let balance :=
-                  match (|Cycle_repr.Map|).(S.MAP.find_opt) cycle map with
-                  | None => empty_frozen_balance
-                  | Some balance => balance
-                  end in
-                Lwt.__return
-                  ((|Cycle_repr.Map|).(S.MAP.add) cycle
-                    (frozen_balance.with_fees amount balance) map)))
-        (fun map =>
-          Error_monad.op_gtgteq
-            ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.fold)
-              (ctxt, contract) map
-              (fun cycle =>
-                fun amount =>
-                  fun map =>
-                    let balance :=
-                      match (|Cycle_repr.Map|).(S.MAP.find_opt) cycle map with
-                      | None => empty_frozen_balance
-                      | Some balance => balance
-                      end in
-                    Lwt.__return
-                      ((|Cycle_repr.Map|).(S.MAP.add) cycle
-                        (frozen_balance.with_rewards amount balance) map)))
-            (fun map => Lwt.__return map))).
+                (frozen_balance.with_deposit amount empty_frozen_balance) map))
+    in
+  let= map :=
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) map
+      (fun cycle =>
+        fun amount =>
+          fun map =>
+            let balance :=
+              match (|Cycle_repr.Map|).(S.MAP.find_opt) cycle map with
+              | None => empty_frozen_balance
+              | Some balance => balance
+              end in
+            Lwt.__return
+              ((|Cycle_repr.Map|).(S.MAP.add) cycle
+                (frozen_balance.with_fees amount balance) map)) in
+  let= map :=
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) map
+      (fun cycle =>
+        fun amount =>
+          fun map =>
+            let balance :=
+              match (|Cycle_repr.Map|).(S.MAP.find_opt) cycle map with
+              | None => empty_frozen_balance
+              | Some balance => balance
+              end in
+            Lwt.__return
+              ((|Cycle_repr.Map|).(S.MAP.add) cycle
+                (frozen_balance.with_rewards amount balance) map)) in
+  Lwt.__return map.
 
 Definition __frozen_balance_value
   (ctxt : Raw_context.t)
@@ -807,41 +797,39 @@ Definition __frozen_balance_value
   let contract := Contract_repr.implicit_contract delegate in
   let balance {A : Set} : Pervasives.result Tez_repr.t A :=
     Pervasives.Ok Tez_repr.zero in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
+  let= balance :=
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
       (ctxt, contract) balance
       (fun _cycle =>
         fun amount =>
           fun acc =>
-            let!? acc := Lwt.__return acc in
-            Lwt.__return (Tez_repr.op_plusquestion acc amount)))
-    (fun balance =>
-      Error_monad.op_gtgteq
-        ((|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
-          (ctxt, contract) balance
-          (fun _cycle =>
-            fun amount =>
-              fun acc =>
-                let!? acc := Lwt.__return acc in
-                Lwt.__return (Tez_repr.op_plusquestion acc amount)))
-        (fun balance =>
-          Error_monad.op_gtgteq
-            ((|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.fold)
-              (ctxt, contract) balance
-              (fun _cycle =>
-                fun amount =>
-                  fun acc =>
-                    let!? acc := Lwt.__return acc in
-                    Lwt.__return (Tez_repr.op_plusquestion acc amount)))
-            (fun balance => Lwt.__return balance))).
+            let=? acc := Lwt.__return acc in
+            Lwt.__return (Tez_repr.op_plusquestion acc amount)) in
+  let= balance :=
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) balance
+      (fun _cycle =>
+        fun amount =>
+          fun acc =>
+            let=? acc := Lwt.__return acc in
+            Lwt.__return (Tez_repr.op_plusquestion acc amount)) in
+  let= balance :=
+    (|Storage.Contract.Frozen_rewards|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) balance
+      (fun _cycle =>
+        fun amount =>
+          fun acc =>
+            let=? acc := Lwt.__return acc in
+            Lwt.__return (Tez_repr.op_plusquestion acc amount)) in
+  Lwt.__return balance.
 
 Definition full_balance
   (ctxt : Raw_context.t)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? __frozen_balance_value := __frozen_balance_value ctxt delegate in
-  let!? balance :=
+  let=? __frozen_balance_value := __frozen_balance_value ctxt delegate in
+  let=? balance :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) ctxt
       contract in
   Lwt.__return (Tez_repr.op_plusquestion __frozen_balance_value balance).
@@ -866,10 +854,10 @@ Definition staking_balance
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   let token_per_rolls := Constants_storage.tokens_per_roll ctxt in
-  let!? rolls := Roll_storage.get_rolls ctxt delegate in
-  let!? change := Roll_storage.get_change ctxt delegate in
+  let=? rolls := Roll_storage.get_rolls ctxt delegate in
+  let=? change := Roll_storage.get_change ctxt delegate in
   let rolls := Int64.of_int (List.length rolls) in
-  let!? balance := Lwt.__return (Tez_repr.op_starquestion token_per_rolls rolls)
+  let=? balance := Lwt.__return (Tez_repr.op_starquestion token_per_rolls rolls)
     in
   Lwt.__return (Tez_repr.op_plusquestion balance change).
 
@@ -878,30 +866,27 @@ Definition delegated_balance
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
   let contract := Contract_repr.implicit_contract delegate in
-  let!? staking_balance := staking_balance ctxt delegate in
-  Error_monad.op_gtgteq
-    ((|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) ctxt
-      contract)
-    (fun self_staking_balance =>
-      Error_monad.op_gtgteq
-        ((|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
-          (ctxt, contract) self_staking_balance
-          (fun _cycle =>
-            fun amount =>
-              fun acc =>
-                let!? acc := Lwt.__return acc in
-                Lwt.__return (Tez_repr.op_plusquestion acc amount)))
-        (fun self_staking_balance =>
-          let!? self_staking_balance :=
-            (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
-              (ctxt, contract) self_staking_balance
-              (fun _cycle =>
-                fun amount =>
-                  fun acc =>
-                    let!? acc := Lwt.__return acc in
-                    Lwt.__return (Tez_repr.op_plusquestion acc amount)) in
-          Lwt.__return
-            (Tez_repr.op_minusquestion staking_balance self_staking_balance))).
+  let=? staking_balance := staking_balance ctxt delegate in
+  let= self_staking_balance :=
+    (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) ctxt
+      contract in
+  let= self_staking_balance :=
+    (|Storage.Contract.Frozen_deposits|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) self_staking_balance
+      (fun _cycle =>
+        fun amount =>
+          fun acc =>
+            let=? acc := Lwt.__return acc in
+            Lwt.__return (Tez_repr.op_plusquestion acc amount)) in
+  let=? self_staking_balance :=
+    (|Storage.Contract.Frozen_fees|).(Storage_sigs.Indexed_data_storage.fold)
+      (ctxt, contract) self_staking_balance
+      (fun _cycle =>
+        fun amount =>
+          fun acc =>
+            let=? acc := Lwt.__return acc in
+            Lwt.__return (Tez_repr.op_plusquestion acc amount)) in
+  Lwt.__return (Tez_repr.op_minusquestion staking_balance self_staking_balance).
 
 Definition fold {A : Set}
   : (|Storage.Delegates|).(Storage_sigs.Data_set_storage.context) -> A ->

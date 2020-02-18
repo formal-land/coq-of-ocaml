@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Commitment_repr.
 Require Tezos.Raw_context.
@@ -48,5 +48,5 @@ Definition init
         |} := function_parameter in
     (|Storage.Commitments|).(Storage_sigs.Indexed_data_storage.init) ctxt
       blinded_public_key_hash amount in
-  let!? ctxt := Error_monad.fold_left_s init_commitment ctxt commitments in
+  let=? ctxt := Error_monad.fold_left_s init_commitment ctxt commitments in
   Error_monad.__return ctxt.

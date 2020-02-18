@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply.
 Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
@@ -209,9 +209,9 @@ Definition begin_partial_application
   let fitness := predecessor_fitness in
   let timestamp :=
     block_header.(block_header.shell).(Block_header.shell_header.timestamp) in
-  let!? ctxt :=
+  let=? ctxt :=
     Alpha_context.prepare ctxt level predecessor_timestamp timestamp fitness in
-  let!? '(ctxt, baker, block_delay) :=
+  let=? '(ctxt, baker, block_delay) :=
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Partial_application
@@ -234,9 +234,9 @@ Definition begin_application
   let fitness := predecessor_fitness in
   let timestamp :=
     block_header.(block_header.shell).(Block_header.shell_header.timestamp) in
-  let!? ctxt :=
+  let=? ctxt :=
     Alpha_context.prepare ctxt level predecessor_timestamp timestamp fitness in
-  let!? '(ctxt, baker, block_delay) :=
+  let=? '(ctxt, baker, block_delay) :=
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Application
@@ -258,19 +258,19 @@ Definition begin_construction
   let '_ := function_parameter in
   let level := Int32.succ pred_level in
   let fitness := pred_fitness in
-  let!? ctxt :=
+  let=? ctxt :=
     Alpha_context.prepare ctxt level predecessor_timestamp timestamp fitness in
-  let!? '(mode, ctxt) :=
+  let=? '(mode, ctxt) :=
     match protocol_data with
     | None =>
-      let!? ctxt := Apply.begin_partial_construction ctxt in
+      let=? ctxt := Apply.begin_partial_construction ctxt in
       let mode :=
         Partial_construction
           {| validation_mode.Partial_construction.predecessor := predecessor |}
         in
       Error_monad.__return (mode, ctxt)
     | Some proto_header =>
-      let!? '(ctxt, protocol_data, baker, block_delay) :=
+      let=? '(ctxt, protocol_data, baker, block_delay) :=
         Apply.begin_full_construction ctxt predecessor_timestamp
           proto_header.(Alpha_context.Block_header.protocol_data.contents) in
       let mode :=
@@ -355,7 +355,7 @@ Definition apply_operation (function_parameter : validation_state)
               |} =>
           (predecessor, (|Signature.Public_key_hash|).(S.SPublic_key_hash.zero))
         end in
-      let!? '(ctxt, __result_value) :=
+      let=? '(ctxt, __result_value) :=
         Apply.apply_operation ctxt chain_id Script_ir_translator.Optimized
           predecessor baker (Alpha_context.Operation.__hash_value operation)
           operation in
@@ -378,15 +378,15 @@ Definition finalize_block (function_parameter : validation_state)
   match mode with
   | Partial_construction _ =>
     let level := Alpha_context.Level.current ctxt in
-    let!? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt
+    let=? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt
       in
     let baker := (|Signature.Public_key_hash|).(S.SPublic_key_hash.zero) in
-    let!? ctxt :=
+    let=? ctxt :=
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
         (fun delegate =>
           fun deposit =>
             fun ctxt =>
-              let!? ctxt := ctxt in
+              let=? ctxt := ctxt in
               Alpha_context.Delegate.freeze_deposit ctxt delegate deposit)
         (Alpha_context.get_deposits ctxt) (Error_monad.__return ctxt) in
     let ctxt := Alpha_context.finalize None ctxt in
@@ -407,11 +407,11 @@ Definition finalize_block (function_parameter : validation_state)
         |} =>
     let level := Alpha_context.Level.current ctxt in
     let included_endorsements := Alpha_context.included_endorsements ctxt in
-    let!? '_ :=
+    let=? '_ :=
       Apply.check_minimum_endorsements ctxt
         block_header.(block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
         block_delay included_endorsements in
-    let!? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt
+    let=? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt
       in
     let ctxt := Alpha_context.finalize None ctxt in
     Error_monad.__return
@@ -438,7 +438,7 @@ Definition finalize_block (function_parameter : validation_state)
         validation_mode.Full_construction.baker := baker;
         validation_mode.Full_construction.block_delay := block_delay
         |}) =>
-    let!? '(ctxt, receipt) :=
+    let=? '(ctxt, receipt) :=
       Apply.finalize_application ctxt protocol_data baker block_delay in
     let level := Alpha_context.Level.current ctxt in
     let priority := protocol_data.(Alpha_context.Block_header.contents.priority)
@@ -584,20 +584,20 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
       (Error_monad.tzresult
         ((Alpha_context.Script.t * option Alpha_context.Contract.big_map_diff) *
           Alpha_context.context)) :=
-    let!? '(Script_ir_translator.Ex_script parsed_script, ctxt) :=
+    let=? '(Script_ir_translator.Ex_script parsed_script, ctxt) :=
       Script_ir_translator.parse_script None ctxt false script in
     let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
       existT (A := [Set ** Set])
         (fun '[__Ex_script_'a, __Ex_script_'b] =>
           [(Script_typed_ir.script __Ex_script_'a __Ex_script_'b) **
             Alpha_context.context]) [_, _] [parsed_script, ctxt] in
-    let!? '(storage, big_map_diff, ctxt) :=
+    let=? '(storage, big_map_diff, ctxt) :=
       Script_ir_translator.extract_big_map_diff ctxt
         Script_ir_translator.Optimized false Script_ir_translator.no_big_map_id
         Script_ir_translator.no_big_map_id
         parsed_script.(Script_typed_ir.script.storage_type)
         parsed_script.(Script_typed_ir.script.storage) in
-    let!? '(storage, ctxt) :=
+    let=? '(storage, ctxt) :=
       Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
         parsed_script.(Script_typed_ir.script.storage_type) storage in
     let storage :=
@@ -606,6 +606,6 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     Error_monad.__return
       (((Alpha_context.Script.t.with_storage storage script), big_map_diff),
         ctxt) in
-  let!? ctxt :=
+  let=? ctxt :=
     Alpha_context.prepare_first_block ctxt typecheck level timestamp fitness in
   Error_monad.__return (Alpha_context.finalize None ctxt).

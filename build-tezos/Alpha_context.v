@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Block_header_repr.
 Require Tezos.Bootstrap_storage.
 Require Tezos.Commitment_repr.
@@ -151,21 +151,17 @@ Module Script.
     (ctxt : Raw_context.context) (lexpr : Script_repr.lazy_expr)
     : Lwt.t (Error_monad.tzresult (Script_repr.expr * Raw_context.context)) :=
     Lwt.__return
-      (Error_monad.op_gtgtquestion (Script_repr.force_decode lexpr)
-        (fun function_parameter =>
-          let '(v, cost) := function_parameter in
-          Error_monad.op_gtpipequestion (Raw_context.consume_gas ctxt cost)
-            (fun ctxt => (v, ctxt)))).
+      (let? '(v, cost) := Script_repr.force_decode lexpr in
+      Error_monad.op_gtpipequestion (Raw_context.consume_gas ctxt cost)
+        (fun ctxt => (v, ctxt))).
   
   Definition force_bytes_in_context
     (ctxt : Raw_context.context) (lexpr : Script_repr.lazy_expr)
     : Lwt.t (Error_monad.tzresult (MBytes.t * Raw_context.context)) :=
     Lwt.__return
-      (Error_monad.op_gtgtquestion (Script_repr.force_bytes lexpr)
-        (fun function_parameter =>
-          let '(__b_value, cost) := function_parameter in
-          Error_monad.op_gtpipequestion (Raw_context.consume_gas ctxt cost)
-            (fun ctxt => (__b_value, ctxt)))).
+      (let? '(__b_value, cost) := Script_repr.force_bytes lexpr in
+      Error_monad.op_gtpipequestion (Raw_context.consume_gas ctxt cost)
+        (fun ctxt => (__b_value, ctxt))).
   
   Module Legacy_support := Legacy_script_support_repr.
 End Script.
@@ -279,9 +275,8 @@ Module Big_map.
   
   Definition cleanup_temporary (c : Raw_context.context)
     : Lwt.t Raw_context.context :=
-    Error_monad.op_gtgteq
-      (Raw_context.temporary_big_maps c Storage.Big_map.remove_rec c)
-      (fun c => Lwt.__return (Raw_context.reset_temporary_big_map c)).
+    let= c := Raw_context.temporary_big_maps c Storage.Big_map.remove_rec c in
+    Lwt.__return (Raw_context.reset_temporary_big_map c).
   
   Definition __exists
     (c : Raw_context.context)
@@ -293,16 +288,16 @@ Module Big_map.
             ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.value)
               *
               (|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.value)))) :=
-    let!? c :=
+    let=? c :=
       Lwt.__return
         (Raw_context.consume_gas c (Gas_limit_repr.read_bytes_cost Z.zero)) in
-    let!? kt :=
+    let=? kt :=
       (|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.get_option)
         c id in
     match kt with
     | None => Error_monad.__return (c, None)
     | Some kt =>
-      let!? kv :=
+      let=? kv :=
         (|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.get) c
           id in
       Error_monad.__return (c, (Some (kt, kv)))

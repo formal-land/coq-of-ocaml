@@ -3330,11 +3330,27 @@ Module RPC_context.
 End RPC_context.
 
 Module Notations.
-  Notation "'let!?' x ':=' X 'in' Y" :=
+  Notation "'let=' x ':=' X 'in' Y" :=
+    (Error_monad.op_gtgteq X (fun x => Y))
+    (at level 200, x ident, X at level 100, Y at level 200).
+
+  Notation "'let=' ' x ':=' X 'in' Y" :=
+    (Error_monad.op_gtgteq X (fun x => Y))
+    (at level 200, x pattern, X at level 100, Y at level 200).
+
+  Notation "'let=?' x ':=' X 'in' Y" :=
     (Error_monad.op_gtgteqquestion X (fun x => Y))
     (at level 200, x ident, X at level 100, Y at level 200).
 
-  Notation "'let!?' ' x ':=' X 'in' Y" :=
+  Notation "'let=?' ' x ':=' X 'in' Y" :=
     (Error_monad.op_gtgteqquestion X (fun x => Y))
+    (at level 200, x pattern, X at level 100, Y at level 200).
+
+  Notation "'let?' x ':=' X 'in' Y" :=
+    (Error_monad.op_gtgtquestion X (fun x => Y))
+    (at level 200, x ident, X at level 100, Y at level 200).
+
+  Notation "'let?' ' x ':=' X 'in' Y" :=
+    (Error_monad.op_gtgtquestion X (fun x => Y))
     (at level 200, x pattern, X at level 100, Y at level 200).
 End Notations.

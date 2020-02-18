@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 Require Tezos.Constants_repr.
@@ -263,7 +263,7 @@ Module Scripts.
       let ctxt :=
         Alpha_context.Contract.init_origination_nonce ctxt
           (|Operation_hash|).(S.HASH.zero) in
-      let!? '(ctxt, dummy_contract) :=
+      let=? '(ctxt, dummy_contract) :=
         Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
       let balance :=
         match
@@ -275,7 +275,7 @@ Module Scripts.
           (* ❌ Assert instruction is not handled. *)
           assert false
         end in
-      let!? ctxt :=
+      let=? ctxt :=
         Alpha_context.Contract.originate ctxt dummy_contract balance
           (script, None) None in
       Error_monad.__return (ctxt, dummy_contract) in
@@ -300,24 +300,19 @@ Module Scripts.
           fun expr =>
             let ctxt := Alpha_context.Gas.set_unlimited ctxt in
             let legacy := false in
-            let!? '(unreachable_entrypoint, map) :=
+            let=? '(unreachable_entrypoint, map) :=
               Lwt.__return
-                (Error_monad.op_gtgtquestion
-                  (Script_ir_translator.parse_toplevel legacy expr)
-                  (fun function_parameter =>
-                    let '(arg_type, _, _, root_name) := function_parameter in
-                    Error_monad.op_gtgtquestion
-                      (Script_ir_translator.parse_ty ctxt legacy true false true
-                        arg_type)
-                      (fun function_parameter =>
-                        let '(Script_ir_translator.Ex_ty arg_type, _) :=
-                          function_parameter in
-                        let 'existT _ __Ex_ty_'a3 arg_type :=
-                          existT (A := Set)
-                            (fun __Ex_ty_'a3 => (Script_typed_ir.ty __Ex_ty_'a3))
-                            _ arg_type in
-                        Script_ir_translator.list_entrypoints arg_type ctxt
-                          root_name))) in
+                (let? '(arg_type, _, _, root_name) :=
+                  Script_ir_translator.parse_toplevel legacy expr in
+                let? '(Script_ir_translator.Ex_ty arg_type, _) :=
+                  Script_ir_translator.parse_ty ctxt legacy true false true
+                    arg_type in
+                let 'existT _ __Ex_ty_'a3 arg_type :=
+                  existT (A := Set)
+                    (fun __Ex_ty_'a3 => (Script_typed_ir.ty __Ex_ty_'a3)) _
+                    arg_type in
+                Script_ir_translator.list_entrypoints arg_type ctxt root_name)
+              in
             Error_monad.__return
               (unreachable_entrypoint,
                 ((|Script_ir_translator.Entrypoints_map|).(S.MAP.fold)
@@ -671,59 +666,53 @@ Module Forge.
       (gas_limit : Z.t) (storage_limit : Z.t)
       (operations : list Alpha_context.packed_manager_operation)
       : Lwt.t (Pervasives.result MBytes.t (list Error_monad.shell_error)) :=
-      Error_monad.op_gtgteq (Contract_services.manager_key ctxt block source)
-        (fun function_parameter =>
-          match function_parameter with
-          | (Pervasives.Error _) as e => Lwt.__return e
-          | Pervasives.Ok revealed =>
-            let ops :=
-              List.map
-                (fun function_parameter =>
-                  let 'Alpha_context.Manager operation := function_parameter in
-                  let 'existT _ __Manager_'kind operation :=
-                    existT (A := Set)
-                      (fun __Manager_'kind =>
-                        (Alpha_context.manager_operation __Manager_'kind)) _
-                      operation in
-                  Alpha_context.Contents
-                    (Alpha_context.Manager_operation
-                      {|
-                        Alpha_context.contents.Manager_operation.source :=
-                          source;
-                        Alpha_context.contents.Manager_operation.fee := fee;
-                        Alpha_context.contents.Manager_operation.counter :=
-                          counter;
-                        Alpha_context.contents.Manager_operation.operation :=
-                          operation;
-                        Alpha_context.contents.Manager_operation.gas_limit :=
-                          gas_limit;
-                        Alpha_context.contents.Manager_operation.storage_limit :=
-                          storage_limit |})) operations in
-            let ops :=
-              match (sourcePubKey, revealed) with
-              | ((None, _) | (_, Some _)) => ops
-              | (Some pk, None) =>
-                let operation := Alpha_context.Reveal pk in
-                cons
-                  (Alpha_context.Contents
-                    (Alpha_context.Manager_operation
-                      {|
-                        Alpha_context.contents.Manager_operation.source :=
-                          source;
-                        Alpha_context.contents.Manager_operation.fee := fee;
-                        Alpha_context.contents.Manager_operation.counter :=
-                          counter;
-                        Alpha_context.contents.Manager_operation.operation :=
-                          operation;
-                        Alpha_context.contents.Manager_operation.gas_limit :=
-                          gas_limit;
-                        Alpha_context.contents.Manager_operation.storage_limit :=
-                          storage_limit |})) ops
-              end in
-            RPC_context.make_call0 S.operations ctxt block tt
-              ({| Operation.shell_header.branch := branch |},
-                (Alpha_context.Operation.of_list ops))
-          end).
+      let= function_parameter := Contract_services.manager_key ctxt block source
+        in
+      match function_parameter with
+      | (Pervasives.Error _) as e => Lwt.__return e
+      | Pervasives.Ok revealed =>
+        let ops :=
+          List.map
+            (fun function_parameter =>
+              let 'Alpha_context.Manager operation := function_parameter in
+              let 'existT _ __Manager_'kind operation :=
+                existT (A := Set)
+                  (fun __Manager_'kind =>
+                    (Alpha_context.manager_operation __Manager_'kind)) _
+                  operation in
+              Alpha_context.Contents
+                (Alpha_context.Manager_operation
+                  {| Alpha_context.contents.Manager_operation.source := source;
+                    Alpha_context.contents.Manager_operation.fee := fee;
+                    Alpha_context.contents.Manager_operation.counter := counter;
+                    Alpha_context.contents.Manager_operation.operation :=
+                      operation;
+                    Alpha_context.contents.Manager_operation.gas_limit :=
+                      gas_limit;
+                    Alpha_context.contents.Manager_operation.storage_limit :=
+                      storage_limit |})) operations in
+        let ops :=
+          match (sourcePubKey, revealed) with
+          | ((None, _) | (_, Some _)) => ops
+          | (Some pk, None) =>
+            let operation := Alpha_context.Reveal pk in
+            cons
+              (Alpha_context.Contents
+                (Alpha_context.Manager_operation
+                  {| Alpha_context.contents.Manager_operation.source := source;
+                    Alpha_context.contents.Manager_operation.fee := fee;
+                    Alpha_context.contents.Manager_operation.counter := counter;
+                    Alpha_context.contents.Manager_operation.operation :=
+                      operation;
+                    Alpha_context.contents.Manager_operation.gas_limit :=
+                      gas_limit;
+                    Alpha_context.contents.Manager_operation.storage_limit :=
+                      storage_limit |})) ops
+          end in
+        RPC_context.make_call0 S.operations ctxt block tt
+          ({| Operation.shell_header.branch := branch |},
+            (Alpha_context.Operation.of_list ops))
+      end.
     
     Definition reveal {D E G I K L a b c i o q : Set}
       (ctxt :

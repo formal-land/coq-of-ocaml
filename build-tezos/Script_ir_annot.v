@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Script_tc_errors.
 Require Tezos.Script_typed_ir.
@@ -310,30 +310,28 @@ Definition parse_annots
         (List.fold_left
           (fun acc =>
             fun s =>
-              Error_monad.op_gtgtquestion acc
-                (fun acc =>
-                  if (|Compare.Int|).(Compare.S.op_eq) (String.length s) 0 then
-                    Error_monad.__error_value extensible_type_value
-                  else
-                    match String.get s 0 with
-                    | ":" % char =>
-                      sub_or_wildcard nil
-                        (fun __a_value => Type_annot_opt __a_value) s acc
-                    | "@" % char =>
-                      sub_or_wildcard
-                        (if allow_special_var then
-                          [ "%" % char ]
-                        else
-                          nil) (fun __a_value => Var_annot_opt __a_value) s acc
-                    | "%" % char =>
-                      sub_or_wildcard
-                        (if allow_special_field then
-                          [ "@" % char ]
-                        else
-                          nil) (fun __a_value => Field_annot_opt __a_value) s
-                        acc
-                    | _ => Error_monad.__error_value extensible_type_value
-                    end)) (Error_monad.ok nil) l) List.rev.
+              let? acc := acc in
+              if (|Compare.Int|).(Compare.S.op_eq) (String.length s) 0 then
+                Error_monad.__error_value extensible_type_value
+              else
+                match String.get s 0 with
+                | ":" % char =>
+                  sub_or_wildcard nil
+                    (fun __a_value => Type_annot_opt __a_value) s acc
+                | "@" % char =>
+                  sub_or_wildcard
+                    (if allow_special_var then
+                      [ "%" % char ]
+                    else
+                      nil) (fun __a_value => Var_annot_opt __a_value) s acc
+                | "%" % char =>
+                  sub_or_wildcard
+                    (if allow_special_field then
+                      [ "@" % char ]
+                    else
+                      nil) (fun __a_value => Field_annot_opt __a_value) s acc
+                | _ => Error_monad.__error_value extensible_type_value
+                end) (Error_monad.ok nil) l) List.rev.
 
 Definition opt_var_of_var_opt (function_parameter : option string)
   : option Script_typed_ir.var_annot :=
@@ -410,68 +408,46 @@ Definition get_two_annot {A : Set}
 
 Definition parse_type_annot (loc : Z) (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.type_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
-    (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              get_one_annot loc types))).
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc vars in
+  let? '_ := error_unexpected_annot loc fields in
+  get_one_annot loc types.
 
 Definition parse_type_field_annot (loc : Z) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
-    (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (get_one_annot loc types)
-            (fun __t_value =>
-              Error_monad.op_gtpipequestion (get_one_annot loc fields)
-                (fun f => (__t_value, f))))).
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc vars in
+  let? __t_value := get_one_annot loc types in
+  Error_monad.op_gtpipequestion (get_one_annot loc fields)
+    (fun f => (__t_value, f)).
 
 Definition parse_composed_type_annot (loc : Z) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot *
       option Script_typed_ir.field_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc vars in
+  let? __t_value := get_one_annot loc types in
+  Error_monad.op_gtpipequestion (get_two_annot loc fields)
     (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (get_one_annot loc types)
-            (fun __t_value =>
-              Error_monad.op_gtpipequestion (get_two_annot loc fields)
-                (fun function_parameter =>
-                  let '(f1, f2) := function_parameter in
-                  (__t_value, f1, f2))))).
+      let '(f1, f2) := function_parameter in
+      (__t_value, f1, f2)).
 
 Definition parse_field_annot (loc : Z) (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.field_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
-    (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc vars)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              get_one_annot loc fields))).
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc vars in
+  let? '_ := error_unexpected_annot loc types in
+  get_one_annot loc fields.
 
 Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
   : Error_monad.tzresult
@@ -524,27 +500,21 @@ Definition parse_var_annot
   (loc : Z) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.var_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc types in
+  let? '_ := error_unexpected_annot loc fields in
+  Error_monad.op_gtpipequestion (get_one_annot loc vars)
     (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              Error_monad.op_gtpipequestion (get_one_annot loc vars)
-                (fun function_parameter =>
-                  match function_parameter with
-                  | (Some _) as __a_value => __a_value
-                  | None =>
-                    match default with
-                    | Some __a_value => __a_value
-                    | None => None
-                    end
-                  end)))).
+      match function_parameter with
+      | (Some _) as __a_value => __a_value
+      | None =>
+        match default with
+        | Some __a_value => __a_value
+        | None => None
+        end
+      end).
 
 Definition split_last_dot
   (function_parameter : option Script_typed_ir.field_annot)
@@ -597,62 +567,46 @@ Definition parse_constr_annot
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot *
       option Script_typed_ir.field_annot * option Script_typed_ir.field_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None (Some true) annot)
-      (classify_annot loc))
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None (Some true) annot)
+      (classify_annot loc) in
+  let? v := get_one_annot loc vars in
+  let? __t_value := get_one_annot loc types in
+  let? '(f1, f2) := get_two_annot loc fields in
+  let? '(v1, f1) :=
+    match (if_special_first, f1) with
+    | (Some special_var, Some (Script_typed_ir.Field_annot "@")) =>
+      Error_monad.ok (split_last_dot special_var)
+    | (None, Some (Script_typed_ir.Field_annot "@")) =>
+      Error_monad.__error_value extensible_type_value
+    | (_, _) => Error_monad.ok (v, f1)
+    end in
+  Error_monad.op_gtpipequestion
+    match (if_special_second, f2) with
+    | (Some special_var, Some (Script_typed_ir.Field_annot "@")) =>
+      Error_monad.ok (split_last_dot special_var)
+    | (None, Some (Script_typed_ir.Field_annot "@")) =>
+      Error_monad.__error_value extensible_type_value
+    | (_, _) => Error_monad.ok (v, f2)
+    end
     (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (get_one_annot loc vars)
-        (fun v =>
-          Error_monad.op_gtgtquestion (get_one_annot loc types)
-            (fun __t_value =>
-              Error_monad.op_gtgtquestion (get_two_annot loc fields)
-                (fun function_parameter =>
-                  let '(f1, f2) := function_parameter in
-                  Error_monad.op_gtgtquestion
-                    match (if_special_first, f1) with
-                    | (Some special_var, Some (Script_typed_ir.Field_annot "@"))
-                      => Error_monad.ok (split_last_dot special_var)
-                    | (None, Some (Script_typed_ir.Field_annot "@")) =>
-                      Error_monad.__error_value extensible_type_value
-                    | (_, _) => Error_monad.ok (v, f1)
-                    end
-                    (fun function_parameter =>
-                      let '(v1, f1) := function_parameter in
-                      Error_monad.op_gtpipequestion
-                        match (if_special_second, f2) with
-                        |
-                          (Some special_var,
-                            Some (Script_typed_ir.Field_annot "@")) =>
-                          Error_monad.ok (split_last_dot special_var)
-                        | (None, Some (Script_typed_ir.Field_annot "@")) =>
-                          Error_monad.__error_value extensible_type_value
-                        | (_, _) => Error_monad.ok (v, f2)
-                        end
-                        (fun function_parameter =>
-                          let '(v2, f2) := function_parameter in
-                          let v :=
-                            match v with
-                            | None => common_prefix v1 v2
-                            | Some _ => v
-                            end in
-                          (v, __t_value, f1, f2))))))).
+      let '(v2, f2) := function_parameter in
+      let v :=
+        match v with
+        | None => common_prefix v1 v2
+        | Some _ => v
+        end in
+      (v, __t_value, f1, f2)).
 
 Definition parse_two_var_annot (loc : Z) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.var_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
-    (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              get_two_annot loc vars))).
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc types in
+  let? '_ := error_unexpected_annot loc fields in
+  get_two_annot loc vars.
 
 Definition parse_destr_annot
   (loc : Z) (annot : list string)
@@ -662,69 +616,52 @@ Definition parse_destr_annot
   (value_annot : option Script_typed_ir.var_annot)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc (Some true) None annot)
-      (classify_annot loc))
-    (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (get_one_annot loc vars)
-            (fun v =>
-              Error_monad.op_gtpipequestion (get_one_annot loc fields)
-                (fun f =>
-                  let default :=
-                    gen_access_annot pair_annot (Some default_accessor)
-                      field_name in
-                  let v :=
-                    match v with
-                    | Some (Script_typed_ir.Var_annot "%") =>
-                      field_to_var_annot field_name
-                    | Some (Script_typed_ir.Var_annot "%%") => default
-                    | Some _ => v
-                    | None => value_annot
-                    end in
-                  (v, f))))).
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc (Some true) None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc types in
+  let? v := get_one_annot loc vars in
+  Error_monad.op_gtpipequestion (get_one_annot loc fields)
+    (fun f =>
+      let default :=
+        gen_access_annot pair_annot (Some default_accessor) field_name in
+      let v :=
+        match v with
+        | Some (Script_typed_ir.Var_annot "%") => field_to_var_annot field_name
+        | Some (Script_typed_ir.Var_annot "%%") => default
+        | Some _ => v
+        | None => value_annot
+        end in
+      (v, f)).
 
 Definition parse_entrypoint_annot
   (loc : Z) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc types in
+  let? f := get_one_annot loc fields in
+  Error_monad.op_gtpipequestion (get_one_annot loc vars)
     (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc types)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (get_one_annot loc fields)
-            (fun f =>
-              Error_monad.op_gtpipequestion (get_one_annot loc vars)
-                (fun function_parameter =>
-                  match function_parameter with
-                  | (Some _) as __a_value => (__a_value, f)
-                  | None =>
-                    match default with
-                    | Some __a_value => (__a_value, f)
-                    | None => (None, f)
-                    end
-                  end)))).
+      match function_parameter with
+      | (Some _) as __a_value => (__a_value, f)
+      | None =>
+        match default with
+        | Some __a_value => (__a_value, f)
+        | None => (None, f)
+        end
+      end).
 
 Definition parse_var_type_annot (loc : Z) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot) :=
-  Error_monad.op_gtgtquestion
-    (Error_monad.op_gtgtquestion (parse_annots loc None None annot)
-      (classify_annot loc))
-    (fun function_parameter =>
-      let '(vars, types, fields) := function_parameter in
-      Error_monad.op_gtgtquestion (error_unexpected_annot loc fields)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgtquestion (get_one_annot loc vars)
-            (fun v =>
-              Error_monad.op_gtpipequestion (get_one_annot loc types)
-                (fun __t_value => (v, __t_value))))).
+  let? '(vars, types, fields) :=
+    Error_monad.op_gtgtquestion (parse_annots loc None None annot)
+      (classify_annot loc) in
+  let? '_ := error_unexpected_annot loc fields in
+  let? v := get_one_annot loc vars in
+  Error_monad.op_gtpipequestion (get_one_annot loc types)
+    (fun __t_value => (v, __t_value)).

@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
 Require Tezos.Level_storage.
@@ -46,7 +46,7 @@ Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
       if Cycle_repr.op_lt level.(Level_repr.t.cycle) revealed_cycle then
         Error_monad.fail extensible_type_value
       else
-        let!? function_parameter :=
+        let=? function_parameter :=
           (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
             ctxt level in
         match function_parameter with
@@ -66,13 +66,13 @@ Definition reveal
   (ctxt : Raw_context.t) (level : Level_repr.t)
   (__nonce_value : Seed_repr.nonce)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? unrevealed := get_unrevealed ctxt level in
-  let!? '_ :=
+  let=? unrevealed := get_unrevealed ctxt level in
+  let=? '_ :=
     Error_monad.fail_unless
       (Seed_repr.check_hash __nonce_value
         unrevealed.(Storage.Seed.unrevealed_nonce.nonce_hash))
       extensible_type_value in
-  let!? ctxt :=
+  let=? ctxt :=
     (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.set)
       ctxt level (Storage.Seed.Revealed __nonce_value) in
   Error_monad.__return ctxt.

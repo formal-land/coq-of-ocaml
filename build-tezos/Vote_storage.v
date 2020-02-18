@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Constants_storage.
 Require Tezos.Raw_context.
 Require Tezos.Roll_storage.
@@ -27,7 +27,7 @@ Definition recorded_proposal_count_for_delegate
   : Lwt.t
     (Error_monad.tzresult
       (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.value)) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.get_option)
       ctxt proposer in
   match function_parameter with
@@ -42,14 +42,14 @@ Definition record_proposal
   (proposer :
     (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? count := recorded_proposal_count_for_delegate ctxt proposer in
-  Error_monad.op_gtgteq
-    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.init_set)
-      ctxt proposer (Pervasives.op_plus count 1))
-    (fun ctxt =>
-      Error_monad.op_gtgteq
-        ((|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.add) ctxt
-          (proposal, proposer)) (fun ctxt => Error_monad.__return ctxt)).
+  let=? count := recorded_proposal_count_for_delegate ctxt proposer in
+  let= ctxt :=
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.init_set)
+      ctxt proposer (Pervasives.op_plus count 1) in
+  let= ctxt :=
+    (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.add) ctxt
+      (proposal, proposer) in
+  Error_monad.__return ctxt.
 
 Definition get_proposals
   (ctxt : (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.context))
@@ -61,34 +61,32 @@ Definition get_proposals
     (fun function_parameter =>
       let '(proposal, delegate) := function_parameter in
       fun acc =>
-        let!? weight :=
+        let=? weight :=
           (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get) ctxt
             delegate in
         Lwt.__return
-          (Error_monad.op_gtgtquestion acc
-            (fun acc =>
-              let previous :=
-                match
-                  (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.find_opt)
-                    proposal acc with
-                | None =>
-                  (* ❌ Constant of type int32 is converted to int *)
-                  0
-                | Some x => x
-                end in
-              Error_monad.ok
-                ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.add) proposal
-                  (Int32.add weight previous) acc)))).
+          (let? acc := acc in
+          let previous :=
+            match
+              (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.find_opt) proposal
+                acc with
+            | None =>
+              (* ❌ Constant of type int32 is converted to int *)
+              0
+            | Some x => x
+            end in
+          Error_monad.ok
+            ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.add) proposal
+              (Int32.add weight previous) acc))).
 
 Definition clear_proposals
   (ctxt :
     (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t Raw_context.t :=
-  Error_monad.op_gtgteq
-    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.clear)
-      ctxt)
-    (fun ctxt =>
-      (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.clear) ctxt).
+  let= ctxt :=
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.clear)
+      ctxt in
+  (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.clear) ctxt.
 
 Module ballots.
   Record record : Set := Build {
@@ -151,24 +149,23 @@ Definition get_ballots
     (fun delegate =>
       fun ballot =>
         fun ballots =>
-          let!? weight :=
+          let=? weight :=
             (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
               ctxt delegate in
           let count := Int32.add weight in
           Lwt.__return
-            (Error_monad.op_gtgtquestion ballots
-              (fun ballots =>
-                match ballot with
-                | Vote_repr.Yay =>
-                  Error_monad.ok
-                    (ballots.with_yay (count ballots.(ballots.yay)) ballots)
-                | Vote_repr.Nay =>
-                  Error_monad.ok
-                    (ballots.with_nay (count ballots.(ballots.nay)) ballots)
-                | Vote_repr.Pass =>
-                  Error_monad.ok
-                    (ballots.with_pass (count ballots.(ballots.pass)) ballots)
-                end))).
+            (let? ballots := ballots in
+            match ballot with
+            | Vote_repr.Yay =>
+              Error_monad.ok
+                (ballots.with_yay (count ballots.(ballots.yay)) ballots)
+            | Vote_repr.Nay =>
+              Error_monad.ok
+                (ballots.with_nay (count ballots.(ballots.nay)) ballots)
+            | Vote_repr.Pass =>
+              Error_monad.ok
+                (ballots.with_pass (count ballots.(ballots.pass)) ballots)
+            end)).
 
 Definition get_ballot_list
   : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) ->
@@ -194,7 +191,7 @@ Definition listings_encoding
 
 Definition freeze_listings (ctxt : Raw_context.t)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? '(ctxt, total) :=
+  let=? '(ctxt, total) :=
     Roll_storage.fold ctxt
       (fun _roll =>
         fun delegate =>
@@ -202,8 +199,8 @@ Definition freeze_listings (ctxt : Raw_context.t)
             let '(ctxt, total) := function_parameter in
             let delegate :=
               (|Signature.Public_key|).(S.SPublic_key.__hash_value) delegate in
-            let!? count :=
-              let!? function_parameter :=
+            let=? count :=
+              let=? function_parameter :=
                 (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get_option)
                   ctxt delegate in
               match function_parameter with
@@ -213,14 +210,14 @@ Definition freeze_listings (ctxt : Raw_context.t)
                   0
               | Some count => Error_monad.__return count
               end in
-            Error_monad.op_gtgteq
-              ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.init_set)
-                ctxt delegate (Int32.succ count))
-              (fun ctxt => Error_monad.__return (ctxt, (Int32.succ total))))
+            let= ctxt :=
+              (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.init_set)
+                ctxt delegate (Int32.succ count) in
+            Error_monad.__return (ctxt, (Int32.succ total)))
       (ctxt,
         (* ❌ Constant of type int32 is converted to int *)
         0) in
-  let!? ctxt :=
+  let=? ctxt :=
     (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.init) ctxt
       total in
   Error_monad.__return ctxt.
@@ -249,12 +246,12 @@ Definition get_listings
 Definition clear_listings
   (ctxt : (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.context))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteq
-    ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.clear) ctxt)
-    (fun ctxt =>
-      Error_monad.op_gtgteq
-        ((|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.remove)
-          ctxt) (fun ctxt => Error_monad.__return ctxt)).
+  let= ctxt :=
+    (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.clear) ctxt in
+  let= ctxt :=
+    (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.remove)
+      ctxt in
+  Error_monad.__return ctxt.
 
 Definition get_current_period_kind
   : (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.context)
@@ -275,7 +272,7 @@ Definition get_current_quorum
   (ctxt :
     (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context))
   : Lwt.t (Error_monad.tzresult int32) :=
-  let!? participation_ema :=
+  let=? participation_ema :=
     (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.get)
       ctxt in
   let quorum_min := Constants_storage.quorum_min ctxt in
@@ -325,10 +322,10 @@ Definition clear_current_proposal
 Definition init (ctxt : Raw_context.context)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let participation_ema := Constants_storage.quorum_max ctxt in
-  let!? ctxt :=
+  let=? ctxt :=
     (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.init)
       ctxt participation_ema in
-  let!? ctxt :=
+  let=? ctxt :=
     (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.init)
       ctxt Voting_period_repr.Proposal in
   Error_monad.__return ctxt.

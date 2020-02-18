@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 
 Inductive manager_key : Set :=
 | Hash : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -> manager_key

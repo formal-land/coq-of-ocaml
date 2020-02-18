@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
 Require Tezos.Cycle_repr.
@@ -381,25 +381,18 @@ Module Contract.
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
         Lwt.__return
-          (Error_monad.op_gtgtquestion
-            ((|Raw_context|).(Raw_context.T.check_enough_gas) ctxt
-              (Script_repr.minimal_deserialize_cost value))
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              Error_monad.op_gtgtquestion (Script_repr.force_decode value)
-                (fun function_parameter =>
-                  let '(_value, value_cost) := function_parameter in
-                  (|Raw_context|).(Raw_context.T.consume_gas) ctxt value_cost)))
-        in
+          (let? '_ :=
+            (|Raw_context|).(Raw_context.T.check_enough_gas) ctxt
+              (Script_repr.minimal_deserialize_cost value) in
+          let? '(_value, value_cost) := Script_repr.force_decode value in
+          (|Raw_context|).(Raw_context.T.consume_gas) ctxt value_cost) in
       let consume_serialize_gas
         (ctxt : (|Raw_context|).(Raw_context.T.context))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
         Lwt.__return
-          (Error_monad.op_gtgtquestion (Script_repr.force_bytes value)
-            (fun function_parameter =>
-              let '(_value, value_cost) := function_parameter in
-              (|Raw_context|).(Raw_context.T.consume_gas) ctxt value_cost)) in
+          (let? '(_value, value_cost) := Script_repr.force_bytes value in
+          (|Raw_context|).(Raw_context.T.consume_gas) ctxt value_cost) in
       let get
         (ctxt :
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context))
@@ -409,7 +402,7 @@ Module Contract.
           (Error_monad.tzresult
             ((|Raw_context|).(Raw_context.T.context) *
               (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))) :=
-        let!? '(ctxt, value) :=
+        let=? '(ctxt, value) :=
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get)
             ctxt contract in
         Error_monad.op_gtgtpipequestion (consume_deserialize_gas ctxt value)
@@ -424,7 +417,7 @@ Module Contract.
             (Raw_context.t *
               option
                 (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))) :=
-        let!? '(ctxt, value_opt) :=
+        let=? '(ctxt, value_opt) :=
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
             ctxt contract in
         match value_opt with
@@ -439,7 +432,7 @@ Module Contract.
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
-        let!? ctxt := consume_serialize_gas ctxt value in
+        let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set)
           ctxt contract value in
       let set_option
@@ -456,7 +449,7 @@ Module Contract.
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set_option)
             ctxt contract None
         | Some value =>
-          let!? ctxt := consume_serialize_gas ctxt value in
+          let=? ctxt := consume_serialize_gas ctxt value in
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set_option)
             ctxt contract value_opt
         end in
@@ -466,7 +459,7 @@ Module Contract.
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
-        let!? ctxt := consume_serialize_gas ctxt value in
+        let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init)
           ctxt contract value in
       let init_set
@@ -475,7 +468,7 @@ Module Contract.
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
         : Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
-        let!? ctxt := consume_serialize_gas ctxt value in
+        let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init_set)
           ctxt contract value in
       existT (A := unit) (fun _ => _) tt
@@ -644,8 +637,8 @@ Module Big_map.
     
     Definition incr (ctxt : context)
       : Lwt.t (Error_monad.tzresult (Raw_context.t * value)) :=
-      let!? i := get ctxt in
-      let!? ctxt := set ctxt (Z.succ i) in
+      let=? i := get ctxt in
+      let=? ctxt := set ctxt (Z.succ i) in
       Error_monad.__return (ctxt, i).
     
     Definition init (ctxt : context)
@@ -919,7 +912,7 @@ Module Big_map.
         (Error_monad.tzresult
           ((|Raw_context|).(Raw_context.T.context) *
             (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))) :=
-      let!? '(ctxt, value) :=
+      let=? '(ctxt, value) :=
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get)
           ctxt contract in
       Error_monad.op_gtgtpipequestion (consume_deserialize_gas ctxt value)
@@ -935,7 +928,7 @@ Module Big_map.
           (Raw_context.t *
             option
               (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))) :=
-      let!? '(ctxt, value_opt) :=
+      let=? '(ctxt, value_opt) :=
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
           ctxt contract in
       match value_opt with

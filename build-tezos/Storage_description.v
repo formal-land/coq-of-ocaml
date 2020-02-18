@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 
 Definition depends_on_me (function_parameter : unit) : unit :=
   let '_ := function_parameter in
@@ -227,12 +227,12 @@ Fixpoint register_indexed_subcontext {a b r : Set}
       let equal_left (x : __0) (y : __0) : bool :=
         (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
       let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
-        let!? l := __list_value __r_value in
+        let=? l := __list_value __r_value in
         Error_monad.__return (destutter equal_left l) in
       let list_right (__r_value : __Pair_'inter_key)
         : Lwt.t (Error_monad.tzresult (list __1)) :=
         let '(__a_value, k) := unpack __left __r_value in
-        let!? l := __list_value __a_value in
+        let=? l := __list_value __a_value in
         Error_monad.__return
           (List.map Pervasives.snd
             (List.filter
@@ -464,8 +464,8 @@ Fixpoint combine_object {A : Set}
         handler.Handler.get :=
           fun k =>
             fun i =>
-              let!? v1 := __handler_value.(opt_handler.Opt_handler.get) k i in
-              let!? v2 := handlers.(handler.Handler.get) k i in
+              let=? v1 := __handler_value.(opt_handler.Opt_handler.get) k i in
+              let=? v2 := handlers.(handler.Handler.get) k i in
               Error_monad.__return (v1, v2) |}
   end.
 
@@ -507,7 +507,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           fun q =>
             fun function_parameter =>
               let '_ := function_parameter in
-              let!? function_parameter :=
+              let=? function_parameter :=
                 get k (Pervasives.op_plus q.(query.depth) 1) in
               match function_parameter with
               | None => Pervasives.raise extensible_type_value
@@ -571,7 +571,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                   if (|Compare.Int|).(Compare.S.op_lt) i 0 then
                     Error_monad.return_none
                   else
-                    let!? v :=
+                    let=? v :=
                       __handler_value.(handler.Handler.get) k
                         (Pervasives.op_minus i 1) in
                     Error_monad.return_some v |} in
@@ -635,14 +635,14 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           if (|Compare.Int|).(Compare.S.op_eq) i 0 then
             Error_monad.return_some nil
           else
-            let!? keys := __list_value k in
-            let!? values :=
+            let=? keys := __list_value k in
+            let=? values :=
               Error_monad.map_s
                 (fun __key_value =>
                   if (|Compare.Int|).(Compare.S.op_eq) i 1 then
                     Error_monad.__return (__key_value, None)
                   else
-                    let!? value :=
+                    let=? value :=
                       __handler_value.(opt_handler.Opt_handler.get)
                         (k, __key_value) (Pervasives.op_minus i 1) in
                     Error_monad.__return (__key_value, value)) keys in

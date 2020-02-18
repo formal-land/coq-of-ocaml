@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Bootstrap_storage.
 Require Tezos.Commitment_storage.
 Require Tezos.Contract_storage.
@@ -31,26 +31,26 @@ Definition prepare_first_block
         ((Script_repr.t * option Contract_storage.big_map_diff) * Raw_context.t)))
   (level : int32) (timestamp : Time.t) (fitness : (|Fitness|).(S.T.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? '(previous_protocol, ctxt) :=
+  let=? '(previous_protocol, ctxt) :=
     Raw_context.prepare_first_block level timestamp fitness ctxt in
-  let!? ctxt := Storage.Big_map.Next.init ctxt in
+  let=? ctxt := Storage.Big_map.Next.init ctxt in
   match previous_protocol with
   | Raw_context.Genesis param =>
-    let!? ctxt :=
+    let=? ctxt :=
       Commitment_storage.init ctxt param.(Parameters_repr.t.commitments) in
-    let!? ctxt := Roll_storage.init ctxt in
-    let!? ctxt := Seed_storage.init ctxt in
-    let!? ctxt := Contract_storage.init ctxt in
-    let!? ctxt :=
+    let=? ctxt := Roll_storage.init ctxt in
+    let=? ctxt := Seed_storage.init ctxt in
+    let=? ctxt := Contract_storage.init ctxt in
+    let=? ctxt :=
       Bootstrap_storage.init ctxt typecheck
         param.(Parameters_repr.t.security_deposit_ramp_up_cycles)
         param.(Parameters_repr.t.no_reward_cycles)
         param.(Parameters_repr.t.bootstrap_accounts)
         param.(Parameters_repr.t.bootstrap_contracts) in
-    let!? ctxt := Roll_storage.init_first_cycles ctxt in
-    let!? ctxt := Vote_storage.init ctxt in
-    let!? ctxt := Storage.Block_priority.init ctxt 0 in
-    let!? ctxt := Vote_storage.freeze_listings ctxt in
+    let=? ctxt := Roll_storage.init_first_cycles ctxt in
+    let=? ctxt := Vote_storage.init ctxt in
+    let=? ctxt := Storage.Block_priority.init ctxt 0 in
+    let=? ctxt := Vote_storage.freeze_listings ctxt in
     Error_monad.__return ctxt
   | Raw_context.Alpha_previous => Error_monad.__return ctxt
   end.

@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Misc.
 
@@ -60,14 +60,12 @@ Definition minimal_time
         cumsum_time_between_blocks acc [ Alpha_context.Period.one_minute ]
           __p_value
       | cons last [] =>
-        Error_monad.op_gtgtquestion (Alpha_context.Period.mult __p_value last)
-          (fun period => Alpha_context.Timestamp.op_plusquestion acc period)
+        let? period := Alpha_context.Period.mult __p_value last in
+        Alpha_context.Timestamp.op_plusquestion acc period
       | cons first durations =>
-        Error_monad.op_gtgtquestion
-          (Alpha_context.Timestamp.op_plusquestion acc first)
-          (fun acc =>
-            let __p_value := Int32.pred __p_value in
-            cumsum_time_between_blocks acc durations __p_value)
+        let? acc := Alpha_context.Timestamp.op_plusquestion acc first in
+        let __p_value := Int32.pred __p_value in
+        cumsum_time_between_blocks acc durations __p_value
       end in
   Lwt.__return
     (cumsum_time_between_blocks pred_timestamp
@@ -86,9 +84,9 @@ Definition earlier_predecessor_timestamp
       1 then
     Pervasives.failwith "Baking.earlier_block_timestamp: past block."
   else
-    let!? delay :=
+    let=? delay :=
       Lwt.__return (Alpha_context.Period.mult (Int32.pred gap) step) in
-    let!? __result_value :=
+    let=? __result_value :=
       Lwt.__return
         (Alpha_context.Timestamp.op_plusquestion current_timestamp delay) in
     Error_monad.__return __result_value.
@@ -97,7 +95,7 @@ Definition check_timestamp
   (c : Alpha_context.context) (priority : Z)
   (pred_timestamp : Alpha_context.Timestamp.time)
   : Lwt.t (Error_monad.tzresult Alpha_context.Period.t) :=
-  let!? minimal_time := minimal_time c priority pred_timestamp in
+  let=? minimal_time := minimal_time c priority pred_timestamp in
   let timestamp := Alpha_context.Timestamp.current c in
   Lwt.__return
     (Error_monad.record_trace extensible_type_value
@@ -113,8 +111,8 @@ Definition check_baking_rights
     function_parameter in
   fun pred_timestamp =>
     let level := Alpha_context.Level.current c in
-    let!? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
-    let!? block_delay := check_timestamp c priority pred_timestamp in
+    let=? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
+    let=? block_delay := check_timestamp c priority pred_timestamp in
     Error_monad.__return (delegate, block_delay).
 
 (* ❌ Structure item `typext` not handled. *)
@@ -133,11 +131,11 @@ Definition baking_reward
   (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t))
   (num_endo : (|Compare.Int|).(Compare.S.t))
   : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
-  let!? '_ :=
+  let=? '_ :=
     Error_monad.fail_unless ((|Compare.Int|).(Compare.S.op_gteq) prio 0)
       extensible_type_value in
   let max_endorsements := Alpha_context.Constants.endorsers_per_block ctxt in
-  let!? '_ :=
+  let=? '_ :=
     Error_monad.fail_unless
       (Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_gteq) num_endo 0)
         ((|Compare.Int|).(Compare.S.op_lteq) num_endo max_endorsements))
@@ -151,20 +149,18 @@ Definition baking_reward
     (* ❌ Constant of type int64 is converted to int *)
     10 in
   Lwt.__return
-    (Error_monad.op_gtgtquestion
-      (Alpha_context.Tez.op_starquestion
-        (Alpha_context.Constants.block_reward ctxt) endo_factor_numerator)
-      (fun val1 =>
-        Error_monad.op_gtgtquestion
-          (Alpha_context.Tez.op_divquestion val1 endo_factor_denominator)
-          (fun val2 =>
-            Alpha_context.Tez.op_divquestion val2 prio_factor_denominator))).
+    (let? val1 :=
+      Alpha_context.Tez.op_starquestion
+        (Alpha_context.Constants.block_reward ctxt) endo_factor_numerator in
+    let? val2 := Alpha_context.Tez.op_divquestion val1 endo_factor_denominator
+      in
+    Alpha_context.Tez.op_divquestion val2 prio_factor_denominator).
 
 Definition endorsing_reward
   (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t)) (n : Z)
   : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
   if (|Compare.Int|).(Compare.S.op_gteq) prio 0 then
-    let!? tez :=
+    let=? tez :=
       Lwt.__return
         (Alpha_context.Tez.op_divquestion
           (Alpha_context.Constants.endorsement_reward ctxt)
@@ -178,7 +174,7 @@ Definition baking_priorities
   : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
   let fix f (priority : Z) {struct priority}
     : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
-    let!? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
+    let=? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
     Error_monad.__return
       (Misc.LCons delegate
         (fun function_parameter =>
@@ -195,7 +191,7 @@ Definition endorsement_rights
   Error_monad.fold_left_s
     (fun acc =>
       fun slot =>
-        let!? pk := Alpha_context.Roll.endorsement_rights_owner c level slot in
+        let=? pk := Alpha_context.Roll.endorsement_rights_owner c level slot in
         let pkh := (|Signature.Public_key|).(S.SPublic_key.__hash_value) pk in
         let __right :=
           match
@@ -225,7 +221,7 @@ Definition check_endorsement_rights
         Alpha_context.contents.Endorsement.level := level |}) :=
     op.(Alpha_context.operation.protocol_data).(Alpha_context.protocol_data.contents)
     in
-  let!? endorsements :=
+  let=? endorsements :=
     if
       Alpha_context.Raw_level.op_eq (Alpha_context.Raw_level.succ level)
         current_level.(Alpha_context.Level.t.level) then
@@ -268,7 +264,7 @@ Definition select_delegate
           cons n acc
         else
           acc in
-      let!? __t_value := __t_value tt in
+      let=? __t_value := __t_value tt in
       loop acc __t_value (Pervasives.succ n) in
   loop nil delegate_list 0.
 
@@ -285,7 +281,7 @@ Definition first_baking_priorities
     end in
   fun delegate =>
     fun level =>
-      let!? delegate_list := baking_priorities ctxt level in
+      let=? delegate_list := baking_priorities ctxt level in
       select_delegate delegate delegate_list max_priority.
 
 Definition check_hash
@@ -354,7 +350,7 @@ Definition check_fitness_gap
   (ctxt : Alpha_context.context) (block : Alpha_context.Block_header.t)
   : Lwt.t (Error_monad.tzresult unit) :=
   let current_fitness := Alpha_context.Fitness.current ctxt in
-  let!? announced_fitness :=
+  let=? announced_fitness :=
     Lwt.__return
       (Alpha_context.Fitness.to_int64
         block.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.fitness))
@@ -404,7 +400,7 @@ Definition minimal_valid_time
   (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
   : Lwt.t (Error_monad.tzresult Time.t) :=
   let predecessor_timestamp := Alpha_context.Timestamp.current ctxt in
-  let!? minimal_time := minimal_time ctxt priority predecessor_timestamp in
+  let=? minimal_time := minimal_time ctxt priority predecessor_timestamp in
   let minimal_required_endorsements :=
     Alpha_context.Constants.initial_endorsers ctxt in
   let delay_per_missing_endorsement :=

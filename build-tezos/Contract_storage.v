@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Contract_repr.
 Require Tezos.Delegate_storage.
 Require Tezos.Gas_limit_repr.
@@ -192,22 +192,21 @@ Definition update_script_big_map
         fun function_parameter =>
           match function_parameter with
           | Clear id =>
-            let!? size :=
+            let=? size :=
               (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
                 c id in
-            Error_monad.op_gtgteq (Storage.Big_map.remove_rec c id)
-              (fun c =>
-                if (|Compare.Z|).(Compare.S.op_lt) id Z.zero then
-                  Error_monad.__return (c, total)
-                else
-                  Error_monad.__return
-                    (c, (Z.sub (Z.sub total size) (Z.of_int big_map_cost))))
+            let= c := Storage.Big_map.remove_rec c id in
+            if (|Compare.Z|).(Compare.S.op_lt) id Z.zero then
+              Error_monad.__return (c, total)
+            else
+              Error_monad.__return
+                (c, (Z.sub (Z.sub total size) (Z.of_int big_map_cost)))
           | Copy from to_ =>
-            let!? c := Storage.Big_map.copy c from to_ in
+            let=? c := Storage.Big_map.copy c from to_ in
             if (|Compare.Z|).(Compare.S.op_lt) to_ Z.zero then
               Error_monad.__return (c, total)
             else
-              let!? size :=
+              let=? size :=
                 (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
                   c from in
               Error_monad.__return
@@ -218,7 +217,7 @@ Definition update_script_big_map
                 big_map_diff_item.Alloc.key_type := key_type;
                 big_map_diff_item.Alloc.value_type := value_type
                 |} =>
-            let!? c :=
+            let=? c :=
               (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.init)
                 c big_map Z.zero in
             let key_type :=
@@ -227,10 +226,10 @@ Definition update_script_big_map
             let value_type :=
               Micheline.strip_locations
                 (Script_repr.strip_annotations (Micheline.root value_type)) in
-            let!? c :=
+            let=? c :=
               (|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.init)
                 c big_map key_type in
-            let!? c :=
+            let=? c :=
               (|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.init)
                 c big_map value_type in
             if (|Compare.Z|).(Compare.S.op_lt) big_map Z.zero then
@@ -243,7 +242,7 @@ Definition update_script_big_map
                 big_map_diff_item.Update.diff_key_hash := diff_key_hash;
                 big_map_diff_item.Update.diff_value := None
                 |} =>
-            let!? '(c, freed, existed) :=
+            let=? '(c, freed, existed) :=
               (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove)
                 (c, big_map) diff_key_hash in
             let freed :=
@@ -251,10 +250,10 @@ Definition update_script_big_map
                 Pervasives.op_plus freed big_map_key_cost
               else
                 freed in
-            let!? size :=
+            let=? size :=
               (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
                 c big_map in
-            let!? c :=
+            let=? c :=
               (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.set)
                 c big_map (Z.sub size (Z.of_int freed)) in
             if (|Compare.Z|).(Compare.S.op_lt) big_map Z.zero then
@@ -267,7 +266,7 @@ Definition update_script_big_map
                 big_map_diff_item.Update.diff_key_hash := diff_key_hash;
                 big_map_diff_item.Update.diff_value := Some v
                 |} =>
-            let!? '(c, size_diff, existed) :=
+            let=? '(c, size_diff, existed) :=
               (|Storage.Big_map.Contents|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init_set)
                 (c, big_map) diff_key_hash v in
             let size_diff :=
@@ -275,10 +274,10 @@ Definition update_script_big_map
                 size_diff
               else
                 Pervasives.op_plus size_diff big_map_key_cost in
-            let!? size :=
+            let=? size :=
               (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.get)
                 c big_map in
-            let!? c :=
+            let=? c :=
               (|Storage.Big_map.Total_bytes|).(Storage_sigs.Indexed_data_storage.set)
                 c big_map (Z.add size (Z.of_int size_diff)) in
             if (|Compare.Z|).(Compare.S.op_lt) big_map Z.zero then
@@ -307,25 +306,25 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
           fun script =>
             fun function_parameter =>
               let '_ := function_parameter in
-              let!? c :=
+              let=? c :=
                 match Contract_repr.is_implicit contract with
                 | None => Error_monad.__return c
                 | Some _ =>
-                  let!? counter := Storage.Contract.Global_counter.get c in
+                  let=? counter := Storage.Contract.Global_counter.get c in
                   (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.init)
                     c contract counter
                 end in
-              let!? c :=
+              let=? c :=
                 (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.init)
                   c contract balance in
-              let!? c :=
+              let=? c :=
                 match manager with
                 | Some manager =>
                   (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.init)
                     c contract (Manager_repr.Hash manager)
                 | None => Error_monad.__return c
                 end in
-              let!? c :=
+              let=? c :=
                 match delegate with
                 | None => Error_monad.__return c
                 | Some delegate => Delegate_storage.init c contract delegate
@@ -337,13 +336,13 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                     Script_repr.t.code := code;
                       Script_repr.t.storage := storage
                       |}, big_map_diff) =>
-                let!? '(c, code_size) :=
+                let=? '(c, code_size) :=
                   (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init)
                     c contract code in
-                let!? '(c, storage_size) :=
+                let=? '(c, storage_size) :=
                   (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init)
                     c contract storage in
-                let!? '(c, big_map_size) := update_script_big_map c big_map_diff
+                let=? '(c, big_map_size) := update_script_big_map c big_map_diff
                   in
                 let total_size :=
                   Z.add (Z.add (Z.of_int code_size) (Z.of_int storage_size))
@@ -355,7 +354,7 @@ Definition create_base (c : Raw_context.t) (op_staroptstar : option bool)
                     total_size
                   else
                     Z.zero in
-                let!? c :=
+                let=? c :=
                   (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.init)
                     c contract prepaid_bootstrap_storage in
                 (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.init)
@@ -388,29 +387,29 @@ Definition delete (c : Raw_context.t) (contract : Contract_repr.contract)
   match Contract_repr.is_implicit contract with
   | None => failwith "Non implicit contracts cannot be removed"
   | Some _ =>
-    let!? c := Delegate_storage.remove c contract in
-    let!? c :=
+    let=? c := Delegate_storage.remove c contract in
+    let=? c :=
       (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.delete) c
         contract in
-    let!? c :=
+    let=? c :=
       (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.delete) c
         contract in
-    let!? c :=
+    let=? c :=
       (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.delete) c
         contract in
-    let!? '(c, _, _) :=
+    let=? '(c, _, _) :=
       (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove)
         c contract in
-    let!? '(c, _, _) :=
+    let=? '(c, _, _) :=
       (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove)
         c contract in
-    Error_monad.op_gtgteq
-      ((|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.remove)
-        c contract)
-      (fun c =>
-        Error_monad.op_gtgteq
-          ((|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.remove)
-            c contract) (fun c => Error_monad.__return c))
+    let= c :=
+      (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.remove)
+        c contract in
+    let= c :=
+      (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.remove)
+        c contract in
+    Error_monad.__return c
   end.
 
 Definition allocated
@@ -418,7 +417,7 @@ Definition allocated
   (contract :
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult bool) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -437,7 +436,7 @@ Definition __exists
 Definition must_exist
   (c : (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.context))
   (contract : Contract_repr.contract) : Lwt.t (Error_monad.tzresult unit) :=
-  let!? function_parameter := __exists c contract in
+  let=? function_parameter := __exists c contract in
   match function_parameter with
   | true => Error_monad.return_unit
   | false => Error_monad.fail extensible_type_value
@@ -448,7 +447,7 @@ Definition must_be_allocated
   (contract :
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult unit) :=
-  let!? function_parameter := allocated c contract in
+  let=? function_parameter := allocated c contract in
   match function_parameter with
   | true => Error_monad.return_unit
   | false =>
@@ -463,18 +462,18 @@ Definition __list_value (c : Raw_context.t) : Lwt.t (list Contract_repr.t) :=
 
 Definition fresh_contract_from_current_nonce (c : Raw_context.t)
   : Lwt.t (Error_monad.tzresult (Raw_context.t * Contract_repr.contract)) :=
-  let!? '(c, __nonce_value) :=
+  let=? '(c, __nonce_value) :=
     Lwt.__return (Raw_context.increment_origination_nonce c) in
   Error_monad.__return (c, (Contract_repr.originated_contract __nonce_value)).
 
 Definition originated_from_current_nonce
   (ctxt_since : Raw_context.t) (ctxt_until : Raw_context.t)
   : Lwt.t (Error_monad.tzresult (list Contract_repr.contract)) :=
-  let!? since := Lwt.__return (Raw_context.origination_nonce ctxt_since) in
-  let!? until := Lwt.__return (Raw_context.origination_nonce ctxt_until) in
+  let=? since := Lwt.__return (Raw_context.origination_nonce ctxt_since) in
+  let=? until := Lwt.__return (Raw_context.origination_nonce ctxt_until) in
   Error_monad.filter_map_s
     (fun contract =>
-      let!? function_parameter := __exists ctxt_until contract in
+      let=? function_parameter := __exists ctxt_until contract in
       match function_parameter with
       | true => Error_monad.return_some contract
       | false => Error_monad.return_none
@@ -485,7 +484,7 @@ Definition check_counter_increment
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (counter : (|Compare.Z|).(Compare.S.t)) : Lwt.t (Error_monad.tzresult unit) :=
   let contract := Contract_repr.implicit_contract manager in
-  let!? contract_counter :=
+  let=? contract_counter :=
     (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.get) c
       contract in
   let expected := Z.succ contract_counter in
@@ -502,9 +501,9 @@ Definition increment_counter
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract manager in
-  let!? global_counter := Storage.Contract.Global_counter.get c in
-  let!? c := Storage.Contract.Global_counter.set c (Z.succ global_counter) in
-  let!? contract_counter :=
+  let=? global_counter := Storage.Contract.Global_counter.get c in
+  let=? c := Storage.Contract.Global_counter.set c (Z.succ global_counter) in
+  let=? contract_counter :=
     (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.get) c
       contract in
   (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.set) c
@@ -529,10 +528,10 @@ Definition get_script
   (contract :
     (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
   : Lwt.t (Error_monad.tzresult (Raw_context.t * option Script_repr.t)) :=
-  let!? '(c, code) :=
+  let=? '(c, code) :=
     (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
       c contract in
-  let!? '(c, storage) :=
+  let=? '(c, storage) :=
     (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
       c contract in
   match (code, storage) with
@@ -550,14 +549,14 @@ Definition get_storage
   (contract :
     (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
   : Lwt.t (Error_monad.tzresult (Raw_context.t * option Script_repr.expr)) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.get_option)
       ctxt contract in
   match function_parameter with
   | (ctxt, None) => Error_monad.__return (ctxt, None)
   | (ctxt, Some storage) =>
-    let!? '(storage, cost) := Lwt.__return (Script_repr.force_decode storage) in
-    let!? ctxt := Lwt.__return (Raw_context.consume_gas ctxt cost) in
+    let=? '(storage, cost) := Lwt.__return (Script_repr.force_decode storage) in
+    let=? ctxt := Lwt.__return (Raw_context.consume_gas ctxt cost) in
     Error_monad.__return (ctxt, (Some storage))
   end.
 
@@ -566,7 +565,7 @@ Definition get_counter
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult Z.t) :=
   let contract := Contract_repr.implicit_contract manager in
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Counter|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -583,7 +582,7 @@ Definition get_manager_key
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult (|Signature.Public_key|).(S.SPublic_key.t)) :=
   let contract := Contract_repr.implicit_contract manager in
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -597,7 +596,7 @@ Definition is_manager_key_revealed
   (manager : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.tzresult bool) :=
   let contract := Contract_repr.implicit_contract manager in
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -612,7 +611,7 @@ Definition reveal_manager_key
   (public_key : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let contract := Contract_repr.implicit_contract manager in
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.get) c
       contract in
   match function_parameter with
@@ -623,7 +622,7 @@ Definition reveal_manager_key
     if (|Signature.Public_key_hash|).(S.SPublic_key_hash.equal) actual_hash v
       then
       let v := Manager_repr.Public_key public_key in
-      let!? c :=
+      let=? c :=
         (|Storage.Contract.Manager|).(Storage_sigs.Indexed_data_storage.set) c
           contract v in
       Error_monad.__return c
@@ -636,7 +635,7 @@ Definition get_balance
   (contract :
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Tez_repr.t) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -656,11 +655,11 @@ Definition update_script_storage
   (storage : Script_repr.expr) (big_map_diff : option (list big_map_diff_item))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let storage := Script_repr.__lazy_expr_value storage in
-  let!? '(c, big_map_size_diff) := update_script_big_map c big_map_diff in
-  let!? '(c, size_diff) :=
+  let=? '(c, big_map_size_diff) := update_script_big_map c big_map_diff in
+  let=? '(c, size_diff) :=
     (|Storage.Contract.Storage|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set)
       c contract storage in
-  let!? previous_size :=
+  let=? previous_size :=
     (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.get)
       c contract in
   let new_size :=
@@ -673,23 +672,23 @@ Definition spend
   (contract :
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? balance :=
+  let=? balance :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get) c
       contract in
   match Tez_repr.op_minusquestion balance amount with
   | Pervasives.Error _ => Error_monad.fail extensible_type_value
   | Pervasives.Ok new_balance =>
-    let!? c :=
+    let=? c :=
       (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set) c
         contract new_balance in
-    let!? c := Roll_storage.Contract.remove_amount c contract amount in
+    let=? c := Roll_storage.Contract.remove_amount c contract amount in
     if Tez_repr.op_gt new_balance Tez_repr.zero then
       Error_monad.__return c
     else
       match Contract_repr.is_implicit contract with
       | None => Error_monad.__return c
       | Some pkh =>
-        let!? function_parameter := Delegate_storage.get c contract in
+        let=? function_parameter := Delegate_storage.get c contract in
         match function_parameter with
         | Some pkh' =>
           (* ❌ Sequences of instructions are ignored (operator ";") *)
@@ -706,17 +705,17 @@ Definition credit
   (contract :
     (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
   (amount : Tez_repr.t) : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  let!? c :=
+  let=? c :=
     if Tez_repr.op_ltgt amount Tez_repr.zero then
       Error_monad.__return c
     else
-      let!? '(c, target_has_code) :=
+      let=? '(c, target_has_code) :=
         (|Storage.Contract.Code|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.mem)
           c contract in
-      let!? '_ := Error_monad.fail_unless target_has_code extensible_type_value
+      let=? '_ := Error_monad.fail_unless target_has_code extensible_type_value
         in
       Error_monad.__return c in
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -726,8 +725,8 @@ Definition credit
     | Some manager => create_implicit c manager amount
     end
   | Some balance =>
-    let!? balance := Lwt.__return (Tez_repr.op_plusquestion amount balance) in
-    let!? c :=
+    let=? balance := Lwt.__return (Tez_repr.op_plusquestion amount balance) in
+    let=? c :=
       (|Storage.Contract.Balance|).(Storage_sigs.Indexed_data_storage.set) c
         contract balance in
     Roll_storage.Contract.add_amount c contract amount
@@ -743,7 +742,7 @@ Definition used_storage_space
   (contract :
     (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Z.t) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Used_storage_space|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -757,7 +756,7 @@ Definition paid_storage_space
   (contract :
     (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Z.t) :=
-  let!? function_parameter :=
+  let=? function_parameter :=
     (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.get_option)
       c contract in
   match function_parameter with
@@ -775,14 +774,14 @@ Definition set_paid_storage_space_and_return_fees_to_pay
     (Error_monad.tzresult
       (Z.t *
         (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.context))) :=
-  let!? already_paid_space :=
+  let=? already_paid_space :=
     (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.get)
       c contract in
   if (|Compare.Z|).(Compare.S.op_gteq) already_paid_space new_storage_space then
     Error_monad.__return (Z.zero, c)
   else
     let to_pay := Z.sub new_storage_space already_paid_space in
-    let!? c :=
+    let=? c :=
       (|Storage.Contract.Paid_storage_space|).(Storage_sigs.Indexed_data_storage.set)
         c contract new_storage_space in
     Error_monad.__return (to_pay, c).

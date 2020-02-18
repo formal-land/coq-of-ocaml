@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Cycle_repr.
 Require Tezos.Raw_level_repr.
 Require Tezos.Voting_period_repr.

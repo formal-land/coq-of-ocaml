@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Fitness_repr.
@@ -305,12 +305,12 @@ Definition set_current_fitness (ctxt : t) (fitness : Int64.t) : t :=
 
 Definition add_fees (ctxt : t) (fees : Tez_repr.t)
   : Lwt.t (Error_monad.tzresult t) :=
-  let!? fees := Lwt.__return (Tez_repr.op_plusquestion ctxt.(t.fees) fees) in
+  let=? fees := Lwt.__return (Tez_repr.op_plusquestion ctxt.(t.fees) fees) in
   Error_monad.__return (t.with_fees fees ctxt).
 
 Definition add_rewards (ctxt : t) (rewards : Tez_repr.t)
   : Lwt.t (Error_monad.tzresult t) :=
-  let!? rewards :=
+  let=? rewards :=
     Lwt.__return (Tez_repr.op_plusquestion ctxt.(t.rewards) rewards) in
   Error_monad.__return (t.with_rewards rewards ctxt).
 
@@ -326,7 +326,7 @@ Definition add_deposit
     | Some tz => tz
     | None => Tez_repr.zero
     end in
-  let!? deposit := Lwt.__return (Tez_repr.op_plusquestion previous deposit) in
+  let=? deposit := Lwt.__return (Tez_repr.op_plusquestion previous deposit) in
   let deposits :=
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.add)
       delegate deposit ctxt.(t.deposits) in
@@ -401,15 +401,12 @@ Definition set_gas_unlimited (ctxt : t) : t :=
 
 Definition consume_gas (ctxt : t) (cost : Gas_limit_repr.cost)
   : Error_monad.tzresult t :=
-  Error_monad.op_gtgtquestion
-    (Gas_limit_repr.consume_raw ctxt.(t.block_gas) ctxt.(t.operation_gas)
-      ctxt.(t.internal_gas) cost)
-    (fun function_parameter =>
-      let '(block_gas, operation_gas, __internal_gas_value) :=
-        function_parameter in
-      Error_monad.ok
-        (t.with_internal_gas __internal_gas_value
-          (t.with_operation_gas operation_gas (t.with_block_gas block_gas ctxt)))).
+  let? '(block_gas, operation_gas, __internal_gas_value) :=
+    Gas_limit_repr.consume_raw ctxt.(t.block_gas) ctxt.(t.operation_gas)
+      ctxt.(t.internal_gas) cost in
+  Error_monad.ok
+    (t.with_internal_gas __internal_gas_value
+      (t.with_operation_gas operation_gas (t.with_block_gas block_gas ctxt))).
 
 Definition check_enough_gas (ctxt : t) (cost : Gas_limit_repr.cost)
   : Error_monad.tzresult unit :=
@@ -618,25 +615,23 @@ Definition protocol_param_key : list string := [ "protocol_parameters" ].
 
 Definition get_first_level (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult Raw_level_repr.raw_level) :=
-  Error_monad.op_gtgteq (Context.get ctxt first_level_key)
-    (fun function_parameter =>
-      match function_parameter with
-      | None => __storage_error_value (Missing_key first_level_key Get)
-      | Some __bytes_value =>
-        match
-          Data_encoding.Binary.of_bytes Raw_level_repr.encoding __bytes_value
-          with
-        | None => __storage_error_value (Corrupted_data first_level_key)
-        | Some level => Error_monad.__return level
-        end
-      end).
+  let= function_parameter := Context.get ctxt first_level_key in
+  match function_parameter with
+  | None => __storage_error_value (Missing_key first_level_key Get)
+  | Some __bytes_value =>
+    match Data_encoding.Binary.of_bytes Raw_level_repr.encoding __bytes_value
+      with
+    | None => __storage_error_value (Corrupted_data first_level_key)
+    | Some level => Error_monad.__return level
+    end
+  end.
 
 Definition set_first_level (ctxt : Context.t) (level : Raw_level_repr.raw_level)
   : Lwt.t (Error_monad.tzresult Context.t) :=
   let __bytes_value :=
     Data_encoding.Binary.to_bytes_exn Raw_level_repr.encoding level in
-  Error_monad.op_gtgteq (Context.set ctxt first_level_key __bytes_value)
-    (fun ctxt => Error_monad.__return ctxt).
+  let= ctxt := Context.set ctxt first_level_key __bytes_value in
+  Error_monad.__return ctxt.
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)
@@ -649,24 +644,20 @@ Definition set_first_level (ctxt : Context.t) (level : Raw_level_repr.raw_level)
 
 Definition get_proto_param (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult (Parameters_repr.t * Context.t)) :=
-  Error_monad.op_gtgteq (Context.get ctxt protocol_param_key)
-    (fun function_parameter =>
-      match function_parameter with
-      | None => Pervasives.failwith "Missing protocol parameters."
-      | Some __bytes_value =>
-        match
-          Data_encoding.Binary.of_bytes Data_encoding.__json_value __bytes_value
-          with
-        | None => Error_monad.fail extensible_type_value
-        | Some __json_value =>
-          Error_monad.op_gtgteq (Context.del ctxt protocol_param_key)
-            (fun ctxt =>
-              let 'param :=
-                Data_encoding.Json.destruct Parameters_repr.encoding
-                  __json_value in
-              Error_monad.__return (param, ctxt))
-        end
-      end).
+  let= function_parameter := Context.get ctxt protocol_param_key in
+  match function_parameter with
+  | None => Pervasives.failwith "Missing protocol parameters."
+  | Some __bytes_value =>
+    match Data_encoding.Binary.of_bytes Data_encoding.__json_value __bytes_value
+      with
+    | None => Error_monad.fail extensible_type_value
+    | Some __json_value =>
+      let= ctxt := Context.del ctxt protocol_param_key in
+      let 'param :=
+        Data_encoding.Json.destruct Parameters_repr.encoding __json_value in
+      Error_monad.__return (param, ctxt)
+    end
+  end.
 
 Definition set_constants
   (ctxt : Context.t) (constants : Constants_repr.parametric)
@@ -678,53 +669,49 @@ Definition set_constants
 
 Definition get_constants (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult Constants_repr.parametric) :=
-  Error_monad.op_gtgteq (Context.get ctxt constants_key)
-    (fun function_parameter =>
-      match function_parameter with
-      | None =>
-        Pervasives.failwith "Internal error: cannot read constants in context."
-      | Some __bytes_value =>
-        match
-          Data_encoding.Binary.of_bytes Constants_repr.parametric_encoding
-            __bytes_value with
-        | None =>
-          Pervasives.failwith
-            "Internal error: cannot parse constants in context."
-        | Some constants => Error_monad.__return constants
-        end
-      end).
+  let= function_parameter := Context.get ctxt constants_key in
+  match function_parameter with
+  | None =>
+    Pervasives.failwith "Internal error: cannot read constants in context."
+  | Some __bytes_value =>
+    match
+      Data_encoding.Binary.of_bytes Constants_repr.parametric_encoding
+        __bytes_value with
+    | None =>
+      Pervasives.failwith "Internal error: cannot parse constants in context."
+    | Some constants => Error_monad.__return constants
+    end
+  end.
 
 Definition patch_constants
   (ctxt : t) (f : Constants_repr.parametric -> Constants_repr.parametric)
   : Lwt.t t :=
   let constants := f ctxt.(t.constants) in
-  Error_monad.op_gtgteq (set_constants ctxt.(t.context) constants)
-    (fun context =>
-      Lwt.__return (t.with_constants constants (t.with_context context ctxt))).
+  let= context := set_constants ctxt.(t.context) constants in
+  Lwt.__return (t.with_constants constants (t.with_context context ctxt)).
 
 Definition check_inited (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult unit) :=
-  Error_monad.op_gtgteq (Context.get ctxt version_key)
-    (fun function_parameter =>
-      match function_parameter with
-      | None => Pervasives.failwith "Internal error: un-initialized context."
-      | Some __bytes_value =>
-        let s := MBytes.to_string __bytes_value in
-        if (|Compare.String|).(Compare.S.op_eq) s version_value then
-          Error_monad.return_unit
-        else
-          __storage_error_value (Incompatible_protocol_version s)
-      end).
+  let= function_parameter := Context.get ctxt version_key in
+  match function_parameter with
+  | None => Pervasives.failwith "Internal error: un-initialized context."
+  | Some __bytes_value =>
+    let s := MBytes.to_string __bytes_value in
+    if (|Compare.String|).(Compare.S.op_eq) s version_value then
+      Error_monad.return_unit
+    else
+      __storage_error_value (Incompatible_protocol_version s)
+  end.
 
 Definition prepare
   (level : int32) (predecessor_timestamp : Time.t) (timestamp : Time.t)
   (fitness : list MBytes.t) (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult t) :=
-  let!? level := Lwt.__return (Raw_level_repr.of_int32 level) in
-  let!? fitness := Lwt.__return (Fitness_repr.to_int64 fitness) in
-  let!? '_ := check_inited ctxt in
-  let!? constants := get_constants ctxt in
-  let!? first_level := get_first_level ctxt in
+  let=? level := Lwt.__return (Raw_level_repr.of_int32 level) in
+  let=? fitness := Lwt.__return (Fitness_repr.to_int64 fitness) in
+  let=? '_ := check_inited ctxt in
+  let=? constants := get_constants ctxt in
+  let=? first_level := get_first_level ctxt in
   let level :=
     Level_repr.from_raw_level first_level
       constants.(Constants_repr.parametric.blocks_per_cycle)
@@ -756,63 +743,59 @@ Inductive previous_protocol : Set :=
 
 Definition check_and_update_protocol_version (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult (previous_protocol * Context.t)) :=
-  let!? '(previous_proto, ctxt) :=
-    Error_monad.op_gtgteq (Context.get ctxt version_key)
-      (fun function_parameter =>
-        match function_parameter with
-        | None =>
-          Pervasives.failwith
-            "Internal error: un-initialized context in check_first_block."
-        | Some __bytes_value =>
-          let s := MBytes.to_string __bytes_value in
-          if (|Compare.String|).(Compare.S.op_eq) s version_value then
-            Pervasives.failwith
-              "Internal error: previously initialized context."
+  let=? '(previous_proto, ctxt) :=
+    let= function_parameter := Context.get ctxt version_key in
+    match function_parameter with
+    | None =>
+      Pervasives.failwith
+        "Internal error: un-initialized context in check_first_block."
+    | Some __bytes_value =>
+      let s := MBytes.to_string __bytes_value in
+      if (|Compare.String|).(Compare.S.op_eq) s version_value then
+        Pervasives.failwith "Internal error: previously initialized context."
+      else
+        if (|Compare.String|).(Compare.S.op_eq) s "genesis" then
+          let=? '(param, ctxt) := get_proto_param ctxt in
+          Error_monad.__return ((Genesis param), ctxt)
+        else
+          if (|Compare.String|).(Compare.S.op_eq) s "alpha_previous" then
+            Error_monad.__return (Alpha_previous, ctxt)
           else
-            if (|Compare.String|).(Compare.S.op_eq) s "genesis" then
-              let!? '(param, ctxt) := get_proto_param ctxt in
-              Error_monad.__return ((Genesis param), ctxt)
-            else
-              if (|Compare.String|).(Compare.S.op_eq) s "alpha_previous" then
-                Error_monad.__return (Alpha_previous, ctxt)
-              else
-                __storage_error_value (Incompatible_protocol_version s)
-        end) in
-  Error_monad.op_gtgteq
-    (Context.set ctxt version_key (MBytes.of_string version_value))
-    (fun ctxt => Error_monad.__return (previous_proto, ctxt)).
+            __storage_error_value (Incompatible_protocol_version s)
+    end in
+  let= ctxt := Context.set ctxt version_key (MBytes.of_string version_value) in
+  Error_monad.__return (previous_proto, ctxt).
 
 Definition prepare_first_block
   (level : int32) (timestamp : Time.t) (fitness : list MBytes.t)
   (ctxt : Context.t) : Lwt.t (Error_monad.tzresult (previous_protocol * t)) :=
-  let!? '(previous_proto, ctxt) := check_and_update_protocol_version ctxt in
-  let!? ctxt :=
+  let=? '(previous_proto, ctxt) := check_and_update_protocol_version ctxt in
+  let=? ctxt :=
     match previous_proto with
     | Genesis param =>
-      let!? first_level := Lwt.__return (Raw_level_repr.of_int32 level) in
-      let!? ctxt := set_first_level ctxt first_level in
-      Error_monad.op_gtgteq
-        (set_constants ctxt param.(Parameters_repr.t.constants))
-        (fun ctxt => Error_monad.__return ctxt)
+      let=? first_level := Lwt.__return (Raw_level_repr.of_int32 level) in
+      let=? ctxt := set_first_level ctxt first_level in
+      let= ctxt := set_constants ctxt param.(Parameters_repr.t.constants) in
+      Error_monad.__return ctxt
     | Alpha_previous => Error_monad.__return ctxt
     end in
-  let!? ctxt := prepare level timestamp timestamp fitness ctxt in
+  let=? ctxt := prepare level timestamp timestamp fitness ctxt in
   Error_monad.__return (previous_proto, ctxt).
 
 Definition activate (function_parameter : t)
   : (|Protocol_hash|).(S.HASH.t) -> Lwt.t t :=
   let '{| t.context := c |} as s := function_parameter in
   fun h =>
-    Error_monad.op_gtgteq (Updater.activate c h)
-      (fun c => Lwt.__return (t.with_context c s)).
+    let= c := Updater.activate c h in
+    Lwt.__return (t.with_context c s).
 
 Definition fork_test_chain (function_parameter : t)
   : (|Protocol_hash|).(S.HASH.t) -> Time.t -> Lwt.t t :=
   let '{| t.context := c |} as s := function_parameter in
   fun protocol =>
     fun expiration =>
-      Error_monad.op_gtgteq (Updater.fork_test_chain c protocol expiration)
-        (fun c => Lwt.__return (t.with_context c s)).
+      let= c := Updater.fork_test_chain c protocol expiration in
+      Lwt.__return (t.with_context c s).
 
 Definition key : Set := list string.
 
@@ -858,57 +841,53 @@ Definition dir_mem (ctxt : t) (k : Context.key) : Lwt.t bool :=
 
 Definition get (ctxt : t) (k : Context.key)
   : Lwt.t (Error_monad.tzresult Context.value) :=
-  Error_monad.op_gtgteq (Context.get ctxt.(t.context) k)
-    (fun function_parameter =>
-      match function_parameter with
-      | None => __storage_error_value (Missing_key k Get)
-      | Some v => Error_monad.__return v
-      end).
+  let= function_parameter := Context.get ctxt.(t.context) k in
+  match function_parameter with
+  | None => __storage_error_value (Missing_key k Get)
+  | Some v => Error_monad.__return v
+  end.
 
 Definition get_option (ctxt : t) (k : Context.key)
   : Lwt.t (option Context.value) := Context.get ctxt.(t.context) k.
 
 Definition set (ctxt : t) (k : Context.key) (v : Context.value)
   : Lwt.t (Error_monad.tzresult t) :=
-  Error_monad.op_gtgteq (Context.mem ctxt.(t.context) k)
-    (fun function_parameter =>
-      match function_parameter with
-      | false => __storage_error_value (Missing_key k __Set)
-      | true =>
-        Error_monad.op_gtgteq (Context.set ctxt.(t.context) k v)
-          (fun context => Error_monad.__return (t.with_context context ctxt))
-      end).
+  let= function_parameter := Context.mem ctxt.(t.context) k in
+  match function_parameter with
+  | false => __storage_error_value (Missing_key k __Set)
+  | true =>
+    let= context := Context.set ctxt.(t.context) k v in
+    Error_monad.__return (t.with_context context ctxt)
+  end.
 
 Definition init (ctxt : t) (k : Context.key) (v : Context.value)
   : Lwt.t (Error_monad.tzresult t) :=
-  Error_monad.op_gtgteq (Context.mem ctxt.(t.context) k)
-    (fun function_parameter =>
-      match function_parameter with
-      | true => __storage_error_value (Existing_key k)
-      | false =>
-        Error_monad.op_gtgteq (Context.set ctxt.(t.context) k v)
-          (fun context => Error_monad.__return (t.with_context context ctxt))
-      end).
+  let= function_parameter := Context.mem ctxt.(t.context) k in
+  match function_parameter with
+  | true => __storage_error_value (Existing_key k)
+  | false =>
+    let= context := Context.set ctxt.(t.context) k v in
+    Error_monad.__return (t.with_context context ctxt)
+  end.
 
 Definition init_set (ctxt : t) (k : Context.key) (v : Context.value)
   : Lwt.t t :=
-  Error_monad.op_gtgteq (Context.set ctxt.(t.context) k v)
-    (fun context => Lwt.__return (t.with_context context ctxt)).
+  let= context := Context.set ctxt.(t.context) k v in
+  Lwt.__return (t.with_context context ctxt).
 
 Definition delete (ctxt : t) (k : Context.key)
   : Lwt.t (Error_monad.tzresult t) :=
-  Error_monad.op_gtgteq (Context.mem ctxt.(t.context) k)
-    (fun function_parameter =>
-      match function_parameter with
-      | false => __storage_error_value (Missing_key k Del)
-      | true =>
-        Error_monad.op_gtgteq (Context.del ctxt.(t.context) k)
-          (fun context => Error_monad.__return (t.with_context context ctxt))
-      end).
+  let= function_parameter := Context.mem ctxt.(t.context) k in
+  match function_parameter with
+  | false => __storage_error_value (Missing_key k Del)
+  | true =>
+    let= context := Context.del ctxt.(t.context) k in
+    Error_monad.__return (t.with_context context ctxt)
+  end.
 
 Definition remove (ctxt : t) (k : Context.key) : Lwt.t t :=
-  Error_monad.op_gtgteq (Context.del ctxt.(t.context) k)
-    (fun context => Lwt.__return (t.with_context context ctxt)).
+  let= context := Context.del ctxt.(t.context) k in
+  Lwt.__return (t.with_context context ctxt).
 
 Definition set_option
   (ctxt : t) (k : Context.key) (function_parameter : option Context.value)
@@ -919,17 +898,16 @@ Definition set_option
   end.
 
 Definition remove_rec (ctxt : t) (k : Context.key) : Lwt.t t :=
-  Error_monad.op_gtgteq (Context.remove_rec ctxt.(t.context) k)
-    (fun context => Lwt.__return (t.with_context context ctxt)).
+  let= context := Context.remove_rec ctxt.(t.context) k in
+  Lwt.__return (t.with_context context ctxt).
 
 Definition copy (ctxt : t) (from : Context.key) (to_ : Context.key)
   : Lwt.t (Error_monad.tzresult t) :=
-  Error_monad.op_gtgteq (Context.copy ctxt.(t.context) from to_)
-    (fun function_parameter =>
-      match function_parameter with
-      | None => __storage_error_value (Missing_key from Copy)
-      | Some context => Error_monad.__return (t.with_context context ctxt)
-      end).
+  let= function_parameter := Context.copy ctxt.(t.context) from to_ in
+  match function_parameter with
+  | None => __storage_error_value (Missing_key from Copy)
+  | Some context => Error_monad.__return (t.with_context context ctxt)
+  end.
 
 Definition fold {A : Set}
   (ctxt : t) (k : Context.key) (init : A)
@@ -964,5 +942,6 @@ Definition temporary_big_maps {A : Set}
     if Z.equal id ctxt.(t.temporary_big_map) then
       Lwt.__return acc
     else
-      Error_monad.op_gtgteq (f acc id) (fun acc => iter acc (Z.sub id Z.one)) in
+      let= acc := f acc id in
+      iter acc (Z.sub id Z.one) in
   iter acc (Z.sub Z.zero Z.one).

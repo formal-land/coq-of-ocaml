@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.

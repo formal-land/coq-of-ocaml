@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
 Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
@@ -126,18 +126,17 @@ Module Nonce.
             fun function_parameter =>
               let '_ := function_parameter in
               let level := Alpha_context.Level.from_raw ctxt None raw_level in
-              Error_monad.op_gtgteq (Alpha_context.Nonce.get ctxt level)
-                (fun function_parameter =>
-                  match function_parameter with
-                  | Pervasives.Ok (Alpha_context.Nonce.Revealed __nonce_value)
-                    => Error_monad.__return (Revealed __nonce_value)
-                  |
-                    Pervasives.Ok
-                      (Alpha_context.Nonce.Unrevealed {|
-                        Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash
-                          |}) => Error_monad.__return (Missing nonce_hash)
-                  | Pervasives.Error _ => Error_monad.__return Forgotten
-                  end)).
+              let= function_parameter := Alpha_context.Nonce.get ctxt level in
+              match function_parameter with
+              | Pervasives.Ok (Alpha_context.Nonce.Revealed __nonce_value) =>
+                Error_monad.__return (Revealed __nonce_value)
+              |
+                Pervasives.Ok
+                  (Alpha_context.Nonce.Unrevealed {|
+                    Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash
+                      |}) => Error_monad.__return (Missing nonce_hash)
+              | Pervasives.Error _ => Error_monad.__return Forgotten
+              end).
   
   Definition get {D E G I K L a b c i o q : Set}
     (ctxt :

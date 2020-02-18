@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Alpha_context.
 
 Import Alpha_context.
@@ -19,7 +19,7 @@ Definition select_winning_proposal (ctxt : Alpha_context.context)
   : Lwt.t
     (Error_monad.tzresult
       (option (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.key))) :=
-  let!? proposals := Alpha_context.Vote.get_proposals ctxt in
+  let=? proposals := Alpha_context.Vote.get_proposals ctxt in
   let merge {A : Set}
     (proposal : A) (vote : (|Compare.Int32|).(Compare.S.t))
     (winners : option (list A * (|Compare.Int32|).(Compare.S.t)))
@@ -38,7 +38,7 @@ Definition select_winning_proposal (ctxt : Alpha_context.context)
   match (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.fold) merge proposals None
     with
   | Some (cons proposal [], vote) =>
-    let!? max_vote := Alpha_context.Vote.listing_size ctxt in
+    let=? max_vote := Alpha_context.Vote.listing_size ctxt in
     let min_proposal_quorum := Alpha_context.Constants.min_proposal_quorum ctxt
       in
     let min_vote_to_pass :=
@@ -55,10 +55,10 @@ Definition select_winning_proposal (ctxt : Alpha_context.context)
 Definition check_approval_and_update_participation_ema
   (ctxt : Alpha_context.context)
   : Lwt.t (Error_monad.tzresult (Alpha_context.context * bool)) :=
-  let!? ballots := Alpha_context.Vote.get_ballots ctxt in
-  let!? maximum_vote := Alpha_context.Vote.listing_size ctxt in
-  let!? participation_ema := Alpha_context.Vote.get_participation_ema ctxt in
-  let!? expected_quorum := Alpha_context.Vote.get_current_quorum ctxt in
+  let=? ballots := Alpha_context.Vote.get_ballots ctxt in
+  let=? maximum_vote := Alpha_context.Vote.listing_size ctxt in
+  let=? participation_ema := Alpha_context.Vote.get_participation_ema ctxt in
+  let=? expected_quorum := Alpha_context.Vote.get_current_quorum ctxt in
   let casted_votes :=
     Int32.add ballots.(Alpha_context.Vote.ballots.yay)
       ballots.(Alpha_context.Vote.ballots.nay) in
@@ -93,82 +93,76 @@ Definition check_approval_and_update_participation_ema
           2 participation))
       (* ❌ Constant of type int32 is converted to int *)
       10 in
-  let!? ctxt :=
+  let=? ctxt :=
     Alpha_context.Vote.set_participation_ema ctxt new_participation_ema in
   Error_monad.__return (ctxt, outcome).
 
 Definition start_new_voting_period (ctxt : Alpha_context.context)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
-  let!? function_parameter := Alpha_context.Vote.get_current_period_kind ctxt in
+  let=? function_parameter := Alpha_context.Vote.get_current_period_kind ctxt in
   match function_parameter with
   | Alpha_context.Voting_period.Proposal =>
-    let!? proposal := select_winning_proposal ctxt in
-    Error_monad.op_gtgteq (Alpha_context.Vote.clear_proposals ctxt)
-      (fun ctxt =>
-        let!? ctxt := Alpha_context.Vote.clear_listings ctxt in
-        match proposal with
-        | None =>
-          let!? ctxt := Alpha_context.Vote.freeze_listings ctxt in
-          Error_monad.__return ctxt
-        | Some proposal =>
-          let!? ctxt := Alpha_context.Vote.init_current_proposal ctxt proposal
-            in
-          let!? ctxt := Alpha_context.Vote.freeze_listings ctxt in
-          let!? ctxt :=
-            Alpha_context.Vote.set_current_period_kind ctxt
-              Alpha_context.Voting_period.Testing_vote in
-          Error_monad.__return ctxt
-        end)
+    let=? proposal := select_winning_proposal ctxt in
+    let= ctxt := Alpha_context.Vote.clear_proposals ctxt in
+    let=? ctxt := Alpha_context.Vote.clear_listings ctxt in
+    match proposal with
+    | None =>
+      let=? ctxt := Alpha_context.Vote.freeze_listings ctxt in
+      Error_monad.__return ctxt
+    | Some proposal =>
+      let=? ctxt := Alpha_context.Vote.init_current_proposal ctxt proposal in
+      let=? ctxt := Alpha_context.Vote.freeze_listings ctxt in
+      let=? ctxt :=
+        Alpha_context.Vote.set_current_period_kind ctxt
+          Alpha_context.Voting_period.Testing_vote in
+      Error_monad.__return ctxt
+    end
   | Alpha_context.Voting_period.Testing_vote =>
-    let!? '(ctxt, approved) := check_approval_and_update_participation_ema ctxt
+    let=? '(ctxt, approved) := check_approval_and_update_participation_ema ctxt
       in
-    Error_monad.op_gtgteq (Alpha_context.Vote.clear_ballots ctxt)
-      (fun ctxt =>
-        let!? ctxt := Alpha_context.Vote.clear_listings ctxt in
-        if approved then
-          let expiration :=
-            Time.add (Alpha_context.Timestamp.current ctxt)
-              (Alpha_context.Constants.test_chain_duration ctxt) in
-          let!? proposal := Alpha_context.Vote.get_current_proposal ctxt in
-          Error_monad.op_gtgteq
-            (Alpha_context.fork_test_chain ctxt proposal expiration)
-            (fun ctxt =>
-              let!? ctxt :=
-                Alpha_context.Vote.set_current_period_kind ctxt
-                  Alpha_context.Voting_period.Testing in
-              Error_monad.__return ctxt)
-        else
-          let!? ctxt := Alpha_context.Vote.clear_current_proposal ctxt in
-          let!? ctxt := Alpha_context.Vote.freeze_listings ctxt in
-          let!? ctxt :=
-            Alpha_context.Vote.set_current_period_kind ctxt
-              Alpha_context.Voting_period.Proposal in
-          Error_monad.__return ctxt)
+    let= ctxt := Alpha_context.Vote.clear_ballots ctxt in
+    let=? ctxt := Alpha_context.Vote.clear_listings ctxt in
+    if approved then
+      let expiration :=
+        Time.add (Alpha_context.Timestamp.current ctxt)
+          (Alpha_context.Constants.test_chain_duration ctxt) in
+      let=? proposal := Alpha_context.Vote.get_current_proposal ctxt in
+      let= ctxt := Alpha_context.fork_test_chain ctxt proposal expiration in
+      let=? ctxt :=
+        Alpha_context.Vote.set_current_period_kind ctxt
+          Alpha_context.Voting_period.Testing in
+      Error_monad.__return ctxt
+    else
+      let=? ctxt := Alpha_context.Vote.clear_current_proposal ctxt in
+      let=? ctxt := Alpha_context.Vote.freeze_listings ctxt in
+      let=? ctxt :=
+        Alpha_context.Vote.set_current_period_kind ctxt
+          Alpha_context.Voting_period.Proposal in
+      Error_monad.__return ctxt
   | Alpha_context.Voting_period.Testing =>
-    let!? ctxt := Alpha_context.Vote.freeze_listings ctxt in
-    let!? ctxt :=
+    let=? ctxt := Alpha_context.Vote.freeze_listings ctxt in
+    let=? ctxt :=
       Alpha_context.Vote.set_current_period_kind ctxt
         Alpha_context.Voting_period.Promotion_vote in
     Error_monad.__return ctxt
   | Alpha_context.Voting_period.Promotion_vote =>
-    let!? '(ctxt, approved) := check_approval_and_update_participation_ema ctxt
+    let=? '(ctxt, approved) := check_approval_and_update_participation_ema ctxt
       in
-    let!? ctxt :=
+    let=? ctxt :=
       if approved then
-        let!? proposal := Alpha_context.Vote.get_current_proposal ctxt in
-        Error_monad.op_gtgteq (Alpha_context.activate ctxt proposal)
-          (fun ctxt => Error_monad.__return ctxt)
+        let=? proposal := Alpha_context.Vote.get_current_proposal ctxt in
+        let= ctxt := Alpha_context.activate ctxt proposal in
+        Error_monad.__return ctxt
       else
         Error_monad.__return ctxt in
-    Error_monad.op_gtgteq (Alpha_context.Vote.clear_ballots ctxt)
-      (fun ctxt =>
-        let!? ctxt := Alpha_context.Vote.clear_listings ctxt in
-        let!? ctxt := Alpha_context.Vote.clear_current_proposal ctxt in
-        let!? ctxt := Alpha_context.Vote.freeze_listings ctxt in
-        let!? ctxt :=
-          Alpha_context.Vote.set_current_period_kind ctxt
-            Alpha_context.Voting_period.Proposal in
-        Error_monad.__return ctxt)
+    let= ctxt := Alpha_context.Vote.clear_ballots ctxt in
+    let=? ctxt := Alpha_context.Vote.clear_listings ctxt in
+    let=? ctxt := Alpha_context.Vote.clear_current_proposal ctxt in
+    let=? ctxt := Alpha_context.Vote.freeze_listings ctxt in
+    let=? ctxt :=
+      Alpha_context.Vote.set_current_period_kind ctxt
+        Alpha_context.Voting_period.Proposal in
+    Error_monad.__return ctxt
   end.
 
 (* ❌ Structure item `typext` not handled. *)
@@ -196,35 +190,33 @@ Definition record_proposals
   (ctxt : Alpha_context.context) (delegate : Alpha_context.public_key_hash)
   (proposals : list (|Protocol_hash|).(S.HASH.t))
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
-  let!? '_ :=
+  let=? '_ :=
     match proposals with
     | [] => Error_monad.fail extensible_type_value
     | cons _ _ => Error_monad.return_unit
     end in
-  let!? function_parameter := Alpha_context.Vote.get_current_period_kind ctxt in
+  let=? function_parameter := Alpha_context.Vote.get_current_period_kind ctxt in
   match function_parameter with
   | Alpha_context.Voting_period.Proposal =>
-    Error_monad.op_gtgteq (Alpha_context.Vote.in_listings ctxt delegate)
-      (fun in_listings =>
-        if in_listings then
-          let!? count :=
-            Alpha_context.Vote.recorded_proposal_count_for_delegate ctxt
-              delegate in
-          let!? '_ :=
-            Error_monad.fail_when
-              (longer_than proposals
-                (Pervasives.op_minus
-                  Alpha_context.Constants.max_proposals_per_delegate count))
-              extensible_type_value in
-          let!? ctxt :=
-            Error_monad.fold_left_s
-              (fun ctxt =>
-                fun proposal =>
-                  Alpha_context.Vote.record_proposal ctxt proposal delegate)
-              ctxt proposals in
-          Error_monad.__return ctxt
-        else
-          Error_monad.fail extensible_type_value)
+    let= in_listings := Alpha_context.Vote.in_listings ctxt delegate in
+    if in_listings then
+      let=? count :=
+        Alpha_context.Vote.recorded_proposal_count_for_delegate ctxt delegate in
+      let=? '_ :=
+        Error_monad.fail_when
+          (longer_than proposals
+            (Pervasives.op_minus
+              Alpha_context.Constants.max_proposals_per_delegate count))
+          extensible_type_value in
+      let=? ctxt :=
+        Error_monad.fold_left_s
+          (fun ctxt =>
+            fun proposal =>
+              Alpha_context.Vote.record_proposal ctxt proposal delegate) ctxt
+          proposals in
+      Error_monad.__return ctxt
+    else
+      Error_monad.fail extensible_type_value
   |
     (Alpha_context.Voting_period.Testing_vote |
     Alpha_context.Voting_period.Testing |
@@ -236,25 +228,23 @@ Definition record_ballot
   (ctxt : Alpha_context.context) (delegate : Alpha_context.public_key_hash)
   (proposal : (|Protocol_hash|).(S.HASH.t)) (ballot : Alpha_context.Vote.ballot)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
-  let!? function_parameter := Alpha_context.Vote.get_current_period_kind ctxt in
+  let=? function_parameter := Alpha_context.Vote.get_current_period_kind ctxt in
   match function_parameter with
   |
     (Alpha_context.Voting_period.Testing_vote |
     Alpha_context.Voting_period.Promotion_vote) =>
-    let!? current_proposal := Alpha_context.Vote.get_current_proposal ctxt in
-    let!? '_ :=
+    let=? current_proposal := Alpha_context.Vote.get_current_proposal ctxt in
+    let=? '_ :=
       Error_monad.fail_unless
         ((|Protocol_hash|).(S.HASH.equal) proposal current_proposal)
         extensible_type_value in
-    Error_monad.op_gtgteq (Alpha_context.Vote.has_recorded_ballot ctxt delegate)
-      (fun has_ballot =>
-        let!? '_ := Error_monad.fail_when has_ballot extensible_type_value in
-        Error_monad.op_gtgteq (Alpha_context.Vote.in_listings ctxt delegate)
-          (fun in_listings =>
-            if in_listings then
-              Alpha_context.Vote.record_ballot ctxt delegate ballot
-            else
-              Error_monad.fail extensible_type_value))
+    let= has_ballot := Alpha_context.Vote.has_recorded_ballot ctxt delegate in
+    let=? '_ := Error_monad.fail_when has_ballot extensible_type_value in
+    let= in_listings := Alpha_context.Vote.in_listings ctxt delegate in
+    if in_listings then
+      Alpha_context.Vote.record_ballot ctxt delegate ballot
+    else
+      Error_monad.fail extensible_type_value
   | (Alpha_context.Voting_period.Testing | Alpha_context.Voting_period.Proposal)
     => Error_monad.fail extensible_type_value
   end.

@@ -10,7 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
-Import Notations.
+Import Environment.Notations.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_repr.
@@ -321,7 +321,7 @@ Definition add_do
   (manager_pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (script_code : Script_repr.lazy_expr) (script_storage : Script_repr.lazy_expr)
   : Lwt.t (Error_monad.tzresult (Script_repr.lazy_expr * Script_repr.lazy_expr)) :=
-  let!? '(script_code_expr, _gas_cost) :=
+  let=? '(script_code_expr, _gas_cost) :=
     Lwt.__return (Script_repr.force_decode script_code) in
   Error_monad.op_gtgtpipequestion
     (Lwt.__return (Script_repr.force_decode script_storage))
@@ -763,7 +763,7 @@ Definition add_set_delegate
   (manager_pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (script_code : Script_repr.lazy_expr) (script_storage : Script_repr.lazy_expr)
   : Lwt.t (Error_monad.tzresult (Script_repr.lazy_expr * Script_repr.lazy_expr)) :=
-  let!? '(script_code_expr, _gas_cost) :=
+  let=? '(script_code_expr, _gas_cost) :=
     Lwt.__return (Script_repr.force_decode script_code) in
   Error_monad.op_gtgtpipequestion
     (Lwt.__return (Script_repr.force_decode script_storage))
