@@ -1279,10 +1279,15 @@ and to_coq_cast_existentials
       Pp.primitive_tuple (bound_vars |> List.map (fun (name, _) ->
         Name.to_coq name
       )) in
-    let variable_typ =
-      Pp.primitive_tuple_type (bound_vars |> List.map (fun (_, typ) ->
-        Type.to_coq None (Some Type.Context.Apply) typ
-      )) in
+    let variable_typ paren =
+      match bound_vars with
+      | [(_, typ)] ->
+        let context = if paren then Some (Type.Context.Apply) else None in
+        Type.to_coq None context typ
+      | _ ->
+        Pp.primitive_tuple_type (bound_vars |> List.map (fun (_, typ) ->
+          Type.to_coq None None typ
+        )) in
     begin match (bound_vars, new_typ_vars) with
     | ([], _) -> e
     | (_, []) ->
@@ -1293,7 +1298,7 @@ and to_coq_cast_existentials
           | _ -> !^ "'" ^-^ variable_names in
         nest (
           !^ "let" ^^ variable_names_pattern ^^ !^ ":=" ^^
-          nest (!^ "obj_magic" ^^ variable_typ ^^ variable_names) ^^
+          nest (!^ "obj_magic" ^^ variable_typ true ^^ variable_names) ^^
           !^ "in" ^^ newline ^^
           e
         )
@@ -1319,7 +1324,7 @@ and to_coq_cast_existentials
             Pp.primitive_tuple_type (List.map (fun _ -> Pp.set) new_typ_vars)
           )) ^^
           parens (nest (
-            !^ "fun" ^^ existential_names_pattern ^^ !^ "=>" ^^ variable_typ
+            !^ "fun" ^^ existential_names_pattern ^^ !^ "=>" ^^ variable_typ false
           )) ^^
           begin if cast_with_axioms then
             empty
