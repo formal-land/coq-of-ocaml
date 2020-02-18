@@ -1266,9 +1266,11 @@ and to_coq_cast_existentials
   let e =
     match existential_cast with
     | Some { return_typ; cast_with_axioms = true; _ } ->
-      nest (
-        !^ "obj_magic" ^^
-        Type.to_coq None (Some Type.Context.Apply) return_typ ^^
+      group (
+        nest (
+          !^ "obj_magic" ^^
+          Type.to_coq None (Some Type.Context.Apply) return_typ
+        ) ^^
         to_coq true e
       )
     | _ -> to_coq false e in
