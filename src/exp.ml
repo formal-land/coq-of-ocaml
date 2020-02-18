@@ -1148,15 +1148,13 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       to_coq false e2
     )
   | Match (e, cases, default_value, is_with_default_case) ->
-    begin match (cases, default_value, is_with_default_case) with
-    | ([(pattern, existential_cast, e2)], None, false)
-      when not (Pattern.has_or_patterns pattern) ->
-      Pp.parens paren @@ nest (
-        !^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
-        to_coq false e ^^ !^ "in" ^^ newline ^^
-        to_coq_cast_existentials existential_cast e2
-      )
-    | _ ->
+    let single_let =
+      to_coq_try_single_let_pattern
+        paren "let"
+        e cases default_value is_with_default_case in
+    begin match single_let with
+    | Some single_let -> single_let
+    | None ->
       nest (
         !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
         separate space (cases |> List.map (fun (p, existential_cast, e) ->
@@ -1242,6 +1240,24 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
   | ErrorMessage (e, error_message) ->
     group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
+
+and to_coq_try_single_let_pattern
+  (paren : bool)
+  (let_symbol : string)
+  (e : t)
+  (cases : (Pattern.t * match_existential_cast option * t) list)
+  (default_value : t option)
+  (is_with_default_case : bool)
+  : SmartPrint.t option =
+  match (cases, default_value, is_with_default_case) with
+  | ([(pattern, existential_cast, e2)], None, false)
+    when not (Pattern.has_or_patterns pattern) ->
+    Some (Pp.parens paren @@ nest (
+      !^ let_symbol ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
+      to_coq false e ^^ !^ "in" ^^ newline ^^
+      to_coq_cast_existentials existential_cast e2
+    ))
+  | _ -> None
 
 and to_coq_cast_existentials
   (existential_cast : match_existential_cast option)
